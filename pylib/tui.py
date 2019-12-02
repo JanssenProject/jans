@@ -4,13 +4,21 @@ import time
 import npyscreen
 import sys
 import random
-from messages import msg
 import textwrap
 import re
 import socket
 import curses
 import string
 import inspect
+import threading
+
+from queue import Queue
+
+from messages import msg
+
+
+queue = Queue()
+
 
 #Todo: check min lines:25 comumns: 80
 
@@ -18,6 +26,9 @@ import inspect
 NONE = 0
 LOCAL = 1
 REMOTE = 2
+
+COMPLETED = -99
+ERROR = -101
 
 random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
 
@@ -69,7 +80,7 @@ class GluuSetupApp(npyscreen.StandardApp):
 
     exit_reason = str()
     my_counter = 0
-
+    do_notify = True
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
 
@@ -79,7 +90,8 @@ class GluuSetupApp(npyscreen.StandardApp):
                 self.addForm(obj[0], obj[1], name=getattr(msg, obj[0]+'_label'))
 
     def onCleanExit(self):
-        npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
+        if self.do_notify:
+            npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
 
 
 class GluuSetupForm(npyscreen.FormBaseNew):
@@ -104,8 +116,8 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
-        if hasattr(self, 'update_ui'):
-            self.update_ui()
+        if hasattr(self, 'do_beforeEditing'):
+            self.do_beforeEditing()
     
     def while_waiting(self):
         if self.parentApp.my_counter % marketing_text_period == 0:
@@ -420,7 +432,7 @@ class DisplaySummaryForm(GluuSetupForm):
             hidden = True if wn == 'wrends_storages' else False
             setattr(self, wn, self.add(npyscreen.TitleFixedText, name=getattr(msg, wn+'_label'), value="", begin_entry_at=24, editable=False, hidden=hidden))
 
-    def update_ui(self):
+    def do_beforeEditing(self):
         wrends_storages_widget = getattr(self, 'wrends_storages')
 
         for wn in dir(self):
@@ -458,20 +470,40 @@ class InstallStepsForm(GluuSetupForm):
         self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number, rely=4, editable=False, name="Progress")
         self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
-        
-        
 
-    
+
+    def do_beforeEditing(self):
+        t=threading.Thread(target=startSetup, args=(queue,))
+        t.daemon = True
+        t.start()
+
+
     def do_while_waiting(self):
-        if self.prgress_percantage.value < msg.installation_step_number:
-            self.prgress_percantage.value += 0.5
+
+        if not queue.empty():
+            data = queue.get()
+            if data[0] == COMPLETED:
+                npyscreen.notify_confirm(msg.installation_completed.format(msg.hostname), title="Completed")
+                self.parentApp.do_notify = False
+                self.parentApp.switchForm(None)
+            elif data[0] == ERROR:
+                npyscreen.notify_confirm(msg.installation_error +"\n"+data[2], title="ERROR")
+                self.parentApp.do_notify = False
+                self.parentApp.switchForm(None)
+                
+            self.prgress_percantage.value = data[0]
             self.prgress_percantage.update()
-        
-        self.description.value = random.choice(random_marketing_strings)
-        self.description.update()
-        
-        self.installing.value = random.choice(random_marketing_strings)
-        self.installing.update()
+            self.installing.value = data[2]
+            self.installing.update()
+
+            if hasattr(msg, 'installation_description_' + data[1]):
+                desc = getattr(msg, 'installation_description_' + data[1])
+                self.description.value = '\n'.join(textwrap.wrap(desc, self.columns - 10))
+            else:
+                self.description.value = ""
+
+            self.description.update()
+
 
     def backButtonPressed(self):
         pass
@@ -526,4 +558,54 @@ msg.storage_list = ['default', 'user', 'cache', 'site', 'token']
 msg.wrends_storages = ['user', 'token']
 msg.installation_step_number = 16
 
+class ProgressBar:
+    n = 0
+
+pbar=ProgressBar()
+
+class Setup:
+    installing = (0, '','')
+    
+    def __init__(self, thread_queu):
+        self.thread_queu = thread_queu
+    
+    def installJRE(self):
+        pbar.n += 1
+        self.thread_queu.put((pbar.n, 'jre', 'Installing JRE'))
+        time.sleep(5)
+        
+    def installOpenDJ(self):
+        pbar.n += 1
+        self.thread_queu.put((pbar.n, 'opendj', 'Installing OpenDJ'))
+        time.sleep(2)
+        self.thread_queu.put((pbar.n, 'opendj', 'Creating OpenDJ Indexes'))
+        time.sleep(3)
+        self.thread_queu.put((pbar.n, 'opendj', 'Importing data to OpenDJ'))
+        time.sleep(5)
+
+    def installOxAuth(self):
+        pbar.n += 1
+        self.thread_queu.put((pbar.n, 'oxauth', 'Installing Gluu Component: oxAuth'))
+        time.sleep(5)
+        
+    def raiseError(self):
+        c = x/0
+    
+    def completeInstallation(self):
+        self.thread_queu.put((COMPLETED, '', ''))
+        
+
+def startSetup(thread_queu):
+    try:
+        setupObject = Setup(thread_queu)
+        setupObject.installJRE()
+        setupObject.installOpenDJ()
+        setupObject.installOxAuth()
+        setupObject.raiseError()
+        setupObject.completeInstallation()
+    except Exception as e:
+        thread_queu.put((ERROR, '', str(e)))
 GSA.run()
+
+
+open("/tmp/a.txt","w").write("Program here")
