@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import time
-import npyscreen
 import sys
+import os
+import time
 import random
 import textwrap
 import re
@@ -11,10 +11,11 @@ import curses
 import string
 import inspect
 import threading
-
-from queue import Queue
-
+from Queue import Queue
 from messages import msg
+
+
+import npyscreen
 
 
 queue = Queue()
@@ -77,10 +78,11 @@ def getClassName(c):
         return ''
 
 class GluuSetupApp(npyscreen.StandardApp):
-
+    installObject = None
     exit_reason = str()
     my_counter = 0
     do_notify = True
+
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
 
@@ -101,7 +103,7 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         self.parentApp.my_counter = 0
         
         self.add_handlers({curses.KEY_F1: self.display_help})
-        self.add(npyscreen.MultiLineEdit, value='─' * self.columns, max_height=1, rely=self.lines-4, editable=False)
+        self.add(npyscreen.MultiLineEdit, value='=' * (self.columns - 4), max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
 
         form_name = getClassName(self)
@@ -179,6 +181,7 @@ class MAIN(GluuSetupForm):
                     self.parentApp.onCleanExit()
                     sys.exit(False)
 
+
     def nextButtonPressed(self):
     
         if not self.license_confirm.value:
@@ -202,44 +205,43 @@ class MAIN(GluuSetupForm):
 
 class HostForm(GluuSetupForm):
     
+    myfields_ = ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'countryCode', 'application_max_ram', 'oxtrust_admin_password')
+    
     def create(self):
 
         self.add(npyscreen.FixedText, value=make_title(msg.cert_info_label), editable=False)
-        self.ip = self.add(npyscreen.TitleText, name=msg.ip_label, begin_entry_at=25, value=msg.ip)
-        self.hostname = self.add(npyscreen.TitleText, name=msg.hostname_label, begin_entry_at=25, value=msg.hostname)        
-        self.orgName = self.add(npyscreen.TitleText, name=msg.orgName_label, begin_entry_at=25, value=msg.orgName)
-        self.admin_email = self.add(npyscreen.TitleText, name=msg.admin_email_label, begin_entry_at=25, value=msg.admin_email)
-        self.city = self.add(npyscreen.TitleText, name=msg.city_label, begin_entry_at=25, value=msg.city)
-        self.state = self.add(npyscreen.TitleText, name=msg.state_label, begin_entry_at=25, value=msg.state)
-        self.countryCode = self.add(npyscreen.TitleText, name=msg.countryCode_label, begin_entry_at=25, value=msg.countryCode)
+        self.ip = self.add(npyscreen.TitleText, name=msg.ip_label, begin_entry_at=25)
+        self.hostname = self.add(npyscreen.TitleText, name=msg.hostname_label, begin_entry_at=25)        
+        self.orgName = self.add(npyscreen.TitleText, name=msg.orgName_label, begin_entry_at=25)
+        self.admin_email = self.add(npyscreen.TitleText, name=msg.admin_email_label, begin_entry_at=25)
+        self.city = self.add(npyscreen.TitleText, name=msg.city_label, begin_entry_at=25)
+        self.state = self.add(npyscreen.TitleText, name=msg.state_label, begin_entry_at=25)
+        self.countryCode = self.add(npyscreen.TitleText, name=msg.countryCode_label, begin_entry_at=25)
 
         self.add(npyscreen.FixedText, value=make_title(msg.sys_info_label), rely=12, editable=False)
-        self.max_ram = self.add(npyscreen.TitleText, name=msg.max_ram_label, begin_entry_at=25, value=str(msg.max_ram))
-        self.oxtrust_admin_password = self.add(npyscreen.TitleText, name=msg.oxtrust_admin_password_label, begin_entry_at=25, value=msg.oxtrust_admin_password)
+        self.application_max_ram = self.add(npyscreen.TitleText, name=msg.application_max_ram_label, begin_entry_at=25)
+        self.oxtrust_admin_password = self.add(npyscreen.TitleText, name=msg.oxtrust_admin_password_label, begin_entry_at=25)
 
         
     def nextButtonPressed(self):
 
-        for k in ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'countryCode'):
-            setattr(msg, k, getattr(self, k).value)
-
-        if not msg.hostname:
+        if not self.hostname.value:
             npyscreen.notify_confirm(msg.enter_hostname, title="Info")
             return
 
-        if  msg.hostname.lower() == 'localhost':
+        if  self.hostname.value.lower() == 'localhost':
             npyscreen.notify_confirm(msg.enter_hostname_local, title="Info")
             return
 
-        if not check_email(msg.admin_email):
+        if not check_email(self.admin_email.value):
             npyscreen.notify_confirm(msg.enter_valid_email, title="Info")
             return
         
-        if not isIP(msg.ip):
+        if not isIP(self.ip.value):
             npyscreen.notify_confirm(msg.enter_valid_ip, title="Info")
             return
 
-        if len(msg.countryCode) < 2:
+        if len(self.countryCode.value) < 2:
             npyscreen.notify_confirm(msg.enter_valid_countryCode, title="Info")
             return
         
@@ -248,15 +250,28 @@ class HostForm(GluuSetupForm):
             return
 
         try:
-            msg.max_ram = int(self.max_ram.value)
+            int(self.application_max_ram.value)
         except:
             npyscreen.notify_confirm(msg.max_ram_int_warning, title="Info")
             return
 
-        msg.oxtrust_admin_password = self.oxtrust_admin_password.value
-        msg.countryCode = msg.countryCode[:2].upper()
+        for k in self.myfields_:
+            f = getattr(self, k)
+            setattr(self.parentApp.installObject, k, f.value)
 
+        self.parentApp.installObject.application_max_ram = int(self.application_max_ram.value)
         self.parentApp.switchForm('ServicesForm')
+
+    def do_beforeEditing(self):
+        if not self.parentApp.installObject.hostname:
+            self.parentApp.installObject.hostname = self.parentApp.installObject.detect_hostname()
+
+        for k in self.myfields_:
+            f = getattr(self, k)
+            v = getattr(self.parentApp.installObject, k)
+            if v:
+                f.value = str(v)
+                f.update()
 
     def backButtonPressed(self):
         self.parentApp.switchForm('MAIN')
@@ -266,18 +281,21 @@ class ServicesForm(GluuSetupForm):
     services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius')
 
     def create(self):
-        
         for service in self.services:
-            cb = self.add(npyscreen.Checkbox, scroll_exit=True, name = getattr(msg, 'ask_' + service))  
-            if getattr(msg, service):
-                cb.value = True
-
+            cb = self.add(npyscreen.Checkbox, scroll_exit=True, name = getattr(msg, 'ask_' + service))
             setattr(self, service, cb)
+
+    def do_beforeEditing(self):
+        for service in self.services:
+            if getattr(self.parentApp.installObject, service):
+                cb = getattr(self, service)
+                cb.value = True
+                cb.update()
 
     def nextButtonPressed(self):
         for service in self.services:
             cb_val = getattr(self, service).value
-            setattr(msg, service, cb_val)
+            setattr(self.parentApp.installObject, service, cb_val)
 
         self.parentApp.switchForm('DBBackendForm')
 
@@ -287,7 +305,7 @@ class ServicesForm(GluuSetupForm):
 
 
 def make_title(text):
-    return '─'*10 + ' '+  text +' '+ '─'*10
+    return '-'*10 + ' '+  text +' '+ '-'*10
 
 
 class DBBackendForm(GluuSetupForm):
@@ -295,59 +313,106 @@ class DBBackendForm(GluuSetupForm):
         self.editw = 2
         self.add(npyscreen.FixedText, value=make_title(msg.ask_wrends_install), editable=False)
 
-        self.ask_wrends = self.add(npyscreen.SelectOne, max_height=3, value = [msg.wrends_install], 
+        self.ask_wrends = self.add(npyscreen.SelectOne, max_height=3, 
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_wrends.value_changed_callback = self.wrends_option_changed
-        self.wrends_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.wrends_password)
-        self.wrends_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.wrends_hosts)
+        self.wrends_password = self.add(npyscreen.TitleText, name=msg.password_label)
+        self.wrends_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label)
         self.wrends_option_changed(self.ask_wrends)
 
         self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10, editable=False)
 
-        self.ask_cb = self.add(npyscreen.SelectOne, max_height=3, value = [msg.cb_install], 
+        self.ask_cb = self.add(npyscreen.SelectOne, max_height=3,
                 values = msg.wrends_install_options, scroll_exit=True)
         self.ask_cb.value_changed_callback = self.cb_option_changed
-        self.cb_admin = self.add(npyscreen.TitleText, name=msg.username_label, value=msg.cb_username)
-        self.cb_password = self.add(npyscreen.TitleText, name=msg.password_label, value=msg.cb_password)
-        self.cb_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label, value=msg.cb_hosts)
+        self.cb_admin = self.add(npyscreen.TitleText, name=msg.username_label)
+        self.cb_password = self.add(npyscreen.TitleText, name=msg.password_label)
+        self.cb_hosts = self.add(npyscreen.TitleText, name=msg.hosts_label)
         self.cb_option_changed(self.ask_cb)
+
+    def do_beforeEditing(self):
+        self.ask_wrends.value = [self.parentApp.installObject.wrends_install]
+
+        if self.parentApp.installObject.wrends_install == REMOTE:
+            self.wrends_hosts.hidden = False
+        else:
+            self.wrends_hosts.hidden = True
+
+        if not self.parentApp.installObject.wrends_install:
+            self.wrends_password.hidden = True
+        else:
+            self.wrends_password.hidden = False
+
+        self.wrends_hosts.value = self.parentApp.installObject.ldap_hostname        
+        self.wrends_password.value = self.parentApp.installObject.ldapPass
+
+
+        self.ask_cb.value = [self.parentApp.installObject.cb_install]
+
+        if not self.parentApp.installObject.cb_install:
+            self.cb_admin.hidden = True
+        else:
+            self.cb_admin.hidden = False
+
+        if self.parentApp.installObject.cb_install == REMOTE:
+            self.cb_hosts.hidden = False
+        else:
+            self.cb_hosts.hidden = True
+
+        if not self.parentApp.installObject.cb_install:
+            self.cb_password.hidden = True
+        else:
+            self.cb_password.hidden = False
+
+        self.cb_hosts.value = self.parentApp.installObject.couchbase_hostname
+        self.cb_password.value = self.parentApp.installObject.ldapPass
+        self.cb_admin.value = self.parentApp.installObject.couchebaseClusterAdmin
+
+        self.wrends_hosts.update()
+        self.ask_wrends.update()
+        self.wrends_hosts.update()
+        self.wrends_password.update()
+
+        self.cb_hosts.update()
+        self.ask_cb.update()
+        self.cb_hosts.update()
+        self.cb_password.update()
+
+
 
     def nextButtonPressed(self):
 
         msg.backend_types = []
 
-        msg.wrends_install = self.ask_wrends.value[0]
+        self.parentApp.installObject.wrends_install = self.ask_wrends.value[0]
 
-        if msg.wrends_install == LOCAL:
-            msg.wrends_hosts = 'localhost'
-            msg.wrends_password = self.wrends_password.value
-            msg.backend_types.append('wrends')
-        elif msg.wrends_install == REMOTE:
-            msg.wrends_hosts = self.wrends_hosts.value
-            msg.wrends_password = self.wrends_password.value
-            msg.backend_types.append('wrends[R]')
+        if self.parentApp.installObject.wrends_install == LOCAL:
+            self.parentApp.installObject.ldap_hostname = 'localhost'
+            self.parentApp.installObject.ldapPass = self.wrends_password.value
+        elif self.parentApp.installObject.wrends_install == REMOTE:
+            self.parentApp.installObject.ldap_hostname = self.wrends_hosts.value
+            self.parentApp.installObject.ldapPass = self.wrends_password.value
 
-        msg.cb_install = self.ask_cb.value[0]
+        self.parentApp.installObject.cb_install = self.ask_cb.value[0]
 
-        if msg.cb_install == LOCAL:
-            msg.cb_hosts = 'localhost'
-            msg.cb_password = self.cb_password.value
-            msg.backend_types.append('couchbase')
-        elif msg.cb_install == REMOTE:
-            msg.cb_hosts = self.cb_hosts.value
-            msg.cb_password = self.cb_password.value
-            msg.backend_types.append('couchbase[R]')
+        if self.parentApp.installObject.cb_install == LOCAL:
+            self.parentApp.installObject.couchbase_hostname = 'localhost'
+            self.parentApp.installObject.cb_password = self.cb_password.value
+        elif self.parentApp.installObject.cb_install == REMOTE:
+            self.parentApp.installObject.couchbase_hostname = self.cb_hosts.value
+            self.parentApp.installObject.couchebaseClusterAdmin = self.cb_admin.value
+            self.parentApp.installObject.cb_password = self.cb_password.value
 
-        if msg.wrends_install and not checkPassword(msg.wrends_password):
+        if self.parentApp.installObject.wrends_install and not checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if msg.cb_install and not checkPassword(msg.cb_password):
+        if self.parentApp.installObject.cb_install and not checkPassword(self.parentApp.installObject.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
-        if msg.wrends_install or msg.cb_install:
-            if len(msg.backend_types) > 1:
+        if self.parentApp.installObject.wrends_install or self.parentApp.installObject.cb_install:
+            if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
                 self.parentApp.switchForm('StorageSelectionForm')
             else:
                 self.parentApp.switchForm('DisplaySummaryForm')
@@ -356,37 +421,39 @@ class DBBackendForm(GluuSetupForm):
             return
 
     def wrends_option_changed(self, widget):
-        if not self.ask_wrends.value[0]:
-            self.wrends_password.hidden = True
-            self.wrends_hosts.hidden = True
-        elif self.ask_wrends.value[0] == LOCAL:
-            self.wrends_password.hidden = False
-            self.wrends_hosts.hidden = True
-        elif self.ask_wrends.value[0] == REMOTE:
-            self.wrends_password.hidden = False
-            self.wrends_hosts.hidden = False
-            
-        self.wrends_password.update()
-        self.wrends_hosts.update()
+        if self.ask_wrends.value:
+            if not self.ask_wrends.value[0]:
+                self.wrends_password.hidden = True
+                self.wrends_hosts.hidden = True
+            elif self.ask_wrends.value[0] == LOCAL:
+                self.wrends_password.hidden = False
+                self.wrends_hosts.hidden = True
+            elif self.ask_wrends.value[0] == REMOTE:
+                self.wrends_password.hidden = False
+                self.wrends_hosts.hidden = False
+                
+            self.wrends_password.update()
+            self.wrends_hosts.update()
 
     def cb_option_changed(self, widget):
-        if not self.ask_cb.value[0]:
-            self.cb_admin.hidden = True
-            self.cb_password.hidden = True
-            self.cb_hosts.hidden = True
-        elif self.ask_cb.value[0] == LOCAL:
-            self.cb_admin.hidden = False
-            self.cb_hosts.hidden = False
-            self.cb_password.hidden = False
-            self.cb_hosts.hidden = True
-        elif self.ask_cb.value[0] == REMOTE:
-            self.cb_admin.hidden = False
-            self.cb_password.hidden = False
-            self.cb_hosts.hidden = False
-        
-        self.cb_admin.update()
-        self.cb_password.update()
-        self.cb_hosts.update()
+        if self.ask_cb.value:
+            if not self.ask_cb.value[0]:
+                self.cb_admin.hidden = True
+                self.cb_password.hidden = True
+                self.cb_hosts.hidden = True
+            elif self.ask_cb.value[0] == LOCAL:
+                self.cb_admin.hidden = False
+                self.cb_hosts.hidden = False
+                self.cb_password.hidden = False
+                self.cb_hosts.hidden = True
+            elif self.ask_cb.value[0] == REMOTE:
+                self.cb_admin.hidden = False
+                self.cb_password.hidden = False
+                self.cb_hosts.hidden = False
+            
+            self.cb_admin.update()
+            self.cb_password.update()
+            self.cb_hosts.update()
 
     def backButtonPressed(self):
         self.parentApp.switchForm('ServicesForm')
@@ -395,65 +462,86 @@ class DBBackendForm(GluuSetupForm):
 class StorageSelectionForm(GluuSetupForm):
     def create(self):
 
-        storage_val = []
-
-        for i, s in enumerate(msg.storage_list):
-            if s in msg.wrends_storages:
-                storage_val.append(i)
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(msg.storages), 
+            values=msg.storages, name=msg.DBBackendForm_label, scroll_exit=True)
         
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, max_height = len(msg.storage_list), begin_entry_at=25, value = storage_val, name=msg.DBBackendForm_label, 
-            values = [ s.title() for s in msg.storage_list ], scroll_exit=True)
-        
-        self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storage_list)+4, editable=False, color='STANDOUT')
+        self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storages)+4, editable=False, color='STANDOUT')
 
     def backButtonPressed(self):
         self.parentApp.switchForm('DBBackendForm')
 
-    def nextButtonPressed(self):
+    def do_beforeEditing(self):
+        self.wrends_storage.values = self.parentApp.installObject.couchbaseBucketDict.keys()
         
-        tmp_ = []
+        
+        value = []
+        for i, s in enumerate(self.parentApp.installObject.couchbaseBucketDict.keys()):
+            if self.parentApp.installObject.mappingLocations[s] == 'ldap':
+                value.append(i)
+        self.wrends_storage.value = value
+        
+        self.wrends_storage.update()
 
-        for s in self.wrends_storage.value:
-            tmp_.append(msg.storage_list[s])
+    def nextButtonPressed(self):
+        storage_list = self.parentApp.installObject.couchbaseBucketDict.keys()
 
-        msg.wrends_storages = tmp_
+        for i, s in enumerate(storage_list):
+            if i in self.wrends_storage.value:
+                self.parentApp.installObject.mappingLocations[s] = 'ldap'
+            else:
+                self.parentApp.installObject.mappingLocations[s] = 'couchbase'
 
         self.parentApp.switchForm('DisplaySummaryForm')
 
 class DisplaySummaryForm(GluuSetupForm):
 
-    def create(self):
-
-        for wn in ("hostname", "orgName", "os_type", "city", "state", "countryCode",
-                   "max_ram", "installOxAuth", "installOxTrust", 
+    myfields_ = ("hostname", "orgName", "os_type", "city", "state", "countryCode",
+                   "application_max_ram", "installOxAuth", "installOxTrust", 
                     "installHttpd", "installSaml", "installOxAuthRP",
                     "installPassport", "installGluuRadius", "java_type",
-                    "backend_types", 'wrends_storages'):
+                    "backend_types", 'wrends_storages')
+
+    def create(self):
+
+        for wn in self.myfields_:
+
             hidden = True if wn == 'wrends_storages' else False
             setattr(self, wn, self.add(npyscreen.TitleFixedText, name=getattr(msg, wn+'_label'), value="", begin_entry_at=24, editable=False, hidden=hidden))
 
     def do_beforeEditing(self):
         wrends_storages_widget = getattr(self, 'wrends_storages')
 
-        for wn in dir(self):
+        for wn in self.myfields_:
             w = getattr(self, wn)
             if getClassName(w) == 'TitleFixedText':
-                
-                val = getattr(msg, wn)
                 if wn == 'backend_types':
-                    if len(val) > 1:
-                        wrends_storages_widget.hidden = False
-                    else:
-                        wrends_storages_widget.hidden = True
+                    bt_ = []
+                    if self.parentApp.installObject.wrends_install == LOCAL:
+                        bt_.append('wrends')
+                    elif self.parentApp.installObject.wrends_install == REMOTE:
+                        bt_.append('wrends[R]')
 
-                if type(val) == type([]):
-                    tmp_ = [str(v) for v in val]
-                    val = ', '.join(tmp_)
-                w.value = str(val)
+                    if self.parentApp.installObject.cb_install == LOCAL:
+                        bt_.append('couchbase')
+                    elif self.parentApp.installObject.cb_install == REMOTE:
+                        bt_.append('couchbase[R]')
+                    w.value = ', '.join(bt_)
+                elif wn == 'wrends_storages':
+                    wds_ = []
+                    for k in self.parentApp.installObject.mappingLocations:
+                        if self.parentApp.installObject.mappingLocations[k] == 'ldap':
+                            wds_.append(k)
+                    if wds_:
+                        w.hidden = False
+                    w.value = ', '.join(wds_)
+                else:
+                    val = getattr(self.parentApp.installObject, wn)
+                    w.value = str(val)
 
+            w.update()
 
     def backButtonPressed(self):
-        if len(msg.backend_types) > 1:
+        if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
             self.parentApp.switchForm('StorageSelectionForm')
         else:
             self.parentApp.switchForm('DBBackendForm')
@@ -510,102 +598,3 @@ class InstallStepsForm(GluuSetupForm):
 
     def nextButtonPressed(self):
         pass
-
-
-GSA = GluuSetupApp()
-
-msg.os_type = 'CentOS 7'
-msg.os_initdaemon = 'initd'
-msg.test_title = 'Test Title'
-msg.apache_version = "Apache 2.4"
-msg.current_mem_size = 5.2
-msg.current_number_of_cpu = 4
-msg.current_free_disk_space = 123
-msg.current_file_max = 91200
-
-msg.ip = "192.168.56.112"
-msg.hostname = 'c1.gluu.org'
-msg.city = 'Austin'
-msg.state = 'TX'
-msg.orgName = 'Gluu'
-msg.admin_email = 'support@gluu.org'
-msg.countryCode = 'US'
-
-msg.max_ram = 3072
-msg.oxtrust_admin_password = getPW(special='.*=!%&+/-')
-
-msg.java_type = 'Oracle corretto'
-msg.installOxAuth = True
-msg.installOxTrust = True
-msg.installHttpd = True
-msg.installSaml = False
-msg.installOxAuthRP = False
-msg.installPassport = False
-msg.installGluuRadius = False
-
-msg.backend_types = []
-msg.wrends_install = LOCAL
-msg.wrends_hosts = 'localhost'
-msg.wrends_password = getPW(special='.*=!%&+/-')
-
-msg.cb_install = REMOTE
-msg.cb_password = getPW(special='.*=!%&+/-')
-msg.cb_username = 'admin'
-
-msg.cb_hosts = 'c1.gluu.org,c2.gluu.org'
-
-msg.storage_list = ['default', 'user', 'cache', 'site', 'token']
-msg.wrends_storages = ['user', 'token']
-msg.installation_step_number = 16
-
-class ProgressBar:
-    n = 0
-
-pbar=ProgressBar()
-
-class Setup:
-    installing = (0, '','')
-    
-    def __init__(self, thread_queu):
-        self.thread_queu = thread_queu
-    
-    def installJRE(self):
-        pbar.n += 1
-        self.thread_queu.put((pbar.n, 'jre', 'Installing JRE'))
-        time.sleep(5)
-        
-    def installOpenDJ(self):
-        pbar.n += 1
-        self.thread_queu.put((pbar.n, 'opendj', 'Installing OpenDJ'))
-        time.sleep(2)
-        self.thread_queu.put((pbar.n, 'opendj', 'Creating OpenDJ Indexes'))
-        time.sleep(3)
-        self.thread_queu.put((pbar.n, 'opendj', 'Importing data to OpenDJ'))
-        time.sleep(5)
-
-    def installOxAuth(self):
-        pbar.n += 1
-        self.thread_queu.put((pbar.n, 'oxauth', 'Installing Gluu Component: oxAuth'))
-        time.sleep(5)
-        
-    def raiseError(self):
-        c = x/0
-    
-    def completeInstallation(self):
-        self.thread_queu.put((COMPLETED, '', ''))
-        
-
-def startSetup(thread_queu):
-    try:
-        setupObject = Setup(thread_queu)
-        setupObject.installJRE()
-        setupObject.installOpenDJ()
-        setupObject.installOxAuth()
-        setupObject.raiseError()
-        setupObject.completeInstallation()
-    except Exception as e:
-        thread_queu.put((ERROR, '', str(e)))
-GSA.run()
-
-
-open("/tmp/a.txt","w").write("Program here")

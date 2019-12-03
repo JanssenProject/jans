@@ -81,9 +81,11 @@ ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 re_split_host = re.compile(r'[^,\s,;]+')
 
+istty = False
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+    istty = True
 except:
     tty_rows = 60
     tty_columns = 120
@@ -287,7 +289,7 @@ def get_documents_from_ldif(ldif_file):
 class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
-
+        self.thread_queue = None
         self.properties_password = None
 
         self.distFolder = '/opt/dist'
@@ -504,7 +506,7 @@ class Setup(object):
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
         self.encoded_shib_jks_pw = None
-        self.application_max_ram = None    # in MB
+        self.application_max_ram = 3072    # in MB
         self.encode_salt = None
         self.admin_inum = None
 
@@ -1414,8 +1416,28 @@ class Setup(object):
         if fn.endswith('-DEC~'):
             self.run(['rm', '-f', fn])
 
-        if not 'oxtrust_admin_password' in prop:
-            self.oxtrust_admin_password = prop['ldapPass']
+        if not 'oxtrust_admin_password' in properties_list:
+            self.oxtrust_admin_password = p['ldapPass']
+            
+        if not 'wrends_install' in properties_list:
+            if p['remoteLdap'].lower() == 'true':
+                self.wrends_install = REMOTE
+            elif p['installLdap'].lower() == 'true':
+                self.wrends_install = LOCAL
+            else:
+                self.wrends_install = NONE
+
+        if not 'cb_install' in properties_list:
+            if 'remoteCouchbase' in properties_list and p['remoteCouchbase'].lower() == 'true':
+                self.cb_install = REMOTE
+            elif 'persistence_type' in properties_list and p['persistence_type'] in ('couchbase', 'hybrid'):
+                self.cb_install = LOCAL
+            else:
+                self.cb_install = NONE
+
+        if (not 'cb_password' in properties_list) and self.cb_install:
+            self.cb_password = p['ldapPass']
+
 
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
@@ -3013,7 +3035,7 @@ class Setup(object):
                 print("Please enter valid email address")
 
         
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
+        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
         
         oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
 
@@ -5136,10 +5158,17 @@ class Setup(object):
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
+file_max = int(open("/proc/sys/fs/file-max").read().strip())
+
+current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
+
+current_number_of_cpu = multiprocessing.cpu_count()
+
+disk_st = os.statvfs('/')
+available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
 
 def resource_checkings():
-
-    file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
     if file_max < 64000:
         print("{0}Maximum number of files that can be opened on this computer is "
@@ -5147,8 +5176,6 @@ def resource_checkings():
                   "host system and re-run setup.py{1}".format(colors.DANGER,
                                                                 colors.ENDC))
         sys.exit(1)
-    current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-    current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 
     if current_mem_size < suggested_mem_size:
         print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
@@ -5161,8 +5188,6 @@ def resource_checkings():
         result = raw_input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
-
-    current_number_of_cpu = multiprocessing.cpu_count()
 
     if current_number_of_cpu < suggested_number_of_cpu:
 
@@ -5177,8 +5202,7 @@ def resource_checkings():
         if result and result[0].lower() == 'n':
             sys.exit()
 
-    st = os.statvfs('/')
-    available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
+
 
     if available_disk_space < suggested_free_disk_space:
         print ("{0}Warning: Available free disk space was determined to be {1} "
@@ -5194,6 +5218,20 @@ def resource_checkings():
 
 
 if __name__ == '__main__':
+
+    cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+    thread_queue = None
+
+    if istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
+        try:
+            import npyscreen
+        except:
+            print "Can't start TUI, continuing command line"
+        else:
+            from pylib import tui
+            thread_queue = tui.queue
+            from pylib.tui import *
 
     parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
     oxAuth and oxTrust to start. If setup.properties is found in this folder, these
@@ -5223,13 +5261,14 @@ if __name__ == '__main__':
     
     argsp = parser.parse_args()
 
-    if not argsp.n:
+    if not argsp.n and not thread_queue:
         resource_checkings()
     
     #key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
-        'install_dir': os.path.dirname(os.path.realpath(__file__)),
+        'install_dir': cur_dir,
+        'thread_queue': thread_queue,
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
@@ -5358,28 +5397,57 @@ if __name__ == '__main__':
     elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
         installObject.load_properties(installObject.setup_properties_fn+'.enc')
-    else:
+    
+    if not thread_queue:
         installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
         installObject.promptForProperties()
 
-    # Validate Properties
-    installObject.check_properties()
+        # Validate Properties
+        installObject.check_properties()
 
-    # Show to properties for approval
-    print '\n%s\n' % `installObject`
-    proceed = "NO"
-    if not setupOptions['noPrompt']:
-        proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
-    if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
-        try:
-            installObject.do_installation()
-        except:
-            installObject.logIt("***** Error caught in main loop *****", True)
-            installObject.logIt(traceback.format_exc(), True)
-        print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+        proceed = False
+        if not thread_queu:
+            # Show to properties for approval
+            print '\n%s\n' % `installObject`
+            proceed = False
+            if not setupOptions['noPrompt']:
+                proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
+                if proceed_prompt and proceed_prompt[0]=='y':
+                    proceed = True
+
+            if setupOptions['noPrompt'] or proceed:
+                try:
+                    installObject.do_installation()
+                    print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+                except:
+                    installObject.logIt("***** Error caught in main loop *****", True)
+                    installObject.logIt(traceback.format_exc(), True)
+                    print "***** Error caught in main loop *****"
+                print traceback.format_exc()
+            
+            else:
+                installObject.save_properties()
+                print "Properties saved to %s. Change filename to %s if you want to re-use" % \
+                      (installObject.savedProperties, installObject.setup_properties_fn)
     else:
-        installObject.save_properties()
-        print "Properties saved to %s. Change filename to %s if you want to re-use" % \
-              (installObject.savedProperties, installObject.setup_properties_fn)
 
+            msg = tui.msg
+            msg.storages = installObject.couchbaseBucketDict.keys()
+            msg.installation_step_number = 16
+            
+            msg.os_type = installObject.os_type
+            msg.os_initdaemon = installObject.os_initdaemon
+            msg.apache_version = installObject.apache_version
+            msg.current_mem_size = current_mem_size
+            msg.current_number_of_cpu = current_number_of_cpu
+            msg.current_free_disk_space = available_disk_space
+            msg.current_file_max = file_max
+
+            GSA = tui.GluuSetupApp()
+            GSA.installObject = installObject
+            
+
+
+
+            GSA.run()
 # END

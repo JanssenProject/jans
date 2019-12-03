@@ -43,14 +43,14 @@ class msg:
     insufficient_file_max = "Maximum number of files that can be opened on this computer is {}. Please increase number of file-max to {} on the host system and re-run setup.py"
     insufficient_free_disk_space = "Available free disk space was determined to be {} GB. This is less than the required disk space of {}"
     
-    suggested_free_disk_space = 40 #in GB
+    suggested_free_disk_space = 1 #in GB
     suggested_mem_size = 3.7 # in GB
-    suggested_number_of_cpu = 2
+    suggested_number_of_cpu = 1
     suggested_file_max = 64000
     
     cert_info_label = "Information to Generate Certificates"
     sys_info_label =  "System Information"
-    max_ram_label = "Maximum RAM in MB"
+    application_max_ram_label = "Maximum RAM in MB"
     oxtrust_admin_password_label = "oxTrust Admin Password"
     oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
     max_ram_int_warning = "Please enter and integer value for Max ram"
