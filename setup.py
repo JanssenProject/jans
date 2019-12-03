@@ -352,7 +352,9 @@ class Setup(object):
         #passwords
         self.ldapPass = None
         self.oxtrust_admin_password = None
-        self.cb_password = None        
+        self.encoded_admin_password = ''
+        self.cb_password = None
+        self.encoded_cb_password = ''
 
         #DB installation types
         self.wrends_install = LOCAL
@@ -5026,6 +5028,101 @@ class Setup(object):
         show_version_fn = os.path.join(self.gluuOptBinFolder, 'show_version.py')
         self.run(['cp', '-f', print_version_fn, show_version_fn])
         self.run(['chmod', '+x', show_version_fn])
+
+
+    def do_installation(self):
+        self.pbar.progress("Initializing")
+        self.initialize()
+        self.pbar.progress("Configuring system")
+        self.configureSystem()
+        self.pbar.progress("Downloading War files")
+        self.downloadWarFiles()
+        self.pbar.progress("Calculating application memory")
+        self.calculate_selected_aplications_memory()
+        self.pbar.progress("Installing JRE")
+        self.installJRE()
+        self.pbar.progress("Installing Jetty")
+        self.installJetty()
+        self.pbar.progress("Installing Jython")
+        self.installJython()
+        self.pbar.progress("Installing Node")
+        self.installNode()
+        self.pbar.progress("Making salt")
+        self.make_salt()
+        self.pbar.progress("Making oxauth salt")
+        self.make_oxauth_salt()
+        self.pbar.progress("Copying scripts")
+        self.copy_scripts()
+        self.pbar.progress("Encoding passwords")
+        self.encode_passwords()
+        self.pbar.progress("Encoding test passwords")
+        self.encode_test_passwords()
+        
+        if self.installPassport:
+            self.generate_passport_configuration()
+        
+        self.pbar.progress("Installing Gluu base")
+        self.install_gluu_base()
+        self.pbar.progress("Preparing base64 extention scripts")
+        self.prepare_base64_extension_scripts()
+        self.pbar.progress("Rendering templates")
+        self.render_templates()
+        self.pbar.progress("Generating crypto")
+        self.generate_crypto()
+        self.pbar.progress("Generating oxauth openid keys")
+        self.generate_oxauth_openid_keys()
+        self.pbar.progress("Generating base64 configuration")
+        self.generate_base64_configuration()
+        self.pbar.progress("Rendering configuratipn template")
+        self.render_configuration_template()
+        self.pbar.progress("Updating hostname")
+        self.update_hostname()
+        self.pbar.progress("Setting ulimits")
+        self.set_ulimits()
+        self.pbar.progress("Copying output")
+        self.copy_output()
+        self.pbar.progress("Setting up init scripts")
+        self.setup_init_scripts()
+        self.pbar.progress("Rendering node templates")
+        self.render_node_templates()
+        self.pbar.progress("Installing Gluu components")
+        self.install_gluu_components()
+        self.pbar.progress("Rendering test templates")
+        self.render_test_templates()
+        self.pbar.progress("Copying static")
+        self.copy_static()
+        self.fix_systemd_script()
+        self.pbar.progress("Setting ownerships")
+        self.set_ownership()
+        self.pbar.progress("Setting permissions")
+        self.set_permissions()
+        self.pbar.progress("Starting services")
+        self.start_services()
+        self.pbar.progress("Saving properties")
+        self.save_properties()
+
+        if setupOptions['loadTestData']:
+            self.pbar.progress("Loading test data", False)
+            self.load_test_data()
+
+        if 'importLDIFDir' in setupOptions.keys():
+            self.pbar.progress("Importing LDIF files")
+            self.render_custom_templates(setupOptions['importLDIFDir'])
+            self.import_custom_ldif(setupOptions['importLDIFDir'])
+
+        self.deleteLdapPw()
+
+        self.post_install_tasks()
+
+        self.pbar.progress("Completed")
+        print
+        self.print_post_messages()
+        
+        if self.couchbaseInstallOutput:
+            print
+            print "-"*int(tty_columns)
+            print self.couchbaseInstallOutput
+            print "-"*int(tty_columns)
         
 
     def print_post_messages(self):
@@ -5275,98 +5372,7 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            installObject.pbar.progress("Initializing")
-            installObject.initialize()
-            installObject.pbar.progress("Configuring system")
-            installObject.configureSystem()
-            installObject.pbar.progress("Downloading War files")
-            installObject.downloadWarFiles()
-            installObject.pbar.progress("Calculating application memory")
-            installObject.calculate_selected_aplications_memory()
-            installObject.pbar.progress("Installing JRE")
-            installObject.installJRE()
-            installObject.pbar.progress("Installing Jetty")
-            installObject.installJetty()
-            installObject.pbar.progress("Installing Jython")
-            installObject.installJython()
-            installObject.pbar.progress("Installing Node")
-            installObject.installNode()
-            installObject.pbar.progress("Making salt")
-            installObject.make_salt()
-            installObject.pbar.progress("Making oxauth salt")
-            installObject.make_oxauth_salt()
-            installObject.pbar.progress("Copying scripts")
-            installObject.copy_scripts()
-            installObject.pbar.progress("Encoding passwords")
-            installObject.encode_passwords()
-            installObject.pbar.progress("Encoding test passwords")
-            installObject.encode_test_passwords()
-            
-            if installObject.installPassport:
-                installObject.generate_passport_configuration()
-            
-            installObject.pbar.progress("Installing Gluu base")
-            installObject.install_gluu_base()
-            installObject.pbar.progress("Preparing base64 extention scripts")
-            installObject.prepare_base64_extension_scripts()
-            installObject.pbar.progress("Rendering templates")
-            installObject.render_templates()
-            installObject.pbar.progress("Generating crypto")
-            installObject.generate_crypto()
-            installObject.pbar.progress("Generating oxauth openid keys")
-            installObject.generate_oxauth_openid_keys()
-            installObject.pbar.progress("Generating base64 configuration")
-            installObject.generate_base64_configuration()
-            installObject.pbar.progress("Rendering configuratipn template")
-            installObject.render_configuration_template()
-            installObject.pbar.progress("Updating hostname")
-            installObject.update_hostname()
-            installObject.pbar.progress("Setting ulimits")
-            installObject.set_ulimits()
-            installObject.pbar.progress("Copying output")
-            installObject.copy_output()
-            installObject.pbar.progress("Setting up init scripts")
-            installObject.setup_init_scripts()
-            installObject.pbar.progress("Rendering node templates")
-            installObject.render_node_templates()
-            installObject.pbar.progress("Installing Gluu components")
-            installObject.install_gluu_components()
-            installObject.pbar.progress("Rendering test templates")
-            installObject.render_test_templates()
-            installObject.pbar.progress("Copying static")
-            installObject.copy_static()
-            installObject.fix_systemd_script()
-            installObject.pbar.progress("Setting ownerships")
-            installObject.set_ownership()
-            installObject.pbar.progress("Setting permissions")
-            installObject.set_permissions()
-            installObject.pbar.progress("Starting services")
-            installObject.start_services()
-            installObject.pbar.progress("Saving properties")
-            installObject.save_properties()
-
-            if setupOptions['loadTestData']:
-                installObject.pbar.progress("Loading test data", False)
-                installObject.load_test_data()
-
-            if 'importLDIFDir' in setupOptions.keys():
-                installObject.pbar.progress("Importing LDIF files")
-                installObject.render_custom_templates(setupOptions['importLDIFDir'])
-                installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-
-            installObject.deleteLdapPw()
-
-            installObject.post_install_tasks()
-
-            installObject.pbar.progress("Completed")
-            print
-            installObject.print_post_messages()
-            
-            if installObject.couchbaseInstallOutput:
-                print
-                print "-"*int(tty_columns)
-                print installObject.couchbaseInstallOutput
-                print "-"*int(tty_columns)
+            installObject.do_installation()
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
