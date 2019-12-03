@@ -7,5 +7,5 @@ import javax.xml.bind.annotation.XmlEnum;
  */
 @XmlEnum(String.class)
 public enum RedisProviderType {
-    STANDALONE, CLUSTER, SHARDED
+    STANDALONE, CLUSTER, SHARDED, SENTINEL
 }
