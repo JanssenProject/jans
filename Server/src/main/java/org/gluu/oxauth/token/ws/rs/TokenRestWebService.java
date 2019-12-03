@@ -60,6 +60,8 @@ public interface TokenRestWebService {
             @ApiResponse(code = 400, message = "unsupported_grant_type\n" +
                     "The authorization grant type is not supported by the authorization server."),
             @ApiResponse(code = 400, message = " invalid_scope\n" +
+                    "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner."),
+            @ApiResponse(code = 400, message = " invalid_scope\n" +
                     "The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner.")
     })
     Response requestAccessToken(
@@ -106,6 +108,9 @@ public interface TokenRestWebService {
             String pctCode,
             @FormParam("rpt")
             String rptCode,
+            @FormParam("auth_req_id")
+            @ApiParam(value = "CIBA flow identifier. It is the unique identifier to identify the authentication request (transaction) made by the Client.")
+            String authReqId,
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @Context SecurityContext sec);
