@@ -544,11 +544,15 @@ public class SessionIdService {
     }
 
     private String getClientOrigin(String redirectUri) throws URISyntaxException {
-        final URI uri = new URI(redirectUri);
-        String result = uri.getScheme() + "://" + uri.getHost();
-        if(uri.getPort() > 0)
-            result += ":" + Integer.toString(uri.getPort());
-        return result;
+    	if (StringHelper.isNotEmpty(redirectUri)) {
+	        final URI uri = new URI(redirectUri);
+	        String result = uri.getScheme() + "://" + uri.getHost();
+	        if(uri.getPort() > 0)
+	            result += ":" + Integer.toString(uri.getPort());
+	        return result;
+    	} else {
+    		return appConfiguration.getIssuer();
+    	}
     }
 
     private SessionId generateSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
