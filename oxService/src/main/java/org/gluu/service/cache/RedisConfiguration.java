@@ -19,7 +19,7 @@ public class RedisConfiguration implements Serializable {
 
     private int defaultPutExpiration = 60; // in seconds
 
-    private String sentinelMasterName = "";
+    private String sentinelMasterGroupName = "";
 
     private String password;
 
@@ -85,12 +85,12 @@ public class RedisConfiguration implements Serializable {
         this.decryptedPassword = decryptedPassword;
     }
 
-    public String getSentinelMasterName() {
-        return sentinelMasterName;
+    public String getSentinelMasterGroupName() {
+        return sentinelMasterGroupName;
     }
 
-    public void setSentinelMasterName(String sentinelMasterName) {
-        this.sentinelMasterName = sentinelMasterName;
+    public void setSentinelMasterGroupName(String sentinelMasterGroupName) {
+        this.sentinelMasterGroupName = sentinelMasterGroupName;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class RedisConfiguration implements Serializable {
                 ", redisProviderType=" + redisProviderType +
                 ", useSSL=" + useSSL +
                 ", sslTrustStoreFilePath=" + sslTrustStoreFilePath +
-                ", sentinelMasterName=" + sentinelMasterName +
+                ", sentinelMasterGroupName=" + sentinelMasterGroupName +
                 '}';
     }
 }
