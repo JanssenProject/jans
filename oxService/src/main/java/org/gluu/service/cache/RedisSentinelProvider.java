@@ -34,12 +34,12 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
             if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
                 pool = new JedisSentinelPool(
-                        getRedisConfiguration().getSentinelMasterName(),
+                        getRedisConfiguration().getSentinelMasterGroupName(),
                         Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
                         poolConfig);
             } else {
                 pool = new JedisSentinelPool(
-                        getRedisConfiguration().getSentinelMasterName(),
+                        getRedisConfiguration().getSentinelMasterGroupName(),
                         Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
                         poolConfig,
                         redisConfiguration.getDecryptedPassword());
