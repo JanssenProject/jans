@@ -73,6 +73,9 @@ NONE = 0
 LOCAL = 1
 REMOTE = 2
 
+COMPLETED = -99
+ERROR = -101
+
 suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
@@ -105,27 +108,37 @@ def checkPassword(pwd):
 
 class ProgressBar:
 
-    def __init__(self, tty_columns, max_steps=33):
+    def __init__(self, cols, queue=None, max_steps=33):
         self.n = 0
+        self.queue = queue
         self.max_steps = max_steps
-        self.tty_columns = tty_columns
+        self.tty_columns = int(tty_columns)
 
     def complete(self, msg):
         self.n = self.max_steps
         self.progress(msg, False)
 
-    def progress(self, msg, incr=True):
+    def progress(self, ptype, msg, incr=True):
         if incr and self.n < self.max_steps:
             self.n +=1
 
         time.sleep(0.2)
-        ft = '#' * self.n
-        ft = ft.ljust(self.max_steps)
-        msg =msg.ljust(40)
-        if int(self.tty_columns) < 88:
-            msg = msg[:int(self.tty_columns)-47]
-        sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
-        sys.stdout.flush()
+
+        if self.queue:
+            if msg == 'Completed':
+                self.queue.put((COMPLETED, ptype, msg))
+            else:
+                self.queue.put((self.n, ptype, msg))
+        else:
+            ft = '#' * self.n
+            ft = ft.ljust(self.max_steps)
+            msg =msg.ljust(40)
+
+            if self.tty_columns < 88:
+                msg = msg[:self.tty_columns-47]
+
+            sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
+            sys.stdout.flush()
 
 def get_key_shortcuter_rules():
     ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
@@ -302,8 +315,6 @@ class Setup(object):
         self.oxVersion = oxauth_info['version']
         self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = oxauth_info['branch']
-
-        self.pbar = ProgressBar(tty_columns)
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -1904,26 +1915,26 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            self.pbar.progress("Downloading oxAuth war file")
+            self.pbar.progress("download", "Downloading oxAuth war file")
             
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            self.pbar.progress("Downloading oxTrust war file", False)
+            self.pbar.progress("download", "Downloading oxTrust war file", False)
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                self.pbar.progress("Downloading oxAuth RP war file", False)
+                self.pbar.progress("download", "Downloading oxAuth RP war file", False)
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
             
-            self.pbar.progress("Downloading Shibboleth IDP v3 war file", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 war file", False)
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            self.pbar.progress("Downloading Shibboleth IDP v3 keygenerator", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 keygenerator", False)
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            self.pbar.progress("Downloading Shibboleth IDP v3 binary distributive file", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 binary distributive file", False)
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
 
@@ -2643,35 +2654,35 @@ class Setup(object):
     def install_gluu_components(self):
         
         if self.wrends_install:
-            self.pbar.progress("Installing Gluu components: LDAP", False)
+            self.pbar.progress("ldap", "Installing Gluu components: LDAP", False)
             self.install_ldap_server()
 
         if self.cb_install:
-            self.pbar.progress("Installing Gluu components: Couchbase", False)
+            self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
         if self.installHttpd:
-            self.pbar.progress("Installing Gluu components: HTTPD", False)
+            self.pbar.progress("httpd", "Installing Gluu components: HTTPD", False)
             self.configure_httpd()
 
         if self.installOxAuth:
-            self.pbar.progress("Installing Gluu components: OxAuth", False)
+            self.pbar.progress("oxauth", "Installing Gluu components: OxAuth", False)
             self.install_oxauth()
 
         if self.installOxTrust:
-            self.pbar.progress("Installing Gluu components: oxTrust", False)
+            self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
         if self.installSaml:
-            self.pbar.progress("Installing Gluu components: saml", False)
+            self.pbar.progress("saml", "Installing Gluu components: saml", False)
             self.install_saml()
 
         if self.installOxAuthRP:
-            self.pbar.progress("Installing Gluu components: OxAuthRP", False)
+            self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
             self.install_oxauth_rp()
 
         if self.installPassport:
-            self.pbar.progress("Installing Gluu components: Passport", False)
+            self.pbar.progress("passport", "Installing Gluu components: Passport", False)
             self.install_passport()
     
         self.install_gluu_radius()
@@ -3925,39 +3936,46 @@ class Setup(object):
 
     def start_services(self):
 
-        # Detect service path and apache service name
-        service_path = self.detect_service_path()
-        apache_service_name = 'httpd'
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-            apache_service_name = 'httpd'
-        elif self.os_type in ['debian', 'ubuntu']:
-            apache_service_name = 'apache2'
+        if self.installHttpd:
+            self.pbar.progress("gluu", "Starting httpd")
 
-        # Apache HTTPD
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-            self.run([service_path, 'enable', apache_service_name])
-            self.run([service_path, 'start', apache_service_name])
-        else:
-            self.run([service_path, apache_service_name, 'start'])
+            # Detect service path and apache service name
+            service_path = self.detect_service_path()
+            apache_service_name = 'httpd'
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+                apache_service_name = 'httpd'
+            elif self.os_type in ['debian', 'ubuntu']:
+                apache_service_name = 'apache2'
+
+            # Apache HTTPD
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+                self.run([service_path, 'enable', apache_service_name])
+                self.run([service_path, 'start', apache_service_name])
+            else:
+                self.run([service_path, apache_service_name, 'start'])
 
         # LDAP services
         if self.wrends_install == LOCAL:
-            if self.ldap_type == 'opendj':
-                self.run_service_command('opendj', 'stop')
-                self.run_service_command('opendj', 'start')
+            self.pbar.progress("gluu", "Starting WrenDS")
+            self.run_service_command('opendj', 'stop')
+            self.run_service_command('opendj', 'start')
 
         # Jetty services
         # Iterate through all components and start installed
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if applicationConfiguration['installed']:
+                self.pbar.progress("gluu", "Starting Gluu Jetty {} Service".format(applicationName))
                 self.run_service_command(applicationName, 'start')
-                
+
+        
         # Passport service
         if self.installPassport:
+            self.pbar.progress("gluu", "Starting Passport Service")
             self.run_service_command('passport', 'start')
             
         # Radius service
         if self.installGluuRadius:
+            self.pbar.progress("gluu", "Starting Gluu Radius Service")
             self.run_service_command('gluu-radius', 'start')
         
 
@@ -4006,28 +4024,28 @@ class Setup(object):
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
         
-        self.pbar.progress("Extracting OpenDJ", False)
+        self.pbar.progress("opendj", "Extracting OpenDJ", False)
         self.extractOpenDJ()
         self.opendj_version = self.determineOpenDJVersion()
 
         self.createLdapPw()
         
         try:
-            self.pbar.progress("OpenDJ: installing", False)
+            self.pbar.progress("opendj", "OpenDJ: installing", False)
             self.install_opendj()
     
             if self.ldap_type == 'opendj':
-                self.pbar.progress("OpenDJ: preparing schema", False)
+                self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
-                self.pbar.progress("OpenDJ: setting up service", False)
+                self.pbar.progress("opendj", "OpenDJ: setting up service", False)
                 self.setup_opendj_service()
-                self.pbar.progress("OpenDJ: configuring", False)
+                self.pbar.progress("opendj", "OpenDJ: configuring", False)
                 self.configure_opendj()
-                self.pbar.progress("OpenDJ:  exporting certificate", False)
+                self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
                 self.export_opendj_public_cert()
-                self.pbar.progress("OpenDJ: creating indexes", False)
+                self.pbar.progress("opendj", "OpenDJ: creating indexes", False)
                 self.index_opendj()
-                self.pbar.progress("OpenDJ: importing Ldif files", False)
+                self.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
                 
                 ldif_files = []
 
@@ -4044,7 +4062,7 @@ class Setup(object):
 
                 self.import_ldif_opendj(ldif_files)
                 
-            self.pbar.progress("OpenDJ: post installation", False)
+            self.pbar.progress("opendj", "OpenDJ: post installation", False)
             self.post_install_opendj()
         except:
             pass
@@ -4991,7 +5009,7 @@ class Setup(object):
 
 
         if self.installGluuRadius:
-            self.pbar.progress("Installing Gluu components: Radius", False)
+            self.pbar.progress("radius", "Installing Gluu components: Radius", False)
 
             if not os.path.exists(logs_dir):
                 self.run([self.cmd_mkdir, '-p', logs_dir])
@@ -5052,100 +5070,112 @@ class Setup(object):
         self.run(['chmod', '+x', show_version_fn])
 
 
-    def do_installation(self):
-        self.pbar.progress("Initializing")
-        self.initialize()
-        self.pbar.progress("Configuring system")
-        self.configureSystem()
-        self.pbar.progress("Downloading War files")
-        self.downloadWarFiles()
-        self.pbar.progress("Calculating application memory")
-        self.calculate_selected_aplications_memory()
-        self.pbar.progress("Installing JRE")
-        self.installJRE()
-        self.pbar.progress("Installing Jetty")
-        self.installJetty()
-        self.pbar.progress("Installing Jython")
-        self.installJython()
-        self.pbar.progress("Installing Node")
-        self.installNode()
-        self.pbar.progress("Making salt")
-        self.make_salt()
-        self.pbar.progress("Making oxauth salt")
-        self.make_oxauth_salt()
-        self.pbar.progress("Copying scripts")
-        self.copy_scripts()
-        self.pbar.progress("Encoding passwords")
-        self.encode_passwords()
-        self.pbar.progress("Encoding test passwords")
-        self.encode_test_passwords()
-        
-        if self.installPassport:
-            self.generate_passport_configuration()
-        
-        self.pbar.progress("Installing Gluu base")
-        self.install_gluu_base()
-        self.pbar.progress("Preparing base64 extention scripts")
-        self.prepare_base64_extension_scripts()
-        self.pbar.progress("Rendering templates")
-        self.render_templates()
-        self.pbar.progress("Generating crypto")
-        self.generate_crypto()
-        self.pbar.progress("Generating oxauth openid keys")
-        self.generate_oxauth_openid_keys()
-        self.pbar.progress("Generating base64 configuration")
-        self.generate_base64_configuration()
-        self.pbar.progress("Rendering configuratipn template")
-        self.render_configuration_template()
-        self.pbar.progress("Updating hostname")
-        self.update_hostname()
-        self.pbar.progress("Setting ulimits")
-        self.set_ulimits()
-        self.pbar.progress("Copying output")
-        self.copy_output()
-        self.pbar.progress("Setting up init scripts")
-        self.setup_init_scripts()
-        self.pbar.progress("Rendering node templates")
-        self.render_node_templates()
-        self.pbar.progress("Installing Gluu components")
-        self.install_gluu_components()
-        self.pbar.progress("Rendering test templates")
-        self.render_test_templates()
-        self.pbar.progress("Copying static")
-        self.copy_static()
-        self.fix_systemd_script()
-        self.pbar.progress("Setting ownerships")
-        self.set_ownership()
-        self.pbar.progress("Setting permissions")
-        self.set_permissions()
-        self.pbar.progress("Starting services")
-        self.start_services()
-        self.pbar.progress("Saving properties")
-        self.save_properties()
+    def do_installation(self, queue=None):
+        try:
+            self.thread_queue = queue
+            self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
+            self.pbar.progress("gluu", "Initializing")
+            self.initialize()
+            self.pbar.progress("gluu", "Configuring system")
+            self.configureSystem()
+            self.pbar.progress("download", "Downloading War files")
+            self.downloadWarFiles()
+            self.pbar.progress("gluu", "Calculating application memory")
+            self.calculate_selected_aplications_memory()
+            self.pbar.progress("java", "Installing JRE")
+            self.installJRE()
+            self.pbar.progress("jetty", "Installing Jetty")
+            self.installJetty()
+            self.pbar.progress("jython", "Installing Jython")
+            self.installJython()
+            self.pbar.progress("node", "Installing Node")
+            self.installNode()
+            self.pbar.progress("gluu", "Making salt")
+            self.make_salt()
+            self.pbar.progress("gluu", "Making oxauth salt")
+            self.make_oxauth_salt()
+            self.pbar.progress("scripts", "Copying scripts")
+            self.copy_scripts()
+            self.pbar.progress("gluu", "Encoding passwords")
+            self.encode_passwords()
+            self.pbar.progress("gluu", "Encoding test passwords")
+            self.encode_test_passwords()
+            
+            if self.installPassport:
+                self.generate_passport_configuration()
+            
+            self.pbar.progress("gluu", "Installing Gluu base")
+            self.install_gluu_base()
+            self.pbar.progress("gluu", "Preparing base64 extention scripts")
+            self.prepare_base64_extension_scripts()
+            self.pbar.progress("gluu", "Rendering templates")
+            self.render_templates()
+            self.pbar.progress("gluu", "Generating crypto")
+            self.generate_crypto()
+            self.pbar.progress("gluu","Generating oxauth openid keys")
+            self.generate_oxauth_openid_keys()
+            self.pbar.progress("gluu", "Generating base64 configuration")
+            self.generate_base64_configuration()
+            self.pbar.progress("gluu", "Rendering configuratipn template")
+            self.render_configuration_template()
+            self.pbar.progress("gluu", "Updating hostname")
+            self.update_hostname()
+            self.pbar.progress("gluu", "Setting ulimits")
+            self.set_ulimits()
+            self.pbar.progress("gluu", "Copying output")
+            self.copy_output()
+            self.pbar.progress("gluu", "Setting up init scripts")
+            self.setup_init_scripts()
+            self.pbar.progress("node", "Rendering node templates")
+            self.render_node_templates()
+            self.pbar.progress("gluu", "Installing Gluu components")
+            self.install_gluu_components()
+            self.pbar.progress("gluu", "Rendering test templates")
+            self.render_test_templates()
+            self.pbar.progress("gluu", "Copying static")
+            self.copy_static()
+            self.fix_systemd_script()
+            self.pbar.progress("gluu", "Setting ownerships")
+            self.set_ownership()
+            self.pbar.progress("gluu", "Setting permissions")
+            self.set_permissions()
+            self.pbar.progress("gluu", "Starting services")
+            self.start_services()
+            self.pbar.progress("gluu", "Saving properties")
+            self.save_properties()
 
-        if setupOptions['loadTestData']:
-            self.pbar.progress("Loading test data", False)
-            self.load_test_data()
+            if setupOptions['loadTestData']:
+                self.pbar.progress("gluu", "Loading test data", False)
+                self.load_test_data()
 
-        if 'importLDIFDir' in setupOptions.keys():
-            self.pbar.progress("Importing LDIF files")
-            self.render_custom_templates(setupOptions['importLDIFDir'])
-            self.import_custom_ldif(setupOptions['importLDIFDir'])
+            if 'importLDIFDir' in setupOptions.keys():
+                self.pbar.progress("gluu", "Importing LDIF files")
+                self.render_custom_templates(setupOptions['importLDIFDir'])
+                self.import_custom_ldif(setupOptions['importLDIFDir'])
 
-        self.deleteLdapPw()
+            self.deleteLdapPw()
 
-        self.post_install_tasks()
+            self.post_install_tasks()
 
-        self.pbar.progress("Completed")
-        print
-        self.print_post_messages()
-        
-        if self.couchbaseInstallOutput:
-            print
-            print "-"*int(tty_columns)
-            print self.couchbaseInstallOutput
-            print "-"*int(tty_columns)
-        
+            self.pbar.progress("gluu", "Completed")
+            if self.thread_queue:
+                print
+                self.print_post_messages()
+            
+            if self.couchbaseInstallOutput:
+                print
+                print "-"*int(tty_columns)
+                print self.couchbaseInstallOutput
+                print "-"*int(tty_columns)
+
+        except:
+            if self.thread_queue:
+                self.thread_queue.put((ERROR, "", str(traceback.format_exc())))
+            else:
+                installObject.logIt("***** Error caught in main loop *****", True)
+                installObject.logIt(traceback.format_exc(), True)
+                print "***** Error caught in main loop *****"
+                print traceback.format_exc()
 
     def print_post_messages(self):
         print
@@ -5268,7 +5298,6 @@ if __name__ == '__main__':
 
     setupOptions = {
         'install_dir': cur_dir,
-        'thread_queue': thread_queue,
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
@@ -5406,34 +5435,27 @@ if __name__ == '__main__':
         installObject.check_properties()
 
         proceed = False
-        if not thread_queu:
-            # Show to properties for approval
-            print '\n%s\n' % `installObject`
-            proceed = False
-            if not setupOptions['noPrompt']:
-                proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
-                if proceed_prompt and proceed_prompt[0]=='y':
-                    proceed = True
 
-            if setupOptions['noPrompt'] or proceed:
-                try:
-                    installObject.do_installation()
-                    print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
-                except:
-                    installObject.logIt("***** Error caught in main loop *****", True)
-                    installObject.logIt(traceback.format_exc(), True)
-                    print "***** Error caught in main loop *****"
-                print traceback.format_exc()
-            
-            else:
-                installObject.save_properties()
-                print "Properties saved to %s. Change filename to %s if you want to re-use" % \
-                      (installObject.savedProperties, installObject.setup_properties_fn)
+        # Show to properties for approval
+        print '\n%s\n' % `installObject`
+        proceed = False
+        if not setupOptions['noPrompt']:
+            proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
+            if proceed_prompt and proceed_prompt[0]=='y':
+                proceed = True
+
+        if setupOptions['noPrompt'] or proceed:
+            installObject.do_installation()
+            print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+        else:
+            installObject.save_properties()
+            print "Properties saved to %s. Change filename to %s if you want to re-use" % \
+                  (installObject.savedProperties, installObject.setup_properties_fn)
     else:
 
             msg = tui.msg
             msg.storages = installObject.couchbaseBucketDict.keys()
-            msg.installation_step_number = 16
+            msg.installation_step_number = 33
             
             msg.os_type = installObject.os_type
             msg.os_initdaemon = installObject.os_initdaemon
@@ -5445,9 +5467,6 @@ if __name__ == '__main__':
 
             GSA = tui.GluuSetupApp()
             GSA.installObject = installObject
-            
-
-
 
             GSA.run()
 # END

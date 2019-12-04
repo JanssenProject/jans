@@ -31,9 +31,20 @@ REMOTE = 2
 COMPLETED = -99
 ERROR = -101
 
-random_marketing_strings = ['What is something you refuse to share?', "What's the best type of cheese?", 'Is a hotdog a sandwich?', 'Do you fold your pizza when you eat it?', 'Toilet paper, over or under?', 'Is cereal soup?', 'Who was your worst teacher? Why?', 'Who was your favorite teacher? Why?', 'What was your favorite toy growing up?', 'Who is a celebrity you admire and why?', 'What are your 3 favorite movies?', "What's the right age to get married?", "What's your best childhood memory?", "What's your favorite holiday?", "What's one choice you really regret?", "What's your favorite childhood book?", 'Who is the funniest person you know?', 'Which TV family is most like your own?', "What's your favorite time of day?", "What's your favorite season?", 'What is the sound you love the most?', 'What is your favorite movie quote?', "What's your pet peeve(s)?", "What's your dream job?", 'Cake or pie?', 'Who is the kindest person you know?', 'What is your favorite family tradition?', "Who's your celebrity crush?", 'What are you good at?', 'Whose parents do/did you wish you had?', 'Did you ever skip school as a child?', 'Who is your favorite athlete?', 'What do you like to do on a rainy day?', 'What is your favorite animal sound?', 'What is your favorite Disney movie?', 'What is the sickest you have ever been?', 'What is your favorite day of the week?']
+random_marketing_strings = [
+    'Have a Question? https://support.gluu.org/',
+    'Cluster your Gluu servers https://gluu.org/docs/cm/',
+    'oxd exposes simple, static APIs web application developers https://gluu.org/docs/oxd/4.0/',
+    'Gluu Server Docker Edition https://gluu.org/docs/de/4.0',
+    'Gluu Gateway https://gluu.org/docs/gg/4.0',
+    'Super Gluu (2FA) https://gluu.org/docs/supergluu/3.1.3',
+    'Gluu Casa (self-service web portal) https://gluu.org/docs/casa/4.0',
+    "Let's discuss your project https://www.gluu.org/booking/",
+    'Gluu has both a social and a business mission.',
+    'Consider Gluu VIP Platform Subscription https://gluu.org/contact',
+    ]
 
-marketing_text_period = 10 
+marketing_text_period = 20 
 
 
 def check_email(email):
@@ -343,9 +354,11 @@ class DBBackendForm(GluuSetupForm):
         else:
             self.wrends_password.hidden = False
 
-        self.wrends_hosts.value = self.parentApp.installObject.ldap_hostname        
-        self.wrends_password.value = self.parentApp.installObject.ldapPass
+        if self.parentApp.installObject.wrends_install == LOCAL:
+            if not self.parentApp.installObject.ldapPass:
+                self.wrends_password.value = self.parentApp.installObject.oxtrust_admin_password
 
+        self.wrends_hosts.value = self.parentApp.installObject.ldap_hostname        
 
         self.ask_cb.value = [self.parentApp.installObject.cb_install]
 
@@ -364,8 +377,12 @@ class DBBackendForm(GluuSetupForm):
         else:
             self.cb_password.hidden = False
 
+
+        if self.parentApp.installObject.cb_install == LOCAL:
+            if not self.parentApp.installObject.cb_password:
+                self.cb_password.value = self.parentApp.installObject.oxtrust_admin_password
+
         self.cb_hosts.value = self.parentApp.installObject.couchbase_hostname
-        self.cb_password.value = self.parentApp.installObject.ldapPass
         self.cb_admin.value = self.parentApp.installObject.couchebaseClusterAdmin
 
         self.wrends_hosts.update()
@@ -472,8 +489,7 @@ class StorageSelectionForm(GluuSetupForm):
 
     def do_beforeEditing(self):
         self.wrends_storage.values = self.parentApp.installObject.couchbaseBucketDict.keys()
-        
-        
+
         value = []
         for i, s in enumerate(self.parentApp.installObject.couchbaseBucketDict.keys()):
             if self.parentApp.installObject.mappingLocations[s] == 'ldap':
@@ -527,13 +543,15 @@ class DisplaySummaryForm(GluuSetupForm):
                         bt_.append('couchbase[R]')
                     w.value = ', '.join(bt_)
                 elif wn == 'wrends_storages':
-                    wds_ = []
-                    for k in self.parentApp.installObject.mappingLocations:
-                        if self.parentApp.installObject.mappingLocations[k] == 'ldap':
-                            wds_.append(k)
-                    if wds_:
+                    if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
+                        wds_ = []
+                        for k in self.parentApp.installObject.mappingLocations:
+                            if self.parentApp.installObject.mappingLocations[k] == 'ldap':
+                                wds_.append(k)
                         w.hidden = False
-                    w.value = ', '.join(wds_)
+                        w.value = ', '.join(wds_)
+                    else:
+                        w.hidden = True
                 else:
                     val = getattr(self.parentApp.installObject, wn)
                     w.value = str(val)
@@ -548,20 +566,26 @@ class DisplaySummaryForm(GluuSetupForm):
         
 
     def nextButtonPressed(self):
+        # Validate Properties
+        self.parentApp.installObject.check_properties()
+
         self.parentApp.switchForm('InstallStepsForm')
 
 class InputBox(npyscreen.BoxTitle):
     _contained_widget = npyscreen.MultiLineEdit
 
 class InstallStepsForm(GluuSetupForm):
+    
+    desc_value = None
+    
     def create(self):
-        self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number, rely=4, editable=False, name="Progress")
+        self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number+1, rely=4, editable=False, name="Progress")
         self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
 
 
     def do_beforeEditing(self):
-        t=threading.Thread(target=startSetup, args=(queue,))
+        t=threading.Thread(target=self.parentApp.installObject.do_installation, args=(queue,))
         t.daemon = True
         t.start()
 
@@ -571,7 +595,9 @@ class InstallStepsForm(GluuSetupForm):
         if not queue.empty():
             data = queue.get()
             if data[0] == COMPLETED:
-                npyscreen.notify_confirm(msg.installation_completed.format(msg.hostname), title="Completed")
+                if self.parentApp.installObject.post_messages:
+                    npyscreen.notify_confirm('\n'.join(self.parentApp.installObject.post_messages), title="Post Install Messages", wide=True)
+                npyscreen.notify_confirm(msg.installation_completed.format(self.parentApp.installObject.hostname), title="Completed")
                 self.parentApp.do_notify = False
                 self.parentApp.switchForm(None)
             elif data[0] == ERROR:
@@ -584,14 +610,17 @@ class InstallStepsForm(GluuSetupForm):
             self.installing.value = data[2]
             self.installing.update()
 
-            if hasattr(msg, 'installation_description_' + data[1]):
-                desc = getattr(msg, 'installation_description_' + data[1])
+            if self.desc_value != data[1]:
+
+                if hasattr(msg, 'installation_description_' + data[1]):
+                    desc = getattr(msg, 'installation_description_' + data[1])
+                    
+                else:
+                    desc = msg.installation_description_gluu
                 self.description.value = '\n'.join(textwrap.wrap(desc, self.columns - 10))
-            else:
-                self.description.value = ""
-
-            self.description.update()
-
+                self.description.update()
+                self.desc_value = data[1]
+                
 
     def backButtonPressed(self):
         pass
