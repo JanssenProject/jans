@@ -5253,22 +5253,13 @@ if __name__ == '__main__':
 
     thread_queue = None
 
-    if istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
-        try:
-            import npyscreen
-        except:
-            print "Can't start TUI, continuing command line"
-        else:
-            from pylib import tui
-            thread_queue = tui.queue
-            from pylib.tui import *
-
     parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
     oxAuth and oxTrust to start. If setup.properties is found in this folder, these
     properties will automatically be used instead of the interactive setup.
     '''
 
     parser = argparse.ArgumentParser(description=parser_description)
+    parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
     parser.add_argument('-d', help="Installation directory")
     parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
     parser.add_argument('-p', help="Install Passport", action='store_true')
@@ -5290,6 +5281,16 @@ if __name__ == '__main__':
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     
     argsp = parser.parse_args()
+
+    if (not argsp.c) and istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
+        try:
+            import npyscreen
+        except:
+            print "Can't start TUI, continuing command line"
+        else:
+            from pylib import tui
+            thread_queue = tui.queue
+            from pylib.tui import *
 
     if not argsp.n and not thread_queue:
         resource_checkings()
