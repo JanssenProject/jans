@@ -32,16 +32,17 @@ COMPLETED = -99
 ERROR = -101
 
 random_marketing_strings = [
-    'Have a Question? https://support.gluu.org/',
-    'Cluster your Gluu servers https://gluu.org/docs/cm/',
-    'oxd exposes simple, static APIs web application developers https://gluu.org/docs/oxd/4.0/',
-    'Gluu Server Docker Edition https://gluu.org/docs/de/4.0',
-    'Gluu Gateway https://gluu.org/docs/gg/4.0',
-    'Super Gluu (2FA) https://gluu.org/docs/supergluu/3.1.3',
-    'Gluu Casa (self-service web portal) https://gluu.org/docs/casa/4.0',
-    "Let's discuss your project https://www.gluu.org/booking/",
+    'Having trouble? Open a ticket: https://support.gluu.org',
+    'Cluster your Gluu Server: https://gluu.org/docs/cm',
+    'oxd exposes simple, static APIs web application developers https://gluu.org/docs/oxd',
+    'Gluu Gateway https://gluu.org/docs/gg',
+    'Super Gluu (2FA) https://gluu.org/docs/supergluu',
+    'Gluu Casa (self-service web portal) https://gluu.org/docs/casa',
+    "Let's discuss your project https://www.gluu.org/booking",
     'Gluu has both a social and a business mission.',
     'Consider Gluu VIP Platform Subscription https://gluu.org/contact',
+    "Deploy Gluu using Kubernetes: https://gluu.org/docs/de",
+    'Evaluate our commercial offerings: https://gluu.org/pricing',
     ]
 
 marketing_text_period = 20 
