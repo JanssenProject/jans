@@ -90,7 +90,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
                 sessionAttributes.put(key, value)
 
         # Generate authenticated session
-        sessionId = sessionIdService.generateUnauthenticatedSessionId(user.getDn(), Date(), SessionIdState.AUTHENTICATED, sessionAttributes, True)
+        sessionId = sessionIdService.generateAuthenticatedSessionId(context.getHttpRequest(), user.getDn(), sessionAttributes)
 
         print "ROPC script. Generated session id. DN: '%s'" % sessionId.getDn()
 
