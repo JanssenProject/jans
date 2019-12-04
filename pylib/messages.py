@@ -93,8 +93,18 @@ class msg:
 
     installation_completed = "Gluu Server installation successful! Point your browser to https://{}"
 
-    installation_description_jre = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard and is available on Linux, Windows, and macOS. It includes patches from Amazon that have proven useful in running our own services."
-    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization. Its easy installation process, combined with the power of the Java platform makes OpenDJ the simplest, fastest directory to deploy and manage."
+    installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
+    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
     installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
-
+    installation_description_oxtrust = "oxTrust is a Weld based web application for Gluu Server administration."
+    installation_description_saml = "The Gluu Server acts as a SAML identity provider (IDP) to support outbound SAML single sign-on (SSO)."
+    installation_description_passport = "Gluu bundles the Passport.js authentication middleware project to support user authentication at external SAML, OAuth, and OpenID Connect providers "
+    installation_description_radius = "The Gluu Server now ships with a RADIUS server called Gluu Radius. It is based on the TinyRadius Java library."
+    installation_description_gluu = "Gluu Server is identity & access management (IAM) platform for web & mobile single sign-on (SSO), two-factor authentication (2FA) and API access management."
+    installation_description_jetty = "Eclipse Jetty provides a Web server and javax.servlet container, plus support for HTTP/2, WebSocket, OSGi, JMX, JNDI, JAAS and many other integrations."
+    installation_description_jython = "Jython is a Java implementation of Python that combines expressive power with clarity. Jython is freely available for both commercial and non-commercial use and is distributed with source code under the PSF License v2."
+    installation_description_node = "As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications."
+    installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code."
+    
+    
     installation_error = "The following error was occurred while installing Gluu Server:"
