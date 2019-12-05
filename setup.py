@@ -386,7 +386,8 @@ class Setup(object):
         self.gluuPassportEnabled = 'false'
         self.gluuRadiusEnabled = 'false'
         self.gluuSamlEnabled = 'false'
-
+        self.scimTestMode = 'false'
+        
         self.allowPreReleasedFeatures = False
 
         self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
@@ -5271,6 +5272,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
+    parser.add_argument('-stm', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('--opendj', help="Use OpenDJ as ldap server", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
     parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
@@ -5332,10 +5334,13 @@ if __name__ == '__main__':
             print "\nOoops... %s file not found for setup properties.\n" %argsp.f
 
     setupOptions['noPrompt'] = argsp.n
-        
+
     if argsp.N:
         setupOptions['installHTTPD'] = False
-    
+
+    if argsp.stm:
+        setupOptions['scimTestMode'] = 'true'
+
     setupOptions['installSaml'] = argsp.s
     setupOptions['downloadWars'] = argsp.w
     setupOptions['installOxAuthRP'] = argsp.r
