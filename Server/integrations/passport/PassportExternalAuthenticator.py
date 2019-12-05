@@ -27,6 +27,7 @@ from javax.faces.context import FacesContext
 
 import json
 import sys
+import datetime
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -445,7 +446,7 @@ class PersonAuthentication(PersonAuthenticationType):
         jwt_claims = jwt.getClaims()
         try:
             exp_date = jwt_claims.getClaimAsDate(JwtClaimName.EXPIRATION_TIME)
-            hasExpired = exp_date < datetime.now()
+            hasExpired = exp_date < datetime.datetime.now()
         except:
             print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
             return False
@@ -458,7 +459,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_profile_json = None
 
         try:
-			user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt_claims.getClaimAsString("data"))
+            user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt_claims.getClaimAsString("data"))
             user_profile = json.loads(user_profile_json)
         except:
             print "Passport. getUserProfile. Problem obtaining user profile json representation"
