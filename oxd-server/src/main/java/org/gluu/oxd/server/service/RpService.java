@@ -37,7 +37,7 @@ public class RpService {
     public RpService(ValidationService validationService, PersistenceService persistenceService, ConfigurationService configurationService) {
 
         rpCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(configurationService.get().getRpCacheExpirationInMinutes(), TimeUnit.MINUTES)
+                .expireAfterWrite(configurationService.get() != null ? configurationService.get().getRpCacheExpirationInMinutes() : 60, TimeUnit.MINUTES)
                 .build();
 
         this.validationService = validationService;
