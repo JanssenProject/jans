@@ -26,6 +26,14 @@ public abstract class AbstractRedisProvider {
 		}
 	}
 
+	public boolean isConnected() {
+		put(2, "testKey", "testValue");
+		if (!"testValue".equals(get("testKey"))) {
+			return false;
+		}
+		return true;
+	}
+
 	public abstract void create();
 
 	public abstract void destroy();
