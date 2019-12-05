@@ -132,7 +132,7 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
 
-    "scimTestMode":false,
+    "scimTestMode": %(scimTestMode)s,
     "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200
