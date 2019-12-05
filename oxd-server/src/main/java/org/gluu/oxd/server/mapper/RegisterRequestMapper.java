@@ -211,7 +211,7 @@ public class RegisterRequestMapper {
         request.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseAlg()));
         request.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getIdTokenEncryptedResponseEnc()));
         request.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(rp.getUserInfoSignedResponseAlg()));
-        request.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseAlg().toString()));
+        request.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseAlg()));
         request.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(rp.getUserInfoEncryptedResponseEnc()));
         request.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(rp.getRequestObjectSigningAlg()));
         request.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(rp.getRequestObjectEncryptionAlg()));
