@@ -2,15 +2,19 @@ package org.gluu.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.persistence.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,14 +27,19 @@ public class RpService {
      */
     private static final Logger LOG = LoggerFactory.getLogger(RpService.class);
 
-    private final Map<String, Rp> rpMap = Maps.newConcurrentMap();
+    private final Cache<String, Rp> rpCache;
 
     private ValidationService validationService;
 
     private PersistenceService persistenceService;
 
     @Inject
-    public RpService(ValidationService validationService, PersistenceService persistenceService) {
+    public RpService(ValidationService validationService, PersistenceService persistenceService, ConfigurationService configurationService) {
+
+        rpCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(configurationService.get() != null ? configurationService.get().getRpCacheExpirationInMinutes() : 60, TimeUnit.MINUTES)
+                .build();
+
         this.validationService = validationService;
         this.persistenceService = persistenceService;
     }
@@ -49,11 +58,11 @@ public class RpService {
         Preconditions.checkNotNull(oxdId);
         Preconditions.checkState(!Strings.isNullOrEmpty(oxdId));
 
-        Rp rp = rpMap.get(oxdId);
+        Rp rp = rpCache.getIfPresent(oxdId);
         if (rp == null) {
             rp = persistenceService.getRp(oxdId);
             if (rp != null) {
-                rpMap.put(oxdId, rp);
+                rpCache.put(oxdId, rp);
             }
         }
         rp = validationService.validate(rp);
@@ -61,7 +70,7 @@ public class RpService {
     }
 
     public Map<String, Rp> getRps() {
-        return Maps.newHashMap(rpMap);
+        return Maps.newHashMap(rpCache.asMap());
     }
 
     public void update(Rp rp) {
@@ -82,7 +91,7 @@ public class RpService {
             rp.setOxdId(UUID.randomUUID().toString());
         }
 
-        if (rpMap.get(rp.getOxdId()) == null) {
+        if (rpCache.getIfPresent(rp.getOxdId()) == null) {
             put(rp);
             persistenceService.create(rp);
         } else {
@@ -91,19 +100,20 @@ public class RpService {
     }
 
     private Rp put(Rp rp) {
-        return rpMap.put(rp.getOxdId(), rp);
+        rpCache.put(rp.getOxdId(), rp);
+        return rp;
     }
 
     public boolean remove(String oxdId) {
         boolean ok = persistenceService.remove(oxdId);
         if (ok) {
-            rpMap.remove(oxdId);
+            rpCache.invalidate(oxdId);
         }
         return ok;
     }
 
     public Rp getRpByClientId(String clientId) {
-        for (Rp rp : rpMap.values()) {
+        for (Rp rp : rpCache.asMap().values()) {
             if (rp.getClientId().equalsIgnoreCase(clientId)) {
                 LOG.trace("Found rp by client_id: " + clientId + ", rp: " + rp);
                 return rp;
