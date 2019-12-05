@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -261,6 +262,9 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 }
 
                 byte[] signature = Base64Util.base64urldecode(encodedSignature);
+                if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+                    signature = ECDSA.transcodeSignatureToDER(signature);
+                }
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
@@ -406,5 +410,9 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
+    }
+
+    public KeyStore getKeyStore() {
+        return keyStore;
     }
 }
