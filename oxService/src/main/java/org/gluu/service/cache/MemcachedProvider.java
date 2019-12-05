@@ -65,6 +65,14 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         }
     }
 
+    public boolean isConnected() {
+        put(2, "connectionTest", "connectionTestValue");
+        if (!"connectionTestValue".equals(get("connectionTest"))) {
+         return false;
+        }
+        return true;
+    }
+
     @PreDestroy
     public void destroy() {
         log.debug("Destroying MemcachedProvider");
