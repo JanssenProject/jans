@@ -9,6 +9,7 @@ crypt_provider_dn_name: {{crypt_provider_dn_name}}
 support-google-logout: {{support-google-logout}}
 state_expiration_in_minutes: {{state_expiration_in_minutes}}
 nonce_expiration_in_minutes: {{nonce_expiration_in_minutes}}
+rp_cache_expiration_in_minutes: {{rp_cache_expiration_in_minutes}}
 public_op_key_cache_expiration_in_minutes: {{public_op_key_cache_expiration_in_minutes}}
 protect_commands_with_access_token: {{protect_commands_with_access_token}}
 uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client: {{uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client}}
