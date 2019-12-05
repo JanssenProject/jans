@@ -35,6 +35,8 @@ public class OxdServerConfiguration extends Configuration {
     private int stateExpirationInMinutes = 5;
     @JsonProperty(value = "nonce_expiration_in_minutes")
     private int nonceExpirationInMinutes = 5;
+    @JsonProperty(value = "rp_cache_expiration_in_minutes")
+    private int rpCacheExpirationInMinutes = 60;
     @JsonProperty(value = "public_op_key_cache_expiration_in_minutes")
     private int publicOpKeyCacheExpirationInMinutes = 60;
     @JsonProperty(value = "protect_commands_with_access_token")
@@ -174,6 +176,14 @@ public class OxdServerConfiguration extends Configuration {
         this.nonceExpirationInMinutes = nonceExpirationInMinutes;
     }
 
+    public int getRpCacheExpirationInMinutes() {
+        return rpCacheExpirationInMinutes;
+    }
+
+    public void setRpCacheExpirationInMinutes(int rpCacheExpirationInMinutes) {
+        this.rpCacheExpirationInMinutes = rpCacheExpirationInMinutes;
+    }
+
     public Boolean getSupportGoogleLogout() {
         return supportGoogleLogout;
     }
@@ -277,6 +287,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", supportGoogleLogout=" + supportGoogleLogout +
                 ", stateExpirationInMinutes=" + stateExpirationInMinutes +
                 ", nonceExpirationInMinutes=" + nonceExpirationInMinutes +
+                ", rpCacheExpirationInMinutes=" + rpCacheExpirationInMinutes +
                 ", publicOpKeyCacheExpirationInMinutes=" + publicOpKeyCacheExpirationInMinutes +
                 ", protectCommandsWithAccessToken=" + protectCommandsWithAccessToken +
                 ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
