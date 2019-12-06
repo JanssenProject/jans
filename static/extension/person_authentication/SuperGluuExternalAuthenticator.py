@@ -132,7 +132,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Validate license
             try:
                 self.license_content = LicenseValidator.validate(license["public_key"], license["public_password"], license["license_password"], license["license"],
-                                          Product.fromValue("super_gluu"), Date())
+                                          Product.SUPER_GLUU, Date())
                 self.valid_license = self.license_content.isValid()
             except:
                 print "Super-Gluu. Initialization. Failed to validate license. Exception: ", sys.exc_info()[1]
@@ -808,8 +808,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         send_notification = True
                         
-                        title = "Super-Gluu"
-                        message = "Super-Gluu login request to: %s" % client_redirect_uri
+                        title = "Super Gluu"
+                        message = "Confirm your sign in request to: %s" % client_redirect_uri
 
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)

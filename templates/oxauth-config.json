@@ -167,7 +167,7 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket"
     ],
-    "claimsParameterSupported":true,
+    "claimsParameterSupported":false,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
     "requireRequestUriRegistration":false,
@@ -190,8 +190,8 @@
     "umaRestrictResourceToAssociatedClient":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
-    "cleanServiceInterval":600,
-    "cleanServiceBatchChunkSize": 1000,
+    "cleanServiceInterval":60,
+    "cleanServiceBatchChunkSize": 10000,
     "keyRegenerationEnabled":true,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
@@ -260,8 +260,8 @@
     "legacyIdTokenClaims": %(oxauth_legacyIdTokenClaims)s,
     "customHeadersWithAuthorizationResponse": true,
     "frontChannelLogoutSessionSupported":true,
-    "updateUserLastLogonTime": true,
-    "updateClientAccessTime":true,
+    "updateUserLastLogonTime": false,
+    "updateClientAccessTime":false,
     "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
@@ -309,6 +309,7 @@
     },
    "loggingLevel": "INFO",
    "errorHandlingMethod":"internal",
+   "useLocalCache":true,
     "backchannelTokenDeliveryModesSupported": ["poll", "ping", "push"],
     "backchannelAuthenticationRequestSigningAlgValuesSupported": [
         "RS512",
