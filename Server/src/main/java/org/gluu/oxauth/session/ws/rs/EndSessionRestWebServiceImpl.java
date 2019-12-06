@@ -118,8 +118,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug(reason);
         try {
             if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
-                String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
-                postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                // Commented out to avoid sending an error:                
+                // String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
+                // postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
                 return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
             }
         } catch (URISyntaxException e) {
