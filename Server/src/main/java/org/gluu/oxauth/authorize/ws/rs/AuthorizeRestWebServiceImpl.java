@@ -637,7 +637,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     log.trace("newSessionId = {}", newSessionId);
                                 }
                                 redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
-                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionUser.getSessionState());
+                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
                                 redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
                                 if (scope != null && !scope.isEmpty()) {
                                     scope = authorizationGrant.checkScopesPolicy(scope);

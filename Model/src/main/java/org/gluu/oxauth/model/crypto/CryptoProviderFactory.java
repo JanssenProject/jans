@@ -40,6 +40,9 @@ public class CryptoProviderFactory {
                 break;
         }
 
+        if (configuration.getKeyRegenerationEnabled()) { // set interval only if re-generation is enabled
+            cryptoProvider.setKeyRegenerationIntervalInDays(configuration.getKeyRegenerationInterval() / 24);
+        }
         return cryptoProvider;
     }
 
