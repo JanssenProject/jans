@@ -35,5 +35,6 @@
     "attributeMapping":[
     ],
     "snapshotFolder":"/var/gluu/identity/cr-snapshots",
-    "snapshotMaxCount":10
+    "snapshotMaxCount":10,
+    "defaultInumServer":true
 }

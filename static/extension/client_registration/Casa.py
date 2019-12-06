@@ -49,7 +49,7 @@ class ClientRegistration(ClientRegistrationType):
         self.setClientScopes(client, configurationAttributes.get("scopes"))
         #Extend client lifetime for one year
         cal=GregorianCalendar()
-        cal.add(1,1)
+        cal.add(1,10)
         client.setClientSecretExpiresAt(Date(cal.getTimeInMillis()))
         return True
 

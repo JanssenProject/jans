@@ -1,6 +1,5 @@
 dn: ou=configuration,o=gluu
 objectClass: top
-objectClass: organizationalUnit
 objectClass: gluuConfiguration
 ou: configuration
 gluuMaxLogSize: 200
@@ -10,19 +9,19 @@ gluuManageIdentityPermission: true
 gluuFederationHostingEnabled: disabled
 gluuVdsCacheRefreshEnabled: false
 gluuScimEnabled: false
-oxAuthenticationMode: auth_ldap_server
-oxTrustAuthenticationMode: auth_ldap_server
+oxAuthenticationMode: simple_password_auth
+oxTrustAuthenticationMode: simple_password_auth
 gluuPassportEnabled: %(gluuPassportEnabled)s
 gluuRadiusEnabled: %(gluuRadiusEnabled)s
 gluuSamlEnabled: %(gluuSamlEnabled)s
-oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
+oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
 oxIDPAuthentication: {"type": "auth",
   "name": null,
   "level": 0,
   "priority": 1,
-  "enabled": true,
+  "enabled": false,
   "version": 0,
   "config": {"configId": "auth_ldap_server",
             "servers": ["%(ldap_hostname)s:%(ldaps_port)s"],
@@ -34,7 +33,7 @@ oxIDPAuthentication: {"type": "auth",
             "primaryKey": "uid",
             "localPrimaryKey": "uid",
             "useAnonymousBind": false,
-            "enabled": true}
+            "enabled": false}
   }
 oxLogViewerConfig: {
   "log_template":[
