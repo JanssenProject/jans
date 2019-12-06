@@ -13,7 +13,7 @@ dn: oxId=%(passport_resource_id)s,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: Passport Resource
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
+owner: inum=%(admin_inum)s,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/passport_logo.png
 oxAssociatedClient: inum=%(passport_rs_client_id)s,ou=clients,o=gluu
 oxAuthUmaScope: inum=8CAD-B06E,ou=scopes,o=gluu

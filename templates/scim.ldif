@@ -13,7 +13,7 @@ dn: oxId=%(scim_resource_oxid)s,ou=resources,ou=uma,o=gluu
 objectClass: oxUmaResource
 objectClass: top
 displayName: SCIM Resource
-owner: inum=A8F2-DE1E.D7FB,ou=people,o=gluu
+owner: inum=%(admin_inum)s,ou=people,o=gluu
 oxFaviconImage: http://www.gluu.org/img/scim_logo.png
 oxAssociatedClient: inum=%(scim_rs_client_id)s,ou=clients,o=gluu
 oxAuthUmaScope: inum=8CAD-B06D,ou=scopes,o=gluu
