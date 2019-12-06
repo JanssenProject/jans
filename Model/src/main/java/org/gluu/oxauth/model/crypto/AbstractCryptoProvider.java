@@ -47,6 +47,8 @@ public abstract class AbstractCryptoProvider {
 
     protected static final Logger LOG = Logger.getLogger(AbstractCryptoProvider.class);
 
+    private int keyRegenerationIntervalInDays = -1;
+
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws Exception {
         return generateKey(algorithm, expirationTime, Use.SIGNATURE);
     }
@@ -226,20 +228,40 @@ public abstract class AbstractCryptoProvider {
             Date expirationDate = new Date(expirationTime);
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date today = new Date();
-            long DateDiff = expirationTime - today.getTime();
-            long expiresIn = DateDiff / (24 * 60 * 60 * 1000);
-            if (expiresIn <= 0) {
-                LOG.warn("\nWARNING! Expired Key with alias: " + alias
+            long expiresInDays = (expirationTime - today.getTime()) / (24 * 60 * 60 * 1000);
+            if (expiresInDays <= 0) {
+                LOG.warn("\nWARNING! Expired Key is used, alias: " + alias
                         + "\n\tExpires On: " + ft.format(expirationDate)
                         + "\n\tToday's Date: " + ft.format(today));
-            } else if (expiresIn <= 100) {
+                return;
+            }
+
+            // re-generation interval is unknown, therefore we default to 30 days period warning
+            if (keyRegenerationIntervalInDays <= 0 && expiresInDays < 30) {
                 LOG.warn("\nWARNING! Key with alias: " + alias
-                        + "\n\tExpires In: " + expiresIn + " days"
+                        + "\n\tExpires In: " + expiresInDays + " days"
                         + "\n\tExpires On: " + ft.format(expirationDate)
+                        + "\n\tToday's Date: " + ft.format(today));
+                return;
+            }
+
+            if (expiresInDays < keyRegenerationIntervalInDays) {
+                LOG.warn("\nWARNING! Key with alias: " + alias
+                        + "\n\tExpires In: " + expiresInDays + " days"
+                        + "\n\tExpires On: " + ft.format(expirationDate)
+                        + "\n\tKey Regeneration In: " + keyRegenerationIntervalInDays + " days"
                         + "\n\tToday's Date: " + ft.format(today));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Failed to check key expiration.", e);
         }
+    }
+
+    public int getKeyRegenerationIntervalInDays() {
+        return keyRegenerationIntervalInDays;
+    }
+
+    public void setKeyRegenerationIntervalInDays(int keyRegenerationIntervalInDays) {
+        this.keyRegenerationIntervalInDays = keyRegenerationIntervalInDays;
     }
 }

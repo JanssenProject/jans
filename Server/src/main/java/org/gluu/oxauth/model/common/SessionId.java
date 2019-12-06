@@ -185,6 +185,9 @@ public class SessionId implements Serializable {
     }
 
     public SessionIdAccessMap getPermissionGrantedMap() {
+        if (permissionGrantedMap == null) {
+            permissionGrantedMap = new SessionIdAccessMap();
+        }
         return permissionGrantedMap;
     }
 
