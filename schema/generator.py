@@ -11,6 +11,7 @@ class SchemaGenerator(object):
         self.data = json.loads(jsontext)
         self.header = header
         self.macroMap = {}
+        self.macroMapIndex = {}
         if self.data['oidMacros']:
             self.__mapMacros()
 
@@ -36,6 +37,7 @@ class SchemaGenerator(object):
                 parent, index = oid.split(':')
                 if parent in self.macroMap:
                     self.macroMap[mac] = self.macroMap[parent] + '.' + index
+                    self.macroMapIndex[mac] = 1
 
     def __compare_defs(self, m1, m2):
         n1 = int(m1[1].split(':')[1])
@@ -129,11 +131,13 @@ class SchemaGenerator(object):
 
     def _getOID(self, model):
         oid = model['oid']
-        if ':' not in oid or not self.macroMap:
+
+        if oid.replace('.','').isdigit():
             return oid
 
-        macro, index = oid.split(':')
-        oid = self.macroMap[macro] + '.' + index
+        oid = self.macroMap[oid] + '.' + str(self.macroMapIndex[oid])
+        self.macroMapIndex[model['oid']] += 1
+
         return oid
 
     def generate_ldif(self):
