@@ -44,7 +44,8 @@
         "password",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:openid:params:grant-type:ciba"
     ],
     "subjectTypesSupported":[
         "public",
@@ -165,7 +166,8 @@
         "implicit",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:openid:params:grant-type:ciba"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -307,9 +309,9 @@
         "authenticationHistoryExpiration":1296000,
         "disableFido2":true
     },
-   "loggingLevel": "INFO",
-   "errorHandlingMethod":"internal",
-   "useLocalCache":true,
+    "loggingLevel": "INFO",
+    "errorHandlingMethod":"internal",
+    "useLocalCache":true,
     "backchannelTokenDeliveryModesSupported": ["poll", "ping", "push"],
     "backchannelAuthenticationRequestSigningAlgValuesSupported": [
         "RS512",
@@ -321,6 +323,8 @@
         "PS384",
         "PS512"
     ],
+    "backchannelClientId": "123-123-123",
+    "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
     "backchannelBindingMessagePattern": "^[A-Z]{1,10}$",
     "backchannelAuthenticationResponseExpiresIn": 3600,
