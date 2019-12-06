@@ -388,6 +388,8 @@ class Setup(object):
         self.gluuSamlEnabled = 'false'
         self.scimTestMode = 'false'
         
+        self.enable_scim_access_policy = 'false'
+        
         self.allowPreReleasedFeatures = False
 
         self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
@@ -3233,6 +3235,7 @@ class Setup(object):
         if promptForPassport == 'y':
             self.installPassport = True
             self.gluuPassportEnabled = 'true'
+            self.enable_scim_access_policy = 'true'
         else:
             self.installPassport = False
 
