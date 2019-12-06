@@ -271,14 +271,21 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 }
 
                 byte[] signature = Base64Util.base64urldecode(encodedSignature);
+                byte[] signatureDer = signature;
                 if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-                    signature = ECDSA.transcodeSignatureToDER(signature);
+                	signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
                 }
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
-                verified = verifier.verify(signature);
+                try {
+                	verified = verifier.verify(signatureDer);
+                } catch (SignatureException e) {
+                	// Fall back to old format
+                	// TODO: remove in Gluu 5.0
+                	verified = verifier.verify(signature);
+                }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e.getMessage(), e);
                 verified = false;
