@@ -2,10 +2,11 @@ import os
 import json
 import glob
 
-# Currently we implement only three data types: string, boolean, integer
+# Currently we implement only three data types: string, boolean, integer, datetime
 syntaxType = {
                 '1.3.6.1.4.1.1466.115.121.1.7': 'boolean',
                 '1.3.6.1.4.1.1466.115.121.1.27': 'integer',
+                '1.3.6.1.4.1.1466.115.121.1.24': 'datetime',
               }
 # other syntaxes are treated as string
 
@@ -28,18 +29,10 @@ def opendjSchemaDataTypes(schemaDir):
         def handle(self, dn, entry):
             self.entries.append((dn, entry))
 
-
-    attribTypes = {
-                    'string': [],
-                    'boolean': [],
-                    'integer': [],
-                    "json": []
-                }
-   
+    attribTypes = { v: [] for v in syntaxType.values() }
+    attribTypes['json'] = []
    
     for schema in glob.glob(os.path.join(schemaDir, '*.ldif')):
-
-        print "processing", schema
 
         ldif_parser = myLdifParser(schema)
         ldif_parser.parse()
@@ -72,6 +65,14 @@ class ATTRUBUTEDATATYPES:
         self.installDir = installDir
         opendjTypesFn = os.path.join(self.installDir, 'schema/opendj_types.json')
         self.attribTypes = json.load(open(opendjTypesFn))
+
+        for v in syntaxType.values():
+            if not v in self.attribTypes:
+                self.attribTypes[v] = []
+
+        if 'json' not in self.attribTypes:
+            self.attribTypes['json'] = []
+
         
         self.processGluuSchema()
 
@@ -80,9 +81,6 @@ class ATTRUBUTEDATATYPES:
         gluuSchemaFn = os.path.join(self.installDir, 'schema/gluu_schema.json')
         gluuSchema = json.load(open(gluuSchemaFn))
         gluuAtrribs = gluuSchema['attributeTypes']
-
-        if 'json' not in self.attribTypes:
-            self.attribTypes['json'] = []
 
         for attrib in gluuAtrribs:
             if attrib.get('json'):

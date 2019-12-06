@@ -26,6 +26,7 @@ else:
 parser = argparse.ArgumentParser()
 parser.add_argument("-addshib", help="Install Shibboleth SAML IDP", action="store_true")
 parser.add_argument("-addpassport", help="Install Passport", action="store_true")
+parser.add_argument("-addradius", help="Install Radius", action="store_true")
 args = parser.parse_args()
 
 if  len(sys.argv)<2:
@@ -33,13 +34,17 @@ if  len(sys.argv)<2:
     parser.exit(1)
 
 
-from setup import Setup
+from setup import *
 
 setupObj = Setup('.')
 
 setupObj.setup = setupObj
 
 setupObj.load_properties('/install/community-edition-setup/setup.properties.last')
+attribDataTypes.startup('.')
+
+setupObj.cbm = CBM(setupObj.couchbase_hostname, setupObj.couchebaseClusterAdmin, setupObj.ldapPass)
+
 
 if not hasattr(setupObj, 'ldap_type'):
     setupObj.ldap_type = 'open_ldap'
@@ -116,31 +121,69 @@ def installSaml():
     setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', setupObj.idp3Folder])
     print "Shibboleth installation done"
 
+def installRadius():
 
+    radius_dir = '/opt/gluu/radius'
+    logs_dir = os.path.join(radius_dir,'logs')
+    radius_jar = os.path.join(setupObj.distGluuFolder, 'super-gluu-radius-server.jar')
+    source_dir = os.path.join(setupObj.staticFolder, 'radius')
+    conf_dir = os.path.join(setupObj.gluuBaseFolder, 'conf/radius/')
+    radius_libs = os.path.join(setupObj.distGluuFolder, 'gluu-radius-libs.zip')
+    ldif_file_server = os.path.join(setupObj.outputFolder, 'gluu_radius_server.ldif')
+
+    if not os.path.exists(logs_dir):
+        setupObj.run([setupObj.cmd_mkdir, '-p', logs_dir])
+
+    setupObj.run(['unzip', '-n', '-q', radius_libs, '-d', radius_dir ])
+    setupObj.copyFile(radius_jar, radius_dir)
+
+    if setupObj.mappingLocations['default'] == 'ldap':
+        schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
+        setupObj.import_ldif_opendj([schema_ldif])
+        setupObj.import_ldif_opendj([ldif_file_server])
+    else:
+        setupObj.import_ldif_couchebase([ldif_file_server])
+
+    setupObj.createUser('radius', homeDir=radius_dir, shell='/bin/false')
+    setupObj.addUserToGroup('gluu', 'radius')
     
+    setupObj.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), setupObj.osDefault)
+    setupObj.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
+    setupObj.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(setupObj.gluuOptPythonFolder, 'libs'))
+
+    setupObj.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+    setupObj.run([setupObj.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+    
+    if setupObj.os_type+setupObj.os_version == 'ubuntu16':
+        setupObj.run(['update-rc.d', 'gluu-radius', 'defaults'])
+    else:
+        setupObj.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+        setupObj.run([setupObj.systemctl, 'daemon-reload'])
+    
+    #create empty gluu-radius.private-key.pem
+    gluu_radius_private_key_fn = os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')
+    setupObj.writeFile(gluu_radius_private_key_fn, '')
+    
+    setupObj.run([setupObj.cmd_chown, '-R', 'radius:gluu', radius_dir])
+    setupObj.run([setupObj.cmd_chown, '-R', 'root:gluu', conf_dir])
+    setupObj.run([setupObj.cmd_chown, 'root:gluu', os.path.join(setupObj.gluuOptPythonFolder, 'libs/gluu_common.py')])
+
+    setupObj.enable_service_at_start('gluu-radius')
+
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
 def installPassport():
     
     if os.path.exists('/opt/gluu/node/passport'):
         print "Passport is already installed on this system"
         sys.exit()
 
-    
     print "Installing Passport ..."
-    proc = subprocess.Popen('echo "" | /opt/jre/bin/keytool -list -v -keystore /etc/certs/passport-rp.jks', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    alias_l=''
-
-    jks = {'keys': []}
-
-    for l in proc.stdout.readlines():
-        if l.startswith('Alias name:'):
-            alias_l = l
-        if 'SHA512withRSA' in l:
-            alias = alias_l[11:].strip()
-            jks['keys'].append({'kid': alias, 'alg': 'RS512'})
-            break
-
-    setupObj.passport_rp_client_jwks = [json.dumps(jks)]
-    
+    setupObj.generate_passport_configuration()
     setupObj.install_passport()
     print "Passport installation done"
 
@@ -150,5 +193,8 @@ if args.addshib:
 
 if args.addpassport:
     installPassport()
+
+if args.addradius:
+    installRadius()
 
 print "Please exit container and restart Gluu Server"

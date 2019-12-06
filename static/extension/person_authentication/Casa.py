@@ -9,12 +9,14 @@ from java.nio.charset import Charset
 
 from org.apache.http.params import CoreConnectionPNames
 
+from org.oxauth.persistence.model.configuration import GluuConfiguration
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService, UserService, EncryptionService, AppInitializer
 from org.gluu.oxauth.service.custom import CustomScriptService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.model import SimpleCustomProperty
+from org.gluu.model.casa import ApplicationConfiguration
 from org.gluu.model.custom.script import CustomScriptType
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.service.cdi.util import CdiUtil
@@ -41,7 +43,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         print "Casa. init called"
         self.authenticators = {}
-        self.configFileLocation = "/etc/gluu/conf/casa.json"
         self.uid_attr = self.getLocalPrimaryKey()
 
         custScriptService = CdiUtil.bean(CustomScriptService)
@@ -291,34 +292,42 @@ class PersonAuthentication(PersonAuthenticationType):
 # Miscelaneous
 
     def getLocalPrimaryKey(self):
+        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        config = GluuConfiguration()
+        config = entryManager.find(config.getClass(), "ou=configuration,o=gluu")
         #Pick (one) attribute where user id is stored (e.g. uid/mail)
-        oxAuthInitializer = CdiUtil.bean(AppInitializer)
-        #This call does not create anything, it's like a getter (see oxAuth's AppInitializer)
-        ldapAuthConfigs = oxAuthInitializer.createPersistenceAuthConfigs()
-        uid_attr = ldapAuthConfigs.get(0).getLocalPrimaryKey()
+        uid_attr = config.getOxIDPAuthentication().get(0).getConfig().getPrimaryKey()
         print "Casa. init. uid attribute is '%s'" % uid_attr
         return uid_attr
 
 
+    def getSettings(self):
+        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        config = ApplicationConfiguration()
+        config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o=gluu")
+        settings = None
+        try:
+            settings = json.loads(config.getSettings())
+        except:
+            print "Casa. getSettings. Failed to parse casa settings from DB"
+        return settings
+        
+        
     def computeMethods(self, scriptList):
 
         methods = []
-        f = open(self.configFileLocation, 'r')
-        try:
-            cmConfigs = json.loads(f.read())
-            if 'acr_plugin_mapping' in cmConfigs:
-                mapping = cmConfigs['acr_plugin_mapping']
-            else:
-                mapping = {}
+        mapping = {}
+        cmConfigs = self.getSettings()
+        
+        if cmConfigs != None and 'acr_plugin_mapping' in cmConfigs:
+            mapping = cmConfigs['acr_plugin_mapping']
 
-            for m in mapping:
-                for customScript in scriptList:
-                    if customScript.getName() == m and customScript.isEnabled():
-                        methods.append(m)
-        except:
-            print "Casa. computeMethods. Failed to read configuration file"
-        finally:
-            f.close()
+        for m in mapping:
+            for customScript in scriptList:
+                if customScript.getName() == m and customScript.isEnabled():
+                    methods.append(m)
+
+        print "Casa. computeMethods. %s" % methods
         return methods
 
 
@@ -407,20 +416,17 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Casa. getSuitableAcr. %s was selected for user %s" % (acr, id)
         return acr
 
+
     def determineSkip2FA(self, userService, identity, foundUser, deviceInf):
 
-        f = open(self.configFileLocation, 'r')
-        try:
-            cmConfigs = json.loads(f.read())
-            if 'policy_2fa' in cmConfigs:
-                policy2FA = ','.join(cmConfigs['policy_2fa'])
-            else:
-                policy2FA = 'EVERY_LOGIN'
-        except:
-            print "Casa. determineSkip2FA. Failed to read policy_2fa from configuration file"
+        cmConfigs = self.getSettings()
+        if cmConfigs == None:
+            print "Casa. determineSkip2FA. Failed to read policy_2fa"
             return False
-        finally:
-            f.close()
+        elif 'policy_2fa' in cmConfigs:
+            policy2FA = ','.join(cmConfigs['policy_2fa'])
+        else:
+            policy2FA = 'EVERY_LOGIN'
 
         print "Casa. determineSkip2FA with general policy %s" % policy2FA
         policy2FA += ','

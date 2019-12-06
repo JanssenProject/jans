@@ -34,6 +34,9 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         self.remoteIpParamName  =  "__remote_ip"
         self.sessionIdClaimName =  "__session_id"
         self.clientIdSessionParamName = "__client_id"
+        self.authSchemeParamName = "__auth_scheme"
+        self.oneStepAuthScheme = "onestep"
+        self.twoStepAuthScheme = "twostep"
     
     def init(self, configurationAttributes):
 
@@ -91,7 +94,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     
     def authenticate(self, context): 
         if self.perform_preliminary_user_authentication(context) == False:
-            print "Super-Gluu-Radius. User authentication state not validated"
+            print "Super-Gluu-RO. User authentication state not validated"
             return False
         
         step = context.getHttpRequest().getParameter(self.stepParamName)
@@ -108,6 +111,36 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     
     def initiate_authentication(self, context):
         print "Super-Gluu-RO initiatate_authentication"
+
+        authscheme = context.getHttpRequest().getParameter(self.authSchemeParamName)
+        if authscheme == None:
+            authscheme = self.twoStepAuthScheme
+        
+        if StringHelper.equalsIgnoreCase(authscheme,self.oneStepAuthScheme):
+            print "Super-Gluu-RO using one-step authentication"
+            print "User '%s' authenticated using one-step" % context.getUser().getUserId()
+            return True
+        elif StringHelper.equalsIgnoreCase(authscheme,self.twoStepAuthScheme):
+            print "Super-Gluu-RO using two-step authentication"
+            client = CdiUtil.bean(Identity).getSessionClient().getClient()
+            sessionId = self.new_unauthenticated_session(context.getUser(),client)
+            # set session id in identity object 
+            # this will be used by our dynamic scope script 
+            identity = CdiUtil.bean(Identity)
+            identity.setSessionId(sessionId)
+            if not self.send_push_notification_to_user(sessionId,context):
+                print "Send push notification to user '%s' failed" % context.getUser().getUserId()
+                context.setUser(None)
+                return False
+            print "Super-Gluu-RO initiate_authentication complete"
+            return True
+        else:
+            print "Super-Gluu-RO. Unknown authentication scheme specified '%s'" % authscheme
+            context.setUser(None)
+            return False
+            
+        
+        print "Super-Gluu-RO using two-step authentication"
         client = CdiUtil.bean(Identity).getSessionClient().getClient()
         sessionId = self.new_unauthenticated_session(context.getUser(),client)
         # set session id in identity object
