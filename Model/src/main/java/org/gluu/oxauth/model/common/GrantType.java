@@ -69,8 +69,6 @@ public enum GrantType implements HasParamName, AttributeEnum {
      */
     REFRESH_TOKEN("refresh_token"),
 
-    CIBA("urn:openid:params:grant-type:ciba"),
-
     /**
      * Representing a requesting party, to use a permission ticket to request
      * an OAuth 2.0 access token to gain access to a protected resource
