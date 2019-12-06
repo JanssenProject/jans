@@ -6,31 +6,23 @@
 
 package org.gluu.oxauth.model.jws;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-
+import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
-import org.bouncycastle.math.ec.ECCurve;
-import org.bouncycastle.math.ec.ECFieldElement;
 import org.bouncycastle.math.ec.ECPoint;
 import org.gluu.oxauth.model.crypto.Certificate;
+import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
+
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * @author Javier Rojas Blum
@@ -128,6 +120,9 @@ public class ECDSASigner extends AbstractJwsSigner {
 
         try {
             byte[] sigBytes = Base64Util.base64urldecode(signature);
+            if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
+                sigBytes = ECDSA.transcodeSignatureToDER(sigBytes);
+            }
             byte[] sigInBytes = signingInput.getBytes(Util.UTF8_STRING_ENCODING);
 
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(curve);
