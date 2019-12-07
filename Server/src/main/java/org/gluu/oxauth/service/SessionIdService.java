@@ -6,32 +6,8 @@
 
 package org.gluu.oxauth.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
@@ -43,7 +19,6 @@ import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -64,8 +39,24 @@ import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.slf4j.Logger;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -101,9 +92,6 @@ public class SessionIdService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private StaticConfiguration staticConfiguration;
-
-    @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
@@ -125,7 +113,7 @@ public class SessionIdService {
     private UserService userService;
 
     public String getAcr(SessionId session) {
-        if (session == null || session.getSessionAttributes() == null) {
+        if (session == null) {
             return null;
         }
 
@@ -416,6 +404,9 @@ public class SessionIdService {
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
             header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
+            if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
+                header += "Domain=" + appConfiguration.getСookieDomain() + ";";
+            }
         }
         httpResponse.addHeader("Set-Cookie", header);
     }
@@ -427,36 +418,37 @@ public class SessionIdService {
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
             header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
+            if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
+                header += "Domain=" + appConfiguration.getСookieDomain() + ";";
+            }
         }
 
         httpResponse.addHeader("Set-Cookie", header);
     }
 
     public void removeSessionIdCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
-        httpResponse.addCookie(cookie);
+        removeCookie(SESSION_ID_COOKIE_NAME, httpResponse);
     }
 
     public void removeOPBrowserStateCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(OP_BROWSER_STATE, null); // Not necessary, but saves bandwidth.
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
-        httpResponse.addCookie(cookie);
+        removeCookie(OP_BROWSER_STATE, httpResponse);
     }
 
     public void removeUmaSessionIdCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(UMA_SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
-        httpResponse.addCookie(cookie);
+        removeCookie(UMA_SESSION_ID_COOKIE_NAME, httpResponse);
     }
 
     public void removeConsentSessionIdCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(CONSENT_SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+        removeCookie(CONSENT_SESSION_ID_COOKIE_NAME, httpResponse);
+    }
+
+    public void removeCookie(String cookieName, HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(cookieName, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
+        if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
+            cookie.setDomain(appConfiguration.getСookieDomain());
+        }
         httpResponse.addCookie(cookie);
     }
 
@@ -828,7 +820,7 @@ public class SessionIdService {
 
     public boolean remove(SessionId sessionId) {
         try {
-            cacheService.remove(null, sessionId.getId());
+            cacheService.remove(sessionId.getId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
@@ -930,13 +922,6 @@ public class SessionIdService {
             OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpServletRequest), action);
             oAuth2AuditLog.setSuccess(true);
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        }
-    }
-
-    public void refreshSessionId() {
-        SessionId sessionId = getSessionId();
-        if (sessionId != null) {
-            updateSessionId(sessionId, true, true, true);
         }
     }
 
