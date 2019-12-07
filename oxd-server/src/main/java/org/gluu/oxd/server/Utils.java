@@ -4,13 +4,18 @@
 package org.gluu.oxd.server;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxd.common.ExpiredObject;
+import org.gluu.oxd.common.ExpiredObjectType;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,5 +112,22 @@ public class Utils {
         } else {
             return "";
         }
+    }
+
+    public static ExpiredObject createExpiredObject(String key, ExpiredObjectType expiredObjectType, int expiredObjectExpirationInMins) {
+        if (!Strings.isNullOrEmpty(key)) {
+            Calendar cal = Calendar.getInstance();
+
+            ExpiredObject expiredObject = new ExpiredObject();
+            expiredObject.setKey(key);
+            expiredObject.setValue(key);
+            expiredObject.setType(expiredObjectType);
+            expiredObject.setCreatedAt(new Timestamp(cal.getTimeInMillis()));
+            cal.add(Calendar.MINUTE, expiredObjectExpirationInMins);
+            expiredObject.setExpiredAt(new Timestamp(cal.getTimeInMillis()));
+
+            return expiredObject;
+        }
+        return null;
     }
 }
