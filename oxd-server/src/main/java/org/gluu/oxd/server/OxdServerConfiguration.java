@@ -35,6 +35,8 @@ public class OxdServerConfiguration extends Configuration {
     private int stateExpirationInMinutes = 5;
     @JsonProperty(value = "nonce_expiration_in_minutes")
     private int nonceExpirationInMinutes = 5;
+    @JsonProperty(value = "db_cleanup_interval_in_hours")
+    private int dbCleanupIntervalInHours = 1;
     @JsonProperty(value = "rp_cache_expiration_in_minutes")
     private int rpCacheExpirationInMinutes = 60;
     @JsonProperty(value = "public_op_key_cache_expiration_in_minutes")
@@ -272,6 +274,14 @@ public class OxdServerConfiguration extends Configuration {
         this.allowedOpHosts = allowedOpHosts;
     }
 
+    public int getDbCleanupIntervalInHours() {
+        return dbCleanupIntervalInHours;
+    }
+
+    public void setDbCleanupIntervalInHours(int dbCleanupIntervalInHours) {
+        this.dbCleanupIntervalInHours = dbCleanupIntervalInHours;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -287,6 +297,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", supportGoogleLogout=" + supportGoogleLogout +
                 ", stateExpirationInMinutes=" + stateExpirationInMinutes +
                 ", nonceExpirationInMinutes=" + nonceExpirationInMinutes +
+                ", dbCleanupIntervalInHours=" + dbCleanupIntervalInHours +
                 ", rpCacheExpirationInMinutes=" + rpCacheExpirationInMinutes +
                 ", publicOpKeyCacheExpirationInMinutes=" + publicOpKeyCacheExpirationInMinutes +
                 ", protectCommandsWithAccessToken=" + protectCommandsWithAccessToken +
