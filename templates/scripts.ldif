@@ -146,7 +146,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
-oxEnabled: false
+oxEnabled: %(enable_scim_access_policy)s
 inum: 2DAF-F9A5
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
 oxLevel: 100
