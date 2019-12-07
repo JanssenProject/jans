@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +27,9 @@ import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.Use;
+import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -231,11 +234,17 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 throw new RuntimeException(error);
             }
 
-            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
-            signature.initSign(privateKey);
-            signature.update(signingInput.getBytes());
+            Signature signer = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+            signer.initSign(privateKey);
+            signer.update(signingInput.getBytes());
 
-            return Base64Util.base64urlencode(signature.sign());
+            byte[] signature = signer.sign();
+            if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+            	int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(signatureAlgorithm.getName()));
+                signature = ECDSA.transcodeSignatureToConcat(signature, signatureLenght);
+            }
+
+            return Base64Util.base64urlencode(signature);
         }
     }
 
@@ -262,14 +271,21 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 }
 
                 byte[] signature = Base64Util.base64urldecode(encodedSignature);
+                byte[] signatureDer = signature;
                 if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
-                    signature = ECDSA.transcodeSignatureToDER(signature);
+                	signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
                 }
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
-                verified = verifier.verify(signature);
+                try {
+                	verified = verifier.verify(signatureDer);
+                } catch (SignatureException e) {
+                	// Fall back to old format
+                	// TODO: remove in Gluu 5.0
+                	verified = verifier.verify(signature);
+                }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e.getMessage(), e);
                 verified = false;
@@ -415,4 +431,5 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     public KeyStore getKeyStore() {
         return keyStore;
     }
+    
 }
