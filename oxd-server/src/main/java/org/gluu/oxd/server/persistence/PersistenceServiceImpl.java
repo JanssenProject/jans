@@ -1,16 +1,24 @@
 package org.gluu.oxd.server.persistence;
 
 import com.google.inject.Inject;
+import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 
 public class PersistenceServiceImpl implements PersistenceService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PersistenceServiceImpl.class);
 
     private ConfigurationService configurationService;
     private SqlPersistenceProvider sqlProvider;
@@ -30,6 +38,8 @@ public class PersistenceServiceImpl implements PersistenceService {
     private PersistenceService createServiceInstance() {
         String storage = configurationService.getConfiguration().getStorage();
         if ("h2".equalsIgnoreCase(storage)) {
+            setTimerForDBCleanUpTask();
+
             return new SqlPersistenceServiceImpl(sqlProvider);
         } else if ("redis".equalsIgnoreCase(storage)) {
             return new RedisPersistenceService(configurationService.getConfiguration());
@@ -37,8 +47,30 @@ public class PersistenceServiceImpl implements PersistenceService {
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + configurationService.get());
     }
 
+    public void setTimerForDBCleanUpTask() {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                LOG.debug("Deleting expired_objects from database.");
+                persistenceService.deleteAllExpiredObjects();
+            }
+        }, configurationService.get().getDbCleanupIntervalInHours(), configurationService.get().getDbCleanupIntervalInHours(), TimeUnit.HOURS);
+    }
+
     public boolean create(Rp rp) {
         return persistenceService.create(rp);
+    }
+
+    public boolean createExpiredObject(ExpiredObject obj) {
+        return persistenceService.createExpiredObject(obj);
+    }
+
+    public ExpiredObject getExpiredObject(String key) {
+        return persistenceService.getExpiredObject(key);
+    }
+
+    public boolean isExpiredObjectPresent(String key) {
+        return persistenceService.isExpiredObjectPresent(key);
     }
 
     public boolean update(Rp rp) {
@@ -55,6 +87,14 @@ public class PersistenceServiceImpl implements PersistenceService {
 
     public Set<Rp> getRps() {
         return persistenceService.getRps();
+    }
+
+    public boolean deleteExpiredObjectsByKey(String key) {
+        return persistenceService.deleteExpiredObjectsByKey(key);
+    }
+
+    public boolean deleteAllExpiredObjects() {
+        return persistenceService.deleteAllExpiredObjects();
     }
 
     public void destroy() {
