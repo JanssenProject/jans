@@ -28,9 +28,11 @@ import java.util.Map;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version October 7, 2019
  */
 public class AuthorizationRequest extends BaseRequest {
+
+    public static String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
 
     private List<ResponseType> responseTypes;
     private String clientId;

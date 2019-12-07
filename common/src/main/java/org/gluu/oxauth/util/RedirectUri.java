@@ -22,7 +22,7 @@ import org.gluu.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum
- * @version January 25, 2017
+ * @version October 7, 2019
  */
 public class RedirectUri {
 
@@ -93,12 +93,12 @@ public class RedirectUri {
     public String getQueryString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-            if (sb.length() > 0) {
-                sb.append('&');
-            }
             try {
-                sb.append(URLEncoder.encode(entry.getKey(), Util.UTF8_STRING_ENCODING));
-                if (entry.getValue() != null) {
+                if (StringUtils.isNotBlank(entry.getKey()) && StringUtils.isNotBlank(entry.getValue())) {
+                    if (sb.length() > 0) {
+                        sb.append('&');
+                    }
+                    sb.append(URLEncoder.encode(entry.getKey(), Util.UTF8_STRING_ENCODING));
                     sb.append('=').append(URLEncoder.encode(entry.getValue(), Util.UTF8_STRING_ENCODING));
                 }
             } catch (UnsupportedEncodingException e) {

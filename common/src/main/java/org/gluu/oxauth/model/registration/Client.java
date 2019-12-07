@@ -8,8 +8,10 @@ package org.gluu.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.annotation.*;
@@ -23,7 +25,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 @DataEntry
 @ObjectClass(value = "oxAuthClient")
@@ -52,7 +54,7 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     @AttributeName(name = "oxAuthClientIdIssuedAt")
     private Date clientIdIssuedAt;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "oxAuthClientSecretExpiresAt")
     private Date clientSecretExpiresAt;
 
     @AttributeName(name = "oxAuthRedirectURI")
@@ -215,8 +217,17 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
     @JsonObject
     private ClientAttributes attributes;
 
-    @AttributeName(name = "del")
-    private boolean deletable;
+    @AttributeName(name = "oxAuthBackchannelTokenDeliveryMode")
+    private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
+
+    @AttributeName(name = "oxAuthBackchannelClientNotificationEndpoint")
+    private String backchannelClientNotificationEndpoint;
+
+    @AttributeName(name = "oxAuthBackchannelAuthenticationRequestSigningAlg")
+    private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
+
+    @AttributeName(name = "oxAuthBackchannelUserCodeParameter")
+    private Boolean backchannelUserCodeParameter;
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
@@ -1175,16 +1186,39 @@ public class Client extends DeletableEntity implements Serializable, ClientRefer
         this.softwareStatement = softwareStatement;
     }
 
-    public boolean isDeletable() {
-		return deletable;
-	}
-
-	public void setDeletable(boolean deletable) {
-		this.deletable = deletable;
-	}
-
-	public static Client instance() {
+    public static Client instance() {
         return new Client();
     }
 
+    public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
+        return backchannelTokenDeliveryMode;
+    }
+
+    public void setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
+        this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
+    }
+
+    public String getBackchannelClientNotificationEndpoint() {
+        return backchannelClientNotificationEndpoint;
+    }
+
+    public void setBackchannelClientNotificationEndpoint(String backchannelClientNotificationEndpoint) {
+        this.backchannelClientNotificationEndpoint = backchannelClientNotificationEndpoint;
+    }
+
+    public AsymmetricSignatureAlgorithm getBackchannelAuthenticationRequestSigningAlg() {
+        return backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg) {
+        this.backchannelAuthenticationRequestSigningAlg = backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public Boolean getBackchannelUserCodeParameter() {
+        return backchannelUserCodeParameter;
+    }
+
+    public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
+        this.backchannelUserCodeParameter = backchannelUserCodeParameter;
+    }
 }
