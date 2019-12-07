@@ -20,17 +20,17 @@ import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+
 /**
  * Encapsulates functionality to make authorization request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version October 7, 2019
  */
 public class AuthorizeClient extends BaseClient<AuthorizationRequest, AuthorizationResponse> {
 
     private static final Logger LOG = Logger.getLogger(AuthorizeClient.class);
-
-    static String NO_REDIRECT_HEADER = "X-Gluu-NoRedirect";
 
     /**
      * Constructs an authorize client by providing a REST url where the

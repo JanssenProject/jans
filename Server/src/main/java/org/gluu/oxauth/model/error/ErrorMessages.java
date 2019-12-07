@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version August 20, 2019
  */
 @XmlRootElement(name = "errors")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -49,6 +49,10 @@ public class ErrorMessages {
     @XmlElementWrapper(name = "fido")
     @XmlElement(name = "error")
     private List<ErrorMessage> fido;
+
+    @XmlElementWrapper(name = "backchannelAuthentication")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> backchannelAuthentication;
 
     public List<ErrorMessage> getAuthorize() {
         return authorize;
@@ -122,4 +126,11 @@ public class ErrorMessages {
         this.fido = fido;
     }
 
+    public List<ErrorMessage> getBackchannelAuthentication() {
+        return backchannelAuthentication;
+    }
+
+    public void setBackchannelAuthentication(List<ErrorMessage> backchannelAuthentication) {
+        this.backchannelAuthentication = backchannelAuthentication;
+    }
 }
