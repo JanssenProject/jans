@@ -1,6 +1,9 @@
 package org.gluu.oxd.server.persistence;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import org.gluu.oxd.common.ExpiredObject;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
@@ -8,10 +11,7 @@ import org.h2.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,17 +41,48 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
-            PreparedStatement createRpTable = conn.prepareStatement(
-                    "create table if not exists rp(id varchar(36) primary key, data varchar(65534))");
-            createRpTable.executeUpdate();
-            createRpTable.close();
+            Statement stmt = conn.createStatement();
 
+            stmt.addBatch("create table if not exists rp(id varchar(36) primary key, data varchar(65534))");
+            stmt.addBatch("create table if not exists expired_objects( key varchar(50), value varchar(50), type varchar(5), iat TIMESTAMP, exp TIMESTAMP)");
+
+            stmt.executeBatch();
+
+            stmt.close();
             conn.commit();
+
             LOG.debug("Schema created successfully.");
         } catch (Exception e) {
             LOG.error("Failed to create schema. Error: " + e.getMessage(), e);
             rollbackSilently(conn);
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeSilently(conn);
+        }
+    }
+
+    public boolean createExpiredObject(ExpiredObject obj) {
+        Connection conn = null;
+        try {
+            conn = provider.getConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement query = conn.prepareStatement("insert into expired_objects(key, value, type, iat, exp) values(?, ?, ?, ?, ?)");
+            query.setString(1, obj.getKey().trim());
+            query.setString(2, obj.getValue().trim());
+            query.setString(3, obj.getType().getValue());
+            query.setTimestamp(4, new Timestamp(obj.getCreatedAt().getTime()));
+            query.setTimestamp(5, new Timestamp(obj.getExpiredAt().getTime()));
+            query.executeUpdate();
+            query.close();
+
+            conn.commit();
+            LOG.debug("Expired_object created successfully. Object : " + obj.getKey());
+
+            return true;
+        } catch (Exception e) {
+            LOG.error("Failed to create Expired_object: " + obj.getKey(), e);
+            rollbackSilently(conn);
+            return false;
         } finally {
             IOUtils.closeSilently(conn);
         }
@@ -133,6 +164,50 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         } finally {
             IOUtils.closeSilently(conn);
         }
+    }
+
+    public ExpiredObject getExpiredObject(String key) {
+
+        Connection conn = null;
+        try {
+            conn = provider.getConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement query = conn.prepareStatement("select key, value, type, iat, exp from expired_objects where key = ?");
+            query.setString(1, key.trim());
+            ResultSet rs = query.executeQuery();
+            ExpiredObject expiredObject = null;
+
+            rs.next();
+            if (!Strings.isNullOrEmpty(rs.getString("key"))) {
+                expiredObject = new ExpiredObject();
+                expiredObject.setKey(rs.getString("key"));
+                expiredObject.setValue(rs.getString("value"));
+                expiredObject.setType(ExpiredObjectType.fromValue(rs.getString("type")));
+                expiredObject.setCreatedAt(rs.getTimestamp("iat"));
+                expiredObject.setExpiredAt(rs.getTimestamp("exp"));
+            }
+
+            query.close();
+            conn.commit();
+
+            if (expiredObject != null) {
+                LOG.debug("Found ExpiredObject: " + expiredObject.getKey());
+                return expiredObject;
+            } else {
+                LOG.error("ExpiredObject not found: " + key);
+                return expiredObject;
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to find ExpiredObject: " + key + ". Error: " + e.getMessage(), e);
+            rollbackSilently(conn);
+            return null;
+        } finally {
+            IOUtils.closeSilently(conn);
+        }
+    }
+
+    public boolean isExpiredObjectPresent(String key) {
+        return getExpiredObject(key) != null;
     }
 
     public boolean removeAllRps() {
@@ -220,6 +295,51 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             return true;
         } catch (Exception e) {
             LOG.error("Failed to remove rp with oxdId: " + oxdId, e);
+            rollbackSilently(conn);
+            return false;
+        } finally {
+            IOUtils.closeSilently(conn);
+        }
+    }
+
+    public boolean deleteExpiredObjectsByKey(String key) {
+        Connection conn = null;
+        try {
+            conn = provider.getConnection();
+            conn.setAutoCommit(false);
+
+            PreparedStatement query = conn.prepareStatement("delete from expired_objects where key = ?");
+            query.setString(1, key);
+            query.executeUpdate();
+            query.close();
+
+            conn.commit();
+            LOG.debug("Removed expired_objects successfully: " + key);
+            return true;
+        } catch (Exception e) {
+            LOG.error("Failed to remove expired_objects: " + key, e);
+            rollbackSilently(conn);
+            return false;
+        } finally {
+            IOUtils.closeSilently(conn);
+        }
+    }
+
+    public boolean deleteAllExpiredObjects() {
+        Connection conn = null;
+        try {
+            conn = provider.getConnection();
+            conn.setAutoCommit(false);
+
+            PreparedStatement query = conn.prepareStatement("delete from expired_objects where exp < CURRENT_TIMESTAMP()");
+            query.executeUpdate();
+            query.close();
+
+            conn.commit();
+            LOG.debug("Removed expired_objects successfully. ");
+            return true;
+        } catch (Exception e) {
+            LOG.error("Failed to remove expired_objects. ", e);
             rollbackSilently(conn);
             return false;
         } finally {

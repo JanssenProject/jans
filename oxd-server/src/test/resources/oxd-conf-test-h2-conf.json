@@ -8,6 +8,7 @@
   "public_password":"KN8bol2fjzPeCMOjlpIq",
   "license_password":"8Udn8shi73Mrk83s1JOI",
   "support-google-logout":true,
+  "db_cleanup_interval_in_hours": 1,
   "state_expiration_in_minutes":5,
   "nonce_expiration_in_minutes":5,
   "rp_cache_expiration_in_minutes": 60,

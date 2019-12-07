@@ -11,6 +11,7 @@
     "public_password":"3Rczv1eJ0sDnFOGLLEkX",
     "license_password":"a7rkv7VCFOum40eFtfbL",
     "support-google-logout":true,
+    "db_cleanup_interval_in_hours": 1,
     "state_expiration_in_minutes":5,
     "nonce_expiration_in_minutes":5,
     "rp_cache_expiration_in_minutes": 60,
