@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.jwt;
 
 /**
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 public final class JwtClaimName {
 
@@ -220,6 +220,10 @@ public final class JwtClaimName {
 
     // Custom attributes
     public static final String OX_OPENID_CONNECT_VERSION = "oxOpenIDConnectVersion";
+
+    // CIBA
+    public static final String REFRESH_TOKEN_HASH = "urn:openid:params:jwt:claim:rt_hash";
+    public static final String AUTH_REQ_ID = "urn:openid:params:jwt:claim:auth_req_id";
 
     /**
      * The caller references the constants using <tt>JwtClaimName.TYPE</tt>,

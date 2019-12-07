@@ -37,7 +37,7 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
  * 
- * @version November 24, 2017
+ * @version October 7, 2019
  */
 @Stateless
 @Named
@@ -66,7 +66,8 @@ public class RequestParameterService {
             AuthorizeRequestParam.CODE_CHALLENGE,
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
-            AuthorizeRequestParam.CLAIMS));
+            AuthorizeRequestParam.CLAIMS,
+            AuthorizeRequestParam.AUTH_REQ_ID));
 
     @Inject
     private Logger log;
