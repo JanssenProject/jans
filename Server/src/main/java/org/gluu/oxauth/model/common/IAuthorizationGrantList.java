@@ -10,34 +10,37 @@ import java.util.Date;
 import java.util.List;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.common.User;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 08/01/2013
+ * @version August 20, 2019
  */
 
 public interface IAuthorizationGrantList {
 
-    public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants);
+    void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants);
 
-    public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime);
+    AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime);
 
-    public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime);
+    AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime);
 
-    public ImplicitGrant createImplicitGrant(User user, Client client, Date authenticationTime);
+    ImplicitGrant createImplicitGrant(User user, Client client, Date authenticationTime);
 
-    public ClientCredentialsGrant createClientCredentialsGrant(User user, Client client);
+    ClientCredentialsGrant createClientCredentialsGrant(User user, Client client);
 
-    public ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
+    ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
-    public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode);
+    CIBAGrant createCIBAGrant(User user, Client client, int expiresIn);
 
-    public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode);
+    AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode);
 
-    public List<AuthorizationGrant> getAuthorizationGrant(String clientId);
+    AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode);
 
-    public AuthorizationGrant getAuthorizationGrantByAccessToken(String tokenCode);
+    List<AuthorizationGrant> getAuthorizationGrant(String clientId);
 
-    public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
+    AuthorizationGrant getAuthorizationGrantByAccessToken(String tokenCode);
+
+    AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
+
+    CIBAGrant getCIBAGrant(String authenticationRequestId);
 }
