@@ -7,6 +7,7 @@ crypt_provider_key_store_path: {{crypt_provider_key_store_path}}
 crypt_provider_key_store_password: {{crypt_provider_key_store_password}}
 crypt_provider_dn_name: {{crypt_provider_dn_name}}
 support-google-logout: {{support-google-logout}}
+db_cleanup_interval_in_hours: {{db_cleanup_interval_in_hours}}
 state_expiration_in_minutes: {{state_expiration_in_minutes}}
 nonce_expiration_in_minutes: {{nonce_expiration_in_minutes}}
 rp_cache_expiration_in_minutes: {{rp_cache_expiration_in_minutes}}

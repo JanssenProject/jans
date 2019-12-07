@@ -10,6 +10,7 @@ crypt_provider_dn_name: ''
 support-google-logout: true
 state_expiration_in_minutes: 5
 nonce_expiration_in_minutes: 5
+db_cleanup_interval_in_hours: 1
 rp_cache_expiration_in_minutes: 60
 public_op_key_cache_expiration_in_minutes: 60
 protect_commands_with_access_token: true
