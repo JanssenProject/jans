@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.jws;
 
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -67,11 +68,17 @@ public class ECDSASigner extends AbstractJwsSigner {
             KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
-            Signature signature = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
-            signature.initSign(privateKey);
-            signature.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
+            Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
+            signer.initSign(privateKey);
+            signer.update(signingInput.getBytes(Util.UTF8_STRING_ENCODING));
 
-            return Base64Util.base64urlencode(signature.sign());
+            byte[] signature = signer.sign();
+            if (AlgorithmFamily.EC.equals(getSignatureAlgorithm().getFamily())) {
+            	int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(getSignatureAlgorithm().getName()));
+                signature = ECDSA.transcodeSignatureToConcat(signature, signatureLenght);
+            }
+
+            return Base64Util.base64urlencode(signature);
         } catch (InvalidKeySpecException e) {
             throw new SignatureException(e);
         } catch (InvalidKeyException e) {
