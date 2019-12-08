@@ -49,6 +49,10 @@ public class Jackson2 {
     }
 
     public static ObjectMapper createRpMapper() {
+        return createJsonMapperWithoutEmptyAttributes();
+    }
+
+    public static ObjectMapper createJsonMapperWithoutEmptyAttributes() {
         final ObjectMapper mapper = createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
