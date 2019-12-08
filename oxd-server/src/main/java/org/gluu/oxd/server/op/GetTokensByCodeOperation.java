@@ -78,7 +78,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             site.setIdToken(response.getIdToken());
             site.setAccessToken(response.getAccessToken());
             getRpService().update(site);
-            getStateService().invalidateState(params.getState());
+            getStateService().deleteExpiredObjectsByKey(params.getState());
 
             LOG.trace("Scope: " + response.getScope());
 
@@ -105,7 +105,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         if (Strings.isNullOrEmpty(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
-        if (!getStateService().isStateValid(params.getState())) {
+        if (!getStateService().isExpiredObjectPresent(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
     }
