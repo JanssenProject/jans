@@ -44,7 +44,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             Statement stmt = conn.createStatement();
 
             stmt.addBatch("create table if not exists rp(id varchar(36) primary key, data varchar(65534))");
-            stmt.addBatch("create table if not exists expired_objects( key varchar(50), value varchar(50), type varchar(5), iat TIMESTAMP, exp TIMESTAMP)");
+            stmt.addBatch("create table if not exists expired_objects( key varchar(50), value varchar(65534), type varchar(20), iat TIMESTAMP, exp TIMESTAMP)");
 
             stmt.executeBatch();
 
@@ -70,8 +70,8 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
-            query.setTimestamp(4, new Timestamp(obj.getCreatedAt().getTime()));
-            query.setTimestamp(5, new Timestamp(obj.getExpiredAt().getTime()));
+            query.setTimestamp(4, new Timestamp(obj.getCreatedAt()));
+            query.setTimestamp(5, new Timestamp(obj.getExpiredAt()));
             query.executeUpdate();
             query.close();
 
@@ -179,12 +179,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
             rs.next();
             if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject();
-                expiredObject.setKey(rs.getString("key"));
-                expiredObject.setValue(rs.getString("value"));
-                expiredObject.setType(ExpiredObjectType.fromValue(rs.getString("type")));
-                expiredObject.setCreatedAt(rs.getTimestamp("iat"));
-                expiredObject.setExpiredAt(rs.getTimestamp("exp"));
+                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getTimestamp("iat").getTime(), rs.getTimestamp("exp").getTime());
             }
 
             query.close();
