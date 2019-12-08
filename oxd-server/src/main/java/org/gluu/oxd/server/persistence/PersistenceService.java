@@ -1,7 +1,9 @@
 package org.gluu.oxd.server.persistence;
 
+import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.server.service.Rp;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,9 +15,15 @@ public interface PersistenceService {
 
     boolean create(Rp rp);
 
+    boolean createExpiredObject(ExpiredObject obj);
+
     boolean update(Rp rp);
 
     Rp getRp(String oxdId);
+
+    ExpiredObject getExpiredObject(String key);
+
+    boolean isExpiredObjectPresent(String key);
 
     boolean removeAllRps();
 
@@ -24,4 +32,8 @@ public interface PersistenceService {
     void destroy();
 
     boolean remove(String oxdId);
+
+    boolean deleteExpiredObjectsByKey(String key);
+
+    boolean deleteAllExpiredObjects();
 }
