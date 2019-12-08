@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.persistence;
 
 import com.google.inject.Inject;
+import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +48,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     public void setTimerForDBCleanUpTask() {
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        ScheduledExecutorService scheduledExecutorService = CoreUtils.createExecutor();
         scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 LOG.debug("Deleting expired_objects from database.");
