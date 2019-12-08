@@ -1,8 +1,8 @@
 package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
+import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
-import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.persistence.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,12 +51,12 @@ public class StateService {
     }
 
     public String putState(String state) {
-        persistenceService.createExpiredObject(Utils.createExpiredObject(state, ExpiredObjectType.STATE, configurationService.get().getStateExpirationInMinutes()));
+        persistenceService.createExpiredObject(new ExpiredObject(state, ExpiredObjectType.STATE, configurationService.get().getStateExpirationInMinutes()));
         return state;
     }
 
     public String putNonce(String nonce) {
-        persistenceService.createExpiredObject(Utils.createExpiredObject(nonce, ExpiredObjectType.NONCE, configurationService.get().getNonceExpirationInMinutes()));
+        persistenceService.createExpiredObject(new ExpiredObject(nonce, ExpiredObjectType.NONCE, configurationService.get().getNonceExpirationInMinutes()));
         return nonce;
     }
 }
