@@ -53,7 +53,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
         if (Strings.isNullOrEmpty(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
-        if (!getStateService().isStateValid(params.getState())) {
+        if (!getStateService().isExpiredObjectPresent(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
         if (!Strings.isNullOrEmpty(params.getIdToken())) {
