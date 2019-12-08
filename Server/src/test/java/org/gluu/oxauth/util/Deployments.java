@@ -36,7 +36,11 @@ public class Deployments {
 	}
 
     private static void addFiles(WebArchive war, File dir) {
-        for (File f : dir.listFiles()) {
+        final File[] files = dir.listFiles();
+        if (files == null)
+            return;
+
+        for (File f : files) {
             if (f.isFile()) {
                 war.addAsWebResource(f, f.getPath().replace("\\", "/").substring("src/main/webapp/".length()));
             } else {
