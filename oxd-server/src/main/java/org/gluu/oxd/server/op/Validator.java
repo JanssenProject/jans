@@ -79,7 +79,7 @@ public class Validator {
 
     public void validateNonce(StateService stateService) {
         final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
-        if (!stateService.isNonceValid(nonceFromToken)) {
+        if (!stateService.isExpiredObjectPresent(nonceFromToken)) {
             throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
     }
