@@ -23,8 +23,6 @@
   "tracer_host": "localhost",
   "tracer_port": 5775,
   "storage_configuration": {
-    "dbFileLocation":"u:\\opt\\oxd-server\\bin\\oxd_db",
-    "username": "oxd",
-    "password": "oxd_password"
+    "dbFileLocation":"u:\\opt\\oxd-server\\bin\\oxd_db"
   }
 }
