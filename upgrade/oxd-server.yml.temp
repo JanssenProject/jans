@@ -25,6 +25,8 @@ tracer_host: {{tracer_host}}
 tracer_port: {{tracer_port}}
 storage_configuration:
   dbFileLocation: {{storage_configuration:dbFileLocation}}
+  username: {{storage_configuration:username}}
+  password: {{storage_configuration:password}}
 
 # Connectors
 server:
