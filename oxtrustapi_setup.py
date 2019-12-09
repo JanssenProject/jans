@@ -1,3 +1,5 @@
+# Please place this script in the same directory as setup.py
+
 import os
 import ldap
 import xml.etree.ElementTree as ET
