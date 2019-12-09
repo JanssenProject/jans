@@ -261,6 +261,13 @@
 		</classes>
 	</test>
 
+    <!-- Enable it when client jks is regenerated -->
+    <test name="JWT cross-check test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.comp.JwtCrossCheckTest" />
+        </classes>
+    </test>
+
 	<parameter name="serverUri" value="https://${test.server.name}" />
 	<parameter name="authorizePath" value="restv1/authorize" />
 	<parameter name="introspectionPath" value="restv1/introspection" />
