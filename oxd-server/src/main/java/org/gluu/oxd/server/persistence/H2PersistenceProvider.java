@@ -1,13 +1,14 @@
 package org.gluu.oxd.server.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.server.OxdServerConfiguration;
+import org.gluu.oxd.server.service.ConfigurationService;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxd.server.OxdServerConfiguration;
-import org.gluu.oxd.server.service.ConfigurationService;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
     @Override
     public void onCreate() {
         H2Configuration h2Configuration = asH2Configuration(configurationService.getConfiguration());
-
+        setDefaultUsernamePasswordIfEmpty(h2Configuration);
         pool = JdbcConnectionPool.create("jdbc:h2:file:" + h2Configuration.getDbFileLocation(), "oxd", "oxd");
     }
 
@@ -56,5 +57,15 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
             LOG.error("Failed to parse H2Configuration.", e);
         }
         return new H2Configuration();
+    }
+
+    public void setDefaultUsernamePasswordIfEmpty(H2Configuration h2Configuration) {
+        if (Strings.isNullOrEmpty(h2Configuration.getUsername())) {
+            h2Configuration.setUsername("oxd");
+        }
+
+        if (Strings.isNullOrEmpty(h2Configuration.getPassword())) {
+            h2Configuration.setPassword("oxd");
+        }
     }
 }
