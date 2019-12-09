@@ -1,7 +1,25 @@
 import os
+import ldap
 import xml.etree.ElementTree as ET
 import shutil
 import glob
+
+ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
+
+# Obtain ldap binddn, server and password
+for l in open('/etc/gluu/conf/gluu-ldap.properties'):
+    if l.startswith('bindPassword'):
+        crypted_passwd = l.split(':')[1].strip()
+        ldap_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(crypted_passwd)).read().strip()
+    elif l.startswith('servers'):
+        ls = l.strip()
+        n = ls.find(':')
+        s = ls[n+1:].strip()
+        servers_s = s.split(',')
+        ldap_server = servers_s[0].strip()
+    elif l.startswith('bindDN'):
+        ldap_binddn = l.split(':')[1].strip()
+
 
 identtiy_xml_fn = '/opt/gluu/jetty/identity/webapps/identity.xml'
 
@@ -42,6 +60,13 @@ else:
         shutil.copyfile(identtiy_xml_fn+'~', identtiy_xml_fn)
         os.remove(identtiy_xml_fn+'~')
 
-#TODO: 
-# 1) enable oxtrust_api_access_policy
-# 2) restart identity
+
+ldap_conn = ldap.initialize('ldaps://{0}:1636'.format(ldap_server))
+ldap_conn.simple_bind_s(ldap_binddn, ldap_password)
+
+basedn = 'inum=OO11-BAFE,ou=scripts,o=gluu'
+result = ldap_conn.search_s(basedn, ldap.SCOPE_BASE,  attrlist=['oxEnabled'])
+
+if result and result[0][1]['oxEnabled'][0].lower() != 'true':
+    ldap_conn.modify_s(basedn, [(ldap.MOD_REPLACE, 'oxEnabled',  'true')])
+
