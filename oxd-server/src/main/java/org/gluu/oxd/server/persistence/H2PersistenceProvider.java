@@ -34,7 +34,7 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
     public void onCreate() {
         H2Configuration h2Configuration = asH2Configuration(configurationService.getConfiguration());
         setDefaultUsernamePasswordIfEmpty(h2Configuration);
-        pool = JdbcConnectionPool.create("jdbc:h2:file:" + h2Configuration.getDbFileLocation(), "oxd", "oxd");
+        pool = JdbcConnectionPool.create("jdbc:h2:file:" + h2Configuration.getDbFileLocation(), h2Configuration.getUsername(), h2Configuration.getPassword());
     }
 
     @Override
