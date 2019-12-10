@@ -98,7 +98,6 @@
 		<module>common</module>
 		<module>fido2-server</module>
 		<module>fido2-client</module>
-		<module>mtls</module>
 		<module>oxauth-ciba</module>
 		<module>Server</module>
 		<module>rp-spring-boot</module>
