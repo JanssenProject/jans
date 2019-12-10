@@ -8,6 +8,8 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.registration.Client;
 
+import java.util.Date;
+
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
@@ -19,6 +21,7 @@ public class CIBAGrant extends AuthorizationGrant {
     private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
     private Boolean userAuthorization;
     private String clientNotificationToken;
+    private Long lastAccessPollFlowControl;
 
     public CIBAGrant() {
     }
@@ -27,6 +30,7 @@ public class CIBAGrant extends AuthorizationGrant {
         super.init(user, AuthorizationGrantType.CIBA, client, null);
         setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
         setIsCachedWithNoPersistence(true);
+        setLastAccessPollFlowControl(new Date().getTime());
     }
 
     public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
@@ -52,4 +56,13 @@ public class CIBAGrant extends AuthorizationGrant {
     public void setClientNotificationToken(String clientNotificationToken) {
         this.clientNotificationToken = clientNotificationToken;
     }
+
+    public Long getLastAccessPollFlowControl() {
+        return lastAccessPollFlowControl;
+    }
+
+    public void setLastAccessPollFlowControl(Long lastAccessPollFlowControl) {
+        this.lastAccessPollFlowControl = lastAccessPollFlowControl;
+    }
+
 }
