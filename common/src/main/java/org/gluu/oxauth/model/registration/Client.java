@@ -16,7 +16,6 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.annotation.*;
 import org.oxauth.persistence.model.ClientAttributes;
-import org.gluu.oxauth.model.ref.ClientReference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "oxAuthClient")
-public class Client extends DeletableEntity implements Serializable, ClientReference {
+public class Client extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = -6832496019942067970L;
 
