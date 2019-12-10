@@ -2960,43 +2960,59 @@ class Setup(object):
         return detectedHostname
 
 
+    def test_cb_servers(self, cb_hosts):
+        cb_query_node = None
+        retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
+
+        for i, cb_host in enumerate(cb_hosts):
+
+                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
+                if not thread_queue:
+                    print "    Checking Couchbase connection for " + cb_host
+
+                cbm_result = cbm_.test_connection()
+                if not cbm_result.ok:
+                    if not thread_queue:
+                        print "    Can't establish connection to Couchbase server with given parameters."
+                        print "**", cbm_result.reason
+                    retval['result'] = False
+                    retval['reason'] = cbm_result.reason
+                    return retval
+                try:
+                    qr = cbm_.exec_query('select * from system:indexes limit 1')
+                    if qr.ok:
+                        cb_query_node = i
+                except:
+                    pass
+        else:
+
+            if cbm_result.ok and cb_query_node != None:
+                if not thread_queue:
+                    print "    Successfully connected to Couchbase server"
+                cb_host_ = cb_hosts[self.cb_query_node]
+                self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.cb_password)
+                return retval
+            if cb_query_node == None:
+                if not thread_queue:
+                    print "Can't find any query node"
+                retval['result'] = False
+                retval['reason'] = "Can't find any query node"
+
+        return retval
+
     def prompt_remote_couchbase(self):
     
-        cb_query_node = None
-
         while True:
             self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
             self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
             self.cb_password =self.getPrompt("    Couchbase Password")
 
             cb_hosts = re_split_host.findall(self.couchbase_hostname)
+            result = self.test_cb_servers(cb_hosts)
 
-            for i, cb_host in enumerate(cb_hosts):
-
-                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
-                print "    Checking Couchbase connection for " + cb_host
-
-                cbm_result = cbm_.test_connection()
-                if not cbm_result.ok:
-                    print "    Can't establish connection to Couchbase server with given parameters."
-                    print "**", cbm_result.reason
-                    break
-                try:
-                    qr = cbm_.exec_query('select * from system:indexes limit 1')
-                    if qr.ok:
-                        cb_query_node = i
-                        self.cb_query_node = i
-                except:
-                    pass
-            else:
-
-                if cbm_result.ok and cb_query_node != None:
-                    print "    Successfully connected to Couchbase server"
-                    cb_host_ = cb_hosts[self.cb_query_node]
-                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.cb_password)
-                    break
-                if cb_query_node == None:
-                    print "Can't find any query node"
+            if result['result']:
+                self.cb_query_node = result['query_node']
+                break
 
     def promptForProperties(self):
 
