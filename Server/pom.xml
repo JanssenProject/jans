@@ -246,23 +246,6 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-
-			<!-- OWASP plugin -->
-			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<configuration>
-					<skipProvidedScope>true</skipProvidedScope>
-					<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -1191,6 +1174,35 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+		</profile>
+
+		<profile>
+			<id>owasp-check</id>
+			<activation>
+				<property>
+					<name>dependency.check</name>
+					<value>true</value>
+				</property>
+			</activation>
+
+			<plugins>
+				<!-- OWASP plugin -->
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<configuration>
+						<skipProvidedScope>true</skipProvidedScope>
+						<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
+					</configuration>
+					<executions>
+						<execution>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
 		</profile>
 	</profiles>
 
