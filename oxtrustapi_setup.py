@@ -66,6 +66,8 @@ else:
         shutil.copyfile(identtiy_xml_fn+'~', identtiy_xml_fn)
         os.remove(identtiy_xml_fn+'~')
 
+print "Enabling custom script oxtrust_api_access_policy"
+
 if scripts_location == 'ldap':
     # Obtain ldap binddn, server and password
     for l in open(setupObject.ox_ldap_properties):
@@ -89,7 +91,6 @@ if scripts_location == 'ldap':
     result = ldap_conn.search_s(basedn, ldap.SCOPE_BASE,  attrlist=['oxEnabled'])
 
     if result and result[0][1]['oxEnabled'][0].lower() != 'true':
-        print "Enabling custom script oxtrust_api_access_policy"
         ldap_conn.modify_s(basedn, [(ldap.MOD_REPLACE, 'oxEnabled',  'true')])
 
 else:
