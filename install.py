@@ -104,7 +104,7 @@ os.system(cmd)
 os.system('rm -r -f '+source_dir)
 
 if argsp.o:
-    os.system('wget -nv https://github.com/npcole/npyscreen/archive/master.zip  -O {}'.format(npyscreen_package))
+    os.system('wget -nv https://github.com/npcole/npyscreen/archive/master.zip -O {}'.format(npyscreen_package))
     
 if os.path.exists(npyscreen_package):
     os.system('unzip -o {} -d /tmp/'.format(npyscreen_package))
