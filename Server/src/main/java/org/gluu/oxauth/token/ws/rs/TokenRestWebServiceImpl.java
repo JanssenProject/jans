@@ -47,6 +47,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Provides interface for token REST web services
@@ -105,7 +106,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
-                                       String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
+                                       String ticket, String claimToken, String claimTokenFormat, String pctCode,
+                                       String rptCode, String authReqId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
@@ -380,6 +382,64 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     } else {
                         log.debug("Invalid user", new RuntimeException("User is empty"));
                         builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
+                    }
+                } else if (gt == GrantType.CIBA) {
+                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
+                    }
+
+                    log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
+                    final CIBAGrant authorizationGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+                    log.trace("AuthorizationGrant : '{}'", authorizationGrant);
+
+                    if (authorizationGrant != null) {
+                        if (authorizationGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                            long lastAccess = authorizationGrant.getLastAccessPollFlowControl();
+                            authorizationGrant.setLastAccessPollFlowControl(new Date().getTime());
+                            authorizationGrant.save();
+
+                            AccessToken accToken = authorizationGrant.getLongLivedAccessToken();
+                            IdToken idToken = authorizationGrant.getIdToken();
+                            if (accToken != null && idToken != null) {
+                                log.debug("Issuing access token: {}", accToken.getCode());
+                                RefreshToken reToken = null;
+                                if (client.getGrantTypes() != null
+                                        && client.getGrantTypes().length > 0
+                                        && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                                    reToken = authorizationGrant.createRefreshToken();
+                                }
+
+                                if (scope != null && !scope.isEmpty()) {
+                                    scope = authorizationGrant.checkScopesPolicy(scope);
+                                }
+
+                                builder.entity(getJSonResponse(accToken,
+                                        accToken.getTokenType(),
+                                        accToken.getExpiresIn(),
+                                        reToken,
+                                        scope,
+                                        idToken));
+
+                                oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
+                            } else {
+                                int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                                long timeFromLastAccess = new Date().getTime() - lastAccess;
+                                if (timeFromLastAccess > intervalSeconds * 1000) {
+                                    log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
+                                    builder = error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet");
+                                } else {
+                                    log.debug("Slow down protection authReqId: '{}'", authReqId);
+                                    builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
+                                }
+                            }
+                        } else {
+                            log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
+                            builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
+                        }
+                    } else {
+                        log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
+                        builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                     }
                 }
             }
