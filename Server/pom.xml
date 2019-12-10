@@ -1185,24 +1185,26 @@
 				</property>
 			</activation>
 
-			<plugins>
-				<!-- OWASP plugin -->
-				<plugin>
-					<groupId>org.owasp</groupId>
-					<artifactId>dependency-check-maven</artifactId>
-					<configuration>
-						<skipProvidedScope>true</skipProvidedScope>
-						<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>check</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
+			<build>
+				<plugins>
+					<!-- OWASP plugin -->
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<configuration>
+							<skipProvidedScope>true</skipProvidedScope>
+							<failBuildOnCVSS>${cvss-score}</failBuildOnCVSS>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 
