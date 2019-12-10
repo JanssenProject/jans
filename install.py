@@ -4,6 +4,7 @@ import re
 import glob
 import sys
 import os
+import subprocess
 import argparse
 import time
 import zipfile
@@ -19,7 +20,9 @@ parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-b', help="Github branch name, e.g. version_4.0.b4")
 
 argsp = parser.parse_args()
-    
+
+npyscreen_package = '/opt/dist/app/npyscreen-master.zip'
+
 if argsp.o:
     for cep in glob.glob('/opt/dist/gluu/community-edition-setup*.zip'):
         os.remove(cep)
@@ -57,8 +60,6 @@ def get_path_list(path):
     folders.reverse()
 
     return folders
-
-
 
 ces_list = glob.glob('/opt/dist/gluu/community-edition-setup*.zip')
 
@@ -102,4 +103,10 @@ cmd = 'cp -r -f {}* /install/community-edition-setup'.format(source_dir)
 os.system(cmd)
 os.system('rm -r -f '+source_dir)
 
-
+if argsp.o:
+    os.system('wget -nv https://github.com/npcole/npyscreen/archive/master.zip  -O {}'.format(npyscreen_package))
+    
+if os.path.exists(npyscreen_package):
+    os.system('unzip -o {} -d /tmp/'.format(npyscreen_package))
+    p = subprocess.Popen('python setup.py install', stdout=subprocess.PIPE, stderr=subprocess.PIPE,  shell=True, cwd='/tmp/npyscreen-master/')
+    output, err = p.communicate()
