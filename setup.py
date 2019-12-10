@@ -2960,7 +2960,9 @@ class Setup(object):
         return detectedHostname
 
 
-    def test_cb_servers(self, cb_hosts):
+    def test_cb_servers(self, couchbase_hostname):
+        cb_hosts = re_split_host.findall(couchbase_hostname)
+
         cb_query_node = None
         retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
 
@@ -2976,7 +2978,7 @@ class Setup(object):
                         print "    Can't establish connection to Couchbase server with given parameters."
                         print "**", cbm_result.reason
                     retval['result'] = False
-                    retval['reason'] = cbm_result.reason
+                    retval['reason'] = cb_host + ': ' + cbm_result.reason
                     return retval
                 try:
                     qr = cbm_.exec_query('select * from system:indexes limit 1')
@@ -3007,8 +3009,7 @@ class Setup(object):
             self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
             self.cb_password =self.getPrompt("    Couchbase Password")
 
-            cb_hosts = re_split_host.findall(self.couchbase_hostname)
-            result = self.test_cb_servers(cb_hosts)
+            result = self.test_cb_servers(self.couchbase_hostname)
 
             if result['result']:
                 self.cb_query_node = result['query_node']

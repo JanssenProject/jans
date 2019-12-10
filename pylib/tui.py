@@ -335,7 +335,7 @@ class DBBackendForm(GluuSetupForm):
         self.add(npyscreen.FixedText, value=make_title(msg.ask_cb_install), rely=10, editable=False)
 
         self.ask_cb = self.add(npyscreen.SelectOne, max_height=3,
-                values = msg.wrends_install_options, scroll_exit=True)
+                values = msg.cb_install_options, scroll_exit=True)
         self.ask_cb.value_changed_callback = self.cb_option_changed
         self.cb_admin = self.add(npyscreen.TitleText, name=msg.username_label)
         self.cb_password = self.add(npyscreen.TitleText, name=msg.password_label)
@@ -417,9 +417,13 @@ class DBBackendForm(GluuSetupForm):
             self.parentApp.installObject.couchbase_hostname = 'localhost'
             self.parentApp.installObject.cb_password = self.cb_password.value
         elif self.parentApp.installObject.cb_install == REMOTE:
-            self.parentApp.installObject.couchbase_hostname = self.cb_hosts.value
+            self.parentApp.installObject.couchbase_hostname =  self.cb_hosts.value
             self.parentApp.installObject.couchebaseClusterAdmin = self.cb_admin.value
             self.parentApp.installObject.cb_password = self.cb_password.value
+            result = self.parentApp.installObject.test_cb_servers(self.cb_hosts.value)
+            if not result['result']:
+                npyscreen.notify_confirm(result['reason'], title="Warning")
+                return
 
         if self.parentApp.installObject.wrends_install and not checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
