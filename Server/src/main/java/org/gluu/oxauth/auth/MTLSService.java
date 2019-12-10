@@ -8,7 +8,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.ref.AuthenticatorReference;
-import org.gluu.oxauth.model.ref.ClientReference;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.json.JSONObject;
@@ -35,7 +35,7 @@ public class MTLSService {
     private final static Logger log = LoggerFactory.getLogger(MTLSService.class);
 
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                               ClientReference client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
+                               Client client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
 
