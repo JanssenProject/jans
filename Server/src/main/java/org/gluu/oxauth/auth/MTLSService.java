@@ -7,7 +7,6 @@ import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.ref.AuthenticatorReference;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.model.util.JwtUtil;
@@ -35,7 +34,7 @@ public class MTLSService {
     private final static Logger log = LoggerFactory.getLogger(MTLSService.class);
 
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                               Client client, AuthenticatorReference authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
+                               Client client, Authenticator authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
 
@@ -65,7 +64,7 @@ public class MTLSService {
             // apache/httpd
             if (subjectDn.equals(cert.getSubjectDN().getName())) {
                 log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
-                authenticator.configureSessionClient();
+                authenticator.configureSessionClient(client);
 
                 filterChain.doFilter(httpRequest, httpResponse);
                 return true;
@@ -93,7 +92,7 @@ public class MTLSService {
                         cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
                     log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
                             client.getClientId(), key.getKid());
-                    authenticator.configureSessionClient();
+                    authenticator.configureSessionClient(client);
 
                     filterChain.doFilter(httpRequest, httpResponse);
                     return true;

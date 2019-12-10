@@ -19,7 +19,6 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.ref.AuthenticatorReference;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
 import org.gluu.oxauth.model.token.ClientAssertionType;
@@ -213,12 +212,7 @@ public class AuthenticationFilter implements Filter {
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
-                    @Override
-                    public void configureSessionClient() {
-                        authenticator.configureSessionClient(client);
-                    }
-                }, cryptoProvider);
+                return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
             }
         }
         return false;
