@@ -4757,8 +4757,23 @@ class Setup(object):
             return ldap_conn
 
 
+    def create_test_client_keystore(self):
+        self.logIt("Creating client_keystore.jks")
+        client_keystore_fn = os.path.join(self.outputFolder, 'test/oxauth/client/client_keystore.jks')
+
+        args = [self.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
+                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
+                    'secret', '-dname', 
+                    "'{}'".format(self.default_openid_jks_dn_name)
+                    ]
+
+        self.run(' '.join(args), shell=True)
+
+        self.copyFile(client_keystore_fn, os.path.join(self.outputFolder, 'test/oxauth/server'))
+
     def load_test_data(self):
         self.logIt("Loading test ldif files")
+
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data-user.ldif')
         
@@ -4905,6 +4920,9 @@ class Setup(object):
 
             #query = 'UPDATE gluu USE KEYS "configuration" set gluu.oxIDPAuthentication.config.servers = {0}'.format(json.dumps(config_servers))
             #self.exec_n1ql_query(query)
+
+
+        self.create_test_client_keystore()
 
         # Disable token binding module
         if self.os_type+self.os_version == 'ubuntu18':
