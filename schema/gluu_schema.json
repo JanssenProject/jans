@@ -4850,24 +4850,17 @@
                 "gluuBandwidthTX", 
                 "gluuDSstatus", 
                 "gluuFederationHostingEnabled", 
-                "gluuFreeDiskSpace", 
-                "gluuFreeMemory", 
-                "gluuFreeSwap", 
-                "gluuGroupCount", 
                 "gluuHTTPstatus", 
                 "gluuHostname", 
                 "gluuInvoiceNo", 
-                "gluuIpAddress", 
                 "gluuLastUpdate", 
                 "gluuLifeRay", 
-                "gluuLoadAvg", 
                 "gluuManageIdentityPermission", 
                 "gluuManager", 
                 "gluuMaxLogSize", 
                 "gluuOrgProfileMgt", 
                 "gluuPaidUntil", 
                 "gluuPaymentProcessorTimestamp", 
-                "gluuPersonCount", 
                 "gluuPrivate", 
                 "gluuPublishIdpMetadata", 
                 "gluuResizeInitiated", 
@@ -4888,7 +4881,6 @@
                 "gluuSmtpUserName", 
                 "gluuSslExpiry", 
                 "gluuStatus", 
-                "gluuSystemUptime", 
                 "gluuTargetRAM", 
                 "gluuUrl", 
                 "gluuVDSenabled", 
@@ -6019,7 +6011,32 @@
                 "top"
             ], 
             "x_origin": "Gluu created objectclass"
-        }
+        },
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "gluuFreeDiskSpace",
+                "gluuFreeMemory",
+                "gluuFreeSwap",
+                "gluuGroupCount",
+                "gluuIpAddress",
+                "gluuLoadAvg",
+                "gluuPersonCount",
+                "gluuSystemUptime",
+                "uniqueIdentifier"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuOxtrustStat"
+            ], 
+            "oid": "oxObjectClass", 
+            "sup": [
+                "top"
+            ], 
+            "x_origin": "Gluu created objectclass"
+        } 
     ], 
     "oidMacros": {
         "oxAttribute": "oxPublished:3", 
