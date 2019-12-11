@@ -4760,7 +4760,9 @@ class Setup(object):
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.jks")
         client_keystore_fn = os.path.join(self.outputFolder, 'test/oxauth/client/client_keystore.jks')
-
+        keys_json_fn =  os.path.join(self.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
+        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
+        
         args = [self.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
                     'secret', '-dname', 
@@ -4769,7 +4771,21 @@ class Setup(object):
 
         self.run(' '.join(args), shell=True)
 
+        args = [self.cmd_java, '-Dlog4j.defaultInitOverride=true',
+                '-cp', ':'.join(oxauth_lib_files), 'org.gluu.oxauth.util.KeyGenerator',
+                '-keystore', client_keystore_fn,
+                '-keypasswd', 'secret',
+                '-sig_keys', self.default_key_algs,
+                '-enc_keys', self.default_key_algs,
+                '-dnname', "'{}'".format(self.default_openid_jks_dn_name),
+                '-expiration', '365','>', keys_json_fn]
+
+        cmd = ' '.join(args)
+        
+        self.run(cmd, shell=True)
+
         self.copyFile(client_keystore_fn, os.path.join(self.outputFolder, 'test/oxauth/server'))
+        self.copyFile(keys_json_fn, os.path.join(self.outputFolder, 'test/oxauth/server'))
 
     def load_test_data(self):
         self.logIt("Loading test ldif files")
