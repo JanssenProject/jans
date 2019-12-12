@@ -31,12 +31,11 @@ public class CacheProviderFactory {
     public CacheProvider getCacheProvider() {
         log.debug("Started to create cache provider");
 
-        AbstractCacheProvider<?> cacheProvider = null;
 
-        return getCacheProvider(cacheProvider);
+        return getCacheProvider(cacheConfiguration);
     }
 
-    public CacheProvider getCacheProvider(AbstractCacheProvider<?> cacheProvider) {
+    public CacheProvider getCacheProvider(CacheConfiguration cacheConfiguration) {
 		CacheProviderType cacheProviderType = cacheConfiguration.getCacheProviderType();
 
         if (cacheProviderType == null) {
@@ -45,6 +44,7 @@ public class CacheProviderFactory {
         }
 
         // Create proxied bean
+        AbstractCacheProvider<?> cacheProvider = null;
         switch (cacheProviderType) {
             case IN_MEMORY:
             	cacheProvider = instance.select(InMemoryCacheProvider.class).get();
