@@ -3015,6 +3015,18 @@ class Setup(object):
                 self.cb_query_node = result['query_node']
                 break
 
+    def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
+        
+        result = {'result': True, 'reason': ''}
+        conn = ldap.initialize('ldaps://{0}:1636'.format(ldap_host))
+        try:
+            conn.simple_bind_s(ldap_binddn, ldap_password)
+        except Exception as e:
+            result['result'] = False
+            result['reason'] = str(e)
+        
+        return result
+
     def promptForProperties(self):
 
         promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
@@ -3111,11 +3123,11 @@ class Setup(object):
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
                 conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
-                try:
-                    conn.simple_bind_s(self.opendj_ldap_binddn, ldapPass)
+                conn_check = self.check_remote_ldap(ldapHost, self.opendj_ldap_binddn, ldapPass)
+                if conn_check['result']:
                     break
-                except Exception as e:
-                    print "    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, str(e), colors.ENDC)
+                else:
+                    print "    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC)
 
             self.ldapPass = ldapPass
             self.ldap_hostname = ldapHost
