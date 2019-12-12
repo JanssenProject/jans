@@ -4065,7 +4065,8 @@ class Setup(object):
         
         try:
             self.pbar.progress("opendj", "OpenDJ: installing", False)
-            self.install_opendj()
+            if self.wrends_install == LOCAL:
+                self.install_opendj()
     
             if self.ldap_type == 'opendj':
                 self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
@@ -4096,7 +4097,8 @@ class Setup(object):
                 self.import_ldif_opendj(ldif_files)
                 
             self.pbar.progress("opendj", "OpenDJ: post installation", False)
-            self.post_install_opendj()
+            if self.wrends_install == LOCAL:
+                self.post_install_opendj()
         except:
             pass
 
