@@ -445,7 +445,7 @@ class DBBackendForm(GluuSetupForm):
                     storage = 'couchbase'
 
                 for s in storage_list:
-                    self.parentApp.installObject.mappingLocations[s] = 'couchbase'
+                    self.parentApp.installObject.mappingLocations[s] = storage
                 
                 self.parentApp.installObject.persistence_type = storage
 
