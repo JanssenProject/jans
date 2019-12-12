@@ -435,8 +435,20 @@ class DBBackendForm(GluuSetupForm):
 
         if self.parentApp.installObject.wrends_install or self.parentApp.installObject.cb_install:
             if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
+                self.parentApp.installObject.persistence_type = 'hybrid'
                 self.parentApp.switchForm('StorageSelectionForm')
             else:
+                storage_list = self.parentApp.installObject.couchbaseBucketDict.keys()
+                storage = 'ldap'
+
+                if self.parentApp.installObject.cb_install:
+                    storage = 'couchbase'
+
+                for s in storage_list:
+                    self.parentApp.installObject.mappingLocations[s] = 'couchbase'
+                
+                self.parentApp.installObject.persistence_type = storage
+
                 self.parentApp.switchForm('DisplaySummaryForm')
         else:
             npyscreen.notify_confirm(msg.notify_select_backend, title="Warning")
