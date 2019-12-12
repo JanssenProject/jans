@@ -378,7 +378,6 @@ class DBBackendForm(GluuSetupForm):
         else:
             self.cb_password.hidden = False
 
-
         if self.parentApp.installObject.cb_install == LOCAL:
             if not self.parentApp.installObject.cb_password:
                 self.cb_password.value = self.parentApp.installObject.oxtrust_admin_password
@@ -397,7 +396,6 @@ class DBBackendForm(GluuSetupForm):
         self.cb_password.update()
 
 
-
     def nextButtonPressed(self):
 
         msg.backend_types = []
@@ -410,6 +408,16 @@ class DBBackendForm(GluuSetupForm):
         elif self.parentApp.installObject.wrends_install == REMOTE:
             self.parentApp.installObject.ldap_hostname = self.wrends_hosts.value
             self.parentApp.installObject.ldapPass = self.wrends_password.value
+
+            result = self.parentApp.installObject.check_remote_ldap(
+                        self.wrends_hosts.value, 
+                        self.parentApp.installObject.opendj_ldap_binddn, 
+                        self.wrends_password.value
+                        )
+
+            if not result['result']:
+                npyscreen.notify_confirm(result['reason'], title="Warning")
+                return
 
         self.parentApp.installObject.cb_install = self.ask_cb.value[0]
 
