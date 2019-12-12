@@ -33,7 +33,11 @@ public class CacheProviderFactory {
 
         AbstractCacheProvider<?> cacheProvider = null;
 
-        CacheProviderType cacheProviderType = cacheConfiguration.getCacheProviderType();
+        return getCacheProvider(cacheProvider);
+    }
+
+    public CacheProvider getCacheProvider(AbstractCacheProvider<?> cacheProvider) {
+		CacheProviderType cacheProviderType = cacheConfiguration.getCacheProviderType();
 
         if (cacheProviderType == null) {
             log.error("Failed to initialize cacheProvider, cacheProviderType is null. Fallback to IN_MEMORY type.");
@@ -63,7 +67,7 @@ public class CacheProviderFactory {
         cacheProvider.create();
 
         return cacheProvider;
-    }
+	}
 
     @Produces
     @ApplicationScoped
