@@ -164,7 +164,7 @@ public class AppConfiguration implements Configuration {
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
     private Boolean endSessionWithAccessToken;
-    private String сookieDomain;
+    private String cookieDomain;
     private Boolean enabledOAuthAuditLogging;
     private Set<String> jmsBrokerURISet;
     private String jmsUserName;
@@ -1270,15 +1270,15 @@ public class AppConfiguration implements Configuration {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
     }
 
-    public String getСookieDomain() {
-        return сookieDomain;
-    }
+    public String getCookieDomain() {
+		return cookieDomain;
+	}
 
-    public void setСookieDomain(String сookieDomain) {
-        this.сookieDomain = сookieDomain;
-    }
+	public void setCookieDomain(String cookieDomain) {
+		this.cookieDomain = cookieDomain;
+	}
 
-    public Boolean getEnabledOAuthAuditLogging() {
+	public Boolean getEnabledOAuthAuditLogging() {
         return enabledOAuthAuditLogging;
     }
 
