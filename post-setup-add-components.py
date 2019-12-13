@@ -26,6 +26,7 @@ else:
 parser = argparse.ArgumentParser()
 parser.add_argument("-addshib", help="Install Shibboleth SAML IDP", action="store_true")
 parser.add_argument("-addpassport", help="Install Passport", action="store_true")
+parser.add_argument("-addradius", help="Install Radius", action="store_true")
 args = parser.parse_args()
 
 if  len(sys.argv)<2:
@@ -120,8 +121,61 @@ def installSaml():
     setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', setupObj.idp3Folder])
     print "Shibboleth installation done"
 
+def installRadius():
 
+    radius_dir = '/opt/gluu/radius'
+    logs_dir = os.path.join(radius_dir,'logs')
+    radius_jar = os.path.join(setupObj.distGluuFolder, 'super-gluu-radius-server.jar')
+    source_dir = os.path.join(setupObj.staticFolder, 'radius')
+    conf_dir = os.path.join(setupObj.gluuBaseFolder, 'conf/radius/')
+    radius_libs = os.path.join(setupObj.distGluuFolder, 'gluu-radius-libs.zip')
+    ldif_file_server = os.path.join(setupObj.outputFolder, 'gluu_radius_server.ldif')
+
+    if not os.path.exists(logs_dir):
+        setupObj.run([setupObj.cmd_mkdir, '-p', logs_dir])
+
+    setupObj.run(['unzip', '-n', '-q', radius_libs, '-d', radius_dir ])
+    setupObj.copyFile(radius_jar, radius_dir)
+
+    if setupObj.mappingLocations['default'] == 'ldap':
+        schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
+        setupObj.import_ldif_opendj([schema_ldif])
+        setupObj.import_ldif_opendj([ldif_file_server])
+    else:
+        setupObj.import_ldif_couchebase([ldif_file_server])
+
+    setupObj.createUser('radius', homeDir=radius_dir, shell='/bin/false')
+    setupObj.addUserToGroup('gluu', 'radius')
     
+    setupObj.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), setupObj.osDefault)
+    setupObj.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
+    setupObj.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(setupObj.gluuOptPythonFolder, 'libs'))
+
+    setupObj.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+    setupObj.run([setupObj.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+    
+    if setupObj.os_type+setupObj.os_version == 'ubuntu16':
+        setupObj.run(['update-rc.d', 'gluu-radius', 'defaults'])
+    else:
+        setupObj.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+        setupObj.run([setupObj.systemctl, 'daemon-reload'])
+    
+    #create empty gluu-radius.private-key.pem
+    gluu_radius_private_key_fn = os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')
+    setupObj.writeFile(gluu_radius_private_key_fn, '')
+    
+    setupObj.run([setupObj.cmd_chown, '-R', 'radius:gluu', radius_dir])
+    setupObj.run([setupObj.cmd_chown, '-R', 'root:gluu', conf_dir])
+    setupObj.run([setupObj.cmd_chown, 'root:gluu', os.path.join(setupObj.gluuOptPythonFolder, 'libs/gluu_common.py')])
+
+    setupObj.enable_service_at_start('gluu-radius')
+
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
 def installPassport():
     
     if os.path.exists('/opt/gluu/node/passport'):
@@ -139,5 +193,8 @@ if args.addshib:
 
 if args.addpassport:
     installPassport()
+
+if args.addradius:
+    installRadius()
 
 print "Please exit container and restart Gluu Server"
