@@ -45,7 +45,6 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 
-import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -513,6 +512,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
                                         if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
                                             sessionUser.addPermission(clientId, true);
+                                            sessionIdService.updateSessionId(sessionUser);
                                         } else {
                                             redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                                     redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
@@ -524,6 +524,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         }
                                     } else if (client.getTrustedClient()) {
                                         sessionUser.addPermission(clientId, true);
+                                        sessionIdService.updateSessionId(sessionUser);
                                     }
                                 }
 
