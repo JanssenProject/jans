@@ -4,12 +4,13 @@
       ["objectClass"], 
       ["creationDate"], 
       ["inum"], 
-      ["del","exp"] 
+      ["del","exp"], 
+      ["uid"], 
+      ["mail"] 
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
       [["LOWER(`mail`)"], "objectClass = \"gluuPerson\""], 
-      [["DISTINCT(PAIRS(self))"], "objectClass = \"gluuPerson\""], 
       [["exp", "oxAuthExpiration"], "del=true"] 
     ]
   },
@@ -79,11 +80,9 @@
 
   "gluu_cache": {
     "attributes":[
-      ["del","exp"]
     ],
     "static" : [
-      [["exp", "oxAuthExpiration"], "del=true"],
-      [["oxAuthExpiration"], "objectClass = \"cache\""]
+      [["exp"], "objectClass = \"cache\" and del=true"]
     ]
   },
 
