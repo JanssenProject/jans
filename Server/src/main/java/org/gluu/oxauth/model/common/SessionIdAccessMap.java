@@ -79,4 +79,11 @@ public class SessionIdAccessMap implements Serializable {
             permissionGranted.put(clientId, false);
         }
     }
+
+    @Override
+    public String toString() {
+        return "SessionIdAccessMap{" +
+                "permissionGranted=" + permissionGranted +
+                '}';
+    }
 }
