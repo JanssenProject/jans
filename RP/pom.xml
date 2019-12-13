@@ -216,19 +216,6 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 		</dependency>
 
-		<!-- RichFaces -->
-		<dependency>
-			<groupId>org.richfaces</groupId>
-			<artifactId>richfaces</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.richfaces</groupId>
-			<artifactId>richfaces-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.richfaces</groupId>
-			<artifactId>richfaces-a4j</artifactId>
-		</dependency>
 		<!-- BootsFaces -->
 		<dependency>
 			<groupId>net.bootsfaces</groupId>
