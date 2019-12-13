@@ -3,8 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:a4j="http://richfaces.org/a4j">
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
     <f:view locale="#{language.localeCode}">
         <h:head>
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -23,8 +22,25 @@
         </h:head>
         <h:body>
             <div class="body">
-                <a4j:status startText="Loading..."
-                            startStyle="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px;"/>
+        	<div id="status" class="modal"><span style="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px">Loading...</span></div>
+			<script type="text/javascript">
+	            function handleAjax(data) {
+	                var status = data.status;
+	                switch (status) {
+	                    case "begin":
+	                        document.getElementById('status').className = 'loading';
+	                        break;
+	 
+	                    case "complete":
+	                        break;
+	 
+	                    case "success":
+	                        document.getElementById('status').className = 'modal';
+	                        break;
+	                }
+	            }
+    	        jsf.ajax.addOnEvent(handleAjax);
+        	</script> 
                 <h:messages id="messages" globalOnly="true" styleClass="message"
                             errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
                             rendered="#{showGlobalMessages != 'false'}"/>
