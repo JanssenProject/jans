@@ -68,16 +68,27 @@ class colors:
     UNDERLINE = '\033[4m'
     DANGER = '\033[31m'
 
+#install types
+NONE = 0
+LOCAL = 1
+REMOTE = 2
+
+COMPLETED = -99
+ERROR = -101
+
 suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
 
-
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
+re_split_host = re.compile(r'[^,\s,;]+')
+
+istty = False
 
 try:
     tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+    istty = True
 except:
     tty_rows = 60
     tty_columns = 120
@@ -90,29 +101,44 @@ try:
 except:
     pass
 
+
+def checkPassword(pwd):
+    if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
+        return True
+
 class ProgressBar:
 
-    def __init__(self, tty_columns, max_steps=33):
+    def __init__(self, cols, queue=None, max_steps=33):
         self.n = 0
+        self.queue = queue
         self.max_steps = max_steps
-        self.tty_columns = tty_columns
+        self.tty_columns = int(tty_columns)
 
     def complete(self, msg):
         self.n = self.max_steps
         self.progress(msg, False)
 
-    def progress(self, msg, incr=True):
+    def progress(self, ptype, msg, incr=True):
         if incr and self.n < self.max_steps:
             self.n +=1
 
         time.sleep(0.2)
-        ft = '#' * self.n
-        ft = ft.ljust(self.max_steps)
-        msg =msg.ljust(40)
-        if int(self.tty_columns) < 88:
-            msg = msg[:int(self.tty_columns)-47]
-        sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
-        sys.stdout.flush()
+
+        if self.queue:
+            if msg == 'Completed':
+                self.queue.put((COMPLETED, ptype, msg))
+            else:
+                self.queue.put((self.n, ptype, msg))
+        else:
+            ft = '#' * self.n
+            ft = ft.ljust(self.max_steps)
+            msg =msg.ljust(40)
+
+            if self.tty_columns < 88:
+                msg = msg[:self.tty_columns-47]
+
+            sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
+            sys.stdout.flush()
 
 def get_key_shortcuter_rules():
     ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
@@ -218,12 +244,10 @@ def get_key_from(dn):
     return key
 
 
-
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
         LDIFParser.__init__(self, open(ldif_file,'rb'))
         self.entries = []
-    
 
     def handle(self, dn, entry):
         self.entries.append((dn, entry))
@@ -278,7 +302,8 @@ def get_documents_from_ldif(ldif_file):
 class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
-
+        self.thread_queue = None
+        self.properties_password = None
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -290,8 +315,6 @@ class Setup(object):
         self.oxVersion = oxauth_info['version']
         self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = oxauth_info['branch']
-
-        self.pbar = ProgressBar(tty_columns)
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -333,18 +356,27 @@ class Setup(object):
 
         # Component ithversions
         self.jre_version = '8.222.10.1'
-        self.jetty_version = '9.4.19.v20190610'
+        self.jetty_version = '9.4.24.v20191120'
         self.jython_version = '2.7.2a'
         self.node_version = '12.6.0'
         self.apache_version = None
         self.opendj_version = None
 
+        #passwords
+        self.ldapPass = None
+        self.oxtrust_admin_password = None
+        self.encoded_admin_password = ''
+        self.cb_password = None
+        self.encoded_cb_password = ''
+
+        #DB installation types
+        self.wrends_install = LOCAL
+        self.cb_install = NONE
 
         # Gluu components installation status
         self.loadData = True
         self.installOxAuth = True
         self.installOxTrust = True
-        self.installLdap = False
         self.installHttpd = True
         self.installSaml = False
         self.installOxAuthRP = False
@@ -354,7 +386,10 @@ class Setup(object):
         self.gluuPassportEnabled = 'false'
         self.gluuRadiusEnabled = 'false'
         self.gluuSamlEnabled = 'false'
-
+        self.scimTestMode = 'false'
+        
+        self.enable_scim_access_policy = 'false'
+        
         self.allowPreReleasedFeatures = False
 
         self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
@@ -387,7 +422,7 @@ class Setup(object):
         self.oxPhotosFolder = "/var/gluu/photos"
         self.oxTrustRemovedFolder = "/var/gluu/identity/removed"
         self.oxTrustCacheRefreshFolder = "/var/gluu/identity/cr-snapshots"
-        self.cache_provider_type = 'IN_MEMORY'
+        self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
@@ -484,9 +519,8 @@ class Setup(object):
         self.state = None
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
-        self.encoded_ldap_pw = None
         self.encoded_shib_jks_pw = None
-        self.application_max_ram = None    # in MB
+        self.application_max_ram = 3072    # in MB
         self.encode_salt = None
         self.admin_inum = None
 
@@ -533,7 +567,6 @@ class Setup(object):
         self.ldap_type = 'opendj'
         self.opendj_type = 'wrends'
         self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
-        self.install_couchbase = None
 
         self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
@@ -542,7 +575,6 @@ class Setup(object):
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
-        self.remoteLdap = False
 
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
@@ -714,13 +746,13 @@ class Setup(object):
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
         self.couchebaseClusterAdmin = 'admin'
+        self.isCouchbaseUserAdmin = False
         self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
         self.couchbaseTrustStoreFn = "%s/couchbase.pkcs12" % self.certFolder
         self.couchbaseTrustStorePass = 'newsecret'
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.remoteCouchbase = False
         self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
@@ -728,6 +760,11 @@ class Setup(object):
         self.couchbaseBuckets = []
         self.cbm = None
         self.cb_query_node = 0
+        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
+                            'query_update', 'query_insert',
+                            'query_manage_index']
+        self.post_messages = []
+        
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -870,10 +907,22 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            txt += 'Install Backend'.ljust(30) + repr(self.installLdap or self.install_couchbase).rjust(35) + "\n"
             
-            if (self.installLdap and not self.remoteLdap) or (self.install_couchbase and not self.remoteCouchbase):
-                txt += 'Backend Type'.ljust(30) + self.persistence_type.title().rjust(35) + "\n"
+            bc = []
+            if self.wrends_install:
+                t_ = 'wrends'
+                if self.wrends_install == REMOTE:
+                    t_ += '[R]'
+                bc.append(t_)
+            if self.cb_install:
+                t_ = 'couchbase'
+                if self.cb_install == REMOTE:
+                    t_ += '[R]'
+                bc.append(t_)
+
+            if bc:
+                bct = ', '.join(bc)
+                txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             
@@ -1324,33 +1373,85 @@ class Setup(object):
             self.logIt("Could not set limits.")
             self.logIt(traceback.format_exc(), True)
 
+    def decrypt_properties(self, fn, passwd):
+        out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
+        cmd = ['openssl', 'enc', '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
+        self.logIt('Running: ' + ' '.join(cmd))
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, err = p.communicate()
+        
+        if 'bad decrypt' in err:
+            print "Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd)
+            self.run(['rm', '-f', out_file])
+            sys.exit(False)
+
+        return out_file
+
     def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
         p = Properties.Properties()
+        
+        if fn.endswith('.enc'):
+            if not self.properties_password:
+                print "setup.properties password was not supplied. Please run with argument -properties-password"
+                sys.exit(False)
+
+            fn = self.decrypt_properties(fn, self.properties_password)
+
         try:
-            p.load(open(fn))
-
-            if p.getProperty('ldap_type') == 'openldap':
-                self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
-                p.setProperty('ldap_type', 'opendj')
-
-            properties_list = p.keys()
-            for prop in properties_list:
-                if not prop in no_update:
-                    try:
-                        self.__dict__[prop] = p[prop]
-                        if prop == 'mappingLocations':
-                            self.__dict__[prop] = json.loads(p[prop])                    
-                        if p[prop] == 'True':
-                            self.__dict__[prop] = True
-                        elif p[prop] == 'False':
-                            self.__dict__[prop] = False
-                    except:
-                        self.logIt("Error loading property %s" % prop)
-                        self.logIt(traceback.format_exc(), True)
+            with open(fn) as pf:
+                p.load(pf)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
+
+        if p.getProperty('ldap_type') == 'openldap':
+            self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
+            p.setProperty('ldap_type', 'opendj')
+
+        properties_list = p.keys()
+        no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
+
+        for prop in properties_list:
+            if prop in no_update:
+                continue
+            try:
+                self.__dict__[prop] = p[prop]
+                if prop == 'mappingLocations':
+                    self.__dict__[prop] = json.loads(p[prop])                    
+                if p[prop] == 'True':
+                    self.__dict__[prop] = True
+                elif p[prop] == 'False':
+                    self.__dict__[prop] = False
+            except:
+                self.logIt("Error loading property %s" % prop)
+                self.logIt(traceback.format_exc(), True)
+
+        if fn.endswith('-DEC~'):
+            self.run(['rm', '-f', fn])
+
+        if not 'oxtrust_admin_password' in properties_list:
+            self.oxtrust_admin_password = p['ldapPass']
+            
+        if not 'wrends_install' in properties_list:
+            if p['remoteLdap'].lower() == 'true':
+                self.wrends_install = REMOTE
+            elif p['installLdap'].lower() == 'true':
+                self.wrends_install = LOCAL
+            else:
+                self.wrends_install = NONE
+
+        if not 'cb_install' in properties_list:
+            if 'remoteCouchbase' in properties_list and p['remoteCouchbase'].lower() == 'true':
+                self.cb_install = REMOTE
+            elif 'persistence_type' in properties_list and p['persistence_type'] in ('couchbase', 'hybrid'):
+                self.cb_install = LOCAL
+            else:
+                self.cb_install = NONE
+
+        if (not 'cb_password' in properties_list) and self.cb_install:
+            self.cb_password = p['ldapPass']
+
 
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
@@ -1399,7 +1500,66 @@ class Setup(object):
             self.run([self.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
+        with open('/var/www/html/index.html','w') as w:
+            w.write('OK')
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+            icons_conf_fn = '/etc/httpd/conf.d/autoindex.conf'
+        else:
+            icons_conf_fn = '/etc/apache2/mods-available/alias.conf'
+
+        with open(icons_conf_fn[:]) as f:
+            icons_conf = f.readlines()
+
+        for i, l in enumerate(icons_conf[:]):
+            if l.strip().startswith('Alias') and ('/icons/' in l.strip().split()):
+                icons_conf[i] =  l.replace('Alias', '#Alias')
+
+        with open(icons_conf_fn, 'w') as w:
+            w.write(''.join(icons_conf))
+
+        self.run(['cp', os.path.join(self.templateFolder,'apache/*'), '/var/www/html'])
+
         self.run([service_path, apache_service_name, 'start'])
+
+        # we only need these modules
+        mods_enabled = ['env', 'proxy_http', 'access_compat', 'alias', 'authn_core', 'authz_core', 'authz_host', 'headers', 'mime', 'mpm_event', 'proxy', 'proxy_ajp', 'security2', 'reqtimeout', 'setenvif', 'socache_shmcb', 'ssl', 'unique_id']
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+
+            for mod_load_fn in glob.glob('/etc/httpd/conf.modules.d/*'):
+
+                with open(mod_load_fn) as f:
+                    mod_load_content = f.readlines()
+
+                modified = False
+                
+                for i, l in enumerate(mod_load_content[:]):
+                    ls = l.strip()
+                    
+                    if ls and not ls.startswith('#'):
+                        lsl = ls.split('/')
+                        module =  lsl[-1][4:-3]
+                        
+                        if not module in mods_enabled:
+                            mod_load_content[i] = l.replace('LoadModule', '#LoadModule')
+                            modified = True
+                        
+                        else:
+                            print module
+
+                if modified:
+                    with open(mod_load_fn, 'w') as w:
+                        w.write(''.join(mod_load_content))
+        else:
+
+            for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*'):
+                mod_load_base_name = os.path.basename(mod_load_fn)
+                f_name, f_ext = os.path.splitext(mod_load_base_name)
+
+                if not f_name in mods_enabled:
+                    self.run(['unlink', mod_load_fn])
+
 
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
@@ -1618,7 +1778,7 @@ class Setup(object):
         if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
             changeTo = 'couchbase-server'
 
-        if self.remoteLdap or self.remoteCouchbase:
+        if self.wrends_install == REMOTE or self.cb_install == REMOTE:
             changeTo = ''
 
         if changeTo != None:
@@ -1725,6 +1885,9 @@ class Setup(object):
 
         serviceConfiguration['installed'] = True
 
+        # don't send header to server
+        self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
     def installNodeService(self, serviceName):
         self.logIt("Installing node service %s..." % serviceName)
 
@@ -1755,35 +1918,38 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            self.pbar.progress("Downloading oxAuth war file")
+            self.pbar.progress("download", "Downloading oxAuth war file")
             
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            self.pbar.progress("Downloading oxTrust war file", False)
+            self.pbar.progress("download", "Downloading oxTrust war file", False)
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                self.pbar.progress("Downloading oxAuth RP war file", False)
+                self.pbar.progress("download", "Downloading oxAuth RP war file", False)
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
             
-            self.pbar.progress("Downloading Shibboleth IDP v3 war file", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 war file", False)
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            self.pbar.progress("Downloading Shibboleth IDP v3 keygenerator", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 keygenerator", False)
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            self.pbar.progress("Downloading Shibboleth IDP v3 binary distributive file", False)
+            self.pbar.progress("download", "Downloading Shibboleth IDP v3 binary distributive file", False)
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
         try:
-            self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
+            self.encoded_oxtrust_admin_password = self.ldap_encode(self.oxtrust_admin_password)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
-            self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            if self.ldapPass:
+                self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            if self.cb_password:
+                self.encoded_cb_password = self.obscure(self.cb_password)
             self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
 
             self.oxauthClient_pw = self.getPW()
@@ -2242,9 +2408,6 @@ class Setup(object):
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
 
-        # don't send header to server
-        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
-
     def install_oxtrust(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
@@ -2493,37 +2656,36 @@ class Setup(object):
 
     def install_gluu_components(self):
         
-        if self.installLdap:
-            if self.ldap_type == 'opendj':
-                self.pbar.progress("Installing Gluu components: LDAP", False)
-                self.install_ldap_server()
+        if self.wrends_install:
+            self.pbar.progress("ldap", "Installing Gluu components: LDAP", False)
+            self.install_ldap_server()
 
-        if self.install_couchbase:
-            self.pbar.progress("Installing Gluu components: Couchbase", False)
+        if self.cb_install:
+            self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
         if self.installHttpd:
-            self.pbar.progress("Installing Gluu components: HTTPD", False)
+            self.pbar.progress("httpd", "Installing Gluu components: HTTPD", False)
             self.configure_httpd()
 
         if self.installOxAuth:
-            self.pbar.progress("Installing Gluu components: OxAuth", False)
+            self.pbar.progress("oxauth", "Installing Gluu components: OxAuth", False)
             self.install_oxauth()
 
         if self.installOxTrust:
-            self.pbar.progress("Installing Gluu components: oxTrust", False)
+            self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
         if self.installSaml:
-            self.pbar.progress("Installing Gluu components: saml", False)
+            self.pbar.progress("saml", "Installing Gluu components: saml", False)
             self.install_saml()
 
         if self.installOxAuthRP:
-            self.pbar.progress("Installing Gluu components: OxAuthRP", False)
+            self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
             self.install_oxauth_rp()
 
         if self.installPassport:
-            self.pbar.progress("Installing Gluu components: Passport", False)
+            self.pbar.progress("passport", "Installing Gluu components: Passport", False)
             self.install_passport()
     
         self.install_gluu_radius()
@@ -2730,63 +2892,6 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
 
-    def promptBackendType(self, backend_types):
-
-        promptForLDAP = self.getPrompt("Install Backend DB Server?", "Yes")[0].lower()
-        
-        if promptForLDAP == 'y':
-
-            option = None
-            
-            if len(backend_types) == 2:
-                self.ldap_type = backend_types[0][1]
-                self.installLdap = True
-            
-            else:
-                prompt_text = 'Install '
-                options = []
-                for i, backend in enumerate(backend_types):
-                    prompt_text += '({0}) {1} '.format(i+1, backend[0])
-                    options.append(str(i+1))
-
-                prompt_text += '[{0}]'.format('|'.join(options))
-                option=None
-
-                while not option in options:
-                    option=self.getPrompt(prompt_text, options[0])
-                    if not option in options:
-                        print "You did not enter the correct option. Enter one of this options: {0}".format(', '.join(options))
-
-                persistence_type = backend_types[int(option)-1][1]
-
-                if persistence_type == 'wrends':
-                    self.opendj_type = 'wrends'
-
-                if persistence_type in ('opendj', 'wrends', 'hybrid'):
-                    self.installLdap = True
-
-                if persistence_type in ('couchbase', 'hybrid'):
-                    self.cache_provider_type = 'NATIVE_PERSISTENCE'
-                    print ('  Please note that you have to update your firewall configuration to\n'
-                            '  allow connections to the following ports:\n'
-                            '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                            '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-                    sys.stdout.write("\033[;1mBy using this software you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.\033[0;0m\n")
-                    self.install_couchbase = True
-                
-                if persistence_type == 'couchbase':
-                    self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
-
-                self.persistence_type = persistence_type
-                
-                if self.persistence_type in ('opendj', 'wrends'):
-                    self.persistence_type = 'ldap'
-                
-        else:
-            self.installLdap = False
-
-
     def getBackendTypes(self):
 
         if self.os_type in ('ubuntu', 'debian'):
@@ -2797,33 +2902,26 @@ class Setup(object):
 
         backend_types = []
 
-        if glob.glob(self.distFolder+'/app/opendj-server*.zip'):
-            backend_types.append(('Gluu OpenDj','opendj'))
-            self.ldap_type = 'opendj'
-        
         if self.allowPreReleasedFeatures and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
-            backend_types.append(('Wren:DS','wrends'))
+            backend_types.append('wrends')
 
         if glob.glob(self.distFolder+'/couchbase/couchbase-server-enterprise*.'+suffix):
-            backend_types.append(('Couchbase','couchbase'))
-
-        
-        backend_types.append(('Hybrid', 'hybrid'))
+            backend_types.append('couchbase')
 
         return backend_types
 
-    def promptForBackendMappings(self, backend_types):
+    def promptForBackendMappings(self):
 
         options = []
         options_text = []
         
         bucket_list = self.couchbaseBucketDict.keys()
-        
+
         for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
-        options_text = 'Use {0} to store {1}'.format(backend_types[0][0], ' '.join(options_text))
+        options_text = 'Use WrenDS to store {}'.format(' '.join(options_text))
 
         re_pattern = '^[1-{0}]+$'.format(len(self.couchbaseBucketDict))
 
@@ -2862,45 +2960,72 @@ class Setup(object):
         return detectedHostname
 
 
-    def prompt_remote_couchbase(self):
-        self.installLdap = False
-        self.persistence_type = 'couchbase'
-        self.install_couchbase = True
-    
+    def test_cb_servers(self, couchbase_hostname):
+        cb_hosts = re_split_host.findall(couchbase_hostname)
+
         cb_query_node = None
+        retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
 
-        while True:
-            self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
-            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase Admin user")
-            self.ldapPass = self.getPrompt("    Couchbase Admin password")
+        for i, cb_host in enumerate(cb_hosts):
 
-            for i, cb_host in enumerate(self.couchbase_hostname.split(',')):
-
-                cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
-                print "    Checking Couchbase connection for " + cb_host
+                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
+                if not thread_queue:
+                    print "    Checking Couchbase connection for " + cb_host
 
                 cbm_result = cbm_.test_connection()
                 if not cbm_result.ok:
-                    print "    Can't establish connection to Couchbase server with given parameters."
-                    print "**", cbm_result.reason
-                    break
+                    if not thread_queue:
+                        print "    Can't establish connection to Couchbase server with given parameters."
+                        print "**", cbm_result.reason
+                    retval['result'] = False
+                    retval['reason'] = cb_host + ': ' + cbm_result.reason
+                    return retval
                 try:
                     qr = cbm_.exec_query('select * from system:indexes limit 1')
                     if qr.ok:
                         cb_query_node = i
-                        self.cb_query_node = i
                 except:
                     pass
-            else:
+        else:
 
-                if cbm_result.ok and cb_query_node != None:
+            if cbm_result.ok and cb_query_node != None:
+                if not thread_queue:
                     print "    Successfully connected to Couchbase server"
-                    cb_host_ = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
-                    self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.ldapPass)
-                    break
-                if cb_query_node == None:
+                cb_host_ = cb_hosts[self.cb_query_node]
+                self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.cb_password)
+                return retval
+            if cb_query_node == None:
+                if not thread_queue:
                     print "Can't find any query node"
+                retval['result'] = False
+                retval['reason'] = "Can't find any query node"
 
+        return retval
+
+    def prompt_remote_couchbase(self):
+    
+        while True:
+            self.couchbase_hostname = self.getPrompt("    Couchbase hosts")
+            self.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
+            self.cb_password =self.getPrompt("    Couchbase Password")
+
+            result = self.test_cb_servers(self.couchbase_hostname)
+
+            if result['result']:
+                self.cb_query_node = result['query_node']
+                break
+
+    def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
+        
+        result = {'result': True, 'reason': ''}
+        conn = ldap.initialize('ldaps://{0}:1636'.format(ldap_host))
+        try:
+            conn.simple_bind_s(ldap_binddn, ldap_password)
+        except Exception as e:
+            result['result'] = False
+            result['reason'] = str(e)
+        
+        return result
 
     def promptForProperties(self):
 
@@ -2951,38 +3076,102 @@ class Setup(object):
                 break
             else:
                 print("Please enter valid email address")
-            
+
         
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", '3072')
+        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
+        
+        oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
 
-        if not (self.remoteCouchbase or self.remoteLdap):
+        while True:
+            oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
+            if len(oxtrust_admin_password) > 5:
+                break
+            else:
+                print("Password must be at least 6 characters")
+        
+        self.oxtrust_admin_password = oxtrust_admin_password
 
-            ldapPass = self.getPW(special='.*=!%&+/-')
+
+        available_backends = self.getBackendTypes()
+
+        localWrendsOnly = False
+
+        if (self.wrends_install != REMOTE) and (not self.cb_install) and (available_backends == ['wrends']):
+            self.wrends_install = LOCAL
+            
+        elif self.wrends_install != REMOTE and (self.cb_install == REMOTE or 'couchbase' in available_backends):
+            promptForLDAP = self.getPrompt("Install Local WrenDS Server?", "Yes")[0].lower()
+            if promptForLDAP[0] == 'y':
+                self.wrends_install = LOCAL
+            else:
+                self.wrends_install = NONE
+
+        if self.wrends_install == LOCAL:
 
             while True:
-                ldapPass = self.getPrompt("Optional: enter password for oxTrust and DB superuser", ldapPass)
+                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
 
-                if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', ldapPass):
+                if checkPassword(ldapPass):
                     break
                 else:
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
-            
+
             self.ldapPass = ldapPass
 
-        elif self.remoteLdap:
+        elif self.wrends_install == REMOTE:
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
                 conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
-                try:
-                    conn.simple_bind_s(self.opendj_ldap_binddn, ldapPass)
+                conn_check = self.check_remote_ldap(ldapHost, self.opendj_ldap_binddn, ldapPass)
+                if conn_check['result']:
                     break
-                except Exception as e:
-                    print "Error connecting to LDAP server:", e
+                else:
+                    print "    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC)
 
             self.ldapPass = ldapPass
             self.ldap_hostname = ldapHost
-            self.installLdap = True
+
+        if self.cb_install == REMOTE:
+            self.prompt_remote_couchbase()
+
+        elif 'couchbase' in available_backends:
+            promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
+            if promptForCB[0] == 'y':
+                self.cb_install = LOCAL
+        
+                while True:
+                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), self.oxtrust_admin_password)
+
+                    if checkPassword(cbPass):
+                        break
+                    else:
+                        print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+
+                self.cb_password = cbPass
+            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.cb_password)
+
+        if not (self.wrends_install or self.cb_install):
+            print "{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC)
+            sys.exit(False)
+
+        if self.cb_install:
+            self.cache_provider_type = 'NATIVE_PERSISTENCE'
+            print ('  Please note that you have to update your firewall configuration to\n'
+                    '  allow connections to the following ports:\n'
+                    '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
+                    '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
+
+            print "{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC)
+
+
+        if not self.wrends_install and self.cb_install:
+            self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
+            self.persistence_type = 'couchbase'
+
+        elif self.wrends_install and self.cb_install:
+            self.promptForBackendMappings()
+            self.persistence_type = 'hybrid'
 
         if setupOptions['allowPreReleasedFeatures']:
             while True:
@@ -3017,32 +3206,27 @@ class Setup(object):
         else:
             self.installOxTrust = False
 
-        if self.remoteCouchbase:
-            self.prompt_remote_couchbase()
-            
-            print ("{0}Note: The password used for the admin user in "
-                    "Couchbase is also\nassigned to the admin user in "
-                    "oxTrust.{1}").format(colors.WARNING, colors.ENDC)
+        couchbase_mappings_ = self.getMappingType('couchbase')
+        buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
 
-            use_hybrid = self.getPrompt("    Use hybrid backends?", "No")
+        buckets_.append('gluu')
 
-            if use_hybrid[0].lower() in 'yt':
-                self.installLdap = True
-                self.persistence_type = 'hybrid'
-                backend_types = self.getBackendTypes()
-                backend_types.insert(1,'couchbase')
-                self.promptForBackendMappings(backend_types)
-            else:
-                self.persistence_type = 'couchbase'
-                self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
-        else:
 
-            backend_types = self.getBackendTypes()
 
-            self.promptBackendType(backend_types)
+        if self.cb_install == REMOTE:
 
-            if self.persistence_type == 'hybrid':
-                self.promptForBackendMappings(backend_types)
+            isCBRoleOK = self.checkCBRoles(buckets_)
+
+            if not isCBRoleOK[0]:
+                print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
+                                colors.DANGER,
+                                self.cbm.auth.username,
+                                ', '.join(self.cb_bucket_roles),
+                                ', '.join(isCBRoleOK[1]),
+                                colors.ENDC
+                                )
+                sys.exit(False)
+
 
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
@@ -3080,6 +3264,7 @@ class Setup(object):
         if promptForPassport == 'y':
             self.installPassport = True
             self.gluuPassportEnabled = 'true'
+            self.enable_scim_access_policy = 'true'
         else:
             self.installPassport = False
 
@@ -3354,13 +3539,14 @@ class Setup(object):
                 return str(value)
             else:
                 return ''
+        
         try:
             p = Properties.Properties()
             keys = obj.__dict__.keys()
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key == 'couchbaseInstallOutput':
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password'):
                     continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(obj.__dict__[key])
@@ -3369,7 +3555,15 @@ class Setup(object):
                     if value != '':
                         p[key] = value
 
-            p.store(open(prop_fn, 'w'))
+            with open(prop_fn, 'w') as f:
+                p.store(f)
+            
+            self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.oxtrust_admin_password])
+            
+            self.post_messages.append(prop_fn+".enc is encrypted with password " + self.oxtrust_admin_password)
+            
+            self.run(['rm', '-f', prop_fn])
+            
         except:
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -3468,23 +3662,21 @@ class Setup(object):
         if self.mappingLocations['site'] == 'ldap':
             config_changes.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
-                          
         config_changes += [
                           ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
                           ['set-connection-handler-prop', '--handler-name', '"JMX Connection Handler"', '--set', 'enabled:false'],
                           ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
                           ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                          ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
                           ['create-plugin', '--plugin-name', '"Unique mail address"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:mail'],
                           ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
+                          ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
                           ]
         
         if self.opendj_type == 'opendj':
             config_changes.insert(2, ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'])
 
-        
-        
+
         if not self.listenAllInterfaces:
             config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
             config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
@@ -3777,39 +3969,46 @@ class Setup(object):
 
     def start_services(self):
 
-        # Detect service path and apache service name
-        service_path = self.detect_service_path()
-        apache_service_name = 'httpd'
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-            apache_service_name = 'httpd'
-        elif self.os_type in ['debian', 'ubuntu']:
-            apache_service_name = 'apache2'
+        if self.installHttpd:
+            self.pbar.progress("gluu", "Starting httpd")
 
-        # Apache HTTPD
-        if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
-            self.run([service_path, 'enable', apache_service_name])
-            self.run([service_path, 'start', apache_service_name])
-        else:
-            self.run([service_path, apache_service_name, 'start'])
+            # Detect service path and apache service name
+            service_path = self.detect_service_path()
+            apache_service_name = 'httpd'
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+                apache_service_name = 'httpd'
+            elif self.os_type in ['debian', 'ubuntu']:
+                apache_service_name = 'apache2'
+
+            # Apache HTTPD
+            if self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd':
+                self.run([service_path, 'enable', apache_service_name])
+                self.run([service_path, 'start', apache_service_name])
+            else:
+                self.run([service_path, apache_service_name, 'start'])
 
         # LDAP services
-        if self.installLdap:
-            if self.ldap_type == 'opendj':
-                self.run_service_command('opendj', 'stop')
-                self.run_service_command('opendj', 'start')
+        if self.wrends_install == LOCAL:
+            self.pbar.progress("gluu", "Starting WrenDS")
+            self.run_service_command('opendj', 'stop')
+            self.run_service_command('opendj', 'start')
 
         # Jetty services
         # Iterate through all components and start installed
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if applicationConfiguration['installed']:
+                self.pbar.progress("gluu", "Starting Gluu Jetty {} Service".format(applicationName))
                 self.run_service_command(applicationName, 'start')
-                
+
+        
         # Passport service
         if self.installPassport:
+            self.pbar.progress("gluu", "Starting Passport Service")
             self.run_service_command('passport', 'start')
             
         # Radius service
         if self.installGluuRadius:
+            self.pbar.progress("gluu", "Starting Gluu Radius Service")
             self.run_service_command('gluu-radius', 'start')
         
 
@@ -3858,28 +4057,29 @@ class Setup(object):
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
         
-        self.pbar.progress("Extracting OpenDJ", False)
+        self.pbar.progress("opendj", "Extracting OpenDJ", False)
         self.extractOpenDJ()
         self.opendj_version = self.determineOpenDJVersion()
 
         self.createLdapPw()
         
         try:
-            self.pbar.progress("OpenDJ: installing", False)
-            self.install_opendj()
+            self.pbar.progress("opendj", "OpenDJ: installing", False)
+            if self.wrends_install == LOCAL:
+                self.install_opendj()
     
             if self.ldap_type == 'opendj':
-                self.pbar.progress("OpenDJ: preparing schema", False)
+                self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
-                self.pbar.progress("OpenDJ: setting up service", False)
+                self.pbar.progress("opendj", "OpenDJ: setting up service", False)
                 self.setup_opendj_service()
-                self.pbar.progress("OpenDJ: configuring", False)
+                self.pbar.progress("opendj", "OpenDJ: configuring", False)
                 self.configure_opendj()
-                self.pbar.progress("OpenDJ:  exporting certificate", False)
+                self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
                 self.export_opendj_public_cert()
-                self.pbar.progress("OpenDJ: creating indexes", False)
+                self.pbar.progress("opendj", "OpenDJ: creating indexes", False)
                 self.index_opendj()
-                self.pbar.progress("OpenDJ: importing Ldif files", False)
+                self.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
                 
                 ldif_files = []
 
@@ -3896,8 +4096,9 @@ class Setup(object):
 
                 self.import_ldif_opendj(ldif_files)
                 
-            self.pbar.progress("OpenDJ: post installation", False)
-            self.post_install_opendj()
+            self.pbar.progress("opendj", "OpenDJ: post installation", False)
+            if self.wrends_install == LOCAL:
+                self.post_install_opendj()
         except:
             pass
 
@@ -4174,7 +4375,6 @@ class Setup(object):
         result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
         self.logIt("Creating bucket {0} with type {1} and ramsize {2}".format(bucketName, bucketType, bucketRamsize))
         if result.ok:
-            self.couchbaseBuckets.append(bucketName)
             self.logIt("Bucket {} successfully created".format(bucketName))
         else:
             self.logIt("Failed to create bucket {}, reason: {}".format(bucketName, result.text), errorLog=True)
@@ -4199,6 +4399,8 @@ class Setup(object):
                 self.exec_n1ql_query(query)
 
     def couchebaseCreateIndexes(self, bucket):
+        
+        self.couchbaseBuckets.append(bucket)
         
         couchbase_index = json.load(open(self.couchbaseIndexJson))
 
@@ -4268,6 +4470,33 @@ class Setup(object):
                 
         return retVal
 
+    def checkCBRoles(self, buckets=[]):
+        result = self.cbm.whoami()
+        bc = buckets[:]
+        bucket_roles = {}
+        if 'roles' in result:
+            
+            for role in result['roles']:
+                if role['role'] == 'admin':
+                    self.isCouchbaseUserAdmin = True
+                    return True, None
+
+                if not role['bucket_name'] in bucket_roles:
+                    bucket_roles[role['bucket_name']] = []
+
+                bucket_roles[role['bucket_name']].append(role['role'])
+
+        for b_ in bc[:]:
+            for r_ in self.cb_bucket_roles:
+                if not r_ in bucket_roles[b_]:
+                    break
+            else:
+                bc.remove(b_)
+
+        if bc:
+            return False, bc
+
+        return True, None
 
     def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
         
@@ -4371,9 +4600,9 @@ class Setup(object):
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
         
-        for cb_host in self.couchbase_hostname.split(','):
+        for cb_host in re_split_host.findall(self.couchbase_hostname):
 
-            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.ldapPass)
+            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.cb_password)
             cert = cbm_.get_certificate()
             with open(self.couchebaseCert, 'w') as w:
                 w.write(cert)
@@ -4386,9 +4615,9 @@ class Setup(object):
 
     def couchbaseDict(self):
         prop_dict = {
-                    'hostname': self.couchbase_hostname.replace(' ','').replace('\t',''),
+                    'hostname': ','.join(re_split_host.findall(self.couchbase_hostname)),
                     'couchbase_server_user': self.couchebaseClusterAdmin,
-                    'encoded_couchbase_server_pw': self.encoded_ox_ldap_pw,
+                    'encoded_couchbase_server_pw': self.encoded_cb_password,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
                     'default_bucket': 'gluu',
                     'encryption_method': 'SSHA-256',
@@ -4466,32 +4695,55 @@ class Setup(object):
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
 
         min_cb_ram *= 1.0
-        
-        if self.mappingLocations['default'] != 'couchbase':
-            self.couchebaseCreateBucket('gluu', bucketRamsize=100)
-        else:
-            bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-            self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
+
+        existing_buckets = []
+        r = self.cbm.get_buckets()
+
+        if r.ok:
+            b_ = r.json()
+            existing_buckets = [ bucket['name'] for bucket in b_ ]
+
+        if not 'gluu' in existing_buckets:
+
+            if self.mappingLocations['default'] != 'couchbase':
+                self.couchebaseCreateBucket('gluu', bucketRamsize=100)
+            else:
+                bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
+
+        if self.mappingLocations['default'] == 'couchbase':
             self.couchebaseCreateIndexes('gluu')
+
 
         for group in couchbase_mappings:
             bucket = 'gluu_{0}'.format(group)
-            bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-            self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
+            if not bucket in existing_buckets:
+                bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
+            else:
+                self.logIt("Bucket {} already exists, not creating".format(bucket))
+
             self.couchebaseCreateIndexes(bucket)
 
         if self.installSaml:
-            self.logIt("Creating couchbase readonly user for shib")
-            self.cbm.create_user('couchbaseShibUser', self.couchbaseShibUserPassword, 'Shibboleth IDP', 'query_select[*]')
+            
+            shib_user = 'couchbaseShibUser'
+            shib_user_password = self.couchbaseShibUserPassword
+            shib_user_roles = 'query_select[*]'
+            if self.isCouchbaseUserAdmin:
+                self.logIt("Creating couchbase readonly user for shib")
+                self.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
+            else:
+                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(colors.WARNING, colors.ENDC))
+                self.post_messages.append('Username: {}'.format(shib_user))
+                self.post_messages.append('Password: {}'.format(shib_user_password))
+                self.post_messages.append('Roles: {}'.format(shib_user_roles))
 
     def install_couchbase_server(self):
         # prepare multivalued list
         self.prepare_multivalued_list()
 
-        if not self.remoteCouchbase:
-
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.ldapPass)
-
+        if self.cb_install == LOCAL:
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.couchebaseCreateCluster()
@@ -4519,8 +4771,39 @@ class Setup(object):
             return ldap_conn
 
 
+    def create_test_client_keystore(self):
+        self.logIt("Creating client_keystore.jks")
+        client_keystore_fn = os.path.join(self.outputFolder, 'test/oxauth/client/client_keystore.jks')
+        keys_json_fn =  os.path.join(self.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
+        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
+        
+        args = [self.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
+                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
+                    'secret', '-dname', 
+                    "'{}'".format(self.default_openid_jks_dn_name)
+                    ]
+
+        self.run(' '.join(args), shell=True)
+
+        args = [self.cmd_java, '-Dlog4j.defaultInitOverride=true',
+                '-cp', ':'.join(oxauth_lib_files), 'org.gluu.oxauth.util.KeyGenerator',
+                '-keystore', client_keystore_fn,
+                '-keypasswd', 'secret',
+                '-sig_keys', self.default_key_algs,
+                '-enc_keys', self.default_key_algs,
+                '-dnname', "'{}'".format(self.default_openid_jks_dn_name),
+                '-expiration', '365','>', keys_json_fn]
+
+        cmd = ' '.join(args)
+        
+        self.run(cmd, shell=True)
+
+        self.copyFile(client_keystore_fn, os.path.join(self.outputFolder, 'test/oxauth/server'))
+        self.copyFile(keys_json_fn, os.path.join(self.outputFolder, 'test/oxauth/server'))
+
     def load_test_data(self):
         self.logIt("Loading test ldif files")
+
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data-user.ldif')
         
@@ -4530,18 +4813,20 @@ class Setup(object):
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
         ldif_user_files = [ox_auth_test_user_ldif, scim_test_user_ldif]
 
+        cb_hosts = re_split_host.findall(self.couchbase_hostname)
+
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
         else:
-            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
-            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            cb_host = cb_hosts[self.cb_query_node]
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
-            cb_host = self.couchbase_hostname.split(',')[self.cb_query_node].strip()
-            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.ldapPass)
+            cb_host = cb_hosts[self.cb_query_node]
+            self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
         apache_user = 'www-data'
@@ -4666,6 +4951,9 @@ class Setup(object):
             #query = 'UPDATE gluu USE KEYS "configuration" set gluu.oxIDPAuthentication.config.servers = {0}'.format(json.dumps(config_servers))
             #self.exec_n1ql_query(query)
 
+
+        self.create_test_client_keystore()
+
         # Disable token binding module
         if self.os_type+self.os_version == 'ubuntu18':
             self.run(['a2dismod', 'mod_token_binding'])
@@ -4688,9 +4976,12 @@ class Setup(object):
     def load_test_data_exit(self):
         print "Loading test data"
         prop_file = os.path.join(self.install_dir, 'setup.properties.last')
+        
         if not os.path.exists(prop_file):
-            print "setup.properties.last were not found, exiting."
-            sys.exit(1)
+            prop_file += '.enc'
+            if not os.path.exists(prop_file):
+                print "setup.properties.last or setup.properties.last.enc were not found, exiting."
+                sys.exit(1)
 
         self.load_properties(prop_file)
         self.createLdapPw()
@@ -4705,12 +4996,12 @@ class Setup(object):
             oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
             changed = False
             
-            if self.install_couchbase and not self.remoteCouchbase:
+            if self.cb_install == LOCAL:
                 oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
                 oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
                 changed = True
             
-            elif self.remoteLdap or self.remoteCouchbase:
+            elif self.wrends_install != LOCAL:
                 oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', '')
                 oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', '')
                 changed = True
@@ -4787,7 +5078,7 @@ class Setup(object):
 
 
         if self.installGluuRadius:
-            self.pbar.progress("Installing Gluu components: Radius", False)
+            self.pbar.progress("radius", "Installing Gluu components: Radius", False)
 
             if not os.path.exists(logs_dir):
                 self.run([self.cmd_mkdir, '-p', logs_dir])
@@ -4829,16 +5120,154 @@ class Setup(object):
 
             self.enable_service_at_start('gluu-radius')
 
+    def post_install_tasks(self):
+        super_gluu_lisence_renewer_fn = os.path.join(self.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
+        target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
+        self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+        self.run(['chown', 'root:root', target_fn])
+        self.run(['chmod', '+x', target_fn])
+        cron_service = 'cron'
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+            cron_service = 'crond'
+
+        self.run_service_command(cron_service, 'restart')
+
+        print_version_fn = os.path.join(self.install_dir, 'pylib', 'printVersion.py')
+        show_version_fn = os.path.join(self.gluuOptBinFolder, 'show_version.py')
+        self.run(['cp', '-f', print_version_fn, show_version_fn])
+        self.run(['chmod', '+x', show_version_fn])
+
+
+    def do_installation(self, queue=None):
+        try:
+            self.thread_queue = queue
+            self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
+            self.pbar.progress("gluu", "Initializing")
+            self.initialize()
+            self.pbar.progress("gluu", "Configuring system")
+            self.configureSystem()
+            self.pbar.progress("download", "Downloading War files")
+            self.downloadWarFiles()
+            self.pbar.progress("gluu", "Calculating application memory")
+            self.calculate_selected_aplications_memory()
+            self.pbar.progress("java", "Installing JRE")
+            self.installJRE()
+            self.pbar.progress("jetty", "Installing Jetty")
+            self.installJetty()
+            self.pbar.progress("jython", "Installing Jython")
+            self.installJython()
+            self.pbar.progress("node", "Installing Node")
+            self.installNode()
+            self.pbar.progress("gluu", "Making salt")
+            self.make_salt()
+            self.pbar.progress("gluu", "Making oxauth salt")
+            self.make_oxauth_salt()
+            self.pbar.progress("scripts", "Copying scripts")
+            self.copy_scripts()
+            self.pbar.progress("gluu", "Encoding passwords")
+            self.encode_passwords()
+            self.pbar.progress("gluu", "Encoding test passwords")
+            self.encode_test_passwords()
+            
+            if self.installPassport:
+                self.generate_passport_configuration()
+            
+            self.pbar.progress("gluu", "Installing Gluu base")
+            self.install_gluu_base()
+            self.pbar.progress("gluu", "Preparing base64 extention scripts")
+            self.prepare_base64_extension_scripts()
+            self.pbar.progress("gluu", "Rendering templates")
+            self.render_templates()
+            self.pbar.progress("gluu", "Generating crypto")
+            self.generate_crypto()
+            self.pbar.progress("gluu","Generating oxauth openid keys")
+            self.generate_oxauth_openid_keys()
+            self.pbar.progress("gluu", "Generating base64 configuration")
+            self.generate_base64_configuration()
+            self.pbar.progress("gluu", "Rendering configuratipn template")
+            self.render_configuration_template()
+            self.pbar.progress("gluu", "Updating hostname")
+            self.update_hostname()
+            self.pbar.progress("gluu", "Setting ulimits")
+            self.set_ulimits()
+            self.pbar.progress("gluu", "Copying output")
+            self.copy_output()
+            self.pbar.progress("gluu", "Setting up init scripts")
+            self.setup_init_scripts()
+            self.pbar.progress("node", "Rendering node templates")
+            self.render_node_templates()
+            self.pbar.progress("gluu", "Installing Gluu components")
+            self.install_gluu_components()
+            self.pbar.progress("gluu", "Rendering test templates")
+            self.render_test_templates()
+            self.pbar.progress("gluu", "Copying static")
+            self.copy_static()
+            self.fix_systemd_script()
+            self.pbar.progress("gluu", "Setting ownerships")
+            self.set_ownership()
+            self.pbar.progress("gluu", "Setting permissions")
+            self.set_permissions()
+            self.pbar.progress("gluu", "Starting services")
+            self.start_services()
+            self.pbar.progress("gluu", "Saving properties")
+            self.save_properties()
+
+            if setupOptions['loadTestData']:
+                self.pbar.progress("gluu", "Loading test data", False)
+                self.load_test_data()
+
+            if 'importLDIFDir' in setupOptions.keys():
+                self.pbar.progress("gluu", "Importing LDIF files")
+                self.render_custom_templates(setupOptions['importLDIFDir'])
+                self.import_custom_ldif(setupOptions['importLDIFDir'])
+
+            self.deleteLdapPw()
+
+            self.post_install_tasks()
+
+            self.pbar.progress("gluu", "Completed")
+            if self.thread_queue:
+                print
+                self.print_post_messages()
+            
+            if self.couchbaseInstallOutput:
+                print
+                print "-"*int(tty_columns)
+                print self.couchbaseInstallOutput
+                print "-"*int(tty_columns)
+
+        except:
+            if self.thread_queue:
+                self.thread_queue.put((ERROR, "", str(traceback.format_exc())))
+            else:
+                installObject.logIt("***** Error caught in main loop *****", True)
+                installObject.logIt(traceback.format_exc(), True)
+                print "***** Error caught in main loop *****"
+                print traceback.format_exc()
+
+    def print_post_messages(self):
+        print
+        for m in self.post_messages:
+            print m
+
 ############################   Main Loop   #################################################
 
 
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
+file_max = int(open("/proc/sys/fs/file-max").read().strip())
+
+current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
+
+current_number_of_cpu = multiprocessing.cpu_count()
+
+disk_st = os.statvfs('/')
+available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
 
 def resource_checkings():
-
-    file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
     if file_max < 64000:
         print("{0}Maximum number of files that can be opened on this computer is "
@@ -4846,8 +5275,6 @@ def resource_checkings():
                   "host system and re-run setup.py{1}".format(colors.DANGER,
                                                                 colors.ENDC))
         sys.exit(1)
-    current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
-    current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 
     if current_mem_size < suggested_mem_size:
         print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
@@ -4860,8 +5287,6 @@ def resource_checkings():
         result = raw_input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
-
-    current_number_of_cpu = multiprocessing.cpu_count()
 
     if current_number_of_cpu < suggested_number_of_cpu:
 
@@ -4876,8 +5301,7 @@ def resource_checkings():
         if result and result[0].lower() == 'n':
             sys.exit()
 
-    st = os.statvfs('/')
-    available_disk_space = st.f_bavail * st.f_frsize / (1024 * 1024 *1024)
+
 
     if available_disk_space < suggested_free_disk_space:
         print ("{0}Warning: Available free disk space was determined to be {1} "
@@ -4894,12 +5318,17 @@ def resource_checkings():
 
 if __name__ == '__main__':
 
+    cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+    thread_queue = None
+
     parser_description='''Use setup.py to configure your Gluu Server and to add initial data required for
     oxAuth and oxTrust to start. If setup.properties is found in this folder, these
     properties will automatically be used instead of the interactive setup.
     '''
 
     parser = argparse.ArgumentParser(description=parser_description)
+    parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
     parser.add_argument('-d', help="Installation directory")
     parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
     parser.add_argument('-p', help="Install Passport", action='store_true')
@@ -4911,6 +5340,7 @@ if __name__ == '__main__':
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
+    parser.add_argument('-stm', help="Enable Scim Test Mode", action='store_true')
     parser.add_argument('--opendj', help="Use OpenDJ as ldap server", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
     parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
@@ -4918,21 +5348,33 @@ if __name__ == '__main__':
     parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
+    parser.add_argument('-properties-password', help="Encoded setup.properties file password")
+    
     argsp = parser.parse_args()
 
-    if not argsp.n:
+    if (not argsp.c) and istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
+        try:
+            import npyscreen
+        except:
+            print "Can't start TUI, continuing command line"
+        else:
+            from pylib import tui
+            thread_queue = tui.queue
+            from pylib.tui import *
+
+    if not argsp.n and not thread_queue:
         resource_checkings()
     
     #key_shortcuter_rules = get_key_shortcuter_rules()
 
     setupOptions = {
-        'install_dir': os.path.dirname(os.path.realpath(__file__)),
+        'install_dir': cur_dir,
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
         'installOxAuth': True,
         'installOxTrust': True,
-        'installLDAP': False,
+        'wrends_install': LOCAL,
         'installHTTPD': True,
         'installSaml': False,
         'installOxAuthRP': False,
@@ -4941,8 +5383,7 @@ if __name__ == '__main__':
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
-        'remoteCouchbase': False,
-        'remoteLdap': False,
+        'cb_install': NONE,
         'loadTestDataExit': False,
         'loadData': True,
     }
@@ -4961,10 +5402,13 @@ if __name__ == '__main__':
             print "\nOoops... %s file not found for setup properties.\n" %argsp.f
 
     setupOptions['noPrompt'] = argsp.n
-        
+
     if argsp.N:
         setupOptions['installHTTPD'] = False
-    
+
+    if argsp.stm:
+        setupOptions['scimTestMode'] = 'true'
+
     setupOptions['installSaml'] = argsp.s
     setupOptions['downloadWars'] = argsp.w
     setupOptions['installOxAuthRP'] = argsp.r
@@ -4973,8 +5417,12 @@ if __name__ == '__main__':
     setupOptions['loadTestDataExit'] = argsp.x
     setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
-    setupOptions['remoteCouchbase'] = argsp.remote_couchbase
-    setupOptions['remoteLdap'] = argsp.remote_ldap
+    
+    if argsp.remote_ldap:
+        setupOptions['wrends_install'] = REMOTE
+    
+    if argsp.remote_couchbase:
+        setupOptions['cb_install'] = REMOTE
 
     if argsp.no_data:
         setupOptions['loadData'] = False
@@ -4995,6 +5443,8 @@ if __name__ == '__main__':
 
     installObject = Setup(setupOptions['install_dir'])
     attribDataTypes.startup(setupOptions['install_dir'])
+
+    installObject.properties_password = argsp.properties_password
 
     if setupOptions['loadTestDataExit']:
         installObject.load_test_data_exit()
@@ -5027,7 +5477,7 @@ if __name__ == '__main__':
     print "Detected Apache:  %s" % installObject.apache_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
+    #print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
@@ -5047,116 +5497,50 @@ if __name__ == '__main__':
     elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
         installObject.load_properties(installObject.setup_properties_fn)
-    else:
-        installObject.logIt("%s Properties not found. Interactive setup commencing..." % installObject.setup_properties_fn)
+    elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
+        installObject.load_properties(installObject.setup_properties_fn+'.enc')
+    
+    if not thread_queue:
+        installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
         installObject.promptForProperties()
 
-    # Validate Properties
-    installObject.check_properties()
+        # Validate Properties
+        installObject.check_properties()
 
-    # Show to properties for approval
-    print '\n%s\n' % `installObject`
-    proceed = "NO"
-    if not setupOptions['noPrompt']:
-        proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
-    if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
-        try:
-            installObject.pbar.progress("Initializing")
-            installObject.initialize()
-            installObject.pbar.progress("Configuring system")
-            installObject.configureSystem()
-            installObject.pbar.progress("Downloading War files")
-            installObject.downloadWarFiles()
-            installObject.pbar.progress("Calculating application memory")
-            installObject.calculate_selected_aplications_memory()
-            installObject.pbar.progress("Installing JRE")
-            installObject.installJRE()
-            installObject.pbar.progress("Installing Jetty")
-            installObject.installJetty()
-            installObject.pbar.progress("Installing Jython")
-            installObject.installJython()
-            installObject.pbar.progress("Installing Node")
-            installObject.installNode()
-            installObject.pbar.progress("Making salt")
-            installObject.make_salt()
-            installObject.pbar.progress("Making oxauth salt")
-            installObject.make_oxauth_salt()
-            installObject.pbar.progress("Copying scripts")
-            installObject.copy_scripts()
-            installObject.pbar.progress("Encoding passwords")
-            installObject.encode_passwords()
-            installObject.pbar.progress("Encoding test passwords")
-            installObject.encode_test_passwords()
-            
-            if installObject.installPassport:
-                installObject.generate_passport_configuration()
-            
-            installObject.pbar.progress("Installing Gluu base")
-            installObject.install_gluu_base()
-            installObject.pbar.progress("Preparing base64 extention scripts")
-            installObject.prepare_base64_extension_scripts()
-            installObject.pbar.progress("Rendering templates")
-            installObject.render_templates()
-            installObject.pbar.progress("Generating crypto")
-            installObject.generate_crypto()
-            installObject.pbar.progress("Generating oxauth openid keys")
-            installObject.generate_oxauth_openid_keys()
-            installObject.pbar.progress("Generating base64 configuration")
-            installObject.generate_base64_configuration()
-            installObject.pbar.progress("Rendering configuratipn template")
-            installObject.render_configuration_template()
-            installObject.pbar.progress("Updating hostname")
-            installObject.update_hostname()
-            installObject.pbar.progress("Setting ulimits")
-            installObject.set_ulimits()
-            installObject.pbar.progress("Copying output")
-            installObject.copy_output()
-            installObject.pbar.progress("Setting up init scripts")
-            installObject.setup_init_scripts()
-            installObject.pbar.progress("Rendering node templates")
-            installObject.render_node_templates()
-            installObject.pbar.progress("Installing Gluu components")
-            installObject.install_gluu_components()
-            installObject.pbar.progress("Rendering test templates")
-            installObject.render_test_templates()
-            installObject.pbar.progress("Copying static")
-            installObject.copy_static()
-            installObject.fix_systemd_script()
-            installObject.pbar.progress("Setting ownerships")
-            installObject.set_ownership()
-            installObject.pbar.progress("Setting permissions")
-            installObject.set_permissions()
-            installObject.pbar.progress("Starting services")
-            installObject.start_services()
-            installObject.pbar.progress("Saving properties")
+        proceed = False
+
+        # Show to properties for approval
+        print '\n%s\n' % `installObject`
+        proceed = False
+        if not setupOptions['noPrompt']:
+            proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
+            if proceed_prompt and proceed_prompt[0]=='y':
+                proceed = True
+
+        if setupOptions['noPrompt'] or proceed:
+            installObject.do_installation()
+            print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+        else:
             installObject.save_properties()
-
-            if setupOptions['loadTestData']:
-                installObject.pbar.progress("Loading test data", False)
-                installObject.load_test_data()
-
-            if 'importLDIFDir' in setupOptions.keys():
-                installObject.pbar.progress("Importing LDIF files")
-                installObject.render_custom_templates(setupOptions['importLDIFDir'])
-                installObject.import_custom_ldif(setupOptions['importLDIFDir'])
-
-            installObject.deleteLdapPw()
-
-            installObject.pbar.progress("Completed")
-            print
-            
-            if installObject.couchbaseInstallOutput:
-                print
-                print "-"*int(tty_columns)
-                print installObject.couchbaseInstallOutput
-                print "-"*int(tty_columns)
-        except:
-            installObject.logIt("***** Error caught in main loop *****", True)
-            installObject.logIt(traceback.format_exc(), True)
-        print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+            print "Properties saved to %s. Change filename to %s if you want to re-use" % \
+                  (installObject.savedProperties, installObject.setup_properties_fn)
     else:
-        installObject.save_properties()
-        print "Properties saved to %s. Change filename to %s if you want to re-use" % \
-              (installObject.savedProperties, installObject.setup_properties_fn)
 
+            msg = tui.msg
+            msg.storages = installObject.couchbaseBucketDict.keys()
+            msg.installation_step_number = 33
+            
+            msg.os_type = installObject.os_type
+            msg.os_initdaemon = installObject.os_initdaemon
+            msg.apache_version = installObject.apache_version
+            msg.current_mem_size = current_mem_size
+            msg.current_number_of_cpu = current_number_of_cpu
+            msg.current_free_disk_space = available_disk_space
+            msg.current_file_max = file_max
+
+            GSA = tui.GluuSetupApp()
+            GSA.installObject = installObject
+
+            GSA.run()
 # END
