@@ -25,7 +25,7 @@ dn: inum=2FDB-CF02,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module
-displayName: passport_social
+displayName: %(gluuPassportEnabled)s
 oxEnabled: false
 inum: 2FDB-CF02
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
@@ -146,7 +146,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
-oxEnabled: false
+oxEnabled: %(enable_scim_access_policy)s
 inum: 2DAF-F9A5
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
 oxLevel: 100
@@ -188,7 +188,7 @@ programmingLanguage: python
 dn: inum=2DAF-AA90,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Introspection sample script
+description: Introspection Sample Script
 displayName: introspection_sample
 oxEnabled: false
 inum: 2DAF-AA90
@@ -196,6 +196,20 @@ oxLevel: 1
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(introspection_introspection)s
+oxScriptType: introspection
+programmingLanguage: python
+
+dn: inum=2DAF-BA90,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Introspection Custom Parameters Sample Script
+displayName: introspection_custom_params
+oxEnabled: false
+inum: 2DAF-BA90
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(introspection_introspection_custom_params)s
 oxScriptType: introspection
 programmingLanguage: python
 
@@ -210,6 +224,20 @@ oxLevel: 1
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(resource_owner_password_credentials_resource_owner_password_credentials)s
+oxScriptType: resource_owner_password_credentials
+programmingLanguage: python
+
+dn: inum=2DAF-BA91,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Resource Owner Password Credentials Custom Parameters Example
+displayName: resource_owner_password_credentials_custom_params_example
+oxEnabled: false
+inum: 2DAF-BA91
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(resource_owner_password_credentials_resource_owner_password_credentials_custom_params)s
 oxScriptType: resource_owner_password_credentials
 programmingLanguage: python
 
@@ -442,7 +470,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Passport SAML authentication module
 displayName: passport_saml
-oxEnabled: false
+oxEnabled: %(gluuPassportEnabled)s
 inum: D40C-1CA4
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
@@ -484,6 +512,27 @@ oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
 oxScript::%(person_authentication_twilio2fa)s
+oxScriptType: person_authentication
+programmingLanguage: python
+
+dn: inum=09A0-93D7,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: SMPP SMS authentication module
+displayName: smpp
+oxEnabled: false
+inum: 09A0-93D7
+oxConfigurationProperty: {"value1":"smpp_server","value2":"","description":"IP or FQDN of SMPP server"}
+oxConfigurationProperty: {"value1":"smpp_port","value2":"","description":"TCP port of the SMPP server"}
+oxConfigurationProperty: {"value1":"system_id","value2":"","description":"Use if SMPP server requires authentication"}
+oxConfigurationProperty: {"value1":"password","value2":"","description":"Use if SMPP server requires authentication"}
+oxConfigurationProperty: {"value1":"source_addr_ton","value2":"","description":"Type of number, eg ALPHANUMERIC, INTERNATIONAL"}
+oxConfigurationProperty: {"value1":"source_addr","value2":"","description":"From number/name"}
+oxLevel: 45
+oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(person_authentication_smpp2fa)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
