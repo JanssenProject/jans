@@ -1,5 +1,3 @@
-# Please place this script in the same directory as setup.py
-
 import os
 import shutil
 import glob
@@ -7,7 +5,16 @@ import json
 import subprocess
 import sys
 import zipfile
+import requests
+import urllib3
 import xml.etree.ElementTree as ET
+from requests.auth import HTTPBasicAuth
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+try:
+    requests.packages.urllib3.disable_warnings()
+except:
+    pass
 
 defaul_storage = 'ldap'
 
@@ -38,6 +45,15 @@ def run_command(args):
         cmd = args
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = p.communicate()
+    return result
+
+def exec_cb_query(hostname, username, password, query):
+    result = requests.post(
+            'https://{}:18093/query/service'.format(hostname),
+            data={'statement': query}, 
+            auth=HTTPBasicAuth(username, password), 
+            verify=False)
+
     return result
 
 missing_packages = []
@@ -126,17 +142,15 @@ else:
         ls = l.strip()
         n = ls.find(':')
         if ls.startswith('servers'):
-            server = ls[n+1:].strip().split(',')[0].strip()
+            cb_server = ls[n+1:].strip().split(',')[0].strip()
         elif ls.startswith('auth.userName'):
-            userName = ls[n+1:].strip()
+            cb_username = ls[n+1:].strip()
         elif ls.startswith('auth.userPassword'):
             userPasswordEnc = ls[n+1:].strip()
-            userPassword = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
+            cb_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
 
-    from pylib.cbm import CBM
-
-    cbm = CBM(server, userName, userPassword)
-    result = cbm.exec_query('select * from gluu USE KEYS "configuration_oxauth"')
+    result = exec_cb_query(cb_server, cb_username, cb_password,
+            'select * from gluu USE KEYS "configuration_oxauth"')
 
     if result.ok:
         configuration_oxauth = result.json()
@@ -295,6 +309,7 @@ if defaul_storage == 'ldap':
 else:
     with open(oxauth_keys_json_fn) as f:
         oxauth_oxAuthConfWebKeys = f.read()
-    result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
+    result = exec_cb_query(cb_server, cb_username, cb_password,
+                "update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
 
 print "Please exit container and restart Gluu Server"
