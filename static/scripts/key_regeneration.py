@@ -212,6 +212,8 @@ for l in menifest.splitlines():
 
 vendor = vendor_id.split('.')[-1]
 
+print "Gluu Server version was determined as", gluu_ver
+
 print "Downloading oxauth-client with dependencies"
 # Download oxauth-client with dependencies
 oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/oxauth-client/{1}/oxauth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
