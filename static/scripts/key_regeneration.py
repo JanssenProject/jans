@@ -114,7 +114,7 @@ elif os.path.exists(gluu_couchbase_roperties_fn):
 
 print "Default Storage type is", defaul_storage
 
-print "Obtaining keystore passwrod and determining algorithms"
+print "Obtaining keystore password and determining algorithms"
 
 if defaul_storage == 'ldap':
     prop_fn = gluu_ldap_roperties_fn if os.path.exists(gluu_ldap_roperties_fn) else ox_ldap_roperties_fn
@@ -132,7 +132,7 @@ if defaul_storage == 'ldap':
         elif l.startswith('bindDN'):
             ldap_binddn = l.split(':')[1].strip()
 
-    print "LDAP Server: {}  Bind DN: {}  Password: {}".format(ldap_server, ldap_binddn, ldap_password)
+    print "LDAP Server: {}  Bind DN: {}".format(ldap_server, ldap_binddn)
 
     ldap_conn = ldap.initialize('ldaps://{}'.format(ldap_server))
     ldap_conn.simple_bind_s(ldap_binddn, ldap_password)
@@ -143,12 +143,7 @@ if defaul_storage == 'ldap':
 
     oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
     keyStoreSecret = oxAuthConfDynamic['keyStoreSecret']
-
-    print "Key Store Secret: ", keyStoreSecret
-
     oxAuthConfWebKeys = json.loads(result[0][1]['oxAuthConfWebKeys'][0])
-
-    
 
 else:
     # Obtain couchbase credidentals
@@ -163,7 +158,7 @@ else:
             userPasswordEnc = ls[n+1:].strip()
             cb_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
 
-    print "Couchbase Server: {}  Username: {}  Password: {}".format(cb_server, cb_username, cb_password)
+    print "Couchbase Server: {}  Username: {}".format(cb_server, cb_username, cb_password)
 
     result = exec_cb_query(cb_server, cb_username, cb_password,
             'select * from gluu USE KEYS "configuration_oxauth"')
@@ -171,7 +166,6 @@ else:
     if result.ok:
         configuration_oxauth = result.json()
         keyStoreSecret = configuration_oxauth['results'][0]['gluu']['oxAuthConfDynamic']['keyStoreSecret']
-        print "Key Store Secret: ", keyStoreSecret
         oxAuthConfWebKeys = json.loads(configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys'])
     else:
         print "Couchbase server responded unexpectedly", result.text
@@ -345,6 +339,6 @@ else:
         print "An error occurred while updating persistence", result.text
 
 
-print "Commands executed by this script were written to {} \033[93mTwhich contains plain passwords.\033[0m".format(log_fn)
+print "Commands executed by this script were written to {} \033[93mwhich contains plain passwords.\033[0m".format(log_fn)
 
 print "Please exit container and restart Gluu Server"
