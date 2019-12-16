@@ -71,11 +71,13 @@ public class ScopeChecker {
             if (spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeRequested)) {
                 grantedScopes.add(scopeRequested);
 
-                spontaneousScopeService.createSpontaneousScopeIfNeeded(scopeRequested);
-            }
+                SpontaneousScopeExternalContext context = new SpontaneousScopeExternalContext(client, scopeRequested, grantedScopes, spontaneousScopeService);
+                externalSpontaneousScopeService.executeExternalManipulateScope(context);
 
-            SpontaneousScopeExternalContext context = new SpontaneousScopeExternalContext(client, scopeRequested, scopesAllowedIds, spontaneousScopeService);
-            externalSpontaneousScopeService.executeExternalManipulateScope(context);
+                if (context.isAllowSpontaneousScopePersistence()) {
+                    spontaneousScopeService.createSpontaneousScopeIfNeeded(client, scopeRequested);
+                }
+            }
         }
 
         log.debug("Granted scopes: " + grantedScopes);
