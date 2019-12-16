@@ -46,15 +46,6 @@ public class RpSyncService {
         return sync(rp);
     }
 
-    //this method created for running thetest cases to skip validations of the original method `public Rp getRp(String oxdId)`.
-    public Rp getRpForTest(String oxdId) {
-        Rp rp = rpService.getRps().get(oxdId);
-        if (!shouldSync(rp))
-            return rp;
-
-        return sync(rp);
-    }
-
     private Rp sync(Rp rp) {
         if (!shouldSync(rp))
             return rp;
