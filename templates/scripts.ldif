@@ -25,8 +25,8 @@ dn: inum=2FDB-CF02,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module
-displayName: %(gluuPassportEnabled)s
-oxEnabled: false
+displayName: passport_social
+oxEnabled: %(gluuPassportEnabled)s
 inum: 2FDB-CF02
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
