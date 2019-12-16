@@ -3,16 +3,17 @@ package org.gluu.oxauth.service.external.context;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.SpontaneousScopeService;
 
-import java.util.List;
+import java.util.Set;
 
 public class SpontaneousScopeExternalContext extends ExternalScriptContext {
 
     private Client client;
     private String scopeRequested;
-    private List<String> grantedScopes;
+    private Set<String> grantedScopes;
     private SpontaneousScopeService spontaneousScopeService;
+    private boolean allowSpontaneousScopePersistence = true;
 
-    public SpontaneousScopeExternalContext(Client client, String scopeRequested, List<String> grantedScopes, SpontaneousScopeService spontaneousScopeService) {
+    public SpontaneousScopeExternalContext(Client client, String scopeRequested, Set<String> grantedScopes, SpontaneousScopeService spontaneousScopeService) {
         super(null, null);
         this.client = client;
         this.scopeRequested = scopeRequested;
@@ -28,12 +29,20 @@ public class SpontaneousScopeExternalContext extends ExternalScriptContext {
         return scopeRequested;
     }
 
-    public List<String> getGrantedScopes() {
+    public Set<String> getGrantedScopes() {
         return grantedScopes;
     }
 
     public SpontaneousScopeService getSpontaneousScopeService() {
         return spontaneousScopeService;
+    }
+
+    public boolean isAllowSpontaneousScopePersistence() {
+        return allowSpontaneousScopePersistence;
+    }
+
+    public void setAllowSpontaneousScopePersistence(boolean allowSpontaneousScopePersistence) {
+        this.allowSpontaneousScopePersistence = allowSpontaneousScopePersistence;
     }
 
     @Override
@@ -42,6 +51,7 @@ public class SpontaneousScopeExternalContext extends ExternalScriptContext {
                 "scopeRequested='" + scopeRequested + '\'' +
                 ", grantedScopes=" + grantedScopes +
                 ", contextVariables=" + super.getContextVariables() +
+                ", allowSpontaneousScopePersistence=" + allowSpontaneousScopePersistence +
                 '}';
     }
 }
