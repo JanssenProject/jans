@@ -125,6 +125,10 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private String software_statement;
     @JsonProperty(value = "custom_attributes")
     private Map<String, String> custom_attributes;
+    @JsonProperty(value = "sync_client_from_op")
+    private Boolean syncClientFromOp = false;
+    @JsonProperty(value = "sync_client_period_in_seconds")
+    private int syncClientPeriodInSeconds = 86400;
 
     public RegisterSiteParams() {
     }
@@ -845,6 +849,22 @@ public class RegisterSiteParams implements HasOxdIdParams {
         this.custom_attributes = customAttributes;
     }
 
+    public Boolean getSyncClientFromOp() {
+        return syncClientFromOp;
+    }
+
+    public void setSyncClientFromOp(Boolean syncClientFromOp) {
+        this.syncClientFromOp = syncClientFromOp;
+    }
+
+    public int getSyncClientPeriodInSeconds() {
+        return syncClientPeriodInSeconds;
+    }
+
+    public void setSyncClientPeriodInSeconds(int syncClientPeriodInSeconds) {
+        this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+    }
+
     @Override
     public String toString() {
         return "RegisterSiteParams{" +
@@ -902,6 +922,8 @@ public class RegisterSiteParams implements HasOxdIdParams {
                 ", software_version='" + software_version + '\'' +
                 ", software_statement='" + software_statement + '\'' +
                 ", custom_attributes='" + custom_attributes + '\'' +
+                ", syncClientFromOp='" + syncClientFromOp + '\'' +
+                ", syncClientPeriodInSeconds='" + syncClientPeriodInSeconds + '\'' +
                 '}';
     }
 
