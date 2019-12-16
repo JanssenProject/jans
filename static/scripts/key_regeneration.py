@@ -160,7 +160,10 @@ else:
         print "Couchbase server responded unexpectedly", result.text
 
 #Determine current algs
-key_algs = [ wkey['alg'] for wkey in oxAuthConfWebKeys['keys'] ]
+key_algs = []
+
+for wkey in oxAuthConfWebKeys['keys']:
+    key_algs.append(wkey['alg'])
 
 print "Creating oxauth-keys.jks"
 # Create oxauth-keys.jks
@@ -256,7 +259,8 @@ args += ['-dnname', "'CN=oxAuth CA Certificates'",
 
 output = run_command(args)
 
-oxauth_keys_json = open(oxauth_keys_json_fn).read()
+with open(oxauth_keys_json_fn) as f:
+    oxauth_keys_json = f.read()
 
 keystore_fn_gluu = os.path.join('/etc/certs', keystore_fn)
 backup_file(keystore_fn_gluu)
@@ -272,8 +276,6 @@ args = ['/opt/jre/bin/keytool', '-list', '-v',
         '-storepass', keyStoreSecret,
         '|', 'grep', '"Alias name:"'
         ]
-cmd = ' '.join(args)
-print cmd
 
 output = run_command(args)
 
@@ -304,11 +306,13 @@ for alias_name in jsk_aliases:
 
 print "Content of {} and {} matches".format(oxauth_keys_json_fn, keystore_fn)
 print "Updating oxAuthConfWebKeys in db"
+
+with open(oxauth_keys_json_fn) as f:
+    oxauth_oxAuthConfWebKeys = f.read()
+
 if defaul_storage == 'ldap':
-    ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_keys_json)])
+    result = ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys)])    
 else:
-    with open(oxauth_keys_json_fn) as f:
-        oxauth_oxAuthConfWebKeys = f.read()
     result = exec_cb_query(cb_server, cb_username, cb_password,
                 "update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
 
