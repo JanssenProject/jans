@@ -7,6 +7,7 @@ import sys
 import zipfile
 import requests
 import urllib3
+import time
 import xml.etree.ElementTree as ET
 from requests.auth import HTTPBasicAuth
 
@@ -15,6 +16,8 @@ try:
     requests.packages.urllib3.disable_warnings()
 except:
     pass
+
+log_fn = 'oxauth_key_regeneration.log'
 
 defaul_storage = 'ldap'
 
@@ -45,6 +48,10 @@ def run_command(args):
         cmd = args
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = p.communicate()
+    
+    with open(log_fn, 'a') as w:
+        w.write("{} - cmd: {}, output: {}\n".format(time.ctime(), cmd, str(result)))
+    
     return result
 
 def exec_cb_query(hostname, username, password, query):
@@ -105,6 +112,8 @@ if os.path.exists(gluu_hybrid_roperties_fn):
 elif os.path.exists(gluu_couchbase_roperties_fn):
     defaul_storage = 'couchbase'
 
+print "Default Storage type is", defaul_storage
+
 print "Obtaining keystore passwrod and determining algorithms"
 
 if defaul_storage == 'ldap':
@@ -123,7 +132,8 @@ if defaul_storage == 'ldap':
         elif l.startswith('bindDN'):
             ldap_binddn = l.split(':')[1].strip()
 
-    # Enable custom script oxtrust_api_access_policy
+    print "LDAP Server: {}  Bind DN: {}  Password: {}".format(ldap_server, ldap_binddn, ldap_password)
+
     ldap_conn = ldap.initialize('ldaps://{}'.format(ldap_server))
     ldap_conn.simple_bind_s(ldap_binddn, ldap_password)
 
@@ -134,7 +144,11 @@ if defaul_storage == 'ldap':
     oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
     keyStoreSecret = oxAuthConfDynamic['keyStoreSecret']
 
+    print "Key Store Secret: ", keyStoreSecret
+
     oxAuthConfWebKeys = json.loads(result[0][1]['oxAuthConfWebKeys'][0])
+
+    
 
 else:
     # Obtain couchbase credidentals
@@ -149,12 +163,15 @@ else:
             userPasswordEnc = ls[n+1:].strip()
             cb_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
 
+    print "Couchbase Server: {}  Username: {}  Password: {}".format(cb_server, cb_username, cb_password)
+
     result = exec_cb_query(cb_server, cb_username, cb_password,
             'select * from gluu USE KEYS "configuration_oxauth"')
 
     if result.ok:
         configuration_oxauth = result.json()
         keyStoreSecret = configuration_oxauth['results'][0]['gluu']['oxAuthConfDynamic']['keyStoreSecret']
+        print "Key Store Secret: ", keyStoreSecret
         oxAuthConfWebKeys = json.loads(configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys'])
     else:
         print "Couchbase server responded unexpectedly", result.text
@@ -164,6 +181,8 @@ key_algs = []
 
 for wkey in oxAuthConfWebKeys['keys']:
     key_algs.append(wkey['alg'])
+
+print "Key Algorithms were deremined as", ','.join(key_algs)
 
 print "Creating oxauth-keys.jks"
 # Create oxauth-keys.jks
@@ -237,7 +256,7 @@ if output[1]:
     print "ERROR:", output[1]
 
 
-print "Genereting keys"
+print "Generating keys"
 
 ver_tmp_list = gluu_ver.split('.')
 if not ver_tmp_list[-1].isdigit():
@@ -312,9 +331,20 @@ with open(oxauth_keys_json_fn) as f:
     oxauth_oxAuthConfWebKeys = f.read()
 
 if defaul_storage == 'ldap':
-    result = ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys)])    
+    result = ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys)])
+    if result and result[0]==103:
+        print "Persistence updated successfully"
+    else:
+        print "An error occurred while updating persistence", result
 else:
     result = exec_cb_query(cb_server, cb_username, cb_password,
                 "update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
+    if result.ok:
+        print "Persistence updated successfully"
+    else:
+        print "An error occurred while updating persistence", result.text
+
+
+print "Commands executed by this script were written to {} \033[93mTwhich contains plain passwords.\033[0m".format(log_fn)
 
 print "Please exit container and restart Gluu Server"
