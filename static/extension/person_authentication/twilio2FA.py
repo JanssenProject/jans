@@ -207,7 +207,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
-            return "/auth/twiliosms/twiliosms.xhtml"
+            return "/auth/otp_sms/otp_sms.xhtml"
 
         return ""
 
