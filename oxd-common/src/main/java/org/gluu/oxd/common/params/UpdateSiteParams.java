@@ -128,6 +128,10 @@ public class UpdateSiteParams implements HasAccessTokenParams {
     private String software_statement;
     @JsonProperty(value = "custom_attributes")
     private Map<String, String> custom_attributes;
+    @JsonProperty(value = "sync_client_from_op")
+    private Boolean syncClientFromOp = false;
+    @JsonProperty(value = "sync_client_period_in_seconds")
+    private int syncClientPeriodInSeconds = 86400;
 
     public UpdateSiteParams() {
     }
@@ -848,6 +852,22 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         this.custom_attributes = customAttributes;
     }
 
+    public Boolean getSyncClientFromOp() {
+        return syncClientFromOp;
+    }
+
+    public void setSyncClientFromOp(Boolean syncClientFromOp) {
+        this.syncClientFromOp = syncClientFromOp;
+    }
+
+    public int getSyncClientPeriodInSeconds() {
+        return syncClientPeriodInSeconds;
+    }
+
+    public void setSyncClientPeriodInSeconds(int syncClientPeriodInSeconds) {
+        this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -906,6 +926,8 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append(", software_version=").append(software_version);
         sb.append(", software_statement=").append(software_statement);
         sb.append(", custom_attributes=").append(custom_attributes);
+        sb.append(", syncClientFromOp=").append(syncClientFromOp);
+        sb.append(", syncClientPeriodInSeconds=").append(syncClientPeriodInSeconds);
         sb.append('}');
         return sb.toString();
     }
