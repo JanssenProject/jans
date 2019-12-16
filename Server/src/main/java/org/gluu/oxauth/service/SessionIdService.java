@@ -404,8 +404,8 @@ public class SessionIdService {
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
             header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
-            if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
-                header += "Domain=" + appConfiguration.getСookieDomain() + ";";
+            if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
+                header += "Domain=" + appConfiguration.getCookieDomain() + ";";
             }
         }
         httpResponse.addHeader("Set-Cookie", header);
@@ -418,8 +418,8 @@ public class SessionIdService {
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
             header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
-            if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
-                header += "Domain=" + appConfiguration.getСookieDomain() + ";";
+            if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
+                header += "Domain=" + appConfiguration.getCookieDomain() + ";";
             }
         }
 
@@ -446,8 +446,8 @@ public class SessionIdService {
         final Cookie cookie = new Cookie(cookieName, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
-        if (StringUtils.isNotBlank(appConfiguration.getСookieDomain())) {
-            cookie.setDomain(appConfiguration.getСookieDomain());
+        if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
+            cookie.setDomain(appConfiguration.getCookieDomain());
         }
         httpResponse.addCookie(cookie);
     }
