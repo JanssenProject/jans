@@ -178,9 +178,15 @@ public class Rp implements Serializable {
     @JsonProperty(value = "software_statement")
     private String softwareStatement;
     @JsonProperty(value = "custom_attributes")
-    private Map<String, String> customAttributes = new HashMap<String, String>();
+    private Map<String, String> customAttributes = new HashMap<>();
     @JsonProperty(value = "request_uris")
     private List<String> requestUris;
+    @JsonProperty(value = "last_synced")
+    private Date lastSynced;
+    @JsonProperty(value = "sync_client_from_op")
+    private Boolean syncClientFromOp;
+    @JsonProperty(value = "sync_client_period_in_seconds")
+    private Integer syncClientPeriodInSeconds;
 
     public Rp() {
     }
@@ -279,6 +285,9 @@ public class Rp implements Serializable {
         this.softwareStatement = conf.softwareStatement;
         this.customAttributes = conf.customAttributes;
         this.requestUris = requestUris;
+        this.lastSynced = lastSynced;
+        this.syncClientFromOp = syncClientFromOp;
+        this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -992,6 +1001,30 @@ public class Rp implements Serializable {
         this.requestUris = requestUris;
     }
 
+    public Date getLastSynced() {
+        return lastSynced;
+    }
+
+    public void setLastSynced(Date lastSynced) {
+        this.lastSynced = lastSynced;
+    }
+
+    public Boolean isSyncClientFromOp() {
+        return syncClientFromOp;
+    }
+
+    public void setSyncClientFromOp(Boolean syncClientFromOp) {
+        this.syncClientFromOp = syncClientFromOp;
+    }
+
+    public Integer getSyncClientPeriodInSeconds() {
+        return syncClientPeriodInSeconds;
+    }
+
+    public void setSyncClientPeriodInSeconds(Integer syncClientPeriodInSeconds) {
+        this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+    }
+
     @Override
     public String toString() {
         return "Rp{" +
@@ -1074,6 +1107,9 @@ public class Rp implements Serializable {
                 ", softwareStatement='" + softwareStatement + '\'' +
                 ", customAttributes='" + customAttributes + '\'' +
                 ", requestUris='" + requestUris + '\'' +
+                ", lastSynced='" + lastSynced + '\'' +
+                ", syncClientFromOp='" + syncClientFromOp + '\'' +
+                ", syncClientPeriodInSeconds='" + syncClientPeriodInSeconds + '\'' +
                 '}';
     }
 }
