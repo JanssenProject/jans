@@ -28,18 +28,18 @@ public class SpontaneousScopeService {
     @Inject
     private ScopeService scopeService;
 
-    public void createSpontaneousScopeIfNeeded(String spontaneousScope) {
+    public Scope createSpontaneousScopeIfNeeded(Client client, String spontaneousScope) {
         Scope fromLdap = scopeService.getScopeById(spontaneousScope);
         if (fromLdap != null) { // scope already exists
-            return;
+            return null;
         }
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar expiration = Calendar.getInstance();
         int lifetime = DEFAULT_SPONTANEOUS_SCOPE_LIFETIME_IN_SECONDS;
         if (appConfiguration.getSpontaneousScopeLifetime() > 0) {
             lifetime = appConfiguration.getSpontaneousScopeLifetime();
         }
-        calendar.add(Calendar.SECOND, lifetime);
+        expiration.add(Calendar.SECOND, lifetime);
 
         Scope scope = new Scope();
         scope.setDefaultScope(false);
@@ -49,10 +49,14 @@ public class SpontaneousScopeService {
         scope.setInum(UUID.randomUUID().toString());
         scope.setScopeType(ScopeType.SPONTANEOUS);
         scope.setDeletable(true);
-        scope.setNewExpirationDate(calendar.getTime());
+        scope.setNewExpirationDate(expiration.getTime());
+        scope.setExpirationDate(expiration.getTime());
         scope.setDn("inum=" + scope.getInum() + "," + staticConfiguration.getBaseDn().getScopes());
+        scope.getAttributes().setSpontaneousClientId(client.getClientId());
+        scope.getAttributes().setSpontaneousClientScopes(client.getAttributes().getSpontaneousScopes());
 
         scopeService.persist(scope);
+        return scope;
     }
 
     public boolean isAllowedBySpontaneousScopes(Client client, String scopeRequested) {
