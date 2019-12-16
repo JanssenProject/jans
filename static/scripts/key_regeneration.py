@@ -270,7 +270,6 @@ output = run_command(['chown', 'jetty:jetty', keystore_fn_gluu])
 
 print "Validating ... "
 
-print "keyStoreSecret", keyStoreSecret
 args = ['/opt/jre/bin/keytool', '-list', '-v',
         '-keystore', keystore_fn,
         '-storepass', keyStoreSecret,
