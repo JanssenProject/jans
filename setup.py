@@ -1544,9 +1544,6 @@ class Setup(object):
                         if not module in mods_enabled:
                             mod_load_content[i] = l.replace('LoadModule', '#LoadModule')
                             modified = True
-                        
-                        else:
-                            print module
 
                 if modified:
                     with open(mod_load_fn, 'w') as w:
@@ -2902,7 +2899,7 @@ class Setup(object):
 
         backend_types = []
 
-        if self.allowPreReleasedFeatures and glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
+        if glob.glob(self.distFolder+'/app/opendj-server-*4*.zip'):
             backend_types.append('wrends')
 
         if glob.glob(self.distFolder+'/couchbase/couchbase-server-enterprise*.'+suffix):
@@ -3560,7 +3557,9 @@ class Setup(object):
             
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.oxtrust_admin_password])
             
-            self.post_messages.append(prop_fn+".enc is encrypted with password " + self.oxtrust_admin_password)
+            self.post_messages.append(
+                "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
+                prop_fn,  self.oxtrust_admin_password, os.path.basename(prop_fn), os.path.basename(self.setup_properties_fn)))
             
             self.run(['rm', '-f', prop_fn])
             
@@ -5227,7 +5226,7 @@ class Setup(object):
             self.post_install_tasks()
 
             self.pbar.progress("gluu", "Completed")
-            if self.thread_queue:
+            if not self.thread_queue:
                 print
                 self.print_post_messages()
             
@@ -5508,23 +5507,20 @@ if __name__ == '__main__':
         # Validate Properties
         installObject.check_properties()
 
-        proceed = False
+        proceed = True
 
         # Show to properties for approval
         print '\n%s\n' % `installObject`
-        proceed = False
         if not setupOptions['noPrompt']:
             proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
-            if proceed_prompt and proceed_prompt[0]=='y':
-                proceed = True
+            if proceed_prompt and proceed_prompt[0]!='y':
+                proceed = False
 
         if setupOptions['noPrompt'] or proceed:
             installObject.do_installation()
             print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
         else:
             installObject.save_properties()
-            print "Properties saved to %s. Change filename to %s if you want to re-use" % \
-                  (installObject.savedProperties, installObject.setup_properties_fn)
     else:
 
             msg = tui.msg
