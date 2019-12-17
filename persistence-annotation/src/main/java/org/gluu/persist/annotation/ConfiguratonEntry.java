@@ -12,22 +12,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Mark POJO class as Persistance entry
+ * Mark POJO class as Persistance schema entry
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DataEntry {
-
-    /**
-     * (Optional) Specify that this entry contains LDAP configuration definition.
-     */
-    boolean configurationDefinition() default false;
-
-    /**
-     * (Optional) Specify sortBy properties to sort by default list of Entries.
-     */
-    String[] sortBy() default {};
-
+public @interface ConfiguratonEntry {
 }

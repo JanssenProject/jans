@@ -112,21 +112,22 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         checkEntryClass(entryClass, true);
         if (isSchemaEntry(entryClass)) {
             if (getSupportedLDAPVersion() > 2) {
-                return merge(entry, true, AttributeModificationType.ADD);
+                return merge(entry, true, false, AttributeModificationType.ADD);
             } else {
                 throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
             }
         } else {
-            return merge(entry, false, null);
+        	boolean configurationEntry = isConfigurationEntry(entryClass);
+            return merge(entry, false, configurationEntry, null);
         }
     }
 
     @Override
-    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
+    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromLdapMap,
             List<AttributeDataModification> attributeDataModifications) {
         // Update object classes if entry contains custom object classes
         if (getSupportedLDAPVersion() > 2) {
-            if (!isSchemaUpdate) {
+            if (!isConfigurationUpdate) {
                 String[] objectClasses = getObjectClasses(entry, entryClass);
                 String[] objectClassesFromLdap = attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getStringValues();
 
@@ -144,7 +145,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         checkEntryClass(entryClass, true);
         if (isSchemaEntry(entryClass)) {
             if (getSupportedLDAPVersion() > 2) {
-                merge(entry, true, AttributeModificationType.REMOVE);
+                merge(entry, true, false, AttributeModificationType.REMOVE);
             } else {
                 throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
             }
