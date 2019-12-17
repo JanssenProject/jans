@@ -192,7 +192,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> T merge(T entry, boolean isSchemaUpdate, AttributeModificationType schemaModificationType) {
+	protected <T> T merge(T entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
 			throw new MappingException("Entry to persist is null");
 		}
@@ -215,7 +215,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
 			List<String> currentLdapReturnAttributesList = getAttributesList(entry, propertiesAnnotations, false);
-			currentLdapReturnAttributesList.add("objectClass");
+			if (!isConfigurationUpdate) {
+				currentLdapReturnAttributesList.add("objectClass");
+			}
 
 			attributesFromLdap = find(dnValue.toString(), propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
 		}
@@ -228,7 +230,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				propertiesAnnotations, attributesToPersistMap, attributesFromLdapMap, isSchemaUpdate,
 				schemaModificationType);
 
-		updateMergeChanges(dnValue.toString(), entry, isSchemaUpdate, entryClass, attributesFromLdapMap, attributeDataModifications);
+		updateMergeChanges(dnValue.toString(), entry, isSchemaUpdate | isConfigurationUpdate, entryClass, attributesFromLdapMap, attributeDataModifications);
 
 		LOG.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
 
@@ -237,7 +239,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations, propertiesAnnotationsMap);
 	}
 
-	protected abstract <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass,
+	protected abstract <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass,
 			Map<String, AttributeData> attributesFromLdapMap,
 			List<AttributeDataModification> attributeDataModifications);
 
@@ -649,6 +651,22 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
 
 		return ReflectHelper.getAnnotationByType(entryAnnotations, SchemaEntry.class) != null;
+	}
+
+	protected boolean isConfigurationEntry(Class<?> entryClass) {
+		if (entryClass == null) {
+			throw new MappingException("Entry class is null");
+		}
+
+		// Check if entry is LDAP Entry
+		List<Annotation> entryAnnotations = ReflectHelper.getClassAnnotations(entryClass, LDAP_ENTRY_TYPE_ANNOTATIONS);
+
+		DataEntry dataEntry = (DataEntry) ReflectHelper.getAnnotationByType(entryAnnotations, DataEntry.class);
+		if (dataEntry == null) {
+			return false;
+		}
+		
+		return dataEntry.configurationDefinition();
 	}
 
 	protected String[] getEntrySortBy(Class<?> entryClass) {
