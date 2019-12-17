@@ -40,6 +40,7 @@ dn: inum=42E0,ou=attributes,o=gluu
 description: A domain issued and managed identifier for the person.Subject -
   Identifier for the End-User at the Issuer.
 displayName: Username
+gluuAttributeEditType: admin
 gluuAttributeName: uid
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
