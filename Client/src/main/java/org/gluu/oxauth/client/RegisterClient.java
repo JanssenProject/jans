@@ -163,7 +163,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(ALLOW_SPONTANEOUS_SCOPES.toString(), getRequest().getAllowSpontaneousScopes());
                 }
                 if (getRequest().getSpontaneousScopes() != null) {
-                    requestBody.put(SPONTANEOUS_SCOPES.toString(), getRequest().getSpontaneousScopes());
+                    requestBody.put(SPONTANEOUS_SCOPES.toString(), new JSONArray(getRequest().getSpontaneousScopes()));
                 }
                 if (getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
                     requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims().toString());
