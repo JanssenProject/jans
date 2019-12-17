@@ -822,7 +822,7 @@ class Setup(object):
                                         'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
                                         'jackson-core-*.jar', 'jackson-annotations-*.jar', 'jackson-databind-*.jar', 'jackson-datatype-json-org-*.jar',
                                         'jackson-module-jaxb-annotations-*.jar', 'json-20180813*.jar', 'jettison-*.jar', 'oxauth-model-*.jar',
-                                        'oxauth-client-*.jar', "oxcore-util-*.jar" ]
+                                        'oxauth-client-*.jar', "oxcore-util-*.jar" , "", "json-smart-*.jar", "nimbus-jose-jwt-*.jar"]
 
  
         self.service_requirements = {
