@@ -50,7 +50,6 @@ public class SpontaneousScopeService {
         scope.setScopeType(ScopeType.SPONTANEOUS);
         scope.setDeletable(true);
         scope.setNewExpirationDate(expiration.getTime());
-        scope.setExpirationDate(expiration.getTime());
         scope.setDn("inum=" + scope.getInum() + "," + staticConfiguration.getBaseDn().getScopes());
         scope.getAttributes().setSpontaneousClientId(client.getClientId());
         scope.getAttributes().setSpontaneousClientScopes(client.getAttributes().getSpontaneousScopes());
