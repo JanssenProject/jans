@@ -118,15 +118,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         if (isSchemaEntry(entryClass)) {
             throw new UnsupportedOperationException("Server doesn't support dynamic schema modifications");
         } else {
-            return merge(entry, false, null);
+            return merge(entry, false, false, null);
         }
     }
 
     @Override
-    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
+    protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass, Map<String, AttributeData> attributesFromDbMap,
             List<AttributeDataModification> attributeDataModifications) {
         // Update object classes if entry contains custom object classes
-        if (!isSchemaUpdate) {
+        if (!isConfigurationUpdate) {
             String[] objectClasses = getObjectClasses(entry, entryClass);
             if (ArrayHelper.isEmpty(objectClasses)) {
                 throw new UnsupportedOperationException(String.format("There is no attribute with objectClasses to persist! Entry is invalid: '%s'", entry));

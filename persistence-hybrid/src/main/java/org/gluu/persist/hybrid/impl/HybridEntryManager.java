@@ -408,7 +408,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
-	protected <T> void updateMergeChanges(String baseDn, T entry, boolean isSchemaUpdate, Class<?> entryClass,
+	protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass,
 			Map<String, AttributeData> attributesFromLdapMap, List<AttributeDataModification> attributeDataModifications) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
