@@ -12,6 +12,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScopeAttributes implements Serializable {
 
+    private static final long serialVersionUID = 213428216911083393L;
+
     @JsonProperty("spontaneousClientId")
     private String spontaneousClientId;
 

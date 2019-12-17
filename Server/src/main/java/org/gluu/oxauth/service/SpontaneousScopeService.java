@@ -29,9 +29,9 @@ public class SpontaneousScopeService {
     private ScopeService scopeService;
 
     public Scope createSpontaneousScopeIfNeeded(Client client, String spontaneousScope) {
-        Scope fromLdap = scopeService.getScopeById(spontaneousScope);
-        if (fromLdap != null) { // scope already exists
-            return null;
+        Scope fromPersitence = scopeService.getScopeById(spontaneousScope);
+        if (fromPersitence != null) { // scope already exists
+            return fromPersitence;
         }
 
         Calendar expiration = Calendar.getInstance();
