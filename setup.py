@@ -1277,6 +1277,7 @@ class Setup(object):
 
     def copyFile(self, inFile, destFolder):
         self.backupFile(inFile, destFolder)
+        self.logIt("Copying file {} to {}".format(inFile, destFolder))
         try:
             shutil.copy(inFile, destFolder)
             self.logIt("Copied %s to %s" % (inFile, destFolder))
