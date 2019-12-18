@@ -576,9 +576,7 @@ public class SessionIdService {
         Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
         sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
 
-        if (authenticationDate != null) {
-            sessionId.setAuthenticationTime(authenticationDate);
-        }
+        sessionId.setAuthenticationTime(authenticationDate != null ? authenticationDate : new Date());
 
         if (state != null) {
             sessionId.setState(state);
@@ -698,6 +696,13 @@ public class SessionIdService {
                     Date lastUsedAt = new Date();
                     if (sessionId.getLastUsedAt() != null) {
                         long diff = lastUsedAt.getTime() - sessionId.getLastUsedAt().getTime();
+                        int unusedDiffInSeconds = (int) (diff/1000);
+                        if (unusedDiffInSeconds > unusedLifetime) {
+                            log.debug("Session id expired: {} by sessionIdUnusedLifetime, remove it.", sessionId.getId());
+                            remove(sessionId); // expired
+                            return false;
+                        }
+
                         if (diff > 500) { // update only if diff is more than 500ms
                             update = true;
                             sessionId.setLastUsedAt(lastUsedAt);
@@ -713,17 +718,10 @@ public class SessionIdService {
                     sessionId.setPersisted(true);
                 }
 
-                if (sessionId.getAuthenticationTime() != null) {
-                    final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionId.getAuthenticationTime().getTime()) / 1000;
-                    if (appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0) {
-                        if (currentLifetimeInSeconds > appConfiguration.getSessionIdLifetime()) {
-                            log.debug("Session id expired: {}, remove it.", sessionId.getId());
-                            remove(sessionId); // expired
-                            update = false;
-                        }
-                    } else {
-                        log.debug("Session id lifetime configuration is null.");
-                    }
+                if (isExpired(sessionId)) {
+                    log.debug("Session id expired: {} by lifetime property, remove it.", sessionId.getId());
+                    remove(sessionId); // expired
+                    update = false;
                 }
 
                 if (update) {
@@ -738,11 +736,37 @@ public class SessionIdService {
         return true;
     }
 
+    public boolean isExpired(SessionId sessionId) {
+        if (sessionId.getAuthenticationTime() == null) {
+            return false;
+        }
+        final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionId.getAuthenticationTime().getTime()) / 1000;
+
+        return currentLifetimeInSeconds > getServerSessionIdLifetimeInSeconds();
+    }
+
+    public int getServerSessionIdLifetimeInSeconds() {
+        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getServerSessionIdLifetime() > 0) {
+            return appConfiguration.getServerSessionIdLifetime();
+        }
+        if (appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0) {
+            return appConfiguration.getSessionIdLifetime();
+        }
+
+        // we don't know for how long we can put it in cache/persistence since expiration is not set, so we set it to max integer.
+        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() != null &&
+                appConfiguration.getServerSessionIdLifetime() <= 0 && appConfiguration.getSessionIdLifetime() <= 0) {
+            return Integer.MAX_VALUE;
+        }
+        log.debug("Session id lifetime configuration is null.");
+        return AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
+    }
+
     private void putInCache(SessionId sessionId) {
         int expirationInSeconds = sessionId.getState() == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
-                appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0 ? appConfiguration.getSessionIdLifetime() : Integer.MAX_VALUE; // we don't know for how long we can put it in cache since expiration is not set for session id, so we set it to max integer.
-        cacheService.put(Integer.toString(expirationInSeconds), sessionId.getId(), sessionId); // first parameter is expiration instead of region for memcached
+                getServerSessionIdLifetimeInSeconds();
+        cacheService.put(expirationInSeconds, sessionId.getId(), sessionId); // first parameter is expiration instead of region for memcached
     }
 
     private SessionId getFromCache(String sessionId) {
