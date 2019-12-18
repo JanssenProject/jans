@@ -31,7 +31,10 @@ import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -436,7 +439,6 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 rp.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
                 rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
                 rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
-                rp.setLastSynced(new Date());
             }
 
             getRpService().create(rp);
