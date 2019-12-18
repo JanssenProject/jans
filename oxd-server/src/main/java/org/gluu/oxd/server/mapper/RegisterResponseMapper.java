@@ -265,6 +265,10 @@ public class RegisterResponseMapper {
             isOpClientMetadataChanged = true;
         }
 
+        if (isOpClientMetadataChanged) {
+            rp.setLastSynced(new Date());
+        }
+
         return isOpClientMetadataChanged;
     }
 
