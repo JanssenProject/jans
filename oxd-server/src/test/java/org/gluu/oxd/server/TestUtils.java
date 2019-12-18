@@ -1,11 +1,17 @@
 package org.gluu.oxd.server;
 
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.DefaultConfigurationFactoryFactory;
+import io.dropwizard.jackson.Jackson;
+import io.dropwizard.jersey.validation.Validators;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.ErrorResponse;
 import org.gluu.oxd.common.Jackson2;
 
 import javax.ws.rs.WebApplicationException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -42,5 +48,18 @@ public class TestUtils {
         }
         System.out.println(entityAsString);
         return Jackson2.createJsonMapper().readValue(entityAsString, ErrorResponse.class);
+    }
+
+    public static OxdServerConfiguration parseConfiguration(String pathToYaml) throws IOException, ConfigurationException {
+
+        File file = new File(pathToYaml);
+        if (!file.exists()) {
+            System.out.println("Failed to find yml configuration file. Please check " + pathToYaml);
+            System.exit(1);
+        }
+
+        DefaultConfigurationFactoryFactory<OxdServerConfiguration> configurationFactoryFactory = new DefaultConfigurationFactoryFactory<>();
+        ConfigurationFactory<OxdServerConfiguration> configurationFactory = configurationFactoryFactory.create(OxdServerConfiguration.class, Validators.newValidatorFactory().getValidator(), Jackson.newObjectMapper(), "dw");
+        return configurationFactory.build(file);
     }
 }

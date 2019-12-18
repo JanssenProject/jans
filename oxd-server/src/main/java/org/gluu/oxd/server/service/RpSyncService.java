@@ -32,6 +32,9 @@ public class RpSyncService {
         if (rp == null || !rp.isSyncClientFromOp())
             return false;
 
+        if (rp.getLastSynced() == null)
+            return true;
+
         if ((Utils.addTimeToDate(rp.getLastSynced(), rp.getSyncClientPeriodInSeconds(), Calendar.SECOND).getTime() < new Date().getTime()))
             return true;
 
