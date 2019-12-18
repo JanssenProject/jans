@@ -29,6 +29,8 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
+
     private String issuer;
     private String baseEndpoint;
     private String authorizationEndpoint;
@@ -132,7 +134,8 @@ public class AppConfiguration implements Configuration {
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    private Integer sessionIdLifetime = 86400;
+    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantTypeUpdate;
@@ -1411,6 +1414,14 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdLifetime(Integer sessionIdLifetime) {
         this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    public Integer getServerSessionIdLifetime() {
+        return serverSessionIdLifetime;
+    }
+
+    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
+        this.serverSessionIdLifetime = serverSessionIdLifetime;
     }
 
     public Boolean getLogClientIdOnClientAuthentication() {
