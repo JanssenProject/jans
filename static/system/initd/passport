@@ -270,17 +270,15 @@ then
 fi
 
 get_pid() {
-        if [ -f $NODE_PID_FILE ]; then
-                PID_NUM=$(cat $NODE_PID_FILE)
+        PID_NUM="`ps -eaf|grep -i node|grep -v grep|grep -i passport|grep -i 'app.js'|awk '{print $2}'`"
+        ###For one more possible bug, find and kill node
+        if [ "x$PID_NUM" != "x" ]; then
                 echo "$PID_NUM"
         else
-                PID_NUM="`ps -eaf|grep -i node|grep -v grep|grep -i passport|grep -i 'app.js'|awk '{print $2}'`"
-                ###For one more possible bug, find and kill node
-                if [ "x$PID_NUM" != "x" ]; then
-                        echo "$PID_NUM"
-                fi
+                rm -f $NODE_PID_FILE
         fi
 }
+
 
 if [ -z "$NODE_STATE" ]
 then
