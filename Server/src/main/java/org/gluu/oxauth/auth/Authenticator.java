@@ -418,6 +418,9 @@ public class Authenticator {
             }
 
             if (this.authStep == countAuthenticationSteps) {
+                // Store/Update extra parameters in session attributes map
+                updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
+
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
                 authenticationService.quietLogin(credentials.getUsername());

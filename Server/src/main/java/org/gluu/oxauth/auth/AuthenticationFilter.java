@@ -212,7 +212,7 @@ public class AuthenticationFilter implements Filter {
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client, authenticator, cryptoProvider);
+                return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }
         }
         return false;
