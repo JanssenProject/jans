@@ -430,6 +430,7 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
             appConfiguration.setKeyStoreSecret(self.keyStorePassword)
+            appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
