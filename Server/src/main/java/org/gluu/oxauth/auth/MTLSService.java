@@ -3,25 +3,31 @@ package org.gluu.oxauth.auth;
 import com.google.common.base.Strings;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.service.SessionIdService;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,10 +37,19 @@ import java.security.cert.X509Certificate;
 @Named
 public class MTLSService {
 
-    private final static Logger log = LoggerFactory.getLogger(MTLSService.class);
+    @Inject
+    private Logger log;
 
-    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain,
-                               Client client, Authenticator authenticator, AbstractCryptoProvider cryptoProvider) throws Exception {
+    @Inject
+    private Authenticator authenticator;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
+    public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain, Client client) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
 
@@ -64,7 +79,7 @@ public class MTLSService {
             // apache/httpd
             if (subjectDn.equals(cert.getSubjectDN().getName())) {
                 log.debug("Client {} authenticated via `tls_client_auth`.", client.getClientId());
-                authenticator.configureSessionClient(client);
+                authenticatedSuccessfully(client, httpRequest);
 
                 filterChain.doFilter(httpRequest, httpResponse);
                 return true;
@@ -72,7 +87,6 @@ public class MTLSService {
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
-            // temporarily
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();
 
@@ -92,7 +106,7 @@ public class MTLSService {
                         cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
                     log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
                             client.getClientId(), key.getKid());
-                    authenticator.configureSessionClient(client);
+                    authenticatedSuccessfully(client, httpRequest);
 
                     filterChain.doFilter(httpRequest, httpResponse);
                     return true;
@@ -100,5 +114,21 @@ public class MTLSService {
             }
         }
         return false;
+    }
+
+    private void authenticatedSuccessfully(Client client, HttpServletRequest httpRequest) {
+        authenticator.configureSessionClient(client);
+
+        List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
+        if (prompts.contains(Prompt.LOGIN)) {
+            return; // skip session authentication if we have prompt=login
+        }
+
+        SessionId sessionIdObject = sessionIdService.getSessionId(httpRequest);
+        if (sessionIdObject == null || sessionIdObject.getState() != SessionIdState.AUTHENTICATED) {
+            return;
+        }
+
+        authenticator.authenticateBySessionId(sessionIdObject);
     }
 }
