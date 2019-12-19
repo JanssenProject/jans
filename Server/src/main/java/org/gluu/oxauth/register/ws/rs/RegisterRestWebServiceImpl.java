@@ -174,6 +174,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic client registration is disabled.");
             }
 
+            if (!appConfiguration.getDynamicRegistrationPasswordGrantTypeEnabled()
+                    && registerParamsValidator.checkIfThereIsPasswordGrantType(r.getGrantTypes())) {
+                log.info("Password Grant Type is not allowed for Dynamic Client Registration.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Password Grant Type is not allowed for Dynamic Client Registration.");
+            }
+
             if (r.getSubjectType() == null) {
                 SubjectType defaultSubjectType = SubjectType.fromString(appConfiguration.getDefaultSubjectType());
                 if (defaultSubjectType != null) {
