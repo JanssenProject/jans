@@ -55,12 +55,15 @@ public class RpSyncService {
 
         try {
             // read client with oxauth-client and update Rp object
-            final RegisterResponse response = getClientMetadataFromOP(rp.getClientRegistrationClientUri(), rp.getClientRegistrationAccessToken());
-            if (RegisterResponseMapper.hasClientMetadataChangedAtOp(rp, response)) {
+            final RegisterResponse response = readClientFromRp(rp.getClientRegistrationClientUri(), rp.getClientRegistrationAccessToken());
+
+            boolean isRpUpdated = RegisterResponseMapper.fillRp(rp, response);
+            if (isRpUpdated) {
+                rp.setLastSynced(new Date());
                 persistenceService.update(rp);
+                LOG.debug("Successfully synced Rp object from OP. Rp: " + rp.toString());
             }
 
-            LOG.debug("Successfully synced Rp object from OP. Rp: " + rp.toString());
             return rp;
         } catch (Exception e) {
             LOG.error("Error in sync Rp object from OP: ", e);
@@ -68,7 +71,7 @@ public class RpSyncService {
         }
     }
 
-    private RegisterResponse getClientMetadataFromOP(String clientRegistrationClientUri, String clientRegistrationAccessToken) {
+    private RegisterResponse readClientFromRp(String clientRegistrationClientUri, String clientRegistrationAccessToken) {
         final RegisterRequest request = new RegisterRequest(clientRegistrationAccessToken);
         request.setHttpMethod(HttpMethod.GET);
 
