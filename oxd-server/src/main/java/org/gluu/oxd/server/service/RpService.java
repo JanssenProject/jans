@@ -27,7 +27,7 @@ public class RpService {
      */
     private static final Logger LOG = LoggerFactory.getLogger(RpService.class);
 
-    private final Cache<String, Rp> rpCache;
+    private static Cache<String, Rp> rpCache;
 
     private ValidationService validationService;
 
@@ -45,6 +45,7 @@ public class RpService {
     }
 
     public void removeAllRps() {
+        rpCache.invalidateAll();
         persistenceService.removeAllRps();
     }
 
