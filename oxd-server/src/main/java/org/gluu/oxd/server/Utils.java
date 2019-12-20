@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -107,5 +108,12 @@ public class Utils {
         } else {
             return "";
         }
+    }
+
+    public static Date addTimeToDate(Date date, int timeValue, int timeFormat) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(timeFormat, timeValue);
+        return cal.getTime();
     }
 }

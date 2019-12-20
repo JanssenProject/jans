@@ -427,6 +427,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp.setOpHost(params.getOpHost());
             rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
             rp.setUiLocales(params.getUiLocales());
+            rp.setSyncClientFromOp(params.getSyncClientFromOp());
+            rp.setSyncClientPeriodInSeconds(params.getSyncClientPeriodInSeconds());
 
             if (!hasClient(params)) {
                 final RegisterResponse registerResponse = registerClient(params, registerRequest);
@@ -506,7 +508,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthSigningAlg())) {
             SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getClientTokenEndpointAuthSigningAlg());
             if (signatureAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg() );
+                LOG.error("Received invalid algorithm in `client_token_endpoint_auth_signing_alg` property. Value: " + params.getClientTokenEndpointAuthSigningAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
             request.setTokenEndpointAuthSigningAlg(signatureAlgorithms);
@@ -584,7 +586,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getSubjectType())) {
             SubjectType subjectType = SubjectType.fromString(params.getSubjectType());
             if (subjectType == null) {
-                LOG.error("Received invalid values in `subject_type` property. Value: " + params.getSubjectType() );
+                LOG.error("Received invalid values in `subject_type` property. Value: " + params.getSubjectType());
                 throw new HttpException(ErrorResponseCode.INVALID_SUBJECT_TYPE);
             }
             request.setSubjectType(subjectType);
@@ -597,7 +599,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getIdTokenSignedResponseAlg())) {
             SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getIdTokenSignedResponseAlg());
             if (signatureAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `id_token_signed_response_alg` property. Value: " + params.getIdTokenSignedResponseAlg() );
+                LOG.error("Received invalid algorithm in `id_token_signed_response_alg` property. Value: " + params.getIdTokenSignedResponseAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
             request.setIdTokenSignedResponseAlg(signatureAlgorithms);
@@ -606,7 +608,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getIdTokenEncryptedResponseAlg())) {
             KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getIdTokenEncryptedResponseAlg());
             if (keyEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `id_token_encrypted_response_alg` property. Value: " + params.getIdTokenEncryptedResponseAlg() );
+                LOG.error("Received invalid algorithm in `id_token_encrypted_response_alg` property. Value: " + params.getIdTokenEncryptedResponseAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
             }
             request.setIdTokenEncryptedResponseAlg(keyEncryptionAlgorithms);
@@ -615,7 +617,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getIdTokenEncryptedResponseEnc())) {
             BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getIdTokenEncryptedResponseEnc());
             if (blockEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `id_token_encrypted_response_enc` property. Value: " + params.getIdTokenEncryptedResponseEnc() );
+                LOG.error("Received invalid algorithm in `id_token_encrypted_response_enc` property. Value: " + params.getIdTokenEncryptedResponseEnc());
                 throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
             }
             request.setIdTokenEncryptedResponseEnc(blockEncryptionAlgorithms);
@@ -624,7 +626,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getUserInfoSignedResponseAlg())) {
             SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getUserInfoSignedResponseAlg());
             if (signatureAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `user_info_signed_response_alg` property. Value: " + params.getUserInfoSignedResponseAlg() );
+                LOG.error("Received invalid algorithm in `user_info_signed_response_alg` property. Value: " + params.getUserInfoSignedResponseAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
             request.setUserInfoSignedResponseAlg(signatureAlgorithms);
@@ -633,7 +635,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getUserInfoEncryptedResponseAlg())) {
             KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getUserInfoEncryptedResponseAlg());
             if (keyEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `user_info_encrypted_response_alg` property. Value: " + params.getUserInfoEncryptedResponseAlg() );
+                LOG.error("Received invalid algorithm in `user_info_encrypted_response_alg` property. Value: " + params.getUserInfoEncryptedResponseAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
             }
             request.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithms);
@@ -642,7 +644,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getUserInfoEncryptedResponseEnc())) {
             BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getUserInfoEncryptedResponseEnc());
             if (blockEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `user_info_encrypted_response_enc` property. Value: " + params.getUserInfoEncryptedResponseEnc() );
+                LOG.error("Received invalid algorithm in `user_info_encrypted_response_enc` property. Value: " + params.getUserInfoEncryptedResponseEnc());
                 throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
             }
             request.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithms);
@@ -651,7 +653,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getRequestObjectSigningAlg())) {
             SignatureAlgorithm signatureAlgorithms = SignatureAlgorithm.fromString(params.getRequestObjectSigningAlg());
             if (signatureAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `request_object_signing_alg` property. Value: " + params.getRequestObjectSigningAlg() );
+                LOG.error("Received invalid algorithm in `request_object_signing_alg` property. Value: " + params.getRequestObjectSigningAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
             request.setRequestObjectSigningAlg(signatureAlgorithms);
@@ -660,7 +662,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getRequestObjectEncryptionAlg())) {
             KeyEncryptionAlgorithm keyEncryptionAlgorithms = KeyEncryptionAlgorithm.fromName(params.getRequestObjectEncryptionAlg());
             if (keyEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `request_object_encryption_alg` property. Value: " + params.getRequestObjectEncryptionAlg() );
+                LOG.error("Received invalid algorithm in `request_object_encryption_alg` property. Value: " + params.getRequestObjectEncryptionAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_KEY_ENCRYPTION_ALGORITHM);
             }
             request.setRequestObjectEncryptionAlg(keyEncryptionAlgorithms);
@@ -669,7 +671,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getRequestObjectEncryptionEnc())) {
             BlockEncryptionAlgorithm blockEncryptionAlgorithms = BlockEncryptionAlgorithm.fromName(params.getRequestObjectEncryptionEnc());
             if (blockEncryptionAlgorithms == null) {
-                LOG.error("Received invalid algorithm in `request_object_encryption_enc` property. Value: " + params.getRequestObjectEncryptionEnc() );
+                LOG.error("Received invalid algorithm in `request_object_encryption_enc` property. Value: " + params.getRequestObjectEncryptionEnc());
                 throw new HttpException(ErrorResponseCode.INVALID_BLOCK_ENCRYPTION_ALGORITHM);
             }
             request.setRequestObjectEncryptionEnc(blockEncryptionAlgorithms);
