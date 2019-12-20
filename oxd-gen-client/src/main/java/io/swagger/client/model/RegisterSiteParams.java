@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * RegisterSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-07-28T10:55:36.443Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-15T11:11:25.391Z")
 public class RegisterSiteParams {
   @SerializedName("redirect_uris")
   private List<String> redirectUris = new ArrayList<String>();
@@ -185,6 +185,12 @@ public class RegisterSiteParams {
 
   @SerializedName("custom_attributes")
   private Map<String, String> customAttributes = null;
+
+  @SerializedName("sync_client_from_op")
+  private Boolean syncClientFromOp = null;
+
+  @SerializedName("sync_client_period_in_seconds")
+  private Integer syncClientPeriodInSeconds = null;
 
   public RegisterSiteParams redirectUris(List<String> redirectUris) {
     this.redirectUris = redirectUris;
@@ -1213,6 +1219,42 @@ public class RegisterSiteParams {
     this.customAttributes = customAttributes;
   }
 
+  public RegisterSiteParams syncClientFromOp(Boolean syncClientFromOp) {
+    this.syncClientFromOp = syncClientFromOp;
+    return this;
+  }
+
+   /**
+   * specifies whether to sync client from OP. Default value is false.
+   * @return syncClientFromOp
+  **/
+  @ApiModelProperty(example = "false", value = "specifies whether to sync client from OP. Default value is false.")
+  public Boolean isSyncClientFromOp() {
+    return syncClientFromOp;
+  }
+
+  public void setSyncClientFromOp(Boolean syncClientFromOp) {
+    this.syncClientFromOp = syncClientFromOp;
+  }
+
+  public RegisterSiteParams syncClientPeriodInSeconds(Integer syncClientPeriodInSeconds) {
+    this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+    return this;
+  }
+
+   /**
+   * specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
+   * @return syncClientPeriodInSeconds
+  **/
+  @ApiModelProperty(example = "86400", value = "specifies period after which client can sync again with OP. Default value is 86400 (in seconds).")
+  public Integer getSyncClientPeriodInSeconds() {
+    return syncClientPeriodInSeconds;
+  }
+
+  public void setSyncClientPeriodInSeconds(Integer syncClientPeriodInSeconds) {
+    this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -1273,12 +1315,14 @@ public class RegisterSiteParams {
         Objects.equals(this.softwareId, registerSiteParams.softwareId) &&
         Objects.equals(this.softwareVersion, registerSiteParams.softwareVersion) &&
         Objects.equals(this.softwareStatement, registerSiteParams.softwareStatement) &&
-        Objects.equals(this.customAttributes, registerSiteParams.customAttributes);
+        Objects.equals(this.customAttributes, registerSiteParams.customAttributes) &&
+        Objects.equals(this.syncClientFromOp, registerSiteParams.syncClientFromOp) &&
+        Objects.equals(this.syncClientPeriodInSeconds, registerSiteParams.syncClientPeriodInSeconds);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(redirectUris, opHost, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes);
+    return Objects.hash(redirectUris, opHost, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, trustedClient, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds);
   }
 
 
@@ -1338,6 +1382,8 @@ public class RegisterSiteParams {
     sb.append("    softwareVersion: ").append(toIndentedString(softwareVersion)).append("\n");
     sb.append("    softwareStatement: ").append(toIndentedString(softwareStatement)).append("\n");
     sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");
+    sb.append("    syncClientFromOp: ").append(toIndentedString(syncClientFromOp)).append("\n");
+    sb.append("    syncClientPeriodInSeconds: ").append(toIndentedString(syncClientPeriodInSeconds)).append("\n");
     sb.append("}");
     return sb.toString();
   }

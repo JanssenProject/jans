@@ -257,6 +257,14 @@ paths:
                 additionalProperties:
                   type: string
                 description: specifies custom attribute map copy.
+              sync_client_from_op:
+                type: boolean
+                description: specifies whether to sync client from OP. Default value is false.
+                example: false
+              sync_client_period_in_seconds:
+                type: integer
+                description: specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
+                example: 86400
 
       responses:
         200:
@@ -707,6 +715,14 @@ paths:
                 additionalProperties:
                   type: string
                 description: specifies custom attribute map copy.
+              sync_client_from_op:
+                type: boolean
+                description: specifies whether to sync client from OP. Default value is false.
+                example: false
+              sync_client_period_in_seconds:
+                type: integer
+                description: specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
+                example: 86400
 
       responses:
         200:
