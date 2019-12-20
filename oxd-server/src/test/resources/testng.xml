@@ -111,6 +111,11 @@
             <class name="org.gluu.oxd.server.service.RpServiceTest"/>
         </classes>
     </test>
+    <test name="RpSyncServiceTest" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.service.RpSyncServiceTest"></class>
+        </classes>
+    </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
