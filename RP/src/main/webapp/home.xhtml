@@ -35,7 +35,7 @@
 						<div class="actionButtons">
 							<a4j:commandButton value="Submit"
 								action="#{openIdConnectDiscoveryAction.exec}" execute="@region"
-								render="discoveryResults, registrationForm, authorizationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm" />
+								render="discoveryResults, registrationForm, authorizationForm, backchannelAuthenticationForm, tokenForm, userInfoForm, checkSessionForm, endSessionForm" />
 						</div>
 
 					</a4j:region>
@@ -332,6 +332,38 @@
 									<h:selectBooleanCheckbox id="logoutSessionRequired"
 										value="#{registrationAction.logoutSessionRequired}" />
 									<h:outputText></h:outputText>
+
+									<h:outputLabel for="backchannelTokenDeliveryMode">Backchannel Token Delivery Mode</h:outputLabel>
+									<h:selectOneMenu id="backchannelTokenDeliveryMode"
+													 value="#{registrationAction.backchannelTokenDeliveryMode}"
+													 converter="omnifaces.GenericEnumConverter">
+										<f:selectItem itemLabel="- Please select one -" />
+										<f:selectItems value="#{bachBackchannelTokenDeliveryModes}" />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="backchannelClientNotificationEndpoint">Backchannel Client Notification Endpoint</h:outputLabel>
+									<h:inputText id="backchannelClientNotificationEndpoint"
+												 value="#{registrationAction.backchannelClientNotificationEndpoint}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
+
+									<h:outputLabel for="backchannelAuthenticationRequestSigningAlg">Backchannel Authentication Request Signing Alg</h:outputLabel>
+									<h:selectOneMenu id="backchannelAuthenticationRequestSigningAlg"
+													 value="#{registrationAction.backchannelAuthenticationRequestSigningAlg}"
+													 converter="omnifaces.GenericEnumConverter">
+										<f:selectItem itemLabel="- Please select one -" />
+										<f:selectItems value="#{asymmetricSignatureAlgorithms}" />
+									</h:selectOneMenu>
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="backchannelUserCodeParameter">Backchannel User Code Parameter</h:outputLabel>
+									<h:selectOneRadio id="backchannelUserCodeParameter"
+													  value="#{registrationAction.backchannelUserCodeParameter}">
+										<f:selectItem itemValue="#{true}" itemLabel="yes" />
+										<f:selectItem itemValue="#{false}" itemLabel="no" />
+									</h:selectOneRadio>
+									<h:outputText></h:outputText>
+									
 								</h:panelGrid>
 							</div>
 						</h:panelGroup>
@@ -339,7 +371,7 @@
 						<div class="actionButtons">
 							<a4j:commandButton value="Submit"
 								action="#{registrationAction.exec}" execute="@region"
-								render="registrationResults, clientReadForm, authorizationForm, tokenForm" />
+								render="registrationResults, clientReadForm, authorizationForm, backchannelAuthenticationForm, tokenForm" />
 						</div>
 					</a4j:region>
 					<h:panelGroup layout="block" id="registrationResults">
@@ -665,6 +697,110 @@
 				</b:panel>
 			</h:panelGroup>
 
+			<div>
+				<b:panel title="Backchannel Authentication Endpoint" look="primary">
+					<h:panelGroup layout="block" id="backchannelAuthenticationForm">
+						<div>
+							<strong>Client Initiated Backchannel Authentication Request Parameters</strong>
+						</div>
+						<div>
+							<h:panelGrid columns="3">
+
+								<h:outputLabel for="backchannelAuthenticationEndpoint">Backchannel Authentication Endpoint</h:outputLabel>
+								<h:inputText id="backchannelAuthenticationEndpoint"
+											 value="#{backchannelAuthenticationAction.backchannelAuthenticationEndpoint}" size="40" />
+								<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/bc-authorize</h:outputText>
+
+								<h:outputLabel for="cibaScope">Scope</h:outputLabel>
+								<h:selectManyListbox id="cibaScope"
+													 value="#{backchannelAuthenticationAction.scope}">
+									<f:selectItem itemLabel="openid" itemValue="openid" />
+									<f:selectItem itemLabel="profile" itemValue="profile" />
+									<f:selectItem itemLabel="address" itemValue="address" />
+									<f:selectItem itemLabel="email" itemValue="email" />
+									<f:selectItem itemLabel="phone" itemValue="phone" />
+								</h:selectManyListbox>
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaClientNotificationToken">Client Notificaiton Token</h:outputLabel>
+								<h:inputText id="cibaClientNotificationToken"
+											 value="#{backchannelAuthenticationAction.clientNotificationToken}" size="40" />
+								<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
+
+								<h:outputLabel for="cibaAcrValues">ACR Values (space-separated)</h:outputLabel>
+								<h:inputText id="cibaAcrValues"
+											 value="#{backchannelAuthenticationAction.acrValues}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaLoginHintToken">Login Hint Token</h:outputLabel>
+								<h:inputText id="cibaLoginHintToken"
+											 value="#{backchannelAuthenticationAction.loginHintToken}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaIdTokenHint">ID Token Hint</h:outputLabel>
+								<h:inputText id="cibaIdTokenHint"
+											 value="#{backchannelAuthenticationAction.idTokenHint}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaLoginHint">Login Hint</h:outputLabel>
+								<h:inputText id="cibaLoginHint"
+											 value="#{backchannelAuthenticationAction.loginHint}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaBindingMessage">Binding Message</h:outputLabel>
+								<h:inputText id="cibaBindingMessage"
+											 value="#{backchannelAuthenticationAction.bindingMessage}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaUserCode">User Code</h:outputLabel>
+								<h:inputText id="cibaUserCode"
+											 value="#{backchannelAuthenticationAction.userCode}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaRequestedExppiry">Requested Expiry</h:outputLabel>
+								<h:inputText id="cibaRequestedExppiry"
+											 value="#{backchannelAuthenticationAction.requestedExpiry}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaClientId">Client ID</h:outputLabel>
+								<h:inputText id="cibaClientId" value="#{backchannelAuthenticationAction.clientId}"
+											 size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="cibaSecret">Client Secret</h:outputLabel>
+								<h:inputText id="cibaSecret"
+											 value="#{backchannelAuthenticationAction.clientSecret}" size="40" />
+								<h:outputText></h:outputText>
+
+							</h:panelGrid>
+						</div>
+					</h:panelGroup>
+
+					<div class="actionButtons">
+						<a4j:commandButton value="Submit" action="#{backchannelAuthenticationAction.exec}"
+										   execute="@region" render="backchannelAuthenticationResults, tokenForm" />
+					</div>
+
+					<h:panelGroup layout="block" id="backchannelAuthenticationResults">
+						<h:panelGroup layout="block"
+									  rendered="#{backchannelAuthenticationAction.showResults}">
+							<b:panel title="Backchannel Authentication Request" look="primary">
+								<f:facet name="header"></f:facet>
+								<h:panelGroup layout="block">
+									<h:inputTextarea readonly="true" styleClass="width100"
+													 rows="10" value="#{backchannelAuthenticationAction.requestString}" />
+								</h:panelGroup>
+							</b:panel>
+							<b:panel title="Backchannel Authentication Response" look="primary">
+								<h:panelGroup layout="block">
+									<h:inputTextarea styleClass="width100"
+													 value="#{backchannelAuthenticationAction.responseString}" rows="10" />
+								</h:panelGroup>
+							</b:panel>
+						</h:panelGroup>
+					</h:panelGroup>
+				</b:panel>
+			</div>
 
 			<div>
 				<b:panel title="Token Endpoint" look="primary">
@@ -736,6 +872,11 @@
 									<h:outputLabel for="refreshToken">Refresh Token</h:outputLabel>
 									<h:inputText id="refreshToken"
 										value="#{tokenAction.refreshToken}" size="40" />
+									<h:outputText></h:outputText>
+
+									<h:outputLabel for="authReqId">Auth Req Id</h:outputLabel>
+									<h:inputText id="authReqId"
+												 value="#{tokenAction.authReqId}" size="40" />
 									<h:outputText></h:outputText>
 								</h:panelGrid>
 							</div>
