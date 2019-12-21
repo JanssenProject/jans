@@ -12,6 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
 import org.gluu.oxauth.ciba.CIBAPushTokenDeliveryProxy;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.audit.Action;
@@ -45,7 +46,6 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 
-import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,7 +69,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 19, 2019
+ * @version December 21, 2019
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -128,6 +128,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private CIBAPushTokenDeliveryProxy cibaPushTokenDeliveryProxy;
+
+    @Inject
+    private CIBAPingCallbackProxy cibaPingCallbackProxy;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -659,28 +662,36 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
                                     CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
-                                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-
+                                    if (cibaGrant != null) {
                                         RefreshToken refreshToken = cibaGrant.createRefreshToken();
                                         log.debug("Issuing refresh token: {}", refreshToken.getCode());
 
                                         AccessToken accessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-                                        //AccessToken accessToken = cibaGrant.createAccessToken(null, new ExecutionContext(null, null));
                                         log.debug("Issuing access token: {}", accessToken.getCode());
 
                                         IdToken idToken = cibaGrant.createIdToken(
                                                 null, null, accessToken, refreshToken,
                                                 null, cibaGrant, false, null);
 
-                                        cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                                cibaGrant.getClientNotificationToken(),
-                                                accessToken.getCode(),
-                                                refreshToken.getCode(),
-                                                idToken.getCode(),
-                                                accessToken.getExpiresIn()
-                                        );
+                                        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+                                            cibaPushTokenDeliveryProxy.pushTokenDelivery(
+                                                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                                                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                                                    cibaGrant.getClientNotificationToken(),
+                                                    accessToken.getCode(),
+                                                    refreshToken.getCode(),
+                                                    idToken.getCode(),
+                                                    accessToken.getExpiresIn()
+                                            );
+                                        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
+                                            cibaPingCallbackProxy.pingCallback(
+                                                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                                                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                                                    cibaGrant.getClientNotificationToken()
+                                            );
+                                        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                                            // TODO: Implement this case.
+                                        }
                                     }
                                 }
                             }
