@@ -109,7 +109,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid profile email"));
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken("123");
         backchannelAuthenticationRequest.setUserCode("qwe");
