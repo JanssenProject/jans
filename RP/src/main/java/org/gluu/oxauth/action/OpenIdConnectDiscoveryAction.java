@@ -29,7 +29,7 @@ import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 
 /**
  * @author Javier Rojas Blum
- * @version August 24, 2016
+ * @version December 21, 2019
  */
 @Named
 @SessionScoped
@@ -45,6 +45,9 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 
 	@Inject
 	private AuthorizationAction authorizationAction;
+
+	@Inject
+	private BackchannelAuthenticationAction backchannelAuthenticationAction;
 
 	@Inject
 	private TokenAction tokenAction;
@@ -112,6 +115,7 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 				registrationAction.setRegistrationEndpoint(openIdConfigurationResponse.getRegistrationEndpoint());
 				authorizationAction.setAuthorizationEndpoint(openIdConfigurationResponse.getAuthorizationEndpoint());
 				authorizationAction.setJwksUri(openIdConfigurationResponse.getJwksUri());
+				backchannelAuthenticationAction.setBackchannelAuthenticationEndpoint(openIdConfigurationResponse.getBackchannelAuthenticationEndpoint());
 				tokenAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
 				userInfoAction.setUserInfoEndpoint(openIdConfigurationResponse.getUserInfoEndpoint());
 				checkSessionAction.setCheckSessionEndpoint(openIdConfigurationResponse.getCheckSessionIFrame());
