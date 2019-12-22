@@ -11,7 +11,7 @@ import org.gluu.oxd.common.ErrorResponseCode;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.testng.Assert.*;
 
 public class RemoveSiteTest {
 

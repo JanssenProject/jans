@@ -1,18 +1,16 @@
 package org.gluu.oxd.server;
 
 import com.google.common.collect.Lists;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.RegisterSiteParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
