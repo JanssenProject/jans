@@ -7,7 +7,7 @@ import io.swagger.client.model.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.*;
+import static org.testng.Assert.*;
 
 /**
  * @author yuriyz

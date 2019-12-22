@@ -14,8 +14,8 @@ import org.gluu.oxd.server.Tester;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

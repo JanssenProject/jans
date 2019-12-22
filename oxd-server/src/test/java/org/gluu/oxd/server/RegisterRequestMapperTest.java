@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static junit.framework.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class RegisterRequestMapperTest {
 

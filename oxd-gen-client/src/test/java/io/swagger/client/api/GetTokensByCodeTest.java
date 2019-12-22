@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import org.gluu.oxd.common.CoreUtils;
 
 import static io.swagger.client.api.Tester.notEmpty;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 /**
  * Test class to test refresh token and related end points
