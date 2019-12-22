@@ -1,6 +1,5 @@
 package org.gluu.oxd.server;
 
-import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -10,7 +9,8 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
 
 import java.io.IOException;
-
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/07/2017
@@ -39,8 +39,8 @@ public class RsCheckAccessTest {
 
         final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
 
-        Assert.assertNotNull(response);
-        Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
+        assertNotNull(response);
+        assertTrue(StringUtils.isNotBlank(response.getAccess()));
         return response;
     }
 }
