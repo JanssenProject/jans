@@ -10,8 +10,8 @@ import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.IntrospectAccessTokenResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
