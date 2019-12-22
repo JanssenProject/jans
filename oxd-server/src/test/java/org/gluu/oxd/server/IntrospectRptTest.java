@@ -10,7 +10,7 @@ import org.gluu.oxd.common.response.RpGetRptResponse;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.Assert.assertNotNull;
 
 /**

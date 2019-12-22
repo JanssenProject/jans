@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import org.gluu.oxd.common.params.GetClientTokenParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**

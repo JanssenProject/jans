@@ -1,10 +1,9 @@
 package org.gluu.oxd.server;
 
 import com.google.common.collect.Lists;
-import junit.framework.Assert;
 import org.testng.annotations.Test;
 import org.gluu.util.security.StringEncrypter;
-
+import static org.testng.AssertJUnit.assertEquals;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +19,7 @@ public class UtilsTest {
     @Test
     public void joinAndEncode() throws UnsupportedEncodingException {
         final ArrayList<String> list = Lists.newArrayList("id_token", "token");
-        Assert.assertEquals("id_token%20token", Utils.joinAndUrlEncode(list));
+        assertEquals("id_token%20token", Utils.joinAndUrlEncode(list));
     }
 
     @Test(enabled = false)
@@ -36,7 +35,7 @@ public class UtilsTest {
 
         calendar.add(Calendar.HOUR, 13);
 
-        Assert.assertEquals(Utils.hoursDiff(today, calendar.getTime()), 13);
+        assertEquals(Utils.hoursDiff(today, calendar.getTime()), 13);
     }
 
     public static void main(String[] args) {

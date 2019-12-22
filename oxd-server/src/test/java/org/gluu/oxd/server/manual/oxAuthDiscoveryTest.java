@@ -3,11 +3,10 @@
  */
 package org.gluu.oxd.server.manual;
 
-import junit.framework.Assert;
 import org.testng.annotations.Test;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-
+import static org.testng.AssertJUnit.assertNotNull;
 import java.io.IOException;
 
 /**
@@ -23,6 +22,6 @@ public class oxAuthDiscoveryTest {
         OpenIdConfigurationClient client = new OpenIdConfigurationClient(url);
         OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
         System.out.println(response.getEntity());
-        Assert.assertNotNull(response);
+        assertNotNull(response);
     }
 }

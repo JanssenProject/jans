@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
