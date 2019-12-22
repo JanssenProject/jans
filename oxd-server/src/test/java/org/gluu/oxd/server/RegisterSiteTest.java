@@ -16,8 +16,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**

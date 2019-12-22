@@ -1,6 +1,5 @@
 package org.gluu.oxd.server;
 
-import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.op.RsProtectOperation;
@@ -18,8 +17,9 @@ import javax.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.util.List;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -111,8 +111,8 @@ public class RsProtectTest {
 
         final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
 
-        Assert.assertNotNull(response);
-        Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
+        assertNotNull(response);
+        assertTrue(StringUtils.isNotBlank(response.getAccess()));
     }
 
     public static RsProtectResponse protectResources(ClientInterface client, RegisterSiteResponse site, List<RsResource> resources) {
