@@ -1,6 +1,5 @@
 package org.gluu.oxd.server.manual;
 
-import junit.framework.Assert;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
 import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
@@ -10,7 +9,8 @@ import org.gluu.oxd.server.Tester;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
@@ -33,6 +33,6 @@ public class StressTest {
         final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
-        Assert.assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
+        assertTrue(resp.getAuthorizationUrl().contains("acr_values"));
     }
 }

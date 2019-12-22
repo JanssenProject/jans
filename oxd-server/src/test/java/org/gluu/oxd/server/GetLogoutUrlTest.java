@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.UUID;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Dummy test because we can't check real session management which is handled via browser cookies.

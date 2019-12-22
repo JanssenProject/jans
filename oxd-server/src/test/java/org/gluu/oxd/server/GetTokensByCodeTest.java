@@ -14,9 +14,9 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
-import static org.junit.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy

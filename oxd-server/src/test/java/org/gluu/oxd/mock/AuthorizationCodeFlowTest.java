@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 import java.util.UUID;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
