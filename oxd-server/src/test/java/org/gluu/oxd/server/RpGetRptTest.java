@@ -2,7 +2,6 @@ package org.gluu.oxd.server;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -18,8 +17,9 @@ import org.gluu.oxd.common.response.RsCheckAccessResponse;
 
 import java.io.IOException;
 
-import static org.testng.Assert.*;
-
+import static org.testng.AssertJUnit.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.assertEquals;
 /**
  * @author Yuriy Zabrovarnyy
  */
@@ -58,8 +58,8 @@ public class RpGetRptTest {
                 GrantType.CLIENT_CREDENTIALS.getValue()));
 
         final RegisterSiteResponse site = client.registerSite(params);
-        Assert.assertNotNull(site);
-        Assert.assertTrue(!Strings.isNullOrEmpty(site.getOxdId()));
+        assertNotNull(site);
+        assertTrue(!Strings.isNullOrEmpty(site.getOxdId()));
 
         final RpGetRptResponse response = requestRpt(client, site, rsProtect);
         assertNotNull(response);

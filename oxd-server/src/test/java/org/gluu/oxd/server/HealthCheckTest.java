@@ -3,8 +3,8 @@ package org.gluu.oxd.server;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 
 public class HealthCheckTest {
 

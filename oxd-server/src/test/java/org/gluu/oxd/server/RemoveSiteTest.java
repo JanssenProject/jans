@@ -7,7 +7,7 @@ import org.gluu.oxd.common.params.RemoveSiteParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RemoveSiteResponse;
 
-import static junit.framework.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
