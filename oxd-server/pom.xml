@@ -202,6 +202,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.8</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -212,6 +217,12 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
             <version>${dropwizard.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -222,12 +233,6 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-configuration</artifactId>
             <version>${dropwizard.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-text</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -321,10 +326,6 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>commons-text</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -392,12 +393,6 @@
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxcore-util</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-text</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.gluu</groupId>
@@ -431,17 +426,13 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
             <version>1.4</version>
-        </dependency>
-        <dependency>
-            <artifactId>commons-text</artifactId>
-            <groupId>org.apache.commons</groupId>
-            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>io.opentracing.contrib</groupId>
