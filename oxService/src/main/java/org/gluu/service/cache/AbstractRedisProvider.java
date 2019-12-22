@@ -2,6 +2,7 @@ package org.gluu.service.cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.HostAndPort;
 
 /**
  * @author yuriyz
@@ -13,6 +14,7 @@ public abstract class AbstractRedisProvider {
 
 	public AbstractRedisProvider(RedisConfiguration redisConfiguration) {
 		this.redisConfiguration = redisConfiguration;
+        HostAndPort.setLocalhost("127.0.0.1");
 	}
 
 	public RedisConfiguration getRedisConfiguration() {
