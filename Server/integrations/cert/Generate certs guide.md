@@ -1,3 +1,5 @@
+For testing purpouses there is archive with CA/Intermidiate/User certs in [archive] (./sample/generated_certs.zip).
+
 # 1. Create and sign Root CA
 
 ## 1.1. Generate password protected a 8192-bit long SHA-256 RSA key for root CA:
