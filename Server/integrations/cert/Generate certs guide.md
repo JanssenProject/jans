@@ -1,5 +1,3 @@
-This is not finished guide.
-
 1. Create and sign Root CA
 
 1.1. Generate password protected a 8192-bit long SHA-256 RSA key for root CA:
@@ -23,8 +21,6 @@ Verifying - Enter pass phrase for rootca.key:
 Example output:
 ```
 Enter pass phrase for rootca.key:
-Can't load /root/.rnd into RNG
-140641498669504:error:2406F079:random number generator:RAND_load_file:Cannot open file:crypto/rand/randfile.c:88:Filename=/root/.rnd
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -144,8 +140,6 @@ e is 65537 (0x010001)
 
 Example output:
 ```
-Can't load /root/.rnd into RNG
-140674490167744:error:2406F079:random number generator:RAND_load_file:Cannot open file:crypto/rand/randfile.c:88:Filename=/root/.rnd
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -175,9 +169,6 @@ Example output:
 ```
 Using configuration from root-ca.conf
 Enter pass phrase for .//rootca.key:
-Can't open .//certindex.attr for reading, No such file or directory
-140577679532480:error:02001002:system library:fopen:No such file or directory:crypto/bio/bss_file.c:72:fopen('.//certindex.attr','r')
-140577679532480:error:2006D080:BIO routines:BIO_new_file:no such file:crypto/bio/bss_file.c:79:
 Check that the request matches the signature
 Signature ok
 The Subject's Distinguished Name is as follows
@@ -309,8 +300,6 @@ We use this new intermediate CA to generate an end user certificate. Repeat thes
 
 Example output:
 ```
-Can't load /root/.rnd into RNG
-140048077132224:error:2406F079:random number generator:RAND_load_file:Cannot open file:crypto/rand/randfile.c:88:Filename=/root/.rnd
 You are about to be asked to enter information that will be incorporated
 into your certificate request.
 What you are about to enter is what is called a Distinguished Name or a DN.
@@ -339,9 +328,6 @@ An optional company name []:
 Example output:
 ```
 Using configuration from intermediate-ca.conf
-Can't open .//certindex.attr for reading, No such file or directory
-139670822924736:error:02001002:system library:fopen:No such file or directory:crypto/bio/bss_file.c:72:fopen('.//certindex.attr','r')
-139670822924736:error:2006D080:BIO routines:BIO_new_file:no such file:crypto/bio/bss_file.c:79:
 Check that the request matches the signature
 Signature ok
 The Subject's Distinguished Name is as follows
