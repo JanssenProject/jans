@@ -10,7 +10,7 @@ oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/cert_
 oxConfigurationProperty: {"value1":"map_user_cert","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"use_generic_validator","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"use_path_validator","value2":"true","description":""}
-oxConfigurationProperty: {"value1":"use_ocsp_validator","value2":"true","description":""}
+oxConfigurationProperty: {"value1":"use_ocsp_validator","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"use_crl_validator","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"crl_max_response_size","value2":"10485760","description":""}
 oxLevel: 30
