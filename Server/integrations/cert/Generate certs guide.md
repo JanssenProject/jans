@@ -37,9 +37,8 @@ Common Name (e.g. server FQDN or YOUR name) []:Gluu Root CA
 Email Address []:
 ```
 
-1.3. Create `root-ca.conf` file
+1.3. Create `root-ca.conf` file:
 
-# vim root-ca.conf
 ```
 [ ca ]
 default_ca = gluuca
@@ -72,17 +71,6 @@ organizationName = supplied
 organizationalUnitName = optional
 
 [ gluuca_extensions ]
-basicConstraints = critical,CA:TRUE
-keyUsage = critical,any
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer
-keyUsage = digitalSignature,keyEncipherment,cRLSign,keyCertSign
-extendedKeyUsage = serverAuth
-crlDistributionPoints = @crl_section
-subjectAltName  = @alt_names
-authorityInfoAccess = @ocsp_section
-
-[ v3_ca ]
 basicConstraints = critical,CA:TRUE,pathlen:0
 keyUsage = critical,any
 subjectKeyIdentifier = hash
@@ -245,8 +233,8 @@ basicConstraints = critical,CA:FALSE
 keyUsage = critical,any
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
-keyUsage = digitalSignature,keyEncipherment
-extendedKeyUsage = clientAuth
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = clientAuth,emailProtection
 crlDistributionPoints = @crl_section
 subjectAltName  = @alt_names
 authorityInfoAccess = @ocsp_section
