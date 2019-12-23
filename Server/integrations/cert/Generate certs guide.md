@@ -1,4 +1,4 @@
-For testing purpouses there is archive with CA/Intermidiate/User certs in [archive] (./sample/generated_certs.zip).
+For testing purpouses there is archive with CA/Intermidiate/User certs in [archive](./sample/generated_certs.zip).
 
 # 1. Create and sign Root CA
 
