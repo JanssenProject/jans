@@ -31,6 +31,12 @@
         </classes>
     </test>
 
+    <test name="Spontaneous Scope test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.SpontaneousScopeHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Authorization Code Flow test -->
     <test name="Authorization Code Flow test (HTTP)" enabled="true">
         <classes>
