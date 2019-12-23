@@ -8,7 +8,7 @@
 from org.gluu.model.custom.script.type.spontaneous import SpontaneousScopeType
 from java.lang import String
 
-class Introspection(SpontaneousScopeType):
+class SpontaneousScope(SpontaneousScopeType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
