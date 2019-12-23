@@ -1,6 +1,6 @@
-1. Create and sign Root CA
+# 1. Create and sign Root CA
 
-1.1. Generate password protected a 8192-bit long SHA-256 RSA key for root CA:
+## 1.1. Generate password protected a 8192-bit long SHA-256 RSA key for root CA:
 
 `openssl genrsa -aes256 -out rootca.key 8192`
 
@@ -14,7 +14,7 @@ Enter pass phrase for rootca.key:
 Verifying - Enter pass phrase for rootca.key:
 ```
 
-1.2 Create the self-signed root CA certificate ca.crt; you'll need to provide an identity for your root CA:
+## 1.2 Create the self-signed root CA certificate ca.crt; you'll need to provide an identity for your root CA:
 
 `openssl req -sha256 -new -x509 -days 1826 -key rootca.key -out rootca.crt`
 
@@ -37,7 +37,7 @@ Common Name (e.g. server FQDN or YOUR name) []:Gluu Root CA
 Email Address []:
 ```
 
-1.3. Create `root-ca.conf` file:
+## 1.3. Create `root-ca.conf` file:
 
 ```
 [ ca ]
@@ -96,22 +96,24 @@ OCSP;URI.0 = http://pki.gluu.org/ocsp/
 OCSP;URI.1 = http://pki.backup.com/ocsp/
 
 ```
-1.4. Create a few files where the CA will store it's serials:
+## 1.4. Create a few files where the CA will store it's serials:
 
-`touch certindex`
-`echo 1000 > certserial`
-`echo 1000 > crlnumber`
+```
+touch certindex
+echo 1000 > certserial
+echo 1000 > crlnumber
+```
 
-1.5. If you need to set a specific certificate start / expiry date, add the following to [gluuca]
+## 1.5. If you need to set a specific certificate start / expiry date, add the following to [gluuca]
 ```
 # format: YYYYMMDDHHMMSS
 default_enddate = 20191222035911
 default_startdate = 20181222035911
 ```
 
-2. Create and sign Intermediate 1 CA
+# 2. Create and sign Intermediate 1 CA
 
-2.1. Generate the intermediate CA's private key:
+## 2.1. Generate the intermediate CA's private key:
 
 `openssl genrsa -out intermediate1.key 4096`
 
@@ -122,7 +124,7 @@ Generating RSA private key, 4096 bit long modulus (2 primes)
 .........++++
 e is 65537 (0x010001)
 ```
-2.2. Generate the intermediate1 CA's CSR:
+## 2.2. Generate the intermediate1 CA's CSR:
 
 `openssl req -new -sha256 -key intermediate1.key -out intermediate1.csr`
 
@@ -149,7 +151,7 @@ A challenge password []:
 An optional company name []:
 ```
 
-2.3. Sign the intermediate1 CSR with the Root CA:
+## 2.3. Sign the intermediate1 CSR with the Root CA:
 
 `openssl ca -batch -config root-ca.conf -notext -in intermediate1.csr -out intermediate1.crt`
 
@@ -172,30 +174,36 @@ Write out database with 1 new entries
 Data Base Updated
 ```
 
-2.4. Generate the CRL (both in PEM and DER):
+## 2.4. Generate the CRL (both in PEM and DER):
 
-`openssl ca -config root-ca.conf -gencrl -keyfile rootca.key -cert rootca.crt -out rootca.crl.pem`
-`openssl crl -inform PEM -in rootca.crl.pem -outform DER -out rootca.crl`
+```
+openssl ca -config root-ca.conf -gencrl -keyfile rootca.key -cert rootca.crt -out rootca.crl.pem
+openssl crl -inform PEM -in rootca.crl.pem -outform DER -out rootca.crl
+```
 
 Generate the CRL after every certificate you sign with the CA.
 
-2.5. Configuring the Intermediate CA 1
+## 2.5. Configuring the Intermediate CA 1
 
 Create a new folder for this intermediate and move in to it:
 
-`mkdir intermediate1`
-`cd ./intermediate1`
+```
+mkdir intermediate1
+cd ./intermediate1
+```
 
 Copy the Intermediate cert and key from the Root CA:
 `mv ../intermediate1.* ./`
 
 Create the index files:
 
-`touch certindex`
-`echo 1000 > certserial`
-`echo 1000 > crlnumber`
+```
+touch certindex
+echo 1000 > certserial
+echo 1000 > crlnumber
+```
 
-2.6. Create a new intermediate-ca.conf file:
+## 2.6. Create a new intermediate-ca.conf file:
 
 ```
 [ ca ]
@@ -258,31 +266,35 @@ Change the [alt_names] section to whatever you need as Subject Alternative names
 
 If you need to set a specific certificate start / expiry date, add the following to [gluuca]
 
+```
 # format: YYYYMMDDHHMMSS
 default_enddate = 20191222035911
 default_startdate = 20181222035911
+```
 
 Generate an empty CRL (both in PEM and DER):
 
-`openssl ca -config intermediate-ca.conf -gencrl -keyfile intermediate1.key -cert intermediate1.crt -out intermediate1.crl.pem`
-`openssl crl -inform PEM -in intermediate1.crl.pem -outform DER -out intermediate1.crl`
+```
+openssl ca -config intermediate-ca.conf -gencrl -keyfile intermediate1.key -cert intermediate1.crt -out intermediate1.crl.pem
+openssl crl -inform PEM -in intermediate1.crl.pem -outform DER -out intermediate1.crl
+```
 
-2.7. This is sample to show how to revoke cert. Use it only when you need to revoke the intermediate cert:
+## 2.7. This is sample to show how to revoke cert. Use it only when you need to revoke the intermediate cert:
 
 `openssl ca -config root-ca.conf -revoke intermediate1.crt -keyfile rootca.key -cert rootca.crt`
 
 
-3. Creating end user certificates
+# 3. Creating end user certificates
 We use this new intermediate CA to generate an end user certificate. Repeat these steps for every end user certificate you want to sign with this CA.
 
-3.1. Create folder for end user certs:
+## 3.1. Create folder for end user certs:
 `mkdir enduser-certs`
 
-3.2. Generate the end user's private key:
+## 3.2. Generate the end user's private key:
 
 `openssl genrsa -out enduser-certs/user-gluu.org.key 4096`
 
-3.3. Generate the end user's CSR:
+## 3.3. Generate the end user's CSR:
 
 `openssl req -new -sha256 -key enduser-certs/user-gluu.org.key -out enduser-certs/user-gluu.org.csr`
 
@@ -309,7 +321,7 @@ A challenge password []:
 An optional company name []:
 ```
 
-3.4. Sign the end user's CSR with the Intermediate 1 CA:
+## 3.4. Sign the end user's CSR with the Intermediate 1 CA:
 
 `openssl ca -batch -config intermediate-ca.conf -notext -in enduser-certs/user-gluu.org.csr -out enduser-certs/user-gluu.org.crt`
 
@@ -331,14 +343,16 @@ Write out database with 1 new entries
 Data Base Updated
 ```
 
-3.5. Generate the CRL (both in PEM and DER):
+## 3.5. Generate the CRL (both in PEM and DER):
 
-`openssl ca -config intermediate-ca.conf -gencrl -keyfile intermediate1.key -cert intermediate1.crt -out intermediate1.crl.pem`
-`openssl crl -inform PEM -in intermediate1.crl.pem -outform DER -out intermediate1.crl`
+```
+openssl ca -config intermediate-ca.conf -gencrl -keyfile intermediate1.key -cert intermediate1.crt -out intermediate1.crl.pem
+openssl crl -inform PEM -in intermediate1.crl.pem -outform DER -out intermediate1.crl
+```
 
 Generate the CRL after every certificate you sign with the CA.
 
-3.6. Create the certificate chain file by concatenating the Root and intermediate 1 certificates together.
+## 3.6. Create the certificate chain file by concatenating the Root and intermediate 1 certificates together.
 
 `cat ../rootca.crt intermediate1.crt > enduser-certs/user-gluu.org.chain`
 
@@ -351,23 +365,25 @@ user-gluu.org.chain
 ```
 
 You can also let the end user supply their own CSR and just send them the .crt file. Do not delete that from the server, otherwise you cannot revoke it.
-Validating the certificate
 
-3.7. This is sample to show how to revoke cert. Use it only when you need to revoke the end users cert:
+## 3.7. This is sample to show how to revoke cert. Use it only when you need to revoke the end users cert:
 
 `openssl ca -config intermediate-ca.conf -revoke enduser-certs/enduser-gluu.org.crt -keyfile intermediate1.key -cert intermediate1.crt`
 
-4. You can validate the end user certificate against the chain using the following command:
+# 4. Validating the certificate
 
-openssl verify -CAfile enduser-certs/user-gluu.org.chain enduser-certs/user-gluu.org.crt
+## 4.1. You can validate the end user certificate against the chain using the following command:
+
+`openssl verify -CAfile enduser-certs/user-gluu.org.chain enduser-certs/user-gluu.org.crt`
 
 Example output:
 ```
 enduser-certs/user-gluu.org.crt: OK
 ```
 
-You can also validate it against the CRL. Concatenate the PEM CRL and the chain together first:
-cat ../rootca.crt intermediate1.crt intermediate1.crl.pem > enduser-certs/user-gluu.org.crl.chain
+## 4.2. You can also validate it against the CRL. Concatenate the PEM CRL and the chain together first:
+
+`cat ../rootca.crt intermediate1.crt intermediate1.crl.pem > enduser-certs/user-gluu.org.crl.chain`
 
 Verify the certificate:
 `openssl verify -crl_check -CAfile enduser-certs/user-gluu.org.crl.chain enduser-certs/user-gluu.org.crt`
@@ -377,10 +393,11 @@ Example output:
 enduser-certs/user-gluu.org.crt: OK
 ```
 
-4. Export end user certificate to PKCS#12
+## 5. Export end user certificate to PKCS#12
 
 Convert a PEM certificate file and a private key to PKCS#12 (.pfx .p12)
 
+```
 openssl pkcs12 -export -out enduser-certs/user-gluu.org.pfx -inkey enduser-certs/user-gluu.org.key -in enduser-certs/user-gluu.org.crt -certfile enduser-certs/user-gluu.org.chain
-
-                                                                                           *
+```
+                                                                                           
