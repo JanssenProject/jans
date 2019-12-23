@@ -620,7 +620,7 @@ state the exclusion of warranty; and each file should have at least
 the “copyright” line and a pointer to where the full notice is found.
 
     Gluu oxd OAuth middleware server
-    Copyright (C) 2019  Gluu, Inc.
+    Copyright (C) 2020  Gluu, Inc.
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
