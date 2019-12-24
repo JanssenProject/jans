@@ -46,14 +46,13 @@ public class ValidationService {
     public void isOpHostAllowed(String opHost) {
         List<String> allowedOpHosts = configuration.getAllowedOpHosts();
         if (!Strings.isNullOrEmpty(opHost) && !allowedOpHosts.isEmpty()) {
-            if (!allowedOpHosts.stream().anyMatch(allowedUrl ->
-                {
-                    try {
-                        return (new URL(allowedUrl)).equals(new URL(opHost));
-                    } catch (MalformedURLException e) {
-                        throw new HttpException(ErrorResponseCode.INVALID_ALLOWED_OP_HOST_URL);
+            if (!allowedOpHosts.stream().anyMatch(allowedUrl -> {
+                        try {
+                            return (new URL(allowedUrl)).equals(new URL(opHost));
+                        } catch (MalformedURLException e) {
+                            throw new HttpException(ErrorResponseCode.INVALID_ALLOWED_OP_HOST_URL);
+                        }
                     }
-                }
             )) {
                 throw new HttpException(ErrorResponseCode.RESTRICTED_OP_HOST);
             }
@@ -77,8 +76,8 @@ public class ValidationService {
             try {
                 String oxdId = ((HasOxdIdParams) params).getOxdId();
                 if (StringUtils.isNotBlank(oxdId)) {
-                    final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
-                    final Rp rp = rpService.getRp(oxdId);
+                    final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
+                    final Rp rp = rpSyncService.getRp(oxdId);
                     if (rp != null) {
                         return new Pair<>(rp, false);
                     }
@@ -102,8 +101,8 @@ public class ValidationService {
             GetRpParams p = (GetRpParams) params;
             String oxdId = p.getOxdId();
             if (StringUtils.isNotBlank(oxdId) && (p.getList() == null || !p.getList())) {
-                final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
-                Rp rp = rpService.getRp(oxdId);
+                final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
+                Rp rp = rpSyncService.getRp(oxdId);
                 if (rp != null) {
                     return new Pair<>(rp, true);
                 }
@@ -132,9 +131,9 @@ public class ValidationService {
             return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
         }
 
-        final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+        final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
 
-        final Rp rp = rpService.getRp(params.getOxdId());
+        final Rp rp = rpSyncService.getRp(params.getOxdId());
 
         final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
 
@@ -157,8 +156,8 @@ public class ValidationService {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
-        final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
-        final Rp rp = rpService.getRp(oxdId);
+        final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
+        final Rp rp = rpSyncService.getRp(oxdId);
 
         LOG.trace("Introspect token with rp: " + rp);
 
