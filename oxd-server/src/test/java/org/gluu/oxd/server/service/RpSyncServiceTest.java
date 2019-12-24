@@ -3,21 +3,23 @@ package org.gluu.oxd.server.service;
 import com.google.inject.Inject;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.testing.ResourceHelpers;
+import org.gluu.oxauth.client.RegisterResponse;
+import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.gluu.oxd.server.RegisterSiteTest;
 import org.gluu.oxd.server.TestUtils;
+import org.gluu.oxd.server.Tester;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.guice.GuiceModule;
+import org.gluu.oxd.server.mapper.RegisterResponseMapper;
 import org.gluu.oxd.server.persistence.PersistenceService;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Guice;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.testng.AssertJUnit.assertFalse;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.*;
 
 @Guice(modules = GuiceModule.class)
 public class RpSyncServiceTest {
@@ -25,7 +27,7 @@ public class RpSyncServiceTest {
     @Inject
     ConfigurationService configurationService;
     @Inject
-    RpService service;
+    RpService rpService;
     @Inject
     RpSyncService rpSyncService;
     @Inject
@@ -35,8 +37,8 @@ public class RpSyncServiceTest {
     public void setUp() throws IOException, ConfigurationException {
         configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml")));
         persistenceService.create();
-        service.removeAllRps();
-        service.load();
+        rpService.removeAllRps();
+        rpService.load();
     }
 
     @AfterSuite
@@ -47,7 +49,7 @@ public class RpSyncServiceTest {
     @Test
     public void forNullRp_shouldNotSync() {
         assertFalse(rpSyncService.shouldSync(null));
-        service.removeAllRps();
+        rpService.removeAllRps();
     }
 
     @Test
@@ -116,5 +118,21 @@ public class RpSyncServiceTest {
         rp.setLastSynced(Utils.addTimeToDate(new Date(), -10, Calendar.MINUTE));
         rp.setSyncClientPeriodInSeconds(15 * 60);
         assertFalse(rpSyncService.shouldSync(rp));
+    }
+
+    @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
+    @Test
+    public void testRpSync(String host, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUrl) throws IOException {
+        RegisterSiteResponse resp = RegisterSiteTest.registerSite(Tester.newClient(host), opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, true);
+        Rp oxdRpBeforeSync = rpService.getRps().get(resp.getOxdId());
+
+        final RegisterResponse response = rpSyncService.readClientFromRp(resp.getClientRegistrationClientUri(), resp.getClientRegistrationAccessToken());
+
+        Rp opClientRp = RegisterResponseMapper.createRp(response);
+        Rp oxdRpAfterSync = rpSyncService.getRpTest(resp.getOxdId());
+        //grant_types of Rp before sync are not equal to grant_types of client at OP
+        assertNotSame(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(oxdRpBeforeSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
+        //grant_types of Rp after sync are equal to grant_types of client at OP
+        assertEquals(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(oxdRpAfterSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
     }
 }

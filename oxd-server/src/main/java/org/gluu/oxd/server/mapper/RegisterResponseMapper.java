@@ -261,7 +261,7 @@ public class RegisterResponseMapper {
         return isRpChanged;
     }
 
-    private static Rp createRp(RegisterResponse response) {
+    public static Rp createRp(RegisterResponse response) {
         Rp rpFromRegisterResponse = new Rp();
         RegisterRequest request = RegisterRequest.fromJson(response.getEntity(), false);
 

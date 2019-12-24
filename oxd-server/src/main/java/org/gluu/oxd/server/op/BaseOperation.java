@@ -90,6 +90,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(RpService.class);
     }
 
+    public RpSyncService getRpSyncService() {
+        return getInstance(RpSyncService.class);
+    }
+
     public ConfigurationService getConfigurationService() {
         return getInstance(ConfigurationService.class);
     }
@@ -107,7 +111,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
-            return getRpService().getRp(hasOxdId.getOxdId());
+            return getRpSyncService().getRp(hasOxdId.getOxdId());
         }
         throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }
