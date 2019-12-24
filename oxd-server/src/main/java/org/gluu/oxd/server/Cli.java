@@ -28,6 +28,7 @@ import org.gluu.oxd.server.persistence.PersistenceService;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.RpService;
+import org.gluu.oxd.server.service.RpSyncService;
 import org.gluu.util.Pair;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,7 @@ public class Cli {
             injector.getInstance(PersistenceService.class).create();
 
             RpService rpService = injector.getInstance(RpService.class);
+            RpSyncService rpSyncService = injector.getInstance(RpSyncService.class);
             rpService.load();
 
             //check multiple options
@@ -89,7 +91,7 @@ public class Cli {
 
             // view by oxd_id
             if (cmd.hasOption("oxd_id")) {
-                print(oxdId, rpService.getRp(oxdId));
+                print(oxdId, rpSyncService.getRp(oxdId));
                 return;
             }
 
@@ -343,5 +345,3 @@ public class Cli {
     }
 
 }
-
-
