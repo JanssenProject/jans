@@ -41,7 +41,7 @@ public class GetRpOperation extends BaseOperation<GetRpParams> {
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rps));
         }
 
-        Rp rp = getRpService().getRp(params.getOxdId());
+        Rp rp = getRpSyncService().getRp(params.getOxdId());
         if (rp != null) {
             return new GetRpResponse(Jackson2.createJsonMapper().valueToTree(rp));
         } else {
