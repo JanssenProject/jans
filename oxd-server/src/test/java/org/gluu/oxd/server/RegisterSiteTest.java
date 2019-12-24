@@ -32,7 +32,7 @@ public class RegisterSiteTest {
     @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
     public void register(String host, String opHost, String redirectUrls,  String logoutUrl, String postLogoutRedirectUrls) {
-        RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl);
+        RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl, false);
         assertNotNull(resp);
 
         notEmpty(resp.getOxdId());
@@ -161,10 +161,10 @@ public class RegisterSiteTest {
     }
 
     public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrls) {
-        return registerSite(client, opHost, redirectUrls, redirectUrls, "");
+        return registerSite(client, opHost, redirectUrls, redirectUrls, "", false);
     }
 
-    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUri) {
+    public static RegisterSiteResponse registerSite(ClientInterface client, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUri, boolean syncClientFromOp) {
 
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
@@ -178,6 +178,8 @@ public class RegisterSiteTest {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setSyncClientFromOp(syncClientFromOp);
+        params.setSyncClientPeriodInSeconds(0);
 
         final RegisterSiteResponse resp = client.registerSite(params);
         assertNotNull(resp);
