@@ -45,6 +45,7 @@ public class UmaTokenService {
     private static final Logger LOG = LoggerFactory.getLogger(UmaTokenService.class);
 
     private final RpService rpService;
+    private final RpSyncService rpSyncService;
     private final ValidationService validationService;
     private final DiscoveryService discoveryService;
     private final HttpService httpService;
@@ -54,6 +55,7 @@ public class UmaTokenService {
 
     @Inject
     public UmaTokenService(RpService rpService,
+                           RpSyncService rpSyncService,
                            ValidationService validationService,
                            DiscoveryService discoveryService,
                            HttpService httpService,
@@ -62,6 +64,7 @@ public class UmaTokenService {
                            OpClientFactory opClientFactory
     ) {
         this.rpService = rpService;
+        this.rpSyncService = rpSyncService;
         this.validationService = validationService;
         this.discoveryService = discoveryService;
         this.httpService = httpService;
@@ -71,7 +74,7 @@ public class UmaTokenService {
     }
 
     public RpGetRptResponse getRpt(RpGetRptParams params) throws Exception {
-        Rp rp = rpService.getRp(params.getOxdId());
+        Rp rp = rpSyncService.getRp(params.getOxdId());
         UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(params.getOxdId());
 
         if (!Strings.isNullOrEmpty(rp.getRpt()) && rp.getRptExpiresAt() != null) {
@@ -171,7 +174,7 @@ public class UmaTokenService {
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
 
         if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -188,7 +191,7 @@ public class UmaTokenService {
     }
 
     public Pat obtainPat(String oxdId) {
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
         Token token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
 
         site.setPat(token.getToken());
@@ -204,7 +207,7 @@ public class UmaTokenService {
     public Token getOAuthToken(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
 
         if (site.getOauthToken() != null && site.getOauthTokenCreatedAt() != null && site.getOauthTokenExpiresIn() != null && site.getOauthTokenExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -221,7 +224,7 @@ public class UmaTokenService {
     }
 
     public Token obtainOauthToken(String oxdId) {
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
         Token token = obtainToken(oxdId, null, site);
 
         site.setOauthToken(token.getToken());

@@ -28,7 +28,7 @@ public class GetLogoutUrlTest {
     public void test(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "", false);
 
         final GetLogoutUrlParams params = new GetLogoutUrlParams();
         params.setOxdId(site.getOxdId());
