@@ -45,7 +45,7 @@ public class GetAuthorizationUrlTest {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl,
-                logoutUrl);
+                logoutUrl, false);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
         commandParams.setRedirectUri(paramRedirectUrl);
@@ -107,7 +107,7 @@ public class GetAuthorizationUrlTest {
     public void testWithCustomStateParameter(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl, String state) throws IOException {
         ClientInterface client = Tester.newClient(host);
 
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl, false);
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
         commandParams.setRedirectUri(paramRedirectUrl);
