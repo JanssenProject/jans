@@ -40,14 +40,14 @@ public class DiscoveryService {
     private final ConcurrentMap<String, UmaMetadata> umaMap = new ConcurrentHashMap<String, UmaMetadata>();
 
     private final HttpService httpService;
-    private final RpService rpService;
+    private final RpSyncService rpSyncService;
     private final ValidationService validationService;
     private final OpClientFactory opClientFactory;
 
     @Inject
-    public DiscoveryService(HttpService httpService, RpService rpService, ValidationService validationService, OpClientFactory opClientFactory) {
+    public DiscoveryService(HttpService httpService, RpSyncService rpSyncService, ValidationService validationService, OpClientFactory opClientFactory) {
         this.httpService = httpService;
-        this.rpService = rpService;
+        this.rpSyncService = rpSyncService;
         this.validationService = validationService;
         this.opClientFactory = opClientFactory;
     }
@@ -55,7 +55,7 @@ public class DiscoveryService {
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
         return getConnectDiscoveryResponse(site);
     }
 
@@ -98,7 +98,7 @@ public class DiscoveryService {
     public UmaMetadata getUmaDiscoveryByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpService.getRp(oxdId);
+        Rp site = rpSyncService.getRp(oxdId);
         return getUmaDiscovery(site.getOpHost(), site.getOpDiscoveryPath());
     }
 

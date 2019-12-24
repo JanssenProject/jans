@@ -24,7 +24,10 @@ public class RegisterRequestMapper {
 
     public static void fillRp(Rp rp, RegisterRequest request) {
 
-        rp.setClientName(request.getClientName());
+        if (!Strings.isNullOrEmpty(request.getClientName())) {
+            rp.setClientName(request.getClientName());
+        }
+
         rp.setApplicationType(safeToString(request.getApplicationType()));
         rp.setTokenEndpointAuthSigningAlg(safeToString(request.getTokenEndpointAuthSigningAlg()));
 
@@ -39,7 +42,9 @@ public class RegisterRequestMapper {
             rp.setRequestUris(request.getRequestUris());
         }
 
-        rp.setSectorIdentifierUri(request.getSectorIdentifierUri());
+        if (!Strings.isNullOrEmpty(request.getSectorIdentifierUri())) {
+            rp.setSectorIdentifierUri(request.getSectorIdentifierUri());
+        }
 
         if (CollectionUtils.isNotEmpty(request.getRedirectUris())) {
             rp.setRedirectUris(request.getRedirectUris());
@@ -70,14 +75,35 @@ public class RegisterRequestMapper {
             rp.setScope(request.getScope());
         }
 
-        rp.setLogoUri(request.getLogoUri());
-        rp.setClientUri(request.getClientUri());
-        rp.setPolicyUri(request.getPolicyUri());
+        if (!Strings.isNullOrEmpty(request.getLogoUri())) {
+            rp.setLogoUri(request.getLogoUri());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getClientUri())) {
+            rp.setClientUri(request.getClientUri());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getPolicyUri())) {
+            rp.setPolicyUri(request.getPolicyUri());
+        }
         rp.setFrontChannelLogoutSessionRequired(request.getFrontChannelLogoutSessionRequired());
-        rp.setTosUri(request.getTosUri());
-        rp.setJwks(request.getJwks());
-        rp.setIdTokenBindingCnf(request.getIdTokenTokenBindingCnf());
-        rp.setTlsClientAuthSubjectDn(request.getTlsClientAuthSubjectDn());
+
+        if (!Strings.isNullOrEmpty(request.getTosUri())) {
+            rp.setTosUri(request.getTosUri());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getJwks())) {
+            rp.setJwks(request.getJwks());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getIdTokenTokenBindingCnf())) {
+            rp.setIdTokenBindingCnf(request.getIdTokenTokenBindingCnf());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getTlsClientAuthSubjectDn())) {
+            rp.setTlsClientAuthSubjectDn(request.getTlsClientAuthSubjectDn());
+        }
+
         rp.setSubjectType(safeToString(request.getSubjectType()));
         rp.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(request.getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims());
         rp.setIdTokenSignedResponseAlg(safeToString(request.getIdTokenSignedResponseAlg()));
@@ -91,16 +117,28 @@ public class RegisterRequestMapper {
         rp.setRequestObjectEncryptionEnc(safeToString(request.getRequestObjectEncryptionEnc()));
         rp.setDefaultMaxAge(safeToNumber(request.getDefaultMaxAge()));
         rp.setRequireAuthTime(request.getRequireAuthTime());
-        rp.setInitiateLoginUri(request.getInitiateLoginUri());
+
+        if (!Strings.isNullOrEmpty(request.getInitiateLoginUri())) {
+            rp.setInitiateLoginUri(request.getInitiateLoginUri());
+        }
 
         if (CollectionUtils.isNotEmpty(request.getAuthorizedOrigins())) {
             rp.setAuthorizedOrigins(request.getAuthorizedOrigins());
         }
 
         rp.setAccessTokenLifetime(safeToNumber(request.getAccessTokenLifetime()));
-        rp.setSoftwareId(request.getSoftwareId());
-        rp.setSoftwareVersion(request.getSoftwareVersion());
-        rp.setSoftwareStatement(request.getSoftwareStatement());
+
+        if (!Strings.isNullOrEmpty(request.getSoftwareId())) {
+            rp.setSoftwareId(request.getSoftwareId());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getSoftwareVersion())) {
+            rp.setSoftwareVersion(request.getSoftwareVersion());
+        }
+
+        if (!Strings.isNullOrEmpty(request.getSoftwareStatement())) {
+            rp.setSoftwareStatement(request.getSoftwareStatement());
+        }
 
         if (MapUtils.isNotEmpty(request.getCustomAttributes())) {
             request.getCustomAttributes().entrySet().stream().forEach(e -> {
@@ -108,12 +146,13 @@ public class RegisterRequestMapper {
             });
         }
 
-        rp.setClientJwksUri(request.getJwksUri());
+        if (!Strings.isNullOrEmpty(request.getJwksUri())) {
+            rp.setClientJwksUri(request.getJwksUri());
+        }
 
         if (CollectionUtils.isNotEmpty(request.getClaimsRedirectUris())) {
             rp.setClaimsRedirectUri(request.getClaimsRedirectUris());
         }
-
     }
 
     public static RegisterRequest createRegisterRequest(Rp rp) {

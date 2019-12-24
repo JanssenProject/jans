@@ -48,6 +48,14 @@ public class RpSyncService {
 
         return sync(rp);
     }
+    //this method added to skip the vadidations while running test cases.
+    public Rp getRpTest(String oxdId) {
+        Rp rp = rpService.getRps().get(oxdId);
+        if (!shouldSync(rp))
+            return rp;
+
+        return sync(rp);
+    }
 
     private Rp sync(Rp rp) {
         if (!shouldSync(rp))
@@ -71,7 +79,7 @@ public class RpSyncService {
         }
     }
 
-    private RegisterResponse readClientFromRp(String clientRegistrationClientUri, String clientRegistrationAccessToken) {
+    public RegisterResponse readClientFromRp(String clientRegistrationClientUri, String clientRegistrationAccessToken) {
         final RegisterRequest request = new RegisterRequest(clientRegistrationAccessToken);
         request.setHttpMethod(HttpMethod.GET);
 
