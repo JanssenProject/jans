@@ -122,14 +122,13 @@ public class RpSyncServiceTest {
 
     @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void testRpSync(String host, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUrl) throws IOException {
+    public void testRpGrantTypesSync(String host, String opHost, String redirectUrls, String postLogoutRedirectUrls, String logoutUrl) throws IOException {
         RegisterSiteResponse resp = RegisterSiteTest.registerSite(Tester.newClient(host), opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, true);
-        Rp oxdRpBeforeSync = rpService.getRps().get(resp.getOxdId());
-
+        Rp oxdRpBeforeSync = rpService.getRps().get(resp.getOxdId());//grant_types: [authorization_code, uma-ticket, client_credentials]
         final RegisterResponse response = rpSyncService.readClientFromRp(resp.getClientRegistrationClientUri(), resp.getClientRegistrationAccessToken());
 
-        Rp opClientRp = RegisterResponseMapper.createRp(response);
-        Rp oxdRpAfterSync = rpSyncService.getRpTest(resp.getOxdId());
+        Rp opClientRp = RegisterResponseMapper.createRp(response);//grant_types: [refresh_token, implicit, authorization_code, uma-ticket, client_credentials]
+        Rp oxdRpAfterSync = rpSyncService.getRpTest(resp.getOxdId());//grant_types: [refresh_token, implicit, authorization_code, uma-ticket, client_credentials]
         //grant_types of Rp before sync are not equal to grant_types of client at OP
         assertNotSame(Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(oxdRpBeforeSync.getGrantType())), Jackson2.createRpMapper().readTree(Jackson2.serializeWithoutNulls(opClientRp.getGrantType())));
         //grant_types of Rp after sync are equal to grant_types of client at OP
