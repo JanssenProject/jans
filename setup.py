@@ -1025,7 +1025,10 @@ class Setup(object):
 
     def get_ip(self):
         testIP = None
-        detectedIP = self.detect_ip()
+        detectedIP = self.ip if self.ip else self.detect_ip()
+
+        if self.noPrompt and detectedIP:
+            return detectedIP
 
         while not testIP:
             if detectedIP:
@@ -3038,7 +3041,7 @@ class Setup(object):
         if self.installHttpd:
             self.ip = self.get_ip()
 
-        detectedHostname = self.detect_hostname()
+        detectedHostname = self.hostname if self.hostname else self.detect_hostname()
 
         if detectedHostname == 'localhost':
             detectedHostname = None
@@ -3055,33 +3058,33 @@ class Setup(object):
                 print "Hostname can't be \033[;1mlocalhost\033[0;0m"
 
         # Get city and state|province code
-        self.city = self.getPrompt("Enter your city or locality")
-        self.state = self.getPrompt("Enter your state or province two letter code")
+        self.city = self.getPrompt("Enter your city or locality", self.city)
+        self.state = self.getPrompt("Enter your state or province two letter code", self.state)
 
         # Get the Country Code
         long_enough = False
         while not long_enough:
-            countryCode = self.getPrompt("Enter two letter Country Code")
+            countryCode = self.getPrompt("Enter two letter Country Code", self.countryCode)
             if len(countryCode) != 2:
                 print "Country code must be two characters"
             else:
                 self.countryCode = countryCode
                 long_enough = True
 
-        self.orgName = self.getPrompt("Enter Organization Name")
+        self.orgName = self.getPrompt("Enter Organization Name", self.orgName)
         
         
         while True:
-            self.admin_email = self.getPrompt('Enter email address for support at your organization')
+            self.admin_email = self.getPrompt('Enter email address for support at your organization', self.admin_email)
             if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', self.admin_email):
                 break
             else:
                 print("Please enter valid email address")
 
         
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
-        
-        oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
+        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(self.application_max_ram))
+
+        oxtrust_admin_password = self.oxtrust_admin_password if self.oxtrust_admin_password else self.getPW(special='.*=!%&+/-')
 
         while True:
             oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
@@ -3109,8 +3112,10 @@ class Setup(object):
 
         if self.wrends_install == LOCAL:
 
+            ldapPass = self.ldapPass if self.ldapPass else self.oxtrust_admin_password
+
             while True:
-                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
+                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), ldapPass)
 
                 if checkPassword(ldapPass):
                     break
@@ -5333,9 +5338,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=parser_description)
     parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
     parser.add_argument('-d', help="Installation directory")
-    parser.add_argument('-r', help="Install oxAuth RP", action='store_true')
-    parser.add_argument('-p', help="Install Passport", action='store_true')
-    parser.add_argument('-s', help="Install the Shibboleth IDP", action='store_true')
+    parser.add_argument('-r', '--install-oxauth-rp', help="Install oxAuth RP", action='store_true')
+    parser.add_argument('-p', '--install-passport', help="Install Passport", action='store_true')
+    parser.add_argument('-s', '--install-shib', help="Install the Shibboleth IDP", action='store_true')
     parser.add_argument('-f', help="Specify setup.properties file")
     parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
     parser.add_argument('-N', help="No apache httpd server", action='store_true')
@@ -5348,11 +5353,28 @@ if __name__ == '__main__':
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
     parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
-    parser.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+
+    ldap_group = parser.add_mutually_exclusive_group()
+    ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
+    ldap_group.add_argument('--install-local-wrends', help="Installs local WrenDS", action='store_true')
+
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
+    parser.add_argument('--no-oxauth', help="Do not install oxAuth OAuth2 Authorization Server", action='store_true')
+    parser.add_argument('--no-oxtrust', help="Do not install oxTrust Admin UI", action='store_true')
+    parser.add_argument('--install-gluu-radius', help="Install oxTrust Admin UI", action='store_true')
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
-    
+    parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
+    parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
+    parser.add_argument('-org-name', help="Organization name field used for generating X.509 certificates")
+    parser.add_argument('-email', help="Email address for support at your organization used for generating X.509 certificates")
+    parser.add_argument('-city', help="City field used for generating X.509 certificates")
+    parser.add_argument('-state', help="State field used for generating X.509 certificates")
+    parser.add_argument('-country', help="Two letters country coude used for generating X.509 certificates")
+    parser.add_argument('-oxtrust-admin-password', help="Used as the default admin user for oxTrust")
+    parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
+    parser.add_argument('-application-max-ram', help="Used as the LDAP directory manager password")
+
     argsp = parser.parse_args()
 
     if (not argsp.c) and istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
@@ -5391,6 +5413,51 @@ if __name__ == '__main__':
         'loadData': True,
     }
 
+
+    if argsp.install_local_wrends:
+        setupOptions['wrends_install'] = LOCAL
+    
+    if argsp.no_oxauth:
+        setupOptions['installOxAuth'] = False
+    
+    if argsp.no_oxtrust:
+        setupOptions['installOxTrust'] = False
+
+    setupOptions['installGluuRadius'] = argsp.install_gluu_radius
+
+    if argsp.ip_address:
+        setupOptions['ip'] = argsp.ip_address
+
+    if argsp.host_name:
+        setupOptions['hostname'] = argsp.host_name
+        
+    if argsp.org_name:
+        setupOptions['orgName'] = argsp.org_name
+
+    if argsp.email:
+        setupOptions['admin_email'] = argsp.email
+
+    if argsp.city:
+        setupOptions['city'] = argsp.city
+ 
+    if argsp.state:
+        setupOptions['state'] = argsp.state
+
+    if argsp.state:
+        setupOptions['state'] = argsp.state
+
+    if argsp.country:
+        setupOptions['countryCode'] = argsp.country
+
+    if argsp.application_max_ram:
+        setupOptions['application_max_ram'] = argsp.application_max_ram
+
+    if argsp.oxtrust_admin_password:
+        setupOptions['oxtrust_admin_password'] = argsp.oxtrust_admin_password
+
+    if argsp.ldap_admin_password:
+        setupOptions['ldapPass'] = argsp.ldap_admin_password
+
     if argsp.d:
         if os.path.exists(argsp.d):
             setupOptions['install_dir'] = argsp.d
@@ -5412,10 +5479,10 @@ if __name__ == '__main__':
     if argsp.stm:
         setupOptions['scimTestMode'] = 'true'
 
-    setupOptions['installSaml'] = argsp.s
+    setupOptions['installSaml'] = argsp.install_shib
     setupOptions['downloadWars'] = argsp.w
-    setupOptions['installOxAuthRP'] = argsp.r
-    setupOptions['installPassport'] = argsp.p
+    setupOptions['installOxAuthRP'] = argsp.install_oxauth_rp
+    setupOptions['installPassport'] = argsp.install_passport
     setupOptions['loadTestData']  = argsp.t
     setupOptions['loadTestDataExit'] = argsp.x
     setupOptions['allowPreReleasedFeatures'] = argsp.allow_pre_released_features
