@@ -85,13 +85,8 @@ public class UmaTokenService {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
-            Map<Scope, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
-            Client client = identity.getSessionClient().getClient();
-
-            if (client != null && client.isDisabled()) {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.DISABLED_CLIENT, "Client is disabled.");
-            }
-
+            Client client = umaValidationService.validate(identity.getSessionClient().getClient());
+            Map<Scope, Boolean> scopes = umaValidationService.validateScopes(scope, permissions, client);
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
             Claims claims = new Claims(idToken, pct, claimToken);
 
