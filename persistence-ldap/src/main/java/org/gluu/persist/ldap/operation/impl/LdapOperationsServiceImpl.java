@@ -350,7 +350,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
                 searchLimit = 100;
             }
 
-            boolean collectSearchResult = false;
+            boolean collectSearchResult;
 
             LDAPConnection ldapConnection = null;
             try {
