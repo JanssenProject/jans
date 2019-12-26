@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.model.uma;
 
+import org.gluu.oxauth.model.error.IErrorType;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.gluu.oxauth.model.error.IErrorType;
 
 /**
  * Error codes for UMA error responses.
@@ -109,7 +109,7 @@ public enum UmaErrorResponseType implements IErrorType {
 	/**
 	 * At least one of the scopes included in the request was not registered previously by this host.
 	 */
-	INVALID_RESOURCE_SCOPE("invalid_scope"),
+	INVALID_SCOPE("invalid_scope"),
 
 	/**
 	 * The provided client_id is not valid.
