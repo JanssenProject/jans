@@ -11,8 +11,10 @@ import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.service.InumService;
+import org.gluu.oxauth.service.SpontaneousScopeService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.oxauth.persistence.model.Scope;
@@ -52,6 +54,22 @@ public class UmaScopeService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private SpontaneousScopeService spontaneousScopeService;
+
+    public Scope getOrCreate(Client client, String scopeId) {
+        Scope fromLdap = getScope(scopeId);
+        if (fromLdap != null) { // already exists
+            return fromLdap;
+        }
+
+        if (!spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeId)) {
+            return null;
+        }
+
+        return spontaneousScopeService.createSpontaneousScopeIfNeeded(client, scopeId);
+    }
 
     public Scope getScope(String scopeId) {
         try {
@@ -168,7 +186,7 @@ public class UmaScopeService {
             }
         }
 
-        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Failed to persist scope.");
+        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Failed to persist scope.");
     }
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {
