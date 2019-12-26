@@ -142,7 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif jsonp != None:
                 # Completion of profile takes place
                 user_profile = json.loads(jsonp)
-                user_profile["mail"] = mail
+                user_profile["mail"] = [ mail ]
 
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
