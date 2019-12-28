@@ -52,6 +52,8 @@ public class OperationFactory {
                     return new UpdateSiteOperation(command, injector);
                 case RS_PROTECT:
                     return new RsProtectOperation(command, injector);
+                case RS_MODIFY:
+                    return new RsModifyOperation(command, injector);
                 case RS_CHECK_ACCESS:
                     return new RsCheckAccessOperation(command, injector);
                 case RP_GET_RPT:

@@ -5,16 +5,13 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.uma.JsonLogic;
-import org.gluu.oxauth.model.uma.JsonLogicNode;
-import org.gluu.oxauth.model.util.Util;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaResourceService;
+import org.gluu.oxauth.model.uma.JsonLogic;
+import org.gluu.oxauth.model.uma.JsonLogicNode;
 import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
 import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.RsProtectParams;
@@ -29,6 +26,9 @@ import org.gluu.oxd.rs.protect.resteasy.ServiceProvider;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -93,7 +93,6 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             resource.setId(entry.getValue());
             resource.setPath(entry.getKey().getPath());
             resource.setHttpMethods(entry.getKey().getHttpMethods());
-
             Set<String> scopes = Sets.newHashSet();
             Set<String> scopesForTicket = Sets.newHashSet();
             Set<String> scopeExpressions = Sets.newHashSet();
@@ -177,7 +176,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         JsonLogicNode jsonLogicNode = JsonLogicNodeParser.parseNode(scopeExpression);
         try {
             Object scope = JsonLogic.applyObject(jsonLogicNode.getRule().toString(), Util.asJsonSilently(jsonLogicNode.getData()));
-            if(scope == null || !jsonLogicNode.getData().contains(scope.toString())) {
+            if (scope == null || !jsonLogicNode.getData().contains(scope.toString())) {
                 throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
             }
         } catch (Exception e) {
