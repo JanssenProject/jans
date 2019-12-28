@@ -33,6 +33,7 @@ public enum CommandType {
 
     // UMA
     RS_PROTECT("uma_rs_protect"),
+    RS_MODIFY("uma_rs_modify"),
     RS_CHECK_ACCESS("uma_rs_check_access"),
     INTROSPECT_RPT("introspect_rpt"),
     RP_GET_RPT("uma_rp_get_rpt"),

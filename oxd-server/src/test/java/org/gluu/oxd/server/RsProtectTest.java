@@ -1,25 +1,23 @@
 package org.gluu.oxd.server;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.common.Jackson2;
-import org.gluu.oxd.server.op.RsProtectOperation;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.RsProtectParams2;
+import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.RsCheckAccessParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
 import org.gluu.oxd.common.response.RsProtectResponse;
 import org.gluu.oxd.rs.protect.RsResource;
+import org.gluu.oxd.server.op.RsProtectOperation;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
 import java.io.IOException;
 import java.util.List;
 
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.AssertJUnit.*;
 
 /**
  * @author Yuriy Zabrovarnyy

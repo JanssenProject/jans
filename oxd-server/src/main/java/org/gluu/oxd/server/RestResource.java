@@ -142,6 +142,14 @@ public class RestResource {
     }
 
     @POST
+    @Path("/uma-rs-modify")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String umaRsModify(@HeaderParam("Authorization") String authorization, String params) {
+        return process(CommandType.RS_MODIFY, params, RsModifyParams.class, authorization, uriInfo);
+    }
+
+    @POST
     @Path("/uma-rs-check-access")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

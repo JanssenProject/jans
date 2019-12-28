@@ -98,6 +98,12 @@ public interface ClientInterface {
     RsProtectResponse umaRsProtect(@HeaderParam("Authorization") String authorization, RsProtectParams2 params);
 
     @POST
+    @Path("/uma-rs-modify")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    RsModifyResponse umaRsModify(@HeaderParam("Authorization") String authorization, RsModifyParams params);
+
+    @POST
     @Path("/uma-rs-check-access")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
