@@ -21,7 +21,7 @@ public class RsModifyTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
-        protectResources(client, site, UmaFullTest.resourceList(rsProtect));
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
         RsCheckAccessTest.checkAccess(client, site);
         modifyResourcesWithScopes(client, site, UmaFullTest.resourceList(rsProtect));
 
@@ -34,20 +34,10 @@ public class RsModifyTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
-        protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression));
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression));
         RsCheckAccessTest.checkAccess(client, site);
         modifyResourcesWithScopeExpression(client, site, UmaFullTest.resourceList(rsProtectScopeExpression), correctScopeExpression);
 
-    }
-
-    public static UmaRsProtectResponse protectResources(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
-        final UmaRsProtectParams params = new UmaRsProtectParams();
-        params.setOxdId(site.getOxdId());
-        params.setResources(resources);
-
-        final UmaRsProtectResponse resp = client.umaRsProtect(getAuthorization(), params);
-        assertNotNull(resp);
-        return resp;
     }
 
     public static UmaRsProtectResponse modifyResourcesWithScopes(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
