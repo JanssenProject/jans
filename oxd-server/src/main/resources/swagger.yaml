@@ -1198,6 +1198,73 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /uma-rs-modify:
+    post:
+      tags:
+      - developers
+      summary: UMA RS Modify Resources
+      operationId: uma-rs-modify
+      description: UMA RS Modify Resource. This end-point can be used to modify one resource at a time from whole set of UMA resources of cient.
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: header
+        name: Authorization
+        type: string
+      - in: body
+        name: UmaRsModifyParams
+        schema:
+          type: object
+          required:
+          - oxd_id
+          - path
+          - http_method
+          - scopes / scope_expression
+          properties:
+            oxd_id:
+              type: string
+              example: bcad760f-91ba-46e1-a020-05e4281d91b6
+            path:
+              type: string
+              example: "/ws/document"
+            http_method:
+              type: string
+              example: "POST"
+            scopes:
+              type: array
+              items:
+                type: string
+                example: "http://photoz.example.com/dev/actions/view"
+            scope_expression:
+              type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            title: UmaRsModifyResponse
+            required:
+            - oxd_id
+            properties:
+              oxd_id:
+                type: string
+                example: "bcad760f-91ba-46e1-a020-05e4281d91b6"
+        400:
+          description: Invalid parameters are provided to endpoint.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        403:
+          description: Forbidden. Invalid access token provided in Authorization header.
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal error occured. Please check oxd-server.log file for details (usually located in /var/log/oxd-server/oxd-server.log).
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /uma-rs-check-access:
     post:
       tags:
