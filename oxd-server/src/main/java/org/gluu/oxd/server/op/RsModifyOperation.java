@@ -149,21 +149,8 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
                 if (!nodeValid) {
                     throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
                 }
-                validateScopeExpression(json);
+                RsProtectOperation.validateScopeExpression(json);
             }
-        }
-    }
-
-    public static void validateScopeExpression(String scopeExpression) {
-        JsonLogicNode jsonLogicNode = JsonLogicNodeParser.parseNode(scopeExpression);
-        try {
-            Object scope = JsonLogic.applyObject(jsonLogicNode.getRule().toString(), Util.asJsonSilently(jsonLogicNode.getData()));
-            if (scope == null || !jsonLogicNode.getData().contains(scope.toString())) {
-                throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
-            }
-        } catch (Exception e) {
-            LOG.trace("The scope expression is invalid. Please check the documentation and make sure it is a valid JsonLogic expression.", e);
-            throw new HttpException(ErrorResponseCode.UMA_FAILED_TO_VALIDATE_SCOPE_EXPRESSION);
         }
     }
 }
