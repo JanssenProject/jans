@@ -82,7 +82,8 @@ public enum ErrorResponseCode {
     FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site."),
     REDIRECT_URI_IS_NOT_REGISTERED(400, "redirect_uri_is_not_registered", "The authorization redirect uri is not registered."),
     FAILED_TO_GET_DISCOVERY(500, "failed_to_get_discovery", "Failed to get OP discovery configuration."),
-    SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct.");
+    SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
+    NO_UMA_OXD_ID_PARAMETER(400, "invalid_oxd_id_parameter", "oxd_id parameter is not specified or otherwise is not valid"),;
 
     private final int httpStatus;
     private final String code;
