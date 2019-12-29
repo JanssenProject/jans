@@ -79,19 +79,23 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
         try {
             String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
-            resourceService.updateResource("Bearer " + pat, umaResource.getId(), opUmaResource);
+            return update(pat, umaResource.getId(), site, resourceService, opUmaResource);
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to update resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                resourceService.updateResource("Bearer " + getUmaTokenService().obtainPat(params.getOxdId()), umaResource.getId(), opUmaResource); //refresh pat and update
+                return update(getUmaTokenService().obtainPat(params.getOxdId()).getToken(), umaResource.getId(), site, resourceService, opUmaResource);
+            } else {
+                throw e;
             }
-            throw e;
         }
+    }
 
-        updateRp(opUmaResource, site, umaResource.getId());
+    public RsModifyResponse update(String pat, String resourceId, Rp rp, UmaResourceService resourceService, UmaResource opUmaResource) {
+        resourceService.updateResource("Bearer " + pat, resourceId, opUmaResource);
+        updateRp(opUmaResource, rp, resourceId);
 
-        return new RsModifyResponse(site.getOxdId());
+        return new RsModifyResponse(rp.getOxdId());
     }
 
     private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
