@@ -2,7 +2,7 @@ package org.gluu.oxd.common.params;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class RsModifyParams implements HasAccessTokenParams {
     }
 
     public void setScopeExpression(String scopeExpression) {
-        this.scopeExpression = scopeExpression;
+        this.scopeExpression = correctScopeExpression(scopeExpression);
     }
 
     @Override
@@ -81,5 +81,12 @@ public class RsModifyParams implements HasAccessTokenParams {
         sb.append(", scopeExpression=").append(scopeExpression);
         sb.append('}');
         return sb.toString();
+    }
+
+    public static String correctScopeExpression(String input) {
+        if (!Strings.isNullOrEmpty(input) && !input.equals("null")) {
+            return input.replaceAll("'", "\"");//replacing all single quotes to double quotes
+        }
+        return input;
     }
 }
