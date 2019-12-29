@@ -6,8 +6,10 @@ import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaResourceService;
-import org.gluu.oxauth.model.uma.*;
-import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaResource;
+import org.gluu.oxauth.model.uma.UmaResourceWithId;
 import org.gluu.oxd.common.*;
 import org.gluu.oxd.common.params.RsModifyParams;
 import org.gluu.oxd.common.response.IOpResponse;
@@ -22,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,6 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientExecutor());
 
         UmaResource opUmaResource = getResource(resourceService, params, umaResource.getId());
-        setResource(umaResource, opUmaResource);
 
         try {
             String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
@@ -84,21 +84,14 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             LOG.debug("Failed to update resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
+                resourceService.updateResource("Bearer " + getUmaTokenService().obtainPat(params.getOxdId()), umaResource.getId(), opUmaResource); //refresh pat and update
             }
             throw e;
         }
 
-        update(umaResource, site);
+        updateRp(opUmaResource, site, umaResource.getId());
 
         return new RsModifyResponse(site.getOxdId());
-    }
-
-    private void setResource(org.gluu.oxd.server.model.UmaResource umaResource, UmaResource opUmaResource) {
-        umaResource.setScopes(opUmaResource.getScopes());
-        if (!Strings.isNullOrEmpty(opUmaResource.getScopeExpression()) && !opUmaResource.getScopeExpression().equals("null")) {
-            umaResource.setScopeExpressions(Lists.newArrayList());
-            umaResource.getScopeExpressions().add(opUmaResource.getScopeExpression());
-        }
     }
 
     private UmaResource getResource(UmaResourceService resourceService, RsModifyParams params, String resourceId) {
@@ -119,10 +112,18 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return umaResource;
     }
 
-    private void update(org.gluu.oxd.server.model.UmaResource resource, Rp site) throws IOException {
+    private void updateRp(UmaResource opUmaResource, Rp site, String resourceId) {
         List<org.gluu.oxd.server.model.UmaResource> umaResourceList = site.getUmaProtectedResources();
 
-        site.setUmaProtectedResources(umaResourceList.stream().map(res -> res.getId().equals(resource.getId()) ? resource : res).collect(Collectors.toList()));
+        site.setUmaProtectedResources(umaResourceList.stream().map(res -> {
+            if (res.getId().equals(resourceId)) {
+                res.setScopes(opUmaResource.getScopes());
+                if (!Strings.isNullOrEmpty(opUmaResource.getScopeExpression()) && !opUmaResource.getScopeExpression().equals("null")) {
+                    res.setScopeExpressions(Lists.newArrayList(opUmaResource.getScopeExpression()));
+                }
+            }
+            return res;
+        }).collect(Collectors.toList()));
 
         getRpService().update(site);
     }
@@ -130,7 +131,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
     private void validate(RsModifyParams params) {
 
         if (Strings.isNullOrEmpty(params.getOxdId())) {
-            throw new HttpException(ErrorResponseCode.NO_UMA_OXD_ID_PARAMETER);
+            throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
         }
 
         if (Strings.isNullOrEmpty(params.getHttpMethod())) {
