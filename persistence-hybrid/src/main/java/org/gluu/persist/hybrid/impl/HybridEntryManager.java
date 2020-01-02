@@ -23,6 +23,7 @@ import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
 import org.gluu.persist.key.impl.model.ParsedKey;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.BatchOperation;
@@ -274,8 +275,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 
     @Override
 	public String getPersistenceType(String primaryKey) {
-		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
-		return persistenceEntryManager.getPersistenceType(primaryKey);
+		return HybridEntryManagerFactory.PERSISTANCE_TYPE;
 	}
 
     private PersistenceEntryManager getPersistenceEntryManagerByKey(String key) {
