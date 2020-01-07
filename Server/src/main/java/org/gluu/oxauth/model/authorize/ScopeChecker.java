@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.authorize;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ScopeService;
@@ -75,7 +76,7 @@ public class ScopeChecker {
                 externalSpontaneousScopeService.executeExternalManipulateScope(context);
 
                 if (context.isAllowSpontaneousScopePersistence()) {
-                    spontaneousScopeService.createSpontaneousScopeIfNeeded(client, scopeRequested);
+                    spontaneousScopeService.createSpontaneousScopeIfNeeded(Sets.newHashSet(client.getAttributes().getSpontaneousScopes()), scopeRequested, client.getClientId());
                 }
             }
         }

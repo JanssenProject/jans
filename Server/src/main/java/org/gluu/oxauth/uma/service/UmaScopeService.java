@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,17 +59,21 @@ public class UmaScopeService {
     @Inject
     private SpontaneousScopeService spontaneousScopeService;
 
-    public Scope getOrCreate(Client client, String scopeId) {
+    public Scope getOrCreate(Client client, String scopeId, Set<String> regExps) {
         Scope fromLdap = getScope(scopeId);
         if (fromLdap != null) { // already exists
             return fromLdap;
         }
 
-        if (!spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeId)) {
+        if (!client.getAttributes().getAllowSpontaneousScopes()) {
             return null;
         }
 
-        return spontaneousScopeService.createSpontaneousScopeIfNeeded(client, scopeId);
+        if (!spontaneousScopeService.isAllowedBySpontaneousScopes_(regExps, scopeId)) {
+            return null;
+        }
+
+        return spontaneousScopeService.createSpontaneousScopeIfNeeded(regExps, scopeId, client.getClientId());
     }
 
     public Scope getScope(String scopeId) {
