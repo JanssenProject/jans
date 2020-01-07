@@ -1,20 +1,19 @@
 package org.gluu.oxauth.service;
 
+import com.google.common.collect.Lists;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Pair;
 import org.oxauth.persistence.model.Scope;
+import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Stateless
@@ -31,13 +30,13 @@ public class SpontaneousScopeService {
     @Inject
     private ScopeService scopeService;
 
-    public Scope createSpontaneousScopeIfNeeded(Client client, String scopeId) {
+    public Scope createSpontaneousScopeIfNeeded(Set<String> regExps, String scopeId, String clientId) {
         Scope fromPersistence = scopeService.getScopeById(scopeId);
         if (fromPersistence != null) { // scope already exists
             return fromPersistence;
         }
 
-        final Pair<Boolean, String> isAllowed = isAllowedByClientsSpontaneousScopes(client, scopeId);
+        final Pair<Boolean, String> isAllowed = isAllowedBySpontaneousScopes(regExps, scopeId);
         if (!isAllowed.getFirst()) {
             log.error("Forbidden by client. Check client configuration.");
             return null;
@@ -55,10 +54,9 @@ public class SpontaneousScopeService {
         scope.setDeletable(true);
         scope.setNewExpirationDate(new Date(getLifetime()));
         scope.setDn("inum=" + scope.getInum() + "," + staticConfiguration.getBaseDn().getScopes());
-        scope.getAttributes().setSpontaneousClientId(client.getClientId());
-        scope.getAttributes().setSpontaneousClientScopes(client.getAttributes().getSpontaneousScopes());
+        scope.getAttributes().setSpontaneousClientId(clientId);
+        scope.getAttributes().setSpontaneousClientScopes(Lists.newArrayList(isAllowed.getSecond()));
         scope.setUmaAuthorizationPolicies(regexpScope != null ? regexpScope.getUmaAuthorizationPolicies() : new ArrayList<>());
-
 
         scopeService.persist(scope);
         log.trace("Created spontaneous scope: " + scope.getId() + ", dn: " + scope.getDn());
@@ -76,15 +74,20 @@ public class SpontaneousScopeService {
     }
 
     public boolean isAllowedBySpontaneousScopes(Client client, String scopeRequested) {
-        return isAllowedByClientsSpontaneousScopes(client, scopeRequested).getFirst();
-    }
-
-    public Pair<Boolean, String> isAllowedByClientsSpontaneousScopes(Client client, String scopeRequested) {
         if (!client.getAttributes().getAllowSpontaneousScopes()) {
-            return new Pair<>(false, null);
+            return false;
         }
 
-        for (String spontaneousScope : client.getAttributes().getSpontaneousScopes()) {
+        return isAllowedBySpontaneousScopes(Sets.newHashSet(client.getAttributes().getSpontaneousScopes()), scopeRequested).getFirst();
+    }
+
+    public boolean isAllowedBySpontaneousScopes_(Set<String> regExps, String scopeRequested) {
+        return isAllowedBySpontaneousScopes(regExps, scopeRequested).getFirst();
+    }
+
+    public Pair<Boolean, String> isAllowedBySpontaneousScopes(Set<String> regExps, String scopeRequested) {
+
+        for (String spontaneousScope : regExps) {
             if (isAllowedBySpontaneousScope(spontaneousScope, scopeRequested)) {
                 return new Pair<>(true, spontaneousScope);
             }
@@ -93,9 +96,14 @@ public class SpontaneousScopeService {
         return new Pair<>(false, null);
     }
 
-    private boolean isAllowedBySpontaneousScope(String spontaneousScope, String scopeRequested) {
+    public boolean isAllowedBySpontaneousScope(String spontaneousScope, String scopeRequested) {
         try {
-            boolean result = Pattern.matches(spontaneousScope, scopeRequested);
+            boolean result = spontaneousScope.equals(scopeRequested);
+
+            if (!result) {
+                result = Pattern.matches(spontaneousScope, scopeRequested);
+            }
+
             if (result) {
                 log.trace("Scope {} allowed by spontaneous scope: {}", scopeRequested, spontaneousScope);
             }
