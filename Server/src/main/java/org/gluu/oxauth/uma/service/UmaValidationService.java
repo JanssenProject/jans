@@ -7,6 +7,7 @@
 package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -48,6 +49,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
@@ -187,7 +189,11 @@ public class UmaValidationService {
             }
 
             for (String s : permission.getScopes()) {
-                final Scope spontaneousScope = umaScopeService.getOrCreate(client, s);
+                if (resource.getScopes().contains(s)) {
+                    continue;
+                }
+
+                final Scope spontaneousScope = umaScopeService.getOrCreate(client, s, Sets.newHashSet(resource.getScopes()));
                 if (spontaneousScope == null) {
                     log.error("Scope isn't registered and is not allowed by spontaneous scopes. Scope: " + s);
                     throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_SCOPE, "At least one of the scopes isn't registered");
@@ -354,12 +360,13 @@ public class UmaValidationService {
         final Map<Scope, Boolean> result = new HashMap<Scope, Boolean>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-            for (String s : scopesRequested) {
-                final Scope ldapScope = umaScopeService.getOrCreate(client, s);
+            final Set<String> resourceScopes = resourceService.getResourceScopes(permissions.stream().map(UmaPermission::getResourceId).collect(Collectors.toSet()));
+            for (String scopeId : scopesRequested) {
+                final Scope ldapScope = umaScopeService.getOrCreate(client, scopeId, resourceScopes);
                 if (ldapScope != null) {
                     result.put(ldapScope, true);
                 } else {
-                    log.trace("Skip requested scope because it's not allowed, scope: " + s);
+                    log.trace("Skip requested scope because it's not allowed, scope: " + scopeId);
                 }
             }
         }
