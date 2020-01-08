@@ -182,6 +182,7 @@ public class UmaScopeService {
             newScope.setInum(inum);
             newScope.setDisplayName(scopeId);
             newScope.setId(scopeId);
+            newScope.setDeletable(false);
 
             final boolean persisted = persist(newScope);
             if (persisted) {
