@@ -20,7 +20,12 @@ import javax.inject.Named;
 
 import org.gluu.model.SchemaEntry;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.hybrid.impl.HybridEntryManager;
+import org.gluu.persist.hybrid.impl.HybridPersistenceOperationService;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.ldap.operation.LdapOperationService;
+import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.exception.InvalidSchemaUpdateException;
 import org.slf4j.Logger;
@@ -41,7 +46,7 @@ public class SchemaService {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     private DataSourceTypeService dataSourceTypeService;
@@ -57,7 +62,8 @@ public class SchemaService {
     public SchemaEntry getSchema() {
     	String shemaDn = getDnForSchema();
     	if (StringHelper.isNotEmpty(shemaDn)) { 
-    		SchemaEntry schemaEntry = ldapEntryManager.find(getDnForSchema(), SchemaEntry.class, null);
+        	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    		SchemaEntry schemaEntry = ldapPersistenceEntryManager.find(getDnForSchema(), SchemaEntry.class, null);
             return schemaEntry;
     	}
     	
@@ -87,7 +93,8 @@ public class SchemaService {
         schemaEntry.addObjectClass(objectClassDefinition);
 
         log.debug("Adding new objectClass: {}", schemaEntry);
-        ldapEntryManager.merge(schemaEntry);
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+        ldapPersistenceEntryManager.merge(schemaEntry);
     }
 
     /**
@@ -111,7 +118,8 @@ public class SchemaService {
         schemaEntry.addObjectClass(objectClassDefinition);
 
         log.debug("Removing objectClass: {}", schemaEntry);
-        ldapEntryManager.remove(schemaEntry);
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    	ldapPersistenceEntryManager.remove(schemaEntry);
     }
 
     /**
@@ -165,7 +173,8 @@ public class SchemaService {
         newSchemaEntry.addObjectClass(newObjectClassDefinition);
 
         log.debug("Adding attributeType to objectClass: {}", newSchemaEntry);
-        ldapEntryManager.merge(newSchemaEntry);
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    	ldapPersistenceEntryManager.merge(newSchemaEntry);
     }
 
     /**
@@ -212,7 +221,8 @@ public class SchemaService {
         schemaEntry.addObjectClass(newObjectClassDefinition);
 
         log.debug("Removing attributeType from objectClass: {}", schemaEntry);
-        ldapEntryManager.merge(schemaEntry);
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    	ldapPersistenceEntryManager.merge(schemaEntry);
 
     }
 
@@ -231,7 +241,8 @@ public class SchemaService {
         schemaEntry.addAttributeType(String.format(schemaAddAttributeDefinition, oid, name));
         log.debug("Adding new attributeType: {}", schemaEntry);
         log.info("merging data");
-        ldapEntryManager.merge(schemaEntry);
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    	ldapPersistenceEntryManager.merge(schemaEntry);
     }
 
     /**
@@ -251,7 +262,8 @@ public class SchemaService {
             schemaEntry.addAttributeType(attributeTypeDefinition);
 
             log.debug("Removing attributeType: {}", schemaEntry);
-            ldapEntryManager.remove(schemaEntry);
+        	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+        	ldapPersistenceEntryManager.remove(schemaEntry);
 
         }
     }
@@ -501,11 +513,24 @@ public class SchemaService {
      * @return DN string for DS schema
      */
     public String getDnForSchema() {
-        if (dataSourceTypeService.isLDAP(attributeService.getDnForAttribute(null))) {
-            return ((LdapOperationService) ldapEntryManager.getOperationService()).getSubschemaSubentry();
+    	PersistenceEntryManager ldapPersistenceEntryManager = getPersistenceEntryManager();
+    	if (ldapPersistenceEntryManager != null) {
+            return ((LdapOperationService) ldapPersistenceEntryManager.getOperationService()).getSubschemaSubentry();
     	} else {
     		return "";
     	}
+    }
+    
+    private PersistenceEntryManager getPersistenceEntryManager() {
+        if (dataSourceTypeService.isLDAP(attributeService.getDnForAttribute(null))) {
+        	if (persistenceEntryManager instanceof HybridEntryManager) {
+        		return ((HybridEntryManager) persistenceEntryManager).getPersistenceEntryManager(LdapEntryManagerFactory.PERSISTANCE_TYPE);
+        	}
+        	
+        	return persistenceEntryManager;
+        }
+        
+        return null;
     }
 
 }

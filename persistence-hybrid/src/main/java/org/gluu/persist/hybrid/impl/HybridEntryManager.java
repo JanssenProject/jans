@@ -412,4 +412,8 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
+	public PersistenceEntryManager getPersistenceEntryManager(String persistanceType) {
+		return persistenceEntryManagers.get(persistanceType);
+	}
+
 }
