@@ -925,13 +925,8 @@ class Setup(object):
                 txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
-            
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
-            
-            if self.ldap_type != 'couchbase':
-                txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
-
-
+            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
             txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
             txt += 'Install Gluu Radius '.ljust(30) + repr(self.installGluuRadius).rjust(35) + "\n"
@@ -3148,7 +3143,8 @@ class Setup(object):
             promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
             if promptForCB[0] == 'y':
                 self.cb_install = LOCAL
-        
+                self.isCouchbaseUserAdmin = True
+
                 while True:
                     cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), self.oxtrust_admin_password)
 
