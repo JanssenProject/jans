@@ -1830,7 +1830,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		return key.hashCode();
 	}
-
+    
 	protected byte[][] toBinaryValues(String[] attributeValues) {
 		byte[][] binaryValues = new byte[attributeValues.length][];
 

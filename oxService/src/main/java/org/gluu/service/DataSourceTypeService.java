@@ -18,7 +18,7 @@ public class DataSourceTypeService implements Serializable {
     private PersistenceEntryManager entryManager;
 
     public boolean isLDAP(String key) {
-        return entryManager.getPersistenceType(key).equals(LdapEntryManagerFactory.PERSISTANCE_TYPE);
+        return entryManager.getPersistenceType(key).equals(LdapEntryManagerFactory.PERSISTENCE_TYPE);
     }
 
 }
