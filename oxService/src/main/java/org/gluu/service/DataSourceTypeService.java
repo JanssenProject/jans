@@ -4,11 +4,11 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 
 import java.io.Serializable;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@RequestScoped
+@ApplicationScoped
 @Named
 public class DataSourceTypeService implements Serializable {
 
