@@ -193,7 +193,7 @@ public class UmaValidationService {
                     continue;
                 }
 
-                final Scope spontaneousScope = umaScopeService.getOrCreate(client, s, Sets.newHashSet(resource.getScopes()));
+                final Scope spontaneousScope = umaScopeService.getOrCreate(client, s, Sets.newHashSet(umaScopeService.getScopeIdsByDns(resource.getScopes())));
                 if (spontaneousScope == null) {
                     log.error("Scope isn't registered and is not allowed by spontaneous scopes. Scope: " + s);
                     throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_SCOPE, "At least one of the scopes isn't registered");
