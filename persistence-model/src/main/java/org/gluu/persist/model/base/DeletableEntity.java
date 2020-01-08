@@ -16,14 +16,14 @@ public class DeletableEntity extends BaseEntry implements Deletable {
     @AttributeName(name = "exp")
     private Date newExpirationDate;
     @AttributeName(name = "del")
-    private boolean deletable;
+    private Boolean deletable;
 
     @Override
-    public boolean isDeletable() {
+    public Boolean isDeletable() {
         return deletable;
     }
 
-    public void setDeletable(boolean deletable) {
+    public void setDeletable(Boolean deletable) {
         this.deletable = deletable;
     }
 
@@ -49,7 +49,7 @@ public class DeletableEntity extends BaseEntry implements Deletable {
 
     public boolean canDelete(Date now) {
     	Date exp = expirationDate != null ? expirationDate :  newExpirationDate;
-        return deletable && (exp == null || exp.before(now));
+        return deletable != null && deletable && (exp == null || exp.before(now));
     }
 
     @Override
