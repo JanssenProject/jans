@@ -336,6 +336,10 @@ public class OpenIdConfiguration extends HttpServlet {
 
 		try {
 			for (Scope scope : scopeService.getAllScopesList()) {
+			    if (scope.getScopeType() == ScopeType.SPONTANEOUS && scope.isDeletable()) {
+			        continue;
+                }
+
 				final JSONArray claimsList = new JSONArray();
 				final JSONObject mapping = new JSONObject();
 				mapping.put(scope.getId(), claimsList);
