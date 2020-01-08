@@ -4,6 +4,7 @@ import net.spy.memcached.*;
 import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -16,8 +17,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
-    @Inject
-    private Logger log;
+    private Logger log = LoggerFactory.getLogger(MemcachedProvider.class);
 
     @Inject
     private CacheConfiguration cacheConfiguration;

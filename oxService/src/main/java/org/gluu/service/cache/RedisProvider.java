@@ -55,6 +55,10 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         }
     }
 
+    public void setCacheConfiguration(CacheConfiguration cacheConfiguration){
+        this.cacheConfiguration=cacheConfiguration;
+    }
+
     private void decryptPassword(RedisConfiguration redisConfiguration) {
         try {
             String encryptedPassword = redisConfiguration.getPassword();
@@ -65,6 +69,10 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         } catch (StringEncrypter.EncryptionException e) {
             log.error("Error during redis password decryption", e);
         }
+    }
+
+    public boolean isConnected(){
+        return redisProvider.isConnected();
     }
 
 
@@ -107,5 +115,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     public CacheProviderType getProviderType() {
         return CacheProviderType.REDIS;
     }
+
+
 
 }

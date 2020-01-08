@@ -356,14 +356,23 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             try {
                 ldapConnection = getConnectionPool().getConnection();
                 ASN1OctetString cookie = null;
+                SimplePagedResponse simplePagedResponse = null;
                 if (start > 0) {
                     try {
-                        cookie = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, start);
+                    	simplePagedResponse = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, start); 
+                        cookie = simplePagedResponse.getCookie();
                     } catch (InvalidSimplePageControlException ex) {
                         throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified start", ex);
                     } catch (LDAPException ex) {
                         throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified start", ex);
                     }
+                }
+                
+                if ((cookie != null) && (cookie.getValueLength() == 0)) {
+                    SearchResult searchResultTemp = simplePagedResponse.getLastSearchResult();
+                    return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
+                            searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
+                            searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
                 }
 
                 do {
@@ -431,17 +440,18 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         return searchResult;
     }
 
-    private ASN1OctetString scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope,
+    private SimplePagedResponse scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope,
             Control[] controls, int start) throws LDAPException, InvalidSimplePageControlException {
         SearchRequest searchRequest = new SearchRequest(dn, scope, filter, "dn");
 
         int currentStartIndex = start;
         ASN1OctetString cookie = null;
+        SearchResult searchResult = null;
         do {
             int pageSize = Math.min(currentStartIndex, 100);
             searchRequest.setControls(new Control[] {new SimplePagedResultsControl(pageSize, cookie, true)});
             setControls(searchRequest, controls);
-            SearchResult searchResult = ldapConnection.search(searchRequest);
+            searchResult = ldapConnection.search(searchRequest);
 
             currentStartIndex -= searchResult.getEntryCount();
             try {
@@ -455,7 +465,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
             }
         } while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
 
-        return cookie;
+        return new SimplePagedResponse(cookie, searchResult);
     }
 
     /*
@@ -1158,6 +1168,26 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     @Override
     public boolean isConnected() {
         return connectionProvider.isConnected();
+    }
+    
+    private class SimplePagedResponse {
+
+		private ASN1OctetString cookie;
+		private SearchResult lastSearchResult;
+
+		public SimplePagedResponse(ASN1OctetString cookie, SearchResult lastSearchResult) {
+			this.cookie = cookie;
+			this.lastSearchResult = lastSearchResult;
+		}
+
+		public ASN1OctetString getCookie() {
+			return cookie;
+		}
+
+		public SearchResult getLastSearchResult() {
+			return lastSearchResult;
+		}
+
     }
 
 }
