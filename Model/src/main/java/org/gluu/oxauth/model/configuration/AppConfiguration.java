@@ -1545,6 +1545,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelTokenDeliveryModesSupported() {
+        if (backchannelTokenDeliveryModesSupported == null) backchannelTokenDeliveryModesSupported = Lists.newArrayList();
         return backchannelTokenDeliveryModesSupported;
     }
 
