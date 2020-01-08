@@ -45,7 +45,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
-    public static final String PERSISTANCE_TYPE = "hybrid";
+    public static final String PERSISTENCE_TYPE = "hybrid";
     public static final String PROPERTIES_FILE = "gluu-hybrid.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(HybridEntryManagerFactory.class);
@@ -59,13 +59,13 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
 
     @Override
     public String getPersistenceType() {
-        return PERSISTANCE_TYPE;
+        return PERSISTENCE_TYPE;
     }
 
     @Override
     public HashMap<String, String> getConfigurationFileNames() {
     	HashMap<String, String> confs = new HashMap<String, String>();
-    	confs.put(PERSISTANCE_TYPE, PROPERTIES_FILE);
+    	confs.put(PERSISTENCE_TYPE, PROPERTIES_FILE);
 
     	HashMap<String, String> allConfs = getAllConfigurationFileNames(PROPERTIES_FILE);
     	confs.putAll(allConfs);
@@ -123,7 +123,7 @@ public class HybridEntryManagerFactory implements PersistenceEntryManagerFactory
     		сonnectionProperties.put(persistenceType, entryManagerConf);
     	}
 
-		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
+		this.hybridMappingProperties = PropertiesHelper.filterProperties(conf, PERSISTENCE_TYPE);
 		
 		HybridPersistenceOperationService hybridOperationService = new HybridPersistenceOperationService(operationServices);
     	

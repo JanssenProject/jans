@@ -17,8 +17,6 @@ import javax.persistence.LockModeType;
 import javax.persistence.Query;
 
 import org.gluu.persist.event.DeleteNotifier;
-import org.gluu.persist.exception.operation.DeleteException;
-import org.gluu.persist.key.impl.KeyShortcuter;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
@@ -26,7 +24,6 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.ArrayHelper;
 
 /**
  * Methods which Entry Manager must provide
@@ -85,6 +82,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String primaryKey);
 
     boolean hasBranchesSupport(String primaryKey);
+	String getPersistenceType();
     String getPersistenceType(String primaryKey);
 
     Date decodeTime(String primaryKey, String date);
@@ -107,6 +105,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void importEntry(String dn, List<AttributeData> data);
 
     PersistenceOperationService getOperationService();
+    PersistenceEntryManager getPersistenceEntryManager(String persistenceType);
 
     boolean destroy();
 
