@@ -47,7 +47,7 @@ public class Scope extends DeletableEntity implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private Boolean defaultScope = false;
+    private Boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
     private Boolean oxAuthGroupClaims;
