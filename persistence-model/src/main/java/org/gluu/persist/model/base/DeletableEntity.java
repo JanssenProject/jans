@@ -16,7 +16,7 @@ public class DeletableEntity extends BaseEntry implements Deletable {
     @AttributeName(name = "exp")
     private Date newExpirationDate;
     @AttributeName(name = "del")
-    private boolean deletable = true;
+    private boolean deletable;
 
     @Override
     public boolean isDeletable() {
