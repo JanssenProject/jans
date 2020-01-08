@@ -23,27 +23,27 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
-    public static final String PERSISTANCE_TYPE = "ldap";
+    public static final String PERSISTENCE_TYPE = "ldap";
     public static final String LDAP_DEFAULT_PROPERTIES_FILE = "gluu-ldap.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManagerFactory.class);
 
     @Override
     public String getPersistenceType() {
-        return PERSISTANCE_TYPE;
+        return PERSISTENCE_TYPE;
     }
 
     @Override
     public HashMap<String, String> getConfigurationFileNames() {
     	HashMap<String, String> confs = new HashMap<String, String>();
-    	confs.put(PERSISTANCE_TYPE, LDAP_DEFAULT_PROPERTIES_FILE);
+    	confs.put(PERSISTENCE_TYPE, LDAP_DEFAULT_PROPERTIES_FILE);
 
     	return confs;
     }
 
 	@Override
     public LdapEntryManager createEntryManager(Properties conf) {
-		Properties entryManagerConf = PropertiesHelper.filterProperties(conf, PERSISTANCE_TYPE);
+		Properties entryManagerConf = PropertiesHelper.filterProperties(conf, PERSISTENCE_TYPE);
 
 		LdapConnectionProvider connectionProvider = new LdapConnectionProvider(entryManagerConf);
         if (!connectionProvider.isCreated()) {

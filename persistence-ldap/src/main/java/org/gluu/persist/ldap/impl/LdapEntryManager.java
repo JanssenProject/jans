@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryDeleteException;
@@ -31,7 +32,6 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
-import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
@@ -41,7 +41,6 @@ import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -910,9 +909,23 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String getPersistenceType() {
+		return LdapEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
     @Override
 	public String getPersistenceType(String primaryKey) {
-		return LdapEntryManagerFactory.PERSISTANCE_TYPE;
+		return LdapEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
+	@Override
+	public PersistenceEntryManager getPersistenceEntryManager(String persistenceType) {
+		if (LdapEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceType)) {
+			return this;
+		}
+		
+		return null;
 	}
 
     @Override

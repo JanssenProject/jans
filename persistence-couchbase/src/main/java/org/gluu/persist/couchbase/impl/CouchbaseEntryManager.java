@@ -8,7 +8,6 @@
 package org.gluu.persist.couchbase.impl;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +20,7 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
@@ -872,9 +872,23 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		return false;
 	}
 
+	@Override
+	public String getPersistenceType() {
+		return CouchbaseEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
     @Override
 	public String getPersistenceType(String primaryKey) {
-		return CouchbaseEntryManagerFactory.PERSISTANCE_TYPE;
+		return CouchbaseEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
+	@Override
+	public PersistenceEntryManager getPersistenceEntryManager(String persistenceType) {
+		if (CouchbaseEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceType)) {
+			return this;
+		}
+		
+		return null;
 	}
 
     @Override

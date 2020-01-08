@@ -22,6 +22,7 @@ import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.impl.BaseEntryManager;
 import org.gluu.persist.key.impl.GenericKeyConverter;
 import org.gluu.persist.key.impl.model.ParsedKey;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.BatchOperation;
@@ -271,10 +272,29 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	return persistenceEntryManager.hasBranchesSupport(dn);
 	}
 
+	@Override
+	public String getPersistenceType() {
+		return HybridEntryManagerFactory.PERSISTENCE_TYPE;
+	}
+
     @Override
 	public String getPersistenceType(String primaryKey) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
 		return persistenceEntryManager.getPersistenceType(primaryKey);
+	}
+
+	@Override
+	public PersistenceEntryManager getPersistenceEntryManager(String persistenceType) {
+		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagers.get(persistenceType);
+		if (persistenceEntryManager != null) {
+			return persistenceEntryManager;
+		}
+		
+		if (HybridEntryManagerFactory.PERSISTENCE_TYPE.equals(persistenceType)) {
+			return this;
+		}
+		
+		return null;
 	}
 
     private PersistenceEntryManager getPersistenceEntryManagerByKey(String key) {
@@ -410,10 +430,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	protected <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass,
 			Map<String, AttributeData> attributesFromLdapMap, List<AttributeDataModification> attributeDataModifications) {
         throw new UnsupportedOperationException("Method not implemented.");
-	}
-
-	public PersistenceEntryManager getPersistenceEntryManager(String persistanceType) {
-		return persistenceEntryManagers.get(persistanceType);
 	}
 
 }
