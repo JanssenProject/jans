@@ -28,4 +28,8 @@ public class HybridPersistenceOperationService implements PersistenceOperationSe
 		return true;
 	}
 
+	public List<PersistenceOperationService> getPersistenceOperationServices() {
+		return persistenceOperationServices;
+	}
+
 }
