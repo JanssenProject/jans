@@ -2858,12 +2858,16 @@ class Setup(object):
 
         if ldap_mappings:
             gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
+
         if couchbase_mappings:
-            gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(', '.join(couchbase_mappings)))
+            cb_map_list = []
+            for m in couchbase_mappings:
+                if not m == 'default':
+                    cb_map_list.append(self.couchbaseBucketDict[m]['mapping'])
+            cb_map_str = ', '.join(cb_map_list)
+            gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(cb_map_str))
         
         self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
-        
-        self.gluu_hybrid_roperties_content  = self.gluu_hybrid_roperties_content.replace('user','people, groups')
 
         self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
 
@@ -3566,8 +3570,14 @@ class Setup(object):
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.oxtrust_admin_password])
             
             self.post_messages.append(
-                "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
-                prop_fn,  self.oxtrust_admin_password, os.path.basename(prop_fn), os.path.basename(self.setup_properties_fn)))
+                "Encrypted properties file saved to {0}.enc with password {1}\n"
+                "Decrypt the file with the following command if you want to re-use:\n"
+                "openssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
+                        prop_fn,
+                        self.oxtrust_admin_password,
+                        os.path.basename(prop_fn),
+                        os.path.basename(self.setup_properties_fn))
+                    )
             
             self.run(['rm', '-f', prop_fn])
             
