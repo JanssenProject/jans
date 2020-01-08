@@ -43,6 +43,12 @@ public class SchemaService {
     @Inject
     private PersistenceEntryManager ldapEntryManager;
 
+    @Inject
+    private DataSourceTypeService dataSourceTypeService;
+
+    @Inject
+    private AttributeService attributeService;
+
     /**
      * Load schema from DS
      *
@@ -495,7 +501,7 @@ public class SchemaService {
      * @return DN string for DS schema
      */
     public String getDnForSchema() {
-    	if (ldapEntryManager.getOperationService() instanceof LdapOperationService) {
+        if (dataSourceTypeService.isLDAP(attributeService.getDnForAttribute(null))) {
             return ((LdapOperationService) ldapEntryManager.getOperationService()).getSubschemaSubentry();
     	} else {
     		return "";
