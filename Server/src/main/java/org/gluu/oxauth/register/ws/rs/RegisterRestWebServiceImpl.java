@@ -11,6 +11,10 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.ciba.CIBARegisterClientMetadataProxy;
+import org.gluu.oxauth.ciba.CIBARegisterClientResponseProxy;
+import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorProxy;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
@@ -59,11 +63,6 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
 import static org.gluu.oxauth.model.util.StringUtils.implode;
 import static org.gluu.oxauth.model.util.StringUtils.toList;
-
-import org.gluu.oxauth.ciba.CIBARegisterClientMetadataProxy;
-import org.gluu.oxauth.ciba.CIBARegisterClientResponseProxy;
-import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
 
 /**
  * Implementation for register REST web services.
@@ -248,6 +247,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 final Client client = new Client();
                 client.setDn("inum=" + inum + "," + clientsBaseDN);
                 client.setClientId(inum);
+                client.setDeletable(true);
                 client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
                 client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
                 client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
