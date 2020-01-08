@@ -1185,10 +1185,6 @@ public class Client extends DeletableEntity implements Serializable {
         this.softwareStatement = softwareStatement;
     }
 
-    public static Client instance() {
-        return new Client();
-    }
-
     public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
         return backchannelTokenDeliveryMode;
     }
