@@ -36,6 +36,7 @@ public enum ErrorResponseCode {
     INVALID_STATE(400, "invalid_state", "State value is not registered by oxd."),
     INVALID_ID_TOKEN_BAD_NONCE(500, "invalid_id_token_bad_nonce", "Invalid id_token. Nonce value from token does not match nonce from request."),
     INVALID_ID_TOKEN_BAD_AUDIENCE(500, "invalid_id_token_bad_audience", "Invalid id_token. Audience value from token does not match audience from request."),
+    INVALID_ID_TOKEN_BAD_AUTHORIZED_PARTY(500, "invalid_id_token_bad_authorized_party", "Invalid id_token. Authorized party value from token does not match client_id of client."),
     INVALID_ID_TOKEN_EXPIRED(500, "invalid_id_token_expired", "Invalid id_token. id_token expired."),
     INVALID_ID_TOKEN_BAD_ISSUER(500, "invalid_id_token_bad_issuer", "Invalid id_token. Bad issuer."),
     INVALID_ID_TOKEN_BAD_SIGNATURE(500, "invalid_id_token_bad_signature", "Invalid id_token. Bad signature."),
