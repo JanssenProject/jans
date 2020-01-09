@@ -2,8 +2,6 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
