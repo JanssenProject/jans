@@ -973,6 +973,13 @@ class Setup(object):
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
 
+        for fn in (
+                os.path.join(self.jetty_base, 'oxauth/webapps/oxauth.xml'),
+                os.path.join(self.jetty_base, 'identity/webapps/identity.xml'),
+                ):
+            if os.path.exists(fn):
+                cmd = [self.cmd_chown, 'jetty:jetty', fn]
+                self.run(cmd)
 
     def set_permissions(self):
         self.logIt("Changing permissions")
