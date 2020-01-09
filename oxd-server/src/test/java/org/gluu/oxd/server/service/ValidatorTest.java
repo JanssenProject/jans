@@ -7,6 +7,7 @@ import org.gluu.oxd.server.op.Validator;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class ValidatorTest {
 
@@ -49,17 +50,17 @@ public class ValidatorTest {
 
     @Test
     public void tokenWithNAzpNotClientId_shouldNotValid() throws InvalidJwtException {
-        //"aud": ["6b578a9b-7513-477a-9a7f-134-
-        // 3b487caf8"],
+        //"aud": ["6b578a9b-7513-477a-9a7f-134-3b487caf8","another_aud"],
         //"azp":"Not_equal_to_client_id"
-        final Jwt idToken = Jwt.parse("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiMnI1clZ2STdpMWxfcnNXZUV4bGRuUSIsImF1ZCI6WyI2YjU3OGE5Yi03NTEzLTQ3N2EtOWE3Zi0xMzQzYjQ4N2NhZjgiXSwiYXpwIjoiTm90X2VxdWFsX3RvX2NsaWVudF9pZCIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1NjgxODUzMjcsImlzcyI6Imh0dHBzOi8vZHVtbXktaXNzdWVyLm9yZyIsImV4cCI6MTk2ODE4ODkzMCwiaWF0IjoxNTY4MTg1MzMwLCJub25jZSI6IjdyNDZ1dDZlbXU5Z2kxMWduODA0NHVtNjQwIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.A8nBQuJhnhUtx-KoDrh1DipJ9w9Sil9dY0H-whsHvmA6RBHQHf3c5F2r6jqT8wSQeT7PJn164OIZ7F0abOhynUmXpsS7mp8JsDs4CuIeXlyBMTFNJRiI9Rzm-lJ3rr3fMbla_r2Y3YDHU4VLxGB3FkY6KRt3FnSt-d37a4GY1WE");
-        String clientId = "6b578a9b-7513-477a-9a7f";
+        final Jwt idToken = Jwt.parse("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiMnI1clZ2STdpMWxfcnNXZUV4bGRuUSIsImF1ZCI6WyI2YjU3OGE5Yi03NTEzLTQ3N2EtOWE3Zi0xMzQzYjQ4N2NhZjgiLCJhbm90aGVyX2F1ZCJdLCJhenAiOiJOb3RfZXF1YWxfdG9fY2xpZW50X2lkIiwic3ViIjoicy1fWmlyVnQ3Tk9EZG5XREFVR3JqVDJxVVp3SzZjWFRoYjlxVjk5di10ZyIsImF1dGhfdGltZSI6MTU2ODE4NTMyNywiaXNzIjoiaHR0cHM6Ly9kdW1teS1pc3N1ZXIub3JnIiwiZXhwIjoxOTY4MTg4OTMwLCJpYXQiOjE1NjgxODUzMzAsIm5vbmNlIjoiN3I0NnV0NmVtdTlnaTExZ244MDQ0dW02NDAiLCJveE9wZW5JRENvbm5lY3RWZXJzaW9uIjoib3BlbmlkY29ubmVjdC0xLjAifQ.Tnw-jF4p7VHgIE2_wcuP7WxRqtGFw2pmKltIri63hznYikYFC4frUZcJ44OKCt_tki2ZJY6EDhM1o9cPEz-_Vt-gsavfyDc711xlgNaPOBjGasdPvx5iilPLIogy4BXB4T3ROgqQpLQZf-00AQBBsrpZX5I2VJtLcyJL6_l3bKw");
+        String clientId = "6b578a9b-7513-477a-9a7f-1343b487caf8";
         try {
             Validator.validateAudience(idToken, clientId);
+            assertTrue(false);
         } catch (Exception e) {
             if (e instanceof HttpException) {
                 HttpException httpException = (HttpException)e;
-                assertFalse(httpException.getCode().getCode().equals("invalid_id_token_bad_authorized_party"));
+                assertTrue(httpException.getCode().getCode().equals("invalid_id_token_bad_authorized_party"));
             }
         }
     }
