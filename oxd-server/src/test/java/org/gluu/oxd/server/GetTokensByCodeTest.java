@@ -7,16 +7,19 @@ import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
+import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
+import org.gluu.oxd.common.response.UpdateSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.BadRequestException;
+import java.util.List;
 
-import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,6 +35,28 @@ public class GetTokensByCodeTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
         refreshToken(tokensResponse, client, site.getOxdId());
+    }
+
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret", "tokenAlgos"})
+    @Test
+    public void whenDifferentTokenAlgoUsed_shouldGetTokenInResponse(String host, String opHost, String redirectUrls, String userId, String userSecret, String tokenAlgos) {
+        ClientInterface client = Tester.newClient(host);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+        List<String> tokenAlgoList = Lists.newArrayList(tokenAlgos.split(" "));
+
+        for(String tokenAlgo : tokenAlgoList) {
+            updateSignedAlg(site, host, tokenAlgo);
+            GetTokensByCodeResponse2 tokensResp = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
+        }
+    }
+
+    public void updateSignedAlg(RegisterSiteResponse site, String host, String tokenAlgo) {
+
+        final UpdateSiteParams params = new UpdateSiteParams();
+        params.setOxdId(site.getOxdId());
+        params.setIdTokenSignedResponseAlg(tokenAlgo);
+        UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(), params);
+        assertNotNull(resp);
     }
 
     @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
