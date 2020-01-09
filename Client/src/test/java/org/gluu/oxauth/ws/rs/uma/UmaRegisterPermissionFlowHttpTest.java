@@ -82,6 +82,10 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         registerResourcePermission(this.registerResourceTest.resourceId, Arrays.asList("http://photoz.example.com/dev/scopes/view"));
     }
 
+    public String registerResourcePermission(List<String> scopes) throws Exception {
+        return registerResourcePermission(this.registerResourceTest.resourceId, scopes);
+    }
+
     public String registerResourcePermission(String resourceId, List<String> scopes) throws Exception {
 
         UmaPermission permission = new UmaPermission();
