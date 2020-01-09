@@ -438,25 +438,16 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestClientRegistrationFail1() throws Exception {
-        showTitle("requestClientRegistrationFail1");
+    public void failRegistration_whenRedirectUriIsNotSetForResponseTypeCode() throws Exception {
+        showTitle("failRegistration_whenRedirectUriIsNotSetForResponseTypeCode");
+
+        RegisterRequest request = new RegisterRequest();
+        request.setResponseTypes(Lists.newArrayList(ResponseType.CODE));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(null, null, null);
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
-    }
-
-    @Test
-    public void requestClientRegistrationFail2() throws Exception {
-        showTitle("requestClientRegistrationFail2");
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app", null); // Missing redirect URIs
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(request);
+        RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
