@@ -1,56 +1,92 @@
 package org.gluu.oxauth.ws.rs.uma;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Lists;
 import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.client.RegisterClient;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaRptIntrospectionService;
 import org.gluu.oxauth.client.uma.UmaTokenService;
 import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
 import org.gluu.oxauth.model.uma.UmaMetadata;
-import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
 import org.gluu.oxauth.model.uma.UmaTokenResponse;
 import org.gluu.oxauth.model.uma.wrapper.Token;
-import org.gluu.oxauth.model.util.Util;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.gluu.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest.encodeCredentials;
+import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class UmaSpontaneousScopeHttpTest extends BaseTest {
 
-    protected UmaMetadata metadata;
+    private static final String REDIRECT_URI = "https://cb.example.com";
+    public static final String USER_2_SCOPE = "/user/2";
 
-    protected RegisterResourceFlowHttpTest registerResourceTest;
-    protected UmaRegisterPermissionFlowHttpTest permissionFlowTest;
+    private UmaMetadata metadata;
 
-    protected UmaRptIntrospectionService rptStatusService;
-    protected UmaTokenService tokenService;
+    private RegisterResourceFlowHttpTest registerResourceTest;
+    private UmaRegisterPermissionFlowHttpTest permissionFlowTest;
 
-    protected Token pat;
-    protected String rpt;
-    protected UmaNeedInfoResponse needInfo;
-    protected String claimsGatheringTicket;
+    private UmaRptIntrospectionService rptStatusService;
+    private UmaTokenService tokenService;
+
+    private Token pat;
+    private String rpt;
+    private RegisterResponse clientResponse;
+
+    private void registerClient() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        List<String> scopes = Lists.newArrayList(
+                "openid", "uma_protection", "profile", "address", "email", "phone", "user_name"
+        );
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "UMA Spontaneous scope test", Lists.newArrayList(REDIRECT_URI));
+        registerRequest.setResponseTypes(Arrays.asList(ResponseType.values()));
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.values()));
+        registerRequest.setScope(scopes);
+        registerRequest.setAllowSpontaneousScopes(true); // allow spontaneous scopes (which are off by default)
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        clientResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(clientResponse.getStatus(), 200, "Unexpected response code: " + clientResponse.getEntity());
+        assertNotNull(clientResponse.getClientId());
+        assertNotNull(clientResponse.getClientSecret());
+        assertNotNull(clientResponse.getRegistrationAccessToken());
+        assertNotNull(clientResponse.getClientIdIssuedAt());
+        assertNotNull(clientResponse.getClientSecretExpiresAt());
+    }
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
-    public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
+    @Parameters({"umaMetaDataUrl"})
+    public void init(final String umaMetaDataUrl) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
         assert_(this.metadata);
 
-        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        registerClient();
+
+        pat = UmaClient.requestPat(tokenEndpoint, clientResponse.getClientId(), clientResponse.getClientSecret(), clientExecutor(true));
         assert_(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
@@ -63,97 +99,27 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
         this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientExecutor(true));
     }
 
-    /**
-     * Register resource
-     */
     @Test
     public void registerResource() throws Exception {
         showTitle("registerResource");
-        this.registerResourceTest.addResource();
+        this.registerResourceTest.registerResource(Lists.newArrayList("^/user/.+$"));
     }
 
-    /**
-     * RS registers permissions for specific resource.
-     */
+
     @Test(dependsOnMethods = {"registerResource"})
-    public void rsRegisterPermissions() throws Exception {
-        showTitle("rsRegisterPermissions");
-        permissionFlowTest.testRegisterPermission();
+    public void registerPermissions() throws Exception {
+        showTitle("registerPermissions");
+        permissionFlowTest.registerResourcePermission(Lists.newArrayList(USER_2_SCOPE));
     }
 
-    /**
-     * RP requests RPT with ticket and gets needs_info error (not all claims are provided, so redirect to claims-gathering endpoint)
-     */
-    @Test(dependsOnMethods = {"rsRegisterPermissions"})
-    @Parameters({"umaPatClientId", "umaPatClientSecret"})
-    public void requestRptAndGetNeedsInfo(String umaPatClientId, String umaPatClientSecret) throws Exception {
-        showTitle("requestRptAndGetNeedsInfo");
-
-        try {
-            tokenService.requestRpt(
-                    "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
-                    GrantType.OXAUTH_UMA_TICKET.getValue(),
-                    permissionFlowTest.ticket,
-                    null, null, null, null, null);
-        } catch (ClientResponseFailure ex) {
-            // expected need_info error :
-            // sample:  {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}
-            String entity = (String) ex.getResponse().getEntity(String.class);
-            System.out.println(entity);
-
-            assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");
-
-            needInfo = Util.createJsonMapper().readValue(entity, UmaNeedInfoResponse.class);
-            assert_(needInfo);
-            return;
-        }
-
-        throw new AssertionError("need_info error was not returned");
-    }
-
-
-    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
-    @Parameters({"umaPatClientId"})
-    public void claimsGathering(String umaPatClientId) throws Exception {
-        String gatheringUrl = needInfo.buildClaimsGatheringUrl(umaPatClientId, this.metadata.getClaimsInteractionEndpoint());
-
-        System.out.println(gatheringUrl);
-        System.out.println();
-        try {
-            startSelenium();
-            navigateToAuhorizationUrl(driver, gatheringUrl);
-            System.out.println(driver.getCurrentUrl());
-
-            driver.findElement(By.id("loginForm:country")).sendKeys("US");
-            driver.findElement(By.id("loginForm:gather")).click();
-
-            Thread.sleep(1000);
-            System.out.println(driver.getCurrentUrl());
-
-            driver.findElement(By.id("loginForm:city")).sendKeys("NY");
-            driver.findElement(By.id("loginForm:gather")).click();
-            Thread.sleep(1200);
-            // Finally after claims-redirect flow user gets redirect with new ticket
-            // Sample: https://client.example.com/cb?ticket=e8e7bc0b-75de-4939-a9b1-2425dab3d5ec
-            System.out.println(driver.getCurrentUrl());
-            claimsGatheringTicket = StringUtils.substringAfter(driver.getCurrentUrl(), "ticket=");
-        } finally {
-            stopSelenium();
-        }
-    }
-
-    /**
-     * Request RPT with all claims provided
-     */
-    @Test(dependsOnMethods = {"claimsGathering"})
-    @Parameters({"umaPatClientId", "umaPatClientSecret"})
-    public void successfulRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
+    @Test(dependsOnMethods = {"registerPermissions"})
+    public void successfulRptRequest() throws Exception {
         showTitle("successfulRptRequest");
 
         UmaTokenResponse response = tokenService.requestRpt(
-                "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
+                "Basic " + encodeCredentials(clientResponse.getClientId(), clientResponse.getClientSecret()),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
-                claimsGatheringTicket,
+                permissionFlowTest.ticket,
                 null, null, null, null, null);
         assert_(response);
 
@@ -161,37 +127,13 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     }
 
     @Test(dependsOnMethods = {"successfulRptRequest"})
-    @Parameters({"umaPatClientId", "umaPatClientSecret"})
-    public void repeatRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
-        showTitle("repeatRptRequest");
-        rsRegisterPermissions();
-        requestRptAndGetNeedsInfo(umaPatClientId, umaPatClientSecret);
-        claimsGathering(umaPatClientId);
-
-        showTitle("Request RPT with existing RPT (upgrade case) ... ");
-
-        UmaTokenResponse response = tokenService.requestRpt(
-                "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
-                GrantType.OXAUTH_UMA_TICKET.getValue(),
-                claimsGatheringTicket,
-                null, null, null, this.rpt, "oxd");
-        assert_(response);
-        assertTrue(response.getUpgraded());
-
-        this.rpt = response.getAccessToken();
-    }
-
-    /**
-     * RPT status request
-     */
-    @Test(dependsOnMethods = {"repeatRptRequest"})
     @Parameters()
-    public void rptStatus() throws Exception {
+    public void rptStatus() {
         showTitle("rptStatus");
-        assert_(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
-    }
+        final RptIntrospectionResponse status = this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, "");
+        assert_(status);
 
-    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
-        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
+        // at the end scope registered by permission must be present in RPT permission with scope allowed by spontaneous scope check
+        assertTrue(status.getPermissions().get(0).getScopes().contains(USER_2_SCOPE));
     }
 }
