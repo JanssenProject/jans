@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.jws.AbstractJwsSigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -69,9 +70,11 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             }
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
-            final Validator validator = new Validator(idToken, discoveryResponse, getKeyService(), getOpClientFactory());
+
+            final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), site);
+            final Validator validator = new Validator(jwsSigner, discoveryResponse);
             validator.validateNonce(getStateService());
-            validator.validateIdToken(site.getClientId());
+            validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
 
             // persist tokens
