@@ -2,6 +2,7 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
@@ -73,16 +74,19 @@ public class Validator {
         final String kid = jwsSignerObject.getIdToken().getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
         final String jwkUrl = discoveryResponse.getJwksUri();
 
+        if (signatureAlgorithm == null)
+            throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
+
         if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
             final RSAPublicKey publicKey = jwsSignerObject.getKeyService().getRSAPublicKey(jwkUrl, kid);
             return jwsSignerObject.getOpClientFactory().createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
-            return new HMACSigner(signatureAlgorithm, jwsSignerObject.getSite().getClientSecret());
+            return new HMACSigner(signatureAlgorithm, jwsSignerObject.getRp().getClientSecret());
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.EC) {
             ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(jwkUrl, kid);
             return new ECDSASigner(signatureAlgorithm, publicKey);
         }
-        return null;
+        throw new HttpException(ErrorResponseCode.ALGORITHM_NOT_SUPPORTED);
     }
 
     public void validateNonce(StateService stateService) {
@@ -109,7 +113,7 @@ public class Validator {
         try {
             final String issuer = jwsSignerObject.getIdToken().getClaims().getClaimAsString(JwtClaimName.ISSUER);
             final String nonceFromToken = jwsSignerObject.getIdToken().getClaims().getClaimAsString(JwtClaimName.NONCE);
-            final String clientId = jwsSignerObject.getSite().getClientId();
+            final String clientId = jwsSignerObject.getRp().getClientId();
 
             if (!Strings.isNullOrEmpty(nonce) && !nonceFromToken.endsWith(nonce)) {
                 LOG.error("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
@@ -164,7 +168,13 @@ public class Validator {
         final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
         if (!clientId.equalsIgnoreCase(audienceFromToken)) {
             List<String> audAsList = idToken.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
-            if (audAsList != null) {
+
+            if (audAsList != null && !audAsList.isEmpty()) {
+                //check for element in list format
+                if (hasListAsElement(audAsList)) {
+                    audAsList = arrStringToList(audAsList.get(0));
+                }
+
                 if (!audAsList.stream().anyMatch(aud -> clientId.equalsIgnoreCase(aud))) {
                     LOG.error("ID Token has invalid audience (string list). Expected audience: " + clientId + ", audience from token is: " + audAsList);
                     throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
@@ -187,6 +197,21 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
             }*/
         }
+    }
+
+    public static boolean hasListAsElement(List<String> audAsList) {
+        if (audAsList.size() == 1 && audAsList.get(0).contains("[") && audAsList.get(0).contains("]")) {
+            return true;
+        }
+        return false;
+    }
+
+    public static List<String> arrStringToList(String input) {
+        if (!Strings.isNullOrEmpty(input)) {
+            input = input.replaceAll("\"", "").replaceAll("\\[", "").replaceAll("\\]", "");
+            return Lists.newArrayList(input.split("\\s*,\\s*"));
+        }
+        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
     }
 
     public Jwt getIdToken() {
