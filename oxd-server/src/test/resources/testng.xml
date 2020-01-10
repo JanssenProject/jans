@@ -121,6 +121,11 @@
             <class name="org.gluu.oxd.server.RsModifyTest"/>
         </classes>
     </test>
+    <test name="Validator test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.service.ValidatorTest"/>
+        </classes>
+    </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
