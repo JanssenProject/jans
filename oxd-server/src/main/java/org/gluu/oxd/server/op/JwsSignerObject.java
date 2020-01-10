@@ -9,13 +9,13 @@ public class JwsSignerObject {
     private final Jwt idToken;
     private OpClientFactory opClientFactory;
     private final PublicOpKeyService keyService;
-    private final Rp site;
+    private final Rp rp;
 
-    public JwsSignerObject(Jwt idToken, OpClientFactory opClientFactory, PublicOpKeyService keyService, Rp site) {
+    public JwsSignerObject(Jwt idToken, OpClientFactory opClientFactory, PublicOpKeyService keyService, Rp rp) {
         this.idToken = idToken;
         this.opClientFactory = opClientFactory;
         this.keyService = keyService;
-        this.site = site;
+        this.rp = rp;
     }
 
     public Jwt getIdToken() {
@@ -30,7 +30,7 @@ public class JwsSignerObject {
         return keyService;
     }
 
-    public Rp getSite() {
-        return site;
+    public Rp getRp() {
+        return rp;
     }
 }
