@@ -64,4 +64,28 @@ public class ValidatorTest {
             }
         }
     }
+    // Test case to test issue#178
+    @Test
+    public void tokenWithAudArrayStringWithOneElement_shouldBeValid() throws InvalidJwtException {
+        //"aud": "[\"6b578a9b-7513-477a-9a7f-1343b487caf8\"]",
+        final Jwt idToken = Jwt.parse("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiMnI1clZ2STdpMWxfcnNXZUV4bGRuUSIsImF1ZCI6IltcIjZiNTc4YTliLTc1MTMtNDc3YS05YTdmLTEzNDNiNDg3Y2FmOFwiXSIsInN1YiI6InMtX1ppclZ0N05PRGRuV0RBVUdyalQycVVad0s2Y1hUaGI5cVY5OXYtdGciLCJhdXRoX3RpbWUiOjE1NjgxODUzMjcsImlzcyI6Imh0dHBzOi8vZHVtbXktaXNzdWVyLm9yZyIsImV4cCI6MTk2ODE4ODkzMCwiaWF0IjoxNTY4MTg1MzMwLCJub25jZSI6IjdyNDZ1dDZlbXU5Z2kxMWduODA0NHVtNjQwIiwib3hPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIn0.bFgbYtgt5OA2hdwAXXCwaVMUYprArsGoURJgaA0d-YfsDYu8HU9zVDraDhflSc2Wg9uMv4RAKqEfldDwLIRIocGk5XwjyeOHFAWAlDMeDSPUAWy7d7oNGwPrRNZu37RUT1ncRS9ZAIsOhtJjflUTD0J12DeD-wT_V6Jpv8jn3Mo");
+        String clientId = "6b578a9b-7513-477a-9a7f-1343b487caf8";
+        try {
+            Validator.validateAudience(idToken, clientId);
+        } catch (Exception e) {
+            assertFalse(e instanceof HttpException);
+        }
+    }
+    // Test case to test issue#178
+    @Test
+    public void tokenWithAudArrayStringWithMultiElements_shouldBeValid() throws InvalidJwtException {
+        //"aud": "[\"6b578a9b-7513-477a-9a7f-1343b487caf8\",\"another_element\"]",
+        final Jwt idToken = Jwt.parse("eyJraWQiOiJjZmFiMzRlYy0xNjhkLTQ4OTUtODRiOC0xZjAyNzgwNDkxYzciLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiMnI1clZ2STdpMWxfcnNXZUV4bGRuUSIsImF1ZCI6IltcIjZiNTc4YTliLTc1MTMtNDc3YS05YTdmLTEzNDNiNDg3Y2FmOFwiLFwiYW5vdGhlcl9lbGVtZW50XCJdIiwic3ViIjoicy1fWmlyVnQ3Tk9EZG5XREFVR3JqVDJxVVp3SzZjWFRoYjlxVjk5di10ZyIsImF1dGhfdGltZSI6MTU2ODE4NTMyNywiaXNzIjoiaHR0cHM6Ly9kdW1teS1pc3N1ZXIub3JnIiwiZXhwIjoxOTY4MTg4OTMwLCJpYXQiOjE1NjgxODUzMzAsIm5vbmNlIjoiN3I0NnV0NmVtdTlnaTExZ244MDQ0dW02NDAiLCJveE9wZW5JRENvbm5lY3RWZXJzaW9uIjoib3BlbmlkY29ubmVjdC0xLjAifQ.Z185fBjN4B6ghJaF7Szvvwq2_aNK8xnBdJWY_jZtSrb4DMqB8kXkEF9c11eIldt2fY3lj3cEPUIBjvW9-Bye-ClfGgqZ7eXGCXOEQ3pNdTV0YDSJDMjYOSTAnmeccx8hUsqKbSd0JoZUzaDWZgLYxXX1GodV_V_Nx_Xr3rWGGrc");
+        String clientId = "6b578a9b-7513-477a-9a7f-1343b487caf8";
+        try {
+            Validator.validateAudience(idToken, clientId);
+        } catch (Exception e) {
+            assertFalse(e instanceof HttpException);
+        }
+    }
 }
