@@ -311,14 +311,14 @@ class PersonAuthentication(PersonAuthenticationType):
         except:
             print "Casa. getSettings. Failed to parse casa settings from DB"
         return settings
-        
-        
+
+
     def computeMethods(self, scriptList):
 
         methods = []
         mapping = {}
         cmConfigs = self.getSettings()
-        
+
         if cmConfigs != None and 'acr_plugin_mapping' in cmConfigs:
             mapping = cmConfigs['acr_plugin_mapping']
 
@@ -420,13 +420,22 @@ class PersonAuthentication(PersonAuthenticationType):
     def determineSkip2FA(self, userService, identity, foundUser, deviceInf):
 
         cmConfigs = self.getSettings()
+
         if cmConfigs == None:
             print "Casa. determineSkip2FA. Failed to read policy_2fa"
             return False
-        elif 'policy_2fa' in cmConfigs:
+
+        missing = False
+        if not 'plugins_settings' in cmConfigs:
+            missing = True
+        elif not 'strong-authn-settings' in cmConfigs['plugins_settings']:
+            missing = True
+        elif:
+            cmConfigs = cmConfigs['plugins_settings']['strong-authn-settings']
+
+        policy2FA = 'EVERY_LOGIN'
+        if not missing and 'policy_2fa' in cmConfigs:
             policy2FA = ','.join(cmConfigs['policy_2fa'])
-        else:
-            policy2FA = 'EVERY_LOGIN'
 
         print "Casa. determineSkip2FA with general policy %s" % policy2FA
         policy2FA += ','
