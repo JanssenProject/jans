@@ -1848,8 +1848,8 @@ class Setup(object):
         try:
             self.renderTemplateInOut(serviceName, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
         except:
-            self.setup.logIt("Error rendering service '%s' defaults" % serviceName, True)
-            self.setup.logIt(traceback.format_exc(), True)
+            self.logIt("Error rendering service '%s' defaults" % serviceName, True)
+            self.logIt(traceback.format_exc(), True)
 
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
         self.copyFile(jettyServiceConfiguration, "/etc/default")
@@ -1862,8 +1862,8 @@ class Setup(object):
                 self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
                 self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
-            self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
-            self.setup.logIt(traceback.format_exc(), True)
+            self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
+            self.logIt(traceback.format_exc(), True)
 
         # Render web context file
         try:
@@ -1872,8 +1872,8 @@ class Setup(object):
                 self.renderTemplateInOut(web_context, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
                 self.copyFile('%s/jetty/%s' % (self.outputFolder, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
-            self.setup.logIt("Error rendering service '%s' context xml" % serviceName, True)
-            self.setup.logIt(traceback.format_exc(), True)
+            self.logIt("Error rendering service '%s' context xml" % serviceName, True)
+            self.logIt(traceback.format_exc(), True)
 
         initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
         self.fix_init_scripts(serviceName, initscript_fn)
