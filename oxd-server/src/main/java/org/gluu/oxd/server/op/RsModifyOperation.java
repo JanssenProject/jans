@@ -45,7 +45,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
     public IOpResponse execute(final RsModifyParams params) throws Exception {
         validate(params);
 
-        Rp site = getRp();
+        Rp rp = getRp();
 
         PatProvider patProvider = new PatProvider() {
             @Override
@@ -59,7 +59,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             }
         };
 
-        org.gluu.oxd.server.model.UmaResource umaResource = site.umaResource(params.getPath(), params.getHttpMethod());
+        org.gluu.oxd.server.model.UmaResource umaResource = rp.umaResource(params.getPath(), params.getHttpMethod());
         if (umaResource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
@@ -79,12 +79,12 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
 
         try {
             String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
-            return update(pat, umaResource.getId(), site, resourceService, opUmaResource);
+            return update(pat, umaResource.getId(), rp, resourceService, opUmaResource);
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to update resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                return update(getUmaTokenService().obtainPat(params.getOxdId()).getToken(), umaResource.getId(), site, resourceService, opUmaResource);
+                return update(getUmaTokenService().obtainPat(params.getOxdId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
             } else {
                 throw e;
             }
@@ -116,10 +116,10 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         return umaResource;
     }
 
-    private void updateRp(UmaResource opUmaResource, Rp site, String resourceId) {
-        List<org.gluu.oxd.server.model.UmaResource> umaResourceList = site.getUmaProtectedResources();
+    private void updateRp(UmaResource opUmaResource, Rp rp, String resourceId) {
+        List<org.gluu.oxd.server.model.UmaResource> umaResourceList = rp.getUmaProtectedResources();
 
-        site.setUmaProtectedResources(umaResourceList.stream().map(res -> {
+        rp.setUmaProtectedResources(umaResourceList.stream().map(res -> {
             if (res.getId().equals(resourceId)) {
                 res.setScopes(opUmaResource.getScopes());
                 if (!Strings.isNullOrEmpty(opUmaResource.getScopeExpression()) && !opUmaResource.getScopeExpression().equals("null")) {
@@ -129,7 +129,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
             return res;
         }).collect(Collectors.toList()));
 
-        getRpService().update(site);
+        getRpService().update(rp);
     }
 
     private void validate(RsModifyParams params) {

@@ -38,26 +38,26 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public IOpResponse execute(GetLogoutUrlParams params) throws Exception {
-        final Rp site = getRp();
+        final Rp rp = getRp();
 
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(rp);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         String postLogoutRedirectUrl = params.getPostLogoutRedirectUri();
         if (Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
-            postLogoutRedirectUrl = site.getPostLogoutRedirectUri();
+            postLogoutRedirectUrl = rp.getPostLogoutRedirectUri();
         }
         if (Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
             postLogoutRedirectUrl = "";
         }
 
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
-            if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
+            if (rp.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
                 String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
                 return new GetLogoutUriResponse(logoutUrl);
             }
 
-            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
+            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(rp));
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
