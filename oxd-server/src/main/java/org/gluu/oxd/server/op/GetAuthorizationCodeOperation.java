@@ -39,23 +39,23 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
     @Override
     public IOpResponse execute(GetAuthorizationCodeParams params) {
-        final Rp site = getRp();
+        final Rp rp = getRp();
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
         String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();
 
-        final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
-                site.getClientId(), site.getScope(), site.getRedirectUri(), nonce);
+        final AuthorizationRequest request = new AuthorizationRequest(responseTypes(rp.getResponseTypes()),
+                rp.getClientId(), rp.getScope(), rp.getRedirectUri(), nonce);
         request.setState(state);
         request.setAuthUsername(params.getUsername());
         request.setAuthPassword(params.getPassword());
         request.getPrompts().add(Prompt.NONE);
-        request.setAcrValues(acrValues(params, site));
+        request.setAcrValues(acrValues(params, rp));
 
         getStateService().putNonce(nonce);
         getStateService().putState(state);
 
-        final AuthorizeClient authorizeClient = getOpClientFactory().createAuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint());
+        final AuthorizeClient authorizeClient = getOpClientFactory().createAuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
         authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response = authorizeClient.exec();
@@ -70,13 +70,13 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         return null;
     }
 
-    private List<String> acrValues(GetAuthorizationCodeParams params, Rp site) {
+    private List<String> acrValues(GetAuthorizationCodeParams params, Rp rp) {
         List<String> acrs = Lists.newArrayList();
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
             acrs.addAll(params.getAcrValues());
         }
-        if (acrs.isEmpty() && site.getAcrValues() != null && !site.getAcrValues().isEmpty()) {
-            acrs.addAll(site.getAcrValues());
+        if (acrs.isEmpty() && rp.getAcrValues() != null && !rp.getAcrValues().isEmpty()) {
+            acrs.addAll(rp.getAcrValues());
         }
         return acrs;
     }

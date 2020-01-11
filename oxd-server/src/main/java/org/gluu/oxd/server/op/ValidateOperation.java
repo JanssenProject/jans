@@ -32,15 +32,15 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     public IOpResponse execute(ValidateParams params) throws Exception {
         validateParams(params);
 
-        Rp site = getRp();
+        Rp rp = getRp();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
         final Jwt idToken = Jwt.parse(params.getIdToken());
 
-        final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), site);
+        final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), rp);
         final Validator validator = new Validator(jwsSigner, discoveryResponse);
         validator.validateNonce(getStateService());
-        validator.validateIdToken(site.getClientId());
+        validator.validateIdToken(rp.getClientId());
         validator.validateAccessToken(params.getAccessToken());
         validator.validateAuthorizationCode(params.getCode());
 
