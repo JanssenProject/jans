@@ -14,6 +14,7 @@ import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.service.PublicOpKeyService;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,8 +72,12 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
 
-            final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), rp);
-            final Validator validator = new Validator(jwsSigner, discoveryResponse);
+            final Validator validator = new Validator.ValidatorBuilder(discoveryResponse,
+                    idToken,
+                    getOpClientFactory(),
+                    getKeyService(),
+                    rp).build();
+
             validator.validateNonce(getStateService());
             validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
