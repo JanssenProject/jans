@@ -35,10 +35,10 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         try {
             OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
-            final Rp site = getRp();
+            final Rp rp = getRp();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
-            final JwsSignerObject jwsSigner = new JwsSignerObject(jwt, getOpClientFactory(), getKeyService(), site);
+            final JwsSignerObject jwsSigner = new JwsSignerObject(jwt, getOpClientFactory(), getKeyService(), rp);
             final Validator validator = new Validator(jwsSigner, discoveryResponse);
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();

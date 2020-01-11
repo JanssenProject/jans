@@ -40,44 +40,44 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     @Override
     public IOpResponse execute(GetAuthorizationUrlParams params) throws Exception {
-        final Rp site = getRp();
+        final Rp rp = getRp();
 
-        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint();
+        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(rp).getAuthorizationEndpoint();
 
         List<String> scope = Lists.newArrayList();
         if (params.getScope() != null && !params.getScope().isEmpty()) {
             scope.addAll(params.getScope());
-        } else if (site.getScope() != null) {
-            scope.addAll(site.getScope());
+        } else if (rp.getScope() != null) {
+            scope.addAll(rp.getScope());
         }
 
         if (StringUtils.isNotBlank(params.getRedirectUri()) && !Utils.isValidUrl(params.getRedirectUri())) {
             throw new HttpException(ErrorResponseCode.INVALID_REDIRECT_URI);
         }
 
-        if (StringUtils.isNotBlank(params.getRedirectUri()) && !site.getRedirectUris().contains(params.getRedirectUri())) {
+        if (StringUtils.isNotBlank(params.getRedirectUri()) && !rp.getRedirectUris().contains(params.getRedirectUri())) {
             throw new HttpException(ErrorResponseCode.REDIRECT_URI_IS_NOT_REGISTERED);
         }
 
         List<String> responseTypes = Lists.newArrayList();
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()
-                && site.getResponseTypes().containsAll(params.getResponseTypes())) {
+                && rp.getResponseTypes().containsAll(params.getResponseTypes())) {
             responseTypes.addAll(params.getResponseTypes());
         } else {
-            responseTypes.addAll(site.getResponseTypes());
+            responseTypes.addAll(rp.getResponseTypes());
         }
 
         String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
-        String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : site.getRedirectUri();
+        String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
-        authorizationEndpoint += "&client_id=" + site.getClientId();
+        authorizationEndpoint += "&client_id=" + rp.getClientId();
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + state;
         authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
 
-        String acrValues = Utils.joinAndUrlEncode(acrValues(site, params)).trim();
+        String acrValues = Utils.joinAndUrlEncode(acrValues(rp, params)).trim();
         if (!Strings.isNullOrEmpty(acrValues)) {
             authorizationEndpoint += "&acr_values=" + acrValues;
         }
@@ -100,12 +100,12 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         return new GetAuthorizationUrlResponse(authorizationEndpoint);
     }
 
-    private List<String> acrValues(Rp site, GetAuthorizationUrlParams params) {
-        List<String> acrList = params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
+    private List<String> acrValues(Rp rp, GetAuthorizationUrlParams params) {
+        List<String> acrList = params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : rp.getAcrValues();
         if (acrList != null) {
             return acrList;
         } else {
-            LOG.error("acr value is null for site: " + site);
+            LOG.error("acr value is null for site: " + rp);
             return new ArrayList<>();
         }
     }
