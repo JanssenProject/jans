@@ -17,6 +17,8 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.service.PublicOpKeyService;
+import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,26 +37,77 @@ public class Validator {
 
     private final OpenIdConfigurationResponse discoveryResponse;
     private AbstractJwsSigner jwsSigner;
-    private JwsSignerObject jwsSignerObject;
+    private final Jwt idToken;
+    private OpClientFactory opClientFactory;
+    private final PublicOpKeyService keyService;
+    private final Rp rp;
 
-    public Validator(JwsSignerObject jwsSignerObject, OpenIdConfigurationResponse discoveryResponse) {
-        Preconditions.checkNotNull(jwsSignerObject.getIdToken());
-        Preconditions.checkNotNull(discoveryResponse);
+    public OpenIdConfigurationResponse getDiscoveryResponse() {
+        return discoveryResponse;
+    }
 
-        this.discoveryResponse = discoveryResponse;
-        this.jwsSignerObject = jwsSignerObject;
-        this.jwsSigner = createJwsSigner(jwsSignerObject, discoveryResponse);
+    public AbstractJwsSigner getJwsSigner() {
+        return jwsSigner;
+    }
+
+    public OpClientFactory getOpClientFactory() {
+        return opClientFactory;
+    }
+
+    public PublicOpKeyService getKeyService() {
+        return keyService;
+    }
+
+    public Rp getRp() {
+        return rp;
+    }
+
+    private Validator(ValidatorBuilder builder) {
+        this.discoveryResponse=builder.discoveryResponse;
+        this.idToken=builder.idToken;
+        this.opClientFactory=builder.opClientFactory;
+        this.keyService=builder.keyService;
+        this.rp=builder.rp;
+        this.jwsSigner=createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+    }
+
+    //Builder Class
+    public static class ValidatorBuilder {
+
+        // required parameters
+        private final OpenIdConfigurationResponse discoveryResponse;
+        private final Jwt idToken;
+        private OpClientFactory opClientFactory;
+        private final PublicOpKeyService keyService;
+        private final Rp rp;
+
+        public ValidatorBuilder(OpenIdConfigurationResponse discoveryResponse,
+                                Jwt idToken,
+                                OpClientFactory opClientFactory,
+                                PublicOpKeyService keyService,
+                                Rp rp) {
+
+            this.discoveryResponse = discoveryResponse;
+            this.idToken = idToken;
+            this.opClientFactory = opClientFactory;
+            this.keyService = keyService;
+            this.rp = rp;
+        }
+
+        public Validator build() {
+            return new Validator(this);
+        }
     }
 
     public void validateAccessToken(String accessToken) {
         if (!Strings.isNullOrEmpty(accessToken)) {
-            String atHash = jwsSignerObject.getIdToken().getClaims().getClaimAsString("at_hash");
+            String atHash = idToken.getClaims().getClaimAsString("at_hash");
             if (Strings.isNullOrEmpty(atHash)) {
-                LOG.warn("Skip access_token validation because corresponding id_token does not have at_hash claim. access_token: " + accessToken + ", id_token: " + jwsSignerObject.getIdToken());
+                LOG.warn("Skip access_token validation because corresponding id_token does not have at_hash claim. access_token: " + accessToken + ", id_token: " + idToken);
                 return;
             }
-            if (!jwsSigner.validateAccessToken(accessToken, jwsSignerObject.getIdToken())) {
-                LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + jwsSignerObject.getIdToken() + ", at_hash:" + atHash);
+            if (!jwsSigner.validateAccessToken(accessToken, idToken)) {
+                LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
                 throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
             }
         }
@@ -62,26 +115,26 @@ public class Validator {
 
     public void validateAuthorizationCode(String code) {
         if (!Strings.isNullOrEmpty(code)) {
-            if (!jwsSigner.validateAuthorizationCode(code, jwsSignerObject.getIdToken())) {
+            if (!jwsSigner.validateAuthorizationCode(code, idToken)) {
                 throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
             }
         }
     }
 
-    public static AbstractJwsSigner createJwsSigner(JwsSignerObject jwsSignerObject, OpenIdConfigurationResponse discoveryResponse) {
-        final String algorithm = jwsSignerObject.getIdToken().getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
+    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp) {
+        final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
-        final String kid = jwsSignerObject.getIdToken().getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+        final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
         final String jwkUrl = discoveryResponse.getJwksUri();
 
         if (signatureAlgorithm == null)
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
         if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
-            final RSAPublicKey publicKey = jwsSignerObject.getKeyService().getRSAPublicKey(jwkUrl, kid);
-            return jwsSignerObject.getOpClientFactory().createRSASigner(signatureAlgorithm, publicKey);
+            final RSAPublicKey publicKey = keyService.getRSAPublicKey(jwkUrl, kid);
+            return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
-            return new HMACSigner(signatureAlgorithm, jwsSignerObject.getRp().getClientSecret());
+            return new HMACSigner(signatureAlgorithm, rp.getClientSecret());
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.EC) {
             ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(jwkUrl, kid);
             return new ECDSASigner(signatureAlgorithm, publicKey);
@@ -90,7 +143,7 @@ public class Validator {
     }
 
     public void validateNonce(StateService stateService) {
-        final String nonceFromToken = jwsSignerObject.getIdToken().getClaims().getClaimAsString(JwtClaimName.NONCE);
+        final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
         if (!stateService.isExpiredObjectPresent(nonceFromToken)) {
             throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
@@ -111,19 +164,19 @@ public class Validator {
 
     public void validateIdToken(String nonce) {
         try {
-            final String issuer = jwsSignerObject.getIdToken().getClaims().getClaimAsString(JwtClaimName.ISSUER);
-            final String nonceFromToken = jwsSignerObject.getIdToken().getClaims().getClaimAsString(JwtClaimName.NONCE);
-            final String clientId = jwsSignerObject.getRp().getClientId();
+            final String issuer = idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            final String clientId = rp.getClientId();
 
             if (!Strings.isNullOrEmpty(nonce) && !nonceFromToken.endsWith(nonce)) {
                 LOG.error("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_NONCE);
             }
             //validate audience
-            validateAudience(jwsSignerObject.getIdToken(), clientId);
+            validateAudience(idToken, clientId);
 
             //validate id_token expire date
-            final Date expiresAt = jwsSignerObject.getIdToken().getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
             if (now.after(expiresAt)) {
                 LOG.error("ID Token is expired. (" + expiresAt + " is before " + now + ").");
@@ -137,15 +190,15 @@ public class Validator {
             }
 
             // 2. validate signature
-            boolean signature = jwsSigner.validate(jwsSignerObject.getIdToken());
+            boolean signature = jwsSigner.validate(idToken);
             if (!signature) {
                 final String jwkUrl = discoveryResponse.getJwksUri();
-                final String kid = jwsSignerObject.getIdToken().getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+                final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 
-                jwsSignerObject.getKeyService().refetchKey(jwkUrl, kid);
+                keyService.refetchKey(jwkUrl, kid);
 
-                AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(jwsSignerObject, discoveryResponse);
-                signature = signerWithRefreshedKey.validate(jwsSignerObject.getIdToken());
+                AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+                signature = signerWithRefreshedKey.validate(idToken);
 
                 if (!signature) {
                     LOG.error("ID Token signature is invalid.");
@@ -215,6 +268,6 @@ public class Validator {
     }
 
     public Jwt getIdToken() {
-        return jwsSignerObject.getIdToken();
+        return idToken;
     }
 }
