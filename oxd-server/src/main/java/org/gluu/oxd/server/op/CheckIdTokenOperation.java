@@ -38,8 +38,11 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final Rp rp = getRp();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
-            final JwsSignerObject jwsSigner = new JwsSignerObject(jwt, getOpClientFactory(), getKeyService(), rp);
-            final Validator validator = new Validator(jwsSigner, discoveryResponse);
+            final Validator validator = new Validator.ValidatorBuilder(discoveryResponse,
+                    jwt,
+                    getOpClientFactory(),
+                    getKeyService(),
+                    rp).build();
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid());
