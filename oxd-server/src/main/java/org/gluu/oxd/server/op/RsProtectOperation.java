@@ -52,7 +52,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     public IOpResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
-        Rp site = getRp();
+        Rp rp = getRp();
 
         PatProvider patProvider = new PatProvider() {
             @Override
@@ -66,7 +66,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         };
 
-        ResourceRegistrar registrar = getOpClientFactory().createResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
+        ResourceRegistrar registrar = getOpClientFactory().createResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost()));
         try {
             registrar.register(params.getResources());
         } catch (ClientResponseFailure e) {
@@ -80,12 +80,12 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             }
         }
 
-        persist(registrar, site);
+        persist(registrar, rp);
 
-        return new RsProtectResponse(site.getOxdId());
+        return new RsProtectResponse(rp.getOxdId());
     }
 
-    private void persist(ResourceRegistrar registrar, Rp site) throws IOException {
+    private void persist(ResourceRegistrar registrar, Rp rp) throws IOException {
         Map<Key, RsResource> resourceMapCopy = registrar.getResourceMapCopy();
 
         for (Map.Entry<Key, String> entry : registrar.getIdMapCopy().entrySet()) {
@@ -117,10 +117,10 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             resource.setTicketScopes(Lists.newArrayList(scopesForTicket));
             resource.setScopeExpressions(Lists.newArrayList(scopeExpressions));
 
-            site.getUmaProtectedResources().add(resource);
+            rp.getUmaProtectedResources().add(resource);
         }
 
-        getRpService().update(site);
+        getRpService().update(rp);
     }
 
     private void validate(RsProtectParams params) {

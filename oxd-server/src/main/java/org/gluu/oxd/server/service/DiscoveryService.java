@@ -55,8 +55,8 @@ public class DiscoveryService {
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpSyncService.getRp(oxdId);
-        return getConnectDiscoveryResponse(site);
+        Rp rp = rpSyncService.getRp(oxdId);
+        return getConnectDiscoveryResponse(rp);
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponse(Rp rp) {
@@ -98,8 +98,8 @@ public class DiscoveryService {
     public UmaMetadata getUmaDiscoveryByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = rpSyncService.getRp(oxdId);
-        return getUmaDiscovery(site.getOpHost(), site.getOpDiscoveryPath());
+        Rp rp = rpSyncService.getRp(oxdId);
+        return getUmaDiscovery(rp.getOpHost(), rp.getOpDiscoveryPath());
     }
 
     public UmaMetadata getUmaDiscovery(String opHost, String opDiscoveryPath) {
