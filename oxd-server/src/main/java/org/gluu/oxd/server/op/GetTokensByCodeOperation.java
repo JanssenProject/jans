@@ -40,14 +40,14 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     public IOpResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
-        final Rp site = getRp();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
+        final Rp rp = getRp();
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(rp);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());
-        tokenRequest.setRedirectUri(site.getRedirectUri());
-        tokenRequest.setAuthUsername(site.getClientId());
-        tokenRequest.setAuthPassword(site.getClientSecret());
+        tokenRequest.setRedirectUri(rp.getRedirectUri());
+        tokenRequest.setAuthUsername(rp.getClientId());
+        tokenRequest.setAuthPassword(rp.getClientSecret());
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
 
@@ -71,16 +71,16 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
 
-            final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), site);
+            final JwsSignerObject jwsSigner = new JwsSignerObject(idToken, getOpClientFactory(), getKeyService(), rp);
             final Validator validator = new Validator(jwsSigner, discoveryResponse);
             validator.validateNonce(getStateService());
             validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
 
             // persist tokens
-            site.setIdToken(response.getIdToken());
-            site.setAccessToken(response.getAccessToken());
-            getRpService().update(site);
+            rp.setIdToken(response.getIdToken());
+            rp.setAccessToken(response.getAccessToken());
+            getRpService().update(rp);
             getStateService().deleteExpiredObjectsByKey(params.getState());
 
             LOG.trace("Scope: " + response.getScope());

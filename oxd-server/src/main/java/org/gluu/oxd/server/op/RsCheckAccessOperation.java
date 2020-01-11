@@ -49,8 +49,8 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     public IOpResponse execute(final RsCheckAccessParams params) throws Exception {
         validate(params);
 
-        Rp site = getRp();
-        UmaResource resource = site.umaResource(params.getPath(), params.getHttpMethod());
+        Rp rp = getRp();
+        UmaResource resource = rp.umaResource(params.getPath(), params.getHttpMethod());
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
             error.setErrorDescription("Resource is not protected with path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() +
@@ -97,7 +97,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
                 if (containsAny) {
                     if ((permission.getResourceId() != null && permission.getResourceId().equals(resource.getId()))) { // normal UMA
-                        LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
+                        LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + rp);
                         return new RsCheckAccessResponse("granted");
                     }
                 }
@@ -109,7 +109,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             scopes = resource.getScopes();
         }
 
-        final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
+        final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost())));
         Response response = null;
         try {
             LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
