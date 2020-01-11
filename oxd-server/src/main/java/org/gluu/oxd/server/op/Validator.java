@@ -63,12 +63,15 @@ public class Validator {
     }
 
     private Validator(ValidatorBuilder builder) {
-        this.discoveryResponse=builder.discoveryResponse;
-        this.idToken=builder.idToken;
-        this.opClientFactory=builder.opClientFactory;
-        this.keyService=builder.keyService;
-        this.rp=builder.rp;
-        this.jwsSigner=createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+        Preconditions.checkNotNull(builder.idToken);
+        Preconditions.checkNotNull(builder.discoveryResponse);
+
+        this.discoveryResponse = builder.discoveryResponse;
+        this.idToken = builder.idToken;
+        this.opClientFactory = builder.opClientFactory;
+        this.keyService = builder.keyService;
+        this.rp = builder.rp;
+        this.jwsSigner = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
     }
 
     //Builder Class
