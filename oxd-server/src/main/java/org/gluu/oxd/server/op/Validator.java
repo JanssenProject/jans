@@ -62,10 +62,7 @@ public class Validator {
         return rp;
     }
 
-    private Validator(ValidatorBuilder builder) {
-        Preconditions.checkNotNull(builder.idToken);
-        Preconditions.checkNotNull(builder.discoveryResponse);
-
+    private Validator(Builder builder) {
         this.discoveryResponse = builder.discoveryResponse;
         this.idToken = builder.idToken;
         this.opClientFactory = builder.opClientFactory;
@@ -75,29 +72,47 @@ public class Validator {
     }
 
     //Builder Class
-    public static class ValidatorBuilder {
+    public static class Builder {
 
         // required parameters
-        private final OpenIdConfigurationResponse discoveryResponse;
-        private final Jwt idToken;
+        private OpenIdConfigurationResponse discoveryResponse;
+        private Jwt idToken;
         private OpClientFactory opClientFactory;
-        private final PublicOpKeyService keyService;
-        private final Rp rp;
+        private PublicOpKeyService keyService;
+        private Rp rp;
 
-        public ValidatorBuilder(OpenIdConfigurationResponse discoveryResponse,
-                                Jwt idToken,
-                                OpClientFactory opClientFactory,
-                                PublicOpKeyService keyService,
-                                Rp rp) {
+        public Builder() {
+        }
 
+        public Builder discoveryResponse(OpenIdConfigurationResponse discoveryResponse) {
             this.discoveryResponse = discoveryResponse;
+            return this;
+        }
+
+        public Builder idToken(Jwt idToken) {
             this.idToken = idToken;
+            return this;
+        }
+
+        public Builder opClientFactory(OpClientFactory opClientFactory) {
             this.opClientFactory = opClientFactory;
+            return this;
+        }
+
+        public Builder keyService(PublicOpKeyService keyService) {
             this.keyService = keyService;
+            return this;
+        }
+
+        public Builder rp(Rp rp) {
             this.rp = rp;
+            return this;
         }
 
         public Validator build() {
+            Preconditions.checkNotNull(this.idToken);
+            Preconditions.checkNotNull(this.discoveryResponse);
+
             return new Validator(this);
         }
     }
