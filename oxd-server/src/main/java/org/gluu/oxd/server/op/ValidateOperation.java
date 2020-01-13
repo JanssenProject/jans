@@ -37,11 +37,13 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
 
         final Jwt idToken = Jwt.parse(params.getIdToken());
 
-        final Validator validator = new Validator.ValidatorBuilder(discoveryResponse,
-                idToken,
-                getOpClientFactory(),
-                getKeyService(),
-                rp).build();
+        final Validator validator = new Validator.Builder()
+                .discoveryResponse(discoveryResponse)
+                .idToken(idToken)
+                .keyService(getKeyService())
+                .opClientFactory(getOpClientFactory())
+                .rp(rp)
+                .build();
         validator.validateNonce(getStateService());
         validator.validateIdToken(rp.getClientId());
         validator.validateAccessToken(params.getAccessToken());
