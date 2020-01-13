@@ -61,7 +61,7 @@ public class CustomScript extends BaseEntry {
 
     @JsonObject
     @AttributeName(name = "oxModuleProperty")
-    private List<SimpleCustomProperty> moduleProperties;
+    private List<SimpleCustomProperty> moduleProperties =new ArrayList<>();
 
     @JsonObject
     @AttributeName(name = "oxConfigurationProperty")
