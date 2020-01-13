@@ -4,8 +4,6 @@
 package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
@@ -16,6 +14,8 @@ import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,11 +38,13 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final Rp rp = getRp();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
-            final Validator validator = new Validator.ValidatorBuilder(discoveryResponse,
-                    jwt,
-                    getOpClientFactory(),
-                    getKeyService(),
-                    rp).build();
+            final Validator validator = new Validator.Builder()
+                    .discoveryResponse(discoveryResponse)
+                    .idToken(jwt)
+                    .keyService(getKeyService())
+                    .opClientFactory(getOpClientFactory())
+                    .rp(rp)
+                    .build();
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid());
