@@ -324,7 +324,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             AuthorizationGrant authorizationGrant = null;
 
-            if (jwtAuthorizationRequest.getIdTokenMember() != null) {
+            if (jwtAuthorizationRequest != null && jwtAuthorizationRequest.getIdTokenMember() != null) {
                 Claim userIdClaim = jwtAuthorizationRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
                 if (userIdClaim != null && userIdClaim.getClaimValue() != null
                         && userIdClaim.getClaimValue().getValue() != null) {
