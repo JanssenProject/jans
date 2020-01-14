@@ -2,6 +2,8 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
@@ -14,6 +16,9 @@ import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -65,5 +70,29 @@ public class AuthorizeRestWebServiceValidator {
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build());
         }
+    }
+
+    public boolean validateAuthenticationMaxAge(Integer maxAge, SessionId sessionUser, Client client, JwtAuthorizationRequest jwtAuthorizationRequest, boolean invalidOpenidRequestObject) {
+        Integer authenticationMaxAge = null;
+        if (maxAge != null) {
+            authenticationMaxAge = maxAge;
+        } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
+                && jwtAuthorizationRequest.getIdTokenMember() != null
+                && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
+            authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
+        }
+        GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        if (sessionUser.getAuthenticationTime() != null) {
+            userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
+        }
+        if (authenticationMaxAge != null) {
+            userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
+            return userAuthenticationTime.after(now);
+        } else if (client.getDefaultMaxAge() != null) {
+            userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
+            return userAuthenticationTime.after(now);
+        }
+        return true;
     }
 }

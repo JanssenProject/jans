@@ -438,28 +438,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            // OXAUTH-37 : Validate authentication max age
-            boolean validAuthenticationMaxAge = true;
-            Integer authenticationMaxAge = null;
-            if (maxAge != null) {
-                authenticationMaxAge = maxAge;
-            } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
-                    && jwtAuthorizationRequest.getIdTokenMember() != null
-                    && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
-                authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
-            }
-            GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-            GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-            if (sessionUser.getAuthenticationTime() != null) {
-                userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
-            }
-            if (authenticationMaxAge != null) {
-                userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
-                validAuthenticationMaxAge = userAuthenticationTime.after(now);
-            } else if (client.getDefaultMaxAge() != null) {
-                userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
-                validAuthenticationMaxAge = userAuthenticationTime.after(now);
-            }
+            boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.validateAuthenticationMaxAge(maxAge, sessionUser, client, jwtAuthorizationRequest, invalidOpenidRequestObject);
             if (!validAuthenticationMaxAge) {
                 endSession(sessionId, httpRequest, httpResponse);
                 sessionId = null;
@@ -468,9 +447,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                return builder.build();
+                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
             }
 
             oAuth2AuditLog.setUsername(user.getUserId());
@@ -601,7 +578,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
             }
 
-            //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
             if (sessionUser.getId() == null) {
                 final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, sessionUser.getUserDn(), prompt);
                 String newSessionId = newSessionUser.getId();
