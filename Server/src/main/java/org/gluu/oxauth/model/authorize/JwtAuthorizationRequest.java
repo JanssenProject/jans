@@ -8,16 +8,11 @@ package org.gluu.oxauth.model.authorize;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.common.Display;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -33,7 +28,9 @@ import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.service.cdi.util.CdiUtil;
-import org.gluu.util.security.StringEncrypter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -211,12 +208,6 @@ public class JwtAuthorizationRequest {
             } else {
                 throw new InvalidJwtException("The JWT is null or empty");
             }
-        } catch (JSONException e) {
-            throw new InvalidJwtException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidJwtException(e);
-        } catch (StringEncrypter.EncryptionException e) {
-            throw new InvalidJwtException(e);
         } catch (Exception e) {
             throw new InvalidJwtException(e);
         }
