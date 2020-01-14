@@ -315,7 +315,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            if (invalidOpenidRequestObject || jwtAuthorizationRequest == null) {
+            if (invalidOpenidRequestObject) {
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                         AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
 
