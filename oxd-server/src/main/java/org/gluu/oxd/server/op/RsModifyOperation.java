@@ -111,6 +111,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         umaResource.setType(umaResourceWithId.getType());
         if (!Strings.isNullOrEmpty(params.getScopeExpression()) && !params.getScopeExpression().equals("null")) {
             umaResource.setScopeExpression(params.getScopeExpression());
+            umaResource.setScopes(JsonLogicNodeParser.parseNode(params.getScopeExpression().toString()).getData());
         }
 
         return umaResource;
@@ -122,8 +123,12 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         rp.setUmaProtectedResources(umaResourceList.stream().map(res -> {
             if (res.getId().equals(resourceId)) {
                 res.setScopes(opUmaResource.getScopes());
+                res.setTicketScopes(opUmaResource.getScopes());
+                res.setScopeExpressions(null);
                 if (!Strings.isNullOrEmpty(opUmaResource.getScopeExpression()) && !opUmaResource.getScopeExpression().equals("null")) {
                     res.setScopeExpressions(Lists.newArrayList(opUmaResource.getScopeExpression()));
+                    res.setTicketScopes(JsonLogicNodeParser.parseNode(opUmaResource.getScopeExpression().toString()).getData());
+                    res.setScopes(null);
                 }
             }
             return res;
