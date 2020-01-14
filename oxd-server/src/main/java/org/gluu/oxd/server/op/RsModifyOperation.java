@@ -108,6 +108,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         umaResource.setIconUri(umaResourceWithId.getIconUri());
         umaResource.setName(umaResourceWithId.getName());
         umaResource.setScopes(params.getScopes());
+        umaResource.setScopeExpression(null);
         umaResource.setType(umaResourceWithId.getType());
         if (!Strings.isNullOrEmpty(params.getScopeExpression()) && !params.getScopeExpression().equals("null")) {
             umaResource.setScopeExpression(params.getScopeExpression());
