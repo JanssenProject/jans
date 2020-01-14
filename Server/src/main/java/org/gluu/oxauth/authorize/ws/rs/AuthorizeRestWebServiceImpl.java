@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.collections.CollectionUtils;
@@ -50,15 +51,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
-import java.net.ConnectException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -123,6 +122,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AbstractCryptoProvider cryptoProvider;
 
     @Inject
+    private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
+
+    @Inject
     private CIBASupportProxy cibaSupportProxy;
 
     @Inject
@@ -159,7 +161,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 customResponseHeaders, claims, null, httpRequest, httpResponse, securityContext);
     }
 
-    public Response requestAuthorization(
+    private Response requestAuthorization(
             String scope, String responseType, String clientId, String redirectUri, String state, String respMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
@@ -210,498 +212,454 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
-            try {
-                sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
-            } catch (AcrChangedException e) { // Acr changed
-                //See https://github.com/GluuFederation/oxTrust/issues/797
-                if (e.isForceReAuthentication()) {
-                    if (!prompts.contains(Prompt.LOGIN)) {
-                        log.info("ACR is changed, adding prompt=login to prompts");
-                        prompts.add(Prompt.LOGIN);
+            checkAcrChanged(acrValuesStr, prompts, sessionUser);
+            updateSessionForROPC(httpRequest, sessionUser);
 
-                        sessionUser.setState(SessionIdState.UNAUTHENTICATED);
-                        sessionUser.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
-                        sessionIdService.persistSessionId(sessionUser);
-                    }
-                } else {
-                    throw e;
-                }
-            }
-            
-            if (sessionUser != null) {
-	            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
-	            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
-	            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS ==  GrantType.fromString(authorizedGrant)) {
-	            	// Remove from session to avoid execution on next AuthZ request 
-	            	sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
-	
-	            	// Reset AuthZ parameters
-	                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
-	                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
-	                sessionAttributes.putAll(requestParameterMap);
-	                sessionIdService.updateSessionId(sessionUser, true, true, true);
-	            }
-            }
+            Client client = authorizeRestWebServiceValidator.validate(clientId, state);
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
-                if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
+                if (redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                             AuthorizeErrorResponseType.INVALID_REQUEST, state));
 
-                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                    throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
                 } else {
-                    builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE);
-                    builder.entity(errorResponseFactory.getErrorAsJson(
-                            AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."));
-                }
-            } else {
-                Client client = clientService.getClient(clientId);
-                if (CollectionUtils.isEmpty(acrValues) && client != null && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                    acrValues = new ArrayList<String>();
-                    acrValues.addAll(Arrays.asList(client.getDefaultAcrValues()));
-                }
-
-                JwtAuthorizationRequest jwtAuthorizationRequest = null;
-
-                if (client != null) {
-                    if (client.isDisabled()) {
-                        builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 403
-                        builder.entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state, "Client is disabled."));
-
-                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-
-                        return builder.build();
-                    }
-
-                    List<String> scopes = new ArrayList<String>();
-                    if (StringHelper.isNotEmpty(scope)) {
-                        Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-                        scopes.addAll(grantedScopes);
-                    }
-
-                    // Validate redirectUri
-                    redirectUri = redirectionUriService.validateRedirectionUri(clientId, redirectUri);
-                    boolean validRedirectUri = redirectUri != null;
-
-                    if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                            && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        if (validRedirectUri) {
-
-                            if (StringUtils.isNotBlank(requestUri)) {
-                                boolean validRequestUri = false;
-                                try {
-                                    URI reqUri = new URI(requestUri);
-                                    String reqUriHash = reqUri.getFragment();
-                                    String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
-
-                                    ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
-                                    clientRequest.setHttpMethod(HttpMethod.GET);
-
-                                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                                    int status = clientResponse.getStatus();
-
-                                    if (status == 200) {
-                                        request = clientResponse.getEntity(String.class);
-
-                                        if (StringUtils.isBlank(reqUriHash)) {
-                                            validRequestUri = true;
-                                        } else {
-                                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-                                            validRequestUri = StringUtils.equals(reqUriHash, hash);
-                                        }
-                                    }
-
-                                    if (validRequestUri) {
-                                        requestUri = null;
-                                    } else {
-                                        RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-                                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                                AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
-
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                        return builder.build();
-                                    }
-                                } catch (URISyntaxException e) {
-                                    log.error(e.getMessage(), e);
-                                } catch (UnknownHostException e) {
-                                    log.error(e.getMessage(), e);
-                                } catch (ConnectException e) {
-                                    log.error(e.getMessage(), e);
-                                } catch (Exception e) {
-                                    log.error(e.getMessage(), e);
-                                }
-                            }
-
-                            boolean invalidOpenidRequestObject = false;
-                            if (StringUtils.isNotBlank(request)) {
-                                try {
-                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-
-                                    if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
-                                            || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
-                                        throw new InvalidJwtException("The responseType parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getClientId() != null
-                                            && !jwtAuthorizationRequest.getClientId().equals(clientId)) {
-                                        throw new InvalidJwtException("The clientId parameter is not the same in the JWT");
-                                    } else if (!jwtAuthorizationRequest.getScopes().containsAll(scopes)
-                                            || !scopes.containsAll(jwtAuthorizationRequest.getScopes())) {
-                                        throw new InvalidJwtException("The scope parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getRedirectUri() != null
-                                            && !jwtAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
-                                        throw new InvalidJwtException("The redirectUri parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getState() != null && StringUtils.isNotBlank(state)
-                                            && !jwtAuthorizationRequest.getState().equals(state)) {
-                                        throw new InvalidJwtException("The state parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getNonce() != null && StringUtils.isNotBlank(nonce)
-                                            && !jwtAuthorizationRequest.getNonce().equals(nonce)) {
-                                        throw new InvalidJwtException("The nonce parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getDisplay() != null && StringUtils.isNotBlank(display)
-                                            && !jwtAuthorizationRequest.getDisplay().getParamName().equals(display)) {
-                                        throw new InvalidJwtException("The display parameter is not the same in the JWT");
-                                    } else if (!jwtAuthorizationRequest.getPrompts().isEmpty() && !prompts.isEmpty()
-                                            && !jwtAuthorizationRequest.getPrompts().containsAll(prompts)) {
-                                        throw new InvalidJwtException("The prompt parameter is not the same in the JWT");
-                                    } else if (jwtAuthorizationRequest.getIdTokenMember() != null
-                                            && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
-                                            && !jwtAuthorizationRequest.getIdTokenMember().getMaxAge().equals(maxAge)) {
-                                        throw new InvalidJwtException("The maxAge parameter is not the same in the JWT");
-                                    }
-                                } catch (InvalidJwtException e) {
-                                    invalidOpenidRequestObject = true;
-                                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
-                                            e.getClass().getName(), e.getMessage());
-                                } catch (Exception e) {
-                                    invalidOpenidRequestObject = true;
-                                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
-                                            e.getClass().getName(), e.getMessage());
-                                }
-                            }
-                            if (invalidOpenidRequestObject) {
-                                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-
-                                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                        AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
-
-                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                            } else {
-                                AuthorizationGrant authorizationGrant = null;
-                                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-
-                                if (jwtAuthorizationRequest != null && jwtAuthorizationRequest.getIdTokenMember() != null) {
-                                    Claim userIdClaim = jwtAuthorizationRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
-                                    if (userIdClaim != null && userIdClaim.getClaimValue() != null
-                                            && userIdClaim.getClaimValue().getValue() != null) {
-                                        String userIdClaimValue = userIdClaim.getClaimValue().getValue();
-
-                                        if (user != null) {
-                                            String userId = user.getUserId();
-
-                                            if (!userId.equalsIgnoreCase(userIdClaimValue)) {
-                                                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                                        AuthorizeErrorResponseType.USER_MISMATCHED, state));
-
-                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                                return builder.build();
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (user == null) {
-                                    identity.logout();
-                                    if (prompts.contains(Prompt.NONE)) {
-                                        if (authenticationFilterService.isEnabled()) {
-                                            Map<String, String> params;
-                                            if (method.equals(HttpMethod.GET)) {
-                                                params = QueryStringDecoder.decode(httpRequest.getQueryString());
-                                            } else {
-                                                params = getGenericRequestMap(httpRequest);
-                                            }
-
-                                            String userDn = authenticationFilterService.processAuthenticationFilters(params);
-                                            if (userDn != null) {
-                                                Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
-
-                                                Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
-                                                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
-
-                                                sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, userDn, prompt);
-                                                sessionUser.setSessionAttributes(requestParameterMap);
-
-                                                sessionIdService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), sessionUser.getOPBrowserState(), httpResponse, false);
-                                                sessionIdService.updateSessionId(sessionUser);
-                                                user = userService.getUserByDn(sessionUser.getUserDn());
-                                            } else {
-                                                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                                        AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
-
-                                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                                return builder.build();
-                                            }
-                                        } else {
-                                            redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                                    AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
-
-                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                            return builder.build();
-                                        }
-                                    } else {
-                                        if (prompts.contains(Prompt.LOGIN)) {
-                                            endSession(sessionId, httpRequest, httpResponse);
-                                            sessionId = null;
-                                            prompts.remove(Prompt.LOGIN);
-                                        }
-
-                                        redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                        return builder.build();
-                                    }
-                                }
-
-                                // OXAUTH-37 : Validate authentication max age
-                                boolean validAuthenticationMaxAge = true;
-                                Integer authenticationMaxAge = null;
-                                if (maxAge != null) {
-                                    authenticationMaxAge = maxAge;
-                                } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
-                                        && jwtAuthorizationRequest.getIdTokenMember() != null
-                                        && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
-                                    authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
-                                }
-                                GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                                GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                                if (sessionUser.getAuthenticationTime() != null) {
-                                    userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
-                                }
-                                if (authenticationMaxAge != null) {
-                                    userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
-                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
-                                } else if (client.getDefaultMaxAge() != null) {
-                                    userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
-                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
-                                }
-                                if (!validAuthenticationMaxAge) {
-                                    endSession(sessionId, httpRequest, httpResponse);
-                                    sessionId = null;
-
-                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
-                                }
-
-                                oAuth2AuditLog.setUsername(user.getUserId());
-
-                                ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
-                                        user.getAttribute("inum"),
-                                        client.getClientId(),
-                                        client.getPersistClientAuthorizations());
-                                if (scopes.size() > 0) {
-                                    if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                                        if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
-                                            sessionUser.addPermission(clientId, true);
-                                            sessionIdService.updateSessionId(sessionUser);
-                                        } else {
-                                            redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                                    redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                                    idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                    codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                            return builder.build();
-                                        }
-                                    } else if (client.getTrustedClient()) {
-                                        sessionUser.addPermission(clientId, true);
-                                        sessionIdService.updateSessionId(sessionUser);
-                                    }
-                                }
-
-                                if (prompts.contains(Prompt.LOGIN)) {
-
-                                    //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
-                                    if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
-                                        endSession(sessionId, httpRequest, httpResponse);
-                                    }
-                                    sessionId = null;
-                                    prompts.remove(Prompt.LOGIN);
-
-                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
-                                }
-
-                                if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
-                                    prompts.remove(Prompt.CONSENT);
-
-                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
-                                }
-
-                                AuthorizationCode authorizationCode = null;
-                                if (responseTypes.contains(ResponseType.CODE)) {
-                                    authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
-                                            sessionUser.getAuthenticationTime());
-                                    authorizationGrant.setNonce(nonce);
-                                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
-                                    authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
-                                    authorizationGrant.setScopes(scopes);
-                                    authorizationGrant.setCodeChallenge(codeChallenge);
-                                    authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
-                                    authorizationGrant.setClaims(claims);
-
-                                    // Store acr_values
-                                    authorizationGrant.setAcrValues(acrValuesStr);
-                                    authorizationGrant.setSessionDn(sessionUser.getDn());
-                                    authorizationGrant.save(); // call save after object modification!!!
-
-                                    authorizationCode = authorizationGrant.getAuthorizationCode();
-
-                                    redirectUriResponse.addResponseParameter("code", authorizationCode.getCode());
-                                }
-
-                                AccessToken newAccessToken = null;
-                                if (responseTypes.contains(ResponseType.TOKEN)) {
-                                    if (authorizationGrant == null) {
-                                        authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
-                                                sessionUser.getAuthenticationTime());
-                                        authorizationGrant.setNonce(nonce);
-                                        authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
-                                        authorizationGrant.setScopes(scopes);
-                                        authorizationGrant.setClaims(claims);
-
-                                        // Store acr_values
-                                        authorizationGrant.setAcrValues(acrValuesStr);
-                                        authorizationGrant.setSessionDn(sessionUser.getDn());
-                                        authorizationGrant.save(); // call save after object modification!!!
-                                    }
-                                    newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
-                                }
-
-                                if (responseTypes.contains(ResponseType.ID_TOKEN)) {
-                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims());
-                                    if (authorizationGrant == null) {
-                                        includeIdTokenClaims = true;
-                                        authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
-                                                sessionUser.getAuthenticationTime());
-                                        authorizationGrant.setNonce(nonce);
-                                        authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
-                                        authorizationGrant.setScopes(scopes);
-                                        authorizationGrant.setClaims(claims);
-
-                                        // Store authentication acr values
-                                        authorizationGrant.setAcrValues(acrValuesStr);
-                                        authorizationGrant.setSessionDn(sessionUser.getDn());
-                                        authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
-                                    }
-                                    IdToken idToken = authorizationGrant.createIdToken(
-                                            nonce, authorizationCode, newAccessToken, null,
-                                            state, authorizationGrant, includeIdTokenClaims,
-                                            TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
-
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
-                                }
-
-                                if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
-                                }
-
-                                //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
-                                if (sessionUser.getId() == null) {
-                                    final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, sessionUser.getUserDn(), prompt);
-                                    String newSessionId = newSessionUser.getId();
-                                    sessionUser.setId(newSessionId);
-                                    log.trace("newSessionId = {}", newSessionId);
-                                }
-                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
-                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
-                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
-                                if (scope != null && !scope.isEmpty()) {
-                                    scope = authorizationGrant.checkScopesPolicy(scope);
-
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
-                                }
-
-                                clientService.updateAccessTime(client, false);
-                                oAuth2AuditLog.setSuccess(true);
-
-                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-
-                                if (appConfiguration.getCustomHeadersWithAuthorizationResponse()) {
-                                    for (String key : customResponseHeaders.keySet()) {
-                                        builder.header(key, customResponseHeaders.get(key));
-                                    }
-                                }
-
-                                if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
-                                    CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
-
-                                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-
-                                        RefreshToken refreshToken = cibaGrant.createRefreshToken();
-                                        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
-                                        AccessToken accessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-                                        //AccessToken accessToken = cibaGrant.createAccessToken(null, new ExecutionContext(null, null));
-                                        log.debug("Issuing access token: {}", accessToken.getCode());
-
-                                        IdToken idToken = cibaGrant.createIdToken(
-                                                null, null, accessToken, refreshToken,
-                                                null, cibaGrant, false, null);
-
-                                        cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                                cibaGrant.getClientNotificationToken(),
-                                                accessToken.getCode(),
-                                                refreshToken.getCode(),
-                                                idToken.getCode(),
-                                                accessToken.getExpiresIn()
-                                        );
-                                    }
-                                }
-                            }
-                        } else { // Invalid redirectUri
-                            builder = error(Response.Status.BAD_REQUEST,
-                                    AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state); // 400
-                        }
-                    } else { // Invalid responseTypes
-                        builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-                        builder.entity(errorResponseFactory.getErrorAsJson(
-                                AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""));
-                    }
-                } else {
-                    builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
+                    throw new WebApplicationException(Response
+                            .status(Response.Status.BAD_REQUEST.getStatusCode())
+                            .type(MediaType.APPLICATION_JSON_TYPE)
+                            .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."))
+                            .build());
                 }
             }
-//        } catch (AcrChangedException e) {
-//            builder = Response.status(Response.Status.UNAUTHORIZED).entity("Session already exist with ACR that is different " +
-//                    "than the one send with this authorization request. Please perform logout in order to login with another ACR. ACR: " + acrValuesStr);
-//            log.error(e.getMessage(), e);
+
+            if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                acrValues = Lists.newArrayList(client.getDefaultAcrValues());
+            }
+
+            List<String> scopes = new ArrayList<>();
+            if (StringHelper.isNotEmpty(scope)) {
+                Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+                scopes.addAll(grantedScopes);
+            }
+
+            redirectUri = redirectionUriService.validateRedirectionUri(clientId, redirectUri);
+            if (redirectUri == null) {
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""))
+                        .build());
+            }
+
+
+            final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
+                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
+
+            if (!isResponseTypeValid) {
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""))
+                        .build());
+            }
+
+
+            if (StringUtils.isNotBlank(requestUri)) {
+                boolean validRequestUri = false;
+                try {
+                    URI reqUri = new URI(requestUri);
+                    String reqUriHash = reqUri.getFragment();
+                    String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+                    ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
+                    clientRequest.setHttpMethod(HttpMethod.GET);
+
+                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                    int status = clientResponse.getStatus();
+
+                    if (status == 200) {
+                        request = clientResponse.getEntity(String.class);
+
+                        if (StringUtils.isBlank(reqUriHash)) {
+                            validRequestUri = true;
+                        } else {
+                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                            validRequestUri = StringUtils.equals(reqUriHash, hash);
+                        }
+                    }
+
+                    if (validRequestUri) {
+                        requestUri = null;
+                    } else {
+                        RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                                AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
+
+                        throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+                    }
+                } catch (WebApplicationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+
+            JwtAuthorizationRequest jwtAuthorizationRequest = null;
+            boolean invalidOpenidRequestObject = false;
+            if (StringUtils.isNotBlank(request)) {
+                try {
+
+                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+
+                    if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
+                            || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
+                        throw new InvalidJwtException("The responseType parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getClientId() != null
+                            && !jwtAuthorizationRequest.getClientId().equals(clientId)) {
+                        throw new InvalidJwtException("The clientId parameter is not the same in the JWT");
+                    } else if (!jwtAuthorizationRequest.getScopes().containsAll(scopes)
+                            || !scopes.containsAll(jwtAuthorizationRequest.getScopes())) {
+                        throw new InvalidJwtException("The scope parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getRedirectUri() != null
+                            && !jwtAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
+                        throw new InvalidJwtException("The redirectUri parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getState() != null && StringUtils.isNotBlank(state)
+                            && !jwtAuthorizationRequest.getState().equals(state)) {
+                        throw new InvalidJwtException("The state parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getNonce() != null && StringUtils.isNotBlank(nonce)
+                            && !jwtAuthorizationRequest.getNonce().equals(nonce)) {
+                        throw new InvalidJwtException("The nonce parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getDisplay() != null && StringUtils.isNotBlank(display)
+                            && !jwtAuthorizationRequest.getDisplay().getParamName().equals(display)) {
+                        throw new InvalidJwtException("The display parameter is not the same in the JWT");
+                    } else if (!jwtAuthorizationRequest.getPrompts().isEmpty() && !prompts.isEmpty()
+                            && !jwtAuthorizationRequest.getPrompts().containsAll(prompts)) {
+                        throw new InvalidJwtException("The prompt parameter is not the same in the JWT");
+                    } else if (jwtAuthorizationRequest.getIdTokenMember() != null
+                            && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
+                            && !jwtAuthorizationRequest.getIdTokenMember().getMaxAge().equals(maxAge)) {
+                        throw new InvalidJwtException("The maxAge parameter is not the same in the JWT");
+                    }
+                } catch (WebApplicationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    invalidOpenidRequestObject = true;
+                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
+                            e.getClass().getName(), e.getMessage());
+                }
+            }
+
+            if (invalidOpenidRequestObject) {
+                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+
+                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                        AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
+
+                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+            }
+
+            AuthorizationGrant authorizationGrant = null;
+            RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+
+            if (jwtAuthorizationRequest != null && jwtAuthorizationRequest.getIdTokenMember() != null) {
+                Claim userIdClaim = jwtAuthorizationRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
+                if (userIdClaim != null && userIdClaim.getClaimValue() != null
+                        && userIdClaim.getClaimValue().getValue() != null) {
+                    String userIdClaimValue = userIdClaim.getClaimValue().getValue();
+
+                    if (user != null) {
+                        String userId = user.getUserId();
+
+                        if (!userId.equalsIgnoreCase(userIdClaimValue)) {
+                            redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                                    AuthorizeErrorResponseType.USER_MISMATCHED, state));
+
+                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                            return builder.build();
+                        }
+                    }
+                }
+            }
+
+            if (user == null) {
+                identity.logout();
+                if (prompts.contains(Prompt.NONE)) {
+                    if (authenticationFilterService.isEnabled()) {
+                        Map<String, String> params;
+                        if (method.equals(HttpMethod.GET)) {
+                            params = QueryStringDecoder.decode(httpRequest.getQueryString());
+                        } else {
+                            params = getGenericRequestMap(httpRequest);
+                        }
+
+                        String userDn = authenticationFilterService.processAuthenticationFilters(params);
+                        if (userDn != null) {
+                            Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
+
+                            Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
+                            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+
+                            sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, userDn, prompt);
+                            sessionUser.setSessionAttributes(requestParameterMap);
+
+                            sessionIdService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), sessionUser.getOPBrowserState(), httpResponse, false);
+                            sessionIdService.updateSessionId(sessionUser);
+                            user = userService.getUserByDn(sessionUser.getUserDn());
+                        } else {
+                            redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                                    AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
+
+                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                            return builder.build();
+                        }
+                    } else {
+                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                                AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
+
+                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                        return builder.build();
+                    }
+                } else {
+                    if (prompts.contains(Prompt.LOGIN)) {
+                        endSession(sessionId, httpRequest, httpResponse);
+                        sessionId = null;
+                        prompts.remove(Prompt.LOGIN);
+                    }
+
+                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                    return builder.build();
+                }
+            }
+
+            // OXAUTH-37 : Validate authentication max age
+            boolean validAuthenticationMaxAge = true;
+            Integer authenticationMaxAge = null;
+            if (maxAge != null) {
+                authenticationMaxAge = maxAge;
+            } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
+                    && jwtAuthorizationRequest.getIdTokenMember() != null
+                    && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
+                authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
+            }
+            GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            if (sessionUser.getAuthenticationTime() != null) {
+                userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
+            }
+            if (authenticationMaxAge != null) {
+                userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
+                validAuthenticationMaxAge = userAuthenticationTime.after(now);
+            } else if (client.getDefaultMaxAge() != null) {
+                userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
+                validAuthenticationMaxAge = userAuthenticationTime.after(now);
+            }
+            if (!validAuthenticationMaxAge) {
+                endSession(sessionId, httpRequest, httpResponse);
+                sessionId = null;
+
+                redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                return builder.build();
+            }
+
+            oAuth2AuditLog.setUsername(user.getUserId());
+
+            ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
+                    user.getAttribute("inum"),
+                    client.getClientId(),
+                    client.getPersistClientAuthorizations());
+            if (scopes.size() > 0) {
+                if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
+                    if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
+                        sessionUser.addPermission(clientId, true);
+                        sessionIdService.updateSessionId(sessionUser);
+                    } else {
+                        redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                        return builder.build();
+                    }
+                } else if (client.getTrustedClient()) {
+                    sessionUser.addPermission(clientId, true);
+                    sessionIdService.updateSessionId(sessionUser);
+                }
+            }
+
+            if (prompts.contains(Prompt.LOGIN)) {
+
+                //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
+                if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
+                    endSession(sessionId, httpRequest, httpResponse);
+                }
+                sessionId = null;
+                prompts.remove(Prompt.LOGIN);
+
+                redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                return builder.build();
+            }
+
+            if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
+                prompts.remove(Prompt.CONSENT);
+
+                redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                return builder.build();
+            }
+
+            AuthorizationCode authorizationCode = null;
+            if (responseTypes.contains(ResponseType.CODE)) {
+                authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
+                        sessionUser.getAuthenticationTime());
+                authorizationGrant.setNonce(nonce);
+                authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
+                authorizationGrant.setScopes(scopes);
+                authorizationGrant.setCodeChallenge(codeChallenge);
+                authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
+                authorizationGrant.setClaims(claims);
+
+                // Store acr_values
+                authorizationGrant.setAcrValues(acrValuesStr);
+                authorizationGrant.setSessionDn(sessionUser.getDn());
+                authorizationGrant.save(); // call save after object modification!!!
+
+                authorizationCode = authorizationGrant.getAuthorizationCode();
+
+                redirectUriResponse.addResponseParameter("code", authorizationCode.getCode());
+            }
+
+            AccessToken newAccessToken = null;
+            if (responseTypes.contains(ResponseType.TOKEN)) {
+                if (authorizationGrant == null) {
+                    authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
+                            sessionUser.getAuthenticationTime());
+                    authorizationGrant.setNonce(nonce);
+                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                    authorizationGrant.setScopes(scopes);
+                    authorizationGrant.setClaims(claims);
+
+                    // Store acr_values
+                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setSessionDn(sessionUser.getDn());
+                    authorizationGrant.save(); // call save after object modification!!!
+                }
+                newAccessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
+            }
+
+            if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+                boolean includeIdTokenClaims = Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims());
+                if (authorizationGrant == null) {
+                    includeIdTokenClaims = true;
+                    authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
+                            sessionUser.getAuthenticationTime());
+                    authorizationGrant.setNonce(nonce);
+                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                    authorizationGrant.setScopes(scopes);
+                    authorizationGrant.setClaims(claims);
+
+                    // Store authentication acr values
+                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setSessionDn(sessionUser.getDn());
+                    authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
+                }
+                IdToken idToken = authorizationGrant.createIdToken(
+                        nonce, authorizationCode, newAccessToken, null,
+                        state, authorizationGrant, includeIdTokenClaims,
+                        TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
+
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
+            }
+
+            if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
+            }
+
+            //if (Boolean.valueOf(requestSessionId) && StringUtils.isBlank(sessionId) &&
+            if (sessionUser.getId() == null) {
+                final SessionId newSessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, sessionUser.getUserDn(), prompt);
+                String newSessionId = newSessionUser.getId();
+                sessionUser.setId(newSessionId);
+                log.trace("newSessionId = {}", newSessionId);
+            }
+            redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_ID, sessionUser.getId());
+            redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionIdService.computeSessionState(sessionUser, clientId, redirectUri));
+            redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
+            if (scope != null && !scope.isEmpty()) {
+                scope = authorizationGrant.checkScopesPolicy(scope);
+
+                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
+            }
+
+            clientService.updateAccessTime(client, false);
+            oAuth2AuditLog.setSuccess(true);
+
+            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+
+            if (appConfiguration.getCustomHeadersWithAuthorizationResponse()) {
+                for (String key : customResponseHeaders.keySet()) {
+                    builder.header(key, customResponseHeaders.get(key));
+                }
+            }
+
+            if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
+                CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+                if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+
+                    RefreshToken refreshToken = cibaGrant.createRefreshToken();
+                    log.debug("Issuing refresh token: {}", refreshToken.getCode());
+
+                    AccessToken accessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+                    //AccessToken accessToken = cibaGrant.createAccessToken(null, new ExecutionContext(null, null));
+                    log.debug("Issuing access token: {}", accessToken.getCode());
+
+                    IdToken idToken = cibaGrant.createIdToken(
+                            null, null, accessToken, refreshToken,
+                            null, cibaGrant, false, null);
+
+                    cibaPushTokenDeliveryProxy.pushTokenDelivery(
+                            cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                            cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                            cibaGrant.getClientNotificationToken(),
+                            accessToken.getCode(),
+                            refreshToken.getCode(),
+                            idToken.getCode(),
+                            accessToken.getExpiresIn()
+                    );
+                }
+            }
+
+        } catch (WebApplicationException e) {
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+            log.error(e.getMessage(), e);
+            throw e;
         } catch (AcrChangedException e) { // Acr changed
             log.error("ACR is changed, please provide a supported and enabled acr value");
             log.error(e.getMessage(), e);
@@ -713,7 +671,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
-            builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
+            builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
+                    .type(MediaType.APPLICATION_JSON_TYPE);
             log.error(e.getMessage(), e);
         } catch (InvalidSessionStateException ex) {
             // Allow to handle it via GlobalExceptionHandler
@@ -725,6 +685,43 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private void updateSessionForROPC(HttpServletRequest httpRequest, SessionId sessionUser) {
+        if (sessionUser != null) {
+            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
+            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
+            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS == GrantType.fromString(authorizedGrant)) {
+                // Remove from session to avoid execution on next AuthZ request
+                sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
+
+                // Reset AuthZ parameters
+                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
+                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+                sessionAttributes.putAll(requestParameterMap);
+                sessionIdService.updateSessionId(sessionUser, true, true, true);
+            }
+        }
+    }
+
+    private void checkAcrChanged(String acrValuesStr, List<Prompt> prompts, SessionId sessionUser) throws AcrChangedException {
+        try {
+            sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
+        } catch (AcrChangedException e) { // Acr changed
+            //See https://github.com/GluuFederation/oxTrust/issues/797
+            if (e.isForceReAuthentication()) {
+                if (!prompts.contains(Prompt.LOGIN)) {
+                    log.info("ACR is changed, adding prompt=login to prompts");
+                    prompts.add(Prompt.LOGIN);
+
+                    sessionUser.setState(SessionIdState.UNAUTHENTICATED);
+                    sessionUser.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
+                    sessionIdService.persistSessionId(sessionUser);
+                }
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -759,16 +756,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
-        Map<String, String> result = new HashMap<String, String>();
+        Map<String, String> result = new HashMap<>();
         for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
             result.put(entry.getKey(), entry.getValue()[0]);
         }
 
         return result;
-    }
-
-    private ResponseBuilder error(Response.Status p_status, AuthorizeErrorResponseType p_type, String p_state) {
-        return Response.status(p_status.getStatusCode()).entity(errorResponseFactory.getErrorAsJson(p_type, p_state, "")).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
     private void redirectToAuthorizationPage(
