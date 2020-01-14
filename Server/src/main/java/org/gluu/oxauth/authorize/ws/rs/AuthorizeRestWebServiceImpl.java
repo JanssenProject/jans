@@ -26,6 +26,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
+import org.gluu.oxauth.model.exception.InvalidJweException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
@@ -262,53 +263,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         .build());
             }
 
-
-            if (StringUtils.isNotBlank(requestUri)) {
-                boolean validRequestUri = false;
+            JwtAuthorizationRequest jwtAuthorizationRequest = null;
+            boolean invalidOpenidRequestObject = false;
+            RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+            if (StringUtils.isNotBlank(request)) {
                 try {
-                    URI reqUri = new URI(requestUri);
-                    String reqUriHash = reqUri.getFragment();
-                    String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+                    jwtAuthorizationRequest = createJwtAuthorizationRequest(request, requestUri, client, state, redirectUriResponse, httpRequest);
 
-                    ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
-                    clientRequest.setHttpMethod(HttpMethod.GET);
-
-                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                    int status = clientResponse.getStatus();
-
-                    if (status == 200) {
-                        request = clientResponse.getEntity(String.class);
-
-                        if (StringUtils.isBlank(reqUriHash)) {
-                            validRequestUri = true;
-                        } else {
-                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-                            validRequestUri = StringUtils.equals(reqUriHash, hash);
-                        }
-                    }
-
-                    if (validRequestUri) {
-                        requestUri = null;
-                    } else {
-                        RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
+                    if (jwtAuthorizationRequest == null) {
+                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
 
                         throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
                     }
-                } catch (WebApplicationException e) {
-                    throw e;
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = null;
-            boolean invalidOpenidRequestObject = false;
-            if (StringUtils.isNotBlank(request)) {
-                try {
-
-                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
 
                     if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
                             || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
@@ -348,9 +315,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            if (invalidOpenidRequestObject) {
-                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-
+            if (invalidOpenidRequestObject || jwtAuthorizationRequest == null) {
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                         AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
 
@@ -358,9 +323,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             AuthorizationGrant authorizationGrant = null;
-            RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
 
-            if (jwtAuthorizationRequest != null && jwtAuthorizationRequest.getIdTokenMember() != null) {
+            if (jwtAuthorizationRequest.getIdTokenMember() != null) {
                 Claim userIdClaim = jwtAuthorizationRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
                 if (userIdClaim != null && userIdClaim.getClaimValue() != null
                         && userIdClaim.getClaimValue().getValue() != null) {
@@ -661,6 +625,58 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private JwtAuthorizationRequest createJwtAuthorizationRequest(String request, String requestUri, Client client, String state, RedirectUri redirectUriResponse, HttpServletRequest httpRequest) throws InvalidJwtException, InvalidJweException {
+
+        if (StringUtils.isNotBlank(requestUri)) {
+            boolean validRequestUri = false;
+            try {
+                URI reqUri = new URI(requestUri);
+                String reqUriHash = reqUri.getFragment();
+                String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+                ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
+                clientRequest.setHttpMethod(HttpMethod.GET);
+
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                int status = clientResponse.getStatus();
+
+                if (status == 200) {
+                    request = clientResponse.getEntity(String.class);
+
+                    if (StringUtils.isBlank(reqUriHash)) {
+                        validRequestUri = true;
+                    } else {
+                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                        validRequestUri = StringUtils.equals(reqUriHash, hash);
+                    }
+                }
+
+                if (!validRequestUri) {
+                    redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
+
+                    throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+                }
+            } catch (WebApplicationException e) {
+                throw e;
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return null;
+            }
+        }
+
+        if (StringUtils.isNotBlank(request)) {
+            try {
+                return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+            } catch (WebApplicationException e) {
+                throw e;
+            } catch (Exception e) {
+                log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
+                        e.getClass().getName(), e.getMessage());
+            }
+        }
+        return null;
     }
 
     private void updateSessionForROPC(HttpServletRequest httpRequest, SessionId sessionUser) {
