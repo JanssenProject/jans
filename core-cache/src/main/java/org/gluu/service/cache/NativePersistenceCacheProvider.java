@@ -74,7 +74,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     }
 
 	public void configure(CacheConfiguration cacheConfiguration, PersistenceEntryManager entryManager) {
-		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.log = LoggerFactory.getLogger(NativePersistenceCacheProvider.class);
 		this.cacheConfiguration = cacheConfiguration;
 		this.entryManager = entryManager;
 	}

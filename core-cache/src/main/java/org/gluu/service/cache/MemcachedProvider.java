@@ -65,7 +65,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     }
 
 	public void configure(CacheConfiguration cacheConfiguration) {
-		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.log = LoggerFactory.getLogger(MemcachedProvider.class);
 		this.cacheConfiguration = cacheConfiguration;
 	}
 
