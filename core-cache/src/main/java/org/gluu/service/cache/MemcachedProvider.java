@@ -1,15 +1,20 @@
 package org.gluu.service.cache;
 
-import net.spy.memcached.*;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.BinaryConnectionFactory;
+import net.spy.memcached.ConnectionFactory;
+import net.spy.memcached.DefaultConnectionFactory;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.
@@ -17,7 +22,8 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
-    private Logger log = LoggerFactory.getLogger(MemcachedProvider.class);
+    @Inject
+    private Logger log;
 
     @Inject
     private CacheConfiguration cacheConfiguration;
@@ -57,6 +63,11 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
             throw new IllegalStateException("Error starting MemcachedProvider", e);
         }
     }
+
+	public void configure(CacheConfiguration cacheConfiguration) {
+		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.cacheConfiguration = cacheConfiguration;
+	}
 
     private void testConnection() {
         put(2, "connectionTest", "connectionTestValue");

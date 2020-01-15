@@ -1,14 +1,14 @@
 package org.gluu.service.cache;
 
-import org.gluu.persist.model.base.Deletable;
-import org.gluu.persist.model.base.DeletableEntity;
+import java.io.Serializable;
+import java.util.Date;
+
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
-
-import java.io.Serializable;
-import java.util.Date;
+import org.gluu.persist.model.base.Deletable;
+import org.gluu.persist.model.base.DeletableEntity;
 
 @DataEntry
 @ObjectClass(value = "cache")

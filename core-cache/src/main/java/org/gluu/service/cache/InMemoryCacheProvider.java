@@ -1,15 +1,17 @@
 package org.gluu.service.cache;
 
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -18,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+    @Inject
+    private Logger log;
 
     @Inject
     private CacheConfiguration cacheConfiguration;
@@ -36,23 +39,28 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
     }
 
     public void create() {
-        LOG.debug("Starting InMemoryCacheProvider ...");
+    	log.debug("Starting InMemoryCacheProvider ...");
         try {
             map = ExpiringMap.builder().expirationPolicy(ExpirationPolicy.CREATED).variableExpiration().build();
 
-            LOG.debug("InMemoryCacheProvider started.");
+            log.debug("InMemoryCacheProvider started.");
         } catch (Exception e) {
             throw new IllegalStateException("Error starting InMemoryCacheProvider", e);
         }
     }
 
+	public void configure(CacheConfiguration cacheConfiguration) {
+		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.cacheConfiguration = cacheConfiguration;
+	}
+
     @PreDestroy
     public void destroy() {
-        LOG.debug("Destroying InMemoryCacheProvider");
+    	log.debug("Destroying InMemoryCacheProvider");
 
         map.clear();
 
-        LOG.debug("Destroyed InMemoryCacheProvider");
+        log.debug("Destroyed InMemoryCacheProvider");
     }
 
     @Override

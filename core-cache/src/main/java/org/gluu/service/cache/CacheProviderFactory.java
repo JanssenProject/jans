@@ -1,13 +1,13 @@
 package org.gluu.service.cache;
 
-import org.slf4j.Logger;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import org.slf4j.Logger;
 
 /**
  * @author yuriyz on 02/21/2017.

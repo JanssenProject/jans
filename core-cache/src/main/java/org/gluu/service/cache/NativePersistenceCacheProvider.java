@@ -1,5 +1,16 @@
 package org.gluu.service.cache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -10,19 +21,11 @@ import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Calendar;
-import java.util.Date;
-
 @ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
 
-    private final static Logger log = LoggerFactory.getLogger(NativePersistenceCacheProvider.class);
+    @Inject
+    private Logger log;
 
     @Inject
     private CacheConfiguration cacheConfiguration;
@@ -33,6 +36,10 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private String baseDn;
 
 	private boolean deleteExpiredOnGetRequest;
+
+    @PostConstruct
+    public void init() {
+    }
 
     @Override
     public void create() {
@@ -65,6 +72,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             throw new RuntimeException("Failed to create NATIVE_PERSISTENCE cache provider.", e);
         }
     }
+
+	public void configure(CacheConfiguration cacheConfiguration, PersistenceEntryManager entryManager) {
+		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.cacheConfiguration = cacheConfiguration;
+		this.entryManager = entryManager;
+	}
 
     @Override
     public void destroy() {
@@ -164,7 +177,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         // TODO: Implement all specific application objects removal
     }
 
-    private static Object fromString(String s) {
+    private Object fromString(String s) {
         try {
             byte[] data = Base64.decodeBase64(s);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
@@ -176,12 +189,12 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                 IOUtils.closeQuietly(ois);
             }
         } catch (Exception e) {
-            log.error("Failed to deserizalize cache entity, data: " + s);
+            log.error("Failed to deserizalize cache entity, data: " + s, e);
             return null;
         }
     }
 
-    private static String asString(Object o) {
+    private String asString(Object o) {
         ObjectOutputStream oos = null;
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -190,7 +203,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             oos.close();
             return Base64.encodeBase64String(baos.toByteArray());
         } catch (Exception e) {
-            log.error("Failed to serizalize cache entity to string, object: " + 0);
+            log.error("Failed to serizalize cache entity to string, object: " + 0, e);
             return null;
         } finally {
             IOUtils.closeQuietly(oos);
