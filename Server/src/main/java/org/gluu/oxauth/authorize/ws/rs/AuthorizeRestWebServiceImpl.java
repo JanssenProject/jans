@@ -263,87 +263,81 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         .build());
             }
 
-            JwtAuthorizationRequest jwtAuthorizationRequest = null;
-            boolean invalidOpenidRequestObject = false;
+            JwtAuthorizationRequest jwtRequest = null;
             RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
             if (StringUtils.isNotBlank(request)) {
                 try {
-                    jwtAuthorizationRequest = createJwtAuthorizationRequest(request, requestUri, client, state, redirectUriResponse, httpRequest);
+                    jwtRequest = createJwtRequest(request, requestUri, client, state, redirectUriResponse, httpRequest);
 
-                    if (jwtAuthorizationRequest == null) {
-                        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
-
-                        throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+                    if (jwtRequest == null) {
+                        throw createInvalidJwtRequestException(redirectUriResponse, httpRequest, state, "Failed to parse jwt.");
                     }
 
+                    // MUST be equal
+                    if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
+                        throw createInvalidJwtRequestException(redirectUriResponse, httpRequest, state, "The responseType parameter is not the same in the JWT");
+                    }
+                    if (StringUtils.isBlank(jwtRequest.getClientId()) || !jwtRequest.getClientId().equals(clientId)) {
+                        throw createInvalidJwtRequestException(redirectUriResponse, httpRequest, state, "The clientId parameter is not the same in the JWT");
+                    }
 
-                    if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
-                            || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
-                        throw new InvalidJwtException("The responseType parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getClientId() != null
-                            && !jwtAuthorizationRequest.getClientId().equals(clientId)) {
-                        throw new InvalidJwtException("The clientId parameter is not the same in the JWT");
-                    } else if (!jwtAuthorizationRequest.getScopes().containsAll(scopes)
-                            || !scopes.containsAll(jwtAuthorizationRequest.getScopes())) {
-                        throw new InvalidJwtException("The scope parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getRedirectUri() != null
-                            && !jwtAuthorizationRequest.getRedirectUri().equals(redirectUri)) {
-                        throw new InvalidJwtException("The redirectUri parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getState() != null && StringUtils.isNotBlank(state)
-                            && !jwtAuthorizationRequest.getState().equals(state)) {
-                        throw new InvalidJwtException("The state parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getNonce() != null && StringUtils.isNotBlank(nonce)
-                            && !jwtAuthorizationRequest.getNonce().equals(nonce)) {
-                        throw new InvalidJwtException("The nonce parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getDisplay() != null && StringUtils.isNotBlank(display)
-                            && !jwtAuthorizationRequest.getDisplay().getParamName().equals(display)) {
-                        throw new InvalidJwtException("The display parameter is not the same in the JWT");
-                    } else if (!jwtAuthorizationRequest.getPrompts().isEmpty() && !prompts.isEmpty()
-                            && !jwtAuthorizationRequest.getPrompts().containsAll(prompts)) {
-                        throw new InvalidJwtException("The prompt parameter is not the same in the JWT");
-                    } else if (jwtAuthorizationRequest.getIdTokenMember() != null
-                            && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null && maxAge != null
-                            && !jwtAuthorizationRequest.getIdTokenMember().getMaxAge().equals(maxAge)) {
-                        throw new InvalidJwtException("The maxAge parameter is not the same in the JWT");
+                    // JWT wins
+                    if (!jwtRequest.getScopes().isEmpty()) {
+                        if (!scopes.contains("openid")) { // spec: Even if a scope parameter is present in the Request Object value, a scope parameter MUST always be passed using the OAuth 2.0 request syntax containing the openid scope value
+                            throw new WebApplicationException(Response
+                                    .status(Response.Status.BAD_REQUEST)
+                                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_SCOPE, state, "scope parameter does not contain openid value which is required."))
+                                    .build());
+                        }
+                        scopes = Lists.newArrayList(jwtRequest.getScopes());
+                    }
+                    if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(redirectUri)) {
+                        throw createInvalidJwtRequestException(redirectUriResponse, httpRequest, state, "The redirect_uri parameter is not the same in the JWT");
+                    }
+                    if (StringUtils.isNotBlank(jwtRequest.getState())) {
+                        state = jwtRequest.getState();
+                    }
+                    if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
+                        nonce = jwtRequest.getNonce();
+                    }
+                    if (jwtRequest.getDisplay() != null && StringUtils.isNotBlank(jwtRequest.getDisplay().getParamName())) {
+                        display = jwtRequest.getDisplay().getParamName();
+                    }
+                    if (!jwtRequest.getPrompts().isEmpty()) {
+                        prompts = Lists.newArrayList(jwtRequest.getPrompts());
+                    }
+                    if (jwtRequest.getIdTokenMember() != null) {
+                        if (jwtRequest.getIdTokenMember().getMaxAge() != null) {
+                            maxAge = jwtRequest.getIdTokenMember().getMaxAge();
+                        }
+                        Claim userIdClaim = jwtRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
+                        if (userIdClaim != null && userIdClaim.getClaimValue() != null
+                                && userIdClaim.getClaimValue().getValue() != null) {
+                            String userIdClaimValue = userIdClaim.getClaimValue().getValue();
+
+                            if (user != null) {
+                                String userId = user.getUserId();
+
+                                if (!userId.equalsIgnoreCase(userIdClaimValue)) {
+                                    redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                                            AuthorizeErrorResponseType.USER_MISMATCHED, state));
+
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                    return builder.build();
+                                }
+                            }
+                        }
                     }
                 } catch (WebApplicationException e) {
                     throw e;
                 } catch (Exception e) {
-                    invalidOpenidRequestObject = true;
-                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
-                            e.getClass().getName(), e.getMessage());
+                    log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
+                    throw createInvalidJwtRequestException(redirectUriResponse, httpRequest, state, "Invalid JWT authorization request");
                 }
-            }
-
-            if (invalidOpenidRequestObject) {
-                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                        AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state));
-
-                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
             }
 
             AuthorizationGrant authorizationGrant = null;
-
-            if (jwtAuthorizationRequest != null && jwtAuthorizationRequest.getIdTokenMember() != null) {
-                Claim userIdClaim = jwtAuthorizationRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
-                if (userIdClaim != null && userIdClaim.getClaimValue() != null
-                        && userIdClaim.getClaimValue().getValue() != null) {
-                    String userIdClaimValue = userIdClaim.getClaimValue().getValue();
-
-                    if (user != null) {
-                        String userId = user.getUserId();
-
-                        if (!userId.equalsIgnoreCase(userIdClaimValue)) {
-                            redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                    AuthorizeErrorResponseType.USER_MISMATCHED, state));
-
-                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                            return builder.build();
-                        }
-                    }
-                }
-            }
 
             if (user == null) {
                 identity.logout();
@@ -402,7 +396,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.validateAuthenticationMaxAge(maxAge, sessionUser, client, jwtAuthorizationRequest, invalidOpenidRequestObject);
+            boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.validateAuthnMaxAge(maxAge, sessionUser, client);
             if (!validAuthenticationMaxAge) {
                 endSession(sessionId, httpRequest, httpResponse);
                 sessionId = null;
@@ -475,7 +469,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
                         sessionUser.getAuthenticationTime());
                 authorizationGrant.setNonce(nonce);
-                authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                authorizationGrant.setJwtAuthorizationRequest(jwtRequest);
                 authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
                 authorizationGrant.setScopes(scopes);
                 authorizationGrant.setCodeChallenge(codeChallenge);
@@ -498,7 +492,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
                             sessionUser.getAuthenticationTime());
                     authorizationGrant.setNonce(nonce);
-                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                    authorizationGrant.setJwtAuthorizationRequest(jwtRequest);
                     authorizationGrant.setScopes(scopes);
                     authorizationGrant.setClaims(claims);
 
@@ -521,7 +515,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
                             sessionUser.getAuthenticationTime());
                     authorizationGrant.setNonce(nonce);
-                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                    authorizationGrant.setJwtAuthorizationRequest(jwtRequest);
                     authorizationGrant.setScopes(scopes);
                     authorizationGrant.setClaims(claims);
 
@@ -615,8 +609,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
                     .type(MediaType.APPLICATION_JSON_TYPE);
             log.error(e.getMessage(), e);
-        } catch (InvalidSessionStateException ex) {
-            // Allow to handle it via GlobalExceptionHandler
+        } catch (InvalidSessionStateException ex) { // Allow to handle it via GlobalExceptionHandler
             throw ex;
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500
@@ -627,7 +620,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private JwtAuthorizationRequest createJwtAuthorizationRequest(String request, String requestUri, Client client, String state, RedirectUri redirectUriResponse, HttpServletRequest httpRequest) throws InvalidJwtException, InvalidJweException {
+    private WebApplicationException createInvalidJwtRequestException(RedirectUri redirectUriResponse, HttpServletRequest httpRequest, String state, String reason) {
+        redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, state, reason));
+        return new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+    }
+
+    private JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, String state, RedirectUri redirectUriResponse, HttpServletRequest httpRequest) throws InvalidJwtException, InvalidJweException {
 
         if (StringUtils.isNotBlank(requestUri)) {
             boolean validRequestUri = false;
@@ -666,33 +664,37 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         }
 
-        if (StringUtils.isNotBlank(request)) {
-            try {
-                return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-            } catch (WebApplicationException e) {
-                throw e;
-            } catch (Exception e) {
-                log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
-                        e.getClass().getName(), e.getMessage());
-            }
+        if (StringUtils.isBlank(request)) {
+            return null;
+        }
+
+        try {
+            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
+                    e.getClass().getName(), e.getMessage());
         }
         return null;
     }
 
     private void updateSessionForROPC(HttpServletRequest httpRequest, SessionId sessionUser) {
-        if (sessionUser != null) {
-            Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
-            String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
-            if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS == GrantType.fromString(authorizedGrant)) {
-                // Remove from session to avoid execution on next AuthZ request
-                sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
+        if (sessionUser == null) {
+            return;
+        }
 
-                // Reset AuthZ parameters
-                Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
-                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
-                sessionAttributes.putAll(requestParameterMap);
-                sessionIdService.updateSessionId(sessionUser, true, true, true);
-            }
+        Map<String, String> sessionAttributes = sessionUser.getSessionAttributes();
+        String authorizedGrant = sessionUser.getSessionAttributes().get(Constants.AUTHORIZED_GRANT);
+        if (StringHelper.isNotEmpty(authorizedGrant) && GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS == GrantType.fromString(authorizedGrant)) {
+            // Remove from session to avoid execution on next AuthZ request
+            sessionAttributes.remove(Constants.AUTHORIZED_GRANT);
+
+            // Reset AuthZ parameters
+            Map<String, String> parameterMap = getGenericRequestMap(httpRequest);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+            sessionAttributes.putAll(requestParameterMap);
+            sessionIdService.updateSessionId(sessionUser, true, true, true);
         }
     }
 
