@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -47,63 +48,66 @@ public class RedirectionUriService {
     private ErrorResponseFactory errorResponseFactory;
 
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
+        Client client = clientService.getClient(clientIdentifier);
+        if (client == null) {
+            return null;
+        }
+        return validateRedirectionUri(client, redirectionUri);
+    }
+
+    public String validateRedirectionUri(@NotNull Client client, String redirectionUri) {
         try {
-            Client client = clientService.getClient(clientIdentifier);
+            String sectorIdentifierUri = client.getSectorIdentifierUri();
+            String[] redirectUris = client.getRedirectUris();
 
-            if (client != null) {
-                String sectorIdentifierUri = client.getSectorIdentifierUri();
-                String[] redirectUris = client.getRedirectUris();
+            if (StringUtils.isNotBlank(sectorIdentifierUri)) {
+                ClientRequest clientRequest = new ClientRequest(sectorIdentifierUri);
+                clientRequest.setHttpMethod(HttpMethod.GET);
 
-                if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-                    ClientRequest clientRequest = new ClientRequest(sectorIdentifierUri);
-                    clientRequest.setHttpMethod(HttpMethod.GET);
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                int status = clientResponse.getStatus();
 
-                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                    int status = clientResponse.getStatus();
-
-                    if (status == 200) {
-                        String entity = clientResponse.getEntity(String.class);
-                        JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-                        redirectUris = new String[sectorIdentifierJsonArray.length()];
-                        for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
-                            redirectUris[i] = sectorIdentifierJsonArray.getString(i);
-                        }
-                    } else {
-                        return null;
-                    }
-                }
-
-                if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
-                    log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
-                            clientIdentifier, redirectionUri, redirectUris.length);
-
-                    final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
-
-                    for (String uri : redirectUris) {
-                        log.debug("Comparing {} == {}", uri, redirectionUri);
-                        if (uri.equals(redirectionUri)) { // compare complete uri
-                            return redirectionUri;
-                        }
-
-                        String uriWithoutParams = uriWithoutParams(uri);
-                        final Map<String, String> params = getParams(uri);
-
-                        if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
-                                uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
-                            return redirectionUri;
-                        }
+                if (status == 200) {
+                    String entity = clientResponse.getEntity(String.class);
+                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+                    redirectUris = new String[sectorIdentifierJsonArray.length()];
+                    for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
+                        redirectUris[i] = sectorIdentifierJsonArray.getString(i);
                     }
                 } else {
-                    // Accept Request Without redirect_uri when One Registered
-                    if (redirectUris != null && redirectUris.length == 1) {
-                        return redirectUris[0];
+                    return null;
+                }
+            }
+
+            if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
+                log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
+                        client.getClientId(), redirectionUri, redirectUris.length);
+
+                final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
+
+                for (String uri : redirectUris) {
+                    log.debug("Comparing {} == {}", uri, redirectionUri);
+                    if (uri.equals(redirectionUri)) { // compare complete uri
+                        return redirectionUri;
                     }
+
+                    String uriWithoutParams = uriWithoutParams(uri);
+                    final Map<String, String> params = getParams(uri);
+
+                    if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
+                            uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
+                        return redirectionUri;
+                    }
+                }
+            } else {
+                // Accept Request Without redirect_uri when One Registered
+                if (redirectUris != null && redirectUris.length == 1) {
+                    return redirectUris[0];
                 }
             }
         } catch (Exception e) {
             return null;
         }
-
         return null;
     }
 
@@ -141,7 +145,7 @@ public class RedirectionUriService {
         return null;
     }
 
-	public String validatePostLogoutRedirectUri(SessionId sessionId, String postLogoutRedirectUri) {
+    public String validatePostLogoutRedirectUri(SessionId sessionId, String postLogoutRedirectUri) {
         if (sessionId == null) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.SESSION_NOT_PASSED, "Session object is not found.");
         }

@@ -27,20 +27,17 @@ public class AuthorizeParamsValidator {
     /**
      * Validates the parameters for an authorization request.
      *
-     * @param responseType The response type string. This parameter is mandatory, its
-     *                     value must be set to <strong>code</strong> or
-     *                     <strong>token</strong>.
+     * @param responseTypes The response types. This parameter is mandatory.
      * @return Returns <code>true</code> when all the parameters are valid.
      */
-    public static boolean validateParams(String responseType, List<Prompt> prompts, String nonce) {
-        List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
+    public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce) {
         if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
             if (StringUtils.isBlank(nonce)) {
                 return false;
             }
         }
 
-        boolean validParams = responseType != null && !responseType.isEmpty();
+        boolean validParams = !responseTypes.isEmpty();
         return validParams && noNonePrompt(prompts);
     }
 
