@@ -39,7 +39,7 @@ public class AuthorizeRestWebServiceValidator {
     public Client validate(String clientId, String state) {
         if (StringUtils.isBlank(clientId)) {
             throw new WebApplicationException(Response
-                    .status(Response.Status.UNAUTHORIZED)
+                    .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, "client_id is empty or blank."))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build());
