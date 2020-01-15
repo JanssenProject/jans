@@ -882,4 +882,28 @@ public abstract class BaseTest {
 		}
 	}
 
+	protected RegisterClient newRegisterClient(RegisterRequest request) {
+        try {
+            final RegisterClient client = new RegisterClient(registrationEndpoint);
+            client.setRequest(request);
+            client.setExecutor(clientExecutor(true));
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected AuthorizeClient newAuthorizeClient(AuthorizationRequest request) {
+        try {
+            final AuthorizeClient client = new AuthorizeClient(authorizationEndpoint);
+            client.setRequest(request);
+            client.setExecutor(clientExecutor(true));
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+
+
 }
