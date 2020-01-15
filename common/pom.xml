@@ -210,6 +210,10 @@
 			<groupId>com.github.microsoft</groupId>
 			<artifactId>TSS.Java</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
 
 		<!-- Documentation -->
 		<dependency>
