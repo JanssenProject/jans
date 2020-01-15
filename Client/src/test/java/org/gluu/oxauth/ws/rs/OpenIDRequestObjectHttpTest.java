@@ -2198,8 +2198,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-            RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-            registerClient.setRequest(registerRequest);
+            RegisterClient registerClient = newRegisterClient(registerRequest);
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
@@ -2224,15 +2223,14 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             authorizationRequest.setRequestUri(requestFileBaseUrl + "/FAKE_REQUEST_URI");
 
-            AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-            authorizeClient.setRequest(authorizationRequest);
+            AuthorizeClient authorizeClient = newAuthorizeClient(authorizationRequest);
             AuthorizationResponse response = authorizeClient.exec();
 
             showClient(authorizeClient);
             assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
             assertNotNull(response.getLocation(), "The location is null");
-            // assertNotNull(response.getErrorType(), "The error type is null");
-            // assertNotNull(response.getErrorDescription(), "The error description is null");
+            assertNotNull(response.getErrorType(), "The error type is null");
+            assertNotNull(response.getErrorDescription(), "The error description is null");
             assertNotNull(response.getState(), "The state is null");
         } catch (Exception e) {
             fail(e.getMessage(), e);
