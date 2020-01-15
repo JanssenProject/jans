@@ -216,14 +216,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             checkAcrChanged(acrValuesStr, prompts, sessionUser);
             updateSessionForROPC(httpRequest, sessionUser);
 
-            Client client = authorizeRestWebServiceValidator.validate(clientId, state);
+            authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, state);
+            Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
 
-            if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
+            if (!AuthorizeParamsValidator.validateParams(responseType, prompts, nonce)) {
                 if (redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                     redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                             AuthorizeErrorResponseType.INVALID_REQUEST, state));
-
                     throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
                 } else {
                     throw new WebApplicationException(Response
@@ -252,7 +252,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         .build());
             }
 
-
             final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
                     && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
 
@@ -265,7 +264,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             JwtAuthorizationRequest jwtRequest = null;
             RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
-            if (StringUtils.isNotBlank(request)) {
+            if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
                 try {
                     jwtRequest = createJwtRequest(request, requestUri, client, state, redirectUriResponse, httpRequest);
 
