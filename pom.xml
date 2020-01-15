@@ -40,6 +40,7 @@
 		<module>persistence-couchbase-sample</module>
 		<module>oxModel</module>
 		<module>oxSaml</module>
+		<module>core-cache</module>
 		<module>oxService</module>
 		<module>server</module>
 		<module>oxJsfUtil</module>
