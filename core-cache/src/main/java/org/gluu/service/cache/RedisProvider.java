@@ -57,7 +57,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     }
 
 	public void configure(CacheConfiguration cacheConfiguration, StringEncrypter stringEncrypter) {
-		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.log = LoggerFactory.getLogger(RedisProvider.class);
 		this.cacheConfiguration = cacheConfiguration;
 		this.stringEncrypter = stringEncrypter;
 	}
