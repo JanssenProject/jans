@@ -2,10 +2,18 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.gluu.oxauth.model.common.Prompt;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.RedirectUriResponse;
+import org.gluu.oxauth.service.RedirectionUriService;
+import org.gluu.oxauth.util.RedirectUri;
+import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -13,11 +21,15 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.TimeZone;
 
 /**
@@ -35,6 +47,9 @@ public class AuthorizeRestWebServiceValidator {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private RedirectionUriService redirectionUriService;
 
     public Client validateClient(String clientId, String state) {
         if (StringUtils.isBlank(clientId)) {
@@ -88,13 +103,37 @@ public class AuthorizeRestWebServiceValidator {
         return true;
     }
 
-    public void validateRequestJwt(String request, String requestUri, String state) {
+    public void validateRequestJwt(String request, String requestUri, RedirectUriResponse redirectUriResponse) {
         if (StringUtils.isNotBlank(request) && StringUtils.isNotBlank(requestUri)) {
-            throw new WebApplicationException(Response
-                    .status(Response.Status.BAD_REQUEST.getStatusCode())
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Both request and request_uri are specified which is not allowed."))
-                    .build());
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "Both request and request_uri are specified which is not allowed.");
         }
+    }
+
+    public void validate(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, ResponseMode responseMode) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce)) {
+            if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
+                RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
+                redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
+                        AuthorizeErrorResponseType.INVALID_REQUEST, state));
+                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build());
+            } else {
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST.getStatusCode())
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."))
+                        .build());
+            }
+        }
+    }
+
+    public String validateRedirectUri(@NotNull Client client, @Null String redirectUri, String state) {
+        redirectUri = redirectionUriService.validateRedirectionUri(client, redirectUri);
+        if (StringUtils.isNotBlank(redirectUri)) {
+            return redirectUri;
+        }
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""))
+                .build());
     }
 }
