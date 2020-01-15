@@ -208,33 +208,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             checkAcrChanged(acrValuesStr, prompts, sessionUser);
             updateSessionForROPC(httpRequest, sessionUser);
 
-
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state);
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
 
-            authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
-            authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
-
-            if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                acrValues = Lists.newArrayList(client.getDefaultAcrValues());
-            }
-
-            List<String> scopes = new ArrayList<>();
-            if (StringHelper.isNotEmpty(scope)) {
-                Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-                scopes.addAll(grantedScopes);
-            }
-
-            final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
-
-            if (!isResponseTypeValid) {
-                throw new WebApplicationException(Response
-                        .status(Response.Status.BAD_REQUEST)
-                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""))
-                        .build());
-            }
+            Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
             JwtAuthorizationRequest jwtRequest = null;
             if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
@@ -243,6 +221,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                     if (jwtRequest == null) {
                         throw createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
+                    }
+                    if (StringUtils.isNotBlank(jwtRequest.getState())) {
+                        state = jwtRequest.getState();
+                        redirectUriResponse.setState(state);
                     }
 
                     // MUST be equal
@@ -261,14 +243,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_SCOPE, state, "scope parameter does not contain openid value which is required."))
                                     .build());
                         }
-                        scopes = Lists.newArrayList(jwtRequest.getScopes());
+                        scopes = scopeChecker.checkScopesPolicy(client, Lists.newArrayList(jwtRequest.getScopes()));
                     }
                     if (jwtRequest.getRedirectUri() != null && !jwtRequest.getRedirectUri().equals(redirectUri)) {
                         throw createInvalidJwtRequestException(redirectUriResponse, "The redirect_uri parameter is not the same in the JWT");
-                    }
-                    if (StringUtils.isNotBlank(jwtRequest.getState())) {
-                        state = jwtRequest.getState();
-                        redirectUriResponse.setState(state);
                     }
                     if (StringUtils.isNotBlank(jwtRequest.getNonce())) {
                         nonce = jwtRequest.getNonce();
@@ -305,6 +283,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
                     throw createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
+            }
+
+            authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
+            authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
+
+            if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                acrValues = Lists.newArrayList(client.getDefaultAcrValues());
+            }
+
+            final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
+                    && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
+
+            if (!isResponseTypeValid) {
+                throw new WebApplicationException(Response
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNSUPPORTED_RESPONSE_TYPE, state, ""))
+                        .build());
             }
 
             AuthorizationGrant authorizationGrant = null;
