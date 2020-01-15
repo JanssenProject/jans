@@ -1,14 +1,11 @@
 package org.gluu.service.cache;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.HostAndPort;
 
 /**
  * @author yuriyz
  */
 public abstract class AbstractRedisProvider {
-	private final static Logger LOG = LoggerFactory.getLogger(AbstractRedisProvider.class);
 
 	protected RedisConfiguration redisConfiguration;
 

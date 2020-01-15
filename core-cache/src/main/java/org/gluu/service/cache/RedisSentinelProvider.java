@@ -1,17 +1,21 @@
 package org.gluu.service.cache;
 
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
-import java.io.Serializable;
-
 /**
+ * Important : keep it weld free. It's reused by oxd !
+ *
  * @author Yuriy Zabrovarnyy
  */
 public class RedisSentinelProvider extends AbstractRedisProvider {
