@@ -1,16 +1,22 @@
 package org.gluu.service.cache;
 
+import java.io.File;
+import java.io.Serializable;
+
+import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLParameters;
+
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.*;
 
-import javax.annotation.PreDestroy;
-import javax.net.ssl.SSLParameters;
-import java.io.File;
-import java.io.Serializable;
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 /**
  * Important : keep it weld free. It's reused by oxd !

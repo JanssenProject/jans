@@ -1,13 +1,14 @@
 package org.gluu.service.cache;
 
-import org.apache.commons.lang.StringUtils;
-import org.gluu.util.security.StringEncrypter;
-import org.slf4j.Logger;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.gluu.util.security.StringEncrypter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yuriyz on 02/23/2017.
@@ -54,6 +55,12 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             throw new IllegalStateException("Error starting RedisProvider", e);
         }
     }
+
+	public void configure(CacheConfiguration cacheConfiguration, StringEncrypter stringEncrypter) {
+		this.log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
+		this.cacheConfiguration = cacheConfiguration;
+		this.stringEncrypter = stringEncrypter;
+	}
 
     public void setCacheConfiguration(CacheConfiguration cacheConfiguration){
         this.cacheConfiguration=cacheConfiguration;
