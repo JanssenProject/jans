@@ -16,14 +16,14 @@ import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -126,7 +126,7 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public String validateRedirectUri(@NotNull Client client, @Null String redirectUri, String state) {
+    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, String state) {
         redirectUri = redirectionUriService.validateRedirectionUri(client, redirectUri);
         if (StringUtils.isNotBlank(redirectUri)) {
             return redirectUri;
