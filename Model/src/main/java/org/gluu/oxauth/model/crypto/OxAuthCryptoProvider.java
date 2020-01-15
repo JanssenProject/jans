@@ -26,10 +26,10 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,10 +43,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.*;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -341,6 +341,20 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         }
 
         return publicKey;
+    }
+
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        for (JSONWebKey key : jsonWebKeySet.getKeys()) {
+            if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
+                Key keyFromStore = keyStore.getKey(key.getKid(), keyStoreSecret.toCharArray());
+                if (keyFromStore != null) {
+                    return key.getKid();
+                }
+            }
+        }
+
+        LOG.error("Unable to find key for algorithm: " + algorithm);
+        return null;
     }
 
     public PrivateKey getPrivateKey(String alias)
