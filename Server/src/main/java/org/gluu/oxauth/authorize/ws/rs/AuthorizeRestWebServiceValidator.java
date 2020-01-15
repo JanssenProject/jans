@@ -36,7 +36,7 @@ public class AuthorizeRestWebServiceValidator {
     @Inject
     private ClientService clientService;
 
-    public Client validate(String clientId, String state) {
+    public Client validateClient(String clientId, String state) {
         if (StringUtils.isBlank(clientId)) {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
@@ -86,5 +86,15 @@ public class AuthorizeRestWebServiceValidator {
             return userAuthnTime.after(ServerUtil.now());
         }
         return true;
+    }
+
+    public void validateRequestJwt(String request, String requestUri, String state) {
+        if (StringUtils.isNotBlank(request) && StringUtils.isNotBlank(requestUri)) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Both request and request_uri are specified which is not allowed."))
+                    .build());
+        }
     }
 }
