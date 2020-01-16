@@ -136,6 +136,9 @@ public class KeyGeneratorTimer {
         long nextRevision = conf.getRevision() + 1;
         conf.setRevision(nextRevision);
         ldapEntryManager.merge(conf);
+
+        log.info("Updated JWKS successfully");
+        log.trace("JWKS: " + updatedJwks.toString());
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
