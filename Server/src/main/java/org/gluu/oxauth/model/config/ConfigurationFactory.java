@@ -6,20 +6,6 @@
 
 package org.gluu.oxauth.model.config;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -35,17 +21,26 @@ import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.BaseConfigurationReload;
-import org.gluu.service.cdi.event.ConfigurationEvent;
-import org.gluu.service.cdi.event.ConfigurationUpdate;
-import org.gluu.service.cdi.event.LdapConfigurationReload;
-import org.gluu.service.cdi.event.Scheduled;
+import org.gluu.service.cdi.event.*;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRegistration;
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -467,7 +462,8 @@ public class ConfigurationFactory {
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 			ldapManager.merge(conf);
 
-			log.info("New JWKS generated successfully");
+			log.info("New JWKS generated successfully.");
+			log.trace("JWKS: " + newWebKeys);
 		} catch (Exception ex2) {
 			log.error("Failed to re-generate JWKS keys", ex2);
 		}
