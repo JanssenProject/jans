@@ -1299,6 +1299,12 @@ paths:
                 type: string
               http_method:
                 type: string
+              scopes:
+                type: array
+                items:
+                  type: string
+                example: ["http://photoz.example.com/dev/actions/all",
+                          "http://photoz.example.com/dev/actions/add"]
       responses:
         200:
           description: OK
