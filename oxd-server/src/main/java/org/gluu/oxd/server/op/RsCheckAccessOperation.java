@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -75,22 +76,14 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         };
 
+        List<String> requiredScopes = getRequiredScopes(params, resource);
+
         CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
             for (CorrectUmaPermission permission : status.getPermissions()) {
-                List<String> requiredScopes = resource.getScopes();
-
-                if (requiredScopes.isEmpty()) {
-                    LOG.trace("Not scopes in resource:" + resource + ", oxdId: " + params.getOxdId());
-                    if (!resource.getScopeExpressions().isEmpty() && JsonLogicNodeParser.isNodeValid(resource.getScopeExpressions().get(0))) {
-                        requiredScopes = JsonLogicNodeParser.parseNode(resource.getScopeExpressions().get(0)).getData();
-                        LOG.trace("Set requiredScope from scope expression.");
-                    }
-                }
-
                 boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
 
                 LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
@@ -104,11 +97,10 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         }
 
-        List<String> scopes = resource.getTicketScopes();
+        List<String> scopes = (params.getScopes() != null && !params.getScopes().isEmpty()) ? params.getScopes() : resource.getTicketScopes();
         if (scopes.isEmpty()) {
             scopes = resource.getScopes();
         }
-
         final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost())));
         Response response = null;
         try {
@@ -131,6 +123,31 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         LOG.debug("Access denied for path: " + params.getPath() + " and httpMethod: " + params.getHttpMethod() + ". Ticket is registered: " + opResponse);
 
         return opResponse;
+    }
+
+    private List<String> getRequiredScopes(RsCheckAccessParams params, UmaResource resource) {
+
+        List<String> resourceScopes = resource.getScopes();
+
+        if (resourceScopes.isEmpty()) {
+            LOG.trace("Not scopes in resource:" + resource + ", oxdId: " + params.getOxdId());
+            if (!resource.getScopeExpressions().isEmpty() && JsonLogicNodeParser.isNodeValid(resource.getScopeExpressions().get(0))) {
+                resourceScopes = JsonLogicNodeParser.parseNode(resource.getScopeExpressions().get(0)).getData();
+                LOG.trace("Set requiredScope from scope expression.");
+            }
+        }
+
+        if (params.getScopes() != null && !params.getScopes().isEmpty()) {
+            if (resourceScopes.containsAll(params.getScopes())) {
+                return params.getScopes();
+            }
+            //Initialized rejectedScopes to filter unregistered scopes from list
+            final List<String> rejectedScopes = resourceScopes;
+            LOG.error("At least one of the scope passed as parameter isn't registered. The unregistered scopes are: " +
+                    params.getScopes().stream().filter(scope -> !rejectedScopes.contains(scope)).collect(Collectors.toList()));
+            throw new HttpException(ErrorResponseCode.INVALID_UMA_SCOPES_PARAMETER);
+        }
+        return resourceScopes;
     }
 
     private void validate(RsCheckAccessParams params) {
