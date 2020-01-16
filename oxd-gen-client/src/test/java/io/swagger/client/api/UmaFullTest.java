@@ -41,7 +41,7 @@ public class UmaFullTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
-        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
         params.setOxdId(site.getOxdId());
@@ -88,7 +88,7 @@ public class UmaFullTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
-        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
         params.setOxdId(site.getOxdId());

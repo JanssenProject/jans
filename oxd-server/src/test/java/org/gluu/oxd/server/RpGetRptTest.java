@@ -73,7 +73,7 @@ public class RpGetRptTest {
     public static RpGetRptResponse requestRpt(ClientInterface client, RegisterSiteResponse site, String rsProtect) throws IOException {
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetRptParams params = new RpGetRptParams();
         params.setOxdId(site.getOxdId());
