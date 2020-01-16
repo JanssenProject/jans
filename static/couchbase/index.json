@@ -6,7 +6,12 @@
       ["inum"], 
       ["del","exp"], 
       ["uid"], 
-      ["mail"] 
+      ["mail"], 
+      ["oxStatus"], 
+      ["oxApplication"], 
+      ["oxDeviceHashCode"], 
+      ["oxDeviceKeyHandle"], 
+
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
@@ -38,7 +43,8 @@
       ["inum"], 
       ["displayName"], 
       ["oxAuthRegistrationAccessToken"], 
-      ["oxAuthClaimName"], 
+      ["oxAuthUmaScope"], 
+      ["oxTicket"], 
       ["mail"], 
       ["oxId"], 
       ["oxTicket"], 
