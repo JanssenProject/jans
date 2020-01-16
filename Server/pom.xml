@@ -592,7 +592,7 @@
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-client</artifactId>
-			<version>${project.version}</version>
+			<version>4.0.Final</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
