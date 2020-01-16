@@ -80,7 +80,7 @@ public class RsCheckAccessTest {
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setRpt("dummy");
-        params.setScopes(Lists.newArrayList("/dev/actions/all","/dev/actions/view"));
+        params.setScopes(scopeList);
         try {
             client.umaRsCheckAccess(Tester.getAuthorization(), params);
             assertTrue(false);
