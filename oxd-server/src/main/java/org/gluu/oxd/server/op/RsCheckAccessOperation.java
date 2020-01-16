@@ -2,6 +2,7 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.apache.commons.collections.CollectionUtils;
 import org.gluu.oxd.common.*;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
@@ -97,21 +98,22 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         }
 
-        List<String> scopes = (params.getScopes() != null && !params.getScopes().isEmpty()) ? params.getScopes() : resource.getTicketScopes();
-        if (scopes.isEmpty()) {
-            scopes = resource.getScopes();
+
+        if (CollectionUtils.isEmpty(params.getScopes()) && !CollectionUtils.isEmpty(resource.getTicketScopes())) {
+            requiredScopes = resource.getTicketScopes();
         }
+
         final RptPreProcessInterceptor rptInterceptor = getOpClientFactory().createRptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(rp.getOpHost())));
         Response response = null;
         try {
-            LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
-            response = rptInterceptor.registerTicketResponse(scopes, resource.getId());
+            LOG.trace("Try to register ticket, scopes: " + requiredScopes + ", resourceId: " + resource.getId());
+            response = rptInterceptor.registerTicketResponse(requiredScopes, resource.getId());
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
-                response = rptInterceptor.registerTicketResponse(scopes, resource.getId());
+                response = rptInterceptor.registerTicketResponse(requiredScopes, resource.getId());
             } else {
                 throw e;
             }
@@ -137,7 +139,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         }
 
-        if (params.getScopes() != null && !params.getScopes().isEmpty()) {
+        if (!CollectionUtils.isEmpty(params.getScopes())) {
             if (resourceScopes.containsAll(params.getScopes())) {
                 return params.getScopes();
             }

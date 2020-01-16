@@ -31,7 +31,7 @@ public class UmaGetClaimsGatheringUrlTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
         params.setOxdId(site.getOxdId());
@@ -58,7 +58,7 @@ public class UmaGetClaimsGatheringUrlTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final RpGetClaimsGatheringUrlParams params = new RpGetClaimsGatheringUrlParams();
         params.setOxdId(site.getOxdId());
