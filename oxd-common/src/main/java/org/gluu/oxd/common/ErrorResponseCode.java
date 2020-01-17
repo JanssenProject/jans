@@ -69,6 +69,7 @@ public enum ErrorResponseCode {
     NO_UMA_DISCOVERY_RESPONSE(500, "no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma2-configuration"),
     NO_UMA_RESOURCES_TO_PROTECT(400, "invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at " + CoreUtils.DOC_URL),
     NO_UMA_HTTP_METHOD(400, "invalid_http_method", "http_method is not specified or otherwise not GET or POST or PUT or DELETE. Please check it according to protocol definition at " + CoreUtils.DOC_URL),
+    INVALID_UMA_SCOPES_PARAMETER(400, "invalid_uma_scope_parameter", "At least one of the scope passed as parameter isn't registered"),
     NO_UMA_PATH_PARAMETER(400, "invalid_path_parameter", "path parameter is not specified or otherwise not valid"),
     NO_UMA_TICKET_PARAMETER(400, "invalid_ticket_parameter", "ticket parameter is not specified or otherwise is not valid"),
     NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER(400, "invalid_claims_redirect_uri_parameter", "claims_redirect_uri parameter is not specified or otherwise is not valid"),
