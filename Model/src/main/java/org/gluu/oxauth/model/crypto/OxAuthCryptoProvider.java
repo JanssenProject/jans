@@ -344,17 +344,19 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        String kid = null;
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
-                Key keyFromStore = keyStore.getKey(key.getKid(), keyStoreSecret.toCharArray());
+                kid = key.getKid();
+                Key keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
                 if (keyFromStore != null) {
-                    return key.getKid();
+                    return kid;
                 }
             }
         }
 
-        LOG.error("Unable to find key for algorithm: " + algorithm);
-        return null;
+        LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid:" + kid);
+        return kid;
     }
 
     public PrivateKey getPrivateKey(String alias)
