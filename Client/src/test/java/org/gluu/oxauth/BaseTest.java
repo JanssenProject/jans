@@ -882,11 +882,26 @@ public abstract class BaseTest {
 		}
 	}
 
+	private ClientExecutor getClientExecutor() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        return clientExecutor(true);
+    }
+
 	protected RegisterClient newRegisterClient(RegisterRequest request) {
         try {
             final RegisterClient client = new RegisterClient(registrationEndpoint);
             client.setRequest(request);
-            client.setExecutor(clientExecutor(true));
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected UserInfoClient newUserInfoClient(UserInfoRequest request) {
+        try {
+            final UserInfoClient client = new UserInfoClient(userInfoEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
             throw new AssertionError("Failed to create register client");
@@ -897,7 +912,7 @@ public abstract class BaseTest {
         try {
             final AuthorizeClient client = new AuthorizeClient(authorizationEndpoint);
             client.setRequest(request);
-            client.setExecutor(clientExecutor(true));
+            client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
             throw new AssertionError("Failed to create register client");
