@@ -3,6 +3,8 @@ package org.gluu.oxd.common.params;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 06/06/2016
@@ -21,6 +23,8 @@ public class RsCheckAccessParams implements HasAccessTokenParams {
     private String http_method;
     @JsonProperty(value = "token")
     private String token;
+    @JsonProperty(value = "scopes")
+    private List<String> scopes;
 
     public RsCheckAccessParams() {
     }
@@ -65,6 +69,14 @@ public class RsCheckAccessParams implements HasAccessTokenParams {
         this.http_method = httpMethod;
     }
 
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<String> scopes) {
+        this.scopes = scopes;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -74,6 +86,7 @@ public class RsCheckAccessParams implements HasAccessTokenParams {
         sb.append(", path='").append(path).append('\'');
         sb.append(", http_method='").append(http_method).append('\'');
         sb.append(", token='").append(token).append('\'');
+        sb.append(", scopes='").append(scopes).append('\'');
         sb.append('}');
         return sb.toString();
     }

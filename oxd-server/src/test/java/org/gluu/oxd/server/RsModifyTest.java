@@ -26,7 +26,7 @@ public class RsModifyTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
-        RsCheckAccessTest.checkAccess(client, site);
+        RsCheckAccessTest.checkAccess(client, site, null);
         modifyResourcesWithScopes(client, site, UmaFullTest.resourceList(rsProtect).getResources());
     }
 
@@ -37,7 +37,7 @@ public class RsModifyTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
-        RsCheckAccessTest.checkAccess(client, site);
+        RsCheckAccessTest.checkAccess(client, site, null);
         modifyResourcesWithScopeExpression(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources(), correctScopeExpression);
     }
 
