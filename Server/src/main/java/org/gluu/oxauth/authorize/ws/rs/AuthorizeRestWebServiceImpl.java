@@ -257,11 +257,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (!jwtRequest.getPrompts().isEmpty()) {
                         prompts = Lists.newArrayList(jwtRequest.getPrompts());
                     }
-                    if (jwtRequest.getIdTokenMember() != null) {
-                        if (jwtRequest.getIdTokenMember().getMaxAge() != null) {
-                            maxAge = jwtRequest.getIdTokenMember().getMaxAge();
+
+                    final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
+                    if (idTokenMember != null) {
+                        if (idTokenMember.getMaxAge() != null) {
+                            maxAge = idTokenMember.getMaxAge();
                         }
-                        Claim userIdClaim = jwtRequest.getIdTokenMember().getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
+                        final Claim acrClaim = idTokenMember.getClaim("acr");
+                        if (acrClaim != null && acrClaim.getClaimValue() != null) {
+                            acrValuesStr = acrClaim.getClaimValue().getValueAsString();
+                            acrValues = Util.splittedStringAsList(acrValuesStr, " ");
+                        }
+
+                        Claim userIdClaim = idTokenMember.getClaim(JwtClaimName.SUBJECT_IDENTIFIER);
                         if (userIdClaim != null && userIdClaim.getClaimValue() != null
                                 && userIdClaim.getClaimValue().getValue() != null) {
                             String userIdClaimValue = userIdClaim.getClaimValue().getValue();
