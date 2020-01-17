@@ -6,23 +6,6 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONException;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
@@ -42,8 +25,22 @@ import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenID Request Object (embedded)
@@ -53,7 +50,8 @@ import org.testng.annotations.Test;
  */
 public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
-	@ArquillianResource
+    public static final String ACR_VALUE = "basic";
+    @ArquillianResource
 	private URI url;
 
 	private static String clientId1;
@@ -131,7 +129,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] {ACR_VALUE})));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -235,7 +233,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -339,7 +337,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -443,7 +441,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -548,7 +546,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -652,7 +650,7 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);

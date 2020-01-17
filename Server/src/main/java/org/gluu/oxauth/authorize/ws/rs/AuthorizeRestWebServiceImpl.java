@@ -263,7 +263,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         if (idTokenMember.getMaxAge() != null) {
                             maxAge = idTokenMember.getMaxAge();
                         }
-                        final Claim acrClaim = idTokenMember.getClaim("acr");
+                        final Claim acrClaim = idTokenMember.getClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
                         if (acrClaim != null && acrClaim.getClaimValue() != null) {
                             acrValuesStr = acrClaim.getClaimValue().getValueAsString();
                             acrValues = Util.splittedStringAsList(acrValuesStr, " ");
