@@ -36,7 +36,7 @@ public class RsProtectTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtect));
-        RsCheckAccessTest.checkAccess(client, site);
+        RsCheckAccessTest.checkAccess(client, site, null);
 
     }
 
@@ -92,7 +92,7 @@ public class RsProtectTest {
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression));
 
-        RsCheckAccessTest.checkAccess(client, site);
+        RsCheckAccessTest.checkAccess(client, site, null);
 
     }
 

@@ -44,7 +44,7 @@ public class RpGetRptTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         final UmaRpGetRptResponse firstResponse = requestRpt(client, site, rsProtect);
 
-        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
         params.setOxdId(site.getOxdId());
@@ -64,7 +64,7 @@ public class RpGetRptTest {
     private static UmaRpGetRptResponse requestRpt(DevelopersApi client, RegisterSiteResponse site, String rsProtect) throws Exception {
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect));
 
-        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+        final UmaRsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site, null);
 
         final UmaRpGetRptParams params = new UmaRpGetRptParams();
         params.setOxdId(site.getOxdId());
