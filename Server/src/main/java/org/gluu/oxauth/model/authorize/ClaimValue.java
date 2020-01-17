@@ -21,6 +21,7 @@ public class ClaimValue {
     private ClaimValueType claimValueType;
     private List<String> values;
     private String value;
+    private Boolean essential;
 
     private ClaimValue() {
     }
@@ -34,6 +35,9 @@ public class ClaimValue {
 
     public static ClaimValue createEssential(boolean essentialValue) {
         ClaimValue claimValue = new ClaimValue();
+        claimValue.setEssential(essentialValue);
+
+        // todo do we need code below ?
         if (essentialValue) {
             claimValue.claimValueType = ClaimValueType.ESSENTIAL_TRUE;
         } else {
@@ -58,6 +62,14 @@ public class ClaimValue {
         claimValue.value = value;
 
         return claimValue;
+    }
+
+    public Boolean getEssential() {
+        return essential;
+    }
+
+    public void setEssential(Boolean essential) {
+        this.essential = essential;
     }
 
     public ClaimValueType getClaimValueType() {
