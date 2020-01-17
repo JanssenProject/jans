@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012
@@ -69,6 +69,13 @@ public class ClaimValue {
     }
 
     public String getValue() {
+        return value;
+    }
+
+    public String getValueAsString() {
+        if (values != null && !values.isEmpty()) {
+            return String.join(" ", values);
+        }
         return value;
     }
 
