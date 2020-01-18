@@ -445,34 +445,39 @@ class Setup(object):
         self.jetty_base = '%s/jetty' % self.gluuOptFolder
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
-        self.jetty_app_configuration = {
-            'oxauth' : {'name' : 'oxauth',
-                        'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                        'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
-                        'installed' : False
-                        },
-            'identity' : {'name' : 'identity',
-                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                          'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
-                          'installed' : False
-                          },
-            'idp' : {'name' : 'idp',
-                     'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
-                     'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
-                     'installed' : False
-                     },
+        self.jetty_app_configuration = OrderedDict((
+                ('oxauth', {'name' : 'oxauth',
+                            'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
+                            'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                            'installed' : False
+                            }),
+                ('identity', {'name' : 'identity',
+                              'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
+                              'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                              'installed' : False
+                              }),
+                ('idp', {'name' : 'idp',
+                         'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
+                         'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                         'installed' : False
+                         }),
 
-            'oxauth-rp' : {'name' : 'oxauth-rp',
-                           'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                           'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
-                           'installed' : False
-                           },
-            'passport' : {'name' : 'passport',
-                          'node' : {},
-                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
-                          'installed' : False
-                           }
-        }
+                ('oxauth-rp', {'name' : 'oxauth-rp',
+                               'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
+                               'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
+                               'installed' : False
+                               }),
+                ('passport', {'name' : 'passport',
+                              'node' : {},
+                              'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                              'installed' : False
+                               }),
+                ('casa', {'name': 'casa',
+                         'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
+                         'memory': {'ratio': 0.1, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'installed': False
+                         }),
+            ))
 
         self.app_custom_changes = {
             'jetty' : {
