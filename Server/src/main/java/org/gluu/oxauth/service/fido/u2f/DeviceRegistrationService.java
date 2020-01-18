@@ -93,7 +93,7 @@ public class DeviceRegistrationService {
 		String baseDn = userService.getDnForUser(null);
 
 		Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "oxDeviceRegistration");
-		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", String.valueOf(getKeyHandleHashCode(keyHandleDecoded)));
+		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", getKeyHandleHashCode(keyHandleDecoded));
 		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("oxDeviceKeyHandle", keyHandle);
 		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
 
