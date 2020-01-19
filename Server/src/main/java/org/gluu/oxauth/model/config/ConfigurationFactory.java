@@ -462,7 +462,7 @@ public class ConfigurationFactory {
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 			ldapManager.merge(conf);
 
-			log.info("New JWKS generated successfully.");
+			log.info("Generated new JWKS successfully.");
 			log.trace("JWKS: " + newWebKeys);
 		} catch (Exception ex2) {
 			log.error("Failed to re-generate JWKS keys", ex2);
