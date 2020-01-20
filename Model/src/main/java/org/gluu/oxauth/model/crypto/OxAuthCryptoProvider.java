@@ -348,6 +348,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         String kid = null;
         LOG.trace("WebKeys:" + jsonWebKeySet.getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        LOG.trace("KeyStoreKeys:" + getKeys());
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 kid = key.getKid();
@@ -358,7 +359,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             }
         }
 
-        LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid:" + kid);
+        LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
         return kid;
     }
 
