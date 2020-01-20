@@ -37,10 +37,7 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.PrivateKey;
@@ -98,6 +95,15 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+    }
+
+    public void load() {
+        try(InputStream is = new FileInputStream(keyStoreFile)) {
+            keyStore.load(is, keyStoreSecret.toCharArray());
+            LOG.trace("Loaded keys from JKS.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
