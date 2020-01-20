@@ -11,8 +11,10 @@ import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.ApplicationFactory;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
@@ -41,6 +43,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -462,9 +465,10 @@ public class ConfigurationFactory {
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 			ldapManager.merge(conf);
 
-			log.info("New JWKS generated successfully.");
-			log.trace("JWKS: " + newWebKeys);
-		} catch (Exception ex2) {
+			log.info("Generated new JWKS successfully.");
+            log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+            log.trace("KeyStore keys: " + CryptoProviderFactory.getCryptoProvider(getAppConfiguration()).getKeys());
+        } catch (Exception ex2) {
 			log.error("Failed to re-generate JWKS keys", ex2);
 		}
 	}
