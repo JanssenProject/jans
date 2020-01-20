@@ -31,15 +31,13 @@ public class SpontaneousScopeHttpTest extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
 
-        List<String> scopes = Lists.newArrayList("openid", "profile", "address", "email", "phone", "user_name");
-        scopes.add("transaction:245");
-        scopes.add("transaction:8645");
-
-        RegisterResponse registerResponse = registerClient(redirectUri, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUri, responseTypes);
 
         String clientId = registerResponse.getClientId();
 
         // Request authorization and receive the authorization code.
+        List<String> scopes = Lists.newArrayList("openid", "profile", "address", "email", "phone", "user_name",
+                "transaction:245", "transaction:8645");
         AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId);
 
         final String[] responseScopes = authorizationResponse.getScope().split(" ");
@@ -50,10 +48,10 @@ public class SpontaneousScopeHttpTest extends BaseTest {
         assertFalse(Arrays.asList(responseScopes).contains("transaction:not_requested"));
     }
 
-    private RegisterResponse registerClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    private RegisterResponse registerClient(String redirectUris, List<ResponseType> responseTypes) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "Spontaneous scope test", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScope(scopes);
+        registerRequest.setScope(Lists.newArrayList("openid", "profile", "address", "email", "phone", "user_name"));
 
         // 1. allow spontaneous scopes (off by default)
         // 2. set spontaneous scope regular expression. In this example `transaction:345236456`
