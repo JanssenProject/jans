@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import com.google.common.collect.Lists;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.apache.commons.codec.binary.Base64;
@@ -57,6 +58,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -345,6 +347,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         String kid = null;
+        LOG.trace("WebKeys:" + jsonWebKeySet.getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 kid = key.getKid();
@@ -411,8 +414,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return cert;
     }
 
-    public List<String> getKeyAliases() throws KeyStoreException {
-        return Collections.list(this.keyStore.aliases());
+    public List<String> getKeys() {
+        try {
+            return Collections.list(this.keyStore.aliases());
+        } catch (KeyStoreException e) {
+            LOG.error(e.getMessage(), e);
+            return Lists.newArrayList();
+        }
     }
 
     public SignatureAlgorithm getSignatureAlgorithm(String alias) throws KeyStoreException {
@@ -447,5 +455,5 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     public KeyStore getKeyStore() {
         return keyStore;
     }
-    
+
 }

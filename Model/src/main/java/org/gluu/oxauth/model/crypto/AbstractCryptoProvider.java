@@ -5,6 +5,7 @@
  */
 package org.gluu.oxauth.model.crypto;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
@@ -32,10 +33,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -62,6 +60,10 @@ public abstract class AbstractCryptoProvider {
     public abstract boolean deleteKey(String keyId) throws Exception;
 
     public abstract boolean containsKey(String keyId);
+
+    public List<String> getKeys() {
+        return Lists.newArrayList();
+    }
 
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
