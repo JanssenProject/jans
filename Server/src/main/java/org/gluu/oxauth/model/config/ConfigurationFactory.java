@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
@@ -213,6 +214,17 @@ public class ConfigurationFactory {
 			this.isActive.set(false);
 		}
 	}
+
+    private void reloadKeysIfNeeded() {
+	    try {
+            final AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(this.conf);
+            if (cryptoProvider instanceof OxAuthCryptoProvider) {
+                ((OxAuthCryptoProvider) cryptoProvider).load();
+            }
+        } catch (Throwable e ) {
+            log.error("Failed to reload keys.", e);
+        }
+    }
 
 	private void reloadConfiguration() {
 		// Reload LDAP configuration if needed
@@ -422,6 +434,7 @@ public class ConfigurationFactory {
 		initConfigurationConf(p_conf);
 
 		this.loadedRevision = p_conf.getRevision();
+		reloadKeysIfNeeded();
 	}
 
 	private void initConfigurationConf(Conf p_conf) {
