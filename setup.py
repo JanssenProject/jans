@@ -1463,6 +1463,13 @@ class Setup(object):
         if (not 'cb_password' in properties_list) and self.cb_install:
             self.cb_password = p['ldapPass']
 
+        for si, se in ( 
+                        ('installPassport', 'gluuPassportEnabled'),
+                        ('gluuRadiusEnabled', 'installGluuRadius'),
+                        ('installSaml', 'gluuSamlEnabled'),
+                        ):
+            if getattr(self, si):
+                setattr(self, se, 'true')
 
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
