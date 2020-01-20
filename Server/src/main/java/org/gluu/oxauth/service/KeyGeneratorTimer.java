@@ -11,6 +11,7 @@ import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
@@ -31,6 +32,7 @@ import javax.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -138,7 +140,8 @@ public class KeyGeneratorTimer {
         ldapEntryManager.merge(conf);
 
         log.info("Updated JWKS successfully");
-        log.trace("JWKS: " + updatedJwks.toString());
+        log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        log.trace("KeyStore keys: " + cryptoProvider.getKeys());
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
