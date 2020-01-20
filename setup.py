@@ -5371,7 +5371,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--install-shib', help="Install the Shibboleth IDP", action='store_true')
     parser.add_argument('-f', help="Specify setup.properties file")
     parser.add_argument('-n', help="No interactive prompt before install starts. Run with -f", action='store_true')    
-    parser.add_argument('-N', '--no-httpd' help="No apache httpd server", action='store_true')
+    parser.add_argument('-N', '--no-httpd', help="No apache httpd server", action='store_true')
     parser.add_argument('-u', help="Update hosts file with IP address / hostname", action='store_true')
     parser.add_argument('-w', help="Get the development head war files", action='store_true')
     parser.add_argument('-t', help="Load test data", action='store_true')
