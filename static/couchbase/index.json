@@ -10,8 +10,7 @@
       ["oxStatus"], 
       ["oxApplication"], 
       ["oxDeviceHashCode"], 
-      ["oxDeviceKeyHandle"], 
-
+      ["oxDeviceKeyHandle"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
