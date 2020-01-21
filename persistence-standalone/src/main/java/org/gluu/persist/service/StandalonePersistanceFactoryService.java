@@ -16,7 +16,6 @@ import org.gluu.persist.reflect.util.ReflectHelper;
  * Factory which creates Persistence Entry Manager
  *
  * @author Yuriy Movchan Date: 05/10/2019
- * @param <E>
  */
 public class StandalonePersistanceFactoryService extends PersistanceFactoryService {
 

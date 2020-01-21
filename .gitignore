@@ -11,5 +11,8 @@
 # Maven
 target
 
+# Test
+test-output
+
 # Visual Studio Code project files 
 *.factorypath
