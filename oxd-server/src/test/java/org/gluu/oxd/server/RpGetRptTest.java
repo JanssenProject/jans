@@ -50,7 +50,6 @@ public class RpGetRptTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
-        params.setTrustedClient(true);
         params.setRptAsJwt(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
