@@ -30,7 +30,7 @@ public class GetUserInfoTest {
         final DevelopersApi client = api();
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        final GetTokensByCodeResponse tokens = requestTokens(client, site, userId, userSecret);
+        final GetTokensByCodeResponse tokens = requestTokens(client, opHost, site, userId, userSecret, site.getClientId(), redirectUrls);
 
         final GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
@@ -60,15 +60,14 @@ public class GetUserInfoTest {
         assertNull(apiResponse.getData().get("sub"));
     }
 
-
-    private GetTokensByCodeResponse requestTokens(DevelopersApi client, RegisterSiteResponse site, String userId, String userSecret) throws Exception {
+    private GetTokensByCodeResponse requestTokens(DevelopersApi client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls) throws Exception {
 
         final String state = CoreUtils.secureRandomString();
         final String nonce = CoreUtils.secureRandomString();
 
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
         params.setOxdId(site.getOxdId());
-        params.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce, getAuthorization(site)));
+        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
         params.setState(state);
 
         final GetTokensByCodeResponse resp = client.getTokensByCode(getAuthorization(site), params);

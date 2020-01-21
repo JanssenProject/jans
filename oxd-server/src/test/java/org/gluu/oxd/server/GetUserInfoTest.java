@@ -26,7 +26,7 @@ public class GetUserInfoTest {
         ClientInterface client = Tester.newClient(host);
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        final GetTokensByCodeResponse2 tokens = requestTokens(client, site, userId, userSecret);
+        final GetTokensByCodeResponse2 tokens = requestTokens(client, opHost, site, userId, userSecret, site.getClientId(), redirectUrls);
 
         GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
@@ -37,14 +37,13 @@ public class GetUserInfoTest {
         assertNotNull(resp.get("sub"));
     }
 
-    private GetTokensByCodeResponse2 requestTokens(ClientInterface client, RegisterSiteResponse site, String userId, String userSecret) {
+    private GetTokensByCodeResponse2 requestTokens(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls) {
 
         final String state = CoreUtils.secureRandomString();
         final String nonce = CoreUtils.secureRandomString();
-
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
         params.setOxdId(site.getOxdId());
-        params.setCode(GetTokensByCodeTest.codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
+        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce));
         params.setState(state);
 
         final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), params);

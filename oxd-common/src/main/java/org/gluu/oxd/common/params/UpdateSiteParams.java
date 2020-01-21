@@ -70,8 +70,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
     private String client_name;
     @JsonProperty(value = "client_token_endpoint_auth_signing_alg")
     private String client_token_endpoint_auth_signing_alg;
-    @JsonProperty(value = "trusted_client")
-    private Boolean trusted_client;
     @JsonProperty(value = "logo_uri")
     private String logo_uri;
     @JsonProperty(value = "client_uri")
@@ -342,14 +340,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
 
     public void setClientTokenEndpointAuthSigningAlg(String clientTokenEndpointAuthSigningAlg) {
         this.client_token_endpoint_auth_signing_alg = clientTokenEndpointAuthSigningAlg;
-    }
-
-    public Boolean getTrustedClient() {
-        return trusted_client;
-    }
-
-    public void setTrustedClient(Boolean trustedClient) {
-        this.trusted_client = trustedClient;
     }
 
     /**
@@ -897,7 +887,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append(", client_registration_client_uri=").append(client_registration_client_uri);
         sb.append(", client_name=").append(client_name);
         sb.append(", client_token_endpoint_auth_signing_alg=").append(client_token_endpoint_auth_signing_alg);
-        sb.append(", trusted_client=").append(trusted_client);
         sb.append(", logo_uri=").append(logo_uri);
         sb.append(", client_uri=").append(client_uri);
         sb.append(", policy_uri=").append(policy_uri);
