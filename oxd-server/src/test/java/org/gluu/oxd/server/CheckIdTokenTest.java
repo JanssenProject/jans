@@ -30,7 +30,7 @@ public class CheckIdTokenTest {
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         String nonce = CoreUtils.secureRandomString();
-        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, userId, userSecret, nonce);
+        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, nonce);
 
         final CheckIdTokenParams params = new CheckIdTokenParams();
         params.setOxdId(site.getOxdId());
