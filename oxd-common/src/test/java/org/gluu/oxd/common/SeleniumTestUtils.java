@@ -19,10 +19,10 @@ import java.util.function.Function;
 
 import static org.testng.Assert.fail;
 
-public class SeleniumUtils {
+public class SeleniumTestUtils {
 
     private static int WAIT_OPERATION_TIMEOUT = 60;
-    private static final Logger LOG = LoggerFactory.getLogger(SeleniumUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestUtils.class);
 
     public static void authorizeClient(String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
         WebDriver driver = initWebDriver(true, true);
