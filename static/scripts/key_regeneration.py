@@ -1,3 +1,5 @@
+# Please place this script in the same directory as setup.py
+
 import os
 import shutil
 import glob
@@ -5,19 +7,7 @@ import json
 import subprocess
 import sys
 import zipfile
-import requests
-import urllib3
-import time
 import xml.etree.ElementTree as ET
-from requests.auth import HTTPBasicAuth
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-try:
-    requests.packages.urllib3.disable_warnings()
-except:
-    pass
-
-log_fn = 'oxauth_key_regeneration.log'
 
 defaul_storage = 'ldap'
 
@@ -46,21 +36,9 @@ def run_command(args):
         cmd = ' '.join(args)
     else:
         cmd = args
+    print "Executing command", cmd
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = p.communicate()
-    
-    with open(log_fn, 'a') as w:
-        w.write("{} - cmd: {}, output: {}\n".format(time.ctime(), cmd, str(result)))
-    
-    return result
-
-def exec_cb_query(hostname, username, password, query):
-    result = requests.post(
-            'https://{}:18093/query/service'.format(hostname),
-            data={'statement': query}, 
-            auth=HTTPBasicAuth(username, password), 
-            verify=False)
-
     return result
 
 missing_packages = []
@@ -112,9 +90,7 @@ if os.path.exists(gluu_hybrid_roperties_fn):
 elif os.path.exists(gluu_couchbase_roperties_fn):
     defaul_storage = 'couchbase'
 
-print "Default Storage type is", defaul_storage
-
-print "Obtaining keystore password and determining algorithms"
+print "Obtaining keystore passwrod and determining algorithms"
 
 if defaul_storage == 'ldap':
     prop_fn = gluu_ldap_roperties_fn if os.path.exists(gluu_ldap_roperties_fn) else ox_ldap_roperties_fn
@@ -132,51 +108,59 @@ if defaul_storage == 'ldap':
         elif l.startswith('bindDN'):
             ldap_binddn = l.split(':')[1].strip()
 
-    print "LDAP Server: {}  Bind DN: {}".format(ldap_server, ldap_binddn)
-
+    # Enable custom script oxtrust_api_access_policy
     ldap_conn = ldap.initialize('ldaps://{}'.format(ldap_server))
     ldap_conn.simple_bind_s(ldap_binddn, ldap_password)
 
-    result = ldap_conn.search_s('o=gluu', ldap.SCOPE_SUBTREE, '(objectClass=oxAuthConfiguration)', ['oxAuthConfDynamic','oxAuthConfWebKeys'])
+    result = ldap_conn.search_s('o=gluu', ldap.SCOPE_SUBTREE, '(objectClass=oxAuthConfiguration)', ['oxAuthConfDynamic','oxAuthConfWebKeys', 'oxRevision'])
 
     dn = result[0][0]
 
     oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
     keyStoreSecret = oxAuthConfDynamic['keyStoreSecret']
-    oxAuthConfWebKeys = json.loads(result[0][1]['oxAuthConfWebKeys'][0])
-
+    try:
+        oxAuthConfWebKeys = json.loads(result[0][1]['oxAuthConfWebKeys'][0])
+    except:
+        oxAuthConfWebKeys = None
+    oxRevision = 1
+    try:
+        oxRevision = result[0][1]['oxRevision'][0]
+    except:
+        pass
 else:
     # Obtain couchbase credidentals
     for l in open(gluu_couchbase_roperties_fn):
         ls = l.strip()
         n = ls.find(':')
         if ls.startswith('servers'):
-            cb_server = ls[n+1:].strip().split(',')[0].strip()
+            server = ls[n+1:].strip().split(',')[0].strip()
         elif ls.startswith('auth.userName'):
-            cb_username = ls[n+1:].strip()
+            userName = ls[n+1:].strip()
         elif ls.startswith('auth.userPassword'):
             userPasswordEnc = ls[n+1:].strip()
-            cb_password = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
+            userPassword = os.popen('/opt/gluu/bin/encode.py -D {}'.format(userPasswordEnc)).read().strip()
 
-    print "Couchbase Server: {}  Username: {}".format(cb_server, cb_username, cb_password)
+    from pylib.cbm import CBM
 
-    result = exec_cb_query(cb_server, cb_username, cb_password,
-            'select * from gluu USE KEYS "configuration_oxauth"')
+    cbm = CBM(server, userName, userPassword)
+    result = cbm.exec_query('select * from gluu USE KEYS "configuration_oxauth"')
 
     if result.ok:
         configuration_oxauth = result.json()
         keyStoreSecret = configuration_oxauth['results'][0]['gluu']['oxAuthConfDynamic']['keyStoreSecret']
         oxAuthConfWebKeys = json.loads(configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys'])
+        oxRevision = configuration_oxauth['results'][0]['gluu']['oxRevision']
     else:
         print "Couchbase server responded unexpectedly", result.text
 
-#Determine current algs
-key_algs = []
+if oxAuthConfWebKeys:
+    #Determine current algs
+    key_algs = [ wkey['alg'] for wkey in oxAuthConfWebKeys['keys'] ]
+else:
+    print "Keys does not exist on the server, using defaults"
+    key_algs = ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'RSA1_5', 'RSA-OAEP']
 
-for wkey in oxAuthConfWebKeys['keys']:
-    key_algs.append(wkey['alg'])
-
-print "Key Algorithms were deremined as", ','.join(key_algs)
+oxRevision = int(oxRevision) + 1
 
 print "Creating oxauth-keys.jks"
 # Create oxauth-keys.jks
@@ -225,8 +209,6 @@ for l in menifest.splitlines():
 
 vendor = vendor_id.split('.')[-1]
 
-print "Gluu Server version was determined as", gluu_ver
-
 print "Downloading oxauth-client with dependencies"
 # Download oxauth-client with dependencies
 oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/oxauth-client/{1}/oxauth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
@@ -250,7 +232,7 @@ if output[1]:
     print "ERROR:", output[1]
 
 
-print "Generating keys"
+print "Genereting keys"
 
 ver_tmp_list = gluu_ver.split('.')
 if not ver_tmp_list[-1].isdigit():
@@ -274,8 +256,7 @@ args += ['-dnname', "'CN=oxAuth CA Certificates'",
 
 output = run_command(args)
 
-with open(oxauth_keys_json_fn) as f:
-    oxauth_keys_json = f.read()
+oxauth_keys_json = open(oxauth_keys_json_fn).read()
 
 keystore_fn_gluu = os.path.join('/etc/certs', keystore_fn)
 backup_file(keystore_fn_gluu)
@@ -290,6 +271,8 @@ args = ['/opt/jre/bin/keytool', '-list', '-v',
         '-storepass', keyStoreSecret,
         '|', 'grep', '"Alias name:"'
         ]
+cmd = ' '.join(args)
+print cmd
 
 output = run_command(args)
 
@@ -307,38 +290,34 @@ with open(oxauth_keys_json_fn) as f:
 
 json_aliases = [ wkey['kid'] for wkey in oxauth_keys_json['keys'] ]
 
-valid = True
+valid1 = True
 for alias_name in json_aliases:
     if not alias_name in jsk_aliases:
         print keystore_fn, "does not contain", alias_name
-        valid = False
+        valid1 = False
 
+valid2 = True
 for alias_name in jsk_aliases:
     if not alias_name in json_aliases:
         print oxauth_keys_json_fn, "does not contain", alias_name
-        valid = False
+        valid2 = False
 
-print "Content of {} and {} matches".format(oxauth_keys_json_fn, keystore_fn)
+if valid1 and valid2:
+    print "Content of {} and {} matches".format(oxauth_keys_json_fn, keystore_fn)
+else:
+    print "Validation failed, not updating db"
+    sys.exit(1)
+
 print "Updating oxAuthConfWebKeys in db"
 
 with open(oxauth_keys_json_fn) as f:
     oxauth_oxAuthConfWebKeys = f.read()
 
 if defaul_storage == 'ldap':
-    result = ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys)])
-    if result and result[0]==103:
-        print "Persistence updated successfully"
-    else:
-        print "An error occurred while updating persistence", result
+    ldap_conn.modify_s(dn, [    ( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys),
+                                ( ldap.MOD_REPLACE, 'oxRevision',  str(oxRevision))
+                            ])
 else:
-    result = exec_cb_query(cb_server, cb_username, cb_password,
-                "update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
-    if result.ok:
-        print "Persistence updated successfully"
-    else:
-        print "An error occurred while updating persistence", result.text
-
-
-print "Commands executed by this script were written to {} \033[93mwhich contains plain passwords.\033[0m".format(log_fn)
-
+    result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
+    result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxRevision={}".format(oxRevision))
 print "Please exit container and restart Gluu Server"
