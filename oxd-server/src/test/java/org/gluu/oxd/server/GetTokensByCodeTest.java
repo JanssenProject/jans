@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
-import org.gluu.oxd.common.SeleniumUtils;
+import org.gluu.oxd.common.SeleniumTestUtils;
 import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
@@ -208,7 +208,7 @@ public class GetTokensByCodeTest {
     }
 
     public static String codeRequest(ClientInterface client, String opHost, String siteId, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
-        SeleniumUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
+        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(siteId);
         params.setUsername(userId);
