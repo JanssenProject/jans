@@ -46,6 +46,10 @@ public class StandaloneCacheProviderFactory {
 				cacheProvider = memcachedProvider;
 				break;
 			case REDIS:
+				if (stringEncrypter == null) {
+					throw new RuntimeException("Factory is not initialized properly. stringEncrypter is not specified");
+				}
+
 				RedisProvider redisProvider = new RedisProvider();
 				redisProvider.configure(cacheConfiguration, stringEncrypter);
 				redisProvider.init();
@@ -53,6 +57,10 @@ public class StandaloneCacheProviderFactory {
 				cacheProvider = redisProvider;
 				break;
 			case NATIVE_PERSISTENCE:
+				if (entryManager == null) {
+					throw new RuntimeException("Factory is not initialized properly. entryManager is not specified");
+				}
+
 				NativePersistenceCacheProvider nativePersistenceCacheProvider = new NativePersistenceCacheProvider();
 				nativePersistenceCacheProvider.configure(cacheConfiguration, entryManager);
 				nativePersistenceCacheProvider.init();

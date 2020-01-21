@@ -27,9 +27,9 @@ public class CouchbaseNativeCacheTest {
             cacheConfiguration.getNativePersistenceConfiguration().setBaseDn("");
 
             NativePersistenceCacheProvider provider = new NativePersistenceCacheProvider();
+            provider.configure(cacheConfiguration, manager);
+
             provider.setBaseDn(baseDn);
-            provider.setCacheConfiguration(cacheConfiguration);
-            provider.setEntryManager(manager);
 
             Map<String, String> sessionAttributes = new HashMap<>();
             sessionAttributes.put("attr1", "value1");
