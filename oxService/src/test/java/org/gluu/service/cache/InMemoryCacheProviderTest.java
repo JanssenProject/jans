@@ -18,8 +18,9 @@ public class InMemoryCacheProviderTest {
 
     @BeforeClass
     public void beforeClass() {
+        CacheConfiguration cacheConfiguration = new CacheConfiguration();
         cache = new InMemoryCacheProvider();
-        cache.setCacheConfiguration(new CacheConfiguration());
+        cache.configure(cacheConfiguration);
         cache.create();
     }
 

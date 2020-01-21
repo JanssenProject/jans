@@ -41,6 +41,7 @@
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>core-cache</module>
+		<module>core-standalone</module>
 		<module>oxService</module>
 		<module>server</module>
 		<module>oxJsfUtil</module>

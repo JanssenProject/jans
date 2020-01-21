@@ -1,0 +1,68 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.gluu</groupId>
+	<artifactId>oxcore-standalone</artifactId>
+	<name>Configuration factories for standalone applications</name>
+
+	<parent>
+		<groupId>org.gluu</groupId>
+		<artifactId>oxcore</artifactId>
+		<version>4.1.0.Final</version>
+	</parent>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/services/*</include>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/services/*</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+        </testResources>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-cdi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-cache</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxcore-persistence-standalone</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
