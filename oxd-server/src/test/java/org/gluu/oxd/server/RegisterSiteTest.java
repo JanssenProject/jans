@@ -173,7 +173,6 @@ public class RegisterSiteTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
-        params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
@@ -195,7 +194,6 @@ public class RegisterSiteTest {
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
-        params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),

@@ -8,6 +8,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
+import org.gluu.oxd.common.SeleniumTestUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.common.CoreUtils;
@@ -34,7 +35,7 @@ public class GetTokensByCodeTest {
 
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
-        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
+        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString());
 
         refreshToken(tokensResponse, client, site);
     }
@@ -57,13 +58,13 @@ public class GetTokensByCodeTest {
         notEmpty(refreshResponse.getRefreshToken());
     }
 
-    private static GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String userId, String userSecret, String nonce) throws Exception {
+    private static GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce) throws Exception {
 
         final String state = CoreUtils.secureRandomString();
 
         final String authorizationStr = Tester.getAuthorization(site);
 
-        final String code = codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce, authorizationStr);
+        final String code = codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, authorizationStr);
 
         notEmpty(code);
 
@@ -80,8 +81,9 @@ public class GetTokensByCodeTest {
         return resp;
     }
 
-    public static String codeRequest(DevelopersApi client, String oxdId, String userId, String userSecret, String state,
+    public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
                                String nonce, String authorization) throws Exception {
+        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);
 

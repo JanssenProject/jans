@@ -22,6 +22,7 @@
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
         <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
+        <selenium.version>3.141.59</selenium.version>
     </properties>
 
     <prerequisites>
@@ -271,6 +272,30 @@
                 <groupId>com.google.inject.extensions</groupId>
                 <artifactId>guice-servlet</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <!-- selenium dependencies-->
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${selenium.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
+                <version>2.35.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit-cssparser</artifactId>
+                <version>1.4.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>htmlunit-driver</artifactId>
+                <version>2.35.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
