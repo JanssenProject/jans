@@ -8,7 +8,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
-import org.gluu.oxd.common.SeleniumUtils;
+import org.gluu.oxd.common.SeleniumTestUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.gluu.oxd.common.CoreUtils;
@@ -83,7 +83,7 @@ public class GetTokensByCodeTest {
 
     public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
                                String nonce, String authorization) throws Exception {
-        SeleniumUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
+        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);
 
