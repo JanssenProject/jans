@@ -146,9 +146,6 @@ paths:
               client_secret:
                 type: string
                 description: client secret of existing client, must be used together with client_id
-              trusted_client:
-                type: boolean
-                description: specifies whether client is trusted. Default value is false.
               access_token_as_jwt:
                 type: boolean
                 description: specifies whether access_token should be return as JWT or not. Default value is false.
@@ -610,9 +607,6 @@ paths:
               client_token_endpoint_auth_signing_alg:
                 type: string
                 description: Provide the Requested Client Authentication method for the Token Endpoint. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.
-              trusted_client:
-                type: boolean
-                description: specifies whether client is trusted. Default value is false.
               client_name:
                 type: string
                 description: oxd will generate its own non-human readable name by default if client_name is not specified

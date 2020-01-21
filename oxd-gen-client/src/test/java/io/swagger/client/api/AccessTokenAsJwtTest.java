@@ -34,7 +34,6 @@ public class AccessTokenAsJwtTest {
         siteParams.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         siteParams.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         siteParams.setAccessTokenAsJwt(true);
-        siteParams.setTrustedClient(true);
         siteParams.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
