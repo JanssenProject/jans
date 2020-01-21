@@ -75,8 +75,11 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	private PersistenceConfiguration persistenceConfiguration;
 
 	private String cryptoConfigurationSalt;
+	private StringEncrypter stringEncrypter;
 
 	private PersistenceEntryManager persistenceEntryManager;
+
+	private CacheConfiguration cacheConfiguration;
 
 	@SuppressWarnings("unused")
 	private long baseConfigurationFileLastModifiedTime;
@@ -105,6 +108,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		this.saltFilePath = confDir + SALT_FILE_NAME;
 
 		this.cryptoConfigurationSalt = loadCryptoConfigurationSalt();
+		this.stringEncrypter = createStringEncrypter();
 
 		this.persistenceEntryManager = createPersistenceEntryManager();
 
@@ -115,6 +119,8 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 			this.loaded = true;
 			LOG.info("Configuration loaded successfully.");
 		}
+		
+		this.cacheConfiguration = loadCacheConfiguration();
 	}
 
 	public void destroy() {
@@ -186,6 +192,29 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 			LOG.error("Failed to load configuration from {}", saltFilePath, ex);
 			throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
 		}
+	}
+
+	private CacheConfiguration loadCacheConfiguration() {
+		SharedConfigurationEntry sharedConfigurationEntry = persistenceEntryManager.find(SharedConfigurationEntry.class, SHARED_CONFIGURATION_DN);
+		if (sharedConfigurationEntry == null) {
+			LOG.error("Failed to load share configuration from DB. Please fix it!!!.");
+			throw new ConfigurationException("Failed to load shared configuration from DB.");
+		}
+
+		CacheConfiguration cacheConfiguration = sharedConfigurationEntry.getCacheConfiguration();
+		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
+			LOG.error("Failed to read cache configuration from DB. Please check configuration oxCacheConfiguration attribute " +
+					"that must contain cache configuration JSON represented by CacheConfiguration.class. Shared configuration DN: " + SHARED_CONFIGURATION_DN);
+			LOG.info("Creating fallback IN-MEMORY cache configuration ... ");
+
+			cacheConfiguration = new CacheConfiguration();
+			cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
+
+			LOG.info("IN-MEMORY cache configuration is created.");
+		}
+		LOG.info("Cache configuration: " + cacheConfiguration);
+
+		return cacheConfiguration;
 	}
 
 	private String confDir() {
@@ -261,6 +290,26 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		}
 	}
 
+	public StringEncrypter createStringEncrypter() {
+		String encodeSalt = this.cryptoConfigurationSalt;
+
+		if (StringHelper.isEmpty(encodeSalt)) {
+			throw new ConfigurationException("Encode salt isn't defined");
+		}
+
+		try {
+			StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
+
+			return stringEncrypter;
+		} catch (EncryptionException ex) {
+			throw new ConfigurationException("Failed to create StringEncrypter instance");
+		}
+	}
+
+	public StringEncrypter getStringEncrypter() {
+		return stringEncrypter;
+	}
+
 	public FileConfiguration getPersistenceConfiguration() {
 		return this.persistenceConfiguration.getConfiguration();
 	}
@@ -278,24 +327,6 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 	}
 
 	public CacheConfiguration getCacheConfiguration() {
-		SharedConfigurationEntry sharedConfigurationEntry = persistenceEntryManager.find(SharedConfigurationEntry.class, SHARED_CONFIGURATION_DN);
-		if (sharedConfigurationEntry == null) {
-			LOG.error("Failed to load share configuration from DB. Please fix it!!!.");
-			throw new ConfigurationException("Failed to load shared configuration from DB.");
-		}
-
-		CacheConfiguration cacheConfiguration = sharedConfigurationEntry.getCacheConfiguration();
-		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-			LOG.error("Failed to read cache configuration from DB. Please check configuration oxCacheConfiguration attribute " +
-					"that must contain cache configuration JSON represented by CacheConfiguration.class. Shared configuration DN: " + SHARED_CONFIGURATION_DN);
-			LOG.info("Creating fallback IN-MEMORY cache configuration ... ");
-
-			cacheConfiguration = new CacheConfiguration();
-			cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
-
-			LOG.info("IN-MEMORY cache configuration is created.");
-		}
-		LOG.info("Cache configuration: " + cacheConfiguration);
 		return cacheConfiguration;
 	}
 
