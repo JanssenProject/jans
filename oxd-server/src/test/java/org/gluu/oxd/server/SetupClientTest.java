@@ -61,7 +61,6 @@ public class SetupClientTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
-        params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));

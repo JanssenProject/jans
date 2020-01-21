@@ -114,7 +114,6 @@ public class RegisterSiteTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
-        params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
@@ -140,7 +139,6 @@ public class RegisterSiteTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(""));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
-        params.setTrustedClient(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),

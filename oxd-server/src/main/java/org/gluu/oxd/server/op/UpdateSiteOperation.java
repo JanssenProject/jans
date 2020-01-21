@@ -354,13 +354,10 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getCustomAttributes() != null && !params.getCustomAttributes().isEmpty()) {
+            params.getCustomAttributes().entrySet().removeIf(entry -> entry.getKey().contains("oxAuthTrustedClient"));
             params.getCustomAttributes().entrySet().stream().forEach(e -> {
                 request.addCustomAttribute(e.getKey(), e.getValue());
             });
-        }
-
-        if (params.getTrustedClient() != null && params.getTrustedClient()) {
-            request.addCustomAttribute("oxAuthTrustedClient", "true");
         }
 
         if (StringUtils.isNotBlank(rp.getOxdId())) {
