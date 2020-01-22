@@ -129,12 +129,6 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		}
 	}
 
-	private FileConfiguration loadBaseConfiguration() {
-		FileConfiguration fileConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
-		
-		return fileConfiguration;
-	}
-
 	private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
 		try {
 			FileConfiguration fileConfiguration = new FileConfiguration(fileName);
@@ -150,37 +144,10 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		return null;
 	}
 
-	public FileConfiguration loadPersistanceConfiguration(String persistanceConfigurationFileName, boolean mandatory) {
-		try {
-			if (StringHelper.isEmpty(persistanceConfigurationFileName)) {
-				if (mandatory) {
-					throw new ConfigurationException("Failed to load Persistance configuration file!");
-				} else {
-					return null;
-				}
-			}
-
-			String persistanceConfigurationFilePath = DIR + persistanceConfigurationFileName;
-
-			FileConfiguration persistanceConfiguration = new FileConfiguration(persistanceConfigurationFilePath);
-			if (persistanceConfiguration.isLoaded()) {
-				File persistanceFile = new File(persistanceConfigurationFilePath);
-				if (persistanceFile.exists()) {
-					this.baseConfigurationFileLastModifiedTime = persistanceFile.lastModified();
-				}
-	
-				return persistanceConfiguration;
-			}
-		} catch (Exception ex) {
-			LOG.error(ex.getMessage(), ex);
-			throw new ConfigurationException("Failed to load DB configuration from " + persistanceConfigurationFileName, ex);
-		}
-
-		if (mandatory) {
-			throw new ConfigurationException("Failed to load DB configuration from " + persistanceConfigurationFileName);
-		}
+	private FileConfiguration loadBaseConfiguration() {
+		FileConfiguration fileConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
 		
-		return null;
+		return fileConfiguration;
 	}
 
 	private String loadCryptoConfigurationSalt() {
@@ -269,7 +236,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		return decryptedConnectionProperties;
 	}
 
-	public PersistenceEntryManager createPersistenceEntryManager() {
+	private PersistenceEntryManager createPersistenceEntryManager() {
 		Properties connectionProperties = preparePersistanceProperties();
 
 		PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(persistenceConfiguration);
@@ -290,7 +257,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		}
 	}
 
-	public StringEncrypter createStringEncrypter() {
+	private StringEncrypter createStringEncrypter() {
 		String encodeSalt = this.cryptoConfigurationSalt;
 
 		if (StringHelper.isEmpty(encodeSalt)) {
@@ -316,6 +283,10 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 
 	public String getCryptoConfigurationSalt() {
 		return cryptoConfigurationSalt;
+	}
+
+	public PersistenceEntryManager getPersistenceEntryManager() {
+		return persistenceEntryManager;
 	}
 
 	protected String getDefaultPersistanceConfigurationFileName() {
