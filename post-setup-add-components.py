@@ -39,8 +39,11 @@ from setup import *
 setupObj = Setup('.')
 
 setupObj.setup = setupObj
-
 setupObj.load_properties('/install/community-edition-setup/setup.properties.last')
+
+setupObj.log = os.path.join(setupObj.install_dir, 'post_setup.log')
+setupObj.logError = os.path.join(setupObj.install_dir, 'post_setup_error.log')
+
 attribDataTypes.startup('.')
 
 setupObj.cbm = CBM(setupObj.couchbase_hostname, setupObj.couchebaseClusterAdmin, setupObj.ldapPass)
