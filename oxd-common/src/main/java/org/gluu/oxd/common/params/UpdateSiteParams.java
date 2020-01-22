@@ -130,6 +130,10 @@ public class UpdateSiteParams implements HasAccessTokenParams {
     private Boolean syncClientFromOp = false;
     @JsonProperty(value = "sync_client_period_in_seconds")
     private int syncClientPeriodInSeconds = 86400;
+    @JsonProperty(value = "allow_spontaneous_scopes")
+    private Boolean allowSpontaneousScopes = false;
+    @JsonProperty(value = "spontaneous_scopes")
+    private List<String> spontaneousScopes;
 
     public UpdateSiteParams() {
     }
@@ -858,6 +862,22 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
     }
 
+    public Boolean getAllowSpontaneousScopes() {
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopes() {
+        return spontaneousScopes;
+    }
+
+    public void setSpontaneousScopes(List<String> spontaneousScopes) {
+        this.spontaneousScopes = spontaneousScopes;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -917,6 +937,8 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append(", custom_attributes=").append(custom_attributes);
         sb.append(", syncClientFromOp=").append(syncClientFromOp);
         sb.append(", syncClientPeriodInSeconds=").append(syncClientPeriodInSeconds);
+        sb.append(", allowSpontaneousScopes=").append(allowSpontaneousScopes);
+        sb.append(", spontaneousScopes=").append(spontaneousScopes);
         sb.append('}');
         return sb.toString();
     }

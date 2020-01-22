@@ -262,6 +262,16 @@ paths:
                 type: integer
                 description: specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
                 example: 86400
+              allow_spontaneous_scopes:
+                type: boolean
+                description: specifies whether to allow spontaneous scopes for client. The default value is false
+                example: false
+              spontaneous_scopes:
+                type: array
+                description: list of spontaneous scopes (regexp against which validation is performed).
+                items:
+                  type: string
+                  example: ["/user/?/??", "/user/123abc/balance/history"]
 
       responses:
         200:
@@ -717,6 +727,16 @@ paths:
                 type: integer
                 description: specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
                 example: 86400
+              allow_spontaneous_scopes:
+                type: boolean
+                description: specifies whether to allow spontaneous scopes for client. The default value is false
+                example: false
+              spontaneous_scopes:
+                type: array
+                description: list of spontaneous scopes (regexp against which validation is performed).
+                items:
+                  type: string
+                  example: ["/user/?/??", "/user/123abc/balance/history"]
 
       responses:
         200:
