@@ -3,12 +3,9 @@ package org.gluu.oxd.server.op;
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.apache.commons.collections.CollectionUtils;
-import org.gluu.oxd.common.*;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
 import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxd.common.*;
 import org.gluu.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.gluu.oxd.common.introspection.CorrectUmaPermission;
 import org.gluu.oxd.common.params.RsCheckAccessParams;
@@ -21,13 +18,15 @@ import org.gluu.oxd.rs.protect.resteasy.ServiceProvider;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
+import org.jboss.resteasy.client.ClientResponseFailure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -140,14 +139,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         }
 
         if (!CollectionUtils.isEmpty(params.getScopes())) {
-            if (resourceScopes.containsAll(params.getScopes())) {
-                return params.getScopes();
-            }
-            //Initialized rejectedScopes to filter unregistered scopes from list
-            final List<String> rejectedScopes = resourceScopes;
-            LOG.error("At least one of the scope passed as parameter isn't registered. The unregistered scopes are: " +
-                    params.getScopes().stream().filter(scope -> !rejectedScopes.contains(scope)).collect(Collectors.toList()));
-            throw new HttpException(ErrorResponseCode.INVALID_UMA_SCOPES_PARAMETER);
+            return params.getScopes(); // we can't validate it because it can be spontaneous scope
         }
         return resourceScopes;
     }
