@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * UpdateSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-21T06:12:36.096Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-22T13:33:32.189Z")
 public class UpdateSiteParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -179,6 +179,12 @@ public class UpdateSiteParams {
 
   @SerializedName("sync_client_period_in_seconds")
   private Integer syncClientPeriodInSeconds = null;
+
+  @SerializedName("allow_spontaneous_scopes")
+  private Boolean allowSpontaneousScopes = null;
+
+  @SerializedName("spontaneous_scopes")
+  private List<String> spontaneousScopes = null;
 
   public UpdateSiteParams oxdId(String oxdId) {
     this.oxdId = oxdId;
@@ -1166,6 +1172,50 @@ public class UpdateSiteParams {
     this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
   }
 
+  public UpdateSiteParams allowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+    this.allowSpontaneousScopes = allowSpontaneousScopes;
+    return this;
+  }
+
+   /**
+   * specifies whether to allow spontaneous scopes for client. The default value is false
+   * @return allowSpontaneousScopes
+  **/
+  @ApiModelProperty(example = "false", value = "specifies whether to allow spontaneous scopes for client. The default value is false")
+  public Boolean isAllowSpontaneousScopes() {
+    return allowSpontaneousScopes;
+  }
+
+  public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+    this.allowSpontaneousScopes = allowSpontaneousScopes;
+  }
+
+  public UpdateSiteParams spontaneousScopes(List<String> spontaneousScopes) {
+    this.spontaneousScopes = spontaneousScopes;
+    return this;
+  }
+
+  public UpdateSiteParams addSpontaneousScopesItem(String spontaneousScopesItem) {
+    if (this.spontaneousScopes == null) {
+      this.spontaneousScopes = new ArrayList<String>();
+    }
+    this.spontaneousScopes.add(spontaneousScopesItem);
+    return this;
+  }
+
+   /**
+   * list of spontaneous scopes (regexp against which validation is performed).
+   * @return spontaneousScopes
+  **/
+  @ApiModelProperty(value = "list of spontaneous scopes (regexp against which validation is performed).")
+  public List<String> getSpontaneousScopes() {
+    return spontaneousScopes;
+  }
+
+  public void setSpontaneousScopes(List<String> spontaneousScopes) {
+    this.spontaneousScopes = spontaneousScopes;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -1224,12 +1274,14 @@ public class UpdateSiteParams {
         Objects.equals(this.softwareStatement, updateSiteParams.softwareStatement) &&
         Objects.equals(this.customAttributes, updateSiteParams.customAttributes) &&
         Objects.equals(this.syncClientFromOp, updateSiteParams.syncClientFromOp) &&
-        Objects.equals(this.syncClientPeriodInSeconds, updateSiteParams.syncClientPeriodInSeconds);
+        Objects.equals(this.syncClientPeriodInSeconds, updateSiteParams.syncClientPeriodInSeconds) &&
+        Objects.equals(this.allowSpontaneousScopes, updateSiteParams.allowSpontaneousScopes) &&
+        Objects.equals(this.spontaneousScopes, updateSiteParams.spontaneousScopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, redirectUris, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, claimsRedirectUri, clientTokenEndpointAuthSigningAlg, clientName, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds);
+    return Objects.hash(oxdId, redirectUris, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientJwksUri, clientTokenEndpointAuthMethod, clientRequestUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, claimsRedirectUri, clientTokenEndpointAuthSigningAlg, clientName, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
   }
 
 
@@ -1287,6 +1339,8 @@ public class UpdateSiteParams {
     sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");
     sb.append("    syncClientFromOp: ").append(toIndentedString(syncClientFromOp)).append("\n");
     sb.append("    syncClientPeriodInSeconds: ").append(toIndentedString(syncClientPeriodInSeconds)).append("\n");
+    sb.append("    allowSpontaneousScopes: ").append(toIndentedString(allowSpontaneousScopes)).append("\n");
+    sb.append("    spontaneousScopes: ").append(toIndentedString(spontaneousScopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
