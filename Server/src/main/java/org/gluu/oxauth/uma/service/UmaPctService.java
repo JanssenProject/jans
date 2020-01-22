@@ -147,6 +147,10 @@ public class UmaPctService {
     }
 
     private void prepareBranch() {
+        if (!ldapEntryManager.hasBranchesSupport(branchBaseDn())) {
+            return;
+        }
+
         if (!ldapEntryManager.contains(branchBaseDn(), SimpleBranch.class)) {
             addBranch();
         }
