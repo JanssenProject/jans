@@ -185,6 +185,10 @@ public class Rp implements Serializable {
     private Boolean syncClientFromOp;
     @JsonProperty(value = "sync_client_period_in_seconds")
     private Integer syncClientPeriodInSeconds;
+    @JsonProperty(value = "allow_spontaneous_scopes")
+    private Boolean allowSpontaneousScopes = false;
+    @JsonProperty(value = "spontaneous_scopes")
+    private List<String> spontaneousScopes;
 
     public Rp() {
     }
@@ -285,6 +289,8 @@ public class Rp implements Serializable {
         this.lastSynced = lastSynced;
         this.syncClientFromOp = syncClientFromOp;
         this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+        this.spontaneousScopes = spontaneousScopes;
     }
 
     public Boolean getAccessTokenAsJwt() {
@@ -1014,6 +1020,22 @@ public class Rp implements Serializable {
         this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
     }
 
+    public Boolean getAllowSpontaneousScopes() {
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopes() {
+        return spontaneousScopes;
+    }
+
+    public void setSpontaneousScopes(List<String> spontaneousScopes) {
+        this.spontaneousScopes = spontaneousScopes;
+    }
+
     @Override
     public String toString() {
         return "Rp{" +
@@ -1098,6 +1120,8 @@ public class Rp implements Serializable {
                 ", lastSynced='" + lastSynced + '\'' +
                 ", syncClientFromOp='" + syncClientFromOp + '\'' +
                 ", syncClientPeriodInSeconds='" + syncClientPeriodInSeconds + '\'' +
+                ", allowSpontaneousScopes='" + allowSpontaneousScopes + '\'' +
+                ", spontaneousScopes='" + spontaneousScopes + '\'' +
                 '}';
     }
 }
