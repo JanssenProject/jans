@@ -153,6 +153,14 @@ public class RegisterRequestMapper {
         if (CollectionUtils.isNotEmpty(request.getClaimsRedirectUris())) {
             rp.setClaimsRedirectUri(request.getClaimsRedirectUris());
         }
+
+        if (request.getAllowSpontaneousScopes() != null) {
+            rp.setAllowSpontaneousScopes(request.getAllowSpontaneousScopes());
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getSpontaneousScopes())) {
+            rp.setSpontaneousScopes(request.getSpontaneousScopes());
+        }
     }
 
     public static RegisterRequest createRegisterRequest(Rp rp) {
@@ -293,6 +301,14 @@ public class RegisterRequestMapper {
 
         if (CollectionUtils.isNotEmpty(rp.getClaimsRedirectUri())) {
             request.setClaimsRedirectUris(rp.getClaimsRedirectUri());
+        }
+
+        if (rp.getAllowSpontaneousScopes() != null) {
+            request.setAllowSpontaneousScopes(rp.getAllowSpontaneousScopes());
+        }
+
+        if (CollectionUtils.isNotEmpty(rp.getSpontaneousScopes())) {
+            request.setSpontaneousScopes(rp.getSpontaneousScopes());
         }
 
         return request;
