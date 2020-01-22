@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.gluu.oxauth.client.RegisterClient;
@@ -351,6 +352,14 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (!Strings.isNullOrEmpty(params.getSoftwareStatement())) {
             request.setSoftwareStatement(params.getSoftwareStatement());
+        }
+
+        if (params.getAllowSpontaneousScopes() != null) {
+            request.setAllowSpontaneousScopes(params.getAllowSpontaneousScopes());
+        }
+
+        if (CollectionUtils.isNotEmpty(params.getSpontaneousScopes())) {
+            request.setSpontaneousScopes(params.getSpontaneousScopes());
         }
 
         if (params.getCustomAttributes() != null && !params.getCustomAttributes().isEmpty()) {
