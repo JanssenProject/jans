@@ -183,7 +183,7 @@ public class JwtCrossCheckTest extends BaseTest {
     }
 
     private static String getKeyIdByAlgorithm(SignatureAlgorithm algorithm, Use use, OxAuthCryptoProvider cryptoProvider) throws KeyStoreException {
-        final List<String> aliases = cryptoProvider.getKeyAliases();
+        final List<String> aliases = cryptoProvider.getKeys();
         for (String keyId : aliases) {
             if (keyId.endsWith(use.getParamName()  + "_" + algorithm.getName().toLowerCase())) {
                 return keyId;
