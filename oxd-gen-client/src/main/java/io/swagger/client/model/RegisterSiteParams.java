@@ -31,7 +31,7 @@ import java.util.Map;
 /**
  * RegisterSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-21T06:12:36.096Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-22T13:33:32.189Z")
 public class RegisterSiteParams {
   @SerializedName("redirect_uris")
   private List<String> redirectUris = new ArrayList<String>();
@@ -188,6 +188,12 @@ public class RegisterSiteParams {
 
   @SerializedName("sync_client_period_in_seconds")
   private Integer syncClientPeriodInSeconds = null;
+
+  @SerializedName("allow_spontaneous_scopes")
+  private Boolean allowSpontaneousScopes = null;
+
+  @SerializedName("spontaneous_scopes")
+  private List<String> spontaneousScopes = null;
 
   public RegisterSiteParams redirectUris(List<String> redirectUris) {
     this.redirectUris = redirectUris;
@@ -1234,6 +1240,50 @@ public class RegisterSiteParams {
     this.syncClientPeriodInSeconds = syncClientPeriodInSeconds;
   }
 
+  public RegisterSiteParams allowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+    this.allowSpontaneousScopes = allowSpontaneousScopes;
+    return this;
+  }
+
+   /**
+   * specifies whether to allow spontaneous scopes for client. The default value is false
+   * @return allowSpontaneousScopes
+  **/
+  @ApiModelProperty(example = "false", value = "specifies whether to allow spontaneous scopes for client. The default value is false")
+  public Boolean isAllowSpontaneousScopes() {
+    return allowSpontaneousScopes;
+  }
+
+  public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+    this.allowSpontaneousScopes = allowSpontaneousScopes;
+  }
+
+  public RegisterSiteParams spontaneousScopes(List<String> spontaneousScopes) {
+    this.spontaneousScopes = spontaneousScopes;
+    return this;
+  }
+
+  public RegisterSiteParams addSpontaneousScopesItem(String spontaneousScopesItem) {
+    if (this.spontaneousScopes == null) {
+      this.spontaneousScopes = new ArrayList<String>();
+    }
+    this.spontaneousScopes.add(spontaneousScopesItem);
+    return this;
+  }
+
+   /**
+   * list of spontaneous scopes (regexp against which validation is performed).
+   * @return spontaneousScopes
+  **/
+  @ApiModelProperty(value = "list of spontaneous scopes (regexp against which validation is performed).")
+  public List<String> getSpontaneousScopes() {
+    return spontaneousScopes;
+  }
+
+  public void setSpontaneousScopes(List<String> spontaneousScopes) {
+    this.spontaneousScopes = spontaneousScopes;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -1295,12 +1345,14 @@ public class RegisterSiteParams {
         Objects.equals(this.softwareStatement, registerSiteParams.softwareStatement) &&
         Objects.equals(this.customAttributes, registerSiteParams.customAttributes) &&
         Objects.equals(this.syncClientFromOp, registerSiteParams.syncClientFromOp) &&
-        Objects.equals(this.syncClientPeriodInSeconds, registerSiteParams.syncClientPeriodInSeconds);
+        Objects.equals(this.syncClientPeriodInSeconds, registerSiteParams.syncClientPeriodInSeconds) &&
+        Objects.equals(this.allowSpontaneousScopes, registerSiteParams.allowSpontaneousScopes) &&
+        Objects.equals(this.spontaneousScopes, registerSiteParams.spontaneousScopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(redirectUris, opHost, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds);
+    return Objects.hash(redirectUris, opHost, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
   }
 
 
@@ -1361,6 +1413,8 @@ public class RegisterSiteParams {
     sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");
     sb.append("    syncClientFromOp: ").append(toIndentedString(syncClientFromOp)).append("\n");
     sb.append("    syncClientPeriodInSeconds: ").append(toIndentedString(syncClientPeriodInSeconds)).append("\n");
+    sb.append("    allowSpontaneousScopes: ").append(toIndentedString(allowSpontaneousScopes)).append("\n");
+    sb.append("    spontaneousScopes: ").append(toIndentedString(spontaneousScopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }
