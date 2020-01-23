@@ -48,8 +48,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             deleteExpiredOnGetRequest = cacheConfiguration.getNativePersistenceConfiguration().isDeleteExpiredOnGetRequest();
 
             if (StringUtils.isBlank(baseDn)) {
-                log.error("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in LdapCacheConfiguration is not initialized. It has to be set by client application (e.g. oxAuth has to set it in ApplicationFactory.)");
-                throw new RuntimeException("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in LdapCacheConfiguration is not initialized. It has to be set by client application.");
+                log.error("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in CacheConfiguration is not initialized. It has to be set by client application (e.g. oxAuth has to set it in ApplicationFactory.)");
+                throw new RuntimeException("Failed to create NATIVE_PERSISTENCE cache provider. 'baseDn' in CacheConfiguration is not initialized. It has to be set by client application.");
             }
 
             String branchDn = String.format("ou=cache,%s", baseDn);
@@ -88,6 +88,22 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         return entryManager;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+        try {
+            key = hashKey(key);
+            boolean hasKey = entryManager.contains(createDn(key), NativePersistenceCacheEntity.class);
+            
+//            log.trace("Contains key in cache, key: " + key + ", dn: " + createDn(key)) + ", contains: " + hasKey);
+            return hasKey;
+        } catch (Exception e) {
+            // ignore, we call cache first which is empty and then fill it in
+            // log.trace("No entry with key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key);
+        }
+
+        return false;
+	}
+
     @Override
     public Object get(String key) {
         try {
@@ -102,7 +118,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
                     return null;
                 }
                 Object o = fromString(entity.getData());
-                //log.trace("Returned object from cache, key: " + originalKey + ", dn: " + entity.getDn());
+//                log.trace("Returned object from cache, key: " + key + ", dn: " + entity.getDn());
                 return o;
             }
         } catch (Exception e) {
@@ -120,34 +136,47 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
         return DigestUtils.sha256Hex(key);
     }
 
+	@Override
+	public void put(String key, Object object) {
+        Date creationDate = new Date();
+        Date expirationDate = new Date(Long.MAX_VALUE);
+
+        putImpl(key, object, creationDate, expirationDate);
+	}
+
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
+        Date creationDate = new Date();
+
+        expirationInSeconds = expirationInSeconds > 0 ? expirationInSeconds : cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
+
+        Calendar expirationDate = Calendar.getInstance();
+		expirationDate.setTime(creationDate);
+		expirationDate.add(Calendar.SECOND, expirationInSeconds);
+
+        putImpl(key, object, creationDate, expirationDate.getTime());
+    }
+
+	private void putImpl(String key, Object object, Date creationDate, Date expirationDate) {
         String originalKey = key;
 
         try {
             key = hashKey(key);
-            Date creationDate = new Date();
-
-            expirationInSeconds = expirationInSeconds > 0 ? expirationInSeconds : cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
-
-            Calendar expirationDate = Calendar.getInstance();
-            expirationDate.setTime(creationDate);
-            expirationDate.add(Calendar.SECOND, expirationInSeconds);
-
-            NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
-            entity.setData(asString(object));
-            entity.setId(key);
-            entity.setDn(createDn(key));
-            entity.setCreationDate(creationDate);
-            entity.setNewExpirationDate(expirationDate.getTime());
-            entity.setDeletable(true);
-
-        	silentlyRemoveEntityIfExists(entity.getDn());
-            entryManager.persist(entity);
+	
+			NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
+			entity.setData(asString(object));
+			entity.setId(key);
+			entity.setDn(createDn(key));
+			entity.setCreationDate(creationDate);
+			entity.setNewExpirationDate(expirationDate);
+			entity.setDeletable(true);
+	
+			silentlyRemoveEntityIfExists(entity.getDn());
+			entryManager.persist(entity);
         } catch (Exception e) {
-            log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
+        	log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
         }
-    }
+	}
 
     private boolean silentlyRemoveEntityIfExists(String dn) {
         try {

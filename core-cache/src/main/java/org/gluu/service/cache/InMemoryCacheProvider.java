@@ -68,10 +68,25 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
         return map;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+		return map.containsKey(key);
+	}
+
     @Override
     public Object get(String key) {
         return map.get(key);
     }
+
+	@Override
+	public void put(String key, Object object) {
+        // if key already exists and hash is the same for value then expiration time is
+        // not updated
+        // net.jodah.expiringmap.ExpiringMap.putInternal()
+        // therefore we first remove entry and then put it
+        map.remove(key);
+        map.put(key, object, ExpirationPolicy.CREATED, Long.MAX_VALUE, TimeUnit.DAYS);
+	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
