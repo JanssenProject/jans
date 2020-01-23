@@ -173,12 +173,11 @@ public class AuthenticationFilter implements Filter {
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else {
-                String sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
+                String sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
                 List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
-                if (StringUtils.isBlank(sessionId)) {
-                    // OXAUTH-297 : check whether session_id is present in cookie
-                    sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
+                if (StringUtils.isBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
+                    sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
                 }
 
                 SessionId sessionIdObject = null;
