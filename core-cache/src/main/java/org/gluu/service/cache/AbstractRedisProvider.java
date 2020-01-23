@@ -38,6 +38,8 @@ public abstract class AbstractRedisProvider {
 	public abstract void destroy();
 
 	public abstract Object getDelegate();
+	
+	public abstract boolean hasKey(String key);
 
 	public abstract Object get(String key);
 

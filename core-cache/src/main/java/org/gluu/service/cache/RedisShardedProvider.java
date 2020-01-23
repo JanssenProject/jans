@@ -99,6 +99,13 @@ public class RedisShardedProvider extends AbstractRedisProvider {
         return pool;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+        Boolean hasKey = pool.getResource().exists(key);
+
+        return Boolean.TRUE.equals(hasKey);
+	}
+
     @Override
     public Object get(String key) {
         ShardedJedis jedis = pool.getResource();

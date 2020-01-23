@@ -1,6 +1,7 @@
 package org.gluu.service.cache;
 
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,12 @@ public class StandaloneCacheProviderFactory {
 
 				NativePersistenceCacheProvider nativePersistenceCacheProvider = new NativePersistenceCacheProvider();
 				nativePersistenceCacheProvider.configure(cacheConfiguration, entryManager);
+				
+				// TODO: Remove after configuration fix
+				if (StringHelper.isEmpty(cacheConfiguration.getNativePersistenceConfiguration().getBaseDn())) {
+					cacheConfiguration.getNativePersistenceConfiguration().setBaseDn("o=gluu");
+				}
+
 				nativePersistenceCacheProvider.init();
 	
 				cacheProvider = nativePersistenceCacheProvider;

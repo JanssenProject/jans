@@ -101,6 +101,13 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         return client;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+		Object value = get(key);
+		
+		return value != null;
+	}
+
     @Override
     public Object get(String key) {
         try {
@@ -115,6 +122,17 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
             return null;
         }
     }
+
+	@Override
+	public void put(String key, Object object) {
+        try {
+            OperationFuture<Boolean> set = client.set(key, 0, object);
+            OperationStatus status = set.getStatus(); // block
+            log.trace("set - key:" + key + ", expiration: " + 0 + ", status:" + status + ", get:" + get(key));
+        } catch (Exception e) {
+            log.error("Failed to put object in cache, key: " + key, e);
+        }
+	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
