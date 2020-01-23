@@ -42,32 +42,6 @@ import java.util.*;
 @Named
 public class AuthorizeService {
 
-    // use only "acr" instead of "acr_values" #334
-    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
-            AuthorizeRequestParam.SCOPE,
-            AuthorizeRequestParam.RESPONSE_TYPE,
-            AuthorizeRequestParam.CLIENT_ID,
-            AuthorizeRequestParam.REDIRECT_URI,
-            AuthorizeRequestParam.STATE,
-            AuthorizeRequestParam.RESPONSE_MODE,
-            AuthorizeRequestParam.NONCE,
-            AuthorizeRequestParam.DISPLAY,
-            AuthorizeRequestParam.PROMPT,
-            AuthorizeRequestParam.MAX_AGE,
-            AuthorizeRequestParam.UI_LOCALES,
-            AuthorizeRequestParam.ID_TOKEN_HINT,
-            AuthorizeRequestParam.LOGIN_HINT,
-            AuthorizeRequestParam.ACR_VALUES,
-            AuthorizeRequestParam.SESSION_ID,
-            AuthorizeRequestParam.REQUEST,
-            AuthorizeRequestParam.REQUEST_URI,
-            AuthorizeRequestParam.ORIGIN_HEADERS,
-            AuthorizeRequestParam.CODE_CHALLENGE,
-            AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
-            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
-            AuthorizeRequestParam.CLAIMS,
-            AuthorizeRequestParam.AUTH_REQ_ID));
-
     @Inject
     private Logger log;
 
@@ -175,7 +149,7 @@ public class AuthorizeService {
             log.trace("permissionGranted, redirectTo: {}", uri);
 
             if (invalidateSessionCookiesIfNeeded()) {
-                if (!uri.contains(AuthorizeRequestParam.SESSION_ID)) {
+                if (!uri.contains(AuthorizeRequestParam.SESSION_ID) && appConfiguration.getSessionIdRequestParameterEnabled()) {
                     uri += "&session_id=" + session.getId();
                 }
             }
