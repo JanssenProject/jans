@@ -21,7 +21,7 @@
             <var>msgs</var>
         </resource-bundle>
         <message-bundle>
-           OxtrustCustomValidationMessage
+           validation_messages
         </message-bundle>
     </application>
     <factory>
