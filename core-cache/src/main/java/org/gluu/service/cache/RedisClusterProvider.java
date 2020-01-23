@@ -83,6 +83,13 @@ public class RedisClusterProvider extends AbstractRedisProvider {
         return pool;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+        Boolean hasKey = pool.exists(key);
+
+        return Boolean.TRUE.equals(hasKey);
+	}
+
     @Override
     public Object get(String key) {
         byte[] value = pool.get(key.getBytes());
@@ -115,4 +122,5 @@ public class RedisClusterProvider extends AbstractRedisProvider {
     public void clear() {
         LOG.trace("clear not allowed for cluster deployments");
     }
+
 }

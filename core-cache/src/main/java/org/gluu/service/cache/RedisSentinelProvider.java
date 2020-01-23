@@ -75,6 +75,13 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
         return pool;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+        Boolean hasKey = pool.getResource().exists(key);
+
+        return Boolean.TRUE.equals(hasKey);
+	}
+
     @Override
     public Object get(String key) {
         byte[] value = pool.getResource().get(key.getBytes());

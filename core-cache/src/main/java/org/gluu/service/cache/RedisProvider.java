@@ -95,6 +95,14 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         return redisProvider;
     }
 
+	@Override
+	public boolean hasKey(String key) {
+        if (key == null) {
+            return false;
+        }
+        return redisProvider.hasKey(key);
+	}
+
     @Override
     public Object get(String key) {
         if (key == null) {
@@ -102,6 +110,11 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         }
         return redisProvider.get(key);
     }
+
+	@Override
+	public void put(String key, Object object) {
+        redisProvider.put(key, object);
+	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
@@ -122,7 +135,5 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
     public CacheProviderType getProviderType() {
         return CacheProviderType.REDIS;
     }
-
-
 
 }
