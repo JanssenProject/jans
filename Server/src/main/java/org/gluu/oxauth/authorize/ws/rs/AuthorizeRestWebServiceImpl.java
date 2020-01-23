@@ -800,7 +800,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(codeChallengeMethod)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
         }
-        if (StringUtils.isNotBlank(sessionId)) {
+        if (StringUtils.isNotBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SESSION_ID, sessionId);
         }
         if (StringUtils.isNotBlank(claims)) {
