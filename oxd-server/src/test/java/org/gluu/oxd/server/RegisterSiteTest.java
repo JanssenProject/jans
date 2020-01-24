@@ -11,10 +11,7 @@ import org.gluu.oxd.common.response.UpdateSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
@@ -31,7 +28,7 @@ public class RegisterSiteTest {
 
     @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
-    public void register(String host, String opHost, String redirectUrls,  String logoutUrl, String postLogoutRedirectUrls) {
+    public void register(String host, String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls) {
         RegisterSiteResponse resp = registerSite(Tester.newClient(host), opHost, redirectUrls, postLogoutRedirectUrls, logoutUrl, false);
         assertNotNull(resp);
 
@@ -194,6 +191,28 @@ public class RegisterSiteTest {
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+
+        final RegisterSiteResponse resp = client.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        return resp;
+    }
+
+    public static RegisterSiteResponse registerSite(
+            ClientInterface client, String opHost, String redirectUrls, List<String> scopes, List<String> responseTypes,
+            boolean allowSpontaneousScopes, List<String> spontaneousScopes) {
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setScope(scopes);
+        params.setResponseTypes(responseTypes);
+        params.setAllowSpontaneousScopes(true);
+        params.setSpontaneousScopes(spontaneousScopes);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
