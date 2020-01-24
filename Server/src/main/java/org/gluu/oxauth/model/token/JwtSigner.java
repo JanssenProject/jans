@@ -8,7 +8,6 @@ package org.gluu.oxauth.model.token;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
@@ -17,6 +16,7 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.ServerCryptoProvider;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.python.jline.internal.Preconditions;
 
@@ -49,7 +49,7 @@ public class JwtSigner {
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
 
-        cryptoProvider = CdiUtil.bean(AbstractCryptoProvider.class);
+        cryptoProvider = new ServerCryptoProvider(CdiUtil.bean(AbstractCryptoProvider.class));
     }
 
     public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
