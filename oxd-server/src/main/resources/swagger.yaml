@@ -271,7 +271,7 @@ paths:
                 description: list of spontaneous scopes (regexp against which validation is performed).
                 items:
                   type: string
-                  example: ["/user/?/??", "/user/123abc/balance/history"]
+                  example: ["^transaction:.+$", "^\/user\/[^\/]+\/.+$"]
 
       responses:
         200:
@@ -736,7 +736,7 @@ paths:
                 description: list of spontaneous scopes (regexp against which validation is performed).
                 items:
                   type: string
-                  example: ["/user/?/??", "/user/123abc/balance/history"]
+                  example: ["^transaction:.+$", "^\/user\/[^\/]+\/.+$"]
 
       responses:
         200:
