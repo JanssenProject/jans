@@ -259,6 +259,7 @@ public class ConfigurationFactory {
 		}
 
 		if (conf.getRevision() <= this.loadedRevision) {
+		    log.trace("Skip configuration loading. currentRevision: " + loadedRevision + ", ldapRevision: " + conf.getRevision());
 			return;
 		}
 
