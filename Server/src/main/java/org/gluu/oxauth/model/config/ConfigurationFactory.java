@@ -219,7 +219,7 @@ public class ConfigurationFactory {
 	    try {
             final AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(this.conf);
             if (cryptoProvider instanceof OxAuthCryptoProvider) {
-                ((OxAuthCryptoProvider) cryptoProvider).load();
+                ((OxAuthCryptoProvider) cryptoProvider).load(conf.getKeyStoreSecret());
             }
         } catch (Throwable e ) {
             log.error("Failed to reload keys.", e);
@@ -253,17 +253,21 @@ public class ConfigurationFactory {
 			return;
 		}
 
-		final Conf conf = loadConfigurationFromLdap("oxRevision");
-		if (conf == null) {
-			return;
-		}
-
-		if (conf.getRevision() <= this.loadedRevision) {
+		if (!isRevisionIncreased()) {
 			return;
 		}
 
 		createFromLdap(false);
 	}
+
+	private boolean isRevisionIncreased() {
+        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        if (conf == null) {
+            return false;
+        }
+
+        return conf.getRevision() > this.loadedRevision;
+    }
 
 	private String confDir() {
 		final String confDir = this.baseConfiguration.getString("confDir", null);
@@ -375,6 +379,13 @@ public class ConfigurationFactory {
 		return false;
 	}
 
+	public boolean reloadConfFromLdap() {
+        if (!isRevisionIncreased()) {
+            return false;
+        }
+	    return createFromLdap(false);
+    }
+
 	private boolean createFromLdap(boolean recoverFromFiles) {
 		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
@@ -434,7 +445,7 @@ public class ConfigurationFactory {
 		initConfigurationConf(p_conf);
 
 		this.loadedRevision = p_conf.getRevision();
-		reloadKeysIfNeeded();
+		reloadKeysIfNeeded(); // call it after configuration is updated
 	}
 
 	private void initConfigurationConf(Conf p_conf) {
