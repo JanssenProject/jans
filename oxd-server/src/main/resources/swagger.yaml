@@ -735,7 +735,7 @@ paths:
                 type: array
                 description: list of spontaneous scopes (regexp against which validation is performed).
                 items:
-                  type: string
+                  type: stringcommit
                   example: ["^transaction:.+$", "^\/user\/[^\/]+\/.+$"]
 
       responses:

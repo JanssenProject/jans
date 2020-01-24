@@ -1,6 +1,10 @@
 package org.gluu.oxd.common;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.gluu.oxauth.client.AuthorizationRequest;
+import org.gluu.oxauth.client.AuthorizationResponse;
 import org.gluu.oxauth.model.common.Holder;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.util.Util;
 import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -10,12 +14,15 @@ import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.collections.Lists;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.testng.Assert.fail;
 
@@ -24,18 +31,21 @@ public class SeleniumTestUtils {
     private static int WAIT_OPERATION_TIMEOUT = 60;
     private static final Logger LOG = LoggerFactory.getLogger(SeleniumTestUtils.class);
 
-    public static void authorizeClient(String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
+    public static AuthorizationResponse authorizeClient(
+            String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
         WebDriver driver = initWebDriver(true, true);
 
-        loginGluuServer(driver, opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
-        acceptAuthorization(driver);
+        loginGluuServer(driver, opHost, userId, userSecret, clientId, redirectUrls, state, nonce, responseTypes, scopes);
+        AuthorizationResponse authorizationResponse = acceptAuthorization(driver);
 
         driver.quit();
+        return authorizationResponse;
     }
 
-    public static void loginGluuServer(WebDriver driver, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
+    private static void loginGluuServer(
+            WebDriver driver, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
         //navigate to opHost
-        driver.navigate().to(getAuthorizationUrl(opHost, clientId, redirectUrls, state, nonce));
+        driver.navigate().to(getAuthorizationUrl(opHost, clientId, redirectUrls, state, nonce, responseTypes, scopes));
         //driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
                 .withTimeout(Duration.ofSeconds(WAIT_OPERATION_TIMEOUT))
@@ -64,9 +74,9 @@ public class SeleniumTestUtils {
 
     }
 
-    private static void acceptAuthorization(WebDriver driver) {
+    private static AuthorizationResponse acceptAuthorization(WebDriver driver) {
         String authorizationResponseStr = driver.getCurrentUrl();
-
+        AuthorizationResponse authorizationResponse = null;
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
@@ -94,10 +104,13 @@ public class SeleniumTestUtils {
             waitForPageSwitch(driver, previousURL);
 
             authorizationResponseStr = driver.getCurrentUrl();
+            authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
+
             LOG.info("Authorization Response url is: " + driver.getCurrentUrl());
         } else {
             fail("The authorization form was expected to be shown.");
         }
+        return authorizationResponse;
     }
 
     private static WebDriver initWebDriver(boolean enableJavascript, boolean cleanupCookies) {
@@ -113,15 +126,29 @@ public class SeleniumTestUtils {
         return currentDriver;
     }
 
-    private static String getAuthorizationUrl(String opHost, String clientId, String redirectUrls, String state, String nonce) {
+    private static String getAuthorizationUrl(String opHost, String clientId, String redirectUrls, String state, String nonce, List<String> responseTypes, List<String> scopes) {
         try {
-            return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +
+            if(CollectionUtils.isEmpty(responseTypes)) {
+                responseTypes = Lists.newArrayList("code", "id_token", "token");
+            }
+
+            if(CollectionUtils.isEmpty(scopes)) {
+                scopes = Lists.newArrayList("openid", "profile", "oxd", "uma_protection");
+            }
+            List<ResponseType> resTypes = responseTypes.stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList());
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(resTypes, clientId, scopes, redirectUrls.split(" ")[0], nonce);
+            authorizationRequest.setResponseTypes(responseTypes.stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList()));
+            authorizationRequest.setState(state);
+
+            return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +authorizationRequest.getQueryString(), Util.UTF8_STRING_ENCODING);
+
+            /*return URLDecoder.decode(opHost + "/oxauth/restv1/authorize?" +
                     "response_type=code+id_token+token" +
                     "&state=" + state +
                     "&nonce=" + nonce +
                     "&client_id=" + clientId +
                     "&redirect_uri=" + redirectUrls.split(" ")[0] +
-                    "&scope=openid+profile+oxd+uma_protection", Util.UTF8_STRING_ENCODING);
+                    "&scope=openid+profile+oxd+uma_protection", Util.UTF8_STRING_ENCODING);*/
         } catch (UnsupportedEncodingException ex) {
             fail("Failed to decode the authorization URL.");
             return null;
