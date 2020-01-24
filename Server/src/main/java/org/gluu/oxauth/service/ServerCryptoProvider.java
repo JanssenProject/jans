@@ -19,7 +19,7 @@ import java.security.PrivateKey;
  */
 public class ServerCryptoProvider extends AbstractCryptoProvider {
 
-    protected static final Logger LOG = Logger.getLogger(ServerCryptoProvider.class);
+    private static final Logger LOG = Logger.getLogger(ServerCryptoProvider.class);
 
     private final ConfigurationFactory configurationFactory;
     private final AbstractCryptoProvider cryptoProvider;
@@ -34,7 +34,11 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     @Override
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         try {
-            return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+            final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+            if (!cryptoProvider.getKeys().contains(kid) && configurationFactory.reloadConfFromLdap()) {
+                return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+            }
+            return kid;
 
         } catch (KeyStoreException e) {
             LOG.trace("Try to re-load configuration due to keystore exception (it can be rotated).");
