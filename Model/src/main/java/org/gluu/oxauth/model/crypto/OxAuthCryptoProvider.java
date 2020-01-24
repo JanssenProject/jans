@@ -105,7 +105,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         this.keyStoreSecret = keyStoreSecret;
         try(InputStream is = new FileInputStream(keyStoreFile)) {
             keyStore.load(is, keyStoreSecret.toCharArray());
-            LOG.trace("Loaded keys from JKS.");
+            LOG.debug("Loaded keys from JKS.");
+            LOG.trace("Loaded keys:"+ getKeys());
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
