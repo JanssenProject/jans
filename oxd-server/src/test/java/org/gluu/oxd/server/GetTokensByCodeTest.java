@@ -208,7 +208,7 @@ public class GetTokensByCodeTest {
     }
 
     public static String codeRequest(ClientInterface client, String opHost, String siteId, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
-        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
+        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(siteId);
         params.setUsername(userId);
