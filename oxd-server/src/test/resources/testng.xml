@@ -17,6 +17,8 @@
     <parameter name="clientSecret" value="${auth.client.secret}"/>
     <parameter name="rsProtect"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'ticketScopes':['http://photoz.example.com/dev/actions/view']},{'httpMethods':['PUT', 'POST'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add'],'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
+    <parameter name="rsProtectWithSpontaneousScope"
+               value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['^/user/.+$','http://photoz.example.com/dev/actions/view'],'ticketScopes':['/user/2']}]}]}"/>
     <parameter name="rsProtectScopeExpression"
                value="{'resources':[{'path':'/ws/phone','conditions':[{'httpMethods':['GET'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/view'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add','http://photoz.example.com/dev/actions/view']}},{'httpMethods':['PUT','POST'],'scope_expression':{'rule':{'and':[{'or':[{'var':0},{'var':1}]},{'var':2}]},'data':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/add','http://photoz.example.com/dev/actions/view']},'ticketScopes':['http://photoz.example.com/dev/actions/add']},{'httpMethods':['DELETE'],'scopes':['http://photoz.example.com/dev/actions/all','http://photoz.example.com/dev/actions/remove'],'ticketScopes':['http://photoz.example.com/dev/actions/remove']}]}]}"/>
     <parameter name="rsProtectScopeExpressionSecond"
@@ -126,7 +128,16 @@
             <class name="org.gluu.oxd.server.service.ValidatorTest"/>
         </classes>
     </test>
-
+    <test name="Spontaneous Scope Auth Test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.SpontaneousScopeAuthTest"/>
+        </classes>
+    </test>
+    <test name="Uma Spontaneous Scope Test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.UmaSpontaneousScopeTest"/>
+        </classes>
+    </test>
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
         <classes>

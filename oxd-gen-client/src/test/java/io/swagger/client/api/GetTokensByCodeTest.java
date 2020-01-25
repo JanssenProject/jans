@@ -83,7 +83,7 @@ public class GetTokensByCodeTest {
 
     public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
                                String nonce, String authorization) throws Exception {
-        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce);
+        SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
 
         final Request request = buildRequest(authorization, oxdId, userId, userSecret, state, nonce, client);
 
