@@ -12,9 +12,9 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.event.CryptoProviderEvent;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.ApplicationFactory;
 import org.gluu.oxauth.util.ServerUtil;
@@ -65,6 +65,9 @@ public class ConfigurationFactory {
 	@Inject
 	private Event<AppConfiguration> configurationUpdateEvent;
 
+    @Inject
+    private Event<AbstractCryptoProvider> cryptoProviderEvent;
+
 	@Inject
 	private Event<String> event;
 
@@ -79,6 +82,9 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
+
+	@Inject
+	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -215,17 +221,6 @@ public class ConfigurationFactory {
 		}
 	}
 
-    private void reloadKeysIfNeeded() {
-	    try {
-            final AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(this.conf);
-            if (cryptoProvider instanceof OxAuthCryptoProvider) {
-                ((OxAuthCryptoProvider) cryptoProvider).load();
-            }
-        } catch (Throwable e ) {
-            log.error("Failed to reload keys.", e);
-        }
-    }
-
 	private void reloadConfiguration() {
 		// Reload LDAP configuration if needed
 	    PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(LDAP_PROPERTIES_FILE);
@@ -253,18 +248,22 @@ public class ConfigurationFactory {
 			return;
 		}
 
-		final Conf conf = loadConfigurationFromLdap("oxRevision");
-		if (conf == null) {
-			return;
-		}
-
-		if (conf.getRevision() <= this.loadedRevision) {
-		    log.trace("Skip configuration loading. currentRevision: " + loadedRevision + ", ldapRevision: " + conf.getRevision());
+		if (!isRevisionIncreased()) {
 			return;
 		}
 
 		createFromLdap(false);
 	}
+
+	private boolean isRevisionIncreased() {
+        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        if (conf == null) {
+            return false;
+        }
+
+        log.trace("LDAP revision: " + conf.getRevision() + ", server revision:" + loadedRevision);
+        return conf.getRevision() > this.loadedRevision;
+    }
 
 	private String confDir() {
 		final String confDir = this.baseConfiguration.getString("confDir", null);
@@ -376,6 +375,13 @@ public class ConfigurationFactory {
 		return false;
 	}
 
+	public boolean reloadConfFromLdap() {
+        if (!isRevisionIncreased()) {
+            return false;
+        }
+	    return createFromLdap(false);
+    }
+
 	private boolean createFromLdap(boolean recoverFromFiles) {
 		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
@@ -389,10 +395,15 @@ public class ConfigurationFactory {
 					destroy(StaticConfiguration.class);
 					destroy(WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
+
+					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
 				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(conf);
+
+				AbstractCryptoProvider newAbstractCryptoProvider = abstractCryptoProviderInstance.get();
+				cryptoProviderEvent.select(CryptoProviderEvent.Literal.INSTANCE).fire(newAbstractCryptoProvider);
 
 				return true;
 			}
@@ -416,6 +427,11 @@ public class ConfigurationFactory {
 		configurationInstance.destroy(confInstance.get());
 	}
 
+	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
+		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
+		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
+	}
+
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
@@ -433,9 +449,7 @@ public class ConfigurationFactory {
 
 	private void init(Conf p_conf) {
 		initConfigurationConf(p_conf);
-
 		this.loadedRevision = p_conf.getRevision();
-		reloadKeysIfNeeded();
 	}
 
 	private void initConfigurationConf(Conf p_conf) {

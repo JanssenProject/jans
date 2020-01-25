@@ -6,24 +6,8 @@
 
 package org.gluu.oxauth.model.token;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.model.GluuAttribute;
@@ -53,10 +37,7 @@ import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
-import org.gluu.oxauth.service.ScopeService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
@@ -68,8 +49,14 @@ import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -511,7 +498,7 @@ public class IdTokenFactory {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+            String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
