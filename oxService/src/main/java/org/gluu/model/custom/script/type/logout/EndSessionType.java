@@ -8,6 +8,4 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 public interface EndSessionType extends BaseExternalType {
 
     String getFrontchannelHtml(Object context);
-
-    String getFrontchannelPage(Object context);
 }

@@ -27,9 +27,4 @@ public class DummyEndSessionType implements EndSessionType {
     public String getFrontchannelHtml(Object context) {
         return null;
     }
-
-    @Override
-    public String getFrontchannelPage(Object context) {
-        return null;
-    }
 }
