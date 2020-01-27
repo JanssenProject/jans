@@ -3371,7 +3371,7 @@ class Setup(object):
                     oxd_port=8443
 
                 self.templateRenderingDict['oxd_hostname'] = oxd_hostname
-                self.templateRenderingDict['port'] = str(oxd_port)
+                self.templateRenderingDict['oxd_port'] = str(oxd_port)
 
 
         if (not self.installOxd) and self.oxd_package:
