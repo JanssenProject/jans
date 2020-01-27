@@ -119,6 +119,10 @@ public abstract class MetricService implements Serializable {
     }
 
     public void prepareBranch(Date creationDate, ApplicationType applicationType) {
+        if (!getEntryManager().hasBranchesSupport(baseDn())) {
+        	return;
+        }
+
         String baseDn = buildDn(null, creationDate, applicationType);
         // Create ou=YYYY-MM branch if needed
         if (!containsBranch(baseDn)) {
