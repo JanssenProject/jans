@@ -6,9 +6,6 @@
 
 package org.gluu.model.custom.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.gluu.model.custom.script.type.BaseExternalType;
@@ -22,6 +19,8 @@ import org.gluu.model.custom.script.type.id.DummyIdGeneratorType;
 import org.gluu.model.custom.script.type.id.IdGeneratorType;
 import org.gluu.model.custom.script.type.introspection.DummyIntrospectionType;
 import org.gluu.model.custom.script.type.introspection.IntrospectionType;
+import org.gluu.model.custom.script.type.logout.DummyEndSessionType;
+import org.gluu.model.custom.script.type.logout.EndSessionType;
 import org.gluu.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
 import org.gluu.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
 import org.gluu.model.custom.script.type.scim.DummyScimType;
@@ -73,6 +72,7 @@ public enum CustomScriptType implements AttributeEnum {
     DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope",
             new DummyDynamicScopeType()),
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
+    END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
     private String value;
