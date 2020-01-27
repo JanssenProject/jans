@@ -60,6 +60,11 @@ public class DeviceRegistrationService {
 	}
 
 	public void prepareBranch(final String userInum) {
+        String baseDn = getBaseDnForU2fUserDevices(userInum);
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
 		// Create U2F user device registrations branch if needed
 		if (!containsBranch(userInum)) {
 			addBranch(userInum);
