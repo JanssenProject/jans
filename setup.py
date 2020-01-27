@@ -4840,6 +4840,9 @@ class Setup(object):
     def load_test_data(self):
         self.logIt("Loading test ldif files")
 
+        if not self.installPassport:
+            self.generate_passport_configuration()
+
         ox_auth_test_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data.ldif')
         ox_auth_test_user_ldif = os.path.join(self.outputFolder, 'test/oxauth/data/oxauth-test-data-user.ldif')
         
