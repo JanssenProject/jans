@@ -24,12 +24,12 @@ public class DummyEndSessionType implements EndSessionType {
     }
 
     @Override
-    public String getHtml(Object context) {
+    public String getFrontchannelHtml(Object context) {
         return null;
     }
 
     @Override
-    public String getPage(Object context) {
+    public String getFrontchannelPage(Object context) {
         return null;
     }
 }
