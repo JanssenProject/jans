@@ -430,7 +430,7 @@ class PersonAuthentication(PersonAuthenticationType):
             missing = True
         elif not 'strong-authn-settings' in cmConfigs['plugins_settings']:
             missing = True
-        elif:
+        else:
             cmConfigs = cmConfigs['plugins_settings']['strong-authn-settings']
 
         policy2FA = 'EVERY_LOGIN'
