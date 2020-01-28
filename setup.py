@@ -4553,6 +4553,39 @@ class Setup(object):
             if query:
                 self.exec_n1ql_query(query)
 
+    def couchbaseMakeIndex(self, bucket, ind):
+
+        if isinstance(ind[0], list):
+            attrquoted = []
+            attribs = ind[0]
+            wherec = ind[1]
+            for a in attribs:
+                if not '(' in a:
+                    attrquoted.append('`{}`'.format(a))
+                else:
+                    attrquoted.append(a)
+
+            attrquoteds = ', '.join(attrquoted)
+            
+            index_name = '{0}_static_{1}'.format(bucket, str(uuid.uuid4()).split('-')[1])
+            cmd = 'CREATE INDEX `{0}` ON `{1}`({2}) WHERE ({3})'.format(index_name, bucket, attrquoteds, wherec)
+        
+        else:
+            if '(' in ''.join(ind):
+                attr_ = ind[0]
+                index_name_ = ind[0].replace('(','_').replace(')','_').replace('`','').lower()
+                if index_name_.endswith('_'):
+                    index_name_ = index_name_[:-1]
+                index_name = 'def_{0}_{1}'.format(bucket, index_name_)
+            else:
+                attr_ = ','.join(['`{}`'.format(a) for a in ind])
+                index_name = 'def_{0}_{1}'.format(bucket, '_'.join(ind))
+
+            cmd = 'CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true}' % (index_name, bucket, attr_)
+
+        return cmd, index_name
+
+
     def couchebaseCreateIndexes(self, bucket):
         
         self.couchbaseBuckets.append(bucket)
@@ -4571,37 +4604,16 @@ class Setup(object):
 
             index_names = []
             for ind in index_list['attributes']:
-                if '(' in ''.join(ind):
-                    attr_ = ind[0]
-                    index_name_ = ind[0].replace('(','_').replace(')','_').replace('`','').lower()
-                    if index_name_.endswith('_'):
-                        index_name_ = index_name_[:-1]
-                    index_name = 'def_{0}_{1}'.format(bucket, index_name_)
-                else:
-                    attr_ = ','.join(['`{}`'.format(a) for a in ind])
-                    index_name = 'def_{0}_{1}'.format(bucket, '_'.join(ind))
-
-                W.write('CREATE INDEX %s ON `%s`(%s) USING GSI WITH {"defer_build":true};\n' % (index_name, bucket, attr_))
+                cmd, index_name = self.couchbaseMakeIndex(bucket, ind)
+                W.write(cmd+';\n')
                 index_names.append(index_name)
+
+            for ind in index_list['static']:
+                cmd, index_name = self.couchbaseMakeIndex(bucket, ind)
+                W.write(cmd+';\n')
 
             if index_names:
                 W.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
-
-            sic = 1
-            for attribs, wherec in index_list['static']:
-                
-                attrquoted = []
-
-                for a in attribs:
-                    if not '(' in a:
-                        attrquoted.append('`{}`'.format(a))
-                    else:
-                        attrquoted.append(a)
-
-                attrquoteds = ', '.join(attrquoted)
-                query = 'CREATE INDEX `{0}_static_{1:02d}` ON `{0}`({2}) WHERE ({3})\n'.format(bucket, sic, attrquoteds, wherec)
-                W.write(query)
-                sic += 1
 
         self.couchbaseExecQuery(tmp_file)
 
