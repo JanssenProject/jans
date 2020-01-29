@@ -28,6 +28,8 @@ import org.gluu.oxauth.service.GrantService;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
+import org.gluu.oxauth.service.external.ExternalEndSessionService;
+import org.gluu.oxauth.service.external.context.EndSessionContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
@@ -70,6 +72,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private ExternalApplicationSessionService externalApplicationSessionService;
 
     @Inject
+    private ExternalEndSessionService externalEndSessionService;
+
+    @Inject
     private SessionIdService sessionIdService;
 
     @Inject
@@ -105,7 +110,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
             }
 
-            return httpBased(postLogoutRedirectUri, state, pair);
+            return httpBased(postLogoutRedirectUri, state, pair, httpRequest);
         } catch (WebApplicationException e) {
             if (e.getResponse() != null)
                 return e.getResponse();
@@ -176,6 +181,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
+            if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
+                return postLogoutRedirectUri;
+            }
             if (pair.getSecond() == null) {
                 return redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
             } else {
@@ -192,11 +200,28 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
     }
 
-    public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair) {
+    private Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
         final String redirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
         final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
+
+        try {
+            final EndSessionContext context = new EndSessionContext(httpRequest, frontchannelLogoutUris, postLogoutRedirectUri, pair.getFirst());
+            final String htmlFromScript = externalEndSessionService.getFrontchannelHtml(context);
+            if (StringUtils.isNotBlank(htmlFromScript)) {
+                log.debug("HTML from `getFrontchannelHtml` external script: " + htmlFromScript);
+                return okResponse(htmlFromScript);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        // default handling
         final String html = constructPage(frontchannelLogoutUris, redirectUri, state);
         log.debug("Constructed http logout page: " + html);
+        return okResponse(html);
+    }
+
+    private Response okResponse(String html) {
         return Response.ok().
                 cacheControl(ServerUtil.cacheControl(true, true)).
                 header("Pragma", "no-cache").
@@ -226,7 +251,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         boolean externalLogoutResult = false;
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
-        if (isExternalLogoutPresent && (ldapSessionId != null)) {
+        if (isExternalLogoutPresent) {
             String userName = ldapSessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionId);
             log.info("End session result for '{}': '{}'", userName, "logout", externalLogoutResult);
@@ -237,15 +262,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, EndSessionErrorResponseType.INVALID_GRANT, "External logout is present but executed external logout script returned failed result.");
         }
 
-        if (ldapSessionId != null) {
-            grantService.removeAllTokensBySession(ldapSessionId.getDn());
-        }
+        grantService.removeAllTokensBySession(ldapSessionId.getDn());
 
         if (identity != null) {
             identity.logout();
         }
 
-        return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
+        return new Pair<>(ldapSessionId, authorizationGrant);
     }
 
     private Set<String> getRpFrontchannelLogoutUris(Pair<SessionId, AuthorizationGrant> pair) {
@@ -261,7 +284,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null ?
                 clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
-                Sets.<Client>newHashSet();
+                Sets.newHashSet();
         if (authorizationGrant != null) {
             clientsByDns.add(authorizationGrant.getClient());
         }
@@ -320,14 +343,12 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return ldapSessionId;
     }
 
-    private SessionId removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        SessionId ldapSessionId = null;
-
+    private void removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             String id = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
 
             if (StringHelper.isNotEmpty(id)) {
-                ldapSessionId = sessionIdService.getSessionId(id);
+                SessionId ldapSessionId = sessionIdService.getSessionId(id);
                 if (ldapSessionId != null) {
                     boolean result = sessionIdService.remove(ldapSessionId);
                     if (!result) {
@@ -342,7 +363,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } finally {
             sessionIdService.removeConsentSessionIdCookie(httpResponse);
         }
-        return ldapSessionId;
     }
 
     private String constructPage(Set<String> logoutUris, String postLogoutUrl, String state) {
