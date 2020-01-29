@@ -190,6 +190,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableU2fEndpoint = false;
 
     private Boolean useLocalCache = false;
+    private Boolean fapiCompatibility = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -209,6 +210,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getFapiCompatibility() {
+        if (fapiCompatibility == null) fapiCompatibility = false;
+        return fapiCompatibility;
+    }
+
+    public void setFapiCompatibility(Boolean fapiCompatibility) {
+        this.fapiCompatibility = fapiCompatibility;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
