@@ -203,7 +203,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 }
                             };
                             idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, null,
+                                    nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null,
                                     authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
                         }
 
