@@ -30,7 +30,11 @@ public class AuthorizeParamsValidator {
      * @param responseTypes The response types. This parameter is mandatory.
      * @return Returns <code>true</code> when all the parameters are valid.
      */
-    public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce) {
+    public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, boolean fapiCompatibility) {
+        if (fapiCompatibility && responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
+            return false;
+        }
+
         if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
             if (StringUtils.isBlank(nonce)) {
                 return false;
