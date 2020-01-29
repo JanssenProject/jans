@@ -991,6 +991,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {
+        if (allowPostLogoutRedirectWithoutValidation == null) allowPostLogoutRedirectWithoutValidation = false;
         return allowPostLogoutRedirectWithoutValidation;
     }
 
