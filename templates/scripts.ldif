@@ -213,6 +213,20 @@ oxScript::%(introspection_introspection_custom_params)s
 oxScriptType: introspection
 programmingLanguage: python
 
+dn: inum=2DAF-CA90,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Frontchannel logout Sample
+displayName: frontchannel_logout_sample
+oxEnabled: false
+inum: 2DAF-CA90
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(end_session)s
+oxScriptType: end_session
+programmingLanguage: python
+
 dn: inum=2DAF-AA91,ou=scripts,o=gluu
 objectClass: top
 objectClass: oxCustomScript
