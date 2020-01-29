@@ -7,6 +7,7 @@ import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
@@ -50,6 +51,9 @@ public class AuthorizeRestWebServiceValidator {
 
     @Inject
     private RedirectionUriService redirectionUriService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public Client validateClient(String clientId, String state) {
         if (StringUtils.isBlank(clientId)) {
@@ -110,7 +114,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validate(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, ResponseMode responseMode) {
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce)) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility())) {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
