@@ -235,18 +235,16 @@ body {
 				</div>
 			</div>
 		</h:panelGroup>
-		<h:panelGroup id="subsequent" style="margin-top:50px;margin-bottom:50px">
-			<header class="bs-docs-nav navbar navbar-static-top" id="top">
-			<div class="container">
-				<div class="navbar-header">
-					<a target="_blank" class="navbar-brand"><img
-						src="#{oxAuthConfigurationService.getImgLocation()}/logo.png"
-						alt="logo" /></a>
-				</div>
-			</div>
-			</header>
-
+		<h:panelGroup id="subsequent"
+			style="margin-top:50px;margin-bottom:50px">
 			<div class="bs-docs-section">
+				<div id="dialog"
+					style="display: none; margin-top: 50px; margin-bottom: 50px"
+					title="QR Code">
+					<div id="susequentcontainer"></div>
+					<div id="susequentprogressbar"></div>
+
+				</div>
 				<div class="container">
 					<div class="row">
 						<div class="col-md-12">
@@ -278,11 +276,5 @@ body {
 				</div>
 			</div>
 		</h:panelGroup>
-
-		<div id="dialog" style="display: none; margin-top:50px;margin-bottom:50px" title="QR Code">
-			<div id="susequentcontainer"></div>
-			<div id="susequentprogressbar"></div>
-
-		</div>
 	</ui:define>
 </ui:composition>
