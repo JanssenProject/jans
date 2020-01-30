@@ -18,10 +18,10 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
 
 import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;
@@ -31,7 +31,10 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Movchan
@@ -168,19 +171,15 @@ public class AuthorizeService {
             return;
         }
 
-        StringBuilder sb = new StringBuilder();
-        String redirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
+        String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
         String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
+        ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
+        List<ResponseType> responseType = ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
 
-        sb.append(redirectUri);
-        if (redirectUri != null && redirectUri.contains("?")) {
-            sb.append("&");
-        } else {
-            sb.append("?");
-        }
-        sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
+        RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
+        redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
 
-        facesService.redirectToExternalURL(sb.toString());
+        facesService.redirectToExternalURL(redirectUri.toString());
     }
 
     private void authenticationFailedSessionInvalid() {
