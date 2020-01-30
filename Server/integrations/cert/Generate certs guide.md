@@ -77,7 +77,7 @@ basicConstraints = critical,CA:TRUE,pathlen:0
 keyUsage = critical,any
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
-keyUsage = digitalSignature,keyEncipherment,cRLSign,keyCertSign
+keyUsage = digitalSignature,cRLSign,keyCertSign
 extendedKeyUsage = serverAuth
 crlDistributionPoints = @crl_section
 subjectAltName  = @alt_names
@@ -195,6 +195,7 @@ cd ./intermediate1
 ```
 
 Copy the Intermediate cert and key from the Root CA:
+
 `mv ../intermediate1.* ./`
 
 Create the index files:
@@ -243,8 +244,8 @@ basicConstraints = critical,CA:FALSE
 keyUsage = critical,any
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-extendedKeyUsage = clientAuth,emailProtection
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment
+extendedKeyUsage = clientAuth
 crlDistributionPoints = @crl_section
 subjectAltName  = @alt_names
 authorityInfoAccess = @ocsp_section
@@ -388,6 +389,7 @@ enduser-certs/user-gluu.org.crt: OK
 `cat ../rootca.crt intermediate1.crt intermediate1.crl.pem > enduser-certs/user-gluu.org.crl.chain`
 
 Verify the certificate:
+
 `openssl verify -crl_check -CAfile enduser-certs/user-gluu.org.crl.chain enduser-certs/user-gluu.org.crt`
 
 Example output:
