@@ -16,9 +16,18 @@ public class OxdServerApplication extends Application<OxdServerConfiguration> {
 
     public static void main(String[] args) {
         try {
-            new OxdServerApplication().run(args);
+            if (args.length > 0 && "stop".equalsIgnoreCase(args[0])) {
+                ServerLauncher.shutdown(true);
+                return;
+            } else {
+                new OxdServerApplication().run(args);
+            }
         } catch (Throwable e) {
-            LOG.error("Failed to start oxd-server.", e);
+            if (args.length > 0 && "stop".equalsIgnoreCase(args[0])) {
+                LOG.error("Failed to stop oxd-server.", e);
+            } else {
+                LOG.error("Failed to start oxd-server.", e);
+            }
             System.exit(1);
         }
     }
