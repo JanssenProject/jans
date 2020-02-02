@@ -23,6 +23,7 @@
         <guava.version>13.0.1</guava.version>
         <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
         <selenium.version>3.141.59</selenium.version>
+        <skip.exe.generation>true</skip.exe.generation>
     </properties>
 
     <prerequisites>
@@ -424,6 +425,12 @@
                     </plugins>
                 </pluginManagement>
             </build>
+        </profile>
+        <profile>
+            <id>windows-build</id>
+            <properties>
+                <skip.exe.generation>false</skip.exe.generation>
+            </properties>
         </profile>
     </profiles>
 

@@ -18,15 +18,35 @@
     </dependencySets>
     <files>
         <file>
+            <source>${project.basedir}/src/main/resources/windows/oxd-server.yml</source>
+            <outputDirectory>/conf</outputDirectory>
+            <destName>oxd-server-win.yml</destName>
+        </file>
+        <file>
             <source>${project.basedir}/src/main/resources/oxd-server.yml</source>
             <outputDirectory>/conf</outputDirectory>
+            <destName>oxd-server.yml</destName>
+        </file>
+        <file>
+            <source>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows/amd64/prunsrv.exe</source>
+            <outputDirectory>/bin</outputDirectory>
+            <destName>oxdServer.exe</destName>
         </file>
         <file>
             <source>${project.basedir}/src/main/resources/oxd-server.keystore</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
+            <source>${project.basedir}/../license.md</source>
+            <outputDirectory>/license</outputDirectory>
+            <destName>license.txt</destName>
+        </file>
+        <file>
             <source>${project.basedir}/src/main/resources/swagger.yaml</source>
+            <outputDirectory>/conf</outputDirectory>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/resources/windows/generate-exe-using-bat.iss</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
@@ -51,6 +71,10 @@
                 <include>oxd*</include>
                 <include>ls*</include>
             </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/bin/windows</directory>
+            <outputDirectory>/bin</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
