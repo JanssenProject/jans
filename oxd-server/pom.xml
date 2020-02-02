@@ -179,6 +179,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.exe.generation}</skip>
                             <url>https://www-us.apache.org/dist/commons/daemon/binaries/windows/commons-daemon-${commons-daemon.bin.version}-bin-windows.zip</url>
                             <unpack>true</unpack>
                             <outputDirectory>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows</outputDirectory>
@@ -197,6 +198,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <skipAssembly>!${skip.exe.generation}</skipAssembly>
                             <archive>
                                 <manifest>
                                     <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
@@ -204,6 +206,24 @@
                             </archive>
                             <descriptors>
                                 <descriptor>src/main/assembly/src.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>windows-assembly-dist</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <skipAssembly>${skip.exe.generation}</skipAssembly>
+                            <archive>
+                                <manifest>
+                                    <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptors>
+                                <descriptor>src/main/assembly/windows-exe-src.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
@@ -221,6 +241,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.exe.generation}</skip>
                             <target>
                                 <delete dir="${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows"/>
                             </target>
