@@ -62,14 +62,23 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--show-latest-commit", help="Gets latest commit from githbub", action='store_true')
+    parser.add_argument("-target", help="Target directory", default='/opt/gluu/jetty/*/webapps')
+    parser.add_argument("--json", help="Print output in json format", action='store_true')
     args = parser.parse_args()
 
-    for war_fn in glob.glob('/opt/gluu/jetty/*/webapps/*.war'):
+    target = os.path.join(args.target, '*.war')
+
+    if args.json:
+        output = []
+
+    for war_fn in glob.glob(target):
         info = get_war_info(war_fn)
         service = os.path.basename(war_fn).split('.')[0]
         
-        for si in ('title', 'version', 'build date', 'build'):
-            print "{0}: {1}".format(si.title(), info[si])
+        
+        if not args.json:
+            for si in ('title', 'version', 'build date', 'build'):
+                print "{0}: {1}".format(si.title(), info[si])
         
         if args.show_latest_commit and (service in repos):
             latest_commit = get_latest_commit(service, info['branch'])
@@ -77,7 +86,15 @@ if __name__ == '__main__':
                 compare_build = 'diff: https://github.com/GluuFederation/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
             else:
                 compare_build = ''
-            
-            print "Latest Commit:", latest_commit, compare_build
+            if not target.json:
+                print "Latest Commit:", latest_commit, compare_build
+            else:
+                info["Latest Commit"] = latest_commit
         
         print
+
+        if args.json:
+            output.append(info)
+            
+    if args.json:
+        print json.dumps(output)
