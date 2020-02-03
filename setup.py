@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from pyDes import *
 
 # The MIT License (MIT)
 #
