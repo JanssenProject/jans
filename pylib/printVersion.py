@@ -75,7 +75,6 @@ if __name__ == '__main__':
         info = get_war_info(war_fn)
         service = os.path.basename(war_fn).split('.')[0]
         
-        
         if not args.json:
             for si in ('title', 'version', 'build date', 'build'):
                 print "{0}: {1}".format(si.title(), info[si])
@@ -90,11 +89,13 @@ if __name__ == '__main__':
                 print "Latest Commit:", latest_commit, compare_build
             else:
                 info["Latest Commit"] = latest_commit
-        
-        print
 
         if args.json:
+            info["file"] = war_fn
             output.append(info)
+        else:
+            print
             
+
     if args.json:
         print json.dumps(output)
