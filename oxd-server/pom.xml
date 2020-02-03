@@ -14,6 +14,7 @@
         <jedis.version>2.9.0</jedis.version>
         <dropwizard.version>2.0.0</dropwizard.version>
         <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>
+        <generate.windows.exe>false</generate.windows.exe>
         <commons-daemon.bin.version>1.2.0</commons-daemon.bin.version>
     </properties>
 
@@ -168,26 +169,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.4.2</version>
-                <executions>
-                    <execution>
-                        <id>download-procrun-bin</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.exe.generation}</skip>
-                            <url>https://www-us.apache.org/dist/commons/daemon/binaries/windows/commons-daemon-${commons-daemon.bin.version}-bin-windows.zip</url>
-                            <unpack>true</unpack>
-                            <outputDirectory>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -198,7 +179,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <skipAssembly>!${skip.exe.generation}</skipAssembly>
+                            <skipAssembly>${generate.windows.exe}</skipAssembly>
                             <archive>
                                 <manifest>
                                     <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
@@ -207,44 +188,6 @@
                             <descriptors>
                                 <descriptor>src/main/assembly/src.xml</descriptor>
                             </descriptors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>windows-assembly-dist</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <skipAssembly>${skip.exe.generation}</skipAssembly>
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptors>
-                                <descriptor>src/main/assembly/windows-exe-src.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>delete-commons-daemon-dir</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.exe.generation}</skip>
-                            <target>
-                                <delete dir="${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows"/>
-                            </target>
                         </configuration>
                     </execution>
                 </executions>
@@ -543,5 +486,77 @@
             <version>2.7.6</version>
         </dependency>
     </dependencies>
-
+    <profiles>
+        <profile>
+            <id>windows-build</id>
+            <properties>
+                <generate.windows.exe>true</generate.windows.exe>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.4.2</version>
+                        <executions>
+                            <execution>
+                                <id>download-procrun-bin</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://www-us.apache.org/dist/commons/daemon/binaries/windows/commons-daemon-${commons-daemon.bin.version}-bin-windows.zip</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>windows-assembly-dist</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <archive>
+                                        <manifest>
+                                            <mainClass>org.gluu.oxd.server.OxdServerApplication</mainClass>
+                                        </manifest>
+                                    </archive>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/windows-exe-src.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>delete-commons-daemon-dir</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <delete dir="${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
