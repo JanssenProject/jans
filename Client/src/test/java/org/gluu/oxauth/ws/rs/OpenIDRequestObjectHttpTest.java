@@ -1806,7 +1806,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
-            authorizationRequest.setRequest("INVALID_OPENID_REQUEST_OBJECT");
+            authorizationRequest.setRequest("INVALID_REQUEST_OBJECT");
             authorizationRequest.setAuthUsername(userId);
             authorizationRequest.setAuthPassword(userSecret);
 

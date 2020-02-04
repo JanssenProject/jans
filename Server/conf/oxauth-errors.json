@@ -76,7 +76,7 @@
             "uri":null
         },
         {
-            "id":"invalid_openid_request_object",
+            "id":"invalid_request_object",
             "description":"The request parameter contains an invalid OpenID Request Object.",
             "uri":null
         },
