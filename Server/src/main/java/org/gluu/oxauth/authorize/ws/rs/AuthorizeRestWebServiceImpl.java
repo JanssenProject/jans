@@ -227,6 +227,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         redirectUriResponse.setState(state);
                     }
 
+                    authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
+
                     // MUST be equal
                     if (!jwtRequest.getResponseTypes().containsAll(responseTypes) || !responseTypes.containsAll(jwtRequest.getResponseTypes())) {
                         throw createInvalidJwtRequestException(redirectUriResponse, "The responseType parameter is not the same in the JWT");
