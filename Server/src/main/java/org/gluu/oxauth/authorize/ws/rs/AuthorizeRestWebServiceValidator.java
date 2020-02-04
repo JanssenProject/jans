@@ -135,19 +135,24 @@ public class AuthorizeRestWebServiceValidator {
 
         // FAPI related validation
         if (jwtRequest.getExp() == null) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "The exp claim is not set");
+            log.debug("The exp claim is not set");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if ((jwtRequest.getExp() * 1000) < new Date().getTime()) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object expired");
+            log.debug("Request object expired");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have scope claim.");
+            log.debug("Request object does not have scope claim.");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (StringUtils.isBlank(jwtRequest.getNonce())) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have nonce claim.");
+            log.debug("Request object does not have nonce claim.");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
-            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have redirect_uri claim.");
+            log.debug("Request object does not have redirect_uri claim.");
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
     }
 
