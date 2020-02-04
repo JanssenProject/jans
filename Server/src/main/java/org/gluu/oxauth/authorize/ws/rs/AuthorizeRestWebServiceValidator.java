@@ -3,6 +3,7 @@ package org.gluu.oxauth.authorize.ws.rs;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -28,10 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -127,6 +125,29 @@ public class AuthorizeRestWebServiceValidator {
                         .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Invalid redirect uri."))
                         .build());
             }
+        }
+    }
+
+    public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
+        if (!appConfiguration.getFapiCompatibility()) {
+            return;
+        }
+
+        // FAPI related validation
+        if (jwtRequest.getExp() == null) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "The exp claim is not set");
+        }
+        if ((jwtRequest.getExp() * 1000) < new Date().getTime()) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object expired");
+        }
+        if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have scope claim.");
+        }
+        if (StringUtils.isBlank(jwtRequest.getNonce())) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have nonce claim.");
+        }
+        if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, "Request object does not have redirect_uri claim.");
         }
     }
 
