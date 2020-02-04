@@ -26,6 +26,10 @@ public class RedirectUriResponse {
         this.errorFactory = errorFactory;
     }
 
+    public WebApplicationException createWebException(IErrorType errorType) {
+        return createWebException(errorType, null);
+    }
+
     public WebApplicationException createWebException(IErrorType errorType, String reason) {
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state, reason));
         return new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUri, httpRequest).build());
