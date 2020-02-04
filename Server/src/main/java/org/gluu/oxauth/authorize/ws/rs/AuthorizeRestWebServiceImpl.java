@@ -592,7 +592,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
-        return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_OPENID_REQUEST_OBJECT, reason);
+        return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
     }
 
     private JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse) throws InvalidJwtException, InvalidJweException {
