@@ -383,7 +383,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         False
                     ),
                     0,
-                    code
+                    code + " is your passcode to access your account"
                 )
                 print("SMPP Message '{}' sent to #{} with message id {}".format(code, number, message_id))
                 status = True
