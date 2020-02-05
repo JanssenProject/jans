@@ -29,7 +29,7 @@ def get_latest_commit(service, branch):
         return "ERROR: Unable to retreive latest commit"
 
 def get_war_info(war_fn):
-    retDict = {'title':'', 'version':'', 'build':'', 'build date':'', 'branch':''}
+    retDict = {'title':'', 'version':'', 'build':'', 'buildDate':'', 'branch':''}
     war_zip = zipfile.ZipFile(war_fn,"r")
     menifest = war_zip.read('META-INF/MANIFEST.MF')
 
@@ -53,7 +53,7 @@ def get_war_info(war_fn):
             for l in pom_prop.split('\n'):
                 build_date = re.findall("\w{3}\s\w{3}\s{1,2}\w{1,2}\s\w{2}:\w{2}:\w{2}\s[+\w]{3}\s\w{4}", l)
                 if build_date:
-                    retDict['build date'] =  build_date[0]
+                    retDict['buildDate'] =  build_date[0]
                     break
 
     return retDict
@@ -76,7 +76,7 @@ if __name__ == '__main__':
         service = os.path.basename(war_fn).split('.')[0]
         
         if not args.json:
-            for si in ('title', 'version', 'build date', 'build'):
+            for si in ('title', 'version', 'buildDate', 'build'):
                 print "{0}: {1}".format(si.title(), info[si])
         
         if args.show_latest_commit and (service in repos):
