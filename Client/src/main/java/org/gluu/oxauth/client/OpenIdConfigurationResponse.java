@@ -68,6 +68,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private Boolean tlsClientCertificateBoundAccessTokens;
     private Boolean frontChannelLogoutSupported;
     private Boolean frontChannelLogoutSessionSupported;
+    private Boolean backchannelLogoutSupported;
     private String opPolicyUri;
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
@@ -1004,6 +1005,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.frontChannelLogoutSupported = frontChannelLogoutSupported;
     }
 
+    public Boolean getBackchannelLogoutSupported() {
+        return backchannelLogoutSupported;
+    }
+
+    public void setBackchannelLogoutSupported(Boolean backchannelLogoutSupported) {
+        this.backchannelLogoutSupported = backchannelLogoutSupported;
+    }
+
     public Boolean getTlsClientCertificateBoundAccessTokens() {
         return tlsClientCertificateBoundAccessTokens;
     }
@@ -1097,6 +1106,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", tlsClientCertificateBoundAccessTokens=" + tlsClientCertificateBoundAccessTokens +
                 ", frontChannelLogoutSupported=" + frontChannelLogoutSupported +
                 ", frontChannelLogoutSessionSupported=" + frontChannelLogoutSessionSupported +
+                ", backchannelLogoutSupported=" + backchannelLogoutSupported +
                 ", requireRequestUriRegistration=" + requireRequestUriRegistration +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
