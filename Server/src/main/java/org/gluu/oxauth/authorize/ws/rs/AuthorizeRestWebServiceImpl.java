@@ -592,6 +592,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
+        if (appConfiguration.getFapiCompatibility()) {
+            log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known.
+            return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
         return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
     }
 
