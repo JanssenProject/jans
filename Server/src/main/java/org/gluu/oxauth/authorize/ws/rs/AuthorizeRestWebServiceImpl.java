@@ -296,7 +296,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
             if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
-                throw createInvalidJwtRequestException(redirectUriResponse, "Failed to identify request object.");
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
             }
 
             authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
