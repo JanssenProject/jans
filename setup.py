@@ -962,6 +962,17 @@ class Setup(object):
             print "Please ensure that you are running this script inside Gluu container."
             sys.exit(1)
 
+    def get_ssl_subject(self, ssl_fn):
+        retDict = {}
+        cmd = 'openssl x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
+        s = self.run(cmd, shell=True)
+        s = s.strip() + ','
+
+        for k in ('emailAddress', 'CN', 'O', 'L', 'ST', 'C'):
+            rex = re.search('{}=(.*?),'.format(k), s)
+            retDict[k] = rex.groups()[0] if rex else ''
+
+        return retDict
 
     def set_ownership(self):
         self.logIt("Changing ownership")
@@ -3361,8 +3372,24 @@ class Setup(object):
                         self.installOxd = True
                         break
 
-                    print "Checking oxd server ..."
-                    if self.check_oxd_server(oxd_server_https):
+                print "Checking oxd server ..."
+                if self.check_oxd_server(oxd_server_https):
+                    oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
+                    oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+                    oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+                    self.writeFile(oxd_crt_fn, oxd_cert)
+                    ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+                    
+                    if not ssl_subjects['CN'] == oxd_hostname:
+                        print ('Hostname of oxd ssl certificate is {0}{1}{2} '
+                                'which does not match {0}{3}{2}, \ncasa won\'t start '
+                                'properly').format(
+                                        colors.DANGER,
+                                        ssl_subjects['CN'],
+                                        colors.ENDC,
+                                        oxd_hostname
+                                        )
+                    else:
                         self.oxd_server_https = oxd_server_https
                         break
 
