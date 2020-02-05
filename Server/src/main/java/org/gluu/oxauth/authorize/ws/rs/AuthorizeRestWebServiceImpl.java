@@ -211,6 +211,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state);
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
+            redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
 
             Set<String> scopes = scopeChecker.checkScopesPolicy(client, scope);
 
@@ -293,6 +294,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     log.error("Invalid JWT authorization request. Message : " + e.getMessage(), e);
                     throw createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
+            }
+            if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+                throw createInvalidJwtRequestException(redirectUriResponse, "Failed to identify request object.");
             }
 
             authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);

@@ -106,6 +106,9 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validateRequestJwt(String request, String requestUri, RedirectUriResponse redirectUriResponse) {
+        if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(request) && StringUtils.isBlank(requestUri)) {
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "request and request_uri are both not specified which is forbidden for FAPI.");
+        }
         if (StringUtils.isNotBlank(request) && StringUtils.isNotBlank(requestUri)) {
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "Both request and request_uri are specified which is not allowed.");
         }
