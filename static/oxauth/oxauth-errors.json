@@ -81,6 +81,11 @@
             "uri":null
         },
         {
+            "id":"invalid_request_object",
+            "description":"The request parameter contains an invalid Request Object.",
+            "uri":null
+        },
+        {
             "id":"authentication_session_invalid",
             "description":"The authorization server can't handle user authentication due to session expiration",
             "uri":null
