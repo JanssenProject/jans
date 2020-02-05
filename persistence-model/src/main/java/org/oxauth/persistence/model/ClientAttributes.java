@@ -36,6 +36,12 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("spontaneousScopeScriptDns")
     private List<String> spontaneousScopeScriptDns = Lists.newArrayList();
 
+    @JsonProperty("backchannelLogoutUri")
+    private List<String> backchannelLogoutUri;
+
+    @JsonProperty("backchannelLogoutSessionRequired")
+    private Boolean backchannelLogoutSessionRequired;
+
 
     public String getTlsClientAuthSubjectDn() {
         return tlsClientAuthSubjectDn;
@@ -94,6 +100,23 @@ public class ClientAttributes implements Serializable {
         this.keepClientAuthorizationAfterExpiration = keepClientAuthorizationAfterExpiration;
     }
 
+    public List<String> getBackchannelLogoutUri() {
+        return backchannelLogoutUri;
+    }
+
+    public void setBackchannelLogoutUri(List<String> backchannelLogoutUri) {
+        this.backchannelLogoutUri = backchannelLogoutUri;
+    }
+
+    public Boolean getBackchannelLogoutSessionRequired() {
+        if (backchannelLogoutSessionRequired == null) backchannelLogoutSessionRequired = false;
+        return backchannelLogoutSessionRequired;
+    }
+
+    public void setBackchannelLogoutSessionRequired(Boolean backchannelLogoutSessionRequired) {
+        this.backchannelLogoutSessionRequired = backchannelLogoutSessionRequired;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
@@ -103,6 +126,8 @@ public class ClientAttributes implements Serializable {
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 ", spontaneousScopes=" + spontaneousScopes +
                 ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
+                ", backchannelLogoutUri=" + backchannelLogoutUri +
+                ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
                 '}';
     }
 }
