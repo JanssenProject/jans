@@ -223,7 +223,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getApplicationType(), r.getSubjectType(),
                     r.getRedirectUris(), r.getSectorIdentifierUri())) {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Failed to validate redirect uris.");
-            } else if (cibaSupportProxy.isCIBASupported() && !cibaRegisterParamsValidatorProxy.validateParams(
+            }
+
+            if (cibaSupportProxy.isCIBASupported() && !cibaRegisterParamsValidatorProxy.validateParams(
                     r.getBackchannelTokenDeliveryMode(),
                     r.getBackchannelClientNotificationEndpoint(),
                     r.getBackchannelAuthenticationRequestSigningAlg(),
@@ -233,77 +235,78 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getSectorIdentifierUri(),
                     r.getJwksUri()
             )) { // CIBA
-                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
-                builder.entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA,
-                        "Invalid Client Metadata registering to use CIBA (Client Initiated Backchannel Authentication)."));
-            } else {
-                registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
-
-                String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
-
-                String inum = inumService.generateClientInum();
-                String generatedClientSecret = UUID.randomUUID().toString();
-
-                final Client client = new Client();
-                client.setDn("inum=" + inum + "," + clientsBaseDN);
-                client.setClientId(inum);
-                client.setDeletable(true);
-                client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
-                client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
-                client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
-
-                final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                client.setClientIdIssuedAt(calendar.getTime());
-
-                if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
-                    calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
-                    client.setClientSecretExpiresAt(calendar.getTime());
-                    client.setExpirationDate(calendar.getTime());
-                }
-                client.setDeletable(client.getClientSecretExpiresAt() != null);
-
-                if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
-                    try {
-                        URI redUri = new URI(r.getRedirectUris().get(0));
-                        client.setClientName(redUri.getHost());
-                    } catch (Exception e) {
-                        //ignore
-                        log.error(e.getMessage(), e);
-                        client.setClientName("Unknown");
-                    }
-                }
-
-                updateClientFromRequestObject(client, r, false);
-
-                boolean registerClient = true;
-                if (externalDynamicClientRegistrationService.isEnabled()) {
-                    registerClient = externalDynamicClientRegistrationService.executeExternalCreateClientMethods(r, client);
-                }
-
-                if (!registerClient) {
-                    log.trace("Client parameters are invalid, returns invalid_request error. External registration script returned false.");
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "External registration script returned false.");
-                }
-
-                Date currentTime = Calendar.getInstance().getTime();
-                client.setLastAccessTime(currentTime);
-                client.setLastLogonTime(currentTime);
-
-                Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
-                client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
-
-                clientService.persist(client);
-
-                JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
-                builder.entity(jsonObject.toString(4).replace("\\/", "/"));
-
-                log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
-                        client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri());
-
-                oAuth2AuditLog.setClientId(client.getClientId());
-                oAuth2AuditLog.setScope(clientScopesToString(client));
-                oAuth2AuditLog.setSuccess(true);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA,
+                        "Invalid Client Metadata registering to use CIBA (Client Initiated Backchannel Authentication).");
             }
+
+
+            registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
+            registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
+
+            String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
+
+            String inum = inumService.generateClientInum();
+            String generatedClientSecret = UUID.randomUUID().toString();
+
+            final Client client = new Client();
+            client.setDn("inum=" + inum + "," + clientsBaseDN);
+            client.setClientId(inum);
+            client.setDeletable(true);
+            client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
+            client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
+            client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
+
+            final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            client.setClientIdIssuedAt(calendar.getTime());
+
+            if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
+                calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
+                client.setClientSecretExpiresAt(calendar.getTime());
+                client.setExpirationDate(calendar.getTime());
+            }
+            client.setDeletable(client.getClientSecretExpiresAt() != null);
+
+            if (StringUtils.isBlank(r.getClientName()) && r.getRedirectUris() != null && !r.getRedirectUris().isEmpty()) {
+                try {
+                    URI redUri = new URI(r.getRedirectUris().get(0));
+                    client.setClientName(redUri.getHost());
+                } catch (Exception e) {
+                    //ignore
+                    log.error(e.getMessage(), e);
+                    client.setClientName("Unknown");
+                }
+            }
+
+            updateClientFromRequestObject(client, r, false);
+
+            boolean registerClient = true;
+            if (externalDynamicClientRegistrationService.isEnabled()) {
+                registerClient = externalDynamicClientRegistrationService.executeExternalCreateClientMethods(r, client);
+            }
+
+            if (!registerClient) {
+                log.trace("Client parameters are invalid, returns invalid_request error. External registration script returned false.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "External registration script returned false.");
+            }
+
+            Date currentTime = Calendar.getInstance().getTime();
+            client.setLastAccessTime(currentTime);
+            client.setLastLogonTime(currentTime);
+
+            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
+            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
+
+            clientService.persist(client);
+
+            JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+
+            log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
+                    client.getClientId(), client.getApplicationType(), client.getClientName(), client.getRedirectUris(), client.getSectorIdentifierUri());
+
+            oAuth2AuditLog.setClientId(client.getClientId());
+            oAuth2AuditLog.setScope(clientScopesToString(client));
+            oAuth2AuditLog.setSuccess(true);
         } catch (StringEncrypter.EncryptionException e) {
             builder = internalErrorResponse("Encryption exception occured.");
             log.error(e.getMessage(), e);
@@ -330,7 +333,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    public Response.ResponseBuilder internalErrorResponse(String reason) {
+    private Response.ResponseBuilder internalErrorResponse(String reason) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, reason));
@@ -513,6 +516,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUris().toArray(new String[requestObject.getFrontChannelLogoutUris().size()]));
         }
         p_client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
+
+        if (requestObject.getBackchannelLogoutUris() != null && !requestObject.getBackchannelLogoutUris().isEmpty()) {
+            p_client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
+        }
+        p_client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
@@ -790,6 +798,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         // Logout params
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_URI.toString(), client.getFrontChannelLogoutUri());
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getFrontChannelLogoutSessionRequired());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_URI.toString(), client.getAttributes().getBackchannelLogoutUri());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getAttributes().getBackchannelLogoutSessionRequired());
 
         // Custom Params
         String[] scopeNames = null;
