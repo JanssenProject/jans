@@ -8,6 +8,7 @@ package org.gluu.oxauth.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -36,6 +37,8 @@ import static org.gluu.oxauth.model.util.StringUtils.toJSONArray;
  */
 public class RegisterRequest extends BaseRequest {
 
+    private static final Logger log = Logger.getLogger(RegisterRequest.class);
+
     private String registrationAccessToken;
     private List<String> redirectUris;
     private List<String> claimsRedirectUris;
@@ -49,6 +52,8 @@ public class RegisterRequest extends BaseRequest {
     private String policyUri;
     private List<String> frontChannelLogoutUris;
     private Boolean frontChannelLogoutSessionRequired;
+    private List<String> backchannelLogoutUris;
+    private Boolean backchannelLogoutSessionRequired;
     private String tosUri;
     private String jwksUri;
     private String jwks;
@@ -214,6 +219,22 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setAccessToken(String registrationAccessToken) {
         this.registrationAccessToken = registrationAccessToken;
+    }
+
+    public List<String> getBackchannelLogoutUris() {
+        return backchannelLogoutUris;
+    }
+
+    public void setBackchannelLogoutUris(List<String> backchannelLogoutUris) {
+        this.backchannelLogoutUris = backchannelLogoutUris;
+    }
+
+    public Boolean getBackchannelLogoutSessionRequired() {
+        return backchannelLogoutSessionRequired;
+    }
+
+    public void setBackchannelLogoutSessionRequired(Boolean backchannelLogoutSessionRequired) {
+        this.backchannelLogoutSessionRequired = backchannelLogoutSessionRequired;
     }
 
     /**
@@ -1201,6 +1222,12 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
+        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
+            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
+        }
+        if (backchannelLogoutSessionRequired != null) {
+            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+        }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
         }
@@ -1385,17 +1412,6 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        final List<String> frontChannelLogoutUris = new ArrayList<String>();
-        if (requestObject.has(FRONT_CHANNEL_LOGOUT_URI.toString())) {
-            try {
-                JSONArray frontChannelLogoutUriJsonArray = requestObject.getJSONArray(FRONT_CHANNEL_LOGOUT_URI.toString());
-                for (int i = 0; i < frontChannelLogoutUriJsonArray.length(); i++) {
-                    frontChannelLogoutUris.add(frontChannelLogoutUriJsonArray.getString(i));
-                }
-            } catch (JSONException e) {
-                frontChannelLogoutUris.add(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
-            }
-        }
 
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
@@ -1406,8 +1422,10 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
-        result.setFrontChannelLogoutUris(frontChannelLogoutUris);
+        result.setFrontChannelLogoutUris(extractList(requestObject, FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        result.setBackchannelLogoutUris(extractList(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
+        result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
                 requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
@@ -1473,6 +1491,21 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelUserCodeParameter(requestObject.has(BACKCHANNEL_USER_CODE_PARAMETER.toString()) ?
                 requestObject.getBoolean(BACKCHANNEL_USER_CODE_PARAMETER.toString()) : null);
 
+        return result;
+    }
+
+    private static List<String> extractList(JSONObject requestObject, String key) {
+        final List<String> result = new ArrayList<>();
+        if (requestObject.has(key)) {
+            try {
+                JSONArray jsonArray = requestObject.getJSONArray(key);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    result.add(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                result.add(requestObject.optString(key));
+            }
+        }
         return result;
     }
 
@@ -1606,6 +1639,12 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
+        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
+            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+        }
+        if (backchannelLogoutSessionRequired != null) {
+            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+        }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
         }
@@ -1668,16 +1707,11 @@ public class RegisterRequest extends BaseRequest {
 
     @Override
     public String getQueryString() {
-        String jsonQueryString = null;
-
         try {
-            jsonQueryString = ClientUtil.toPrettyJson(getJSONParameters()).replace("\\/", "/");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-        return jsonQueryString;
+            return ClientUtil.toPrettyJson(getJSONParameters()).replace("\\/", "/");
+        } catch (JSONException | JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 }

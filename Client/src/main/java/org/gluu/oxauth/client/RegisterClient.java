@@ -225,6 +225,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
                     requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
                 }
+                if (getRequest().getBackchannelLogoutUris() != null && !getRequest().getBackchannelLogoutUris().isEmpty()) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_URI.getName(), getRequest().getBackchannelLogoutUris());
+                }
+                if (getRequest().getBackchannelLogoutSessionRequired() != null) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getBackchannelLogoutSessionRequired());
+                }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
                 }

@@ -150,6 +150,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
         registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setFrontChannelLogoutSessionRequired(true);
+        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setBackchannelLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
@@ -174,10 +176,12 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getClaims().get(SCOPE.toString()));
+        assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
+        assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertEquals(logoutUri, new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
