@@ -215,12 +215,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
 
-                return Response.ok().entity(getJSonResponse(accToken,
-                        accToken.getTokenType(),
-                        accToken.getExpiresIn(),
-                        reToken,
-                        scope,
-                        idToken)).build();
+                final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+                return response(Response.ok().entity(entity), oAuth2AuditLog);
             } else if (gt == GrantType.REFRESH_TOKEN) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
@@ -229,13 +225,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                 if (authorizationGrant != null) {
-
-
-                        /*
-                        The authorization server MAY issue a new refresh token, in which case
-                        the client MUST discard the old refresh token and replace it with the
-                        new refresh token.
-                        */
+                    // The authorization server MAY issue a new refresh token, in which case
+                    // the client MUST discard the old refresh token and replace it with the new refresh token.
                     RefreshToken reToken = authorizationGrant.createRefreshToken();
                     grantService.removeByCode(refreshToken, client.getClientId());
 
