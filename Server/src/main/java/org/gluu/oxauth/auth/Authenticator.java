@@ -196,6 +196,7 @@ public class Authenticator {
                     && servletRequest != null
                     && (servletRequest.getRequestURI().endsWith("/token")
                     || servletRequest.getRequestURI().endsWith("/revoke")
+                    || servletRequest.getRequestURI().endsWith("/userinfo")
                     || servletRequest.getRequestURI().endsWith("/bc-authorize")))) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
                 if (authenticated) {
