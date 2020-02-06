@@ -140,6 +140,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private boolean scimTestMode;
     private boolean oxTrustApiTestMode;
+    private boolean enableUpdateNotification;
 
     private boolean rptConnectionPoolUseConnectionPooling;
     private int rptConnectionPoolMaxTotal;
@@ -1018,4 +1019,11 @@ public class AppConfiguration implements Configuration, Serializable {
 		this.useLocalCache = useLocalCache;
 	}
 
+    public boolean isEnableUpdateNotification() {
+        return enableUpdateNotification;
+    }
+
+    public void setEnableUpdateNotification(boolean enableUpdateNotification) {
+        this.enableUpdateNotification = enableUpdateNotification;
+    }
 }
