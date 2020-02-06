@@ -49,9 +49,14 @@ public class CertUtils {
         if (org.apache.commons.lang.StringUtils.isBlank(certificateAsPem)) {
             return "";
         }
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
-        certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
-        return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+        try {
+            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
+            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
+            certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
+            return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+        } catch (Exception e) {
+            log.error("Failed to hash certificate: " + certificateAsPem, e);
+            return "";
+        }
     }
 }
