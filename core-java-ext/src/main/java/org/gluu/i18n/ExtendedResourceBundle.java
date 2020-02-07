@@ -15,7 +15,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Logger;
 
 /**
  * Custom i18n resource bundle with realod support
@@ -24,8 +23,6 @@ import java.util.logging.Logger;
  * @version 02/07/2020
  */
 public class ExtendedResourceBundle extends ResourceBundle {
-
-	private static final Logger LOG = Logger.getLogger(ExtendedResourceBundle.class.getName());
 
     private WatchKey watcher = null;
     private Date watcherLastUpdate = new Date();
@@ -59,7 +56,7 @@ public class ExtendedResourceBundle extends ResourceBundle {
                         this.lastUpdate = new Date();
                     }
                 } catch (IOException ex) {
-                	LOG.warning("Failed to reload message bundle:" + externalResource);
+                	System.err.println("Failed to reload message bundle:" + externalResource);
 				} finally {
                     updateLock.unlock();
                 }
@@ -105,7 +102,7 @@ public class ExtendedResourceBundle extends ResourceBundle {
                 properties.load(input); // External bundle (will overwrite same keys).
             }
         } catch (IOException ex) {
-            LOG.warning("Failed to read properties file");
+        	System.err.println("Failed to load message bundle:" + externalResource);
             throw ex;
         } finally {
         	try {
