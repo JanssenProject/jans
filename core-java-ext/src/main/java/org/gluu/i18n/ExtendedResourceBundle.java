@@ -40,7 +40,9 @@ public class ExtendedResourceBundle extends ResourceBundle {
         this.properties = properties;
 
         this.lastUpdate = new Date();
-        this.watcher = externalResource.register(FileSystems.getDefault().newWatchService(), StandardWatchEventKinds.ENTRY_MODIFY);
+
+        Path baseFolder = externalResource.getParent(); 
+        this.watcher = baseFolder.register(FileSystems.getDefault().newWatchService(), StandardWatchEventKinds.ENTRY_MODIFY);
     }
 
     @Override
