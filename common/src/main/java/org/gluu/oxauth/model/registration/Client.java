@@ -281,6 +281,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @return logout session required
      */
     public Boolean getFrontChannelLogoutSessionRequired() {
+        if (frontChannelLogoutSessionRequired == null) frontChannelLogoutSessionRequired = false;
         return frontChannelLogoutSessionRequired;
     }
 
@@ -299,6 +300,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @return logout uri
      */
     public String[] getFrontChannelLogoutUri() {
+        if (frontChannelLogoutUri == null) frontChannelLogoutUri = new String[0];
         return frontChannelLogoutUri;
     }
 
