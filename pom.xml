@@ -42,6 +42,7 @@
 		<module>oxSaml</module>
 		<module>core-cache</module>
 		<module>core-standalone</module>
+		<module>core-java-ext</module>
 		<module>oxService</module>
 		<module>server</module>
 		<module>oxJsfUtil</module>
