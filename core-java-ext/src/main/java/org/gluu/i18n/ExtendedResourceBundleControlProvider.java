@@ -33,15 +33,14 @@ public class ExtendedResourceBundleControlProvider implements ResourceBundleCont
     }
 
     public ResourceBundle.Control getControl(String baseName) {
-        if (baseName.startsWith("com.sun") || baseName.startsWith("org.apache")) {
-//            System.out.println("Using default control to load bundle with baseName: " + baseName);
-        	return null;
-        }
+		if (baseName.equals("javax.faces.Messages")) {
+			System.out.println("Preparing control to load bundle with baseName: " + baseName);
+			return new CustomControl();
+		}
 
-        System.out.println("Preparing control to load bundle with baseName: " + baseName);
+//        System.out.println("Using default control to load bundle with baseName: " + baseName);
 
-//    	return null;
-        return new CustomControl();
+    	return null;
     }
 
     protected static class CustomControl extends Control {
