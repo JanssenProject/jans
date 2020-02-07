@@ -10,7 +10,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
-import java.util.logging.Logger;
 import java.util.spi.ResourceBundleControlProvider;
 
 /**
@@ -20,8 +19,6 @@ import java.util.spi.ResourceBundleControlProvider;
  * @version 02/07/2020
  */
 public class ExtendedResourceBundleControlProvider implements ResourceBundleControlProvider {
-
-	private static final Logger LOG = Logger.getLogger(ExtendedResourceBundleControlProvider.class.getName());
 
 	private static Path EXTERNAL_PATH;
 
@@ -36,15 +33,21 @@ public class ExtendedResourceBundleControlProvider implements ResourceBundleCont
     }
 
     public ResourceBundle.Control getControl(String baseName) {
+        if (baseName.startsWith("com.sun") || baseName.startsWith("org.apache")) {
+//            System.out.println("Using default control to load bundle with baseName: " + baseName);
+        	return null;
+        }
+
+        System.out.println("Preparing control to load bundle with baseName: " + baseName);
+
+//    	return null;
         return new CustomControl();
     }
 
     protected static class CustomControl extends Control {
-
         @Override
         public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
                 throws IllegalAccessException, InstantiationException, IOException {
-            LOG.info("Attempting to laa bundel with baseName: " + baseName);
 
             String resourceName = toResourceName(toBundleName(baseName, locale), "properties");
             Properties properties = new Properties();
@@ -52,6 +55,11 @@ public class ExtendedResourceBundleControlProvider implements ResourceBundleCont
             try (InputStream input = loader.getResourceAsStream(resourceName)) {
                 InputStreamReader inputReader = new InputStreamReader(input, "UTF-8");
                 properties.load(inputReader); // Default (internal) bundle.
+            }
+            
+            if (properties.isEmpty()) {
+                System.out.println("Using default control to load bundle with baseName: " + baseName);
+            	return null;
             }
 
             Path externalResource = null;
