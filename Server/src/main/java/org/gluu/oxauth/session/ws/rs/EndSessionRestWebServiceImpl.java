@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.session.ws.rs;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
@@ -45,7 +46,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Javier Rojas Blum
@@ -110,6 +113,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
             }
 
+            postLogoutRedirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
+
+            boolean isBackchannel = false; // TODO
+            if (isBackchannel) {
+                return backChannel(postLogoutRedirectUri, state, pair, httpRequest);
+            }
+
             return httpBased(postLogoutRedirectUri, state, pair, httpRequest);
         } catch (WebApplicationException e) {
             if (e.getResponse() != null)
@@ -117,6 +127,44 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             throw e;
         }
+    }
+
+    private Response backChannel(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
+        final Set<String> backchannelLogoutUris = collectLogoutUris(pair, false);
+
+        final String logoutToken = createLogoutToken();
+        final ExecutorService executorService = EndSessionUtils.getExecutorService(backchannelLogoutUris.size());
+        for (String backchannelLogoutUri : backchannelLogoutUris) {
+
+            if (backchannelLogoutUri.contains("?")) {
+                backchannelLogoutUri = backchannelLogoutUri + "&logout_token=" + logoutToken;
+            } else {
+                backchannelLogoutUri = backchannelLogoutUri + "?logout_token=" + logoutToken;
+            }
+
+            callBackchannelUri(backchannelLogoutUri, executorService);
+        }
+
+        if (StringUtils.isBlank(postLogoutRedirectUri)) {
+            return Response.ok().build();
+        }
+        try {
+            return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
+        } catch (URISyntaxException e) {
+            final String message = "Failed to create URI for " + postLogoutRedirectUri + " postlogout_redirect_uri.";
+            log.error(message);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, message)).build();
+        }
+    }
+
+    private String createLogoutToken() {
+        return ""; // todo
+    }
+
+    private void callBackchannelUri(final String backchannelLogoutUri, ExecutorService executorService) {
+        executorService.execute(() -> {
+            // todo
+        });
     }
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
@@ -201,8 +249,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
-        final String redirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
-        final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
+        final Set<String> frontchannelLogoutUris = collectLogoutUris(pair, true);
 
         try {
             final EndSessionContext context = new EndSessionContext(httpRequest, frontchannelLogoutUris, postLogoutRedirectUri, pair.getFirst());
@@ -216,8 +263,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         // default handling
-        final String html = constructPage(frontchannelLogoutUris, redirectUri, state);
-        log.debug("Constructed http logout page: " + html);
+        final String html = EndSessionUtils.createFronthannelHtml(frontchannelLogoutUris, postLogoutRedirectUri, state);
+        log.debug("Constructed html logout page: " + html);
         return okResponse(html);
     }
 
@@ -271,14 +318,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return new Pair<>(ldapSessionId, authorizationGrant);
     }
 
-    private Set<String> getRpFrontchannelLogoutUris(Pair<SessionId, AuthorizationGrant> pair) {
+    private Set<String> collectLogoutUris(Pair<SessionId, AuthorizationGrant> pair, boolean isFrontchannel) {
         final Set<String> result = Sets.newHashSet();
 
         SessionId sessionId = pair.getFirst();
         AuthorizationGrant authorizationGrant = pair.getSecond();
         if (sessionId == null) {
-            log.error("session_id is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_id." +
-                    "Http based html will contain no iframes.");
+            log.error("session_id is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_id.");
             return result;
         }
 
@@ -290,18 +336,16 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         for (Client client : clientsByDns) {
-            String[] logoutUris = client.getFrontChannelLogoutUri();
-
-            if (logoutUris == null) {
-                continue;
-            }
+            List<String> logoutUris = isFrontchannel ? Lists.newArrayList(client.getFrontChannelLogoutUri()) : client.getAttributes().getBackchannelLogoutUri();
 
             for (String logoutUri : logoutUris) {
                 if (Util.isNullOrEmpty(logoutUri)) {
                     continue; // skip client if logout_uri is blank
                 }
 
-                if (client.getFrontChannelLogoutSessionRequired() != null && client.getFrontChannelLogoutSessionRequired()) {
+                boolean appendSid = isFrontchannel ? client.getFrontChannelLogoutSessionRequired() : client.getAttributes().getBackchannelLogoutSessionRequired();
+
+                if (appendSid) {
                     if (logoutUri.contains("?")) {
                         logoutUri = logoutUri + "&sid=" + sessionId.getId();
                     } else {
@@ -363,43 +407,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } finally {
             sessionIdService.removeConsentSessionIdCookie(httpResponse);
         }
-    }
-
-    private String constructPage(Set<String> logoutUris, String postLogoutUrl, String state) {
-        String iframes = "";
-        for (String logoutUri : logoutUris) {
-            iframes = iframes + String.format("<iframe height=\"0\" width=\"0\" src=\"%s\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\"></iframe>", logoutUri);
-        }
-
-        String html = "<!DOCTYPE html>" +
-                "<html>" +
-                "<head>";
-
-        if (!Util.isNullOrEmpty(postLogoutUrl)) {
-
-            if (!Util.isNullOrEmpty(state)) {
-                if (postLogoutUrl.contains("?")) {
-                    postLogoutUrl += "&state=" + state;
-                } else {
-                    postLogoutUrl += "?state=" + state;
-                }
-            }
-
-            html += "<script>" +
-                    "window.onload=function() {" +
-                    "window.location='" + postLogoutUrl + "'" +
-                    "}" +
-                    "</script>";
-        }
-
-        html += "<title>Gluu Generated logout page</title>" +
-                "</head>" +
-                "<body>" +
-                "Logout requests sent.<br/>" +
-                iframes +
-                "</body>" +
-                "</html>";
-        return html;
     }
 
     private void auditLogging(HttpServletRequest request, Pair<SessionId, AuthorizationGrant> pair) {
