@@ -198,6 +198,10 @@ public abstract class JwtClaimSet {
             setClaim(key, (List) value);
         } else if (value instanceof JwtSubClaimObject) {
             setClaim(key, (JwtSubClaimObject) value);
+        } else if (value instanceof JSONObject) {
+            setClaim(key, (JSONObject) value);
+        } else if (value instanceof JSONArray) {
+            setClaim(key, (JSONArray) value);
         } else {
             throw new UnsupportedOperationException("Claim value is not supported, key: " + key + ", value :" + value);
         }
