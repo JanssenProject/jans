@@ -67,6 +67,14 @@ public class ServerUtil {
         }
     }
 
+    public static ThreadFactory daemonThreadFactory() {
+        return runnable -> {
+            Thread thread = new Thread(runnable);
+            thread.setDaemon(true);
+            return thread;
+        };
+    }
+
     public static boolean isTrue(Boolean booleanObject) {
         return booleanObject != null && booleanObject;
     }
