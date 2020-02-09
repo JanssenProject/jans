@@ -1492,6 +1492,8 @@ class Setup(object):
             if getattr(self, si):
                 setattr(self, se, 'true')
 
+        return p
+
     def load_json(self, fn):
         self.logIt('Loading JSON from %s' % fn)
         try:
