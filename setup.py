@@ -359,10 +359,6 @@ class Setup(object):
         os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
 
         # Component ithversions
-        self.jre_version = '8.222.10.1'
-        self.jetty_version = '9.4.24.v20191120'
-        self.jython_version = '2.7.2a'
-        self.node_version = '12.6.0'
         self.apache_version = None
         self.opendj_version = None
 
@@ -395,8 +391,6 @@ class Setup(object):
         self.enable_scim_access_policy = 'false'
         
         self.allowPreReleasedFeatures = False
-
-        self.jreDestinationPath = '/opt/amazon-corretto-%s-linux-x64' % self.jre_version
 
         self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -444,7 +438,6 @@ class Setup(object):
         self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.java_type = 'jre'
 
-        self.jetty_dist = '/opt/jetty-9.4'
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '%s/jetty' % self.gluuOptFolder
         self.jetty_user_home = '/home/jetty'
@@ -1370,7 +1363,7 @@ class Setup(object):
 
     # = Utilities ====================================================================
 
-    def logIt(self, msg, errorLog=False):
+    def logIt(self, msg, errorLog=False, fatal=False):
         if errorLog:
             f = open(self.logError, 'a')
             f.write('%s %s\n' % (time.strftime('%X %x'), msg))
@@ -1378,6 +1371,11 @@ class Setup(object):
         f = open(self.log, 'a')
         f.write('%s %s\n' % (time.strftime('%X %x'), msg))
         f.close()
+
+        if fatal:
+            print "FATAL:", errorLog
+            sys.exit(1)
+
 
     def appendLine(self, line, fileName=False):
         
@@ -1444,7 +1442,6 @@ class Setup(object):
             p.setProperty('ldap_type', 'opendj')
 
         properties_list = p.keys()
-        no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
         for prop in properties_list:
             if prop in no_update:
@@ -1550,7 +1547,6 @@ class Setup(object):
         for i, l in enumerate(icons_conf[:]):
             if l.strip().startswith('Alias') and ('/icons/' in l.strip().split()):
                 icons_conf[i] =  l.replace('Alias', '#Alias')
-
 
         self.writeFile(icons_conf_fn, ''.join(icons_conf))
 
@@ -1691,32 +1687,46 @@ class Setup(object):
         return "3.0"
 
     def installJRE(self):
-        self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
-        if self.java_type == 'jre':
-            jreArchive = 'amazon-corretto-{}-linux-x64.tar.gz'.format(self.jre_version)
+        jre_arch_list = glob.glob(os.path.join(self.distAppFolder, 'amazon-corretto-*-linux-x64.tar.gz'))
+
+        if not jre_arch_list:
+            self.logIt("JRE packgage not found in {}. Will download jdk".format(self.distAppFolder))
+            self.java_type = 'jdk'
         else:
+            self.java_type = 'jre'
+
+        if self.java_type != 'jre':
             self.logIt("Downloading " + self.open_jdk_archive_link)
-            jreArchive = os.path.basename(self.open_jdk_archive_link)
-            self.run(['wget', '-nv', self.open_jdk_archive_link, '-O', os.path.join(self.distAppFolder, jreArchive)])
+            jdk_fn = os.path.basename(self.open_jdk_archive_link)
+            jreArchive = os.path.join(self.distAppFolder, jdk_fn)
+            self.run(['wget', '-nv', self.open_jdk_archive_link, '-O', jreArchive])
+        else:
+            jreArchive = max(jre_arch_list)
+
+
+        self.logIt("Installing server JRE {} ...".format(os.path.basename(jreArchive)))
 
         try:
-            self.logIt("Extracting %s into /opt/" % jreArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting %s into /opt/" % os.path.basename(jreArchive))
+            self.run(['tar', '-xzf', jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
 
         if self.java_type == 'jdk':
-            self.jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
+            jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
+        else:
+            jreDestinationPath = max(glob.glob('/opt/amazon-corretto-*'))
 
-        self.run([self.cmd_ln, '-sf', self.jreDestinationPath, self.jre_home])
-        self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % self.jreDestinationPath])
-        self.run([self.cmd_chown, '-R', 'root:root', self.jreDestinationPath])
+        self.run([self.cmd_ln, '-sf', jreDestinationPath, self.jre_home])
+        self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
+        self.run([self.cmd_chown, '-R', 'root:root', jreDestinationPath])
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
         
         if self.java_type == 'jre':
             self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
+
 
     def extractOpenDJ(self):        
         if self.opendj_type == 'opendj':
@@ -1738,20 +1748,36 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
 
     def installJetty(self):
-        self.logIt("Installing jetty %s..." % self.jetty_version)
+        self.logIt("Installing jetty %s...")
 
-        jettyTemp = '%s/temp' % self.jetty_dist
+        jetty_archive_list = glob.glob(os.path.join(self.distAppFolder, 'jetty-distribution-*.tar.gz'))
+
+        if not jetty_archive_list:
+            self.logIt("Jetty archive not found in {}. Exiting...".format(self.distAppFolder), True, True)
+
+        jettyArchive = max(jetty_archive_list)
+
+        jettyArchive_fn = os.path.basename(jettyArchive)
+        jetty_regex = re.search('jetty-distribution-(\d*\.\d*)', jettyArchive_fn)
+        
+        if not jetty_regex:
+            self.logIt("Can't determine Jetty version", True, True)
+
+        jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
+        self.templateRenderingDict['jetty_dist'] = jetty_dist
+        jettyTemp = os.path.join(jetty_dist, 'temp')
         self.run([self.cmd_mkdir, '-p', jettyTemp])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyTemp])
 
-        jettyArchive = 'jetty-distribution-%s.tar.gz' % self.jetty_version
-        jettyDestinationPath = '%s/jetty-distribution-%s' % (self.jetty_dist, self.jetty_version)
         try:
             self.logIt("Extracting %s into /opt/jetty" % jettyArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jettyArchive), '-C', self.jetty_dist, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '-xzf', jettyArchive, '-C', jetty_dist, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
             self.logIt(traceback.format_exc(), True)
+
+
+        jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, 'jetty-distribution-*')))
 
         self.run([self.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
@@ -1775,16 +1801,23 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
 
     def installNode(self):
-        self.logIt("Installing node %s..." % self.node_version)
+        self.logIt("Installing node %s..." )
 
-        nodeArchive = 'node-v%s-linux-x64.tar.xz' % self.node_version
-        nodeDestinationPath = '/opt/node-v%s-linux-x64' % self.node_version
+        node_archieve_list = glob.glob(os.path.join(self.distAppFolder, 'node-*-linux-x64.tar.xz'))
+
+        if not node_archieve_list:
+            self.logIt("Can't find node archive", True, True)
+
+        nodeArchive = max(node_archieve_list)
+
         try:
             self.logIt("Extracting %s into /opt" % nodeArchive)
-            self.run(['tar', '-xJf', '%s/%s' % (self.distAppFolder, nodeArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '-xJf', nodeArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % nodeArchive)
             self.logIt(traceback.format_exc(), True)
+
+        nodeDestinationPath = max(glob.glob('/opt/node-*-linux-x64'))
 
         self.run([self.cmd_ln, '-sf', nodeDestinationPath, self.node_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
@@ -1938,18 +1971,30 @@ class Setup(object):
             self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
     def installJython(self):
-        self.logIt("Installing Jython %s..." % self.jython_version)
-        jythonInstaller = 'jython-%s.jar' % self.jython_version
+        self.logIt("Installing Jython")
+
+        jython_installer_list = glob.glob(os.path.join(self.distAppFolder, 'jython-installer-*'))
+
+        if not jython_installer_list:
+            self.logIt("Jython installer not found in. Exiting...", True, True)
+
+        jython_installer = max(jython_installer_list)
+        jython_version_regex = re.search('jython-installer-(.*)\.jar', jython_installer)
+        
+        if not jython_version_regex:
+            self.logIt("Jython installer not found in. Exiting...", True, True)
+
+        jython_version = jython_version_regex.groups()[0]
 
         try:
-            self.run(['rm', '-rf', '/opt*-%s' % self.jython_version])
-            self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard', '-e', 'ensurepip'])
+            self.run(['rm', '-rf', '/opt*-%s' % jython_version])
+            self.run([self.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
-            self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
+            self.logIt("Error installing jython-installer-%s.jar" % jython_version)
             self.logIt(traceback.format_exc(), True)
 
-        self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % self.jython_version, self.jython_home])
-        self.run([self.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % self.jython_version])
+        self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, self.jython_home])
+        self.run([self.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % jython_version])
         self.run([self.cmd_chown, '-h', 'root:root', self.jython_home])
 
     def downloadWarFiles(self):
@@ -3372,34 +3417,33 @@ class Setup(object):
                         self.installOxd = True
                         break
 
-                print "Checking oxd server ..."
-                if self.check_oxd_server(oxd_server_https):
-                    oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
-                    oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-                    oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-                    self.writeFile(oxd_crt_fn, oxd_cert)
-                    ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-                    
-                    if not ssl_subjects['CN'] == oxd_hostname:
-                        print ('Hostname of oxd ssl certificate is {0}{1}{2} '
-                                'which does not match {0}{3}{2}, \ncasa won\'t start '
-                                'properly').format(
-                                        colors.DANGER,
-                                        ssl_subjects['CN'],
-                                        colors.ENDC,
-                                        oxd_hostname
-                                        )
-                    else:
-                        self.oxd_server_https = oxd_server_https
-                        break
+                    print "Checking oxd server ..."
+                    if self.check_oxd_server(oxd_server_https):
+                        oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
+                        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+                        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+                        self.writeFile(oxd_crt_fn, oxd_cert)
+                        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+                        
+                        if not ssl_subjects['CN'] == oxd_hostname:
+                            print ('Hostname of oxd ssl certificate is {0}{1}{2} '
+                                    'which does not match {0}{3}{2}, \ncasa won\'t start '
+                                    'properly').format(
+                                            colors.DANGER,
+                                            ssl_subjects['CN'],
+                                            colors.ENDC,
+                                            oxd_hostname
+                                            )
+                        else:
+                            self.oxd_server_https = oxd_server_https
+                            break
 
-                oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-                if not oxd_port: 
-                    oxd_port=8443
+        oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
+        if not oxd_port: 
+            oxd_port=8443
 
-                self.templateRenderingDict['oxd_hostname'] = oxd_hostname
-                self.templateRenderingDict['oxd_port'] = str(oxd_port)
-
+        self.templateRenderingDict['oxd_hostname'] = oxd_hostname
+        self.templateRenderingDict['oxd_port'] = str(oxd_port)
 
         if (not self.installOxd) and self.oxd_package:
             promptForOxd = self.getPrompt("Install Oxd?", 
