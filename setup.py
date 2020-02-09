@@ -761,6 +761,7 @@ class Setup(object):
                             'query_update', 'query_insert',
                             'query_manage_index']
         self.post_messages = []
+        self.couchbase_bucket_prefix = 'gluu'
         
         #oxd install options
         self.installOxd = False
@@ -4660,8 +4661,9 @@ class Setup(object):
     def couchebaseCreateIndexes(self, bucket):
         
         self.couchbaseBuckets.append(bucket)
-        
-        couchbase_index = json.load(open(self.couchbaseIndexJson))
+        couchbase_index_str = self.readFile(self.couchbaseIndexJson)
+        couchbase_index_str = couchbase_index_str.replace('!bucket_prefix!', self.couchbase_bucket_prefix)
+        couchbase_index = json.loads(couchbase_index_str)
 
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
@@ -4767,7 +4769,7 @@ class Setup(object):
                     else:
                         n_ = e[0].find('_')
                         document_key_prefix = e[0][:n_+1]
-                        cur_bucket = 'gluu_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
+                        cur_bucket = self.couchbase_bucket_prefix + '_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
 
                     query = ''
 
@@ -4857,7 +4859,7 @@ class Setup(object):
                     'couchbase_server_user': self.couchebaseClusterAdmin,
                     'encoded_couchbase_server_pw': self.encoded_cb_password,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
-                    'default_bucket': 'gluu',
+                    'default_bucket': self.couchbase_bucket_prefix,
                     'encryption_method': 'SSHA-256',
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
@@ -4869,12 +4871,12 @@ class Setup(object):
         couchbase_mappings = []
 
         for group in self.couchbaseBucketDict.keys()[1:]:
-            bucket = 'gluu' if group == 'default' else 'gluu_' + group
+            bucket = self.couchbase_bucket_prefix if group == 'default' else self.couchbase_bucket_prefix + '_' + group
             if bucket in self.couchbaseBuckets:
                 cb_key = 'couchbase_{}_mapping'.format(group)
                 if self.mappingLocations[group] == 'couchbase':
                     if self.couchbaseBucketDict[group]['mapping']:
-                        couchbase_mappings.append('bucket.gluu_{0}.mapping: {1}'.format(group, self.couchbaseBucketDict[group]['mapping']))
+                        couchbase_mappings.append('bucket.{}_{}.mapping: {}'.format(self.couchbase_bucket_prefix, group, self.couchbaseBucketDict[group]['mapping']))
                         self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
                     else:
                          self.templateRenderingDict[cb_key] = ''
@@ -4941,20 +4943,20 @@ class Setup(object):
             b_ = r.json()
             existing_buckets = [ bucket['name'] for bucket in b_ ]
 
-        if not 'gluu' in existing_buckets:
+        if not self.couchbase_bucket_prefix in existing_buckets:
 
             if self.mappingLocations['default'] != 'couchbase':
-                self.couchebaseCreateBucket('gluu', bucketRamsize=100)
+                self.couchebaseCreateBucket(self.couchbase_bucket_prefix, bucketRamsize=100)
             else:
                 bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-                self.couchebaseCreateBucket('gluu', bucketRamsize=bucketRamsize)
+                self.couchebaseCreateBucket(self.couchbase_bucket_prefix, bucketRamsize=bucketRamsize)
 
         if self.mappingLocations['default'] == 'couchbase':
-            self.couchebaseCreateIndexes('gluu')
+            self.couchebaseCreateIndexes(self.couchbase_bucket_prefix)
 
 
         for group in couchbase_mappings:
-            bucket = 'gluu_{0}'.format(group)
+            bucket = '{}_{}'.format(self.couchbase_bucket_prefix, group)
             if not bucket in existing_buckets:
                 bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
                 self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
@@ -4993,10 +4995,10 @@ class Setup(object):
         couchbase_mappings = self.getMappingType('couchbase')
 
         if self.mappingLocations['default'] == 'couchbase':
-            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], 'gluu')
+            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], self.couchbase_bucket_prefix)
 
         for group in couchbase_mappings:
-            bucket = 'gluu_{0}'.format(group)
+            bucket = '{}_{}'.format(self.couchbase_bucket_prefix, group)
             if self.couchbaseBucketDict[group]['ldif']:
                 self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
 
@@ -5068,6 +5070,7 @@ class Setup(object):
         else:
             cb_host = cb_hosts[self.cb_query_node]
             self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
+            bucket = '{}_user'.format(self.couchbase_bucket_prefix)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
 
         apache_user = 'www-data'
@@ -5723,6 +5726,7 @@ if __name__ == '__main__':
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--install-casa', help="Install Casa", action='store_true')
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
+    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
 
     argsp = parser.parse_args()
 
@@ -5840,7 +5844,7 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['installCasa'] = argsp.install_casa
     setupOptions['installOxd'] = argsp.install_oxd
-
+    setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
 
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = REMOTE
