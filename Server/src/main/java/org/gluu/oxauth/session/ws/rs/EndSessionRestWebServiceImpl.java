@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.session.ws.rs;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.URLPatternList;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
@@ -46,7 +47,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -95,6 +96,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    // todo
+//    @Inject
+//    private LogoutTokenFactory logoutTokenFactory;
+
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
@@ -115,56 +120,78 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             postLogoutRedirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
 
-            boolean isBackchannel = false; // TODO
-            if (isBackchannel) {
-                return backChannel(postLogoutRedirectUri, state, pair, httpRequest);
+            Set<Client> clients = getSsoClients(pair);
+
+            Set<String> frontchannelUris = Sets.newHashSet();
+            Map<String, Client> backchannelUris = Maps.newHashMap();
+
+            for (Client client : clients) {
+                boolean hasBackchannel = false;
+                for (String logoutUri : client.getAttributes().getBackchannelLogoutUri()) {
+                    if (Util.isNullOrEmpty(logoutUri)) {
+                        continue; // skip if logout_uri is blank
+                    }
+                    backchannelUris.put(EndSessionUtils.appendSid(logoutUri, pair.getFirst().getId(), client.getAttributes().getBackchannelLogoutSessionRequired()), client);
+                    hasBackchannel = true;
+                }
+
+                if (hasBackchannel) { // client has backchannel_logout_uri
+                    continue;
+                }
+
+                for (String logoutUri : client.getFrontChannelLogoutUri()) {
+                    if (Util.isNullOrEmpty(logoutUri)) {
+                        continue; // skip if logout_uri is blank
+                    }
+
+                    frontchannelUris.add(EndSessionUtils.appendSid(logoutUri, pair.getFirst().getId(), client.getFrontChannelLogoutSessionRequired()));
+                }
             }
 
-            return httpBased(postLogoutRedirectUri, state, pair, httpRequest);
-        } catch (WebApplicationException e) {
-            if (e.getResponse() != null)
-                return e.getResponse();
+            backChannel(backchannelUris);
 
+            if (frontchannelUris.isEmpty()) { // no front-channel
+                log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
+                if (StringUtils.isBlank(postLogoutRedirectUri)) {
+                    log.trace("postlogout_redirect_uri is missed");
+                    return Response.ok().build();
+                }
+                try {
+                    log.trace("Redirect to postlogout_redirect_uri: " + postLogoutRedirectUri);
+                    return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
+                } catch (URISyntaxException e) {
+                    final String message = "Failed to create URI for " + postLogoutRedirectUri + " postlogout_redirect_uri.";
+                    log.error(message);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, message)).build();
+                }
+            }
+
+
+            return httpBased(frontchannelUris, postLogoutRedirectUri, state, pair, httpRequest);
+        } catch (WebApplicationException e) {
+            if (e.getResponse() != null) {
+                return e.getResponse();
+            }
             throw e;
         }
     }
 
-    private Response backChannel(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
-        final Set<String> backchannelLogoutUris = collectLogoutUris(pair, false);
+    private void backChannel(Map<String, Client> backchannelUris) {
+        if (backchannelUris.isEmpty()) {
+            return;
+        }
 
-        final String logoutToken = createLogoutToken();
-        final ExecutorService executorService = EndSessionUtils.getExecutorService(backchannelLogoutUris.size());
-        for (String backchannelLogoutUri : backchannelLogoutUris) {
+        log.trace("backchannel_redirect_uri's: " + backchannelUris);
 
-            if (backchannelLogoutUri.contains("?")) {
-                backchannelLogoutUri = backchannelLogoutUri + "&logout_token=" + logoutToken;
-            } else {
-                backchannelLogoutUri = backchannelLogoutUri + "?logout_token=" + logoutToken;
+        final ExecutorService executorService = EndSessionUtils.getExecutorService(backchannelUris.size());
+        for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
+            final JsonWebResponse logoutToken = null;// todo logoutTokenFactory.createLogoutToken(entry.getValue());
+            if (logoutToken == null) {
+                log.error("Failed to create logout_token for client: " + entry.getValue().getClientId());
+                return;
             }
-
-            callBackchannelUri(backchannelLogoutUri, executorService);
+            executorService.execute(() -> EndSessionUtils.callRpWithBackchannelUri(entry.getKey(), logoutToken.toString()));
         }
-
-        if (StringUtils.isBlank(postLogoutRedirectUri)) {
-            return Response.ok().build();
-        }
-        try {
-            return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
-        } catch (URISyntaxException e) {
-            final String message = "Failed to create URI for " + postLogoutRedirectUri + " postlogout_redirect_uri.";
-            log.error(message);
-            return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.errorAsJson(EndSessionErrorResponseType.INVALID_REQUEST, message)).build();
-        }
-    }
-
-    private String createLogoutToken() {
-        return ""; // todo
-    }
-
-    private void callBackchannelUri(final String backchannelLogoutUri, ExecutorService executorService) {
-        executorService.execute(() -> {
-            // todo
-        });
     }
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
@@ -248,11 +275,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
     }
 
-    private Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
-        final Set<String> frontchannelLogoutUris = collectLogoutUris(pair, true);
-
+    private Response httpBased(Set<String> frontchannelUris, String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest) {
         try {
-            final EndSessionContext context = new EndSessionContext(httpRequest, frontchannelLogoutUris, postLogoutRedirectUri, pair.getFirst());
+            final EndSessionContext context = new EndSessionContext(httpRequest, frontchannelUris, postLogoutRedirectUri, pair.getFirst());
             final String htmlFromScript = externalEndSessionService.getFrontchannelHtml(context);
             if (StringUtils.isNotBlank(htmlFromScript)) {
                 log.debug("HTML from `getFrontchannelHtml` external script: " + htmlFromScript);
@@ -263,7 +288,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         // default handling
-        final String html = EndSessionUtils.createFronthannelHtml(frontchannelLogoutUris, postLogoutRedirectUri, state);
+        final String html = EndSessionUtils.createFronthannelHtml(frontchannelUris, postLogoutRedirectUri, state);
         log.debug("Constructed html logout page: " + html);
         return okResponse(html);
     }
@@ -318,44 +343,21 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return new Pair<>(ldapSessionId, authorizationGrant);
     }
 
-    private Set<String> collectLogoutUris(Pair<SessionId, AuthorizationGrant> pair, boolean isFrontchannel) {
-        final Set<String> result = Sets.newHashSet();
-
+    private Set<Client> getSsoClients(Pair<SessionId, AuthorizationGrant> pair) {
         SessionId sessionId = pair.getFirst();
         AuthorizationGrant authorizationGrant = pair.getSecond();
         if (sessionId == null) {
             log.error("session_id is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_id.");
-            return result;
+            return Sets.newHashSet();
         }
 
-        final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null ?
+        final Set<Client> clients = sessionId.getPermissionGrantedMap() != null ?
                 clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
                 Sets.newHashSet();
         if (authorizationGrant != null) {
-            clientsByDns.add(authorizationGrant.getClient());
+            clients.add(authorizationGrant.getClient());
         }
-
-        for (Client client : clientsByDns) {
-            List<String> logoutUris = isFrontchannel ? Lists.newArrayList(client.getFrontChannelLogoutUri()) : client.getAttributes().getBackchannelLogoutUri();
-
-            for (String logoutUri : logoutUris) {
-                if (Util.isNullOrEmpty(logoutUri)) {
-                    continue; // skip client if logout_uri is blank
-                }
-
-                boolean appendSid = isFrontchannel ? client.getFrontChannelLogoutSessionRequired() : client.getAttributes().getBackchannelLogoutSessionRequired();
-
-                if (appendSid) {
-                    if (logoutUri.contains("?")) {
-                        logoutUri = logoutUri + "&sid=" + sessionId.getId();
-                    } else {
-                        logoutUri = logoutUri + "?sid=" + sessionId.getId();
-                    }
-                }
-                result.add(logoutUri);
-            }
-        }
-        return result;
+        return clients;
     }
 
     private SessionId removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
