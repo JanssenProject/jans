@@ -101,6 +101,7 @@ public class ClientAttributes implements Serializable {
     }
 
     public List<String> getBackchannelLogoutUri() {
+        if (backchannelLogoutUri == null) backchannelLogoutUri = Lists.newArrayList();
         return backchannelLogoutUri;
     }
 
