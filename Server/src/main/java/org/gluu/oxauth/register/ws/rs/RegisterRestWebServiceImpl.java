@@ -141,22 +141,36 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         try {
             final JSONObject requestObject = new JSONObject(requestParams);
             if (requestParams != null && requestObject.has(SOFTWARE_STATEMENT.toString())) {
-                Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
+                try {
+                    Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
 
-                // Validate the crypto segment
-                String keyId = softwareStatement.getHeader().getKeyId();
-                JSONObject jwks = Strings.isNullOrEmpty(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString())) ?
-                        new JSONObject(softwareStatement.getClaims().getClaimAsString(JWKS.toString())) :
-                        JwtUtil.getJSONWebKeys(softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString()));
-                boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
-                        softwareStatement.getEncodedSignature(),
-                        keyId, jwks, null, softwareStatement.getHeader().getAlgorithm());
+                    // Validate the crypto segment
+                    String keyId = softwareStatement.getHeader().getKeyId();
+                    final String jwksUriClaim = softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString());
+                    final String jwksClaim = softwareStatement.getClaims().getClaimAsString(JWKS.toString());
+                    if (StringUtils.isBlank(jwksUriClaim) && StringUtils.isBlank(jwksClaim)) {
+                        final String msg = "software_statement does not contain jwks and jwks_uri claim and thus is considered as invalid.";
+                        log.error(msg);
+                        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+                    }
 
-                if (!validSignature) {
-                    throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
+                    JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
+                            new JSONObject(jwksClaim) :
+                            JwtUtil.getJSONWebKeys(jwksUriClaim);
+                    boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
+                            softwareStatement.getEncodedSignature(),
+                            keyId, jwks, null, softwareStatement.getHeader().getAlgorithm());
+
+                    if (!validSignature) {
+                        throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
+                    }
+
+                    requestParams = softwareStatement.getClaims().toJsonObject().toString();
+                } catch (Exception e) {
+                    final String msg = "Invalid software_statement.";
+                    log.error(msg, e);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
                 }
-
-                requestParams = softwareStatement.getClaims().toJsonObject().toString();
             }
 
             final RegisterRequest r = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
@@ -316,11 +330,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         } catch (WebApplicationException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (InvalidJwtException e) {
-            builder = Response.status(Response.Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(errorResponseFactory.errorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Invalid jwt."));
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = internalErrorResponse("Unknown.");
             log.error(e.getMessage(), e);

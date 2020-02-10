@@ -157,6 +157,11 @@
             "uri":null
         },
         {
+            "id": "invalid_software_statement",
+            "description":"The software_statement is malformed or invalid.",
+            "uri":null
+        },
+        {
             "id":"access_denied",
             "description":"The authorization server denied the request.",
             "uri":null
