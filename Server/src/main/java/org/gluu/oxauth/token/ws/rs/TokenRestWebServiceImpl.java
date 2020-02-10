@@ -217,45 +217,47 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
                 return response(Response.ok().entity(entity), oAuth2AuditLog);
-            } else if (gt == GrantType.REFRESH_TOKEN) {
+            }
+
+            if (gt == GrantType.REFRESH_TOKEN) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
 
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
-                if (authorizationGrant != null) {
-                    // The authorization server MAY issue a new refresh token, in which case
-                    // the client MUST discard the old refresh token and replace it with the new refresh token.
-                    RefreshToken reToken = authorizationGrant.createRefreshToken();
-                    grantService.removeByCode(refreshToken, client.getClientId());
-
-                    if (scope != null && !scope.isEmpty()) {
-                        scope = authorizationGrant.checkScopesPolicy(scope);
-                    }
-
-                    AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
-
-                    IdToken idToken = null;
-                    if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
-                        boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                appConfiguration.getLegacyIdTokenClaims());
-
-                        idToken = authorizationGrant.createIdToken(
-                                null, null, accToken, null,
-                                null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
-                    }
-
-                    builder.entity(getJSonResponse(accToken,
-                            accToken.getTokenType(),
-                            accToken.getExpiresIn(),
-                            reToken,
-                            scope,
-                            idToken));
-                    oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
-                } else {
-                    builder = error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token.");
+                if (authorizationGrant == null) {
+                    return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
                 }
+
+                // The authorization server MAY issue a new refresh token, in which case
+                // the client MUST discard the old refresh token and replace it with the new refresh token.
+                RefreshToken reToken = authorizationGrant.createRefreshToken();
+                grantService.removeByCode(refreshToken, client.getClientId());
+
+                if (scope != null && !scope.isEmpty()) {
+                    scope = authorizationGrant.checkScopesPolicy(scope);
+                }
+
+                AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+
+                IdToken idToken = null;
+                if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
+                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                            appConfiguration.getLegacyIdTokenClaims());
+
+                    idToken = authorizationGrant.createIdToken(
+                            null, null, accToken, null,
+                            null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                }
+
+                builder.entity(getJSonResponse(accToken,
+                        accToken.getTokenType(),
+                        accToken.getExpiresIn(),
+                        reToken,
+                        scope,
+                        idToken));
+                oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
             } else if (gt == GrantType.CLIENT_CREDENTIALS) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
