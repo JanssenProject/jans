@@ -151,16 +151,21 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-            return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), TokenType.REFRESH_TOKEN);
+            return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), TokenType.REFRESH_TOKEN, clientId);
         }
-        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), TokenType.REFRESH_TOKEN);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), TokenType.REFRESH_TOKEN, clientId);
     }
 
-    public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType) {
-        if (tokenLdap != null && tokenLdap.getTokenTypeEnum() == tokenType) {
-            return asGrant(tokenLdap);
+    public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType, String clientId) {
+        if (tokenLdap == null || tokenLdap.getTokenTypeEnum() != tokenType) {
+            return null;
         }
-        return null;
+
+        final AuthorizationGrant grant = asGrant(tokenLdap);
+        if (grant == null || !grant.getClientId().equals(clientId)) {
+            return null;
+        }
+        return grant;
     }
 
     @Override
