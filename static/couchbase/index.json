@@ -1,5 +1,5 @@
 {
-  "gluu_user": {
+  "!bucket_prefix!_user": {
     "attributes": [
       ["objectClass"], 
       ["creationDate"], 
@@ -19,7 +19,7 @@
     ]
   },
 
-  "gluu_authorization": {
+  "!bucket_prefix!_authorization": {
      "attributes": [
         ["oxAuthExpiration"],
         ["del"],
@@ -30,7 +30,7 @@
     ]
   },
 
-  "gluu": {
+  "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
       ["oxScriptType"], 
@@ -62,7 +62,7 @@
     ]
   },
 
-  "gluu_site": {
+  "!bucket_prefix!_site": {
     "attributes": [
         ["objectClass"], 
         ["inum"]
@@ -71,7 +71,7 @@
     ]
   },
 
-  "gluu_statistic": {
+  "!bucket_prefix!_statistic": {
     "attributes": [
       ["objectClass"], 
       ["oxStartDate"], 
@@ -82,7 +82,7 @@
     ]
   },
 
-  "gluu_cache": {
+  "!bucket_prefix!_cache": {
     "attributes":[
     ],
     "static" : [
@@ -90,7 +90,7 @@
     ]
   },
 
-  "gluu_token": {
+  "!bucket_prefix!_token": {
     "attributes": [
       ["del","exp"],
       ["authzCode"]

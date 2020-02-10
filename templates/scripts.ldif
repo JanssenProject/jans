@@ -223,7 +223,7 @@ inum: 2DAF-CA90
 oxLevel: 1
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-oxScript::%(end_session)s
+oxScript::%(end_session_end_session)s
 oxScriptType: end_session
 programmingLanguage: python
 
