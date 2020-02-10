@@ -562,7 +562,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
         showResponse("revokeTokensStep5", response, entity);
 
-        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertEquals(response.getStatus(), 401, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);
