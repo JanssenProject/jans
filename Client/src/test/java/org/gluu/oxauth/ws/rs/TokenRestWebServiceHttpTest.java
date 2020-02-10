@@ -1447,7 +1447,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         TokenResponse response = tokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient);
-        assertEquals(response.getStatus(), 401, "Unexpected response code: " + response.getStatus());
+        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getStatus());
         assertNotNull(response.getEntity(), "The entity is null");
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");
