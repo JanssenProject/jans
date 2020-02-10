@@ -141,8 +141,10 @@ public class AuthorizeRestWebServiceValidator {
             log.debug("The exp claim is not set");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
-        if ((jwtRequest.getExp() * 1000) < new Date().getTime()) {
-            log.debug("Request object expired");
+        final long expInMillis = jwtRequest.getExp() * 1000L;
+        final long now = new Date().getTime();
+        if (expInMillis < now) {
+            log.debug("Request object expired. Exp:" + expInMillis + ", now: " + now);
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
