@@ -1,7 +1,14 @@
 package org.gluu.oxauth.session.ws.rs;
 
 import org.gluu.oxauth.model.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +22,7 @@ public class EndSessionUtils {
 
     private static final int MAX_NUMBER_OF_THREADS_FOR_BACKCHANNEL_CALLS = 5;
 
+    private final static Logger log = LoggerFactory.getLogger(EndSessionUtils.class);
 
     private EndSessionUtils() {
     }
@@ -24,6 +32,29 @@ public class EndSessionUtils {
         return Executors.newFixedThreadPool(maxNumOfThreadPool, daemonThreadFactory());
     }
 
+    public static void callRpWithBackchannelUri(final String backchannelLogoutUri, String logoutToken) {
+        javax.ws.rs.client.Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(backchannelLogoutUri);
+
+        log.trace("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);
+        try (Response response = target.request().post(Entity.form(new Form("logout_token", logoutToken)))) {
+            log.trace("Backchannel RP response, status: " + response.getStatus() + ", backchannel_logout_uri" + backchannelLogoutUri);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public static String appendSid(String logoutUri, String sid, boolean appendSid) {
+        if (!appendSid) {
+            return logoutUri;
+        }
+
+        if (logoutUri.contains("?")) {
+            return logoutUri + "&sid=" + sid;
+        } else {
+            return logoutUri + "?sid=" + sid;
+        }
+    }
 
     public static String createFronthannelHtml(Set<String> logoutUris, String postLogoutUrl, String state) {
         String iframes = "";
