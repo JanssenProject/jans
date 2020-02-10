@@ -827,13 +827,6 @@ class Setup(object):
                              self.ldif_casa: False,
                              }
 
-        self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
-                                        'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
-                                        'jackson-core-*.jar', 'jackson-annotations-*.jar', 'jackson-databind-*.jar', 'jackson-datatype-json-org-*.jar',
-                                        'jackson-module-jaxb-annotations-*.jar', 'json-20180813*.jar', 'jettison-*.jar', 'oxauth-model-*.jar',
-                                        'oxauth-client-*.jar', "oxcore-util-*.jar", "json-smart-*.jar", "nimbus-jose-jwt-*.jar"]
-
- 
         self.service_requirements = {
                         'opendj': ['', 70],
                         'oxauth': ['opendj', 72],
@@ -898,12 +891,9 @@ class Setup(object):
                                     }),
 
                     ))
-                            
-        
-        
-        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
 
-        
+        self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
+        self.non_setup_properties = {}
 
     def __repr__(self):
         try:
@@ -955,6 +945,18 @@ class Setup(object):
         if not os.path.exists(self.distFolder):
             print "Please ensure that you are running this script inside Gluu container."
             sys.exit(1)
+
+        self.non_setup_properties['oxauth_client_jar_fn'] = os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
+        self.logIt("Determining key generator path")
+        oxauth_client_jar_zf = zipfile.ZipFile(self.non_setup_properties['oxauth_client_jar_fn'])
+        for fn in oxauth_client_jar_zf.namelist():
+            if fn.endswith('KeyGenerator.class'):
+                fp, ext = os.path.splitext(fn)
+                self.non_setup_properties['key_gen_path'] = fp.replace('/','.')
+                self.logIt("Key generator path is determined as {}".format(fp))
+                break
+        else:
+            self.logIt("Can't determine key generator path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
 
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
@@ -2236,13 +2238,10 @@ class Setup(object):
                             '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
-        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
-
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp",
-                        ":".join(oxauth_lib_files),
-                        "org.gluu.oxauth.util.KeyGenerator",
+                        "-cp", self.non_setup_properties['oxauth_client_jar_fn'], 
+                        self.non_setup_properties['key_gen_path'],
                         "-keystore",
                         jks_path,
                         "-keypasswd",
@@ -2255,6 +2254,7 @@ class Setup(object):
                         '"%s"' % dn_name,
                         "-expiration",
                         "%s" % key_expiration])
+
         args = ['/bin/sh', '-c', cmd]
 
         self.logIt("Runnning: %s" % " ".join(args))
@@ -2275,13 +2275,11 @@ class Setup(object):
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
         self.logIt("Exporting oxAuth OpenID Connect keys")
 
-        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
-
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        ":".join(oxauth_lib_files),
-                        "org.gluu.oxauth.util.KeyExporter",
+                        self.non_setup_properties['oxauth_client_jar_fn'], 
+                        self.non_setup_properties['key_gen_path'],
                         "-keystore",
                         jks_path,
                         "-keypasswd",
@@ -2406,36 +2404,8 @@ class Setup(object):
                 
         return ''.join(random_password)
 
-
-    def prepare_openid_keys_generator(self, distOxAuthPath=None):
-        self.logIt("Preparing files needed to run OpenId keys generator")
-        # Unpack oxauth.war to get libs needed to run key generator
-        if not distOxAuthPath:
-            oxauthWar = 'oxauth.war'
-            distOxAuthPath = '%s/%s' % (self.distGluuFolder, oxauthWar)
-
-        tmpOxAuthDir = '%s/tmp_oxauth' % self.distGluuFolder
-
-        self.logIt("Unpacking %s..." % distOxAuthPath)
-        self.removeDirs(tmpOxAuthDir)
-        self.createDirs(tmpOxAuthDir)
-
-        self.run([self.cmd_jar,
-                  'xf',
-                  distOxAuthPath], tmpOxAuthDir)
-
-        tmpLibsOxAuthPath = '%s/WEB-INF/lib' % tmpOxAuthDir
-
-        self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
-        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, tmpLibsOxAuthPath)
-        for oxauth_lib_file in oxauth_lib_files:
-            self.copyFile(oxauth_lib_file, self.jetty_user_home_lib)
-
-        self.removeDirs(tmpOxAuthDir)
-
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
-        self.prepare_openid_keys_generator()
         self.generate_oxtrust_api_configuration()
         self.generate_scim_configuration()
 
@@ -3736,7 +3706,7 @@ class Setup(object):
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password'):
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties'):
                     continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(obj.__dict__[key])
@@ -5017,7 +4987,6 @@ class Setup(object):
         self.logIt("Creating client_keystore.jks")
         client_keystore_fn = os.path.join(self.outputFolder, 'test/oxauth/client/client_keystore.jks')
         keys_json_fn =  os.path.join(self.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
-        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
         
         args = [self.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
                     client_keystore_fn, '-storepass', 'secret', '-keypass', 
@@ -5028,7 +4997,7 @@ class Setup(object):
         self.run(' '.join(args), shell=True)
 
         args = [self.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', ':'.join(oxauth_lib_files), 'org.gluu.oxauth.util.KeyGenerator',
+                '-cp', self.non_setup_properties['oxauth_client_jar_fn'], self.non_setup_properties['key_gen_path'],
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
                 '-sig_keys', self.default_key_algs,
