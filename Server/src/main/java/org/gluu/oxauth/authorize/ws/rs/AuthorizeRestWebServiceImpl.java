@@ -227,6 +227,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         state = jwtRequest.getState();
                         redirectUriResponse.setState(state);
                     }
+                    if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(jwtRequest.getState())) {
+                        state = ""; // #1250 - FAPI : discard state if in JWT we don't have state
+                        redirectUriResponse.setState("");
+                    }
 
                     authorizeRestWebServiceValidator.validateRequestObject(jwtRequest, redirectUriResponse);
 
