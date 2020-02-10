@@ -148,7 +148,7 @@ else:
     if result.ok:
         configuration_oxauth = result.json()
         keyStoreSecret = configuration_oxauth['results'][0]['gluu']['oxAuthConfDynamic']['keyStoreSecret']
-        oxAuthConfWebKeys = json.loads(configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys'])
+        oxAuthConfWebKeys = configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys']
         oxRevision = configuration_oxauth['results'][0]['gluu']['oxRevision']
     else:
         print "Couchbase server responded unexpectedly", result.text
