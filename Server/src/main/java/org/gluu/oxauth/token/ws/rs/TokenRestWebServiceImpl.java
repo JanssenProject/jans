@@ -227,7 +227,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                 if (authorizationGrant == null) {
-                    return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
                 }
 
                 // The authorization server MAY issue a new refresh token, in which case
