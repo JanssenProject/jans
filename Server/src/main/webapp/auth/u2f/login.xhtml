@@ -15,10 +15,12 @@
 		<script>
 			var auth_request = ${identity.getWorkingParameter('fido_u2f_authentication_request')};
 			var register_request = ${identity.getWorkingParameter('fido_u2f_registration_request')};
+			var application_id = "${identity.getWorkingParameter('u2f_application_id')}";
+			var challenge = "${identity.getWorkingParameter('u2f_challenge')}";
 
 			function startRegistration() {
 				u2f
-						.register(
+						.register(application_id,
 								register_request.registerRequests,
 								register_request.authenticateRequests,
 								function(data) {
@@ -39,7 +41,7 @@
 
 			function startAuthentication() {
 				u2f
-						.sign(
+						.sign(application_id, challenge,
 								auth_request.authenticateRequests,
 								function(data) {
 									if (data.errorCode) {
