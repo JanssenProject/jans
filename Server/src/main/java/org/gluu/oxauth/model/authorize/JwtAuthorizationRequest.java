@@ -129,6 +129,9 @@ public class JwtAuthorizationRequest {
                 if (sigAlg == null) {
                     throw new InvalidJwtException("The JWT algorithm is not supported");
                 }
+                if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.getFapiCompatibility()) {
+                    throw new InvalidJwtException("None algorithm is not allowed for FAPI");
+                }
                 if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
                     throw new InvalidJwtException("The JWT signature is not valid");
                 }
