@@ -275,7 +275,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 if (jwks == null) {
                     publicKey = getPublicKey(alias);
                 } else {
-                    publicKey = getPublicKey(alias, jwks);
+                    publicKey = getPublicKey(alias, jwks, signatureAlgorithm.getAlg());
                 }
                 if (publicKey == null) {
                     return false;

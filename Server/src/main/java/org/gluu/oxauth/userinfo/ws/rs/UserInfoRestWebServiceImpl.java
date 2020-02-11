@@ -46,7 +46,6 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
-import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
@@ -60,7 +59,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.util.*;
@@ -290,7 +288,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
-            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
+            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, keyEncryptionAlgorithm.getAlg());
 
             if (publicKey != null) {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
@@ -304,10 +302,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
-            } catch (UnsupportedEncodingException e) {
-                throw new InvalidJweException(e);
-            } catch (StringEncrypter.EncryptionException e) {
-                throw new InvalidJweException(e);
             } catch (Exception e) {
                 throw new InvalidJweException(e);
             }

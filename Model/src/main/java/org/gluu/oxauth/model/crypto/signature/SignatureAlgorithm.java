@@ -9,6 +9,7 @@ package org.gluu.oxauth.model.crypto.signature;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.nimbusds.jose.JWSAlgorithm;
+import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwt.JwtType;
 
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ public enum SignatureAlgorithm {
     private final ECEllipticCurve curve;
     private final JwtType jwtType;
     private final JWSAlgorithm jwsAlgorithm;
+    private final Algorithm alg;
 
     SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, ECEllipticCurve curve, JWSAlgorithm jwsAlgorithm) {
         this.name = name;
@@ -48,6 +50,7 @@ public enum SignatureAlgorithm {
         this.curve = curve;
         this.jwtType = JwtType.JWT;
         this.jwsAlgorithm = jwsAlgorithm;
+        this.alg = Algorithm.fromString(name);
     }
 
     SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, JWSAlgorithm jwsAlgorithm) {
@@ -56,6 +59,10 @@ public enum SignatureAlgorithm {
 
     SignatureAlgorithm(String name) {
         this(name, null, null, null, null);
+    }
+
+    public Algorithm getAlg() {
+        return alg;
     }
 
     public String getName() {
