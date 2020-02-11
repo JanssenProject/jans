@@ -166,6 +166,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             registrationRequest = None
             authenticationRequest = None
+            challenge = ""
 
             deviceRegistrations = deviceRegistrationService.findUserDeviceRegistrations(userInum, u2f_application_id)
             if (deviceRegistrations.size() > 0):
@@ -174,6 +175,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
                     authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_id)
+                    challenge = authenticationRequest.getAuthenticateRequests().get(0).getChallenge()
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
@@ -183,6 +185,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
                 registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_id)
 
+            identity.setWorkingParameter("u2f_application_id", u2f_application_id)
+            identity.setWorkingParameter("u2f_challenge", challenge)
             identity.setWorkingParameter("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
             identity.setWorkingParameter("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
 
