@@ -163,7 +163,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                 }
 
-                log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
+                log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
                 final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
                 log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
@@ -171,7 +171,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     log.debug("AuthorizationCodeGrant is empty by clientId: '{}', code: '{}'", client.getClientId(), code);
                     // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
                     grantService.removeAllByAuthorizationCode(code);
-                    return response(error(400, TokenErrorResponseType.INVALID_CLIENT, "Unable to find grant object for given code."), oAuth2AuditLog);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), oAuth2AuditLog);
                 }
 
                 validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
