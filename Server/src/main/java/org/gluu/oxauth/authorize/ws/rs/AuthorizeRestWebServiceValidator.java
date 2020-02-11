@@ -132,31 +132,36 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
+        if (StringUtils.isNotBlank(jwtRequest.getAud()) && !jwtRequest.getAud().equals(appConfiguration.getIssuer())) {
+            log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+
         if (!appConfiguration.getFapiCompatibility()) {
             return;
         }
 
         // FAPI related validation
         if (jwtRequest.getExp() == null) {
-            log.debug("The exp claim is not set");
+            log.error("The exp claim is not set");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         final long expInMillis = jwtRequest.getExp() * 1000L;
         final long now = new Date().getTime();
         if (expInMillis < now) {
-            log.debug("Request object expired. Exp:" + expInMillis + ", now: " + now);
+            log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
-            log.debug("Request object does not have scope claim.");
+            log.error("Request object does not have scope claim.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (StringUtils.isBlank(jwtRequest.getNonce())) {
-            log.debug("Request object does not have nonce claim.");
+            log.error("Request object does not have nonce claim.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
-            log.debug("Request object does not have redirect_uri claim.");
+            log.error("Request object does not have redirect_uri claim.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
     }
