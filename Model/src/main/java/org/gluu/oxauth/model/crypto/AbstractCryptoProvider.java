@@ -196,7 +196,7 @@ public abstract class AbstractCryptoProvider {
                     Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
 
                     if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
-                        LOG.error("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                        LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
                         continue;
                     }
                     family = algorithm.getFamily();
