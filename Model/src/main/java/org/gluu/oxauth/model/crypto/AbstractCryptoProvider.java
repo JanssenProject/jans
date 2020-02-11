@@ -184,7 +184,7 @@ public abstract class AbstractCryptoProvider {
         }
     }
 
-    public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
+    public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws Exception {
         java.security.PublicKey publicKey = null;
 
         JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
@@ -194,6 +194,11 @@ public abstract class AbstractCryptoProvider {
                 AlgorithmFamily family = null;
                 if (key.has(ALGORITHM)) {
                     Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
+
+                    if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
+                        LOG.error("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                        continue;
+                    }
                     family = algorithm.getFamily();
                 } else if (key.has(KEY_TYPE)) {
                     family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
