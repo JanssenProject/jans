@@ -58,6 +58,7 @@ public class JwtAuthorizationRequest {
     private String redirectUri;
     private String nonce;
     private String state;
+    private String aud;
     private Display display;
     private List<Prompt> prompts;
     private UserInfoMember userInfoMember;
@@ -179,6 +180,9 @@ public class JwtAuthorizationRequest {
         }
         if (jsonPayload.has("exp")) {
             exp = jsonPayload.getInt("exp");
+        }
+        if (jsonPayload.has("aud")) {
+            aud = jsonPayload.getString("aud");
         }
         if (jsonPayload.has("client_id")) {
             clientId = jsonPayload.getString("client_id");
@@ -341,5 +345,13 @@ public class JwtAuthorizationRequest {
 
     public Integer getExp() {
         return exp;
+    }
+
+    public String getAud() {
+        return aud;
+    }
+
+    public void setAud(String aud) {
+        this.aud = aud;
     }
 }
