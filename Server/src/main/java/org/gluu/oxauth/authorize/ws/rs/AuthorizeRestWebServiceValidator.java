@@ -132,7 +132,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validateRequestObject(JwtAuthorizationRequest jwtRequest, RedirectUriResponse redirectUriResponse) {
-        if (StringUtils.isNotBlank(jwtRequest.getAud()) && !jwtRequest.getAud().equals(appConfiguration.getIssuer())) {
+        if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
