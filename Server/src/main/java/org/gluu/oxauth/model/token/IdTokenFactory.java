@@ -501,7 +501,7 @@ public class IdTokenFactory {
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
-            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, keyEncryptionAlgorithm.getAlg());
+            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
             jwe.getHeader().setKeyId(keyId);
 
             if (publicKey != null) {
