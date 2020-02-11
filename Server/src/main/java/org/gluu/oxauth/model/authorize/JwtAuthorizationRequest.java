@@ -7,6 +7,7 @@
 package org.gluu.oxauth.model.authorize;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.Display;
 import org.gluu.oxauth.model.common.Prompt;
@@ -58,7 +59,7 @@ public class JwtAuthorizationRequest {
     private String redirectUri;
     private String nonce;
     private String state;
-    private String aud;
+    private List<String> aud;
     private Display display;
     private List<Prompt> prompts;
     private UserInfoMember userInfoMember;
@@ -185,7 +186,14 @@ public class JwtAuthorizationRequest {
             exp = jsonPayload.getInt("exp");
         }
         if (jsonPayload.has("aud")) {
-            aud = jsonPayload.getString("aud");
+            final String audStr = jsonPayload.optString("aud");
+            if (StringUtils.isNotBlank(audStr)) {
+                this.aud.add(audStr);
+            }
+            final JSONArray audArray = jsonPayload.optJSONArray("aud");
+            if (audArray != null && audArray.length() > 0) {
+                this.aud.addAll(Util.asList(audArray));
+            }
         }
         if (jsonPayload.has("client_id")) {
             clientId = jsonPayload.getString("client_id");
@@ -350,11 +358,12 @@ public class JwtAuthorizationRequest {
         return exp;
     }
 
-    public String getAud() {
+    public List<String> getAud() {
+        if (aud == null) aud = Lists.newArrayList();
         return aud;
     }
 
-    public void setAud(String aud) {
+    public void setAud(List<String> aud) {
         this.aud = aud;
     }
 }
