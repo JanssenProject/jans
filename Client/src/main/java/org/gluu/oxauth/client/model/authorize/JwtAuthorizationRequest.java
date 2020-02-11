@@ -333,7 +333,7 @@ public class JwtAuthorizationRequest {
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             JweEncrypterImpl jweEncrypter;
             if (cryptoProvider != null && jwks != null) {
-                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, keyEncryptionAlgorithm.getAlg());
+                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
             } else {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));
