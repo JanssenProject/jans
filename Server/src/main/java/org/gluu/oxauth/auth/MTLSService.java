@@ -103,7 +103,7 @@ public class MTLSService {
             final JSONWebKeySet keySet = JSONWebKeySet.fromJSONObject(jsonWebKeys);
             for (JSONWebKey key : keySet.getKeys()) {
                 if (ArrayUtils.isEquals(encodedKey,
-                        cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys).getEncoded())) {
+                        cryptoProvider.getPublicKey(key.getKid(), jsonWebKeys, null).getEncoded())) {
                     log.debug("Client {} authenticated via `self_signed_tls_client_auth`, matched kid: {}.",
                             client.getClientId(), key.getKid());
                     authenticatedSuccessfully(client, httpRequest);
