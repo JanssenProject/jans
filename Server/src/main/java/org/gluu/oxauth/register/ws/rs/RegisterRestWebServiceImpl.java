@@ -914,4 +914,49 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return null;
     }
 
+    @Override
+    public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
+
+        try {
+            String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+
+            log.debug("Attempting to read client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
+                    clientId, accessToken, securityContext.isSecure());
+
+            if (!appConfiguration.getDynamicRegistrationEnabled()) {
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.ACCESS_DENIED, "Dynamic registration is disabled.");
+            }
+
+            if (!registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
+                log.trace("Client parameters are invalid.");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "");
+            }
+
+            Client client = clientService.getClient(clientId, accessToken);
+            if (client == null) {
+                throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_TOKEN, "");
+            }
+
+            clientService.remove(client);
+
+
+            CacheControl cacheControl = new CacheControl();
+            cacheControl.setNoTransform(false);
+            cacheControl.setNoStore(true);
+
+            return Response
+                    .status(Response.Status.NO_CONTENT)
+                    .cacheControl(cacheControl)
+                    .header("Pragma", "no-cache").build();
+        } catch (WebApplicationException e) {
+            if (e.getResponse() != null) {
+                return e.getResponse();
+            }
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Failed to process request.");
+        }
+    }
+
 }
