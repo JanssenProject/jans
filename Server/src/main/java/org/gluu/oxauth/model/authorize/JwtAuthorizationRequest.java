@@ -59,7 +59,7 @@ public class JwtAuthorizationRequest {
     private String redirectUri;
     private String nonce;
     private String state;
-    private List<String> aud;
+    private List<String> aud = Lists.newArrayList();
     private Display display;
     private List<Prompt> prompts;
     private UserInfoMember userInfoMember;
