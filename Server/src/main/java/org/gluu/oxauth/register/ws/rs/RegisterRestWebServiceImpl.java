@@ -916,11 +916,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Override
     public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
-
         try {
             String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
 
-            log.debug("Attempting to read client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
+            log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
                     clientId, accessToken, securityContext.isSecure());
 
             if (!appConfiguration.getDynamicRegistrationEnabled()) {
@@ -938,7 +937,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             clientService.remove(client);
-
 
             CacheControl cacheControl = new CacheControl();
             cacheControl.setNoTransform(false);
