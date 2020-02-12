@@ -62,22 +62,22 @@
 		<repository>
 			<id>repository.jboss.org</id>
 			<name>JBoss Repository</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
 		<repository>
 			<id>gluu</id>
 			<name>Gluu repository</name>
-			<url>http://ox.gluu.org/maven</url>
+			<url>https://ox.gluu.org/maven</url>
 		</repository>
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>http://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 		<repository>
 			<id>mavencentral</id>
 			<name>maven central</name>
-			<url>http://repo1.maven.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 	</repositories>
 
