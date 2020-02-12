@@ -6,24 +6,14 @@
 
 package org.gluu.oxauth.register.ws.rs;
 
+import com.wordnik.swagger.annotations.*;
+
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * Provides interface for register REST web services.
@@ -141,6 +131,47 @@ public interface RegisterRestWebService {
             @QueryParam("client_id")
             @ApiParam(value = "Client ID that identifies client.", required = true)
             String clientId,
+            @HeaderParam("Authorization") String authorization,
+            @Context HttpServletRequest httpRequest,
+            @Context SecurityContext securityContext);
+
+    /**
+     * This operation removes the Client Metadata for a previously registered client.
+     *
+     * @param clientId        Unique Client identifier.
+     * @param securityContext An injectable interface that provides access to security related information.
+     * @return If a client has been successfully deprovisioned, the authorization
+     * server responds with an HTTP 204 No Content message.
+     * <p>
+     * If the registration access token used to make this request is not
+     * valid, the server responds with HTTP 401 Unauthorized.
+     * <p>
+     * If the client does not exist on this server, the server responds
+     * with HTTP 401 Unauthorized.
+     * <p>
+     * If the client is not allowed to delete itself, the server
+     * responds with HTTP 403 Forbidden.
+     */
+    @DELETE
+    @Path("/register")
+    @Produces({MediaType.APPLICATION_JSON})
+    @ApiOperation(
+            value = "Deletes client info.",
+            notes = "Deletes client info.",
+            response = Response.class,
+            responseContainer = "JSON"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "invalid_token\n" +
+                    "The registration access token used to make this request is not valid"),
+            @ApiResponse(code = 401, message = "invalid_client_id\n" +
+                    "The client does not exist on this server "),
+            @ApiResponse(code = 403, message = "not_allowed\n" +
+                    "The client is not allowed to delete itself")
+    })
+    Response delete(
+            @QueryParam("client_id")
+            @ApiParam(value = "Client ID that identifies client.", required = true) String clientId,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);

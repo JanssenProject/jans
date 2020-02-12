@@ -620,4 +620,36 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorType());
         assertNotNull(response.getErrorDescription());
     }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void deleteClient(final String redirectUris) throws Exception {
+        showTitle("deleteClient");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI", redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+
+        registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
+        registerRequest.setHttpMethod(HttpMethod.DELETE);
+
+        RegisterClient registerClient2 = new RegisterClient(response.getRegistrationClientUri());
+        registerClient2.setRequest(registerRequest);
+        RegisterResponse deleteResponse = registerClient2.exec();
+
+        assertEquals(response.getStatus(), 204, "Unexpected response code: " + response.getEntity());
+    }
 }
