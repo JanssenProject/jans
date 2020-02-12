@@ -653,8 +653,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
-            log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
-                    e.getClass().getName(), e.getMessage());
+            log.error("Invalid JWT authorization request. " + e.getMessage(), e);
         }
         return null;
     }
