@@ -798,7 +798,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -819,6 +819,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -859,6 +860,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
+        authorizeClient.setExecutor(clientExecutor(true));
         AuthorizationResponse response1 = authorizeClient.exec();
 
         showClient(authorizeClient);
@@ -873,6 +875,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         // 3. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setExecutor(clientExecutor(true));
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
@@ -888,7 +891,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
