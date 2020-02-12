@@ -302,6 +302,8 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 clientResponse = clientRequest.post(String.class);
             } else if (getHttpMethod().equals(HttpMethod.PUT)) {
                 clientResponse = clientRequest.put(String.class);
+            } else if (getHttpMethod().equals(HttpMethod.DELETE)) {
+                clientResponse = clientRequest.delete(String.class);
             } else { // GET
                 clientResponse = clientRequest.get(String.class);
             }

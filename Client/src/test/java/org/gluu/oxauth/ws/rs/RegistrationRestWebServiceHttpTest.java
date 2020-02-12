@@ -646,10 +646,11 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
         registerRequest.setHttpMethod(HttpMethod.DELETE);
 
-        RegisterClient registerClient2 = new RegisterClient(response.getRegistrationClientUri());
-        registerClient2.setRequest(registerRequest);
-        RegisterResponse deleteResponse = registerClient2.exec();
+        RegisterClient deleteClient = new RegisterClient(response.getRegistrationClientUri());
+        deleteClient.setRequest(registerRequest);
+        deleteClient.setExecutor(clientExecutor(true));
+        RegisterResponse deleteResponse = deleteClient.exec();
 
-        assertEquals(response.getStatus(), 204, "Unexpected response code: " + response.getEntity());
+        assertEquals(deleteResponse.getStatus(), 204, "Unexpected response code: " + response.getEntity());
     }
 }
