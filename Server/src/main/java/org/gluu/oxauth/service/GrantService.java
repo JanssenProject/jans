@@ -174,7 +174,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode(), token.getGrantId()));
+                cacheService.remove(null, CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -318,12 +318,12 @@ public class GrantService {
      *
      * @param p_code code
      */
-    public void removeByCode(String p_code, String p_clientId) {
+    public void removeByCode(String p_code) {
         final TokenLdap t = getGrantByCode(p_code, true);
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(CacheGrant.cacheKey(p_clientId, p_code, null));
+        cacheService.remove(CacheGrant.cacheKey(p_code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
