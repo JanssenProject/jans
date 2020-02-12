@@ -164,7 +164,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 }
 
                 log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
-                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
+                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
                 log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
                 if (authorizationCodeGrant == null) {
@@ -172,6 +172,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
                     grantService.removeAllByAuthorizationCode(code);
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), oAuth2AuditLog);
+                }
+
+                if (!client.getClientId().equals(authorizationCodeGrant.getClientId())) {
+                    log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', code: '{}'", authorizationCodeGrant.getClientId(), code);
+                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
+                    grantService.removeAllByAuthorizationCode(code);
+                    return response(error(400, TokenErrorResponseType.INVALID_CLIENT, "Client mismatch."), oAuth2AuditLog);
                 }
 
                 validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
@@ -213,7 +220,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
 
-                grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
+                grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode());
 
                 final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
                 return response(Response.ok().entity(entity), oAuth2AuditLog);
@@ -233,7 +240,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 // The authorization server MAY issue a new refresh token, in which case
                 // the client MUST discard the old refresh token and replace it with the new refresh token.
                 RefreshToken reToken = authorizationGrant.createRefreshToken();
-                grantService.removeByCode(refreshToken, client.getClientId());
+                grantService.removeByCode(refreshToken);
 
                 if (scope != null && !scope.isEmpty()) {
                     scope = authorizationGrant.checkScopesPolicy(scope);
