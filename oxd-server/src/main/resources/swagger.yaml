@@ -357,7 +357,7 @@ paths:
                     is performed).
                   items:
                     type: string
-                    example: ""
+                    example: ["^transaction:.+$", "^/user/[^/]+/.+$"]
         required: false
       responses:
         200:
@@ -927,7 +927,7 @@ paths:
                     is performed).
                   items:
                     type: string
-                    example: ""
+                    example: ["^transaction:.+$", "^/user/[^/]+/.+$"]
         required: false
       responses:
         200:
