@@ -1,5 +1,8 @@
 package org.gluu.oxauth.model.token;
 
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -17,8 +20,11 @@ import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.PairwiseIdentifierService;
 import org.gluu.oxauth.service.ServerCryptoProvider;
+import org.gluu.util.StringHelper;
 import org.json.JSONObject;
+import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -26,6 +32,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.util.UUID;
 
 import static org.gluu.oxauth.model.jwt.JwtHeaderName.ALGORITHM;
 
@@ -51,6 +58,8 @@ public class JwrService {
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
+    @Inject
+    private PairwiseIdentifierService pairwiseIdentifierService;
 
     /**
      * Encode means encrypt for Jwe and sign for Jwt, means it's implementaiton specific but we want to abstract it.
@@ -125,4 +134,43 @@ public class JwrService {
             return null;
         }
     }
+
+    public void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) throws Exception {
+        final Client client = authorizationGrant.getClient();
+        if (client.getSubjectType() != null &&
+                SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE) &&
+                (StringUtils.isNotBlank(client.getSectorIdentifierUri()) || client.getRedirectUris() != null)) {
+            final String sectorIdentifierUri;
+            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
+                sectorIdentifierUri = client.getSectorIdentifierUri();
+            } else {
+                sectorIdentifierUri = client.getRedirectUris()[0];
+            }
+
+            String userInum = authorizationGrant.getUser().getAttribute("inum");
+            String clientId = authorizationGrant.getClientId();
+            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
+                    userInum, sectorIdentifierUri, clientId);
+            if (pairwiseIdentifier == null) {
+                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
+                pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
+                        pairwiseIdentifier.getId(),
+                        userInum));
+                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+            }
+            jwr.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
+        } else {
+            if (client.getSubjectType() != null && SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE)) {
+                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
+            }
+            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
+            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
+            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
+                subValue = authorizationGrant.getUser().getUserId();
+            }
+            jwr.getClaims().setSubjectIdentifier(subValue);
+        }
+    }
+
 }
