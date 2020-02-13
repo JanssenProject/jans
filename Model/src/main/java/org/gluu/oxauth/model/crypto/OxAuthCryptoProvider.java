@@ -355,6 +355,10 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+            return null;
+        }
+
         String kid = null;
         LOG.trace("WebKeys:" + jsonWebKeySet.getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
         LOG.trace("KeyStoreKeys:" + getKeys());
