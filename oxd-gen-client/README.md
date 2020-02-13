@@ -1,8 +1,7 @@
 # swagger-java-client
 
 oxd-server
-- API version: 4.0
-  - Build date: 2020-02-13T06:19:07.893Z[GMT]
+- API version: 4.2
 
 oxd-server
 
