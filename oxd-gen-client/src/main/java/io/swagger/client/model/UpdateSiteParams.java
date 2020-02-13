@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package io.swagger.client.model;
 
 import java.util.Objects;
@@ -20,18 +19,17 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 /**
  * UpdateSiteParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-22T13:33:32.189Z")
+
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-02-13T06:19:07.893Z[GMT]")
 public class UpdateSiteParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -195,7 +193,7 @@ public class UpdateSiteParams {
    * Get oxdId
    * @return oxdId
   **/
-  @ApiModelProperty(example = "6F9619FF-8B86-D011-B42D-00CF4FC964FF", required = true, value = "")
+  @Schema(example = "6F9619FF-8B86-D011-B42D-00CF4FC964FF", required = true, description = "")
   public String getOxdId() {
     return oxdId;
   }
@@ -221,7 +219,7 @@ public class UpdateSiteParams {
    * Provide the list of redirection URIs. The first URL is where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).
    * @return redirectUris
   **/
-  @ApiModelProperty(example = "[\"https://client.example.org/cb\"]", value = "Provide the list of redirection URIs. The first URL is where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).")
+  @Schema(example = "[\"https://client.example.org/cb\"]", description = "Provide the list of redirection URIs. The first URL is where the user will be redirected after successful authorization at the OpenID Connect Provider (OP).")
   public List<String> getRedirectUris() {
     return redirectUris;
   }
@@ -247,7 +245,7 @@ public class UpdateSiteParams {
    * Get postLogoutRedirectUris
    * @return postLogoutRedirectUris
   **/
-  @ApiModelProperty(example = "[\"https://client.example.org/logout/page1\",\"https://client.example.org/logout/page2\",\"https://client.example.org/logout/page3\"]", value = "")
+  @Schema(example = "[\"https://client.example.org/logout/page1\",\"https://client.example.org/logout/page2\",\"https://client.example.org/logout/page3\"]", description = "")
   public List<String> getPostLogoutRedirectUris() {
     return postLogoutRedirectUris;
   }
@@ -273,7 +271,7 @@ public class UpdateSiteParams {
    * Get responseTypes
    * @return responseTypes
   **/
-  @ApiModelProperty(example = "[\"code\"]", value = "")
+  @Schema(example = "[\"code\"]", description = "")
   public List<String> getResponseTypes() {
     return responseTypes;
   }
@@ -299,7 +297,7 @@ public class UpdateSiteParams {
    * Get grantTypes
    * @return grantTypes
   **/
-  @ApiModelProperty(example = "[\"authorization_code\",\"client_credentials\"]", value = "")
+  @Schema(example = "[\"authorization_code\",\"client_credentials\"]", description = "")
   public List<String> getGrantTypes() {
     return grantTypes;
   }
@@ -325,7 +323,7 @@ public class UpdateSiteParams {
    * Get scope
    * @return scope
   **/
-  @ApiModelProperty(example = "[\"openid\"]", value = "")
+  @Schema(example = "[\"openid\"]", description = "")
   public List<String> getScope() {
     return scope;
   }
@@ -351,7 +349,7 @@ public class UpdateSiteParams {
    * Get acrValues
    * @return acrValues
   **/
-  @ApiModelProperty(example = "[\"basic\"]", value = "")
+  @Schema(example = "[\"basic\"]", description = "")
   public List<String> getAcrValues() {
     return acrValues;
   }
@@ -369,7 +367,7 @@ public class UpdateSiteParams {
    * Get clientJwksUri
    * @return clientJwksUri
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public String getClientJwksUri() {
     return clientJwksUri;
   }
@@ -387,7 +385,7 @@ public class UpdateSiteParams {
    * Get clientTokenEndpointAuthMethod
    * @return clientTokenEndpointAuthMethod
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public String getClientTokenEndpointAuthMethod() {
     return clientTokenEndpointAuthMethod;
   }
@@ -413,7 +411,7 @@ public class UpdateSiteParams {
    * Get clientRequestUris
    * @return clientRequestUris
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public List<String> getClientRequestUris() {
     return clientRequestUris;
   }
@@ -431,7 +429,7 @@ public class UpdateSiteParams {
    * Get clientSectorIdentifierUri
    * @return clientSectorIdentifierUri
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public String getClientSectorIdentifierUri() {
     return clientSectorIdentifierUri;
   }
@@ -457,7 +455,7 @@ public class UpdateSiteParams {
    * Get contacts
    * @return contacts
   **/
-  @ApiModelProperty(example = "[\"foo_bar@spam.org\"]", value = "")
+  @Schema(example = "[\"foo_bar@spam.org\"]", description = "")
   public List<String> getContacts() {
     return contacts;
   }
@@ -483,7 +481,7 @@ public class UpdateSiteParams {
    * Get uiLocales
    * @return uiLocales
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public List<String> getUiLocales() {
     return uiLocales;
   }
@@ -509,7 +507,7 @@ public class UpdateSiteParams {
    * Get claimsLocales
    * @return claimsLocales
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public List<String> getClaimsLocales() {
     return claimsLocales;
   }
@@ -527,7 +525,7 @@ public class UpdateSiteParams {
    * specifies whether access_token should be return as JWT or not. Default value is false.
    * @return accessTokenAsJwt
   **/
-  @ApiModelProperty(value = "specifies whether access_token should be return as JWT or not. Default value is false.")
+  @Schema(description = "specifies whether access_token should be return as JWT or not. Default value is false.")
   public Boolean isAccessTokenAsJwt() {
     return accessTokenAsJwt;
   }
@@ -545,7 +543,7 @@ public class UpdateSiteParams {
    * sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
    * @return accessTokenSigningAlg
   **/
-  @ApiModelProperty(value = "sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512")
+  @Schema(description = "sets signing algorithm used for JWT signing. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512")
   public String getAccessTokenSigningAlg() {
     return accessTokenSigningAlg;
   }
@@ -563,7 +561,7 @@ public class UpdateSiteParams {
    * specifies whether RPT should be return as JWT or not. Default value is false.
    * @return rptAsJwt
   **/
-  @ApiModelProperty(value = "specifies whether RPT should be return as JWT or not. Default value is false.")
+  @Schema(description = "specifies whether RPT should be return as JWT or not. Default value is false.")
   public Boolean isRptAsJwt() {
     return rptAsJwt;
   }
@@ -589,7 +587,7 @@ public class UpdateSiteParams {
    * Get claimsRedirectUri
    * @return claimsRedirectUri
   **/
-  @ApiModelProperty(value = "")
+  @Schema(description = "")
   public List<String> getClaimsRedirectUri() {
     return claimsRedirectUri;
   }
@@ -607,7 +605,7 @@ public class UpdateSiteParams {
    * Provide the Requested Client Authentication method for the Token Endpoint. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.
    * @return clientTokenEndpointAuthSigningAlg
   **/
-  @ApiModelProperty(value = "Provide the Requested Client Authentication method for the Token Endpoint. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.")
+  @Schema(description = "Provide the Requested Client Authentication method for the Token Endpoint. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512.")
   public String getClientTokenEndpointAuthSigningAlg() {
     return clientTokenEndpointAuthSigningAlg;
   }
@@ -625,7 +623,7 @@ public class UpdateSiteParams {
    * oxd will generate its own non-human readable name by default if client_name is not specified
    * @return clientName
   **/
-  @ApiModelProperty(value = "oxd will generate its own non-human readable name by default if client_name is not specified")
+  @Schema(description = "oxd will generate its own non-human readable name by default if client_name is not specified")
   public String getClientName() {
     return clientName;
   }
@@ -643,7 +641,7 @@ public class UpdateSiteParams {
    * specifies an URL that references a logo for the Client application.
    * @return logoUri
   **/
-  @ApiModelProperty(example = "https://client.example.org/logo.png", value = "specifies an URL that references a logo for the Client application.")
+  @Schema(example = "https://client.example.org/logo.png", description = "specifies an URL that references a logo for the Client application.")
   public String getLogoUri() {
     return logoUri;
   }
@@ -661,7 +659,7 @@ public class UpdateSiteParams {
    * specifies an URL of the home page of the Client.
    * @return clientUri
   **/
-  @ApiModelProperty(example = "https://client.example.org/page", value = "specifies an URL of the home page of the Client.")
+  @Schema(example = "https://client.example.org/page", description = "specifies an URL of the home page of the Client.")
   public String getClientUri() {
     return clientUri;
   }
@@ -679,7 +677,7 @@ public class UpdateSiteParams {
    * specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
    * @return policyUri
   **/
-  @ApiModelProperty(example = "https://client.example.org/page", value = "specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.")
+  @Schema(example = "https://client.example.org/page", description = "specifies an URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.")
   public String getPolicyUri() {
     return policyUri;
   }
@@ -697,7 +695,7 @@ public class UpdateSiteParams {
    * specifies if front channel logout session required.
    * @return frontChannelLogoutSessionRequired
   **/
-  @ApiModelProperty(example = "true", value = "specifies if front channel logout session required.")
+  @Schema(example = "true", description = "specifies if front channel logout session required.")
   public Boolean isFrontChannelLogoutSessionRequired() {
     return frontChannelLogoutSessionRequired;
   }
@@ -712,10 +710,10 @@ public class UpdateSiteParams {
   }
 
    /**
-   * specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party&#39;s terms.
+   * specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party&#x27;s terms.
    * @return tosUri
   **/
-  @ApiModelProperty(example = "https://client.example.org/page", value = "specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms.")
+  @Schema(example = "https://client.example.org/page", description = "specifies an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms.")
   public String getTosUri() {
     return tosUri;
   }
@@ -730,10 +728,10 @@ public class UpdateSiteParams {
   }
 
    /**
-   * Client&#39;s JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.
+   * Client&#x27;s JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.
    * @return jwks
   **/
-  @ApiModelProperty(example = "{\"key1\": \"value1\", \"key2\": \"value2\"}", value = "Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.")
+  @Schema(example = "{\"key1\": \"value1\", \"key2\": \"value2\"}", description = "Client's JSON Web Key Set (JWK) document, passed by value. The semantics of the jwks parameter are the same as the jwks_uri parameter, other than that the JWK Set is passed by value, rather than by reference. This parameter is intended only to be used by Clients that, for some reason, are unable to use the jwks_uri parameter, for instance, by native applications that might not have a location to host the contents of the JWK Set. If a Client can use jwks_uri, it must not use jwks. One significant downside of jwks is that it does not enable key rotation. The jwks_uri and jwks parameters must not be used together.")
   public String getJwks() {
     return jwks;
   }
@@ -751,7 +749,7 @@ public class UpdateSiteParams {
    * Get idTokenBindingCnf
    * @return idTokenBindingCnf
   **/
-  @ApiModelProperty(example = "4NRB1-0XZABZI9E6-5SM3R", value = "")
+  @Schema(example = "4NRB1-0XZABZI9E6-5SM3R", description = "")
   public String getIdTokenBindingCnf() {
     return idTokenBindingCnf;
   }
@@ -769,7 +767,7 @@ public class UpdateSiteParams {
    * Get tlsClientAuthSubjectDn
    * @return tlsClientAuthSubjectDn
   **/
-  @ApiModelProperty(example = "www.test.com", value = "")
+  @Schema(example = "www.test.com", description = "")
   public String getTlsClientAuthSubjectDn() {
     return tlsClientAuthSubjectDn;
   }
@@ -787,7 +785,7 @@ public class UpdateSiteParams {
    * choose to run introspection script before access_token_as_jwt creation and include claims.
    * @return runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims
   **/
-  @ApiModelProperty(example = "true", value = "choose to run introspection script before access_token_as_jwt creation and include claims.")
+  @Schema(example = "true", description = "choose to run introspection script before access_token_as_jwt creation and include claims.")
   public Boolean isRunIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims() {
     return runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims;
   }
@@ -805,7 +803,7 @@ public class UpdateSiteParams {
    * choose the JWS alg algorithm (JWA) required for the ID Token issued to this client_id. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
    * @return idTokenSignedResponseAlg
   **/
-  @ApiModelProperty(value = "choose the JWS alg algorithm (JWA) required for the ID Token issued to this client_id. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
+  @Schema(description = "choose the JWS alg algorithm (JWA) required for the ID Token issued to this client_id. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
   public String getIdTokenSignedResponseAlg() {
     return idTokenSignedResponseAlg;
   }
@@ -823,7 +821,7 @@ public class UpdateSiteParams {
    * choose the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id. Valid values are RSA1_5, RSA-OAEP, A128KW, A256KW
    * @return idTokenEncryptedResponseAlg
   **/
-  @ApiModelProperty(value = "choose the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id. Valid values are RSA1_5, RSA-OAEP, A128KW, A256KW")
+  @Schema(description = "choose the JWE alg algorithm (JWA) required for encrypting the ID Token issued to this client_id. Valid values are RSA1_5, RSA-OAEP, A128KW, A256KW")
   public String getIdTokenEncryptedResponseAlg() {
     return idTokenEncryptedResponseAlg;
   }
@@ -841,7 +839,7 @@ public class UpdateSiteParams {
    * choose the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
    * @return idTokenEncryptedResponseEnc
   **/
-  @ApiModelProperty(value = "choose the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
+  @Schema(description = "choose the JWE enc algorithm (JWA) required for symmetric encryption of the ID Token issued to this client_id. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
   public String getIdTokenEncryptedResponseEnc() {
     return idTokenEncryptedResponseEnc;
   }
@@ -859,7 +857,7 @@ public class UpdateSiteParams {
    * choose the JWS alg algorithm (JWA) required for UserInfo responses. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
    * @return userInfoSignedResponseAlg
   **/
-  @ApiModelProperty(value = "choose the JWS alg algorithm (JWA) required for UserInfo responses. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
+  @Schema(description = "choose the JWS alg algorithm (JWA) required for UserInfo responses. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
   public String getUserInfoSignedResponseAlg() {
     return userInfoSignedResponseAlg;
   }
@@ -877,7 +875,7 @@ public class UpdateSiteParams {
    * choose the JWE alg algorithm (JWA) required for encrypting UserInfo responses. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW
    * @return userInfoEncryptedResponseAlg
   **/
-  @ApiModelProperty(value = "choose the JWE alg algorithm (JWA) required for encrypting UserInfo responses. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW")
+  @Schema(description = "choose the JWE alg algorithm (JWA) required for encrypting UserInfo responses. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW")
   public String getUserInfoEncryptedResponseAlg() {
     return userInfoEncryptedResponseAlg;
   }
@@ -895,7 +893,7 @@ public class UpdateSiteParams {
    * choose the JWE enc algorithm (JWA) required for symmetric encryption of UserInfo responses. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
    * @return userInfoEncryptedResponseEnc
   **/
-  @ApiModelProperty(value = "choose the JWE enc algorithm (JWA) required for symmetric encryption of UserInfo responses. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
+  @Schema(description = "choose the JWE enc algorithm (JWA) required for symmetric encryption of UserInfo responses. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
   public String getUserInfoEncryptedResponseEnc() {
     return userInfoEncryptedResponseEnc;
   }
@@ -913,7 +911,7 @@ public class UpdateSiteParams {
    * choose the JWS alg algorithm (JWA) that must be required by the Authorization Server. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512
    * @return requestObjectSigningAlg
   **/
-  @ApiModelProperty(value = "choose the JWS alg algorithm (JWA) that must be required by the Authorization Server. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
+  @Schema(description = "choose the JWS alg algorithm (JWA) that must be required by the Authorization Server. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384, PS512")
   public String getRequestObjectSigningAlg() {
     return requestObjectSigningAlg;
   }
@@ -931,7 +929,7 @@ public class UpdateSiteParams {
    * choose the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW
    * @return requestObjectEncryptionAlg
   **/
-  @ApiModelProperty(value = "choose the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW")
+  @Schema(description = "choose the JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are RSA1_5, RSA_OAEP, A128KW, A256KW")
   public String getRequestObjectEncryptionAlg() {
     return requestObjectEncryptionAlg;
   }
@@ -949,7 +947,7 @@ public class UpdateSiteParams {
    * choose the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM
    * @return requestObjectEncryptionEnc
   **/
-  @ApiModelProperty(value = "choose the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
+  @Schema(description = "choose the JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP. Valid values are A128CBC+HS256, A256CBC+HS512, A128GCM, A256GCM")
   public String getRequestObjectEncryptionEnc() {
     return requestObjectEncryptionEnc;
   }
@@ -967,7 +965,7 @@ public class UpdateSiteParams {
    * specifies the Default Maximum Authentication Age.
    * @return defaultMaxAge
   **/
-  @ApiModelProperty(example = "1000000", value = "specifies the Default Maximum Authentication Age.")
+  @Schema(example = "1000000", description = "specifies the Default Maximum Authentication Age.")
   public Integer getDefaultMaxAge() {
     return defaultMaxAge;
   }
@@ -985,7 +983,7 @@ public class UpdateSiteParams {
    * specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.
    * @return requireAuthTime
   **/
-  @ApiModelProperty(example = "true", value = "specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.")
+  @Schema(example = "true", description = "specifies the Boolean value specifying whether the auth_time claim in the id_token is required. It is required when the value is true. The auth_time claim request in the request object overrides this setting.")
   public Boolean isRequireAuthTime() {
     return requireAuthTime;
   }
@@ -1003,7 +1001,7 @@ public class UpdateSiteParams {
    * specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
    * @return initiateLoginUri
   **/
-  @ApiModelProperty(example = "https://client.example.org/authorization/page", value = "specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.")
+  @Schema(example = "https://client.example.org/authorization/page", description = "specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.")
   public String getInitiateLoginUri() {
     return initiateLoginUri;
   }
@@ -1029,7 +1027,7 @@ public class UpdateSiteParams {
    * specifies authorized JavaScript origins.
    * @return authorizedOrigins
   **/
-  @ApiModelProperty(value = "specifies authorized JavaScript origins.")
+  @Schema(description = "specifies authorized JavaScript origins.")
   public List<String> getAuthorizedOrigins() {
     return authorizedOrigins;
   }
@@ -1047,7 +1045,7 @@ public class UpdateSiteParams {
    * specifies the Client-specific access token expiration.
    * @return accessTokenLifetime
   **/
-  @ApiModelProperty(example = "100000000", value = "specifies the Client-specific access token expiration.")
+  @Schema(example = "100000000", description = "specifies the Client-specific access token expiration.")
   public Integer getAccessTokenLifetime() {
     return accessTokenLifetime;
   }
@@ -1065,7 +1063,7 @@ public class UpdateSiteParams {
    * specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
    * @return softwareId
   **/
-  @ApiModelProperty(example = "4NRB1-0XZABZI9E6-5SM3R", value = "specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.")
+  @Schema(example = "4NRB1-0XZABZI9E6-5SM3R", description = "specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.")
   public String getSoftwareId() {
     return softwareId;
   }
@@ -1080,10 +1078,10 @@ public class UpdateSiteParams {
   }
 
    /**
-   * specifies a version identifier string for the client software identified by &#39;software_id&#39;. The value of the &#39;software_version&#39; should change on any update to the client software identified by the same &#39;software_id&#39;.
+   * specifies a version identifier string for the client software identified by &#x27;software_id&#x27;. The value of the &#x27;software_version&#x27; should change on any update to the client software identified by the same &#x27;software_id&#x27;.
    * @return softwareVersion
   **/
-  @ApiModelProperty(example = "2.1", value = "specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.")
+  @Schema(example = "2.1", description = "specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.")
   public String getSoftwareVersion() {
     return softwareVersion;
   }
@@ -1101,7 +1099,7 @@ public class UpdateSiteParams {
    * specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
    * @return softwareStatement
   **/
-  @ApiModelProperty(value = "specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.")
+  @Schema(description = "specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.")
   public String getSoftwareStatement() {
     return softwareStatement;
   }
@@ -1127,7 +1125,7 @@ public class UpdateSiteParams {
    * specifies custom attribute map copy.
    * @return customAttributes
   **/
-  @ApiModelProperty(value = "specifies custom attribute map copy.")
+  @Schema(description = "specifies custom attribute map copy.")
   public Map<String, String> getCustomAttributes() {
     return customAttributes;
   }
@@ -1145,7 +1143,7 @@ public class UpdateSiteParams {
    * specifies whether to sync client from OP. Default value is false.
    * @return syncClientFromOp
   **/
-  @ApiModelProperty(example = "false", value = "specifies whether to sync client from OP. Default value is false.")
+  @Schema(example = "false", description = "specifies whether to sync client from OP. Default value is false.")
   public Boolean isSyncClientFromOp() {
     return syncClientFromOp;
   }
@@ -1163,7 +1161,7 @@ public class UpdateSiteParams {
    * specifies period after which client can sync again with OP. Default value is 86400 (in seconds).
    * @return syncClientPeriodInSeconds
   **/
-  @ApiModelProperty(example = "86400", value = "specifies period after which client can sync again with OP. Default value is 86400 (in seconds).")
+  @Schema(example = "86400", description = "specifies period after which client can sync again with OP. Default value is 86400 (in seconds).")
   public Integer getSyncClientPeriodInSeconds() {
     return syncClientPeriodInSeconds;
   }
@@ -1181,7 +1179,7 @@ public class UpdateSiteParams {
    * specifies whether to allow spontaneous scopes for client. The default value is false
    * @return allowSpontaneousScopes
   **/
-  @ApiModelProperty(example = "false", value = "specifies whether to allow spontaneous scopes for client. The default value is false")
+  @Schema(example = "false", description = "specifies whether to allow spontaneous scopes for client. The default value is false")
   public Boolean isAllowSpontaneousScopes() {
     return allowSpontaneousScopes;
   }
@@ -1207,7 +1205,7 @@ public class UpdateSiteParams {
    * list of spontaneous scopes (regexp against which validation is performed).
    * @return spontaneousScopes
   **/
-  @ApiModelProperty(value = "list of spontaneous scopes (regexp against which validation is performed).")
+  @Schema(description = "list of spontaneous scopes (regexp against which validation is performed).")
   public List<String> getSpontaneousScopes() {
     return spontaneousScopes;
   }
@@ -1218,7 +1216,7 @@ public class UpdateSiteParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -1349,7 +1347,7 @@ public class UpdateSiteParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
@@ -1357,4 +1355,3 @@ public class UpdateSiteParams {
   }
 
 }
-

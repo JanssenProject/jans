@@ -19,41 +19,33 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.swagger.client.model.JsonWebKey;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 /**
- * GetJwksResponse
+ * RemoveSiteResponse
  */
 
 @javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-02-13T06:19:07.893Z[GMT]")
-public class GetJwksResponse {
-  @SerializedName("keys")
-  private List<JsonWebKey> keys = new ArrayList<JsonWebKey>();
+public class RemoveSiteResponse {
+  @SerializedName("oxd_id")
+  private String oxdId = null;
 
-  public GetJwksResponse keys(List<JsonWebKey> keys) {
-    this.keys = keys;
-    return this;
-  }
-
-  public GetJwksResponse addKeysItem(JsonWebKey keysItem) {
-    this.keys.add(keysItem);
+  public RemoveSiteResponse oxdId(String oxdId) {
+    this.oxdId = oxdId;
     return this;
   }
 
    /**
-   * Get keys
-   * @return keys
+   * Get oxdId
+   * @return oxdId
   **/
   @Schema(required = true, description = "")
-  public List<JsonWebKey> getKeys() {
-    return keys;
+  public String getOxdId() {
+    return oxdId;
   }
 
-  public void setKeys(List<JsonWebKey> keys) {
-    this.keys = keys;
+  public void setOxdId(String oxdId) {
+    this.oxdId = oxdId;
   }
 
 
@@ -65,22 +57,22 @@ public class GetJwksResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GetJwksResponse getJwksResponse = (GetJwksResponse) o;
-    return Objects.equals(this.keys, getJwksResponse.keys);
+    RemoveSiteResponse removeSiteResponse = (RemoveSiteResponse) o;
+    return Objects.equals(this.oxdId, removeSiteResponse.oxdId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keys);
+    return Objects.hash(oxdId);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GetJwksResponse {\n");
+    sb.append("class RemoveSiteResponse {\n");
     
-    sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
+    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("}");
     return sb.toString();
   }
