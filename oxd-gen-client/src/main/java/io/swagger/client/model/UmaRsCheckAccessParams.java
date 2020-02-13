@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-
 package io.swagger.client.model;
 
 import java.util.Objects;
@@ -20,16 +19,15 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * UmaRsCheckAccessParams
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-16T05:49:47.436Z")
+
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.JavaClientCodegen", date = "2020-02-13T06:19:07.893Z[GMT]")
 public class UmaRsCheckAccessParams {
   @SerializedName("oxd_id")
   private String oxdId = null;
@@ -55,7 +53,7 @@ public class UmaRsCheckAccessParams {
    * Get oxdId
    * @return oxdId
   **/
-  @ApiModelProperty(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, value = "")
+  @Schema(example = "bcad760f-91ba-46e1-a020-05e4281d91b6", required = true, description = "")
   public String getOxdId() {
     return oxdId;
   }
@@ -73,7 +71,7 @@ public class UmaRsCheckAccessParams {
    * Get rpt
    * @return rpt
   **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   public String getRpt() {
     return rpt;
   }
@@ -91,7 +89,7 @@ public class UmaRsCheckAccessParams {
    * Get path
    * @return path
   **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   public String getPath() {
     return path;
   }
@@ -109,7 +107,7 @@ public class UmaRsCheckAccessParams {
    * Get httpMethod
    * @return httpMethod
   **/
-  @ApiModelProperty(required = true, value = "")
+  @Schema(required = true, description = "")
   public String getHttpMethod() {
     return httpMethod;
   }
@@ -135,7 +133,7 @@ public class UmaRsCheckAccessParams {
    * Get scopes
    * @return scopes
   **/
-  @ApiModelProperty(example = "[\"http://photoz.example.com/dev/actions/all\",\"http://photoz.example.com/dev/actions/add\"]", value = "")
+  @Schema(example = "[\"http://photoz.example.com/dev/actions/all\",\"http://photoz.example.com/dev/actions/add\"]", description = "")
   public List<String> getScopes() {
     return scopes;
   }
@@ -146,7 +144,7 @@ public class UmaRsCheckAccessParams {
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -185,7 +183,7 @@ public class UmaRsCheckAccessParams {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }
@@ -193,4 +191,3 @@ public class UmaRsCheckAccessParams {
   }
 
 }
-
