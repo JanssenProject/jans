@@ -10,7 +10,7 @@ info:
   license:
     name: License
     url: https://github.com/GluuFederation/oxd/blob/master/LICENSE
-  version: "4.0"
+  version: "4.2"
 servers:
 - url: https://gluu.org/
 tags:
