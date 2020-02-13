@@ -15,8 +15,8 @@
         <resteasy.version>3.9.3.Final</resteasy.version>
         <resteasy.jaxrs.version>3.9.3.Final</resteasy.jaxrs.version>
 
-	<httpcore.version>4.4.9</httpcore.version>
-	<httpclient.version>4.5.5</httpclient.version>
+	<httpcore.version>4.4.13</httpcore.version>
+	<httpclient.version>4.5.11</httpclient.version>
 
         <weld.version>3.1.2.Final</weld.version>
         <richfaces.version>4.5.17-gluu.Final</richfaces.version>
