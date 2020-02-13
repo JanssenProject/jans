@@ -130,7 +130,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
                                 jwt.getHeader().getKeyId(),
                                 JwtUtil.getJSONWebKeys(jwksUri),
                                 sharedKey,
-                                jwt.getHeader().getAlgorithm());
+                                jwt.getHeader().getSignatureAlgorithm());
 
                         if (signatureVerified) {
                             getResponse().setClaims(jwt.getClaims().toMap());
