@@ -50,7 +50,7 @@ public class JwtHeader extends JwtClaimSet {
         return this;
     }
 
-    public SignatureAlgorithm getAlgorithm() {
+    public SignatureAlgorithm getSignatureAlgorithm() {
         String alg = getClaimAsString(ALGORITHM);
         return SignatureAlgorithm.fromString(alg);
     }

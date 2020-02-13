@@ -159,7 +159,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             JwtUtil.getJSONWebKeys(jwksUriClaim);
                     boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
                             softwareStatement.getEncodedSignature(),
-                            keyId, jwks, null, softwareStatement.getHeader().getAlgorithm());
+                            keyId, jwks, null, softwareStatement.getHeader().getSignatureAlgorithm());
 
                     if (!validSignature) {
                         throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
