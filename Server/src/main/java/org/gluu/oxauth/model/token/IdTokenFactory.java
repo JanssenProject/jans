@@ -16,10 +16,10 @@ import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.authorize.Claim;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
-import org.gluu.oxauth.model.jwe.Jwe;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.registration.Client;
@@ -41,6 +41,8 @@ import javax.inject.Named;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.gluu.oxauth.model.common.ScopeType.DYNAMIC;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -85,181 +87,6 @@ public class IdTokenFactory {
     @Inject
     private JwrService jwrService;
 
-    private void fillJwtWithClaims(JsonWebResponse jwt,
-                                   IAuthorizationGrant authorizationGrant, String nonce,
-                                   AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-                                   String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
-
-
-        int lifeTime = appConfiguration.getIdTokenLifetime();
-        Calendar calendar = Calendar.getInstance();
-        Date issuedAt = calendar.getTime();
-        calendar.add(Calendar.SECOND, lifeTime);
-        Date expiration = calendar.getTime();
-
-        jwt.getClaims().setExpirationTime(expiration);
-        jwt.getClaims().setIssuedAt(issuedAt);
-
-        if (preProcessing != null) {
-            preProcessing.apply(jwt);
-        }
-
-        if (authorizationGrant.getAcrValues() != null) {
-            jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
-            setAmrClaim(jwt, authorizationGrant.getAcrValues());
-        }
-        if (StringUtils.isNotBlank(nonce)) {
-            jwt.getClaims().setClaim(JwtClaimName.NONCE, nonce);
-        }
-        if (authorizationGrant.getAuthenticationTime() != null) {
-            jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
-        }
-        if (authorizationCode != null) {
-            String codeHash = AbstractToken.getHash(authorizationCode.getCode(), jwt.getHeader().getAlgorithm());
-            jwt.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
-        }
-        if (accessToken != null) {
-            String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwt.getHeader().getAlgorithm());
-            jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
-        }
-        if (Strings.isNotBlank(state)) {
-            String stateHash = AbstractToken.getHash(state, jwt.getHeader().getAlgorithm());
-            jwt.getClaims().setClaim(JwtClaimName.STATE_HASH, stateHash);
-        }
-        jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
-
-        User user = authorizationGrant.getUser();
-        List<Scope> dynamicScopes = new ArrayList<Scope>();
-        if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
-            for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
-                if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
-                    dynamicScopes.add(scope);
-                    continue;
-                }
-
-                Map<String, Object> claims = getClaims(user, scope);
-
-                if (Boolean.TRUE.equals(scope.isOxAuthGroupClaims())) {
-                    JwtSubClaimObject groupClaim = new JwtSubClaimObject();
-                    groupClaim.setName(scope.getId());
-                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-
-                        if (value instanceof List) {
-                            groupClaim.setClaim(key, (List<String>) value);
-                        } else {
-                            groupClaim.setClaim(key, (String) value);
-                        }
-                    }
-
-                    jwt.getClaims().setClaim(scope.getId(), groupClaim);
-                } else {
-                    for (Map.Entry<String, Object> entry : claims.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-
-                        if (value instanceof List) {
-                            jwt.getClaims().setClaim(key, (List<String>) value);
-                        } else if (value instanceof Boolean) {
-                            jwt.getClaims().setClaim(key, (Boolean) value);
-                        } else if (value instanceof Date) {
-                            jwt.getClaims().setClaim(key, ((Date) value).getTime());
-                        } else {
-                            jwt.getClaims().setClaim(key, (String) value);
-                        }
-                    }
-                }
-
-                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
-            }
-        }
-
-        if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
-                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
-
-                if (gluuAttribute != null) {
-                    Client client = authorizationGrant.getClient();
-
-                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                        String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
-                        if (attribute != null) {
-                            if (attribute instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attribute;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwt.getClaims().setClaim(claim.getName(), values);
-                            } else {
-                                String value = (String) attribute;
-                                jwt.getClaims().setClaim(claim.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
-                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else {
-            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
-            }
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
-                subValue = authorizationGrant.getUser().getUserId();
-            }
-            jwt.getClaims().setSubjectIdentifier(subValue);
-        }
-
-        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwt, unmodifiableAuthorizationGrant);
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
-        }
-
-        if (cibaSupportProxy.isCIBASupported() && authorizationGrant instanceof CIBAGrant) {
-            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), jwt.getHeader().getAlgorithm());
-            jwt.getClaims().setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
-
-            CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
-            jwt.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
-        }
-    }
-
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
 
@@ -283,14 +110,13 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    public void fillJweWithClaims(JsonWebResponse jwe,
-                                  IAuthorizationGrant authorizationGrant, String nonce,
-                                  AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-                                  String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    private void fillClaims(JsonWebResponse jwr,
+                            IAuthorizationGrant authorizationGrant, String nonce,
+                            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
-        // Claims
-        jwe.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwe.getClaims().setAudience(authorizationGrant.getClient().getClientId());
+        jwr.getClaims().setIssuer(appConfiguration.getIssuer());
+        jwr.getClaims().setAudience(authorizationGrant.getClient().getClientId());
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
@@ -298,43 +124,47 @@ public class IdTokenFactory {
         calendar.add(Calendar.SECOND, lifeTime);
         Date expiration = calendar.getTime();
 
-        jwe.getClaims().setExpirationTime(expiration);
-        jwe.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setExpirationTime(expiration);
+        jwr.getClaims().setIssuedAt(issuedAt);
 
         if (preProcessing != null) {
-            preProcessing.apply(jwe);
+            preProcessing.apply(jwr);
         }
 
         if (authorizationGrant.getAcrValues() != null) {
-            jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
-            setAmrClaim(jwe, authorizationGrant.getAcrValues());
+            jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, authorizationGrant.getAcrValues());
+            setAmrClaim(jwr, authorizationGrant.getAcrValues());
         }
         if (StringUtils.isNotBlank(nonce)) {
-            jwe.getClaims().setClaim(JwtClaimName.NONCE, nonce);
+            jwr.setClaim(JwtClaimName.NONCE, nonce);
         }
         if (authorizationGrant.getAuthenticationTime() != null) {
-            jwe.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
+            jwr.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
         }
         if (authorizationCode != null) {
-            String codeHash = authorizationCode.getHash(authorizationCode.getCode(), null);
-            jwe.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
+            String codeHash = AbstractToken.getHash(authorizationCode.getCode(), jwr.getHeader().getSignatureAlgorithm());
+            jwr.setClaim(JwtClaimName.CODE_HASH, codeHash);
         }
         if (accessToken != null) {
-            String accessTokenHash = accessToken.getHash(accessToken.getCode(), null);
-            jwe.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
+            String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwr.getHeader().getSignatureAlgorithm());
+            jwr.setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
         if (Strings.isNotBlank(state)) {
-            String stateHash = AbstractToken.getHash(state, null);
-            jwe.getClaims().setClaim(JwtClaimName.STATE_HASH, stateHash);
+            String stateHash = AbstractToken.getHash(state, jwr.getHeader().getSignatureAlgorithm());
+            jwr.setClaim(JwtClaimName.STATE_HASH, stateHash);
         }
-        jwe.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
+        jwr.setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         User user = authorizationGrant.getUser();
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
-                if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+                Scope scope = scopeService.getScopeById(scopeName);
+                if (scope == null) {
+                    continue;
+                }
+
+                if (DYNAMIC == scope.getScopeType()) {
                     dynamicScopes.add(scope);
                     continue;
                 }
@@ -349,76 +179,68 @@ public class IdTokenFactory {
                         Object value = entry.getValue();
 
                         if (value instanceof List) {
-                            groupClaim.setClaim(key, (List<String>) value);
+                            groupClaim.setClaim(key, (List) value);
                         } else {
                             groupClaim.setClaim(key, (String) value);
                         }
                     }
 
-                    jwe.getClaims().setClaim(scope.getId(), groupClaim);
+                    jwr.getClaims().setClaim(scope.getId(), groupClaim);
                 } else {
                     for (Map.Entry<String, Object> entry : claims.entrySet()) {
                         String key = entry.getKey();
                         Object value = entry.getValue();
 
                         if (value instanceof List) {
-                            jwe.getClaims().setClaim(key, (List<String>) value);
+                            jwr.getClaims().setClaim(key, (List) value);
                         } else if (value instanceof Boolean) {
-                            jwe.getClaims().setClaim(key, (Boolean) value);
+                            jwr.getClaims().setClaim(key, (Boolean) value);
                         } else if (value instanceof Date) {
-                            jwe.getClaims().setClaim(key, ((Date) value).getTime());
+                            jwr.getClaims().setClaim(key, ((Date) value).getTime());
                         } else {
-                            jwe.getClaims().setClaim(key, (String) value);
+                            jwr.setClaim(key, (String) value);
                         }
                     }
                 }
 
-                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+                jwr.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
             }
         }
 
-        if (authorizationGrant.getJwtAuthorizationRequest() != null
-                && authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember() != null) {
-            for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getIdTokenMember().getClaims()) {
-                boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
+        setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
+        setSubjectIdentifier(jwr, authorizationGrant);
 
-                if (gluuAttribute != null) {
-                    Client client = authorizationGrant.getClient();
-
-                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                        String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
-                        if (attribute != null) {
-                            if (attribute instanceof JSONArray) {
-                                JSONArray jsonArray = (JSONArray) attribute;
-                                List<String> values = new ArrayList<String>();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    String value = jsonArray.optString(i);
-                                    if (value != null) {
-                                        values.add(value);
-                                    }
-                                }
-                                jwe.getClaims().setClaim(claim.getName(), values);
-                            } else {
-                                String value = (String) attribute;
-                                jwe.getClaims().setClaim(claim.getName(), value);
-                            }
-                        }
-                    }
-                }
-            }
+        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
+            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwr, unmodifiableAuthorizationGrant);
+            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
-                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
+        processCiba(jwr, authorizationGrant, refreshToken);
+    }
+
+    private void processCiba(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, RefreshToken refreshToken) {
+        if (!cibaSupportProxy.isCIBASupported() || !(authorizationGrant instanceof CIBAGrant)) {
+            return;
+        }
+
+        String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), null);
+        jwr.setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
+
+        CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
+        jwr.setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
+    }
+
+    private void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) throws Exception {
+        final Client client = authorizationGrant.getClient();
+        if (client.getSubjectType() != null &&
+                SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE) &&
+                (StringUtils.isNotBlank(client.getSectorIdentifierUri()) || client.getRedirectUris() != null)) {
             String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
+            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
+                sectorIdentifierUri = client.getSectorIdentifierUri();
             } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
+                sectorIdentifierUri = client.getRedirectUris()[0];
             }
 
             String userInum = authorizationGrant.getUser().getAttribute("inum");
@@ -433,9 +255,9 @@ public class IdTokenFactory {
                         userInum));
                 pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
             }
-            jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
+            jwr.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
+            if (client.getSubjectType() != null && SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE)) {
                 log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
             }
             String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
@@ -443,21 +265,46 @@ public class IdTokenFactory {
             if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
                 subValue = authorizationGrant.getUser().getUserId();
             }
-            jwe.getClaims().setSubjectIdentifier(subValue);
+            jwr.getClaims().setSubjectIdentifier(subValue);
+        }
+    }
+
+    private void setClaimsFromJwtAuthorizationRequest(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, Set<String> scopes) throws InvalidClaimException {
+        final JwtAuthorizationRequest requestObject = authorizationGrant.getJwtAuthorizationRequest();
+        if (requestObject == null || requestObject.getIdTokenMember() == null) {
+            return;
         }
 
-        if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
-            final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwe, unmodifiableAuthorizationGrant);
-            externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
-        }
+        for (Claim claim : requestObject.getIdTokenMember().getClaims()) {
+            boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+            GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
 
-        if (cibaSupportProxy.isCIBASupported() && authorizationGrant instanceof CIBAGrant) {
-            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), null);
-            jwe.getClaims().setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
+            if (gluuAttribute == null) {
+                continue;
+            }
 
-            CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
-            jwe.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
+            Client client = authorizationGrant.getClient();
+
+            if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
+                String ldapClaimName = gluuAttribute.getName();
+                Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
+                if (attribute != null) {
+                    if (attribute instanceof JSONArray) {
+                        JSONArray jsonArray = (JSONArray) attribute;
+                        List<String> values = new ArrayList<String>();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            String value = jsonArray.optString(i);
+                            if (value != null) {
+                                values.add(value);
+                            }
+                        }
+                        jwr.getClaims().setClaim(claim.getName(), values);
+                    } else {
+                        String value = (String) attribute;
+                        jwr.setClaim(claim.getName(), value);
+                    }
+                }
+            }
         }
     }
 
@@ -469,11 +316,7 @@ public class IdTokenFactory {
         final Client client = grant.getClient();
 
         JsonWebResponse jwr = jwrService.createJwr(client);
-        if (jwr instanceof Jwe) {
-            fillJweWithClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
-        } else {
-            fillJwtWithClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
-        }
+        fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
         return jwrService.encode(jwr, client);
     }
 
@@ -488,7 +331,7 @@ public class IdTokenFactory {
             }
 
             for (String scopeName : scopes) {
-                org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
+                Scope scope = scopeService.getScopeById(scopeName);
 
                 if (scope != null && scope.getOxAuthClaims() != null) {
                     for (String claimDn : scope.getOxAuthClaims()) {
