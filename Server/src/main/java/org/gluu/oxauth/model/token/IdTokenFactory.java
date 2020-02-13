@@ -24,16 +24,12 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
-import org.gluu.util.StringHelper;
 import org.json.JSONArray;
-import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
-import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -54,14 +50,12 @@ import static org.gluu.oxauth.model.common.ScopeType.DYNAMIC;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 4, 2019
+ * @author Yuriy Zabrovarnyy
+ * @version 12 Feb, 2020
  */
 @Stateless
 @Named
 public class IdTokenFactory {
-
-    @Inject
-    private Logger log;
 
     @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
@@ -74,9 +68,6 @@ public class IdTokenFactory {
 
     @Inject
     private AttributeService attributeService;
-
-    @Inject
-    private PairwiseIdentifierService pairwiseIdentifierService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -156,7 +147,7 @@ public class IdTokenFactory {
         jwr.setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         User user = authorizationGrant.getUser();
-        List<Scope> dynamicScopes = new ArrayList<Scope>();
+        List<Scope> dynamicScopes = new ArrayList<>();
         if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 Scope scope = scopeService.getScopeById(scopeName);
@@ -208,7 +199,7 @@ public class IdTokenFactory {
         }
 
         setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
-        setSubjectIdentifier(jwr, authorizationGrant);
+        jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
@@ -229,44 +220,6 @@ public class IdTokenFactory {
 
         CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
         jwr.setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
-    }
-
-    private void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) throws Exception {
-        final Client client = authorizationGrant.getClient();
-        if (client.getSubjectType() != null &&
-                SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE) &&
-                (StringUtils.isNotBlank(client.getSectorIdentifierUri()) || client.getRedirectUris() != null)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
-                sectorIdentifierUri = client.getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = client.getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jwr.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else {
-            if (client.getSubjectType() != null && SubjectType.fromString(client.getSubjectType()).equals(SubjectType.PAIRWISE)) {
-                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
-            }
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
-                subValue = authorizationGrant.getUser().getUserId();
-            }
-            jwr.getClaims().setSubjectIdentifier(subValue);
-        }
     }
 
     private void setClaimsFromJwtAuthorizationRequest(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, Set<String> scopes) throws InvalidClaimException {
@@ -320,72 +273,75 @@ public class IdTokenFactory {
         return jwrService.encode(jwr, client);
     }
 
-    public boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
-        if (gluuAttribute != null) {
-            if (clientAllowedClaims != null) {
-                for (int i = 0; i < clientAllowedClaims.length; i++) {
-                    if (gluuAttribute.getDn().equals(clientAllowedClaims[i])) {
-                        return true;
-                    }
-                }
-            }
+    private boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
+        if (gluuAttribute == null) {
+            return false;
+        }
 
-            for (String scopeName : scopes) {
-                Scope scope = scopeService.getScopeById(scopeName);
-
-                if (scope != null && scope.getOxAuthClaims() != null) {
-                    for (String claimDn : scope.getOxAuthClaims()) {
-                        if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
-                            return true;
-                        }
-                    }
+        if (clientAllowedClaims != null) {
+            for (String clientAllowedClaim : clientAllowedClaims) {
+                if (gluuAttribute.getDn().equals(clientAllowedClaim)) {
+                    return true;
                 }
             }
         }
 
+        for (String scopeName : scopes) {
+            Scope scope = scopeService.getScopeById(scopeName);
+
+            if (scope != null && scope.getOxAuthClaims() != null) {
+                for (String claimDn : scope.getOxAuthClaims()) {
+                    if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
     public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
-        Map<String, Object> claims = new HashMap<String, Object>();
+        Map<String, Object> claims = new HashMap<>();
 
-        if (scope != null && scope.getOxAuthClaims() != null) {
-            for (String claimDn : scope.getOxAuthClaims()) {
-                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
+        if (scope == null || scope.getOxAuthClaims() == null) {
+            return claims;
+        }
 
-                String claimName = gluuAttribute.getOxAuthClaimName();
-                String ldapName = gluuAttribute.getName();
-                Object attribute = null;
+        for (String claimDn : scope.getOxAuthClaims()) {
+            GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDn);
 
-                if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
-                    if (ldapName.equals("uid")) {
-                        attribute = user.getUserId();
-                    } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
-                        attribute = Boolean.parseBoolean(String.valueOf(user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute())));
-                    } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
-                        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
-                        if (attributeValue != null) {
-                            attribute = format.parse(attributeValue.toString());
-                        }
-                    } else {
-                        attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+            String claimName = gluuAttribute.getOxAuthClaimName();
+            String ldapName = gluuAttribute.getName();
+            Object attribute = null;
+
+            if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
+                if (ldapName.equals("uid")) {
+                    attribute = user.getUserId();
+                } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                    attribute = Boolean.parseBoolean(String.valueOf(user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute())));
+                } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                    SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+                    Object attributeValue = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+                    if (attributeValue != null) {
+                        attribute = format.parse(attributeValue.toString());
                     }
+                } else {
+                    attribute = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
+                }
 
-                    if (attribute != null) {
-                        if (attribute instanceof JSONArray) {
-                            JSONArray jsonArray = (JSONArray) attribute;
-                            List<String> values = new ArrayList<String>();
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                String value = jsonArray.optString(i);
-                                if (value != null) {
-                                    values.add(value);
-                                }
+                if (attribute != null) {
+                    if (attribute instanceof JSONArray) {
+                        JSONArray jsonArray = (JSONArray) attribute;
+                        List<String> values = new ArrayList<>();
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            String value = jsonArray.optString(i);
+                            if (value != null) {
+                                values.add(value);
                             }
-                            claims.put(claimName, values);
-                        } else {
-                            claims.put(claimName, attribute);
                         }
+                        claims.put(claimName, values);
+                    } else {
+                        claims.put(claimName, attribute);
                     }
                 }
             }
