@@ -72,7 +72,7 @@ public class RsCheckAccessTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
 
-        final ApiResponse<UmaRsCheckAccessResponse> apiResp = client.umaRsCheckAccessWithHttpInfo(Tester.getAuthorization(), params);
+        final ApiResponse<UmaRsCheckAccessResponse> apiResp = client.umaRsCheckAccessWithHttpInfo(params, Tester.getAuthorization());
 
         assertEquals(apiResp.getStatusCode(), 200)  ;  //fixme should be 401
         assertNotNull(apiResp.getData());
@@ -90,7 +90,7 @@ public class RsCheckAccessTest {
         params.setScopes(scopeList);
 
         try {
-            client.umaRsCheckAccessWithHttpInfo(Tester.getAuthorization(), params);
+            client.umaRsCheckAccessWithHttpInfo(params, Tester.getAuthorization());
             assertTrue(false);
 
         } catch (Exception e) {

@@ -3,7 +3,7 @@ package io.swagger.client.api;
 import io.swagger.client.ApiException;
 import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.RemoveSiteParams;
-import io.swagger.client.model.UpdateSiteResponse;
+import io.swagger.client.model.RemoveSiteResponse;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -24,7 +24,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(response.getOxdId());
 
-        UpdateSiteResponse removeResponse = api.removeSite(Tester.getAuthorization(response), params);
+        RemoveSiteResponse removeResponse = api.removeSite(params, Tester.getAuthorization(response));
         assertNotNull(removeResponse);
         assertTrue(StringUtils.isNotEmpty(removeResponse.getOxdId()));
     }
@@ -37,7 +37,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(someRandomId);
         try {
-            api.removeSite(Tester.getAuthorization(), params);
+            api.removeSite(params, Tester.getAuthorization());
         } catch (ApiException e) {
             assertEquals(e.getCode(), 400);
             assertEquals(Tester.asError(e).getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());

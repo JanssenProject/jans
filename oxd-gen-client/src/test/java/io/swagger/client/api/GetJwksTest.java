@@ -31,7 +31,7 @@ public class GetJwksTest {
         params.setOpHost(opHost);
         params.setOpDiscoveryPath(opDiscoveryPath);
 
-        final GetJwksResponse response = client.getJsonWebKeySet(Tester.getAuthorization(), params);
+        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization());
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());
@@ -48,7 +48,7 @@ public class GetJwksTest {
         params.setOpDiscoveryPath(opDiscoveryPath);
 
         try {
-            client.getJsonWebKeySetWithHttpInfo(Tester.getAuthorization(), params);
+            client.getJsonWebKeySetWithHttpInfo(params, Tester.getAuthorization());
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);
         }

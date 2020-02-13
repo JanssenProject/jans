@@ -56,7 +56,7 @@ public class RsProtectTest {
         params.setResources(resources);
 
         try {
-            final ApiResponse<?> response = client.umaRsProtectWithHttpInfo(getAuthorization(), params);
+            final ApiResponse<?> response = client.umaRsProtectWithHttpInfo(params, getAuthorization());
             assertEquals(response.getStatusCode(), 400);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);
@@ -79,7 +79,7 @@ public class RsProtectTest {
         params.setResources(resources);
         params.setOverwrite(true); // force overwrite
 
-        final UmaRsProtectResponse response = client.umaRsProtect(getAuthorization(), params);
+        final UmaRsProtectResponse response = client.umaRsProtect(params, getAuthorization());
         assertNotNull(response);
     }
 
@@ -111,7 +111,7 @@ public class RsProtectTest {
         params.setPath("/GetAll");
         params.setRpt("");
 
-        final UmaRsCheckAccessResponse response = client.umaRsCheckAccess(getAuthorization(), params);
+        final UmaRsCheckAccessResponse response = client.umaRsCheckAccess(params, getAuthorization());
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -122,7 +122,7 @@ public class RsProtectTest {
         params.setOxdId(site.getOxdId());
         params.setResources(resources);
 
-        final UmaRsProtectResponse resp = client.umaRsProtect(getAuthorization(), params);
+        final UmaRsProtectResponse resp = client.umaRsProtect(params, getAuthorization());
         assertNotNull(resp);
         return resp;
     }

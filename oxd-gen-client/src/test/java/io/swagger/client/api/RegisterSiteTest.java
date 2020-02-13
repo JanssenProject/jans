@@ -98,7 +98,7 @@ public class RegisterSiteTest {
         params.setOxdId(oxdId);
         params.setScope(Lists.newArrayList("profile", "oxd"));
 
-        UpdateSiteResponse resp = api().updateSite(getAuthorization(), params);
+        UpdateSiteResponse resp = api().updateSite(params, getAuthorization());
         assertNotNull(resp);
     }
 
