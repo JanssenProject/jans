@@ -17,34 +17,20 @@ import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.authorize.Claim;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
-import org.gluu.oxauth.model.exception.InvalidJweException;
 import org.gluu.oxauth.model.jwe.Jwe;
-import org.gluu.oxauth.model.jwe.JweEncrypter;
-import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
-import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.AttributeService;
+import org.gluu.oxauth.service.PairwiseIdentifierService;
+import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.util.StringHelper;
-import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
@@ -52,8 +38,6 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -84,9 +68,6 @@ public class IdTokenFactory {
     private ExternalAuthenticationService externalAuthenticationService;
 
     @Inject
-    private ClientService clientService;
-
-    @Inject
     private ScopeService scopeService;
 
     @Inject
@@ -99,21 +80,16 @@ public class IdTokenFactory {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private WebKeysConfiguration webKeysConfiguration;
-
-    @Inject
-    private AbstractCryptoProvider cryptoProvider;
-
-    @Inject
     private CIBASupportProxy cibaSupportProxy;
 
-    public Jwt generateSignedIdToken(
-            IAuthorizationGrant authorizationGrant, String nonce,
-            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+    @Inject
+    private JwrService jwrService;
 
-        JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, authorizationGrant.getClient());
-        Jwt jwt = jwtSigner.newJwt();
+    private void fillJwtWithClaims(JsonWebResponse jwt,
+                                   IAuthorizationGrant authorizationGrant, String nonce,
+                                   AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+                                   String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
@@ -139,15 +115,15 @@ public class IdTokenFactory {
             jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_TIME, authorizationGrant.getAuthenticationTime());
         }
         if (authorizationCode != null) {
-            String codeHash = AbstractToken.getHash(authorizationCode.getCode(), jwtSigner.getSignatureAlgorithm());
+            String codeHash = AbstractToken.getHash(authorizationCode.getCode(), jwt.getHeader().getAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.CODE_HASH, codeHash);
         }
         if (accessToken != null) {
-            String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwtSigner.getSignatureAlgorithm());
+            String accessTokenHash = AbstractToken.getHash(accessToken.getCode(), jwt.getHeader().getAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
         if (Strings.isNotBlank(state)) {
-            String stateHash = AbstractToken.getHash(state, jwtSigner.getSignatureAlgorithm());
+            String stateHash = AbstractToken.getHash(state, jwt.getHeader().getAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.STATE_HASH, stateHash);
         }
         jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
@@ -276,14 +252,12 @@ public class IdTokenFactory {
         }
 
         if (cibaSupportProxy.isCIBASupported() && authorizationGrant instanceof CIBAGrant) {
-            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), jwtSigner.getSignatureAlgorithm());
+            String refreshTokenHash = AbstractToken.getHash(refreshToken.getCode(), jwt.getHeader().getAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
 
             CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
             jwt.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
         }
-
-        return jwtSigner.sign();
     }
 
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
@@ -309,18 +283,10 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
-    public Jwe generateEncryptedIdToken(
-            IAuthorizationGrant authorizationGrant, String nonce,
-            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
-        Jwe jwe = new Jwe();
-
-        // Header
-        KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseAlg());
-        BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(authorizationGrant.getClient().getIdTokenEncryptedResponseEnc());
-        jwe.getHeader().setType(JwtType.JWT);
-        jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
-        jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
+    public void fillJweWithClaims(JsonWebResponse jwe,
+                                  IAuthorizationGrant authorizationGrant, String nonce,
+                                  AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+                                  String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
         // Claims
         jwe.getClaims().setIssuer(appConfiguration.getIssuer());
@@ -493,54 +459,22 @@ public class IdTokenFactory {
             CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
             jwe.getClaims().setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
         }
-
-        // Encryption
-        if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
-            JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
-                    Algorithm.fromString(keyEncryptionAlgorithm.getName()),
-                    Use.ENCRYPTION);
-            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
-            jwe.getHeader().setKeyId(keyId);
-
-            if (publicKey != null) {
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
-                jwe = jweEncrypter.encrypt(jwe);
-            } else {
-                throw new InvalidJweException("The public key is not valid");
-            }
-        } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
-                || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
-            try {
-                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
-                JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
-                jwe = jweEncrypter.encrypt(jwe);
-            } catch (UnsupportedEncodingException e) {
-                throw new InvalidJweException(e);
-            } catch (StringEncrypter.EncryptionException e) {
-                throw new InvalidJweException(e);
-            } catch (Exception e) {
-                throw new InvalidJweException(e);
-            }
-        }
-
-        return jwe;
     }
 
     public JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce,
             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
-        final Client grantClient = grant.getClient();
-        if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
-                && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            return generateEncryptedIdToken(
-                    grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
+
+        final Client client = grant.getClient();
+
+        JsonWebResponse jwr = jwrService.createJwr(client);
+        if (jwr instanceof Jwe) {
+            fillJweWithClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
         } else {
-            return generateSignedIdToken(
-                    grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
+            fillJwtWithClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
         }
+        return jwrService.encode(jwr, client);
     }
 
     public boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
