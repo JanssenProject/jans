@@ -13,11 +13,13 @@ import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jwt.Jwt;
+import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ServerCryptoProvider;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -32,7 +34,10 @@ import static org.gluu.oxauth.model.jwt.JwtHeaderName.ALGORITHM;
  */
 @Stateless
 @Named
-public class JwrEncoder {
+public class JwrService {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
@@ -96,5 +101,28 @@ public class JwrEncoder {
         }
 
         throw new IllegalArgumentException("Unsupported encryption algorithm: " + keyEncryptionAlgorithm);
+    }
+
+    public JsonWebResponse createJwr(Client client) {
+        try {
+            if (client.getIdTokenEncryptedResponseAlg() != null
+                    && client.getIdTokenEncryptedResponseEnc() != null) {
+                Jwe jwe = new Jwe();
+
+                // Header
+                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseAlg());
+                BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseEnc());
+                jwe.getHeader().setType(JwtType.JWT);
+                jwe.getHeader().setAlgorithm(keyEncryptionAlgorithm);
+                jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
+                return jwe;
+            } else {
+                JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
+                return jwtSigner.newJwt();
+            }
+        } catch (Exception e) {
+            log.error("Failed to create logout_token.", e);
+            return null;
+        }
     }
 }
