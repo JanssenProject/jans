@@ -93,6 +93,10 @@ public class JwtSigner {
         return jwt;
     }
 
+    public void setJwt(Jwt jwt) {
+        this.jwt = jwt;
+    }
+
     public SignatureAlgorithm getSignatureAlgorithm() {
         return signatureAlgorithm;
     }
