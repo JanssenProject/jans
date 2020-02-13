@@ -68,6 +68,9 @@ public abstract class AbstractCryptoProvider {
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+            return null;
+        }
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 return key.getKid();
