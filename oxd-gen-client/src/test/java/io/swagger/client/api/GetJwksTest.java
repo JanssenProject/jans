@@ -39,6 +39,22 @@ public class GetJwksTest {
     }
 
     @Test
+    @Parameters({"opConfigurationEndpoint"})
+    public void test_withOpConfigurationEndpoint(String opConfigurationEndpoint) throws Exception {
+
+        final DevelopersApi client = api();
+
+        final GetJwksParams params = new GetJwksParams();
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
+
+        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization());
+        assertNotNull(response);
+        assertNotNull(response.getKeys());
+        assertFalse(response.getKeys().isEmpty());
+
+    }
+
+    @Test
     @Parameters({"opDiscoveryPath"})
     public void testWithNoOP(@Optional String opDiscoveryPath) throws Exception {
 

@@ -23,6 +23,8 @@ public class Rp implements Serializable {
     private String opHost;
     @JsonProperty(value = "op_discovery_path")
     private String opDiscoveryPath;
+    @JsonProperty(value = "op_configuration_endpoint")
+    private String opConfigurationEndpoint;
     @JsonProperty(value = "id_token")
     private String idToken;
     @JsonProperty(value = "access_token")
@@ -198,7 +200,7 @@ public class Rp implements Serializable {
 
         this.opHost = conf.opHost;
         this.opDiscoveryPath = conf.opDiscoveryPath;
-
+        this.opConfigurationEndpoint = conf.opConfigurationEndpoint;
         this.idToken = conf.idToken;
         this.accessToken = conf.accessToken;
 
@@ -599,6 +601,14 @@ public class Rp implements Serializable {
 
     public String getOpHost() {
         return opHost;
+    }
+
+    public String getOpConfigurationEndpoint() {
+        return opConfigurationEndpoint;
+    }
+
+    public void setOpConfigurationEndpoint(String opConfigurationEndpoint) {
+        this.opConfigurationEndpoint = opConfigurationEndpoint;
     }
 
     public String opHostWithoutProtocol() {
@@ -1042,6 +1052,7 @@ public class Rp implements Serializable {
                 "oxdId='" + oxdId + '\'' +
                 ", opHost='" + opHost + '\'' +
                 ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
+                ", opConfigurationEndpoint='" + opConfigurationEndpoint + '\'' +
                 ", idToken='" + idToken + '\'' +
                 ", accessToken='" + accessToken + '\'' +
                 ", redirectUri='" + redirectUri + '\'' +

@@ -72,6 +72,7 @@ logging:
 defaultSiteConfig:
   op_host: ''
   op_discovery_path: ''
+  op_configuration_endpoint: ''
   response_types: ['code']
   grant_type: ['authorization_code']
   acr_values: ['']
