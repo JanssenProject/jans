@@ -9,7 +9,7 @@ info:
     email: yuriyz@gluu.org
   license:
     name: License
-    url: https://github.com/GluuFederation/oxd/blob/master/LICENSE
+    url: https://github.com/GluuFederation/oxd/blob/master/license.md
   version: "4.2"
 servers:
 - url: https://gluu.org/
