@@ -8,6 +8,8 @@ package org.gluu.oxauth;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
@@ -840,12 +842,16 @@ public abstract class BaseTest {
         if (p_verifierType != null && p_verifierType != HostnameVerifierType.DEFAULT) {
             switch (p_verifierType) {
                 case ALLOW_ALL:
-                	return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+					return HttpClients.custom()
+							.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+							.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
 
             }
         }
 
-        return HttpClients.custom().build();
+        return HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+        		.build();
     }
 
     public static ClientExecutor clientExecutor() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
@@ -868,10 +874,12 @@ public abstract class BaseTest {
 			}
 		}).build();
 		SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-		return HttpClients.custom()
-                .setSSLSocketFactory(sslContextFactory)
-				.setRedirectStrategy(new LaxRedirectStrategy())
-                .build();
+		CloseableHttpClient httpclient = HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+				.setSSLSocketFactory(sslContextFactory)
+				.setRedirectStrategy(new LaxRedirectStrategy()).build();
+
+		return httpclient;
 	}
 
 	protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
