@@ -68,7 +68,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         RegisterSiteResponse response = new RegisterSiteResponse();
         response.setOxdId(oxdId);
-        response.setOpHost(params.getOpHost());
+        response.setOpHost(rp.getOpHost());
         response.setClientId(rp.getClientId());
         response.setClientName(rp.getClientName());
         response.setClientSecret(rp.getClientSecret());
@@ -102,15 +102,25 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         Rp fallback = getConfigurationService().defaultRp();
 
+        //op_configuration_endpoint
+        if (StringUtils.isBlank(params.getOpConfigurationEndpoint()) && StringUtils.isNotBlank(fallback.getOpConfigurationEndpoint())) {
+            params.setOpConfigurationEndpoint(fallback.getOpConfigurationEndpoint());
+        }
+
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("'op_host' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_host'");
+            LOG.warn("Either 'op_configuration_endpoint' or 'op_host' should be set. Parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint' or 'op_host'");
             String fallbackOpHost = fallback.getOpHost();
-            if (Strings.isNullOrEmpty(fallbackOpHost)) {
-                throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
+            if (Strings.isNullOrEmpty(fallbackOpHost) && Strings.isNullOrEmpty(params.getOpConfigurationEndpoint())) {
+                throw new HttpException(ErrorResponseCode.INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT);
             }
             LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from configuration file.");
             params.setOpHost(fallbackOpHost);
+        }
+
+        //op_discovery_path
+        if (StringUtils.isBlank(params.getOpDiscoveryPath()) && StringUtils.isNotBlank(fallback.getOpDiscoveryPath())) {
+            params.setOpDiscoveryPath(fallback.getOpDiscoveryPath());
         }
 
         // grant_type
@@ -162,8 +172,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
         if (autoRegister != null && autoRegister && !redirectUris.isEmpty()) {
             String first = redirectUris.iterator().next();
-            if (first.contains(params.getOpHost())) {
-                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpHost(), params.getOpDiscoveryPath());
+            if (first.contains(getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer())) {
+                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
                 String autoRedirectUri = discovery.getClaimsInteractionEndpoint() + "?authentication=true";
 
                 LOG.trace("Register claims interaction endpoint as redirect_uri: " + autoRedirectUri);
@@ -420,8 +430,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             rp = createRp(registerRequest);
             rp.setOxdId(siteId);
             rp.setApplicationType("web");
-            rp.setOpHost(params.getOpHost());
+            rp.setOpHost(getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer());
             rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
+            rp.setOpConfigurationEndpoint(params.getOpConfigurationEndpoint());
             rp.setUiLocales(params.getUiLocales());
             rp.setSyncClientFromOp(params.getSyncClientFromOp());
             rp.setSyncClientPeriodInSeconds(params.getSyncClientPeriodInSeconds());
@@ -451,11 +462,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterResponse registerClient(RegisterSiteParams params, RegisterRequest request) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
+        String opHostEndpoint = Strings.isNullOrEmpty(params.getOpConfigurationEndpoint()) ? params.getOpHost() : params.getOpConfigurationEndpoint();
+        Preconditions.checkState(!Strings.isNullOrEmpty(opHostEndpoint), "Both op_configuration_endpoint and op_host contains blank value. Please specify valid OP public address.");
 
-        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
+        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
-            LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
+            LOG.error("This OP (" + opHostEndpoint + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
             throw new HttpException(ErrorResponseCode.NO_REGISTRATION_ENDPOINT);
         }

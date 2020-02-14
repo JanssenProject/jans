@@ -33,18 +33,25 @@ public class RegisterSiteTest {
         assertNotNull(resp);
 
         notEmpty(resp.getOxdId());
+        oxdId = resp.getOxdId();
+    }
+    @Parameters({"host", "opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
+    @Test
+    public static void register_withOpConfigurationEndpoint(String host, String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls) {
 
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
-        //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
-        params.setOpHost(opHost);
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setAcrValues(new ArrayList<String>());
-        params.setScope(Lists.newArrayList("openid", "profile"));
-        params.setGrantTypes(Lists.newArrayList("authorization_code"));
-        params.setResponseTypes(Lists.newArrayList("code"));
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
 
         params.setClientName("oxd-client-extension-up" + System.currentTimeMillis());
         params.setClientTokenEndpointAuthMethod("client_secret_basic");
@@ -90,10 +97,9 @@ public class RegisterSiteTest {
         customAttributes.put("k2", "v2");
         params.setCustomAttributes(customAttributes);
 
-        resp = Tester.newClient(host).registerSite(params);
+        RegisterSiteResponse resp = Tester.newClient(host).registerSite(params);
         assertNotNull(resp);
         assertNotNull(resp.getOxdId());
-        oxdId = resp.getOxdId();
     }
 
     @Parameters({"host"})
