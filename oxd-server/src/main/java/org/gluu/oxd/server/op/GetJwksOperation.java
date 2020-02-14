@@ -33,15 +33,15 @@ public class GetJwksOperation extends BaseOperation<GetJwksParams> {
     @Override
     public IOpResponse execute(GetJwksParams params) {
 
-        if (StringUtils.isEmpty(params.getOpHost())) {
-            throw new HttpException(ErrorResponseCode.INVALID_OP_HOST);
+        if (StringUtils.isEmpty(params.getOpHost()) && StringUtils.isEmpty(params.getOpConfigurationEndpoint())) {
+            throw new HttpException(ErrorResponseCode.INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT);
         }
 
         try {
 
             final DiscoveryService discoveryService = getDiscoveryService();
 
-            final UmaMetadata umaMetadata = discoveryService.getUmaDiscovery(params.getOpHost(), params.getOpDiscoveryPath());
+            final UmaMetadata umaMetadata = discoveryService.getUmaDiscovery(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
 
             final String jwksUri = umaMetadata.getJwksUri();
 

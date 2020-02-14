@@ -38,9 +38,15 @@ public class RegisterSiteTest {
 
         registerSite(client, opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
 
+    }
+
+    @Parameters({"opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
+    @Test
+    public void register_withOpConfigurationEndpoint(String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+        DevelopersApi client = api();
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
-        params.setOpHost(opHost);
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));

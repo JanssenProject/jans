@@ -33,7 +33,7 @@ public class GetDiscoveryOperation extends BaseOperation<GetDiscoveryParams> {
     }
 
     public IOpResponse execute(GetDiscoveryParams params) {
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath());
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath());
 
         GetDiscoveryResponse response = new GetDiscoveryResponse();
         try {
