@@ -1,6 +1,9 @@
 package io.swagger.client.api;
 
-import io.swagger.client.model.*;
+import io.swagger.client.model.RegisterSiteResponse;
+import io.swagger.client.model.RsResource;
+import io.swagger.client.model.UmaRsModifyParams;
+import io.swagger.client.model.UmaRsModifyResponse;
 import org.gluu.oxd.common.Jackson2;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -40,7 +43,7 @@ public class RsModifyTest {
 
     }
 
-    public static UmaRsProtectResponse modifyResourcesWithScopes(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
+    public static UmaRsModifyResponse modifyResourcesWithScopes(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources) throws Exception {
         final UmaRsModifyParams params = new UmaRsModifyParams();
         params.setOxdId(site.getOxdId());
         RsResource rsResource = Jackson2.createJsonMapper().convertValue(resources.get(0), RsResource.class);
@@ -48,19 +51,19 @@ public class RsModifyTest {
         params.setPath(rsResource.getPath());
         params.setScopes(Lists.newArrayList("http://photoz.example.com/dev/actions/see"));
 
-        final UmaRsProtectResponse resp = client.umaRsModify(getAuthorization(), params);
+        final UmaRsModifyResponse resp = client.umaRsModify(params, getAuthorization());
         assertNotNull(resp.getOxdId());
         return resp;
     }
 
-    public static UmaRsProtectResponse modifyResourcesWithScopeExpression(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources, String correctScopeExpression) throws Exception {
+    public static UmaRsModifyResponse modifyResourcesWithScopeExpression(DevelopersApi client, RegisterSiteResponse site, List<RsResource> resources, String correctScopeExpression) throws Exception {
         final UmaRsModifyParams params = new UmaRsModifyParams();
         params.setOxdId(site.getOxdId());
         params.setHttpMethod("GET");
         params.setPath("/ws/phone");
         params.setScopeExpression(correctScopeExpression.replaceAll("'", "\""));
 
-        final UmaRsProtectResponse resp = client.umaRsModify(getAuthorization(), params);
+        final UmaRsModifyResponse resp = client.umaRsModify(params, getAuthorization());
         assertNotNull(resp.getOxdId());
         return resp;
     }

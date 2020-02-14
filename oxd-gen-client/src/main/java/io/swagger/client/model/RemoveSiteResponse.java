@@ -22,30 +22,30 @@ import com.google.gson.stream.JsonWriter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
 /**
- * GetAuthorizationUrlResponse
+ * RemoveSiteResponse
  */
 
 
-public class GetAuthorizationUrlResponse {
-  @SerializedName("authorization_url")
-  private String authorizationUrl = null;
+public class RemoveSiteResponse {
+  @SerializedName("oxd_id")
+  private String oxdId = null;
 
-  public GetAuthorizationUrlResponse authorizationUrl(String authorizationUrl) {
-    this.authorizationUrl = authorizationUrl;
+  public RemoveSiteResponse oxdId(String oxdId) {
+    this.oxdId = oxdId;
     return this;
   }
 
    /**
-   * Get authorizationUrl
-   * @return authorizationUrl
+   * Get oxdId
+   * @return oxdId
   **/
-  @Schema(example = "https://<op-hostname>/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm", required = true, description = "")
-  public String getAuthorizationUrl() {
-    return authorizationUrl;
+  @Schema(required = true, description = "")
+  public String getOxdId() {
+    return oxdId;
   }
 
-  public void setAuthorizationUrl(String authorizationUrl) {
-    this.authorizationUrl = authorizationUrl;
+  public void setOxdId(String oxdId) {
+    this.oxdId = oxdId;
   }
 
 
@@ -57,22 +57,22 @@ public class GetAuthorizationUrlResponse {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GetAuthorizationUrlResponse getAuthorizationUrlResponse = (GetAuthorizationUrlResponse) o;
-    return Objects.equals(this.authorizationUrl, getAuthorizationUrlResponse.authorizationUrl);
+    RemoveSiteResponse removeSiteResponse = (RemoveSiteResponse) o;
+    return Objects.equals(this.oxdId, removeSiteResponse.oxdId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authorizationUrl);
+    return Objects.hash(oxdId);
   }
 
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GetAuthorizationUrlResponse {\n");
+    sb.append("class RemoveSiteResponse {\n");
     
-    sb.append("    authorizationUrl: ").append(toIndentedString(authorizationUrl)).append("\n");
+    sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

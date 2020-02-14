@@ -51,7 +51,7 @@ public class RpGetRptTest {
         params.setTicket(checkAccess.getTicket());
         params.setRpt(firstResponse.getAccessToken());
 
-        final UmaRpGetRptResponse secondResponse = client.umaRpGetRpt(Tester.getAuthorization(), params);
+        final UmaRpGetRptResponse secondResponse = client.umaRpGetRpt(params, Tester.getAuthorization());
 
         assertNotNull(secondResponse);
         assertEquals(secondResponse.getAccessToken(), firstResponse.getAccessToken());
@@ -70,7 +70,7 @@ public class RpGetRptTest {
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
 
-        final UmaRpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), params);
+        final UmaRpGetRptResponse response = client.umaRpGetRpt(params, Tester.getAuthorization());
 
         assertNotNull(response);
         assertTrue(isNotBlank(response.getAccessToken()));
