@@ -3126,7 +3126,7 @@ class Setup(object):
         if self.noPrompt:
             return
 
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the Apache-2.0 license?","N|y")[0].lower()
         if promptForMITLicense != 'y':
             sys.exit(0)
 
