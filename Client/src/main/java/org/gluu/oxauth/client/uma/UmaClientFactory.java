@@ -111,7 +111,7 @@ public class UmaClientFactory {
 
         return proxy;
     }
-	
+
 	private ApacheHttpClient4Engine createEngine() {
 	    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 	    CloseableHttpClient httpClient = HttpClients.custom()
