@@ -5,6 +5,7 @@
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="opDiscoveryPath" value=""/>
+    <parameter name="opConfigurationEndpoint" value="https://${test.server.name}/.well-known/openid-configuration"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
     <parameter name="postLogoutRedirectUrl" value="https://client.example.com/cb/logout"/>
@@ -194,6 +195,12 @@
 
 
     <!-- SWAGGER TESTS -->
+
+    <test name="Get OpDiscovery swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetDiscoveryTest"></class>
+        </classes>
+    </test>
 
     <test name="Register site swagger" enabled="true">
         <classes>
