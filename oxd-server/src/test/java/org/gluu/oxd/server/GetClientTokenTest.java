@@ -31,4 +31,20 @@ public class GetClientTokenTest {
         notEmpty(resp.getAccessToken());
 
     }
+
+    @Parameters({"host", "opConfigurationEndpoint"})
+    @Test
+    public void getClientToken_withOpConfigurationEndpoint(String host, String opConfigurationEndpoint) {
+        final GetClientTokenParams params = new GetClientTokenParams();
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
+        params.setScope(Lists.newArrayList("openid"));
+        params.setClientId(Tester.getSetupClient().getClientId());
+        params.setClientSecret(Tester.getSetupClient().getClientSecret());
+
+        GetClientTokenResponse resp = Tester.newClient(host).getClientToken(params);
+
+        assertNotNull(resp);
+        notEmpty(resp.getAccessToken());
+
+    }
 }

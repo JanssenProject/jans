@@ -20,4 +20,17 @@ public class GetDiscoveryTest {
         assertNotNull(resp);
         assertNotNull(resp.getIssuer());
     }
+
+    @Parameters({"opConfigurationEndpoint"})
+    @Test
+    public void test_withOpConfigurationEndpoint(String opConfigurationEndpoint) throws Exception {
+        DevelopersApi api = Tester.api();
+
+        final GetDiscoveryParams commandParams = new GetDiscoveryParams();
+        commandParams.setOpConfigurationEndpoint(opConfigurationEndpoint);
+
+        final GetDiscoveryResponse resp = api.getDiscovery(commandParams);
+        assertNotNull(resp);
+        assertNotNull(resp.getIssuer());
+    }
 }

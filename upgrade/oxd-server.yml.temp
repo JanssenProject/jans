@@ -71,6 +71,7 @@ logging:
 defaultSiteConfig:
   op_host: {{defaultSiteConfig:op_host}}
   op_discovery_path: {{defaultSiteConfig:op_discovery_path}}
+  op_configuration_endpoint: {{defaultSiteConfig:op_configuration_endpoint}}
   response_types: {{defaultSiteConfig:response_types}}
   grant_type: {{defaultSiteConfig:response_types}}
   acr_values: {{defaultSiteConfig:acr_values}}
