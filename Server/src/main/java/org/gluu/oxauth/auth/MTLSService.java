@@ -9,9 +9,11 @@ import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.util.CertUtils;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.SessionIdService;
@@ -25,6 +27,8 @@ import javax.inject.Named;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -49,6 +53,9 @@ public class MTLSService {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain, Client client) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
                 client.getAuthenticationMethod());
@@ -63,6 +70,11 @@ public class MTLSService {
         if (cert == null) {
             log.debug("Failed to parse client certificate, client_id: {}.", client.getClientId());
             return false;
+        }
+        final String cn = CertUtils.getCN(cert);
+        if (!cn.equals(client.getClientId())) {
+            log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId());
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
