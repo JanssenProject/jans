@@ -25,7 +25,7 @@ public class GetAuthorizationUrlTest {
         final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
         commandParams.setOxdId(site.getOxdId());
 
-        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site));
         assertNotNull(resp);
         Tester.notEmpty(resp.getAuthorizationUrl());
     }
@@ -40,7 +40,7 @@ public class GetAuthorizationUrlTest {
         commandParams.setOxdId(site.getOxdId());
         commandParams.setState(state);
 
-        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site));
         assertNotNull(resp);
         Tester.notEmpty(resp.getAuthorizationUrl());
 
@@ -59,7 +59,7 @@ public class GetAuthorizationUrlTest {
         commandParams.setOxdId(site.getOxdId());
         commandParams.setResponseTypes(Lists.newArrayList("code", "token"));
 
-        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(Tester.getAuthorization(site), commandParams);
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site));
         assertNotNull(resp);
         Tester.notEmpty(resp.getAuthorizationUrl());
 
