@@ -106,8 +106,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (StringUtils.isBlank(params.getOpConfigurationEndpoint())) {
             LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'");
             String fallbackOpConfigurationEndpoint = fallback.getOpConfigurationEndpoint();
-            LOG.warn("Fallback to op_configuration_endpoint: " + fallbackOpConfigurationEndpoint + ", from configuration file.");
-            params.setOpConfigurationEndpoint(fallbackOpConfigurationEndpoint);
+            if(StringUtils.isNotBlank(fallbackOpConfigurationEndpoint)) {
+                LOG.warn("Fallback to op_configuration_endpoint: " + fallbackOpConfigurationEndpoint + ", from configuration file.");
+                params.setOpConfigurationEndpoint(fallbackOpConfigurationEndpoint);
+            }
         }
 
         // op_host
