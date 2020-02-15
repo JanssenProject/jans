@@ -103,24 +103,17 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         Rp fallback = getConfigurationService().defaultRp();
 
         //op_configuration_endpoint
-        if (StringUtils.isBlank(params.getOpConfigurationEndpoint()) && StringUtils.isNotBlank(fallback.getOpConfigurationEndpoint())) {
-            params.setOpConfigurationEndpoint(fallback.getOpConfigurationEndpoint());
+        if (StringUtils.isBlank(params.getOpConfigurationEndpoint())) {
+            LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'");
+            String fallbackOpConfigurationEndpoint = fallback.getOpConfigurationEndpoint();
+            LOG.warn("Fallback to op_configuration_endpoint: " + fallbackOpConfigurationEndpoint + ", from configuration file.");
+            params.setOpConfigurationEndpoint(fallbackOpConfigurationEndpoint);
         }
 
         // op_host
-        if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("Either 'op_configuration_endpoint' or 'op_host' should be set. Parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint' or 'op_host'");
-            String fallbackOpHost = fallback.getOpHost();
-            if (Strings.isNullOrEmpty(fallbackOpHost) && Strings.isNullOrEmpty(params.getOpConfigurationEndpoint())) {
-                throw new HttpException(ErrorResponseCode.INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT);
-            }
-            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from configuration file.");
-            params.setOpHost(fallbackOpHost);
-        }
-
-        //op_discovery_path
-        if (StringUtils.isBlank(params.getOpDiscoveryPath()) && StringUtils.isNotBlank(fallback.getOpDiscoveryPath())) {
-            params.setOpDiscoveryPath(fallback.getOpDiscoveryPath());
+        if (Strings.isNullOrEmpty(params.getOpHost()) && Strings.isNullOrEmpty(params.getOpConfigurationEndpoint())) {
+            LOG.error("Either 'op_configuration_endpoint' or 'op_host' should be set. Parameter: " + params);
+            throw new HttpException(ErrorResponseCode.INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT);
         }
 
         // grant_type
