@@ -61,19 +61,20 @@ paths:
                     it must be present in defaults or `op_host` must be defined.
                 op_host:
                   type: string
-                  description: Provide the URL of OpenID Provider (OP). If missing,
-                    then either it must be present in defaults or `op_configuration_endpoint`
-                    must be defined.
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide the URL of OpenID Provider (OP) in this
+                    field. If missing, then `op_configuration_endpoint` must be defined.
                   deprecated: true
                   example: https://<ophostname>
                 op_discovery_path:
                   type: string
                   example: /oxauth
                   deprecated: true
-                  description: Path to the OpenID Connect Provider's discovery document.
-                    For example, if it is 'https://example.com/.well-known/openid-configuration'
-                    then the path is blank . But if it is
-                    'https://example.com/oxauth/.well-known/openid-configuration'
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide path to the OpenID Connect Provider's
+                    discovery document in this field. For example, if it is
+                    'https://example.com/.well-known/openid-configuration' then the path is blank.
+                    But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
                     then the path is '/oxauth'
                 post_logout_redirect_uris:
                   type: array
@@ -461,17 +462,19 @@ paths:
                   type: string
                   example: https://<ophostname>
                   deprecated: true
-                  description: Provide the URL of OpenID Provider (OP). If missing, then
-                    `op_configuration_endpoint` must be defined.
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide the URL of OpenID Provider (OP) in this
+                    field. If missing, then `op_configuration_endpoint` must be defined.
                 op_discovery_path:
                   type: string
                   example: /oxauth
                   deprecated: true
-                  description: Path to the OpenID Connect Provider's discovery document.
-                    For example, if it is 'https://example.com/.well-known/openid-configuration'
-                    then the path is blank . But if it is
-                    'https://example.com/oxauth/.well-known/openid-configuration' then the path
-                    is '/oxauth'
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide path to the OpenID Connect Provider's
+                    discovery document in this field. For example, if it is
+                    'https://example.com/.well-known/openid-configuration' then the path is blank.
+                    But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
+                    then the path is '/oxauth'
                 scope:
                   type: array
                   example:
@@ -1974,17 +1977,19 @@ paths:
                   type: string
                   example: https://<ophostname>
                   deprecated: true
-                  description: Provide the URL of OpenID Provider (OP). If missing,
-                    then `op_configuration_endpoint` must be defined.
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide the URL of OpenID Provider (OP) in this
+                    field. If missing, then `op_configuration_endpoint` must be defined.
                 op_discovery_path:
                   type: string
                   example: /oxauth
                   deprecated: true
-                  description: Path to the OpenID Connect Provider's discovery document.
-                    For example, if it is 'https://example.com/.well-known/openid-configuration'
-                    then the path is blank . But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide path to the OpenID Connect Provider's
+                    discovery document in this field. For example, if it is
+                    'https://example.com/.well-known/openid-configuration' then the path is blank.
+                    But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
                     then the path is '/oxauth'
-
         required: false
       responses:
         200:
@@ -2046,15 +2051,18 @@ paths:
                   type: string
                   example: https://<ophostname>
                   deprecated: true
-                  description: Provide the URL of OpenID Provider (OP). If missing,
-                    then `op_configuration_endpoint` must be defined.
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide the URL of OpenID Provider (OP) in this
+                    field. If missing, then `op_configuration_endpoint` must be defined.
                 op_discovery_path:
                   type: string
                   example: /oxauth
                   deprecated: true
-                  description: Path to the OpenID Connect Provider's discovery document.
-                    For example, if it is 'https://example.com/.well-known/openid-configuration'
-                    then the path is blank . But if it is 'https://example.com/oxauth/.well-known/openid-configuration`'
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide path to the OpenID Connect Provider's
+                    discovery document in this field. For example, if it is
+                    'https://example.com/.well-known/openid-configuration' then the path is blank.
+                    But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
                     then the path is '/oxauth'
         required: false
       responses:
