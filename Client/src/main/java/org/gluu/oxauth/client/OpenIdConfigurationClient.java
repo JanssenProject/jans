@@ -79,7 +79,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
             setResponse(new OpenIdConfigurationResponse(status));
 
-            clientResponse.getEntity(String.class);
+            entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
