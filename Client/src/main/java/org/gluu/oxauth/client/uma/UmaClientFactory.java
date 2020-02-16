@@ -45,7 +45,8 @@ public class UmaClientFactory {
     }
 
     public UmaResourceService createResourceService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).property(name, value).build();
+        client.	
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getResourceRegistrationEndpoint()));
         UmaResourceService proxy = target.proxy(UmaResourceService.class);
 
@@ -120,6 +121,7 @@ public class UmaClientFactory {
 	    cm.setMaxTotal(200); // Increase max total connection to 200
 	    cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
 	    ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+	    engine.setFollowRedirects(true);
 	    
 	    return engine;
 	}
