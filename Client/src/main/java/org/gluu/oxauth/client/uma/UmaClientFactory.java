@@ -45,8 +45,7 @@ public class UmaClientFactory {
     }
 
     public UmaResourceService createResourceService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).property(name, value).build();
-        client.	
+        ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(metadata.getResourceRegistrationEndpoint()));
         UmaResourceService proxy = target.proxy(UmaResourceService.class);
 
