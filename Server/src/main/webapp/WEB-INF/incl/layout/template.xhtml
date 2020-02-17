@@ -16,6 +16,10 @@
     <h:body>
         <div class="body">
         	<div id="status" class="modal"><span style="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px">Loading...</span></div>
+            <h:messages id="messages" globalOnly="true" styleClass="message"
+                        errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+                        rendered="#{showGlobalMessages != 'false'}"/>
+            <ui:insert name="body"/>
 			<script type="text/javascript">
 				if (!(typeof jsf === 'undefined')) {
 		            function handleAjax(data) {
@@ -36,10 +40,6 @@
 	    	        jsf.ajax.addOnEvent(handleAjax);
 				}
         	</script> 
-            <h:messages id="messages" globalOnly="true" styleClass="message"
-                        errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
-                        rendered="#{showGlobalMessages != 'false'}"/>
-            <ui:insert name="body"/>
         </div>
     </h:body>
 </f:view>
