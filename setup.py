@@ -2928,11 +2928,16 @@ class Setup(object):
 
         if ldap_mappings:
             gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
+            ldap_map_list = []
+            for m in ldap_mappings:
+                if m != 'default':
+                    ldap_map_list.append(self.couchbaseBucketDict[m]['mapping'])
+            gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_map_list)))
 
         if couchbase_mappings:
             cb_map_list = []
             for m in couchbase_mappings:
-                if not m == 'default':
+                if m != 'default':
                     cb_map_list.append(self.couchbaseBucketDict[m]['mapping'])
             cb_map_str = ', '.join(cb_map_list)
             gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(cb_map_str))
