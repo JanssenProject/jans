@@ -37,6 +37,20 @@ public class GetJwksTest {
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());
+    }
 
+    @Test
+    @Parameters({"host", "opConfigurationEndpoint"})
+    public void test_withOpConfigurationEndpoint(String host, String opConfigurationEndpoint) {
+
+        final ClientInterface client = Tester.newClient(host);
+
+        final GetJwksParams params = new GetJwksParams();
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
+
+        final GetJwksResponse response = client.getJwks(Tester.getAuthorization(), params);
+        assertNotNull(response);
+        assertNotNull(response.getKeys());
+        assertFalse(response.getKeys().isEmpty());
     }
 }

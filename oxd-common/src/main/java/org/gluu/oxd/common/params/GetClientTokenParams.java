@@ -21,6 +21,8 @@ public class GetClientTokenParams implements IParams {
     private String op_host;
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
+    @JsonProperty(value = "op_configuration_endpoint")
+    private String op_configuration_endpoint;
     @JsonProperty(value = "scope")
     private List<String> scope;
     @JsonProperty(value = "authentication_method")
@@ -36,6 +38,14 @@ public class GetClientTokenParams implements IParams {
 
     public void setOpDiscoveryPath(String opDiscoveryPath) {
         this.op_discovery_path = opDiscoveryPath;
+    }
+
+    public String getOpConfigurationEndpoint() {
+        return op_configuration_endpoint;
+    }
+
+    public void setOpConfigurationEndpoint(String op_configuration_endpoint) {
+        this.op_configuration_endpoint = op_configuration_endpoint;
     }
 
     public String getClientId() {
@@ -100,6 +110,7 @@ public class GetClientTokenParams implements IParams {
                 "client_id='" + client_id + '\'' +
                 ", op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
+                ", op_configuration_endpoint='" + op_configuration_endpoint + '\'' +
                 ", scope=" + scope +
                 ", authentication_method='" + authentication_method + '\'' +
                 ", algorithm='" + algorithm + '\'' +

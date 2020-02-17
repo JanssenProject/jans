@@ -17,6 +17,8 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private String op_host;
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
+    @JsonProperty(value = "op_configuration_endpoint")
+    private String op_configuration_endpoint;
     @JsonProperty(value = "post_logout_redirect_uris")
     private List<String> post_logout_redirect_uris;
     @JsonProperty(value = "redirect_uris")
@@ -197,6 +199,14 @@ public class RegisterSiteParams implements HasOxdIdParams {
 
     public void setOpDiscoveryPath(String opDiscoveryPath) {
         this.op_discovery_path = opDiscoveryPath;
+    }
+
+    public String getOpConfigurationEndpoint() {
+        return op_configuration_endpoint;
+    }
+
+    public void setOpConfigurationEndpoint(String op_configuration_endpoint) {
+        this.op_configuration_endpoint = op_configuration_endpoint;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -880,6 +890,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
         return "RegisterSiteParams{" +
                 "op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
+                ", op_configuration_endpoint='" + op_configuration_endpoint + '\'' +
                 ", post_logout_redirect_uris='" + post_logout_redirect_uris + '\'' +
                 ", redirect_uris=" + redirect_uris +
                 ", response_types=" + response_types +

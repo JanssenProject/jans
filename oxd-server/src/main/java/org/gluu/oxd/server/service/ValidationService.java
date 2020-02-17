@@ -43,6 +43,12 @@ public class ValidationService {
         }
     }
 
+    public void validateOpConfigurationEndpoint(String opConfigurationEndpoint) {
+        if (Strings.isNullOrEmpty(opConfigurationEndpoint) || !opConfigurationEndpoint.contains(DiscoveryService.WELL_KNOWN_CONNECT_PATH)) {
+            throw new HttpException(ErrorResponseCode.INVALID_OP_CONFIGURATION_ENDPOINT);
+        }
+    }
+
     public void isOpHostAllowed(String opHost) {
         List<String> allowedOpHosts = configuration.getAllowedOpHosts();
         if (!Strings.isNullOrEmpty(opHost) && !allowedOpHosts.isEmpty()) {
