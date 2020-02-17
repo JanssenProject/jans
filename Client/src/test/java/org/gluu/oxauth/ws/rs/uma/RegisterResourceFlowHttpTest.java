@@ -14,6 +14,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
@@ -179,7 +180,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             getResourceService().updateResource("Bearer " + pat.getAccessToken(), "fake_resource_id", resource);
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             int status = ex.getResponse().getStatus();
             assertTrue(status != Response.Status.OK.getStatusCode(), "Unexpected response status");
         }
@@ -201,7 +203,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
         }
 
