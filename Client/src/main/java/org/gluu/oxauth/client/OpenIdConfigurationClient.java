@@ -72,13 +72,14 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         clientRequest.setHttpMethod(getHttpMethod());
 
         // Call REST Service and handle response
+        String entity = null;
         try {
             clientResponse = clientRequest.get(String.class);
             int status = clientResponse.getStatus();
 
             setResponse(new OpenIdConfigurationResponse(status));
 
-            String entity = clientResponse.getEntity(String.class);
+            entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
@@ -194,6 +195,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             }
         } catch (JSONException e) {
             LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
+            if (entity != null) {
+            	LOG.error("Invalid JSON: " + entity);
+            }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw e;
