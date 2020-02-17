@@ -10,9 +10,9 @@ import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaScopeService;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxauth.model.uma.UmaScopeDescription;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
