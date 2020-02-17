@@ -12,6 +12,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.UnsupportedEncodingException;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
@@ -106,9 +107,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
         } catch (ClientResponseFailure ex) {
+        } catch (ClientErrorException ex) {
             // expected need_info error :
             // sample:  {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}
-            String entity = (String) ex.getResponse().getEntity(String.class);
+            String entity = (String) ex.getResponse().readEntity(String.class);
             System.out.println(entity);
 
             assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");
