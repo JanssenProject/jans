@@ -81,7 +81,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
     @BeforeClass
     @Parameters({"umaMetaDataUrl"})
     public void init(final String umaMetaDataUrl) throws Exception {
-        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
+        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
         assert_(this.metadata);
 
         registerClient();
@@ -95,8 +95,8 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
         this.permissionFlowTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
         this.permissionFlowTest.registerResourceTest = this.registerResourceTest;
 
-        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientExecutor(true));
-        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientExecutor(true));
+        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientEngine(true));
+        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientEngine(true));
     }
 
     @Test
