@@ -44,7 +44,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
     public IOpResponse execute(GetClientTokenParams params) {
         try {
             final AuthenticationMethod authenticationMethod = AuthenticationMethod.fromString(params.getAuthenticationMethod());
-            final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
+            final String tokenEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint();
             final TokenClient tokenClient = getOpClientFactory().createTokenClient(tokenEndpoint);
             tokenClient.setExecutor(getHttpService().getClientExecutor());
 

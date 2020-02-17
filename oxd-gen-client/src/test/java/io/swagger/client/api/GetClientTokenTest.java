@@ -33,4 +33,19 @@ public class GetClientTokenTest {
         Tester.notEmpty(resp.getAccessToken());
 
     }
+
+    @Parameters({ "opConfigurationEndpoint"})
+    @Test
+    public void getClientToken_withOpConfigurationEndpoint(String opConfigurationEndpoint) throws ApiException {
+        final GetClientTokenParams params = new GetClientTokenParams();
+        params.setOpConfigurationEndpoint(opConfigurationEndpoint);
+        params.setScope(Lists.newArrayList("openid","oxd"));
+        params.setClientId(Tester.getSetupData().getClientId());
+        params.setClientSecret(Tester.getSetupData().getClientSecret());
+
+        GetClientTokenResponse resp = Tester.api().getClientToken(params);
+        assertNotNull(resp);
+        Tester.notEmpty(resp.getAccessToken());
+
+    }
 }

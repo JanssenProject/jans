@@ -29,6 +29,9 @@ import java.util.List;
 
 
 public class GetClientTokenParams {
+  @SerializedName("op_configuration_endpoint")
+  private String opConfigurationEndpoint = null;
+
   @SerializedName("op_host")
   private String opHost = null;
 
@@ -53,16 +56,34 @@ public class GetClientTokenParams {
   @SerializedName("key_id")
   private String keyId = null;
 
+  public GetClientTokenParams opConfigurationEndpoint(String opConfigurationEndpoint) {
+    this.opConfigurationEndpoint = opConfigurationEndpoint;
+    return this;
+  }
+
+   /**
+   * The openid configuration endpoint URL. If missing, then &#x60;op_host&#x60; must be defined.
+   * @return opConfigurationEndpoint
+  **/
+  @Schema(example = "https://op.example.com/acme/.well-known/openid-configuration", required = true, description = "The openid configuration endpoint URL. If missing, then `op_host` must be defined.")
+  public String getOpConfigurationEndpoint() {
+    return opConfigurationEndpoint;
+  }
+
+  public void setOpConfigurationEndpoint(String opConfigurationEndpoint) {
+    this.opConfigurationEndpoint = opConfigurationEndpoint;
+  }
+
   public GetClientTokenParams opHost(String opHost) {
     this.opHost = opHost;
     return this;
   }
 
    /**
-   * Get opHost
+   * Provide the URL of OpenID Provider (OP). If missing, then &#x60;op_configuration_endpoint&#x60; must be defined.
    * @return opHost
   **/
-  @Schema(example = "https://<op-hostname>", required = true, description = "")
+  @Schema(example = "https://<ophostname>", description = "Provide the URL of OpenID Provider (OP). If missing, then `op_configuration_endpoint` must be defined.")
   public String getOpHost() {
     return opHost;
   }
@@ -77,10 +98,10 @@ public class GetClientTokenParams {
   }
 
    /**
-   * Get opDiscoveryPath
+   * Path to the OpenID Connect Provider&#x27;s discovery document. For example, if it is &#x27;https://example.com/.well-known/openid-configuration&#x27; then the path is blank . But if it is &#x27;https://example.com/oxauth/.well-known/openid-configuration&#x27; then the path is &#x27;/oxauth&#x27;
    * @return opDiscoveryPath
   **/
-  @Schema(description = "")
+  @Schema(example = "/oxauth", description = "Path to the OpenID Connect Provider's discovery document. For example, if it is 'https://example.com/.well-known/openid-configuration' then the path is blank . But if it is 'https://example.com/oxauth/.well-known/openid-configuration' then the path is '/oxauth'")
   public String getOpDiscoveryPath() {
     return opDiscoveryPath;
   }
@@ -215,7 +236,8 @@ public class GetClientTokenParams {
       return false;
     }
     GetClientTokenParams getClientTokenParams = (GetClientTokenParams) o;
-    return Objects.equals(this.opHost, getClientTokenParams.opHost) &&
+    return Objects.equals(this.opConfigurationEndpoint, getClientTokenParams.opConfigurationEndpoint) &&
+        Objects.equals(this.opHost, getClientTokenParams.opHost) &&
         Objects.equals(this.opDiscoveryPath, getClientTokenParams.opDiscoveryPath) &&
         Objects.equals(this.scope, getClientTokenParams.scope) &&
         Objects.equals(this.clientId, getClientTokenParams.clientId) &&
@@ -227,7 +249,7 @@ public class GetClientTokenParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(opHost, opDiscoveryPath, scope, clientId, clientSecret, authenticationMethod, algorithm, keyId);
+    return Objects.hash(opConfigurationEndpoint, opHost, opDiscoveryPath, scope, clientId, clientSecret, authenticationMethod, algorithm, keyId);
   }
 
 
@@ -236,6 +258,7 @@ public class GetClientTokenParams {
     StringBuilder sb = new StringBuilder();
     sb.append("class GetClientTokenParams {\n");
     
+    sb.append("    opConfigurationEndpoint: ").append(toIndentedString(opConfigurationEndpoint)).append("\n");
     sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
     sb.append("    opDiscoveryPath: ").append(toIndentedString(opDiscoveryPath)).append("\n");
     sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
