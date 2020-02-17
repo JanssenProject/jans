@@ -6,6 +6,14 @@
 
 package org.gluu.oxauth.ws.rs.uma;
 
+import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.BaseTest;
@@ -24,13 +32,6 @@ import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-
-import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-
-import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -56,7 +57,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
+        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
         assert_(this.metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
@@ -68,8 +69,8 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         this.permissionFlowTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
         this.permissionFlowTest.registerResourceTest = this.registerResourceTest;
 
-        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientExecutor(true));
-        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientExecutor(true));
+        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientEngine(true));
+        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientEngine(true));
     }
 
     /**
