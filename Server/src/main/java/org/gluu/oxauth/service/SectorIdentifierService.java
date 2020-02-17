@@ -1,18 +1,28 @@
 package org.gluu.oxauth.service;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.util.StringHelper;
+import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
  * @version January 15, 2016
  */
+@Stateless
 @Named
 public class SectorIdentifierService {
 
@@ -24,6 +34,13 @@ public class SectorIdentifierService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private PairwiseIdentifierService pairwiseIdentifierService;
+
+    @Inject
+    protected AppConfiguration appConfiguration;
+
 
     /**
      * Get sector identifier by oxId
@@ -56,4 +73,51 @@ public class SectorIdentifierService {
 
         return String.format("oxId=%s,%s", oxId, sectorIdentifierDn);
     }
+
+    public String getSub(Client client, User user) {
+        if (user == null) {
+            log.trace("User is null, return blank sub");
+            return "";
+        }
+        if (client == null) {
+            log.trace("Client is null, return blank sub.");
+            return "";
+        }
+
+
+        final boolean isClientPairwise = SubjectType.PAIRWISE.equals(SubjectType.fromString(client.getSubjectType()));
+        if (isClientPairwise) {
+            final String sectorIdentifierUri;
+            if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
+                sectorIdentifierUri = client.getSectorIdentifierUri();
+            } else {
+                sectorIdentifierUri = !ArrayUtils.isEmpty(client.getRedirectUris()) ? client.getRedirectUris()[0] : null;
+            }
+
+            String userInum = user.getAttribute("inum");
+
+            try {
+                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum,
+                        sectorIdentifierUri, client.getClientId());
+                if (pairwiseIdentifier == null) {
+                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, client.getClientId());
+                    pairwiseIdentifier.setId(UUID.randomUUID().toString());
+                    pairwiseIdentifier.setDn(
+                            pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
+                    pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
+                }
+                return pairwiseIdentifier.getId();
+            } catch (Exception e) {
+                log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
+                return "";
+            }
+        }
+
+        String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
+        if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
+            return user.getUserId();
+        }
+        return user.getAttribute(openidSubAttribute);
+    }
+
 }
