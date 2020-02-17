@@ -19,17 +19,6 @@
     ]
   },
 
-  "!bucket_prefix!_authorization": {
-     "attributes": [
-        ["oxAuthExpiration"],
-        ["del"],
-        ["oxAuthClientId"],
-        ["oxAuthUserId"]
-      ],
-    "static" : [
-    ]
-  },
-
   "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
