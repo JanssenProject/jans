@@ -34,8 +34,14 @@ public class RegisterSiteParams {
   @SerializedName("redirect_uris")
   private List<String> redirectUris = new ArrayList<String>();
 
+  @SerializedName("op_configuration_endpoint")
+  private String opConfigurationEndpoint = null;
+
   @SerializedName("op_host")
   private String opHost = null;
+
+  @SerializedName("op_discovery_path")
+  private String opDiscoveryPath = null;
 
   @SerializedName("post_logout_redirect_uris")
   private List<String> postLogoutRedirectUris = null;
@@ -216,22 +222,58 @@ public class RegisterSiteParams {
     this.redirectUris = redirectUris;
   }
 
+  public RegisterSiteParams opConfigurationEndpoint(String opConfigurationEndpoint) {
+    this.opConfigurationEndpoint = opConfigurationEndpoint;
+    return this;
+  }
+
+   /**
+   * The openid configuration endpoint URL. If missing, then either it must be present in defaults or &#x60;op_host&#x60; must be defined.
+   * @return opConfigurationEndpoint
+  **/
+  @Schema(example = "https://op.example.com/acme/.well-known/openid-configuration", description = "The openid configuration endpoint URL. If missing, then either it must be present in defaults or `op_host` must be defined.")
+  public String getOpConfigurationEndpoint() {
+    return opConfigurationEndpoint;
+  }
+
+  public void setOpConfigurationEndpoint(String opConfigurationEndpoint) {
+    this.opConfigurationEndpoint = opConfigurationEndpoint;
+  }
+
   public RegisterSiteParams opHost(String opHost) {
     this.opHost = opHost;
     return this;
   }
 
    /**
-   * Provide the URL of OpenID Provider (OP). If missing, must be present in defaults.
+   * Provide the URL of OpenID Provider (OP). If missing, then either it must be present in defaults or &#x60;op_configuration_endpoint&#x60; must be defined.
    * @return opHost
   **/
-  @Schema(example = "https://<ophostname>", description = "Provide the URL of OpenID Provider (OP). If missing, must be present in defaults.")
+  @Schema(example = "https://<ophostname>", description = "Provide the URL of OpenID Provider (OP). If missing, then either it must be present in defaults or `op_configuration_endpoint` must be defined.")
   public String getOpHost() {
     return opHost;
   }
 
   public void setOpHost(String opHost) {
     this.opHost = opHost;
+  }
+
+  public RegisterSiteParams opDiscoveryPath(String opDiscoveryPath) {
+    this.opDiscoveryPath = opDiscoveryPath;
+    return this;
+  }
+
+   /**
+   * Path to the OpenID Connect Provider&#x27;s discovery document. For example, if it is &#x27;https://example.com/.well-known/openid-configuration&#x27; then the path is blank . But if it is &#x27;https://example.com/oxauth/.well-known/openid-configuration&#x27; then the path is &#x27;/oxauth&#x27;
+   * @return opDiscoveryPath
+  **/
+  @Schema(example = "/oxauth", description = "Path to the OpenID Connect Provider's discovery document. For example, if it is 'https://example.com/.well-known/openid-configuration' then the path is blank . But if it is 'https://example.com/oxauth/.well-known/openid-configuration' then the path is '/oxauth'")
+  public String getOpDiscoveryPath() {
+    return opDiscoveryPath;
+  }
+
+  public void setOpDiscoveryPath(String opDiscoveryPath) {
+    this.opDiscoveryPath = opDiscoveryPath;
   }
 
   public RegisterSiteParams postLogoutRedirectUris(List<String> postLogoutRedirectUris) {
@@ -1293,7 +1335,9 @@ public class RegisterSiteParams {
     }
     RegisterSiteParams registerSiteParams = (RegisterSiteParams) o;
     return Objects.equals(this.redirectUris, registerSiteParams.redirectUris) &&
+        Objects.equals(this.opConfigurationEndpoint, registerSiteParams.opConfigurationEndpoint) &&
         Objects.equals(this.opHost, registerSiteParams.opHost) &&
+        Objects.equals(this.opDiscoveryPath, registerSiteParams.opDiscoveryPath) &&
         Objects.equals(this.postLogoutRedirectUris, registerSiteParams.postLogoutRedirectUris) &&
         Objects.equals(this.responseTypes, registerSiteParams.responseTypes) &&
         Objects.equals(this.grantTypes, registerSiteParams.grantTypes) &&
@@ -1350,7 +1394,7 @@ public class RegisterSiteParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(redirectUris, opHost, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
+    return Objects.hash(redirectUris, opConfigurationEndpoint, opHost, opDiscoveryPath, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
   }
 
 
@@ -1360,7 +1404,9 @@ public class RegisterSiteParams {
     sb.append("class RegisterSiteParams {\n");
     
     sb.append("    redirectUris: ").append(toIndentedString(redirectUris)).append("\n");
+    sb.append("    opConfigurationEndpoint: ").append(toIndentedString(opConfigurationEndpoint)).append("\n");
     sb.append("    opHost: ").append(toIndentedString(opHost)).append("\n");
+    sb.append("    opDiscoveryPath: ").append(toIndentedString(opDiscoveryPath)).append("\n");
     sb.append("    postLogoutRedirectUris: ").append(toIndentedString(postLogoutRedirectUris)).append("\n");
     sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
     sb.append("    grantTypes: ").append(toIndentedString(grantTypes)).append("\n");

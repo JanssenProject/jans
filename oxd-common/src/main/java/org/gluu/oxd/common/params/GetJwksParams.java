@@ -23,6 +23,9 @@ public class GetJwksParams implements IParams {
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
 
+    @JsonProperty(value = "op_configuration_endpoint")
+    private String op_configuration_endpoint;
+
     public String getOpHost() {
         return op_host;
     }
@@ -37,5 +40,13 @@ public class GetJwksParams implements IParams {
 
     public void setOpDiscoveryPath(String opDiscoveryPath) {
         this.op_discovery_path = opDiscoveryPath;
+    }
+
+    public String getOpConfigurationEndpoint() {
+        return op_configuration_endpoint;
+    }
+
+    public void setOpConfigurationEndpoint(String op_configuration_endpoint) {
+        this.op_configuration_endpoint = op_configuration_endpoint;
     }
 }

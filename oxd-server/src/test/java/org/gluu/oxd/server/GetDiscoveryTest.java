@@ -22,4 +22,17 @@ public class GetDiscoveryTest {
         assertNotNull(resp);
         assertNotNull(resp.getIssuer());
     }
+
+    @Parameters({"host", "opConfigurationEndpoint"})
+    @Test
+    public void test_withOpConfigurationEndpoint(String host, String opConfigurationEndpoint) {
+        ClientInterface client = Tester.newClient(host);
+
+        final GetDiscoveryParams commandParams = new GetDiscoveryParams();
+        commandParams.setOpConfigurationEndpoint(opConfigurationEndpoint);
+
+        final GetDiscoveryResponse resp = client.getDiscovery(commandParams);
+        assertNotNull(resp);
+        assertNotNull(resp.getIssuer());
+    }
 }
