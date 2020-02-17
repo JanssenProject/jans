@@ -51,6 +51,8 @@ public enum ErrorResponseCode {
     INVALID_CLIENT_ID_REQUIRED(400, "invalid_client_id", "client_id is required parameter in request (skip client_secret if you wish to dynamically register client.)."),
     UNSUPPORTED_OPERATION(500, "unsupported_operation", "Operation is not supported by server error."),
     INVALID_OP_HOST(400, "invalid_op_host", "Invalid op_host (empty or blank)."),
+    INVALID_OP_CONFIGURATION_ENDPOINT(400, "invalid_op_configuration_endpoint", "Invalid op_configuration_endpoint (invalid or blank)."),
+    INVALID_OP_HOST_AND_CONFIGURATION_ENDPOINT(400, "invalid_op_host_and_configuration_endpoint", "Both op_host and op_configuration_endpoint are invalid (empty or blank). At least one parameter should be defined."),
     INVALID_ALLOWED_OP_HOST_URL(400, "invalid_allowed_op_host_url", "Please check 1) The urls in allowed_op_hosts field of oxd-server.yml are valid. 2) If op_host url is valid."),
     RESTRICTED_OP_HOST(400, "restricted_op_host", "oxd server is not allowed to access op_host. Please check if op_host url is present in allowed_op_hosts field of oxd-server.yml."),
     BLANK_ACCESS_TOKEN(403, "blank_access_token", "access_token is blank. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false"),

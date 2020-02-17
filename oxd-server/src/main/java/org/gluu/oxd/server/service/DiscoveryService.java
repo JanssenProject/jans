@@ -4,6 +4,7 @@
 package org.gluu.oxd.server.service;
 
 import com.google.inject.Inject;
+import io.dropwizard.util.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.OpenIdConfigurationClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
@@ -60,24 +61,29 @@ public class DiscoveryService {
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponse(Rp rp) {
-        return getConnectDiscoveryResponse(rp.getOpHost(), rp.getOpDiscoveryPath());
+        return getConnectDiscoveryResponse(rp.getOpConfigurationEndpoint(), rp.getOpHost(), rp.getOpDiscoveryPath());
     }
 
-    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost, String opDiscoveryPath) {
-        validationService.notBlankOpHost(opHost);
-        validationService.isOpHostAllowed(opHost);
+    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opConfigurationEndpoint, String opHost, String opDiscoveryPath) {
+        return Strings.isNullOrEmpty(opConfigurationEndpoint) ? getConnectDiscoveryResponse(getConnectDiscoveryUrl(opHost, opDiscoveryPath))
+                : getConnectDiscoveryResponse(opConfigurationEndpoint);
+    }
 
+    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opConfigurationEndpoint) {
+        validationService.validateOpConfigurationEndpoint(opConfigurationEndpoint);
         try {
-            final OpenIdConfigurationResponse r = map.get(opHost);
+            final OpenIdConfigurationResponse r = map.get(opConfigurationEndpoint);
             if (r != null) {
+                validationService.isOpHostAllowed(r.getIssuer());
                 return r;
             }
-            final OpenIdConfigurationClient client = opClientFactory.createOpenIdConfigurationClient(getConnectDiscoveryUrl(opHost, opDiscoveryPath));
+            final OpenIdConfigurationClient client = opClientFactory.createOpenIdConfigurationClient(opConfigurationEndpoint);
             client.setExecutor(httpService.getClientExecutor());
             final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
             LOG.trace("Discovery response: {} ", response.getEntity());
             if (StringUtils.isNotBlank(response.getEntity())) {
-                map.put(opHost, response);
+                map.put(opConfigurationEndpoint, response);
+                validationService.isOpHostAllowed(response.getIssuer());
                 return response;
             } else {
                 LOG.error("No response from discovery!");
@@ -91,7 +97,7 @@ public class DiscoveryService {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        LOG.error("Unable to fetch discovery information for op_host: {}", opHost);
+        LOG.error("Unable to fetch discovery information for op_configuration_endpoint: {}", opConfigurationEndpoint);
         throw new HttpException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
     }
 
@@ -99,28 +105,34 @@ public class DiscoveryService {
         validationService.notBlankOxdId(oxdId);
 
         Rp rp = rpSyncService.getRp(oxdId);
-        return getUmaDiscovery(rp.getOpHost(), rp.getOpDiscoveryPath());
+        return getUmaDiscovery(rp.getOpConfigurationEndpoint(), rp.getOpHost(), rp.getOpDiscoveryPath());
     }
 
-    public UmaMetadata getUmaDiscovery(String opHost, String opDiscoveryPath) {
-        validationService.notBlankOpHost(opHost);
-        validationService.isOpHostAllowed(opHost);
+    public UmaMetadata getUmaDiscovery(String opConfigurationEndpoint, String opHost, String opDiscoveryPath) {
+        return Strings.isNullOrEmpty(opConfigurationEndpoint) ? getUmaDiscovery(getConnectDiscoveryUrl(opHost, opDiscoveryPath))
+                : getUmaDiscovery(opConfigurationEndpoint);
+    }
+
+    public UmaMetadata getUmaDiscovery(String opConfigurationEndpoint) {
+        validationService.validateOpConfigurationEndpoint(opConfigurationEndpoint);
 
         try {
-            final UmaMetadata r = umaMap.get(opHost);
+            final UmaMetadata r = umaMap.get(opConfigurationEndpoint);
             if (r != null) {
+                validationService.isOpHostAllowed(r.getIssuer());
                 return r;
             }
             final UmaMetadata response = opClientFactory.createUmaClientFactory().createMetadataService(
-                    getUmaDiscoveryUrl(opHost, opDiscoveryPath), httpService.getClientExecutor()).getMetadata();
+                    getUmaDiscoveryUrl(opConfigurationEndpoint), httpService.getClientExecutor()).getMetadata();
             LOG.trace("Uma discovery response: {} ", response);
-            umaMap.put(opHost, response);
+            umaMap.put(opConfigurationEndpoint, response);
+            validationService.isOpHostAllowed(response.getIssuer());
             return response;
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        LOG.error("Unable to fetch UMA discovery information for op_host: {}", opHost);
+        LOG.error("Unable to fetch UMA discovery information for op_configuration_endpoint: {}", opConfigurationEndpoint);
         throw new HttpException(ErrorResponseCode.NO_UMA_DISCOVERY_RESPONSE);
     }
 
@@ -142,6 +154,12 @@ public class DiscoveryService {
             result += opDiscoveryPath;
         }
         return result + WELL_KNOWN_UMA_PATH;
+    }
+
+    public String getUmaDiscoveryUrl(String opConfigurationEndpoint) {
+        String result = baseOpUrl(opConfigurationEndpoint);
+        result = result.replace(WELL_KNOWN_CONNECT_PATH, WELL_KNOWN_UMA_PATH);
+        return result;
     }
 
     private String baseOpUrl(String opHost) {
