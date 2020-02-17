@@ -12,6 +12,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
@@ -119,7 +120,8 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
             ticket = getPermissionService().registerPermission(
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             assertTrue(ex.getResponse().getStatus() != Response.Status.CREATED.getStatusCode() &&
                     ex.getResponse().getStatus() != Response.Status.OK.getStatusCode()
                     , "Unexpected response status");
