@@ -1,10 +1,13 @@
 package org.gluu.oxauth.session.ws.rs;
 
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwrService;
+import org.gluu.oxauth.service.SectorIdentifierService;
 import org.msgpack.core.Preconditions;
 import org.slf4j.Logger;
 
@@ -33,13 +36,16 @@ public class LogoutTokenFactory {
     @Inject
     private JwrService jwrService;
 
-    public JsonWebResponse createLogoutToken(Client client) {
+    @Inject
+    private SectorIdentifierService sectorIdentifierService;
+
+    public JsonWebResponse createLogoutToken(Client client, User user) {
         try {
             Preconditions.checkNotNull(client);
 
             JsonWebResponse jwr = jwrService.createJwr(client);
 
-            fillClaims(jwr);
+            fillClaims(jwr, client, user);
 
             jwrService.encode(jwr, client);
             return jwr;
@@ -49,7 +55,7 @@ public class LogoutTokenFactory {
         }
     }
 
-    private void fillClaims(JsonWebResponse jwr) {
+    private void fillClaims(JsonWebResponse jwr, Client client, User user) {
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
@@ -60,7 +66,9 @@ public class LogoutTokenFactory {
         jwr.getClaims().setIssuedAt(issuedAt);
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
 
-        // todo
-        //jwr.getClaims().setSubjectIdentifier();
+        final String sub = sectorIdentifierService.getSub(client, user);
+        if (StringUtils.isNotBlank(sub)) {
+            jwr.getClaims().setSubjectIdentifier(sub);
+        }
     }
 }
