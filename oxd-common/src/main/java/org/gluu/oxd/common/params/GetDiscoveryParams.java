@@ -15,6 +15,9 @@ public class GetDiscoveryParams implements IParams {
     @JsonProperty(value = "op_discovery_path")
     private String op_discovery_path;
 
+    @JsonProperty(value = "op_configuration_endpoint")
+    private String op_configuration_endpoint;
+
     public GetDiscoveryParams() {
     }
 
@@ -34,11 +37,19 @@ public class GetDiscoveryParams implements IParams {
         this.op_discovery_path = opDiscoveryPath;
     }
 
+    public String getOpConfigurationEndpoint() {
+        return op_configuration_endpoint;
+    }
+
+    public void setOpConfigurationEndpoint(String op_configuration_endpoint) {
+        this.op_configuration_endpoint = op_configuration_endpoint;
+    }
     @Override
     public String toString() {
         return "GetDiscoveryParams{" +
                 "op_host='" + op_host + '\'' +
                 ", op_discovery_path='" + op_discovery_path + '\'' +
+                ", op_configuration_endpoint='" + op_configuration_endpoint + '\'' +
                 '}';
     }
 }
