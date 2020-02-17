@@ -13,6 +13,8 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ProxyFactory;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -42,6 +44,10 @@ public class ClientFactory {
         return createIntrospectionService(p_url, engine);
     }
 
+    public IntrospectionService createIntrospectionService(String p_url, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(IntrospectionService.class, p_url, clientExecutor);
+    }
+    
     public IntrospectionService createIntrospectionService(String p_url, ClientHttpEngine engine) {
         ResteasyClient client = new ResteasyClientBuilder().httpEngine(engine).build();
         ResteasyWebTarget target = client.target(UriBuilder.fromPath(p_url));
