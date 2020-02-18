@@ -147,7 +147,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 }
             }
 
-            backChannel(backchannelUris, pair.getSecond());
+            backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getId());
 
             if (frontchannelUris.isEmpty()) { // no front-channel
                 log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
@@ -175,7 +175,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
     }
 
-    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant) {
+    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, String sessionId) {
         if (backchannelUris.isEmpty()) {
             return;
         }
@@ -184,7 +184,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final ExecutorService executorService = EndSessionUtils.getExecutorService(backchannelUris.size());
         for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
-            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), grant != null ? grant.getUser() : null);
+            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), grant != null ? grant.getUser() : null, sessionId);
             if (logoutToken == null) {
                 log.error("Failed to create logout_token for client: " + entry.getValue().getClientId());
                 return;
