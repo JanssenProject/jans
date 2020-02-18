@@ -123,7 +123,7 @@ public class DiscoveryService {
                 return r;
             }
             final UmaMetadata response = opClientFactory.createUmaClientFactory().createMetadataService(
-                    getUmaDiscoveryUrl(opConfigurationEndpoint), httpService.getClientExecutor()).getMetadata();
+                    getUmaDiscoveryUrl(opConfigurationEndpoint), httpService.getClientEngine()).getMetadata();
             LOG.trace("Uma discovery response: {} ", response);
             umaMap.put(opConfigurationEndpoint, response);
             validationService.isOpHostAllowed(response.getIssuer());
