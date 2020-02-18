@@ -121,7 +121,7 @@ public class RegistrationService extends RequestService {
         rawRegistrationService.checkSignature(appId, clientData, rawRegisterResponse);
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(rawRegisterResponse);
+        DeviceRegistration deviceRegistration = rawRegistrationService.createDevice(userInum, rawRegisterResponse);
         deviceRegistration.setStatus(DeviceRegistrationStatus.ACTIVE);
         deviceRegistration.setApplication(appId);
         deviceRegistration.setCreationDate(now);

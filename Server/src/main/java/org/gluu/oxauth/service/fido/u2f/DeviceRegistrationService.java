@@ -83,9 +83,12 @@ public class DeviceRegistrationService {
 		prepareBranch(userInum);
 
 		String baseDnForU2fDevices = getBaseDnForU2fUserDevices(userInum);
+		Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
 		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
 
-		return ldapEntryManager.findEntries(baseDnForU2fDevices, DeviceRegistration.class, appIdFilter, returnAttributes);
+		Filter filter = Filter.createANDFilter(userInumFilter, appIdFilter);
+
+		return ldapEntryManager.findEntries(baseDnForU2fDevices, DeviceRegistration.class, filter, returnAttributes);
 	}
 
 	public List<DeviceRegistration> findDeviceRegistrationsByKeyHandle(String appId, String keyHandle, String ... returnAttributes) {
