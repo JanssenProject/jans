@@ -6,18 +6,14 @@
 
 package org.gluu.oxauth.client.fido.u2f;
 
-import javax.ws.rs.core.UriBuilder;
-
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.gluu.oxauth.client.service.ClientFactory;
 import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * Helper class which creates proxy FIDO U2F services
@@ -31,7 +27,7 @@ public class FidoU2fClientFactory {
     private ApacheHttpClient4Engine engine;
 
     private FidoU2fClientFactory() {
-        this.engine = createEngine();
+        this.engine = ClientFactory.instance().createEngine();
     }
 
     public static FidoU2fClientFactory instance() {
@@ -61,17 +57,4 @@ public class FidoU2fClientFactory {
 
         return proxy;
     }
-
-	private ApacheHttpClient4Engine createEngine() {
-	    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-	    CloseableHttpClient httpClient = HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-	    		.setConnectionManager(cm).build();
-	    cm.setMaxTotal(200); // Increase max total connection to 200
-	    cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
-	    ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-	    
-	    return engine;
-	}
-
 }

@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth.client.service;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,6 +18,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+
+import javax.ws.rs.core.UriBuilder;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -56,16 +56,23 @@ public class ClientFactory {
         return proxy;
     }
 
-	private ApacheHttpClient4Engine createEngine() {
+    public ApacheHttpClient4Engine createEngine() {
+        return createEngine(false);
+    }
+
+    public ApacheHttpClient4Engine createEngine(boolean followRedirects) {
+        return createEngine(200, 20, CookieSpecs.STANDARD, followRedirects);
+    }
+
+	public ApacheHttpClient4Engine createEngine(int maxTotal, int defaultMaxPerRoute, String cookieSpec, boolean followRedirects) {
 	    PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 	    CloseableHttpClient httpClient = HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(cookieSpec).build())
 	    		.setConnectionManager(cm).build();
-	    cm.setMaxTotal(200); // Increase max total connection to 200
-	    cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
-	    ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-	    
-	    return engine;
+	    cm.setMaxTotal(maxTotal);
+	    cm.setDefaultMaxPerRoute(defaultMaxPerRoute);
+        final ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        engine.setFollowRedirects(followRedirects);
+        return engine;
 	}
-
 }
