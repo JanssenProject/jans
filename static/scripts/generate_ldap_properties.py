@@ -2,6 +2,13 @@
 # ! NOTE! Under development, not use for production #
 #####################################################
 
+##################
+#   passportSpJksPass has no usage
+#
+#
+##################
+
+
 import os
 import json
 import ldap
@@ -143,14 +150,15 @@ else:
     if result[0][1]['oxEnabled'][0].lower() == 'true':
         setup_prop['enableRadiusScripts'] = 'true' 
 
+    result = ldap_conn.search_s('ou=clients,o=gluu',ldap.SCOPE_SUBTREE, '(inum=1402.*)', ['inum'])
+    if result:
+        setup_prop['oxtrust_requesting_party_client_id'] = result[0][1]['inum'][0]
 
 result = ldap_conn.search_s('o=gluu',ldap.SCOPE_SUBTREE, '(gluuGroupType=gluuManagerGroup)', ['member'])
 if result and result[0][1]['member']:
     admin_dn = result[0][1]['member'][0]
     tmp_ = explode_dn(admin_dn)
     setup_prop['admin_inum'] = str(str2dn(tmp_[0])[0][0][1])
-    
-    
 
 result = ldap_conn.search_s(gluu_ConfigurationDN, ldap.SCOPE_BASE,'(objectClass=*)')
 setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
@@ -266,6 +274,7 @@ setup_prop['os_version'] = p[1].split('.')[0]
 https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if setup_prop['os_type'] in ('red', 'fedora', 'centos') else '/etc/apache2/sites-available/https_gluu.conf'
 setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 
-
+"""
 for p in setup_prop.keys():
     print p,":", setup_prop[p]
+"""
