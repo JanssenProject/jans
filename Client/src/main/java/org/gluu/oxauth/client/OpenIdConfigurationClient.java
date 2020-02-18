@@ -71,6 +71,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         clientRequest.accept(mediaTypes);
         clientRequest.setHttpMethod(getHttpMethod());
 
+        // Support AWS LB
+        clientRequest.followRedirects(true);
+
         // Call REST Service and handle response
         String entity = null;
         try {
