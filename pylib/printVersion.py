@@ -29,7 +29,7 @@ def get_latest_commit(service, branch):
         return "ERROR: Unable to retreive latest commit"
 
 def get_war_info(war_fn):
-    retDict = {'title':'', 'version':'', 'build':'', 'build date':'', 'branch':''}
+    retDict = {'title':'', 'version':'', 'build':'', 'buildDate':'', 'branch':''}
     war_zip = zipfile.ZipFile(war_fn,"r")
     menifest = war_zip.read('META-INF/MANIFEST.MF')
 
@@ -53,7 +53,7 @@ def get_war_info(war_fn):
             for l in pom_prop.split('\n'):
                 build_date = re.findall("\w{3}\s\w{3}\s{1,2}\w{1,2}\s\w{2}:\w{2}:\w{2}\s[+\w]{3}\s\w{4}", l)
                 if build_date:
-                    retDict['build date'] =  build_date[0]
+                    retDict['buildDate'] =  build_date[0]
                     break
 
     return retDict
@@ -62,14 +62,22 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--show-latest-commit", help="Gets latest commit from githbub", action='store_true')
+    parser.add_argument("-target", help="Target directory", default='/opt/gluu/jetty/*/webapps')
+    parser.add_argument("--json", help="Print output in json format", action='store_true')
     args = parser.parse_args()
 
-    for war_fn in glob.glob('/opt/gluu/jetty/*/webapps/*.war'):
+    target = os.path.join(args.target, '*.war')
+
+    if args.json:
+        output = []
+
+    for war_fn in glob.glob(target):
         info = get_war_info(war_fn)
         service = os.path.basename(war_fn).split('.')[0]
         
-        for si in ('title', 'version', 'build date', 'build'):
-            print "{0}: {1}".format(si.title(), info[si])
+        if not args.json:
+            for si in ('title', 'version', 'buildDate', 'build'):
+                print "{0}: {1}".format(si.title(), info[si])
         
         if args.show_latest_commit and (service in repos):
             latest_commit = get_latest_commit(service, info['branch'])
@@ -77,7 +85,17 @@ if __name__ == '__main__':
                 compare_build = 'diff: https://github.com/GluuFederation/{0}/compare/{1}...{2}'.format(repos[service], info['build'], latest_commit) 
             else:
                 compare_build = ''
+            if not target.json:
+                print "Latest Commit:", latest_commit, compare_build
+            else:
+                info["Latest Commit"] = latest_commit
+
+        if args.json:
+            info["file"] = war_fn
+            output.append(info)
+        else:
+            print
             
-            print "Latest Commit:", latest_commit, compare_build
-        
-        print
+
+    if args.json:
+        print json.dumps(output)

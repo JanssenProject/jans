@@ -81,6 +81,11 @@
             "uri":null
         },
         {
+            "id":"invalid_request_object",
+            "description":"The request parameter contains an invalid Request Object.",
+            "uri":null
+        },
+        {
             "id":"authentication_session_invalid",
             "description":"The authorization server can't handle user authentication due to session expiration",
             "uri":null
@@ -164,6 +169,11 @@
         {
             "id":"invalid_token",
             "description":"The access token provided is expired, revoked, malformed, or invalid for other reasons.",
+            "uri":null
+        },
+        {
+            "id": "invalid_software_statement",
+            "description":"The software_statement is malformed or invalid.",
             "uri":null
         },
         {

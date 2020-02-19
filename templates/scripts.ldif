@@ -10,7 +10,7 @@ oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/cert_
 oxConfigurationProperty: {"value1":"map_user_cert","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"use_generic_validator","value2":"true","description":""}
 oxConfigurationProperty: {"value1":"use_path_validator","value2":"true","description":""}
-oxConfigurationProperty: {"value1":"use_ocsp_validator","value2":"true","description":""}
+oxConfigurationProperty: {"value1":"use_ocsp_validator","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"use_crl_validator","value2":"false","description":""}
 oxConfigurationProperty: {"value1":"crl_max_response_size","value2":"10485760","description":""}
 oxLevel: 30
@@ -211,6 +211,20 @@ oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(introspection_introspection_custom_params)s
 oxScriptType: introspection
+programmingLanguage: python
+
+dn: inum=2DAF-CA90,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Frontchannel logout Sample
+displayName: frontchannel_logout_sample
+oxEnabled: false
+inum: 2DAF-CA90
+oxLevel: 1
+oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxScript::%(end_session_end_session)s
+oxScriptType: end_session
 programmingLanguage: python
 
 dn: inum=2DAF-AA91,ou=scripts,o=gluu
