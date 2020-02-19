@@ -100,7 +100,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if step == 2 and numbers != None:
                 #Means the selection number page was used
-                idx = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm:indexOfNumber")
+                idx = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:indexOfNumber")
                 if idx != None and code != None:
                     sendToNumber = numbers.split(",")[int(idx)]
                     self.sendMessage(code, sendToNumber)
