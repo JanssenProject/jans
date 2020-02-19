@@ -105,9 +105,7 @@ for l in menifest.splitlines():
 
 print "Gluu Version", gluu_version
 
-vers = gluu_version.split('.')
-
-gluu_3x = (vers[0] < '4') and (vers[1] < '0')
+gluu_3x = '.'.join(gluu_version.split('.')[:2]) < '4.0'
 
 if gluu_3x:
     gluu_ldap_prop = read_properties_file('/etc/gluu/conf/ox-ldap.properties')
@@ -205,9 +203,12 @@ else:
         except:
             pass
 
-        result = ldap_conn.search_s('inum=5866-4202,ou=scripts,o=gluu',ldap.SCOPE_BASE, attrlist=['oxEnabled'])
-        if result[0][1]['oxEnabled'][0].lower() == 'true':
-            setup_prop['enableRadiusScripts'] = 'true' 
+        try:
+            result = ldap_conn.search_s('inum=5866-4202,ou=scripts,o=gluu',ldap.SCOPE_BASE, attrlist=['oxEnabled'])
+            if result[0][1]['oxEnabled'][0].lower() == 'true':
+                setup_prop['enableRadiusScripts'] = 'true' 
+        except:
+            pass
 
         result = ldap_conn.search_s('ou=clients,o=gluu',ldap.SCOPE_SUBTREE, '(inum=1402.*)', ['inum'])
         if result:
@@ -347,7 +348,6 @@ if oxAuthConfDynamic:
     setup_prop['oxauth_openid_jks_fn'] = str(oxAuthConfDynamic['keyStoreFile'])
     setup_prop['oxauth_openid_jks_pass'] = str(oxAuthConfDynamic['keyStoreSecret'])
 
-#to do: if radius is enabled set oxauth_openidScopeBackwardCompatibility to true
 
 ssl_subj = get_ssl_subject('/etc/certs/httpd.crt')
 setup_prop['countryCode'] = ssl_subj['C']
@@ -387,7 +387,9 @@ if oxauth_max_heap_mem:
 
 setup_prop['application_max_ram'] = str(application_max_ram)
 
-setup_prop['gluuRadiusEnabled'] = str(os.path.exists(os.path.join(default_dir, 'gluu-radius'))).lower()
+if os.path.exists(os.path.join(default_dir, 'gluu-radius')):
+    setup_prop['gluuRadiusEnabled'] = 'true'
+    setup_prop['oxauth_openidScopeBackwardCompatibility'] = 'true'
 
 p = platform.linux_distribution()
 setup_prop['os_type'] = p[0].split()[0].lower()
@@ -398,6 +400,10 @@ setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 
 setup_prop['mappingLocations'] = json.dumps(mappingLocations)
 
-for p in setup_prop.keys():
-    print p,":", setup_prop[p]
+
+with open('setup.properties.last', 'w') as w:
+    setup_prop.store(w)
+
+#for p in setup_prop.keys():
+#    print p,":", setup_prop[p]
 
