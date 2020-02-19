@@ -16,6 +16,7 @@ import re
 import sys
 import base64
 import platform
+import glob
 
 from urlparse import urlparse
 from pyDes import triple_des, ECB, PAD_PKCS5
@@ -455,6 +456,12 @@ setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 setup_prop['mappingLocations'] = json.dumps(mappingLocations)
 
 setup_prop_fn = 'setup.properties.last'
+
+if os.path.exists(setup_prop_fn):
+    flist = glob.glob(setup_prop_fn+'.*')
+    n = len(flist) + 1
+    os.rename(setup_prop_fn, setup_prop_fn+'.'+str(n))
+
 with open(setup_prop_fn, 'w') as w:
     setup_prop.store(w)
 
