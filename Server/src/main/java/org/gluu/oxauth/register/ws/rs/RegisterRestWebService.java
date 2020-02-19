@@ -30,7 +30,6 @@ public interface RegisterRestWebService {
      * the OpenID Provider to acquire a client ID and shared secret.
      *
      * @param requestParams   request parameters
-     * @param authorization   authorization
      * @param httpRequest     http request object
      * @param securityContext An injectable interface that provides access to security related information.
      * @return response
@@ -57,7 +56,6 @@ public interface RegisterRestWebService {
     Response requestRegister(
             @ApiParam(value = "Request parameters as JSON object with data described by Connect Client Registration Specification. ", required = true)
             String requestParams,
-            @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
 
