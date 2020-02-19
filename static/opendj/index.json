@@ -201,6 +201,13 @@
 	},
 
 	{
+		"attribute": "oxDeviceKeyHandle",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "ssnId",
 		"type": "string",
 		"index": ["equality"],

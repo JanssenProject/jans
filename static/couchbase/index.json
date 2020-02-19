@@ -1,12 +1,18 @@
 {
-  "gluu_user": {
+  "!bucket_prefix!_user": {
     "attributes": [
       ["objectClass"], 
       ["creationDate"], 
       ["inum"], 
       ["del","exp"], 
       ["uid"], 
-      ["mail"] 
+      ["mail"], 
+      ["oxStatus"], 
+      ["oxApplication"], 
+      ["oxDeviceHashCode"], 
+      ["oxDeviceKeyHandle"],
+      ["oxAuthClientId"],
+      ["oxAuthUserId"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
@@ -15,18 +21,7 @@
     ]
   },
 
-  "gluu_authorization": {
-     "attributes": [
-        ["oxAuthExpiration"],
-        ["del"],
-        ["oxAuthClientId"],
-        ["oxAuthUserId"]
-      ],
-    "static" : [
-    ]
-  },
-
-  "gluu": {
+  "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
       ["oxScriptType"], 
@@ -38,7 +33,7 @@
       ["inum"], 
       ["displayName"], 
       ["oxAuthRegistrationAccessToken"], 
-      ["oxAuthClaimName"], 
+      ["oxAuthUmaScope"], 
       ["mail"], 
       ["oxId"], 
       ["oxTicket"], 
@@ -58,7 +53,7 @@
     ]
   },
 
-  "gluu_site": {
+  "!bucket_prefix!_site": {
     "attributes": [
         ["objectClass"], 
         ["inum"]
@@ -67,7 +62,7 @@
     ]
   },
 
-  "gluu_statistic": {
+  "!bucket_prefix!_statistic": {
     "attributes": [
       ["objectClass"], 
       ["oxStartDate"], 
@@ -78,7 +73,7 @@
     ]
   },
 
-  "gluu_cache": {
+  "!bucket_prefix!_cache": {
     "attributes":[
     ],
     "static" : [
@@ -86,7 +81,7 @@
     ]
   },
 
-  "gluu_token": {
+  "!bucket_prefix!_token": {
     "attributes": [
       ["del","exp"],
       ["authzCode"]
