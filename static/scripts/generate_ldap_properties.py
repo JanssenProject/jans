@@ -105,9 +105,7 @@ for l in menifest.splitlines():
 
 print "Gluu Version", gluu_version
 
-vers = gluu_version.split('.')
-
-gluu_3x = (vers[0] < '4') and (vers[1] < '0')
+gluu_3x = '.'.join(gluu_version.split('.')[:2]) < '4.0'
 
 if gluu_3x:
     gluu_ldap_prop = read_properties_file('/etc/gluu/conf/ox-ldap.properties')
@@ -398,6 +396,10 @@ setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 
 setup_prop['mappingLocations'] = json.dumps(mappingLocations)
 
-for p in setup_prop.keys():
-    print p,":", setup_prop[p]
+
+with open('setup.properties.last', 'w') as w:
+    setup_prop.store(w)
+
+#for p in setup_prop.keys():
+#    print p,":", setup_prop[p]
 
