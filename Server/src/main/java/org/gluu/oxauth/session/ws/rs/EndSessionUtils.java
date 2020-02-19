@@ -40,7 +40,7 @@ public class EndSessionUtils {
         try (Response response = target.request().post(Entity.form(new Form("logout_token", logoutToken)))) {
             log.trace("Backchannel RP response, status: " + response.getStatus() + ", backchannel_logout_uri" + backchannelLogoutUri);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to call backchannel_logout_uri" + backchannelLogoutUri + ", message: " + e.getMessage(), e);
         }
     }
 
