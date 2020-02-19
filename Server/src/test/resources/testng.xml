@@ -50,6 +50,11 @@
 			<class name="org.gluu.oxauth.ws.rs.EndSessionRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
+    <test name="End Session Backchannel test (embedded)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.EndSessionBackchannelRestServerTest" />
+        </classes>
+    </test>
 
 	<!-- JWK test -->
 	<test name="JWK test (embedded)" enabled="true">
