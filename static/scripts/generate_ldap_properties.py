@@ -11,19 +11,73 @@
 
 import os
 import json
-import ldap
 import zipfile
 import re
-import Properties
 import sys
 import base64
 import platform
 
-from ldap.dn import explode_dn, str2dn, dn2str
 from urlparse import urlparse
 from pyDes import triple_des, ECB, PAD_PKCS5
 
+if os.path.exists('/etc/yum.repos.d/'):
+    package_type = 'rpm'
+elif os.path.exists('/etc/apt/sources.list'):
+    package_type = 'deb'
+
+missing_packages = []
+
+needs_restart = False
+dev_env = True if os.environ.get('update_dev') else False
+
+try:
+    import ldap
+except:
+    missing_packages.append('python-ldap')
+
+try:
+    import requests
+except:
+    missing_packages.append('python-requests')
+
+if missing_packages:
+    needs_restart = True
+    packages_str = ' '.join(missing_packages)
+    result = raw_input("Missing package(s): {0}. Install now? (Y|n): ".format(packages_str))
+    if result.strip() and result.strip().lower()[0] == 'n':
+        sys.exit("Can't continue without installing these packages. Exiting ...")
+            
+
+    if package_type == 'rpm':
+        cmd = 'yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm'
+        os.system(cmd)
+        cmd = 'yum clean all'
+        os.system(cmd)
+        cmd = "yum install -y {0}".format(packages_str)
+    else:
+        os.system('apt-get update')
+        cmd = "apt-get install -y {0}".format(packages_str)
+
+    print "Installing package(s) with command: "+ cmd
+    os.system(cmd)
+
+if not os.path.exists('Properties.py'):
+    os.system('wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/Properties.py')
+
+if not os.path.exists('cbm.py'):
+    os.system('wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/cbm.py')
+
+
+if needs_restart:
+    python_ = sys.executable
+    os.execl(python_, python_, * sys.argv)
+
+
+from ldap.dn import explode_dn, str2dn, dn2str
+import ldap
+
 from cbm import CBM
+import Properties
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
