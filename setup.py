@@ -224,24 +224,19 @@ def getTypedValue(dtype, val):
             retVal = False
 
     return retVal
-    
+
 
 def get_key_from(dn):
-    dns = dn.split(",")
-
-    if "o=gluu" in dns:
-        dns.remove("o=gluu")
-
-    for i in range(len(dns)):
-        e = dns[i]
-        n = e.find('=')
-        e = e[n+1:]
-        dns[i] = e
+    dns = []
+    for d in str2dn(dn):
+        for rd in d:
+            if rd[0] == 'o' and rd[1] == 'gluu':
+                continue
+            dns.append(rd[1])
 
     dns.reverse()
-
     key = '_'.join(dns)
-    
+
     if not key:
         key = '_'
 
