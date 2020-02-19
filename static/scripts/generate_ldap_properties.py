@@ -103,7 +103,7 @@ for l in menifest.splitlines():
 
         gluu_version = '.'.join(gluu_version_list)
 
-print "Gluu Version", gluu_version
+print "Current Gluu Version is determined as", gluu_version
 
 gluu_3x = '.'.join(gluu_version.split('.')[:2]) < '4.0'
 
@@ -400,9 +400,11 @@ setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 
 setup_prop['mappingLocations'] = json.dumps(mappingLocations)
 
-
-with open('setup.properties.last', 'w') as w:
+setup_prop_fn = 'setup.properties.last'
+with open(setup_prop_fn, 'w') as w:
     setup_prop.store(w)
+
+print "{} is written successfully".format(setup_prop_fn)
 
 #for p in setup_prop.keys():
 #    print p,":", setup_prop[p]
