@@ -126,7 +126,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private CIBARegisterClientResponseProxy cibaRegisterClientResponseProxy;
 
     @Override
-    public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
+    public Response requestRegister(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.DYNAMIC_CLIENT_REGISTRATION_RATE).time();
         try {
             return registerClientImpl(requestParams, httpRequest, securityContext);
