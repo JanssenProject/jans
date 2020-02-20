@@ -9,6 +9,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxd.common.CoreUtils;
@@ -56,5 +58,9 @@ public class HttpService {
 
     public ClientExecutor getClientExecutor() {
         return new ApacheHttpClient4Executor(getHttpClient());
+    }
+
+    public ClientHttpEngine getClientEngine() {
+        return new ApacheHttpClient4Engine(getHttpClient());
     }
 }
