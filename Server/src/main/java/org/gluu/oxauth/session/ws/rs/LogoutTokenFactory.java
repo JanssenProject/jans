@@ -69,7 +69,7 @@ public class LogoutTokenFactory {
         jwr.getClaims().setJwtId(UUID.randomUUID());
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());
 
-        if (StringUtils.isNotBlank(sessionId)) {
+        if (StringUtils.isNotBlank(sessionId) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
             jwr.getClaims().setClaim("sid", sessionId);
         }
 
