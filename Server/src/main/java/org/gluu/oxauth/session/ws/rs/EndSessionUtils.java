@@ -1,10 +1,11 @@
 package org.gluu.oxauth.session.ws.rs;
 
+import org.gluu.oxauth.client.service.ClientFactory;
 import org.gluu.oxauth.model.util.Util;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
@@ -33,7 +34,7 @@ public class EndSessionUtils {
     }
 
     public static void callRpWithBackchannelUri(final String backchannelLogoutUri, String logoutToken) {
-        javax.ws.rs.client.Client client = ClientBuilder.newClient();
+        javax.ws.rs.client.Client client = new ResteasyClientBuilder().httpEngine(ClientFactory.instance().createEngine(true)).build();
         WebTarget target = client.target(backchannelLogoutUri);
 
         log.trace("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);
