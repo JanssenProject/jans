@@ -21,31 +21,32 @@
     <h:body>
         <div class="body">
         	<div id="status" class="modal"><span style="background-color: #006699; color: white; font-weight: bold; position: fixed; left: 0px; top: 0px; padding: 5px 5px 5px 5px">Loading...</span></div>
-            <h:messages id="messages" globalOnly="true" styleClass="message"
+			<script type="text/javascript">
+				function handleAjax(data) {
+					var status = data.status;
+					switch (status) {
+					case "begin":
+						document.getElementById('status').className = 'loading';
+						break;
+
+					case "complete":
+						break;
+
+					case "success":
+						document.getElementById('status').className = 'modal';
+						break;
+					}
+				}
+
+				if (!(typeof jsf === 'undefined')) {
+					jsf.ajax.addOnEvent(handleAjax);
+				}
+			</script>
+
+			<h:messages id="messages" globalOnly="true" styleClass="message"
                         errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
                         rendered="#{showGlobalMessages != 'false'}"/>
             <ui:insert name="body"/>
-		<script type="text/javascript">
-	            function handleAjax(data) {
-	                var status = data.status;
-	                switch (status) {
-	                    case "begin":
-	                        document.getElementById('status').className = 'loading';
-	                        break;
-	 
-	                    case "complete":
-	                        break;
-	 
-	                    case "success":
-	                        document.getElementById('status').className = 'modal';
-	                        break;
-	                }
-	            }
-	            
-	            if (jsf !== 'undefined') {
-    	        	jsf.ajax.addOnEvent(handleAjax);
-	            }
-        	</script> 
         </div>
 	
     </h:body>
