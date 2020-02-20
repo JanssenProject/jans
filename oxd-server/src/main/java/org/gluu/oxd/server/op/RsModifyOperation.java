@@ -73,7 +73,7 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         }
 
         UmaMetadata discovery = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientExecutor());
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(discovery, getHttpService().getClientEngine());
 
         UmaResource opUmaResource = getResource(resourceService, params, umaResource.getId());
 
