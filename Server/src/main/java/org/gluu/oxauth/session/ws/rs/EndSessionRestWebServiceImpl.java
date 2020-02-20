@@ -132,7 +132,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     if (Util.isNullOrEmpty(logoutUri)) {
                         continue; // skip if logout_uri is blank
                     }
-                    backchannelUris.put(EndSessionUtils.appendSid(logoutUri, pair.getFirst().getId(), client.getAttributes().getBackchannelLogoutSessionRequired()), client);
+                    backchannelUris.put(logoutUri, client);
                     hasBackchannel = true;
                 }
 
