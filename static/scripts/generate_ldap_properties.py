@@ -68,7 +68,6 @@ if needs_restart:
 from ldap.dn import explode_dn, str2dn, dn2str
 import ldap
 
-from cbm import CBM
 import Properties
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
@@ -118,7 +117,7 @@ def get_key_from(dn):
 
     return key
 
-def get_cb_result(n1ql):
+def get_cb_result(cbm, n1ql):
     result = cbm.exec_query(n1ql)
     if result.ok:
         data = result.json()
@@ -195,6 +194,8 @@ def generate_properties():
                 setup_prop['couchbase_hostname'] = gluu_cb_prop['servers'].split(',')[0].strip()
                 setup_prop['couchbaseTrustStorePass'] = unobscure(gluu_cb_prop['ssl.trustStore.pin'])
 
+                from cbm import CBM
+
                 cbm = CBM(setup_prop['couchbase_hostname'], setup_prop['couchebaseClusterAdmin'], setup_prop['cb_password'])
                 cb_who = cbm.whoami()
                 if cb_who.get('roles'):
@@ -264,19 +265,19 @@ def generate_properties():
 
         elif default_storage == 'couchbase':
             n1ql = 'SELECT * from `{}` USE KEYS "configuration_oxradius"'.format(setup_prop['couchbase_bucket_prefix'])
-            result = get_cb_result(n1ql)
+            result = get_cb_result(cbm, n1ql)
             if result:
                 setup_prop['installGluuRadius'] = 'true'
                 setup_prop['gluu_radius_client_id'] = str(result[0]['gluu']['oxRadiusOpenidUsername'])
                 setup_prop['gluu_ro_pw'] = unobscure(result[0]['gluu']['oxRadiusOpenidPassword'])
             
             n1ql = 'SELECT oxEnabled from `{}` USE KEYS "scripts_5866-4202"'.format(setup_prop['couchbase_bucket_prefix'])
-            result = get_cb_result(n1ql)
+            result = get_cb_result(cbm, n1ql)
             if result and result[0]['oxEnabled']:
                 setup_prop['enableRadiusScripts'] = 'true' 
 
             n1ql =  'SELECT inum from `{}` WHERE objectClass="oxAuthClient" AND inum LIKE "1402.%"'.format(setup_prop['couchbase_bucket_prefix'])
-            result = get_cb_result(n1ql)
+            result = get_cb_result(cbm, n1ql)
             if result:
                 setup_prop['oxtrust_requesting_party_client_id'] = str(result[0]['inum'])
 
@@ -290,7 +291,7 @@ def generate_properties():
     if mappingLocations['user'] == 'couchbase':
         bucket = '{}_user'.format(setup_prop['couchbase_bucket_prefix'])
         n1ql = 'SELECT * from `{}` where objectClass="gluuGroup" and gluuGroupType="gluuManagerGroup"'.format(bucket)
-        result = get_cb_result(n1ql)
+        result = get_cb_result(cbm, n1ql)
         if result and result[0][bucket]['member']:
            admin_dn = result[0][bucket]['member'][0]
 
@@ -329,26 +330,26 @@ def generate_properties():
 
         s_key = get_key_from(gluu_ConfigurationDN)
         n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(format(bucket), s_key)
-        result = get_cb_result(n1ql)
+        result = get_cb_result(cbm, n1ql)
         if result:
             setup_prop['ip'] = str(result[0][bucket]['gluuIpAddress'])
             setup_prop['cache_provider_type'] = str(result[0][bucket]['oxCacheConfiguration']['cacheProviderType'])
 
         s_key = get_key_from(oxidp_ConfigurationEntryDN)
         n1ql = 'SELECT oxConfApplication FROM `{}` USE KEYS "{}"'.format(format(bucket), s_key)
-        result = get_cb_result(n1ql)
+        result = get_cb_result(cbm, n1ql)
         if result:
             oxConfApplication = result[0]['oxConfApplication']
 
         s_key = get_key_from(oxauth_ConfigurationEntryDN)
         n1ql = 'SELECT oxAuthConfDynamic FROM `{}` USE KEYS "{}"'.format(format(bucket), s_key)
-        result = get_cb_result(n1ql)
+        result = get_cb_result(cbm, n1ql)
         if result:        
             oxAuthConfDynamic = result[0]['oxAuthConfDynamic']
 
         s_key = get_key_from(oxtrust_ConfigurationEntryDN)
         n1ql = 'SELECT oxTrustConfApplication FROM `{}` USE KEYS "{}"'.format(format(bucket), s_key)
-        result = get_cb_result(n1ql)
+        result = get_cb_result(cbm, n1ql)
         if result:
             oxTrustConfApplication = result[0]['oxTrustConfApplication']
         
