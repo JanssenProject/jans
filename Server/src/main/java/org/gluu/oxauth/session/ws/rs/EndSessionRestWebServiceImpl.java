@@ -20,6 +20,7 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.gluu.GluuErrorResponseType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.token.JsonWebResponse;
@@ -50,6 +51,7 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Javier Rojas Blum
@@ -172,17 +174,23 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 return e.getResponse();
             }
             throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponseFactory.getJsonErrorResponse(GluuErrorResponseType.SERVER_ERROR))
+                    .build());
         }
     }
 
-    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, String sessionId) {
+    private void backChannel(Map<String, Client> backchannelUris, AuthorizationGrant grant, String sessionId) throws InterruptedException {
         if (backchannelUris.isEmpty()) {
             return;
         }
 
         log.trace("backchannel_redirect_uri's: " + backchannelUris);
 
-        final ExecutorService executorService = EndSessionUtils.getExecutorService(backchannelUris.size());
+        final ExecutorService executorService = EndSessionUtils.getExecutorService();
         for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
             final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), grant != null ? grant.getUser() : null, sessionId);
             if (logoutToken == null) {
@@ -191,6 +199,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
             executorService.execute(() -> EndSessionUtils.callRpWithBackchannelUri(entry.getKey(), logoutToken.toString()));
         }
+        executorService.shutdown();
+        executorService.awaitTermination(30, TimeUnit.SECONDS);
+        log.trace("Finished backchannel calls.");
     }
 
     private Response createErrorResponse(String postLogoutRedirectUri, EndSessionErrorResponseType error, String reason) {
