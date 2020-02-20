@@ -21,25 +21,22 @@ import static org.gluu.oxauth.util.ServerUtil.daemonThreadFactory;
  */
 public class EndSessionUtils {
 
-    private static final int MAX_NUMBER_OF_THREADS_FOR_BACKCHANNEL_CALLS = 5;
-
     private final static Logger log = LoggerFactory.getLogger(EndSessionUtils.class);
 
     private EndSessionUtils() {
     }
 
-    public static ExecutorService getExecutorService(int requestedSize) {
-        int maxNumOfThreadPool = requestedSize >= MAX_NUMBER_OF_THREADS_FOR_BACKCHANNEL_CALLS ? MAX_NUMBER_OF_THREADS_FOR_BACKCHANNEL_CALLS : requestedSize;
-        return Executors.newFixedThreadPool(maxNumOfThreadPool, daemonThreadFactory());
+    public static ExecutorService getExecutorService() {
+        return Executors.newCachedThreadPool(daemonThreadFactory());
     }
 
     public static void callRpWithBackchannelUri(final String backchannelLogoutUri, String logoutToken) {
         javax.ws.rs.client.Client client = new ResteasyClientBuilder().httpEngine(ClientFactory.instance().createEngine(true)).build();
         WebTarget target = client.target(backchannelLogoutUri);
 
-        log.trace("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);
+        log.debug("Calling RP with backchannel, backchannel_logout_uri: " + backchannelLogoutUri);
         try (Response response = target.request().post(Entity.form(new Form("logout_token", logoutToken)))) {
-            log.trace("Backchannel RP response, status: " + response.getStatus() + ", backchannel_logout_uri" + backchannelLogoutUri);
+            log.debug("Backchannel RP response, status: " + response.getStatus() + ", backchannel_logout_uri" + backchannelLogoutUri);
         } catch (Exception e) {
             log.error("Failed to call backchannel_logout_uri" + backchannelLogoutUri + ", message: " + e.getMessage(), e);
         }
