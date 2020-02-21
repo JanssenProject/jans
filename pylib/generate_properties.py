@@ -38,7 +38,6 @@ if missing_packages:
     result = raw_input("Missing package(s): {0}. Install now? (Y|n): ".format(packages_str))
     if result.strip() and result.strip().lower()[0] == 'n':
         sys.exit("Can't continue without installing these packages. Exiting ...")
-            
 
     if package_type == 'rpm':
         cmd = 'yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm'
@@ -371,7 +370,7 @@ def generate_properties(as_dict=False):
         setup_prop['oxauthClient_pw'] = str(unobscure(oxTrustConfApplication['oxAuthClientPassword']))
         setup_prop['scim_rs_client_id'] =  str(oxTrustConfApplication['scimUmaClientId'])
         setup_prop['scim_resource_oxid'] =  str(oxTrustConfApplication['scimUmaResourceId'])
-        setup_prop['scimTestMode'] =  str(oxTrustConfApplication['scimTestMode'])
+        setup_prop['scimTestMode'] =  oxTrustConfApplication['scimTestMode']
 
         if 'apiUmaClientKeyStorePassword' in oxTrustConfApplication:
             setup_prop['api_rp_client_jks_pass'] = unobscure(oxTrustConfApplication['apiUmaClientKeyStorePassword'])
@@ -391,8 +390,8 @@ def generate_properties(as_dict=False):
         o_issuer = urlparse(oxAuthConfDynamic['issuer'])
         setup_prop['hostname'] = str(o_issuer.netloc)
         setup_prop['pairwiseCalculationSalt'] =  str(oxAuthConfDynamic['pairwiseCalculationSalt'])
-        setup_prop['oxauth_openidScopeBackwardCompatibility'] =  str(oxAuthConfDynamic.get('openidScopeBackwardCompatibility', False)).lower()
-        setup_prop['oxauth_legacyIdTokenClaims'] = str(oxAuthConfDynamic['legacyIdTokenClaims']).lower()
+        setup_prop['oxauth_openidScopeBackwardCompatibility'] =  oxAuthConfDynamic.get('openidScopeBackwardCompatibility', False)
+        setup_prop['oxauth_legacyIdTokenClaims'] = oxAuthConfDynamic['legacyIdTokenClaims']
         setup_prop['pairwiseCalculationKey'] = str(oxAuthConfDynamic['pairwiseCalculationKey'])
         setup_prop['oxauth_openid_jks_fn'] = str(oxAuthConfDynamic['keyStoreFile'])
         setup_prop['oxauth_openid_jks_pass'] = str(oxAuthConfDynamic['keyStoreSecret'])
@@ -404,8 +403,7 @@ def generate_properties(as_dict=False):
     setup_prop['city'] = ssl_subj['L']
 
     for service in jetty_services:
-        if os.path.exists('/opt/gluu/jetty/{0}/webapps/{0}.war'.format(service)):
-            setup_prop[jetty_services[service][0]] = 'True'
+        setup_prop[jetty_services[service][0]] = os.path.exists('/opt/gluu/jetty/{0}/webapps/{0}.war'.format(service))
 
     if setup_prop['installSaml']:
         setup_prop['gluuSamlEnabled'] = True
@@ -445,7 +443,7 @@ def generate_properties(as_dict=False):
     setup_prop['os_version'] = p[1].split('.')[0]
 
     https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if setup_prop['os_type'] in ('red', 'fedora', 'centos') else '/etc/apache2/sites-available/https_gluu.conf'
-    setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
+    setup_prop['installHTTPD'] = os.path.exists(https_gluu_fn)
 
     setup_prop['mappingLocations'] = mappingLocations
     
@@ -458,9 +456,9 @@ def generate_properties(as_dict=False):
         p_val = setup_prop[p_key]
         if p_key == 'mappingLocations':
             p_val = json.dumps(p_val)
-        if isinstance(p_val, bool):
+        elif isinstance(p_val, bool):
             p_val = str(p_val).lower()
-        elif isinstance(p_val, int) or isinstance(p_val, float):
+        elif not isinstance(p_val, str):
             p_val = str(p_val)
 
         setup_propp[p_key] = p_val
