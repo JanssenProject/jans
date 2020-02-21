@@ -18,10 +18,10 @@ import org.gluu.oxd.rs.protect.resteasy.ServiceProvider;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -107,8 +107,8 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         try {
             LOG.trace("Try to register ticket, scopes: " + requiredScopes + ", resourceId: " + resource.getId());
             response = rptInterceptor.registerTicketResponse(requiredScopes, resource.getId());
-        } catch (ClientResponseFailure e) {
-            LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
+        } catch (ClientErrorException e) {
+            LOG.debug("Failed to register ticket. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
@@ -116,6 +116,9 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             } else {
                 throw e;
             }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
