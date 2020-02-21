@@ -123,9 +123,9 @@ def get_cb_result(cbm, n1ql):
         data = result.json()
         return data.get('results')
 
-def generate_properties():
+def generate_properties(as_dict=False):
     
-    setup_prop = Properties.Properties()
+    setup_prop = {}
     
     default_storage = 'ldap'
     setup_prop['persistence_type'] = 'ldap'
@@ -202,7 +202,7 @@ def generate_properties():
                     for rd in cb_who['roles']:
                         for r in rd:
                             if r == 'role' and rd[r] == 'admin':
-                                setup_prop['isCouchbaseUserAdmin'] = 'true'
+                                setup_prop['isCouchbaseUserAdmin'] = True
                                 break
 
     if gluu_version < '4.1.0':
@@ -246,7 +246,7 @@ def generate_properties():
 
             try:
                 result = ldap_conn.search_s('ou=oxradius,ou=configuration,o=gluu',ldap.SCOPE_BASE)
-                setup_prop['installGluuRadius'] = 'true'
+                setup_prop['installGluuRadius'] = True
                 setup_prop['gluu_radius_client_id'] = result[0][1]['oxRadiusOpenidUsername'][0]
                 setup_prop['gluu_ro_pw'] = unobscure(result[0][1]['oxRadiusOpenidPassword'][0])
             except:
@@ -255,7 +255,7 @@ def generate_properties():
             try:
                 result = ldap_conn.search_s('inum=5866-4202,ou=scripts,o=gluu',ldap.SCOPE_BASE, attrlist=['oxEnabled'])
                 if result[0][1]['oxEnabled'][0].lower() == 'true':
-                    setup_prop['enableRadiusScripts'] = 'true' 
+                    setup_prop['enableRadiusScripts'] = True
             except:
                 pass
 
@@ -267,14 +267,14 @@ def generate_properties():
             n1ql = 'SELECT * from `{}` USE KEYS "configuration_oxradius"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
             if result:
-                setup_prop['installGluuRadius'] = 'true'
+                setup_prop['installGluuRadius'] = True
                 setup_prop['gluu_radius_client_id'] = str(result[0]['gluu']['oxRadiusOpenidUsername'])
                 setup_prop['gluu_ro_pw'] = unobscure(result[0]['gluu']['oxRadiusOpenidPassword'])
             
             n1ql = 'SELECT oxEnabled from `{}` USE KEYS "scripts_5866-4202"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
             if result and result[0]['oxEnabled']:
-                setup_prop['enableRadiusScripts'] = 'true' 
+                setup_prop['enableRadiusScripts'] = True
 
             n1ql =  'SELECT inum from `{}` WHERE objectClass="oxAuthClient" AND inum LIKE "1402.%"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
@@ -405,13 +405,13 @@ def generate_properties():
 
     for service in jetty_services:
         if os.path.exists('/opt/gluu/jetty/{0}/webapps/{0}.war'.format(service)):
-            setup_prop[jetty_services[service][0]] = 'true'
+            setup_prop[jetty_services[service][0]] = 'True'
 
     if setup_prop['installSaml']:
-        setup_prop['gluuSamlEnabled'] = 'true'
+        setup_prop['gluuSamlEnabled'] = True
 
     if os.path.exists('/opt/gluu/node/passport/server'):
-        setup_prop['installPassport'] = 'true'
+        setup_prop['installPassport'] = True
 
     application_max_ram = 3072
 
@@ -434,11 +434,11 @@ def generate_properties():
         allowedRatio = jetty_services['oxauth'][1] * ratioMultiplier
         application_max_ram = int(round(applicationMemory / allowedRatio))
 
-    setup_prop['application_max_ram'] = str(application_max_ram)
+    setup_prop['application_max_ram'] = application_max_ram
 
     if os.path.exists(os.path.join(default_dir, 'gluu-radius')):
-        setup_prop['gluuRadiusEnabled'] = 'true'
-        setup_prop['oxauth_openidScopeBackwardCompatibility'] = 'true'
+        setup_prop['gluuRadiusEnabled'] = True
+        setup_prop['oxauth_openidScopeBackwardCompatibility'] = True
 
     p = platform.linux_distribution()
     setup_prop['os_type'] = p[0].split()[0].lower()
@@ -447,9 +447,25 @@ def generate_properties():
     https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if setup_prop['os_type'] in ('red', 'fedora', 'centos') else '/etc/apache2/sites-available/https_gluu.conf'
     setup_prop['installHTTPD'] = str(os.path.exists(https_gluu_fn)).lower()
 
-    setup_prop['mappingLocations'] = json.dumps(mappingLocations)
+    setup_prop['mappingLocations'] = mappingLocations
+    
+    if as_dict:
+        return setup_prop
 
-    return setup_prop
+    setup_propp = Properties.Properties()
+
+    for p_key in setup_prop:
+        p_val = setup_prop[p_key]
+        if p_key == 'mappingLocations':
+            p_val = json.dumps(p_val)
+        if isinstance(p_val, bool):
+            p_val = str(p_val).lower()
+        elif isinstance(p_val, int) or isinstance(p_val, float):
+            p_val = str(p_val)
+
+        setup_propp[p_key] = p_val
+
+    return setup_propp
 
 if __name__ == '__main__':
 
