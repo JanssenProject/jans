@@ -21,6 +21,7 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -80,14 +81,17 @@ public class RsModifyOperation extends BaseOperation<RsModifyParams> {
         try {
             String pat = getUmaTokenService().getPat(params.getOxdId()).getToken();
             return update(pat, umaResource.getId(), rp, resourceService, opUmaResource);
-        } catch (ClientResponseFailure e) {
-            LOG.debug("Failed to update resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
+        } catch (ClientErrorException e) {
+            LOG.debug("Failed to update resource. Entity: " + e.getResponse().readEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
                 return update(getUmaTokenService().obtainPat(params.getOxdId()).getToken(), umaResource.getId(), rp, resourceService, opUmaResource);
             } else {
                 throw e;
             }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 
