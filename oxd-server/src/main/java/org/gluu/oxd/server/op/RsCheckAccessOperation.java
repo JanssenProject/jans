@@ -18,7 +18,6 @@ import org.gluu.oxd.rs.protect.resteasy.ServiceProvider;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.model.UmaResource;
 import org.gluu.oxd.server.service.Rp;
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
