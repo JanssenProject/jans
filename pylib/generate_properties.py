@@ -12,6 +12,9 @@ import glob
 from urlparse import urlparse
 from pyDes import triple_des, ECB, PAD_PKCS5
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+
 if os.path.exists('/etc/yum.repos.d/'):
     package_type = 'rpm'
 elif os.path.exists('/etc/apt/sources.list'):
@@ -52,12 +55,13 @@ if missing_packages:
     print "Installing package(s) with command: "+ cmd
     os.system(cmd)
 
-if not os.path.exists('Properties.py'):
-    os.system('wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/Properties.py')
+prop_path = os.path.join(cur_dir, 'Properties.py')
+if not os.path.exists(prop_path):
+    os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/Properties.py -O ' + prop_path)
 
+cbm_path = os.path.join(cur_dir, 'cbm.py')
 if not os.path.exists('cbm.py'):
-    os.system('wget https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/cbm.py')
-
+    os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/cbm.py -O' + cbm_path)
 
 if needs_restart:
     python_ = sys.executable
