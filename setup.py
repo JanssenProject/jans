@@ -960,6 +960,15 @@ class Setup(object):
         else:
             self.logIt("Can't determine key generator path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
 
+
+        self.logIt("Determining oxd server package")
+        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
+
+        if oxd_package_list:
+            self.oxd_package = max(oxd_package_list)
+
+        self.logIt("oxd server package was determined as " + self.oxd_package)
+
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
         cmd = 'openssl x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
@@ -3379,11 +3388,6 @@ class Setup(object):
             self.enable_scim_access_policy = 'true'
         else:
             self.installPassport = False
-
-        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
-        
-        if oxd_package_list:
-            self.oxd_package = max(oxd_package_list)
 
         if os.path.exists(os.path.join(self.distGluuFolder, 'casa.war')):
 
