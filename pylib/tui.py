@@ -290,12 +290,17 @@ class HostForm(GluuSetupForm):
 
 class ServicesForm(GluuSetupForm):
 
-    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius')
+    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius', 'installOxd', 'installCasa')
 
     def create(self):
         for service in self.services:
             cb = self.add(npyscreen.Checkbox, scroll_exit=True, name = getattr(msg, 'ask_' + service))
             setattr(self, service, cb)
+
+        self.oxd_url = self.add(npyscreen.TitleText, name=msg.oxd_url_label, rely=12, begin_entry_at=17, hidden=True)
+
+        self.installCasa.value_changed_callback = self.casa_oxd_option_changed
+        self.installOxd.value_changed_callback = self.casa_oxd_option_changed
 
     def do_beforeEditing(self):
         for service in self.services:
@@ -309,7 +314,57 @@ class ServicesForm(GluuSetupForm):
             cb_val = getattr(self, service).value
             setattr(self.parentApp.installObject, service, cb_val)
 
+        if self.installCasa.value:
+            if not self.installOxd.value and not self.oxd_url.value:
+                npyscreen.notify_confirm(msg.install_oxd_or_url_warning, title="Warning")
+                return
+
+            if not self.installOxd.value:
+        
+                oxd_server_https = self.oxd_url.value
+        
+                oxd_connection_result = self.parentApp.installObject.check_oxd_server(oxd_server_https)
+        
+                if oxd_connection_result != True:
+                    npyscreen.notify_confirm(
+                            msg.oxd_connection_error.format(oxd_server_https, oxd_connection_result),
+                            title="Warning"
+                            )
+                    return
+
+                oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(oxd_server_https)
+                oxd_ssl_result = self.parentApp.installObject.check_oxd_ssl_cert(oxd_hostname, oxd_port)
+                if oxd_ssl_result :
+
+                    npyscreen.notify_confirm(
+                            msg.oxd_ssl_cert_error.format(oxd_ssl_result['CN'], oxd_hostname),
+                            title="Warning")
+                    return
+        
+                self.parentApp.installObject.oxd_server_https = oxd_server_https
+
+        oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(self.parentApp.installObject.oxd_server_https)
+        if not oxd_port: 
+            oxd_port=8443
+
+        self.parentApp.installObject.templateRenderingDict['oxd_hostname'] = oxd_hostname
+        self.parentApp.installObject.templateRenderingDict['oxd_port'] = str(oxd_port)
+
         self.parentApp.switchForm('DBBackendForm')
+
+
+    def casa_oxd_option_changed(self, widget):
+        
+        if self.installOxd.value:
+            self.oxd_url.hidden = True
+        
+        elif self.installCasa.value and not self.installOxd.value:
+            self.oxd_url.hidden = False
+        
+        elif not self.installCasa.value:
+            self.oxd_url.hidden = True
+        
+        self.oxd_url.update()
 
 
     def backButtonPressed(self):
@@ -536,23 +591,58 @@ class StorageSelectionForm(GluuSetupForm):
 
 class DisplaySummaryForm(GluuSetupForm):
 
-    myfields_ = ("hostname", "orgName", "os_type", "city", "state", "countryCode",
-                   "application_max_ram", "installOxAuth", "installOxTrust", 
+    myfields_1 = ("hostname", "orgName", "os_type", "city", "state", "countryCode",
+                   "application_max_ram")
+
+    myfields_2 = ( "installOxAuth", "installOxTrust", 
                     "installHttpd", "installSaml", "installOxAuthRP",
-                    "installPassport", "installGluuRadius", "java_type",
+                    "installPassport", "installGluuRadius", 
+                    "installOxd", "installCasa",
+                    "java_type",
                     "backend_types", 'wrends_storages')
 
     def create(self):
 
-        for wn in self.myfields_:
+        for i, wn in enumerate(self.myfields_1):
+            setattr(self, 
+                    wn, 
+                    self.add(
+                            npyscreen.TitleFixedText,
+                            name=getattr(msg, wn+'_label'),
+                            value="",
+                            begin_entry_at=24,
+                            editable=False,
+                            )
+                    )
 
-            hidden = True if wn == 'wrends_storages' else False
-            setattr(self, wn, self.add(npyscreen.TitleFixedText, name=getattr(msg, wn+'_label'), value="", begin_entry_at=24, editable=False, hidden=hidden))
+        sec_col_n = 6
+        for j, wn in enumerate(self.myfields_2):
+            if j < sec_col_n:
+                relx=2
+                rely = i+4+j
+            else:
+                relx=39
+                rely = i+4+j-sec_col_n
+            setattr(self, 
+                    wn, 
+                    self.add(
+                            npyscreen.TitleFixedText,
+                            name=getattr(msg, wn+'_label'),
+                            value="",
+                            begin_entry_at=20,
+                            editable=False,
+                            rely=rely,
+                            relx=relx,
+                            )
+                    )
+
+
+
 
     def do_beforeEditing(self):
         wrends_storages_widget = getattr(self, 'wrends_storages')
 
-        for wn in self.myfields_:
+        for wn in self.myfields_1+self.myfields_2:
             w = getattr(self, wn)
             if getClassName(w) == 'TitleFixedText':
                 if wn == 'backend_types':
