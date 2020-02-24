@@ -969,6 +969,10 @@ class Setup(object):
 
         self.logIt("oxd server package was determined as " + self.oxd_package)
 
+        if self.installCasa:
+            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
+
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
         cmd = 'openssl x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
@@ -3396,8 +3400,6 @@ class Setup(object):
                                                 )[0].lower()
             if promptForCasa == 'y':
                 self.installCasa = True
-                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
-                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
             else:
                 self.installCasa = False
 
