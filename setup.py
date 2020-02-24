@@ -3114,11 +3114,23 @@ class Setup(object):
                 if oxd_status['status'] == 'running':
                     return True
         except Exception as e:
+            if thread_queue:
+                return str(e)
             if error_out:
                 print colors.DANGER
                 print "Can't connect to oxd-server with url {}".format(oxd_url)
                 print "Reason: ", e
                 print colors.ENDC
+
+    def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
+
+        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+        self.writeFile(oxd_crt_fn, oxd_cert)
+        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+        
+        if ssl_subjects['CN'] != oxd_hostname:
+            return ssl_subjects
 
 
     def promptForProperties(self):
@@ -3398,19 +3410,15 @@ class Setup(object):
                         break
 
                     print "Checking oxd server ..."
-                    if self.check_oxd_server(oxd_server_https):
+                    if self.check_oxd_server(oxd_server_https) != True:
                         oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
-                        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-                        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-                        self.writeFile(oxd_crt_fn, oxd_cert)
-                        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-                        
-                        if not ssl_subjects['CN'] == oxd_hostname:
+                        oxd_ssl_result = self.check_oxd_ssl_cert(oxd_hostname, oxd_port)
+                        if oxd_ssl_result:
                             print ('Hostname of oxd ssl certificate is {0}{1}{2} '
                                     'which does not match {0}{3}{2}, \ncasa won\'t start '
                                     'properly').format(
                                             colors.DANGER,
-                                            ssl_subjects['CN'],
+                                            oxd_ssl_result['CN'],
                                             colors.ENDC,
                                             oxd_hostname
                                             )
