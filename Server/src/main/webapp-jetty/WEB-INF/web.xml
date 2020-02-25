@@ -78,7 +78,7 @@
 	</servlet-mapping>
 
 	<session-config>
-		<session-timeout>30</session-timeout>
+		<session-timeout>1</session-timeout>
 		<tracking-mode>COOKIE</tracking-mode>
 	</session-config>
 
