@@ -33,7 +33,7 @@ def get_war_info(war_fn):
     war_zip = zipfile.ZipFile(war_fn,"r")
     menifest = war_zip.read('META-INF/MANIFEST.MF')
 
-    for l in menifest.split('\n'):
+    for l in menifest.splitlines():
         ls = l.strip()
         for key in retDict:
             if ls.startswith('Implementation-{0}'.format(key.title())):
@@ -50,7 +50,7 @@ def get_war_info(war_fn):
     for f in war_zip.filelist:
         if f.filename.startswith('META-INF/maven/org.gluu') and f.filename.endswith('pom.properties'):
             pom_prop = war_zip.read(f.filename)
-            for l in pom_prop.split('\n'):
+            for l in pom_prop.splitlines():
                 build_date = re.findall("\w{3}\s\w{3}\s{1,2}\w{1,2}\s\w{2}:\w{2}:\w{2}\s[+\w]{3}\s\w{4}", l)
                 if build_date:
                     retDict['buildDate'] =  build_date[0]
