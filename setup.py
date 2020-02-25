@@ -1261,7 +1261,7 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)        
                     
     def commentOutText(self, text):
-        textLines = text.split('\n')
+        textLines = text.splitlines()
 
         lines = []
         for textLine in textLines:
@@ -2452,7 +2452,7 @@ class Setup(object):
 
         service_fn = os.path.join(self.jetty_base, jettyServiceName, 'start.ini')
         start_ini = self.readFile(service_fn)
-        start_ini_list = start_ini.split('\n')
+        start_ini_list = start_ini.splitlines()
         param_ln = jetty_param + '=' + jetty_val
 
         for i, l in enumerate(start_ini_list[:]):
