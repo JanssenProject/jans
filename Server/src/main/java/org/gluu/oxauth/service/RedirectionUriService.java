@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
@@ -46,6 +47,9 @@ public class RedirectionUriService {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {
         Client client = clientService.getClient(clientIdentifier);
@@ -83,21 +87,8 @@ public class RedirectionUriService {
                 log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                         client.getClientId(), redirectionUri, redirectUris.length);
 
-                final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
-
-                for (String uri : redirectUris) {
-                    log.debug("Comparing {} == {}", uri, redirectionUri);
-                    if (uri.equals(redirectionUri)) { // compare complete uri
-                        return redirectionUri;
-                    }
-
-                    String uriWithoutParams = uriWithoutParams(uri);
-                    final Map<String, String> params = getParams(uri);
-
-                    if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
-                            uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
-                        return redirectionUri;
-                    }
+                if (isUriWithoutParamsEqual(redirectionUri, redirectUris)) {
+                    return redirectionUri;
                 }
             } else {
                 // Accept Request Without redirect_uri when One Registered
@@ -111,6 +102,27 @@ public class RedirectionUriService {
         return null;
     }
 
+    public boolean isUriWithoutParamsEqual(String redirectionUri, String[] redirectUris) {
+        final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
+
+        for (String uri : redirectUris) {
+            log.debug("Comparing {} == {}", uri, redirectionUri);
+            if (uri.equals(redirectionUri)) { // compare complete uri
+                return true;
+            }
+
+            String uriWithoutParams = uriWithoutParams(uri);
+            final Map<String, String> params = getParams(uri);
+
+            if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && getParams(redirectionUri).size() == 0) ||
+                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && compareParams(redirectionUri, uri)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public String validatePostLogoutRedirectUri(String clientId, String postLogoutRedirectUri) {
 
         boolean isBlank = Util.isNullOrEmpty(postLogoutRedirectUri);
@@ -119,23 +131,9 @@ public class RedirectionUriService {
 
         if (client != null) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
+            log.debug("Validating post logout redirect URI: clientId = {}, postLogoutRedirectUri = {}", clientId, postLogoutRedirectUri);
 
-            if (postLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
-                log.debug("Validating post logout redirect URI: clientId = {}, postLogoutRedirectUri = {}",
-                        clientId, postLogoutRedirectUri);
-
-                for (String uri : postLogoutRedirectUris) {
-                    log.debug("Comparing {} == {}", uri, postLogoutRedirectUri);
-                    if (uri.equals(postLogoutRedirectUri)) {
-                        return postLogoutRedirectUri;
-                    }
-                }
-            } else {
-                // Accept Request Without post_logout_redirect_uri when One Registered
-                if (postLogoutRedirectUris != null && postLogoutRedirectUris.length == 1) {
-                    return postLogoutRedirectUris[0];
-                }
-            }
+            return validatePostLogoutRedirectUri(postLogoutRedirectUri, postLogoutRedirectUris);
         }
 
         if (!isBlank) {
@@ -161,19 +159,33 @@ public class RedirectionUriService {
 
         for (Client client : clientsByDns) {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
-            if (postLogoutRedirectUris == null) {
-                continue;
-            }
 
-            for (String uri : postLogoutRedirectUris) {
-                log.debug("Comparing {} == {}, clientId: {}", uri, postLogoutRedirectUri, client.getClientId());
-                if (uri.equals(postLogoutRedirectUri)) {
-                    return postLogoutRedirectUri;
-                }
+            String validatedUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, postLogoutRedirectUris);
+
+            if (StringUtils.isNotBlank(validatedUri)) {
+                return validatedUri;
             }
         }
 
         throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, "Unable to validate `post_logout_redirect_uri`");
+    }
+
+    public String validatePostLogoutRedirectUri(String postLogoutRedirectUri, String[] allowedPostLogoutRedirectUris) {
+        if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
+            return postLogoutRedirectUri;
+        }
+
+        if (allowedPostLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
+            if (isUriWithoutParamsEqual(postLogoutRedirectUri, allowedPostLogoutRedirectUris)) {
+                return postLogoutRedirectUri;
+            }
+        } else {
+            // Accept Request Without post_logout_redirect_uri when One Registered
+            if (allowedPostLogoutRedirectUris != null && allowedPostLogoutRedirectUris.length == 1) {
+                return allowedPostLogoutRedirectUris[0];
+            }
+        }
+        return "";
     }
 
     public static Map<String, String> getParams(String uri) {
