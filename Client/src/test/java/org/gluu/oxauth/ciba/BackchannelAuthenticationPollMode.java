@@ -41,7 +41,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version February 25, 2020
  */
 public class BackchannelAuthenticationPollMode extends BaseTest {
 
@@ -73,7 +73,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
     @Parameters({"clientJwksUri", "userId"})
     @Test
     public void backchannelTokenDeliveryModePollLoginHint1(
-            final String clientJwksUri, final String userId) {
+            final String clientJwksUri, final String userId) throws InterruptedException {
         showTitle("backchannelTokenDeliveryModePollLoginHint1");
 
         // 1. Dynamic Client Registration
@@ -108,11 +108,12 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
-        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "email", "address", "phone"));
         backchannelAuthenticationRequest.setLoginHint(userId);
         backchannelAuthenticationRequest.setClientNotificationToken("123");
         backchannelAuthenticationRequest.setUserCode("qwe");
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
 
@@ -125,6 +126,54 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
         assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
         assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+
+        String authReqId = backchannelAuthenticationResponse.getAuthReqId();
+
+        // 3. Token Request Using CIBA Grant Type
+        TokenResponse tokenResponse = null;
+        do {
+            Thread.sleep(5000);
+
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CIBA);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setAuthReqId(authReqId);
+
+            TokenClient tokenClient = new TokenClient(tokenEndpoint);
+            tokenClient.setRequest(tokenRequest);
+            tokenResponse = tokenClient.exec();
+
+            showClient(tokenClient);
+        } while (tokenResponse.getStatus() == 400);
+
+        String accessToken = tokenResponse.getAccessToken();
+
+        // 4. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
     }
 
     @Parameters({"clientJwksUri", "userEmail"})

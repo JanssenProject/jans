@@ -69,7 +69,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 21, 2019
+ * @version February 25, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -663,17 +663,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
                                     if (cibaGrant != null) {
-                                        RefreshToken refreshToken = cibaGrant.createRefreshToken();
-                                        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
-                                        AccessToken accessToken = authorizationGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-                                        log.debug("Issuing access token: {}", accessToken.getCode());
-
-                                        IdToken idToken = cibaGrant.createIdToken(
-                                                null, null, accessToken, refreshToken,
-                                                null, cibaGrant, false, null);
-
                                         if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+                                            RefreshToken refreshToken = cibaGrant.createRefreshToken();
+                                            log.debug("Issuing refresh token: {}", refreshToken.getCode());
+
+                                            AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+                                            log.debug("Issuing access token: {}", accessToken.getCode());
+
+                                            IdToken idToken = cibaGrant.createIdToken(
+                                                    null, null, accessToken, refreshToken,
+                                                    null, cibaGrant, false, null);
+
+                                            cibaGrant.setUserAuthorization(true);
+                                            cibaGrant.setTokensDelivered(true);
+                                            cibaGrant.save();
+
                                             cibaPushTokenDeliveryProxy.pushTokenDelivery(
                                                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                                                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
@@ -684,13 +688,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     accessToken.getExpiresIn()
                                             );
                                         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
+                                            cibaGrant.setUserAuthorization(true);
+                                            cibaGrant.setTokensDelivered(false);
+                                            cibaGrant.save();
+
                                             cibaPingCallbackProxy.pingCallback(
                                                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                                                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                                                     cibaGrant.getClientNotificationToken()
                                             );
                                         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                                            // TODO: Implement this case.
+                                            cibaGrant.setUserAuthorization(true);
+                                            cibaGrant.setTokensDelivered(false);
+                                            cibaGrant.save();
                                         }
                                     }
                                 }
