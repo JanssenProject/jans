@@ -47,18 +47,6 @@ random_marketing_strings = [
 
 marketing_text_period = 20 
 
-
-def check_email(email):
-    return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email)
-
-def isIP(address):
-    if re.match(r'^((\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d{2}|2[0-4]\d|25[0-5])$', address):  
-        return True
-
-def checkPassword(pwd):
-    if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
-        return True
-
 def getPW(size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
         
         if not special:
@@ -245,11 +233,11 @@ class HostForm(GluuSetupForm):
             npyscreen.notify_confirm(msg.enter_hostname_local, title="Info")
             return
 
-        if not check_email(self.admin_email.value):
+        if not self.parentApp.installObject.check_email(self.admin_email.value):
             npyscreen.notify_confirm(msg.enter_valid_email, title="Info")
             return
         
-        if not isIP(self.ip.value):
+        if not self.parentApp.installObject.isIP(self.ip.value):
             npyscreen.notify_confirm(msg.enter_valid_ip, title="Info")
             return
 
@@ -488,11 +476,11 @@ class DBBackendForm(GluuSetupForm):
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
-        if self.parentApp.installObject.wrends_install and not checkPassword(self.parentApp.installObject.ldapPass):
+        if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if self.parentApp.installObject.cb_install and not checkPassword(self.parentApp.installObject.cb_password):
+        if self.parentApp.installObject.cb_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
