@@ -41,7 +41,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version February 25, 2020
  */
 public class BackchannelAuthenticationPushMode extends BaseTest {
 
@@ -114,6 +114,7 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         backchannelAuthenticationRequest.setClientNotificationToken("123");
         backchannelAuthenticationRequest.setUserCode("qwe");
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
 

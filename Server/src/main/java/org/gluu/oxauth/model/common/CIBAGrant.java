@@ -8,20 +8,19 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.registration.Client;
 
-import java.util.Date;
-
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version February 25, 2020
  */
 public class CIBAGrant extends AuthorizationGrant {
 
     private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
-    private Boolean userAuthorization;
     private String clientNotificationToken;
-    private Long lastAccessPollFlowControl;
+    private Long lastAccessControl;
+    private boolean userAuthorization;
+    private boolean tokensDelivered;
 
     public CIBAGrant() {
     }
@@ -30,7 +29,6 @@ public class CIBAGrant extends AuthorizationGrant {
         super.init(user, AuthorizationGrantType.CIBA, client, null);
         setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
         setIsCachedWithNoPersistence(true);
-        setLastAccessPollFlowControl(new Date().getTime());
     }
 
     public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
@@ -41,14 +39,6 @@ public class CIBAGrant extends AuthorizationGrant {
         this.cibaAuthenticationRequestId = cibaAuthenticationRequestId;
     }
 
-    public Boolean isUserAuthorization() {
-        return userAuthorization;
-    }
-
-    public void setUserAuthorization(Boolean userAuthorization) {
-        this.userAuthorization = userAuthorization;
-    }
-
     public String getClientNotificationToken() {
         return clientNotificationToken;
     }
@@ -57,12 +47,27 @@ public class CIBAGrant extends AuthorizationGrant {
         this.clientNotificationToken = clientNotificationToken;
     }
 
-    public Long getLastAccessPollFlowControl() {
-        return lastAccessPollFlowControl;
+    public Long getLastAccessControl() {
+        return lastAccessControl;
     }
 
-    public void setLastAccessPollFlowControl(Long lastAccessPollFlowControl) {
-        this.lastAccessPollFlowControl = lastAccessPollFlowControl;
+    public void setLastAccessControl(Long lastAccessControl) {
+        this.lastAccessControl = lastAccessControl;
     }
 
+    public boolean isUserAuthorization() {
+        return userAuthorization;
+    }
+
+    public void setUserAuthorization(boolean userAuthorization) {
+        this.userAuthorization = userAuthorization;
+    }
+
+    public boolean isTokensDelivered() {
+        return tokensDelivered;
+    }
+
+    public void setTokensDelivered(boolean tokensDelivered) {
+        this.tokensDelivered = tokensDelivered;
+    }
 }

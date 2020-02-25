@@ -54,7 +54,7 @@ import java.util.Date;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version February 25, 2020
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -389,42 +389,59 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     }
 
                     log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
-                    final CIBAGrant authorizationGrant = authorizationGrantList.getCIBAGrant(authReqId);
+                    final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
-                    log.trace("AuthorizationGrant : '{}'", authorizationGrant);
+                    log.trace("AuthorizationGrant : '{}'", cibaGrant);
 
-                    if (authorizationGrant != null) {
-                        if (authorizationGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                            long lastAccess = authorizationGrant.getLastAccessPollFlowControl();
-                            authorizationGrant.setLastAccessPollFlowControl(new Date().getTime());
-                            authorizationGrant.save();
+                    if (cibaGrant != null) {
+                        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
+                                cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                            long currentTime = new Date().getTime();
+                            Long lastAccess = cibaGrant.getLastAccessControl();
+                            if (lastAccess == null) {
+                                lastAccess = currentTime;
+                            }
+                            cibaGrant.setLastAccessControl(currentTime);
+                            cibaGrant.save();
 
-                            AccessToken accToken = authorizationGrant.getLongLivedAccessToken();
-                            IdToken idToken = authorizationGrant.getIdToken();
-                            if (accToken != null && idToken != null) {
-                                log.debug("Issuing access token: {}", accToken.getCode());
+                            if (cibaGrant.isUserAuthorization() && !cibaGrant.isTokensDelivered()) {
+                                RefreshToken refToken = cibaGrant.createRefreshToken();
+                                log.debug("Issuing refresh token: {}", refToken.getCode());
+
+                                AccessToken accessToken = cibaGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
+                                log.debug("Issuing access token: {}", accessToken.getCode());
+
+                                IdToken idToken = cibaGrant.createIdToken(
+                                        null, null, accessToken, refToken,
+                                        null, cibaGrant, false, null);
+
+                                cibaGrant.setUserAuthorization(true);
+                                cibaGrant.setTokensDelivered(true);
+                                cibaGrant.save();
+
                                 RefreshToken reToken = null;
                                 if (client.getGrantTypes() != null
                                         && client.getGrantTypes().length > 0
                                         && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
-                                    reToken = authorizationGrant.createRefreshToken();
+                                    reToken = refToken;
                                 }
 
                                 if (scope != null && !scope.isEmpty()) {
-                                    scope = authorizationGrant.checkScopesPolicy(scope);
+                                    scope = cibaGrant.checkScopesPolicy(scope);
                                 }
 
-                                builder.entity(getJSonResponse(accToken,
-                                        accToken.getTokenType(),
-                                        accToken.getExpiresIn(),
+                                builder.entity(getJSonResponse(accessToken,
+                                        accessToken.getTokenType(),
+                                        accessToken.getExpiresIn(),
                                         reToken,
                                         scope,
                                         idToken));
 
-                                oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
+                                oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
                             } else {
                                 int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
-                                long timeFromLastAccess = new Date().getTime() - lastAccess;
+                                long timeFromLastAccess = currentTime - lastAccess;
+
                                 if (timeFromLastAccess > intervalSeconds * 1000) {
                                     log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
                                     builder = error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet");
