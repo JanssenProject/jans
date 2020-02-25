@@ -106,10 +106,6 @@ except:
     pass
 
 
-def checkPassword(pwd):
-    if re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd):
-        return True
-
 class ProgressBar:
 
     def __init__(self, cols, queue=None, max_steps=33):
@@ -2778,6 +2774,9 @@ class Setup(object):
     def check_email(self, email):
         return re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$', email, re.IGNORECASE)
 
+    def checkPassword(self, pwd):
+        return re.search('^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W)[a-zA-Z0-9\S]{6,}$', pwd)
+
     def ldap_encode(self, password):
         salt = os.urandom(4)
         sha = hashlib.sha1(password)
@@ -3236,7 +3235,7 @@ class Setup(object):
             while True:
                 ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
 
-                if checkPassword(ldapPass):
+                if self.checkPassword(ldapPass):
                     break
                 else:
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
@@ -3269,7 +3268,7 @@ class Setup(object):
                 while True:
                     cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), self.oxtrust_admin_password)
 
-                    if checkPassword(cbPass):
+                    if self.checkPassword(cbPass):
                         break
                     else:
                         print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
