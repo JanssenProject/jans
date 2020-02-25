@@ -25,7 +25,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version December 21, 2019
+ * @version February 25, 2020
  */
 @Interceptor
 @CIBAPushTokenDeliveryInterception
@@ -78,5 +78,7 @@ public class CIBAPushTokenDeliveryInterceptor implements CIBAPushTokenDeliveryIn
         PushTokenDeliveryClient pushTokenDeliveryClient = new PushTokenDeliveryClient(clientNotificationEndpoint);
         pushTokenDeliveryClient.setRequest(pushTokenDeliveryRequest);
         PushTokenDeliveryResponse pushTokenDeliveryResponse = pushTokenDeliveryClient.exec();
+
+        log.debug("CIBA: push token delivery result status " + pushTokenDeliveryResponse.getStatus());
     }
 }

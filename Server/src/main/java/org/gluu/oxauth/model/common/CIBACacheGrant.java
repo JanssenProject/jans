@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version February 25, 2020
  */
 public class CIBACacheGrant implements Serializable {
 
@@ -29,6 +29,9 @@ public class CIBACacheGrant implements Serializable {
     private String sessionDn;
     private int expiresIn = 1;
     private String clientNotificationToken;
+    private Long lastAccessControl;
+    private boolean userAuthorization;
+    private boolean tokensDelivered;
 
     public CIBACacheGrant() {
     }
@@ -45,6 +48,9 @@ public class CIBACacheGrant implements Serializable {
         grantId = grant.getGrantId();
         sessionDn = grant.getSessionDn();
         clientNotificationToken = grant.getClientNotificationToken();
+        lastAccessControl = grant.getLastAccessControl();
+        userAuthorization = grant.isUserAuthorization();
+        tokensDelivered = grant.isTokensDelivered();
     }
 
     private void initExpiresIn(CIBAGrant grant, AppConfiguration appConfiguration) {
@@ -60,10 +66,14 @@ public class CIBACacheGrant implements Serializable {
         grant.init(user, client, expiresIn);
 
         grant.setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
+        grant.getCIBAAuthenticationRequestId().setCode(authorizationRequestId);
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
         grant.setClientNotificationToken(clientNotificationToken);
+        grant.setLastAccessControl(lastAccessControl);
+        grant.setUserAuthorization(userAuthorization);
+        grant.setTokensDelivered(tokensDelivered);
 
         return grant;
     }

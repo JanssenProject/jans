@@ -24,7 +24,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version December 21, 2019
+ * @version February 25, 2020
  */
 @Interceptor
 @CIBAPingCallbackInterception
@@ -67,5 +67,7 @@ public class CIBAPingCallbackInterceptor implements CIBAPingCallbackInterception
         PingCallbackClient pingCallbackClient = new PingCallbackClient(clientNotificationEndpoint);
         pingCallbackClient.setRequest(pingCallbackRequest);
         PingCallbackResponse pingCallbackResponse = pingCallbackClient.exec();
+
+        log.debug("CIBA: ping callback result status " + pingCallbackResponse.getStatus());
     }
 }
