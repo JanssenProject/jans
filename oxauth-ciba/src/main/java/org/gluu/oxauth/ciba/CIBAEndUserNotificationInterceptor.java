@@ -29,7 +29,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
 
 /**
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version February 25, 2020
  */
 @Interceptor
 @CIBAEndUserNotificationInterception
@@ -86,9 +86,11 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
 
         String clickAction = authorizationRequestUri.toString();
 
-        FirebaseCloudMessagingRequest request = new FirebaseCloudMessagingRequest(key, to, title, body, clickAction);
-        FirebaseCloudMessagingClient client = new FirebaseCloudMessagingClient(url);
-        client.setRequest(request);
-        FirebaseCloudMessagingResponse response = client.exec();
+        FirebaseCloudMessagingRequest firebaseCloudMessagingRequest = new FirebaseCloudMessagingRequest(key, to, title, body, clickAction);
+        FirebaseCloudMessagingClient firebaseCloudMessagingClient = new FirebaseCloudMessagingClient(url);
+        firebaseCloudMessagingClient.setRequest(firebaseCloudMessagingRequest);
+        FirebaseCloudMessagingResponse firebaseCloudMessagingResponse = firebaseCloudMessagingClient.exec();
+
+        log.debug("CIBA: firebase cloud messaging result status " + firebaseCloudMessagingResponse.getStatus());
     }
 }

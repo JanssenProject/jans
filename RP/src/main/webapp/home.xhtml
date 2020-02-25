@@ -794,7 +794,7 @@
 							<b:panel title="Backchannel Authentication Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea styleClass="width100"
-													 value="#{backchannelAuthenticationAction.responseString}" rows="10" />
+													 value="#{backchannelAuthenticationAction.responseString}" rows="12" />
 								</h:panelGroup>
 							</b:panel>
 						</h:panelGroup>
@@ -904,13 +904,13 @@
 							<b:panel title="Token Request" look="primary">
 								<f:facet name="header"></f:facet>
 								<h:panelGroup layout="block">
-									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
+									<h:inputTextarea readonly="true" styleClass="width100" rows="10"
 										value="#{tokenAction.requestString}" />
 								</h:panelGroup>
 							</b:panel>
 							<b:panel title="Token Response" look="primary">
 								<h:panelGroup layout="block">
-									<h:inputTextarea readonly="true" styleClass="width100" rows="5"
+									<h:inputTextarea readonly="true" styleClass="width100" rows="12"
 										value="#{tokenAction.responseString}" />
 								</h:panelGroup>
 							</b:panel>
