@@ -5723,7 +5723,7 @@ if __name__ == '__main__':
 
     argsp = parser.parse_args()
 
-    if (not argsp.c) and istty and (int(tty_rows) > 24) and ((tty_columns) > 79):
+    if (not argsp.c) and istty and (int(tty_rows) > 24) and (int(tty_columns) > 79):
         try:
             import npyscreen
         except:
