@@ -1,7 +1,7 @@
 package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Function;
-import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -25,7 +25,6 @@ import org.gluu.oxauth.service.ServerCryptoProvider;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -138,18 +137,17 @@ public class JwrService {
     }
 
     public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String sessionId) {
-        return new Function<JsonWebResponse, Void>() {
-            @Nullable
-            @Override
-            public Void apply(@Nullable JsonWebResponse jwr) {
-                if (input != null) {
-                    input.apply(jwr);
-                }
-                if (StringUtil.isNullOrEmpty(sessionId)) {
-                    jwr.setClaim("sid", sessionId);
-                }
+        return jwr -> {
+            if (jwr == null) {
                 return null;
             }
+            if (input != null) {
+                input.apply(jwr);
+            }
+            if (StringUtils.isNotEmpty(sessionId)) {
+                jwr.setClaim("sid", sessionId);
+            }
+            return null;
         };
     }
 
