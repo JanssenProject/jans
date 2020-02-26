@@ -313,7 +313,8 @@ def generate_properties(as_dict=False):
     if default_storage == 'ldap':
 
         result = ldap_conn.search_s(gluu_ConfigurationDN, ldap.SCOPE_BASE,'(objectClass=*)')
-        setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
+        if 'gluuIpAddress' in result[0][1]:
+            setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
         oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0])
 
         setup_prop['cache_provider_type'] = str(oxCacheConfiguration['cacheProviderType'])
