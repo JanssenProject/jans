@@ -1908,6 +1908,10 @@ paths:
                 claims_redirect_uri:
                   type: string
                   example: https://client.example.com/cb
+                custom_parameters:
+                  type: object
+                  additionalProperties:
+                    type: string
         required: false
       responses:
         200:

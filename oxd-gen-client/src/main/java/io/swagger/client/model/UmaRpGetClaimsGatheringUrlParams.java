@@ -21,6 +21,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 /**
  * UmaRpGetClaimsGatheringUrlParams
  */
@@ -38,6 +41,9 @@ public class UmaRpGetClaimsGatheringUrlParams {
 
   @SerializedName("claims_redirect_uri")
   private String claimsRedirectUri = null;
+
+  @SerializedName("custom_parameters")
+  private Map<String, String> customParameters = null;
 
   public UmaRpGetClaimsGatheringUrlParams oxdId(String oxdId) {
     this.oxdId = oxdId;
@@ -111,6 +117,32 @@ public class UmaRpGetClaimsGatheringUrlParams {
     this.claimsRedirectUri = claimsRedirectUri;
   }
 
+  public UmaRpGetClaimsGatheringUrlParams customParameters(Map<String, String> customParameters) {
+    this.customParameters = customParameters;
+    return this;
+  }
+
+  public UmaRpGetClaimsGatheringUrlParams putCustomParametersItem(String key, String customParametersItem) {
+    if (this.customParameters == null) {
+      this.customParameters = new HashMap<String, String>();
+    }
+    this.customParameters.put(key, customParametersItem);
+    return this;
+  }
+
+   /**
+   * Get customParameters
+   * @return customParameters
+  **/
+  @Schema(description = "")
+  public Map<String, String> getCustomParameters() {
+    return customParameters;
+  }
+
+  public void setCustomParameters(Map<String, String> customParameters) {
+    this.customParameters = customParameters;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -124,12 +156,13 @@ public class UmaRpGetClaimsGatheringUrlParams {
     return Objects.equals(this.oxdId, umaRpGetClaimsGatheringUrlParams.oxdId) &&
         Objects.equals(this.ticket, umaRpGetClaimsGatheringUrlParams.ticket) &&
         Objects.equals(this.state, umaRpGetClaimsGatheringUrlParams.state) &&
-        Objects.equals(this.claimsRedirectUri, umaRpGetClaimsGatheringUrlParams.claimsRedirectUri);
+        Objects.equals(this.claimsRedirectUri, umaRpGetClaimsGatheringUrlParams.claimsRedirectUri) &&
+        Objects.equals(this.customParameters, umaRpGetClaimsGatheringUrlParams.customParameters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, ticket, state, claimsRedirectUri);
+    return Objects.hash(oxdId, ticket, state, claimsRedirectUri, customParameters);
   }
 
 
@@ -142,6 +175,7 @@ public class UmaRpGetClaimsGatheringUrlParams {
     sb.append("    ticket: ").append(toIndentedString(ticket)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    claimsRedirectUri: ").append(toIndentedString(claimsRedirectUri)).append("\n");
+    sb.append("    customParameters: ").append(toIndentedString(customParameters)).append("\n");
     sb.append("}");
     return sb.toString();
   }
