@@ -55,7 +55,6 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
             if (!customParameterMap.isEmpty()) {
                 url += "&" + Utils.mapAsStringWithEncodedValues(customParameterMap);
             }
-
         }
 
         final RpGetClaimsGatheringUrlResponse r = new RpGetClaimsGatheringUrlResponse();
