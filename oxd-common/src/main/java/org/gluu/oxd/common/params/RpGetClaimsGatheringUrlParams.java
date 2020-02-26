@@ -3,6 +3,8 @@ package org.gluu.oxd.common.params;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Map;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/06/2016
@@ -21,6 +23,8 @@ public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
     private String token;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "custom_parameters")
+    private Map<String, String> custom_parameters;
 
     public RpGetClaimsGatheringUrlParams() {
     }
@@ -65,6 +69,14 @@ public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
         this.state = state;
     }
 
+    public Map<String, String> getCustomParameters() {
+        return custom_parameters;
+    }
+
+    public void setCustomParameters(Map<String, String> custom_parameters) {
+        this.custom_parameters = custom_parameters;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -74,6 +86,7 @@ public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
         sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
         sb.append(", token=").append(token);
         sb.append(", state=").append(state);
+        sb.append(", custom_parameters=").append(custom_parameters);
         sb.append('}');
         return sb.toString();
     }
