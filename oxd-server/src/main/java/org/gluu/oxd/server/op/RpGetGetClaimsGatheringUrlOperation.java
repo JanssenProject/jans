@@ -1,5 +1,6 @@
 package org.gluu.oxd.server.op;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.uma.UmaMetadata;
@@ -11,6 +12,10 @@ import org.gluu.oxd.common.response.RpGetClaimsGatheringUrlResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,6 +43,19 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
                 "&ticket=" + params.getTicket() +
                 "&claims_redirect_uri=" + params.getClaimsRedirectUri() +
                 "&state=" + state;
+
+        if (params.getCustomParameters() != null && !params.getCustomParameters().isEmpty()) {
+            List<String> paramsList = Lists.newArrayList("oxd_id", "client_id", "ticket", "state", "claims_redirect_uri");
+
+            Map<String, String> customParameterMap = params.getCustomParameters().entrySet()
+                    .stream()
+                    .filter(map -> !paramsList.contains(map.getKey()))
+                    .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
+
+            if (!customParameterMap.isEmpty()) {
+                url += "&" + Utils.mapAsStringWithEncodedValues(customParameterMap);
+            }
+        }
 
         final RpGetClaimsGatheringUrlResponse r = new RpGetClaimsGatheringUrlResponse();
         r.setUrl(url);
