@@ -565,7 +565,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return logged_in
 
 
-    def setMessageError(self, msg, severity):
+    def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()
