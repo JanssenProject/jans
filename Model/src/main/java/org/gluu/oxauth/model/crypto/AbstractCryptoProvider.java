@@ -102,10 +102,10 @@ public abstract class AbstractCryptoProvider {
         return jwks;
     }
 
-    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
+    public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
         JSONArray keys = new JSONArray();
-        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
-        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.ENCRYPTION);
+        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
+        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.ENCRYPTION);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JSON_WEB_KEY_SET, keys);
@@ -113,12 +113,10 @@ public abstract class AbstractCryptoProvider {
         return jsonObject;
     }
 
-    public static void generateJwks(JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
+    public static void generateJwks(AbstractCryptoProvider cryptoProvider, JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
         GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
         expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
-
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         try {
             keys.put(cryptoProvider.generateKey(Algorithm.RS256, expirationTime.getTimeInMillis(), use));
