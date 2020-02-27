@@ -146,7 +146,7 @@ public class KeyGeneratorTimer {
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
-        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(appConfiguration.getKeyRegenerationInterval(),
+        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(cryptoProvider, appConfiguration.getKeyRegenerationInterval(),
                 appConfiguration.getIdTokenLifetime(), appConfiguration);
 
         JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
@@ -160,10 +160,11 @@ public class KeyGeneratorTimer {
 
                 if (expirationDate.before(now)) {
                     // The expired key is not added to the array of keys
-                    log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
+                    log.trace("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
                             key.getLong(EXPIRATION_TIME));
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
                 } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
+                    log.trace("Contains kid: {}", key.getString(KEY_ID));
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
                 }
             } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
@@ -171,6 +172,8 @@ public class KeyGeneratorTimer {
                 expirationTime.add(GregorianCalendar.HOUR, appConfiguration.getKeyRegenerationInterval());
                 expirationTime.add(GregorianCalendar.SECOND, appConfiguration.getIdTokenLifetime());
                 key.put(EXPIRATION_TIME, expirationTime.getTimeInMillis());
+
+                log.trace("Contains kid {} without exp {}", key.getString(KEY_ID), expirationTime);
 
                 jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
             }
