@@ -596,7 +596,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return user
 
 
-    def setMessageError(self, msg, severity):
+    def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()
