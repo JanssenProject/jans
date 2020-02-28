@@ -100,6 +100,9 @@ public class LanguageBean implements Serializable {
 				break;
 			}
 		}
+		
+		// If there is no supported locale attempt to find it by language
+		setLocaleCode(requestedLocale.getLanguage());
 	}
 
     public List<Locale> getSupportedLocales() {
