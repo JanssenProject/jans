@@ -7,24 +7,30 @@
 package org.gluu.oxauth.i18n;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.util.Strings;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.LocaleUtil;
+import org.gluu.oxauth.model.util.Pair;
+import org.gluu.service.cdi.event.ConfigurationUpdate;
 
 /**
  * @version August 9, 2017
  */
 @Named("language")
-@RequestScoped
+@ApplicationScoped
 public class LanguageBean implements Serializable {
 
 	private static final long serialVersionUID = -6723715664277907737L;
@@ -34,6 +40,12 @@ public class LanguageBean implements Serializable {
 	private static final String COOKIE_PATH = "/";
 
 	private String localeCode = Locale.ENGLISH.getLanguage();
+
+	private List<Locale> supportedLocales;
+
+    public void initSupportedLocales(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
+    	this.supportedLocales = buildSupportedLocales(appConfiguration);
+    }
 
 	public String getLocaleCode() {
 		try {
@@ -47,9 +59,7 @@ public class LanguageBean implements Serializable {
 	}
 
 	public void setLocaleCode(String localeCode) {
-		Iterator<Locale> locales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
-		while (locales.hasNext()) {
-			Locale locale = locales.next();
+		for (Locale locale : supportedLocales) {
 			if (!Strings.isEmpty(locale.getLanguage()) && locale.getLanguage().equals(localeCode)) {
 				this.localeCode = localeCode;
 				FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
@@ -57,6 +67,23 @@ public class LanguageBean implements Serializable {
 				break;
 			}
 		}
+	}
+
+    public List<Locale> getSupportedLocales() {
+    	return supportedLocales;
+    }
+
+	private List<Locale> buildSupportedLocales(AppConfiguration appConfiguration) {
+		List<String> uiLocales = appConfiguration.getUiLocalesSupported();
+		
+		List<Locale> supportedLocales = new LinkedList<Locale>();
+		for (String uiLocale : uiLocales) {
+        	Pair<Locale, List<Locale>> locales = LocaleUtil.toLocaleList(uiLocale);
+        	
+        	supportedLocales.addAll(locales.getSecond());
+		}
+		
+		return supportedLocales;
 	}
 
 	public String getMessage(String key) {
