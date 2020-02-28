@@ -152,6 +152,11 @@ public class ExtendedResourceBundle extends ResourceBundle {
             InputStream input = null;
             try {
                 input = loader.getResourceAsStream(resourceName);
+                
+                // Fall back to default bundle 
+                if (input == null) {
+                    resourceName = toResourceName(toBundleName(baseName, Locale.ROOT), "properties");
+                }
                 InputStreamReader inputReader = new InputStreamReader(input, "UTF-8");
                 properties.load(inputReader); // Default (internal) bundle.
             } finally {
