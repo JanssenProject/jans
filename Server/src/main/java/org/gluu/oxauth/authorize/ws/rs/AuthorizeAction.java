@@ -177,10 +177,7 @@ public class AuthorizeAction {
         if (StringUtils.isNotBlank(uiLocales)) {
             uiLocalesList = Util.splittedStringAsList(uiLocales, " ");
 
-            List<Locale> supportedLocales = new ArrayList<Locale>();
-            for (Iterator<Locale> it = facesContext.getApplication().getSupportedLocales(); it.hasNext(); ) {
-                supportedLocales.add(it.next());
-            }
+            List<Locale> supportedLocales = languageBean.getSupportedLocales();
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
             if (matchingLocale != null)
