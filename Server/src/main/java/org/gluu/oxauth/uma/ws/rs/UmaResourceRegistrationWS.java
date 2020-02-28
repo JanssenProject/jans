@@ -302,10 +302,10 @@ public class UmaResourceRegistrationWS {
         Date exp = getExpirationDate(calendar);
 
         if (resource.getIat() != null && resource.getIat() > 0) {
-            iat = new Date(resource.getIat() * 1000);
+            iat = new Date(resource.getIat() * 1000L);
         }
         if (resource.getExp() != null && resource.getExp() > 0) {
-            exp = new Date(resource.getExp() * 1000);
+            exp = new Date(resource.getExp() * 1000L);
         }
 
         final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = new org.gluu.oxauth.model.uma.persistence.UmaResource();
@@ -354,7 +354,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
         if (resource.getExp() != null && resource.getExp() > 0) {
-            ldapResource.setExpirationDate(new Date(resource.getExp() * 1000));
+            ldapResource.setExpirationDate(new Date(resource.getExp() * 1000L));
         }
 
         resourceService.updateResource(ldapResource);
