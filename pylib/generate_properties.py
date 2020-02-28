@@ -195,6 +195,7 @@ def generate_properties(as_dict=False):
                 setup_prop['couchbase_bucket_prefix'] = gluu_cb_prop['bucket.default']
 
                 setup_prop['couchbase_hostname'] = gluu_cb_prop['servers'].split(',')[0].strip()
+                setup_prop['encoded_couchbaseTrustStorePass'] = gluu_cb_prop['ssl.trustStore.pin']
                 setup_prop['couchbaseTrustStorePass'] = unobscure(gluu_cb_prop['ssl.trustStore.pin'])
 
                 from cbm import CBM
@@ -336,7 +337,9 @@ def generate_properties(as_dict=False):
         n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(format(bucket), s_key)
         result = get_cb_result(cbm, n1ql)
         if result:
-            setup_prop['ip'] = str(result[0][bucket]['gluuIpAddress'])
+            if 'gluuIpAddress' in result[0][bucket]:
+                setup_prop['ip'] = str(result[0][bucket]['gluuIpAddress'])
+            
             setup_prop['cache_provider_type'] = str(result[0][bucket]['oxCacheConfiguration']['cacheProviderType'])
 
         s_key = get_key_from(oxidp_ConfigurationEntryDN)
