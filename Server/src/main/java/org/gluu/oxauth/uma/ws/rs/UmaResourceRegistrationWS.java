@@ -298,6 +298,16 @@ public class UmaResourceRegistrationWS {
         final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
 
         final Calendar calendar = Calendar.getInstance();
+        Date iat = calendar.getTime();
+        Date exp = getExpirationDate(calendar);
+
+        if (resource.getIat() != null && resource.getIat() > 0) {
+            iat = new Date(resource.getIat() * 1000);
+        }
+        if (resource.getExp() != null && resource.getExp() > 0) {
+            exp = new Date(resource.getExp() * 1000);
+        }
+
         final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = new org.gluu.oxauth.model.uma.persistence.UmaResource();
 
         ldapResource.setName(resource.getName());
@@ -311,8 +321,8 @@ public class UmaResourceRegistrationWS {
         ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
         ldapResource.setType(resource.getType());
-        ldapResource.setCreationDate(calendar.getTime());
-        ldapResource.setExpirationDate(getExpirationDate(calendar));
+        ldapResource.setCreationDate(iat);
+        ldapResource.setExpirationDate(exp);
 
         resourceService.addResource(ldapResource);
 
