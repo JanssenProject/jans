@@ -21,12 +21,12 @@ import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.util.LocaleUtil;
-import org.gluu.oxauth.model.util.Pair;
 import org.gluu.service.cdi.event.ConfigurationUpdate;
 import org.gluu.util.StringHelper;
+import org.gluu.util.ilocale.LocaleUtil;
 import org.slf4j.Logger;
 
 /**
@@ -113,7 +113,7 @@ public class LanguageBean implements Serializable {
 		for (String uiLocale : uiLocales) {
         	Pair<Locale, List<Locale>> locales = LocaleUtil.toLocaleList(uiLocale);
         	
-        	supportedLocales.addAll(locales.getSecond());
+        	supportedLocales.addAll(locales.getRight());
 		}
 		
 		return supportedLocales;
