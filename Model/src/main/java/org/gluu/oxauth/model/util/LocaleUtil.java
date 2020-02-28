@@ -22,10 +22,9 @@ public class LocaleUtil {
         }
 
         for (String requestedLocale : requestedLocales) {
-            // LocaleUtils uses an underscore format (e.g. en_US), but the new Java standard
-            // is a hyphenated format (e.g. en-US). This allows us to use LocaleUtils' validation.
-            Locale reqInQuestion = LocaleUtils.toLocale(requestedLocale.replace('-', '_'));
-            List<Locale> lookupList = LocaleUtils.localeLookupList(reqInQuestion);
+        	Pair<Locale, List<Locale>> locales = toLocaleList(requestedLocale);
+            Locale reqInQuestion = locales.getFirst();
+            List<Locale> lookupList = locales.getSecond();
 
             for (Locale localeInQuestion : lookupList) {
                 for (Locale availableLocale : availableLocales) {
@@ -44,4 +43,14 @@ public class LocaleUtil {
 
         return null;
     }
+    
+    public static Pair<Locale, List<Locale>> toLocaleList(String locale) {
+        // LocaleUtils uses an underscore format (e.g. en_US), but the new Java standard
+        // is a hyphenated format (e.g. en-US). This allows us to use LocaleUtils' validation.
+        Locale localeLanguage = LocaleUtils.toLocale(locale.replace('-', '_'));
+        List<Locale> localeList = LocaleUtils.localeLookupList(localeLanguage);
+        
+        return new Pair<Locale, List<Locale>>(localeLanguage, localeList);
+    }
+
 }
