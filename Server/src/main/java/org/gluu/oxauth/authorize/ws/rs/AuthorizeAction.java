@@ -181,7 +181,7 @@ public class AuthorizeAction {
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
             if (matchingLocale != null)
-                languageBean.setLocaleCode(matchingLocale.getLanguage());
+                languageBean.setLocale(matchingLocale);
         } else {
             Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
             if (defaultLocale != null) {
