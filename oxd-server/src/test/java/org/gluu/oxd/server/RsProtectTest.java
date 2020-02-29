@@ -1,6 +1,11 @@
 package org.gluu.oxd.server;
 
+import com.google.inject.Inject;
+import io.dropwizard.configuration.ConfigurationException;
+import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.client.uma.UmaClientFactory;
+import org.gluu.oxauth.client.uma.UmaResourceService;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.RsProtectParams2;
 import org.gluu.oxd.common.Jackson2;
@@ -9,7 +14,13 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.gluu.oxd.common.response.RsCheckAccessResponse;
 import org.gluu.oxd.common.response.RsProtectResponse;
 import org.gluu.oxd.rs.protect.RsResource;
+import org.gluu.oxd.server.guice.GuiceModule;
 import org.gluu.oxd.server.op.RsProtectOperation;
+import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.service.ConfigurationService;
+import org.gluu.oxd.server.service.Rp;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Guice;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -23,8 +34,20 @@ import static org.testng.AssertJUnit.*;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 10/06/2016
  */
-
+@Guice(modules = GuiceModule.class)
 public class RsProtectTest {
+
+    @Inject
+    ConfigurationService configurationService;
+    @Inject
+    PersistenceService persistenceService;
+
+    @BeforeClass
+    public void setUp() throws IOException, ConfigurationException {
+        configurationService.setConfiguration(TestUtils.parseConfiguration(ResourceHelpers.resourceFilePath("oxd-server-jenkins.yml")));
+        persistenceService.create();
+    }
+
 
     @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
     @Test
@@ -36,6 +59,23 @@ public class RsProtectTest {
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
         RsCheckAccessTest.checkAccess(client, site, null);
+    }
+
+    @Parameters({"host", "redirectUrls", "opHost", "rsProtectWithCreationExpiration"})
+    @Test
+    public void protect_withResourceCreationExpiration(String host, String redirectUrls, String opHost, String rsProtectWithCreationExpiration) throws IOException {
+
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+
+        protectResources(client, site, UmaFullTest.resourceList(rsProtectWithCreationExpiration).getResources());
+
+        Rp rp = persistenceService.getRp(site.getOxdId());
+        rp.getUmaProtectedResources().forEach(ele -> {
+            assertEquals(1582890956L, ele.getIat().longValue());
+            assertEquals(2079299799L, ele.getExp().longValue());
+        });
     }
 
     @Parameters({"host", "redirectUrls", "opHost", "rsProtect"})
