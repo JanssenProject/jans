@@ -120,6 +120,13 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             resource.setTicketScopes(Lists.newArrayList(scopesForTicket));
             resource.setScopeExpressions(Lists.newArrayList(scopeExpressions));
 
+            if (rsResource.getIat() != null && rsResource.getIat() > 0) {
+                resource.setIat(rsResource.getIat());
+            }
+
+            if (rsResource.getExp() != null && rsResource.getExp() > 0) {
+                resource.setExp(rsResource.getExp());
+            }
             rp.getUmaProtectedResources().add(resource);
         }
 

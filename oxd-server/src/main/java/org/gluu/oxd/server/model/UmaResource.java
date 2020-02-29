@@ -24,6 +24,10 @@ public class UmaResource {
     private List<String> scopeExpressions = Lists.newArrayList();
     @JsonProperty(value = "ticketScopes")
     private List<String> ticketScopes = Lists.newArrayList();
+    @JsonProperty(value = "iat")
+    private Integer iat = null;
+    @JsonProperty(value = "exp")
+    private Integer exp = null;
 
     public List<String> getScopeExpressions() {
         if (scopeExpressions == null) {
@@ -85,6 +89,22 @@ public class UmaResource {
         this.ticketScopes = ticketScopes;
     }
 
+    public Integer getIat() {
+        return iat;
+    }
+
+    public void setIat(Integer iat) {
+        this.iat = iat;
+    }
+
+    public Integer getExp() {
+        return exp;
+    }
+
+    public void setExp(Integer exp) {
+        this.exp = exp;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -95,6 +115,8 @@ public class UmaResource {
         sb.append(", scopes=").append(scopes);
         sb.append(", scopeExpressions=").append(scopeExpressions);
         sb.append(", ticketScopes=").append(ticketScopes);
+        sb.append(", iat=").append(iat);
+        sb.append(", exp=").append(exp);
         sb.append('}');
         return sb.toString();
     }
