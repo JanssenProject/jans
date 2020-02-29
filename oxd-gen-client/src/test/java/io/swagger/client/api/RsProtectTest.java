@@ -2,12 +2,7 @@ package io.swagger.client.api;
 
 import io.swagger.client.ApiException;
 import io.swagger.client.ApiResponse;
-import io.swagger.client.model.RegisterSiteResponse;
-import io.swagger.client.model.RsResource;
-import io.swagger.client.model.UmaRsCheckAccessParams;
-import io.swagger.client.model.UmaRsCheckAccessResponse;
-import io.swagger.client.model.UmaRsProtectParams;
-import io.swagger.client.model.UmaRsProtectResponse;
+import io.swagger.client.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -21,10 +16,8 @@ import static org.testng.Assert.*;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Shoeb
- *
  * @version 11/08/2018
  */
-
 public class RsProtectTest {
 
     @Parameters({"redirectUrls", "opHost", "rsProtect"})
@@ -36,6 +29,19 @@ public class RsProtectTest {
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
 
         protectResources(client, site, UmaFullTest.resourceList(rsProtect));
+        RsCheckAccessTest.checkAccess(client, site, null);
+
+    }
+
+    @Parameters({"redirectUrls", "opHost", "rsProtectWithCreationExpiration"})
+    @Test
+    public void protect_withResourceCreationExpiration(String redirectUrls, String opHost, String rsProtectWithCreationExpiration) throws Exception {
+
+        final DevelopersApi client = api();
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+
+        protectResources(client, site, UmaFullTest.resourceList(rsProtectWithCreationExpiration));
         RsCheckAccessTest.checkAccess(client, site, null);
 
     }
