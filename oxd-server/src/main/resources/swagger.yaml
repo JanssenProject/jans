@@ -2501,6 +2501,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Condition'
+        exp:
+          type: integer
+          description: Resource expiration date in terms of number of seconds
+           since January 1 1970 UTC
+          format: int64
+          example: 1545709072
+        iat:
+          type: integer
+          description: Resource creation date in terms of number of seconds
+            since January 1 1970 UTC
+          format: int64
+          example: 1535709072
     JsonWebKey:
       required:
       - alg
