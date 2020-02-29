@@ -36,6 +36,12 @@ public class RsResource {
   @SerializedName("conditions")
   private List<Condition> conditions = new ArrayList<Condition>();
 
+  @SerializedName("exp")
+  private Long exp = null;
+
+  @SerializedName("iat")
+  private Long iat = null;
+
   public RsResource path(String path) {
     this.path = path;
     return this;
@@ -77,6 +83,42 @@ public class RsResource {
     this.conditions = conditions;
   }
 
+  public RsResource exp(Long exp) {
+    this.exp = exp;
+    return this;
+  }
+
+   /**
+   * number of seconds since January 1 1970 UTC, indicating when this token will expire
+   * @return exp
+  **/
+  @Schema(example = "1535709072", description = "number of seconds since January 1 1970 UTC, indicating when this token will expire")
+  public Long getExp() {
+    return exp;
+  }
+
+  public void setExp(Long exp) {
+    this.exp = exp;
+  }
+
+  public RsResource iat(Long iat) {
+    this.iat = iat;
+    return this;
+  }
+
+   /**
+   * number of seconds since January 1 1970 UTC, indicating when the token was issued at
+   * @return iat
+  **/
+  @Schema(example = "1535709072", description = "number of seconds since January 1 1970 UTC, indicating when the token was issued at")
+  public Long getIat() {
+    return iat;
+  }
+
+  public void setIat(Long iat) {
+    this.iat = iat;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -88,12 +130,14 @@ public class RsResource {
     }
     RsResource rsResource = (RsResource) o;
     return Objects.equals(this.path, rsResource.path) &&
-        Objects.equals(this.conditions, rsResource.conditions);
+        Objects.equals(this.conditions, rsResource.conditions) &&
+        Objects.equals(this.exp, rsResource.exp) &&
+        Objects.equals(this.iat, rsResource.iat);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(path, conditions);
+    return Objects.hash(path, conditions, exp, iat);
   }
 
 
@@ -104,6 +148,8 @@ public class RsResource {
     
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    conditions: ").append(toIndentedString(conditions)).append("\n");
+    sb.append("    exp: ").append(toIndentedString(exp)).append("\n");
+    sb.append("    iat: ").append(toIndentedString(iat)).append("\n");
     sb.append("}");
     return sb.toString();
   }
