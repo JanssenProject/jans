@@ -1,0 +1,8 @@
+{
+    "passportUmaClientId":"%(passport_rs_client_id)s",
+    "passportUmaClientKeyId":"",
+    "passportUmaResourceId":"%(passport_resource_id)s",
+    "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
+    "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
+    "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s"
+}
