@@ -505,7 +505,6 @@ class Setup(object):
         self.hostname = None
         self.ip = None
         self.orgName = None
-        self.orgShortName = None
         self.countryCode = None
         self.city = None
         self.state = None
@@ -740,7 +739,6 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchebaseBucketClusterPort = 28091
         self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
