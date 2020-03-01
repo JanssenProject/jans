@@ -1194,32 +1194,6 @@ class Setup(object):
 
 
     # = File system  =================================================================
-    def findFiles(self, filePatterns, filesFolder):
-        foundFiles = []
-        try:
-            for filePattern in filePatterns:
-                fileFullPathPattern = "%s/%s" % (filesFolder, filePattern)
-                for fileFullPath in glob.iglob(fileFullPathPattern):
-                    foundFiles.append(fileFullPath)
-        except:
-            self.logIt("Error finding files %s in folder %s" % (":".join(filePatterns), filesFolder), True)
-            self.logIt(traceback.format_exc(), True)
-
-        return foundFiles
-
-    def readFile(self, inFilePath, logError=True):
-        inFilePathText = None
-
-        try:
-            f = open(inFilePath)
-            inFilePathText = f.read()
-            f.close()
-        except:
-            if logError:
-                self.logIt("Error reading %s" % inFilePathText, True)
-                self.logIt(traceback.format_exc(), True)
-
-        return inFilePathText
 
     def writeFile(self, outFilePath, text):
         self.logIt("Writing file %s" % outFilePath)
@@ -1690,16 +1664,6 @@ class Setup(object):
             return self.determineApacheVersion("httpd")
         else:
             return self.determineApacheVersion("apache2")
-
-    def determineOpenDJVersion(self):
-        f = open('/opt/opendj/template/config/buildinfo', 'r')
-        encode_script = f.read().split()[0]
-        f.close()
-
-        if re.match(r'2\.6\.0\..*', encode_script):
-            return "2.6"
-
-        return "3.0"
 
     def installJRE(self):
 
@@ -4275,7 +4239,6 @@ class Setup(object):
         
         self.pbar.progress("opendj", "Extracting OpenDJ", False)
         self.extractOpenDJ()
-        self.opendj_version = self.determineOpenDJVersion()
 
         self.createLdapPw()
         
@@ -4780,42 +4743,6 @@ class Setup(object):
                     o.write(query)
 
             self.couchbaseExecQuery(tmp_file)
-
-    def changeCouchbasePort(self, service, port):
-        self.logIt("Changing Couchbase service %s port to %s from file " % (service, str(port)))
-        
-        self.run_service_command('couchbase-server', 'stop')
-        couchebaseStaticConfigFile = os.path.join(self.couchebaseInstallDir, 'etc/couchbase/static_config')
-        couchebaseDatConfigFile = os.path.join(self.couchebaseInstallDir, 'var/lib/couchbase/config/config.dat')
-
-        conf = open(couchebaseStaticConfigFile).readlines()
-
-        for i in range(len(conf)):
-
-            if service in conf[i]:
-                conf[i] = '{%s, %s}.\n' % (service, str(port))
-                break
-        else:
-            conf.append('{%s, %s}.\n' % (service, str(port)))
-
-        with open(couchebaseStaticConfigFile, 'w') as w:
-            w.write(''.join(conf))
-
-        capi_conf = os.path.join(self.couchebaseInstallDir, 'etc/couchdb/default.d/capi.ini')
-
-        f = open(capi_conf).readlines()
-
-        for i in range(len(f)):
-            if f[i].startswith('bind_address'):
-                f[i] = 'bind_address = 127.0.0.1\n'
-
-        with open(capi_conf, 'w') as w:
-            w.write(''.join(f))
-
-        if os.path.exists(couchebaseDatConfigFile):
-            self.run(['rm', '-f', couchebaseDatConfigFile])
-
-        self.run_service_command('couchbase-server', 'start')
 
     def checkIfGluuBucketReady(self):
 
