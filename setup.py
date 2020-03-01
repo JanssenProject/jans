@@ -558,7 +558,7 @@ class Setup(object):
         self.opendj_type = 'wrends'
         self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
 
-        self.opendj_ldap_binddn = 'cn=directory manager'
+        self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.couchbase_hostname = "localhost"
         self.ldap_port = '1389'
@@ -2420,9 +2420,6 @@ class Setup(object):
         self.generate_oxtrust_api_configuration()
         self.generate_scim_configuration()
 
-        self.ldap_binddn = self.opendj_ldap_binddn
-        self.ldap_site_binddn = self.opendj_ldap_binddn
-
         self.ldapCertFn = self.opendj_cert_fn
         self.ldapTrustStoreFn = self.opendj_p12_fn
         self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
@@ -3233,7 +3230,7 @@ class Setup(object):
             ldapPass = self.ldapPass if self.ldapPass else self.oxtrust_admin_password
 
             while True:
-                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.opendj_ldap_binddn), self.oxtrust_admin_password)
+                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.ldap_binddn), self.oxtrust_admin_password)
 
                 if self.checkPassword(ldapPass):
                     break
@@ -3245,9 +3242,9 @@ class Setup(object):
         elif self.wrends_install == REMOTE:
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
-                ldapPass = self.getPrompt("    Password for '{0}'".format(self.opendj_ldap_binddn))
+                ldapPass = self.getPrompt("    Password for '{0}'".format(self.ldap_binddn))
                 conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
-                conn_check = self.check_remote_ldap(ldapHost, self.opendj_ldap_binddn, ldapPass)
+                conn_check = self.check_remote_ldap(ldapHost, self.ldap_binddn, ldapPass)
                 if conn_check['result']:
                     break
                 else:
@@ -5000,7 +4997,7 @@ class Setup(object):
 
     def getLdapConnection(self):
             ldap_conn = ldap.initialize('ldaps://{0}:{1}'.format(self.ldap_hostname, self.ldaps_port))
-            ldap_conn.simple_bind_s(self.opendj_ldap_binddn, self.ldapPass)
+            ldap_conn.simple_bind_s(self.ldap_binddn, self.ldapPass)
             
             return ldap_conn
 
