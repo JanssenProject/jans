@@ -322,7 +322,6 @@ class Setup(object):
 
         self.downloadWars = None
         self.templateRenderingDict = {
-                                        'passport_oxtrust_config': '',
                                         'oxauthClient_2_inum': 'AB77-1A2B',
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
@@ -697,7 +696,7 @@ class Setup(object):
 
         # oxPassport Configuration
         self.gluu_passport_base = '%s/passport' % self.node_base
-        
+        self.passport_oxtrust_config_fn = '%s/passport_oxtrust_config.son' % self.outputFolder
         self.ldif_passport_config = '%s/oxpassport-config.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_passport_clients = '%s/passport_clients.ldif' % self.outputFolder
@@ -2623,14 +2622,8 @@ class Setup(object):
         if not self.passport_resource_id:
             self.passport_resource_id = '1504.'  + str(uuid.uuid4())
 
-        self.templateRenderingDict['passport_oxtrust_config'] = '''
-                "passportUmaClientId":"%(passport_rs_client_id)s",
-                "passportUmaClientKeyId":"",
-                "passportUmaResourceId":"%(passport_resource_id)s",
-                "passportUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
-                "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
-                "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
-        ''' % self.merge_dicts(self.__dict__)
+        self.renderTemplate(self.passport_oxtrust_config_fn)
+
 
 
     def install_passport(self):
@@ -3637,6 +3630,14 @@ class Setup(object):
         self.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
         self.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         self.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+
+        if self.installPassport:
+            oxtrust_config = json.loads(self.readFile(self.oxtrust_config_json), object_pairs_hook=OrderedDict)
+            passport_oxtrust_config = json.loads(self.readFile(self.passport_oxtrust_config_fn), object_pairs_hook=OrderedDict)
+            oxtrust_config.update(passport_oxtrust_config)
+
+            with open(self.oxtrust_config_json, 'w') as w:
+                json.dump(oxtrust_config, w, indent=2)
 
         self.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(self.oxtrust_config_json);
         self.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
