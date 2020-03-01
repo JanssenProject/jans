@@ -3096,7 +3096,7 @@ class Setup(object):
     def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
         
         result = {'result': True, 'reason': ''}
-        conn = ldap.initialize('ldaps://{0}:1636'.format(ldap_host))
+        conn = ldap.initialize('ldaps://{}:{}'.format(ldap_host, self.ldaps_port))
         try:
             conn.simple_bind_s(ldap_binddn, ldap_password)
         except Exception as e:
@@ -3236,7 +3236,7 @@ class Setup(object):
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.ldap_binddn))
-                conn = ldap.initialize('ldaps://{0}:1636'.format(ldapHost))
+                conn = ldap.initialize('ldaps://{}:{}'.format(ldapHost, self.ldaps_port))
                 conn_check = self.check_remote_ldap(ldapHost, self.ldap_binddn, ldapPass)
                 if conn_check['result']:
                     break
@@ -5143,7 +5143,17 @@ class Setup(object):
 
             self.copyFile(tmp_fn, self.openDjSchemaFolder)
 
-            dsconfigCmd = 'cd {0}/bin ; {1} --trustAll --no-prompt --hostname localhost --port 4444 --bindDN "cn=directory manager" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop --handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'.format(self.ldapBaseFolder, self.ldapDsconfigCommand)
+            dsconfigCmd = (
+                'cd {}/bin ; {} --trustAll --no-prompt --hostname {} --port {} '
+                '--bindDN "{}" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop '
+                '--handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'
+                    ).format(
+                        self.ldapBaseFolder, 
+                        self.ldapDsconfigCommand, 
+                        self.ldap_hostname, 
+                        self.ldap_admin_port,
+                        self.ldap_binddn
+                    )
             
             self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
             
@@ -5151,9 +5161,19 @@ class Setup(object):
             
             self.run_service_command('opendj', 'restart')
 
-            for cmd in ('create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr1 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt',
-                        'create-backend-index --backend-name userRoot --type generic --index-name myCustomAttr2 --set index-type:equality --set index-entry-limit:4000 --hostName localhost --port 4444 --bindDN "cn=directory manager" -j /home/ldap/.pw --trustAll --noPropertiesFile --no-prompt'
-                        ):
+            for atr in ('myCustomAttr1', 'myCustomAttr2'):
+                cmd = (
+                    'create-backend-index --backend-name userRoot --type generic '
+                    '--index-name {} --set index-type:equality --set index-entry-limit:4000 '
+                    '--hostName {} --port {} --bindDN "{}" -j /home/ldap/.pw '
+                    '--trustAll --noPropertiesFile --no-prompt'
+                    ).format(
+                        atr, 
+                        self.ldap_hostname,
+                        self.ldap_admin_port, 
+                        self.ldap_binddn
+                    )
+                
                 dsconfigCmd = 'cd {0}/bin ; {1} {2}'.format(self.ldapBaseFolder, self.ldapDsconfigCommand, cmd)
                 self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
             
@@ -5866,6 +5886,7 @@ if __name__ == '__main__':
     installObject.properties_password = argsp.properties_password
 
     if setupOptions['loadTestDataExit']:
+        installObject.initialize()
         installObject.load_test_data_exit()
 
     if installObject.check_installed():
