@@ -454,7 +454,7 @@ class DBBackendForm(GluuSetupForm):
 
             result = self.parentApp.installObject.check_remote_ldap(
                         self.wrends_hosts.value, 
-                        self.parentApp.installObject.opendj_ldap_binddn, 
+                        self.parentApp.installObject.ldap_binddn, 
                         self.wrends_password.value
                         )
 
