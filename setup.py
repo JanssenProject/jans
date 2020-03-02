@@ -74,8 +74,8 @@ class colors:
 
 #install types
 NONE = 0
-LOCAL = 1
-REMOTE = 2
+LOCAL = '1'
+REMOTE = '2'
 
 COMPLETED = -99
 ERROR = -101
@@ -552,10 +552,6 @@ class Setup(object):
         self.opendj_p12_fn = '%s/opendj.pkcs12' % self.certFolder
         self.opendj_p12_pass = None
 
-        self.ldap_type = 'opendj'
-        self.opendj_type = 'wrends'
-        self.opendj_download_link = 'https://ox.gluu.org/maven/org/forgerock/opendj/opendj-server-legacy/3.0.1.gluu/opendj-server-legacy-3.0.1.gluu.zip'
-
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.couchbase_hostname = "localhost"
@@ -944,15 +940,17 @@ class Setup(object):
 
         self.logIt("Determining key generator path")
         oxauth_client_jar_zf = zipfile.ZipFile(self.non_setup_properties['oxauth_client_jar_fn'])
-        for fn in oxauth_client_jar_zf.namelist():
-            if fn.endswith('KeyGenerator.class'):
-                fp, ext = os.path.splitext(fn)
-                self.non_setup_properties['key_gen_path'] = fp.replace('/','.')
-                self.logIt("Key generator path is determined as {}".format(fp))
+        menifest = oxauth_client_jar_zf.read('META-INF/MANIFEST.MF')
+
+        for l in menifest.splitlines():
+            ls = l.strip()
+            if ls.startswith('Main-Class'):
+                n = ls.find(':')
+                self.non_setup_properties['key_gen_path'] = ls[n+1:].strip()
+                self.logIt("Key generator path is determined as {}".format(self.non_setup_properties['key_gen_path']))
                 break
         else:
             self.logIt("Can't determine key generator path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
-
 
         self.logIt("Determining oxd server package")
         oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
@@ -1192,6 +1190,20 @@ class Setup(object):
 
 
     # = File system  =================================================================
+
+    def readFile(self, inFilePath, logError=True):
+        inFilePathText = None
+
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close()
+        except:
+            if logError:
+                self.logIt("Error reading %s" % inFilePathText, True)
+                self.logIt(traceback.format_exc(), True)
+
+        return inFilePathText
 
     def writeFile(self, outFilePath, text):
         self.logIt("Writing file %s" % outFilePath)
@@ -1706,14 +1718,9 @@ class Setup(object):
 
 
     def extractOpenDJ(self):        
-        if self.opendj_type == 'opendj':
-            self.logIt("Downloading Opendj")
-            openDJArchive_name = os.path.basename(self.opendj_download_link)
-            openDJArchive = os.path.join(self.distAppFolder, openDJArchive_name)
-            self.run(['wget', '-nv', self.opendj_download_link, '-O', openDJArchive])
-        else:
-            openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
-        
+
+        openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
+
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
             self.run(['unzip', '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
@@ -2285,8 +2292,6 @@ class Setup(object):
     def generate_oxauth_openid_keys(self):
         key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=key_algs)
-        
-        
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
@@ -3757,30 +3762,13 @@ class Setup(object):
         with open(opendj_java_properties_fn,'a') as f:
             f.write('\ndefault.java-home={}\n'.format(self.jre_home))
 
-        if self.opendj_type == 'opendj':
-
-            try:
-                ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
-                dsjavaCmd = "cd /opt/opendj/bin ; %s" % ldapDsJavaPropCommand
-                self.run(['/bin/su',
-                          'ldap',
-                          '-c',
-                          dsjavaCmd
-                          ])
-            except:
-                self.logIt("Error running dsjavaproperties", True)
-                self.logIt(traceback.format_exc(), True)
-
         try:
-            stopDsJavaPropCommand = "%s/bin/stop-ds" % self.ldapBaseFolder
-            dsjavaCmd = "cd /opt/opendj/bin ; %s" % stopDsJavaPropCommand
-            self.run(['/bin/su',
-                      'ldap',
-                      '-c',
-                      dsjavaCmd
-                      ])
+            self.logIt('Stopping opendj server')
+            cmd = os.path.join(self.ldapBaseFolder, 'bin/stop-ds')
+            dsjavaCmd = "cd /opt/opendj/bin ; {}".format(cmd)
+            self.run(['/bin/su','ldap', '-c', dsjavaCmd])
         except:
-            self.logIt("Error running stop-ds", True)
+            self.logIt("Error stopping opendj", True)
             self.logIt(traceback.format_exc(), True)
 
     def post_install_opendj(self):
@@ -3815,9 +3803,6 @@ class Setup(object):
                           ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
                           ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
                           ]
-        
-        if self.opendj_type == 'opendj':
-            config_changes.insert(2, ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'])
 
 
         if not self.listenAllInterfaces:
@@ -3893,9 +3878,6 @@ class Setup(object):
                               '--trustAll']
         importParams.append('--useSSL')
 
-        if self.opendj_type == 'opendj':
-            importParams.append('--defaultAdd')
-
         importParams.append('--continueOnError')
         importParams.append('--filename')
         importParams.append(ldif_file_fullpath)
@@ -3943,11 +3925,8 @@ class Setup(object):
                                   '-j',
                                   self.ldapPassFn,
                                   '--trustAll']
-            importParams.append('--useSSL')
 
-            if self.opendj_type == 'opendj':
-                importParams.append('--defaultAdd')
-            
+            importParams.append('--useSSL')
             importParams.append('--continueOnError')
             importParams.append('--filename')
             importParams.append(ldif_file_fullpath)
@@ -4059,10 +4038,8 @@ class Setup(object):
 
             self.fix_init_scripts('opendj', '/etc/init.d/opendj')
             self.enable_service_at_start('opendj')
-            
-            if self.opendj_type == 'wrends':
-                self.run([service_path, 'opendj', 'stop'])
-            
+
+            self.run([service_path, 'opendj', 'stop'])
             self.run([service_path, 'opendj', 'start'])
 
     def setup_init_scripts(self):
@@ -4244,8 +4221,8 @@ class Setup(object):
             self.pbar.progress("opendj", "OpenDJ: installing", False)
             if self.wrends_install == LOCAL:
                 self.install_opendj()
-    
-            if self.ldap_type == 'opendj':
+
+            if self.wrends_install:
                 self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
                 self.pbar.progress("opendj", "OpenDJ: setting up service", False)
@@ -4277,7 +4254,7 @@ class Setup(object):
             if self.wrends_install == LOCAL:
                 self.post_install_opendj()
         except:
-            pass
+            self.logIt(traceback.format_exc(), True)
 
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
@@ -5635,7 +5612,6 @@ if __name__ == '__main__':
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
     parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')
-    parser.add_argument('--opendj', help="Use OpenDJ as ldap server", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
     parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in LDAP")
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
@@ -5793,10 +5769,7 @@ if __name__ == '__main__':
     
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
-
-    if argsp.opendj:
-        setupOptions['opendj_type'] = 'opendj' 
-
+ 
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
             setupOptions['importLDIFDir'] = argsp.import_ldif
