@@ -723,7 +723,7 @@ class Setup(object):
         self.oxRadiusClientIpAddress = None
         self.oxRadiusClientName = None
         self.oxRadiusClientSecret = None
-
+        self.radius_dir = os.path.join(self.gluuOptFolder, 'radius')
 
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
@@ -991,10 +991,6 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '440', realCertFolder])
         self.run([self.cmd_chmod, 'a+X', realCertFolder])
 
-        if self.installGluuRadius:
-            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
-            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
-
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
             self.run([self.cmd_chmod, '660', self.oxauth_openid_jks_fn])
@@ -1037,9 +1033,6 @@ class Setup(object):
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
 
-        if self.installGluuRadius:
-            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
-            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
     def detect_ip(self):
         detectedIP = None
@@ -2784,13 +2777,14 @@ class Setup(object):
         self.createUser('ldap', self.ldap_user_home)
         self.createUser('jetty', self.jetty_user_home)
         self.createUser('node', self.node_user_home)
+        self.createUser('radius', homeDir=self.radius_dir, shell='/bin/false')
 
         self.createGroup('gluu')
 
         self.addUserToGroup('gluu', 'ldap')
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
-
+        self.addUserToGroup('gluu', 'radius')
         self.addUserToGroup('adm', 'ldap')
 
     def makeFolders(self):
@@ -5290,12 +5284,11 @@ class Setup(object):
             self.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
 
         source_dir = os.path.join(self.staticFolder, 'radius')
-        radius_dir = '/opt/gluu/radius'
         radius_libs = os.path.join(self.distGluuFolder, 'gluu-radius-libs.zip')
         radius_jar = os.path.join(self.distGluuFolder, 'super-gluu-radius-server.jar')
         conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
         self.createDirs(conf_dir)
-        logs_dir = os.path.join(radius_dir,'logs')
+        logs_dir = os.path.join(self.radius_dir,'logs')
 
         self.radius_jwt_pass = self.getPW()
         radius_jwt_pass = self.obscure(self.radius_jwt_pass)
@@ -5353,8 +5346,8 @@ class Setup(object):
             if not os.path.exists(logs_dir):
                 self.run([self.cmd_mkdir, '-p', logs_dir])
 
-            self.run(['unzip', '-n', '-q', radius_libs, '-d', radius_dir ])
-            self.copyFile(radius_jar, radius_dir)
+            self.run(['unzip', '-n', '-q', radius_libs, '-d', self.radius_dir ])
+            self.copyFile(radius_jar, self.radius_dir)
 
             if self.mappingLocations['default'] == 'ldap':
                 schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
@@ -5362,9 +5355,6 @@ class Setup(object):
                 self.import_ldif_opendj([ldif_file_server])
             else:
                 self.import_ldif_couchebase([ldif_file_server])
-
-            self.createUser('radius', homeDir=radius_dir, shell='/bin/false')
-            self.addUserToGroup('gluu', 'radius')
             
             self.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), self.osDefault)
             self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
@@ -5384,10 +5374,16 @@ class Setup(object):
             gluu_radius_private_key_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
             self.writeFile(gluu_radius_private_key_fn, '')
             
-            self.run([self.cmd_chown, '-R', 'radius:gluu', radius_dir])
+            self.run([self.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
             self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
             self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+            
+            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
+            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
+            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+            
             self.enable_service_at_start('gluu-radius')
 
     def post_install_tasks(self):
