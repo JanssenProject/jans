@@ -267,6 +267,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
             if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
+                log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true)");
                 return postLogoutRedirectUri;
             }
 
@@ -279,7 +280,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 result = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
             }
 
-            if (isNotBlank && StringUtils.isBlank(result)) { // failed to validate
+            if (isNotBlank && StringUtils.isBlank(result)) {
+                log.trace("Failed to valistdate post_logout_redirect_uri.");
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
             }
 
