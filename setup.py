@@ -3735,16 +3735,18 @@ class Setup(object):
 
         try:
             ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
-            setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([ldapSetupCommand,
-                                                                                                       '--no-prompt',
-                                                                                                       '--cli',
-                                                                                                       '--propertiesFilePath',
-                                                                                                       setupPropsFN,
-                                                                                                       '--acceptLicense'])
+            setupCmd = " ".join([ldapSetupCommand,
+                                '--no-prompt',
+                                '--cli',
+                                '--propertiesFilePath',
+                                setupPropsFN,
+                                '--acceptLicense'])
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      setupCmd])
+                      setupCmd],
+                      cwd='/opt/opendj',
+                      )
         except:
             self.logIt("Error running LDAP setup script", True)
             self.logIt(traceback.format_exc(), True)
@@ -3759,8 +3761,7 @@ class Setup(object):
         try:
             self.logIt('Stopping opendj server')
             cmd = os.path.join(self.ldapBaseFolder, 'bin/stop-ds')
-            dsjavaCmd = "cd /opt/opendj/bin ; {}".format(cmd)
-            self.run(['/bin/su','ldap', '-c', dsjavaCmd])
+            self.run(['/bin/su','ldap', '-c', cmd], cwd='/opt/opendj/bin')
         except:
             self.logIt("Error stopping opendj", True)
             self.logIt(traceback.format_exc(), True)
@@ -3804,7 +3805,8 @@ class Setup(object):
             config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
                           
         for changes in config_changes:
-            dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+            cwd = os.path.join(self.ldapBaseFolder, 'bin')
+            dsconfigCmd = " ".join([
                                     self.ldapDsconfigCommand,
                                     '--trustAll',
                                     '--no-prompt',
@@ -3819,7 +3821,7 @@ class Setup(object):
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      dsconfigCmd])
+                      dsconfigCmd], cwd=cwd)
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
@@ -3858,23 +3860,23 @@ class Setup(object):
         realInstallDir = os.path.realpath(self.outputFolder)
 
         ldif_file_fullpath = os.path.realpath(ldif)
-
-        importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                              self.loadLdifCommand,
-                              '--hostname',
-                              self.ldap_hostname,
-                              '--port',
-                              self.ldap_admin_port,
-                              '--bindDN',
-                              '"%s"' % self.ldap_binddn,
-                              '-j',
-                              self.ldapPassFn,
-                              '--trustAll']
-        importParams.append('--useSSL')
-
-        importParams.append('--continueOnError')
-        importParams.append('--filename')
-        importParams.append(ldif_file_fullpath)
+        cwd = os.path.join(self.ldapBaseFolder, 'bin')
+        importParams = [
+                          self.loadLdifCommand,
+                          '--hostname',
+                          self.ldap_hostname,
+                          '--port',
+                          self.ldap_admin_port,
+                          '--bindDN',
+                          '"%s"' % self.ldap_binddn,
+                          '-j',
+                          self.ldapPassFn,
+                          '--trustAll',
+                          '--useSSL',
+                          '--continueOnError',
+                          '--filename',
+                          ldif_file_fullpath,
+                        ]
 
         importCmd = " ".join(importParams)
         
@@ -3886,7 +3888,7 @@ class Setup(object):
         self.run(['/bin/su',
                   'ldap',
                   '-c',
-                  '%s' % importCmd])
+                  '%s' % importCmd], cwd=cwd)
 
         if createPwFile:
             self.deleteLdapPw()
@@ -3907,33 +3909,34 @@ class Setup(object):
         
         for ldif_file_fn in ldif_file_list:
             ldif_file_fullpath = os.path.realpath(ldif_file_fn)
-
-            importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                                  self.loadLdifCommand,
-                                  '--hostname',
-                                  self.ldap_hostname,
-                                  '--port',
-                                  self.ldap_admin_port,
-                                  '--bindDN',
-                                  '"%s"' % self.ldap_binddn,
-                                  '-j',
-                                  self.ldapPassFn,
-                                  '--trustAll']
-
-            importParams.append('--useSSL')
-            importParams.append('--continueOnError')
-            importParams.append('--filename')
-            importParams.append(ldif_file_fullpath)
+            cwd = os.path.join(self.ldapBaseFolder, 'bin')
+            importParams = [
+                              self.loadLdifCommand,
+                              '--hostname',
+                              self.ldap_hostname,
+                              '--port',
+                              self.ldap_admin_port,
+                              '--bindDN',
+                              '"%s"' % self.ldap_binddn,
+                              '-j',
+                              self.ldapPassFn,
+                              '--trustAll',
+                              '--useSSL',
+                              '--continueOnError',
+                              '--filename',
+                              ldif_file_fullpath,
+                            ]
 
             importCmd = " ".join(importParams)
+
             self.run(['/bin/su',
                       'ldap',
                       '-c',
-                      '%s' % importCmd])
+                      '%s' % importCmd], cwd=cwd)
 
     def index_opendj_backend(self, backend):
         index_command = 'create-backend-index'
-            
+        cwd = os.path.join(self.ldapBaseFolder, 'bin')
         try:
             self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
@@ -3948,7 +3951,7 @@ class Setup(object):
                         for backend_name in backend_names:
                             if (backend_name == backend):
                                 self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                                indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
+                                indexCmd = " ".join([
                                                      self.ldapDsconfigCommand,
                                                      index_command,
                                                      '--backend-name',
@@ -3974,7 +3977,7 @@ class Setup(object):
                                 self.run(['/bin/su',
                                           'ldap',
                                           '-c',
-                                          indexCmd])
+                                          indexCmd], cwd=cwd)
             else:
                 self.logIt('NO indexes found %s' % self.openDjIndexJson, True)
         except:
@@ -4011,7 +4014,6 @@ class Setup(object):
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
         else:
-            os.environ["OPENDJ_JAVA_HOME"] =  self.jre_home
             self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
             # Make the generated script LSB compliant
             lsb_str=(
@@ -5038,9 +5040,9 @@ class Setup(object):
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, self.openDjSchemaFolder)
-
+            cwd = os.path.join(self.ldapBaseFolder, 'bin')
             dsconfigCmd = (
-                'cd {}/bin ; {} --trustAll --no-prompt --hostname {} --port {} '
+                '{} --trustAll --no-prompt --hostname {} --port {} '
                 '--bindDN "{}" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop '
                 '--handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'
                     ).format(
@@ -5051,7 +5053,7 @@ class Setup(object):
                         self.ldap_binddn
                     )
             
-            self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
+            self.run(['/bin/su', 'ldap', '-c', dsconfigCmd], cwd=cwd)
             
             ldap_conn.unbind()
             
@@ -5070,8 +5072,8 @@ class Setup(object):
                         self.ldap_binddn
                     )
                 
-                dsconfigCmd = 'cd {0}/bin ; {1} {2}'.format(self.ldapBaseFolder, self.ldapDsconfigCommand, cmd)
-                self.run(['/bin/su', 'ldap', '-c', dsconfigCmd])
+                dsconfigCmd = '{1} {2}'.format(self.ldapBaseFolder, self.ldapDsconfigCommand, cmd)
+                self.run(['/bin/su', 'ldap', '-c', dsconfigCmd], cwd=cwd)
             
             
             ldap_conn = self.getLdapConnection()
