@@ -359,18 +359,19 @@ def generate_properties(as_dict=False):
         result = ldap_conn.search_s(gluu_ConfigurationDN, ldap.SCOPE_BASE,'(objectClass=*)')
         if 'gluuIpAddress' in result[0][1]:
             setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
-        oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0])
+
+        oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0].decode('utf-8'))
 
         setup_prop['cache_provider_type'] = str(oxCacheConfiguration['cacheProviderType'])
 
         result = ldap_conn.search_s(oxidp_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxApplicationConfiguration)', ['oxConfApplication'])
-        oxConfApplication = json.loads(result[0][1]['oxConfApplication'][0])
+        oxConfApplication = json.loads(result[0][1]['oxConfApplication'][0].decode('utf-8'))
 
         result = ldap_conn.search_s(oxauth_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxAuthConfiguration)', ['oxAuthConfDynamic'])
-        oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
+        oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0].decode('utf-8'))
 
         result = ldap_conn.search_s(oxtrust_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxTrustConfiguration)', ['oxTrustConfApplication'])
-        oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0])
+        oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0].decode('utf-8'))
 
 
     elif default_storage == 'couchbase':
