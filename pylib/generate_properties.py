@@ -10,6 +10,13 @@ import base64
 import platform
 import glob
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+try:
+    import pyDes
+except:
+    pyDes_fn = os.path.join(cur_dir, 'pyDes.py')
+    os.system('wget -nv https://raw.githubusercontent.com/twhiteman/pyDes/master/pyDes.py -O {}'.format(pyDes_fn)) 
 
 from pyDes import triple_des, ECB, PAD_PKCS5
 
@@ -22,7 +29,6 @@ p = platform.linux_distribution()
 os_type = p[0].split()[0].lower()
 os_version = p[1].split('.')[0]
 
-cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 if os.path.exists('/etc/yum.repos.d/'):
     package_type = 'rpm'
