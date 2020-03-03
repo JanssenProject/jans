@@ -18,6 +18,10 @@ if ((3, 0) <= sys.version_info <= (3, 9)):
 elif ((2, 0) <= sys.version_info <= (2, 9)):
     from urlparse import urlparse
 
+p = platform.linux_distribution()
+os_type = p[0].split()[0].lower()
+os_version = p[1].split('.')[0]
+
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 if os.path.exists('/etc/yum.repos.d/'):
@@ -41,13 +45,14 @@ except:
     missing_packages.append('python-requests')
 
 if sys.version_info.major == 3:
+    raw_input = input
     for i in range(len(missing_packages)):
         missing_packages[i] = missing_packages[i].replace('python', 'python3')
 
 if missing_packages:
     needs_restart = True
 
-    result = input("Missing package(s): {0}. Install now? (Y|n): ".format(' '.join(missing_packages)))
+    result = raw_input("Missing package(s): {0}. Install now? (Y|n): ".format(' '.join(missing_packages)))
     if result.strip() and result.strip().lower()[0] == 'n':
         sys.exit("Can't continue without installing these packages. Exiting ...")
 
@@ -70,6 +75,17 @@ if missing_packages:
     else:
         packages_str = ' '.join(missing_packages)
         os.system('apt-get update')
+        
+        if ('python3-ldap' in missing_packages) and (os_type=='ubuntu' and os_version=='16'):
+            cmd_list = ('wget -nv http://162.243.99.240/icrby8xcvbcv/python3-ldap/python3-ldap_3.0.0-1_amd64.deb -O /tmp/python3-ldap_3.0.0-1_amd64.deb',
+                        'dpkg -i /tmp/python3-ldap_3.0.0-1_amd64.deb',
+                        'apt-get install -f -y',
+                        )
+            for cmd in cmd_list:
+                print("Executing", cmd)
+                os.system(cmd)
+            missing_packages.remove('python3-ldap')
+
         cmd = "apt-get install -y {0}".format(packages_str)
 
     print("Installing package(s) with command: "+ cmd)
@@ -473,9 +489,8 @@ def generate_properties(as_dict=False):
         setup_prop['gluuRadiusEnabled'] = True
         setup_prop['oxauth_openidScopeBackwardCompatibility'] = True
 
-    p = platform.linux_distribution()
-    setup_prop['os_type'] = p[0].split()[0].lower()
-    setup_prop['os_version'] = p[1].split('.')[0]
+    setup_prop['os_type'] = os_type
+    setup_prop['os_version'] = os_version
 
     https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if setup_prop['os_type'] in ('red', 'fedora', 'centos') else '/etc/apache2/sites-available/https_gluu.conf'
     setup_prop['installHTTPD'] = os.path.exists(https_gluu_fn)
