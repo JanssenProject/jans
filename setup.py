@@ -5803,7 +5803,7 @@ if __name__ == '__main__':
     print "Detected Apache:  %s" % installObject.apache_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
-    #print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
+
     try:
         os.remove(installObject.log)
         installObject.logIt('Removed %s' % installObject.log)
