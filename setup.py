@@ -1175,10 +1175,7 @@ class Setup(object):
             if startSequence and stopSequence:
                 cmd_list.append(str(startSequence))
                 cmd_list.append(str(stopSequence))
-            elif self.os_type+self.os_version == 'ubuntu14':
-                cmd_list.append(str(self.service_requirements[serviceName][1]))
-                cmd_list.append(str(100 - self.service_requirements[serviceName][1]))
-            
+
             self.run(cmd_list)
 
 
@@ -4370,7 +4367,6 @@ class Setup(object):
                 'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
-                'ubuntu 14': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests bzip2', 'optional': 'memcached'},
                 'centos 6': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
