@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+from __future__ import print_function
 
 import os
 import json
@@ -9,11 +10,15 @@ import base64
 import platform
 import glob
 
-from urlparse import urlparse
+
 from pyDes import triple_des, ECB, PAD_PKCS5
 
-cur_dir = os.path.dirname(os.path.realpath(__file__))
+if ((3, 0) <= sys.version_info <= (3, 9)):
+    from urllib.parse import urlparse
+elif ((2, 0) <= sys.version_info <= (2, 9)):
+    from urlparse import urlparse
 
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 if os.path.exists('/etc/yum.repos.d/'):
     package_type = 'rpm'
@@ -35,10 +40,14 @@ try:
 except:
     missing_packages.append('python-requests')
 
+if sys.version_info.major == 3:
+    for i in range(len(missing_packages)):
+        missing_packages[i] = missing_packages[i].replace('python', 'python3')
+
 if missing_packages:
     needs_restart = True
-    packages_str = ' '.join(missing_packages)
-    result = raw_input("Missing package(s): {0}. Install now? (Y|n): ".format(packages_str))
+
+    result = input("Missing package(s): {0}. Install now? (Y|n): ".format(' '.join(missing_packages)))
     if result.strip() and result.strip().lower()[0] == 'n':
         sys.exit("Can't continue without installing these packages. Exiting ...")
 
@@ -47,17 +56,28 @@ if missing_packages:
         os.system(cmd)
         cmd = 'yum clean all'
         os.system(cmd)
-        cmd = "yum install -y {0}".format(packages_str)
+
+        if 'python3-ldap' in missing_packages:
+            cmd = 'yum install -y http://162.243.99.240/icrby8xcvbcv/python3-ldap/python3-ldap-3.1.0-5.el7.x86_64.rpm'
+            print("Executing", cmd)
+            os.system(cmd)
+            missing_packages.remove('python3-ldap')
+
+        if missing_packages:
+            packages_str = ' '.join(missing_packages)
+            cmd = "yum install -y {0}".format(packages_str)
+
     else:
+        packages_str = ' '.join(missing_packages)
         os.system('apt-get update')
         cmd = "apt-get install -y {0}".format(packages_str)
 
-    print "Installing package(s) with command: "+ cmd
+    print("Installing package(s) with command: "+ cmd)
     os.system(cmd)
 
-prop_path = os.path.join(cur_dir, 'Properties.py')
+prop_path = os.path.join(cur_dir, 'jproperties.py')
 if not os.path.exists(prop_path):
-    os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/Properties.py -O ' + prop_path)
+    os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/jproperties.py -O ' + prop_path)
 
 cbm_path = os.path.join(cur_dir, 'cbm.py')
 if not os.path.exists('cbm.py'):
@@ -71,16 +91,21 @@ if needs_restart:
 from ldap.dn import explode_dn, str2dn, dn2str
 import ldap
 
-import Properties
+from jproperties import Properties
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
-
 def read_properties_file(fn):
-    prop = Properties.Properties()
-    with open(fn) as f:
-        prop.load(f)
-    return prop
+    retDict = {}
+    p = Properties()
+    if os.path.exists(fn):
+        with open(fn, 'rb') as f:
+            p.load(f, 'utf-8')
+      
+        for k in p.keys():
+            retDict[str(k)] = str(p[k].data)
+            
+    return retDict
 
 salt_prop = read_properties_file('/etc/gluu/conf/salt')
 salt = salt_prop['encodeSalt']
@@ -142,6 +167,8 @@ def generate_properties(as_dict=False):
 
     for l in menifest.splitlines():
         ls = l.strip()
+        if sys.version_info[0] > 2:
+            ls = ls.decode('utf-8')
         n = ls.find(':')
 
         if ls[:n].strip() == 'Implementation-Version':
@@ -154,7 +181,7 @@ def generate_properties(as_dict=False):
             gluu_version = '.'.join(gluu_version_list)
 
     if __name__ == '__main__':
-        print "Current Gluu Version is determined as", gluu_version
+        print("Current Gluu Version is determined as", gluu_version)
 
     gluu_3x = '.'.join(gluu_version.split('.')[:2]) < '4.0'
 
@@ -458,7 +485,7 @@ def generate_properties(as_dict=False):
     if as_dict:
         return setup_prop
 
-    setup_propp = Properties.Properties()
+    setup_propp = Properties()
 
     for p_key in setup_prop:
         p_val = setup_prop[p_key]
@@ -483,9 +510,9 @@ if __name__ == '__main__':
         n = len(flist) + 1
         os.rename(setup_prop_fn, setup_prop_fn+'.'+str(n))
 
-    with open(setup_prop_fn, 'w') as w:
+    with open(setup_prop_fn, 'wb') as w:
         setup_prop.store(w)
 
-    print "{} is written successfully".format(setup_prop_fn)
+    print("{} is written successfully".format(setup_prop_fn))
 
 
