@@ -1511,10 +1511,6 @@ class Setup(object):
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
-        # CentOS 6.* + init + apache 2.2
-        if self.os_type == 'centos' and self.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
         if self.os_type in ['red', 'fedora'] and self.os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
@@ -4369,9 +4365,7 @@ class Setup(object):
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python rsyslog python-httplib2 python-ldap net-tools python-requests bzip2', 'optional': 'memcached'},
-                'centos 6': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
-                'red 6': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python rsyslog python-httplib2 python-ldap python-requests bzip2', 'optional': 'memcached'},
                 }
