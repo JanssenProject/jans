@@ -6,24 +6,7 @@
 
 package org.gluu.oxauth.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
@@ -32,6 +15,15 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author Yuriy Movchan
@@ -44,7 +36,7 @@ import org.slf4j.Logger;
 public class RequestParameterService {
 
 	// use only "acr" instead of "acr_values" #334
-    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
+    private static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
             AuthorizeRequestParam.CLIENT_ID,
@@ -59,7 +51,6 @@ public class RequestParameterService {
             AuthorizeRequestParam.ID_TOKEN_HINT,
             AuthorizeRequestParam.LOGIN_HINT,
             AuthorizeRequestParam.ACR_VALUES,
-            AuthorizeRequestParam.SESSION_ID,
             AuthorizeRequestParam.REQUEST,
             AuthorizeRequestParam.REQUEST_URI,
             AuthorizeRequestParam.ORIGIN_HEADERS,
@@ -78,6 +69,13 @@ public class RequestParameterService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    private List<String> getAllAllowedParameters() {
+        List<String> allowedParameters = Lists.newArrayList(ALLOWED_PARAMETER);
+        if (appConfiguration.getSessionIdRequestParameterEnabled()) {
+            allowedParameters.add(AuthorizeRequestParam.SESSION_ID);
+        }
+        return allowedParameters;
+    }
 
     public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
         Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
@@ -86,15 +84,17 @@ public class RequestParameterService {
         }
 
         final Map<String, String> result = new HashMap<String, String>();
-        if (!requestParameterMap.isEmpty()) {
-            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
-            for (Map.Entry<String, String> entry : set) {
-                if (ALLOWED_PARAMETER.contains(entry.getKey()) || authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            }
+        if (requestParameterMap.isEmpty()) {
+            return result;
         }
 
+        final List<String> allAllowed = getAllAllowedParameters();
+        final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
+        for (Map.Entry<String, String> entry : set) {
+            if (allAllowed.contains(entry.getKey()) || authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
         return result;
     }
 
@@ -136,7 +136,7 @@ public class RequestParameterService {
     }
 
     public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
-        final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
+        final List<String> allowedParameters = getAllAllowedParameters();
 
         if (extraParameters != null) {
             for (String extraParameter : extraParameters) {
@@ -146,13 +146,7 @@ public class RequestParameterService {
             allowedParameters.addAll(extraParameters);
         }
 
-        for (Iterator<Entry<String, String>> it = parameterMap.entrySet().iterator(); it.hasNext(); ) {
-            Entry<String, String> entry = it.next();
-            if (!allowedParameters.contains(entry.getKey())) {
-                it.remove();
-            }
-        }
-
+        parameterMap.entrySet().removeIf(entry -> !allowedParameters.contains(entry.getKey()));
         return parameterMap;
     }
 

@@ -62,6 +62,8 @@ public interface ConfigurationResponseClaim {
     String FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     String AUTH_LEVEL_MAPPING = "auth_level_mapping";
     String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
+    String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
+    String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
 
     // CIBA
     String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";

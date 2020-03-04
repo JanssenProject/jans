@@ -9,6 +9,7 @@ package org.gluu.oxauth.uma.ws.rs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.wordnik.swagger.annotations.*;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -80,11 +81,11 @@ public class UmaPermissionRegistrationWS {
                                        @ApiParam(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
                                        String requestAsString) {
         try {
-            umaValidationService.assertHasProtectionScope(authorization);
+            final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
 
             // UMA2 spec defined 2 possible requests, single permission or list of permission. So here we parse manually
             UmaPermissionList permissionList = parseRequest(requestAsString);
-            umaValidationService.validatePermissions(permissionList);
+            umaValidationService.validatePermissions(permissionList, authorizationGrant.getClient());
 
             String ticket = permissionService.addPermission(permissionList, tokenService.getClientDn(authorization));
 

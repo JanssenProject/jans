@@ -172,7 +172,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse3 = tokenClient3.execRefreshToken(scope, refreshToken2, clientId, clientSecret);
 
         showClient(tokenClient3);
-        assertEquals(tokenResponse3.getStatus(), 401, "Unexpected response code: " + tokenResponse3.getStatus());
+        assertEquals(tokenResponse3.getStatus(), 400, "Unexpected response code: " + tokenResponse3.getStatus());
         assertNotNull(tokenResponse3.getEntity(), "The entity is null");
         assertNotNull(tokenResponse3.getErrorType(), "The error type is null");
         assertNotNull(tokenResponse3.getErrorDescription(), "The error description is null");
@@ -329,7 +329,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 401, "Unexpected response code: " + tokenResponse2.getStatus());
+        assertEquals(tokenResponse2.getStatus(), 400, "Unexpected response code: " + tokenResponse2.getStatus());
         assertNotNull(tokenResponse2.getEntity(), "The entity is null");
         assertNotNull(tokenResponse2.getErrorType(), "The error type is null");
         assertNotNull(tokenResponse2.getErrorDescription(), "The error description is null");
@@ -424,7 +424,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 401, "Unexpected response code: " + tokenResponse2.getStatus());
+        assertEquals(tokenResponse2.getStatus(), 400, "Unexpected response code: " + tokenResponse2.getStatus());
         assertNotNull(tokenResponse2.getEntity(), "The entity is null");
         assertNotNull(tokenResponse2.getErrorType(), "The error type is null");
         assertNotNull(tokenResponse2.getErrorDescription(), "The error description is null");
@@ -594,7 +594,7 @@ public class TokenRevocationTest extends BaseTest {
         TokenResponse tokenResponse3 = tokenClient3.execRefreshToken(scope, refreshToken2, clientId, clientSecret);
 
         showClient(tokenClient3);
-        assertEquals(tokenResponse3.getStatus(), 401, "Unexpected response code: " + tokenResponse2.getStatus());
+        assertEquals(tokenResponse3.getStatus(), 400, "Unexpected response code: " + tokenResponse2.getStatus());
         assertNotNull(tokenResponse3.getEntity(), "The entity is null");
         assertNotNull(tokenResponse3.getErrorType(), "The error type is null");
         assertNotNull(tokenResponse3.getErrorDescription(), "The error description is null");

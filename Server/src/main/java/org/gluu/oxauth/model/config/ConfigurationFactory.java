@@ -6,8 +6,31 @@
 
 package org.gluu.oxauth.model.config;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.exception.ConfigurationException;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.configuration.Configuration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
+import org.gluu.oxauth.model.error.ErrorMessages;
+import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.event.CryptoProviderEvent;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.gluu.oxauth.service.ApplicationFactory;
+import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.PersistenceEntryManagerFactory;
+import org.gluu.persist.exception.BasePersistenceException;
+import org.gluu.persist.model.PersistenceConfiguration;
+import org.gluu.persist.service.PersistanceFactoryService;
+import org.gluu.service.cdi.async.Asynchronous;
+import org.gluu.service.cdi.event.*;
+import org.gluu.service.timer.event.TimerEvent;
+import org.gluu.service.timer.schedule.TimerSchedule;
+import org.gluu.util.StringHelper;
+import org.gluu.util.properties.FileConfiguration;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -19,33 +42,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.exception.ConfigurationException;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.configuration.Configuration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.error.ErrorMessages;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.service.ApplicationFactory;
-import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.PersistenceEntryManagerFactory;
-import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.persist.service.PersistanceFactoryService;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.BaseConfigurationReload;
-import org.gluu.service.cdi.event.ConfigurationEvent;
-import org.gluu.service.cdi.event.ConfigurationUpdate;
-import org.gluu.service.cdi.event.LdapConfigurationReload;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
-import org.gluu.util.StringHelper;
-import org.gluu.util.properties.FileConfiguration;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import java.io.File;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -66,6 +65,9 @@ public class ConfigurationFactory {
 	@Inject
 	private Event<AppConfiguration> configurationUpdateEvent;
 
+    @Inject
+    private Event<AbstractCryptoProvider> cryptoProviderEvent;
+
 	@Inject
 	private Event<String> event;
 
@@ -80,6 +82,9 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Instance<Configuration> configurationInstance;
+
+	@Inject
+	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -243,17 +248,22 @@ public class ConfigurationFactory {
 			return;
 		}
 
-		final Conf conf = loadConfigurationFromLdap("oxRevision");
-		if (conf == null) {
-			return;
-		}
-
-		if (conf.getRevision() <= this.loadedRevision) {
+		if (!isRevisionIncreased()) {
 			return;
 		}
 
 		createFromLdap(false);
 	}
+
+	private boolean isRevisionIncreased() {
+        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        if (conf == null) {
+            return false;
+        }
+
+        log.trace("LDAP revision: " + conf.getRevision() + ", server revision:" + loadedRevision);
+        return conf.getRevision() > this.loadedRevision;
+    }
 
 	private String confDir() {
 		final String confDir = this.baseConfiguration.getString("confDir", null);
@@ -365,6 +375,13 @@ public class ConfigurationFactory {
 		return false;
 	}
 
+	public boolean reloadConfFromLdap() {
+        if (!isRevisionIncreased()) {
+            return false;
+        }
+	    return createFromLdap(false);
+    }
+
 	private boolean createFromLdap(boolean recoverFromFiles) {
 		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
@@ -378,10 +395,15 @@ public class ConfigurationFactory {
 					destroy(StaticConfiguration.class);
 					destroy(WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
+
+					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
 				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(conf);
+
+				AbstractCryptoProvider newAbstractCryptoProvider = abstractCryptoProviderInstance.get();
+				cryptoProviderEvent.select(CryptoProviderEvent.Literal.INSTANCE).fire(newAbstractCryptoProvider);
 
 				return true;
 			}
@@ -405,6 +427,11 @@ public class ConfigurationFactory {
 		configurationInstance.destroy(confInstance.get());
 	}
 
+	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
+		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
+		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
+	}
+
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
@@ -422,7 +449,6 @@ public class ConfigurationFactory {
 
 	private void init(Conf p_conf) {
 		initConfigurationConf(p_conf);
-
 		this.loadedRevision = p_conf.getRevision();
 	}
 
@@ -467,8 +493,10 @@ public class ConfigurationFactory {
 			final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 			ldapManager.merge(conf);
 
-			log.info("New JWKS generated successfully");
-		} catch (Exception ex2) {
+			log.info("Generated new JWKS successfully.");
+            log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+            log.trace("KeyStore keys: " + CryptoProviderFactory.getCryptoProvider(getAppConfiguration()).getKeys());
+        } catch (Exception ex2) {
 			log.error("Failed to re-generate JWKS keys", ex2);
 		}
 	}

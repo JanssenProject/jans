@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.client.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.gluu.oxauth.model.common.IntrospectionResponse;
 
 import javax.ws.rs.*;
@@ -36,5 +37,10 @@ public interface IntrospectionService {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     String introspectTokenWithResponseAsJwt(@HeaderParam("Authorization") String p_authorization, @FormParam("token") String p_token, @FormParam("response_as_jwt") boolean responseAsJwt);
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_JSON})
+    JsonNode introspect(@HeaderParam("Authorization") String p_authorization, @FormParam("token") String p_token);
 
 }

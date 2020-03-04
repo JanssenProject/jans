@@ -1,7 +1,8 @@
 package org.gluu.oxauth.servlet;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.gluu.oxauth.service.SectorIdentifierService;
+import org.json.JSONArray;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -9,11 +10,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.gluu.oxauth.service.SectorIdentifierService;
-import org.slf4j.Logger;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author Javier Rojas Blum
@@ -50,8 +48,6 @@ public class SectorIdentifier extends HttpServlet {
             }
 
             out.println(jsonArray.toString(4).replace("\\/", "/"));
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {

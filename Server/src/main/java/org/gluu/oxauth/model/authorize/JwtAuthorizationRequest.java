@@ -7,17 +7,13 @@
 package org.gluu.oxauth.model.authorize;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.model.common.Display;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -33,10 +29,13 @@ import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.service.cdi.util.CdiUtil;
-import org.gluu.util.security.StringEncrypter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +59,12 @@ public class JwtAuthorizationRequest {
     private String redirectUri;
     private String nonce;
     private String state;
+    private List<String> aud = Lists.newArrayList();
     private Display display;
     private List<Prompt> prompts;
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
+    private Integer exp;
 
     private String encodedJwt;
 
@@ -77,146 +78,70 @@ public class JwtAuthorizationRequest {
             this.prompts = new ArrayList<Prompt>();
             this.encodedJwt = encodedJwt;
 
-            if (encodedJwt != null && !encodedJwt.isEmpty()) {
-                String[] parts = encodedJwt.split("\\.");
-
-                if (parts.length == 5) {
-                    String encodedHeader = parts[0];
-                    String encodedEncryptedKey = parts[1];
-                    String encodedInitializationVector = parts[2];
-                    String encodedCipherText = parts[3];
-                    String encodedIntegrityValue = parts[4];
-
-                    JwtHeader jwtHeader = new JwtHeader(encodedHeader);
-
-                    keyId = jwtHeader.getKeyId();
-                    KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(
-                            jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
-                    BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(
-                            jwtHeader.getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
-
-                    JweDecrypterImpl jweDecrypter = null;
-                    if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
-                        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
-                        jweDecrypter = new JweDecrypterImpl(privateKey);
-                    } else {
-                        ClientService clientService = CdiUtil.bean(ClientService.class);
-                        jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING));
-                    }
-                    jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
-                    jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
-
-                    Jwe jwe = jweDecrypter.decrypt(encodedJwt);
-
-                    loadHeader(jwe.getHeader().toJsonString());
-                    loadPayload(jwe.getClaims().toJsonString());
-                } else if (parts.length == 2 || parts.length == 3) {
-                    String encodedHeader = parts[0];
-                    String encodedClaim = parts[1];
-                    String encodedSignature = StringUtils.EMPTY;
-                    if (parts.length == 3) {
-                        encodedSignature = parts[2];
-                    }
-
-                    String signingInput = encodedHeader + "." + encodedClaim;
-                    String header = new String(Base64Util.base64urldecode(encodedHeader), Util.UTF8_STRING_ENCODING);
-                    String payload = new String(Base64Util.base64urldecode(encodedClaim), Util.UTF8_STRING_ENCODING);
-                    payload = payload.replace("\\", "");
-
-                    JSONObject jsonHeader = new JSONObject(header);
-
-                    if (jsonHeader.has("typ")) {
-                        type = jsonHeader.getString("typ");
-                    }
-                    if (jsonHeader.has("alg")) {
-                        algorithm = jsonHeader.getString("alg");
-                    }
-                    if (jsonHeader.has("kid")) {
-                        keyId = jsonHeader.getString("kid");
-                    }
-
-                    SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
-                    if (sigAlg != null) {
-                        if (validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
-                            JSONObject jsonPayload = new JSONObject(payload);
-
-                            if (jsonPayload.has("response_type")) {
-                                JSONArray responseTypeJsonArray = jsonPayload.optJSONArray("response_type");
-                                if (responseTypeJsonArray != null) {
-                                    for (int i = 0; i < responseTypeJsonArray.length(); i++) {
-                                        ResponseType responseType = ResponseType.fromString(responseTypeJsonArray.getString(i));
-                                        responseTypes.add(responseType);
-                                    }
-                                } else {
-                                    responseTypes.addAll(ResponseType.fromString(jsonPayload.getString("response_type"), " "));
-                                }
-                            }
-                            if (jsonPayload.has("client_id")) {
-                                clientId = jsonPayload.getString("client_id");
-                            }
-                            if (jsonPayload.has("scope")) {
-                                JSONArray scopesJsonArray = jsonPayload.optJSONArray("scope");
-                                if (scopesJsonArray != null) {
-                                    for (int i = 0; i < scopesJsonArray.length(); i++) {
-                                        String scope = scopesJsonArray.getString(i);
-                                        scopes.add(scope);
-                                    }
-                                } else {
-                                    String scopeStringList = jsonPayload.getString("scope");
-                                    scopes.addAll(Util.splittedStringAsList(scopeStringList, " "));
-                                }
-                            }
-                            if (jsonPayload.has("redirect_uri")) {
-                                redirectUri = URLDecoder.decode(jsonPayload.getString("redirect_uri"), "UTF-8");
-                            }
-                            if (jsonPayload.has("nonce")) {
-                                nonce = jsonPayload.getString("nonce");
-                            }
-                            if (jsonPayload.has("state")) {
-                                state = jsonPayload.getString("state");
-                            }
-                            if (jsonPayload.has("display")) {
-                                display = Display.fromString(jsonPayload.getString("display"));
-                            }
-                            if (jsonPayload.has("prompt")) {
-                                JSONArray promptJsonArray = jsonPayload.optJSONArray("prompt");
-                                if (promptJsonArray != null) {
-                                    for (int i = 0; i < promptJsonArray.length(); i++) {
-                                        Prompt prompt = Prompt.fromString(promptJsonArray.getString(i));
-                                        prompts.add(prompt);
-                                    }
-                                } else {
-                                    prompts.addAll(Prompt.fromString(jsonPayload.getString("prompt"), " "));
-                                }
-                            }
-                            if (jsonPayload.has("claims")) {
-                                JSONObject claimsJsonObject = jsonPayload.getJSONObject("claims");
-
-                                if (claimsJsonObject.has("userinfo")) {
-                                    userInfoMember = new UserInfoMember(claimsJsonObject.getJSONObject("userinfo"));
-                                }
-                                if (claimsJsonObject.has("id_token")) {
-                                    idTokenMember = new IdTokenMember(claimsJsonObject.getJSONObject("id_token"));
-                                }
-                            }
-                        } else {
-                            throw new InvalidJwtException("The JWT signature is not valid");
-                        }
-                    } else {
-                        throw new InvalidJwtException("The JWT algorithm is not supported");
-                    }
-                } else {
-                    throw new InvalidJwtException("The JWT is not well formed");
-                }
-            } else {
+            if (StringUtils.isEmpty(encodedJwt)) {
                 throw new InvalidJwtException("The JWT is null or empty");
             }
-        } catch (JSONException e) {
-            throw new InvalidJwtException(e);
-        } catch (UnsupportedEncodingException e) {
-            throw new InvalidJwtException(e);
-        } catch (StringEncrypter.EncryptionException e) {
-            throw new InvalidJwtException(e);
+
+
+            String[] parts = encodedJwt.split("\\.");
+
+            if (parts.length == 5) {
+                String encodedHeader = parts[0];
+
+                JwtHeader jwtHeader = new JwtHeader(encodedHeader);
+
+                keyId = jwtHeader.getKeyId();
+                KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(
+                        jwtHeader.getClaimAsString(JwtHeaderName.ALGORITHM));
+                BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(
+                        jwtHeader.getClaimAsString(JwtHeaderName.ENCRYPTION_METHOD));
+
+                JweDecrypterImpl jweDecrypter = null;
+                if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
+                    PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+                    jweDecrypter = new JweDecrypterImpl(privateKey);
+                } else {
+                    ClientService clientService = CdiUtil.bean(ClientService.class);
+                    jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(StandardCharsets.UTF_8));
+                }
+                jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
+                jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
+
+                Jwe jwe = jweDecrypter.decrypt(encodedJwt);
+
+                loadHeader(jwe.getHeader().toJsonString());
+                loadPayload(jwe.getClaims().toJsonString());
+            } else if (parts.length == 2 || parts.length == 3) {
+                String encodedHeader = parts[0];
+                String encodedClaim = parts[1];
+                String encodedSignature = StringUtils.EMPTY;
+                if (parts.length == 3) {
+                    encodedSignature = parts[2];
+                }
+
+                String signingInput = encodedHeader + "." + encodedClaim;
+                String header = new String(Base64Util.base64urldecode(encodedHeader), StandardCharsets.UTF_8);
+                String payload = new String(Base64Util.base64urldecode(encodedClaim), StandardCharsets.UTF_8);
+                payload = payload.replace("\\", "");
+
+                loadHeader(header);
+
+                SignatureAlgorithm sigAlg = SignatureAlgorithm.fromString(algorithm);
+                if (sigAlg == null) {
+                    throw new InvalidJwtException("The JWT algorithm is not supported");
+                }
+                if (sigAlg == SignatureAlgorithm.NONE && appConfiguration.getFapiCompatibility()) {
+                    throw new InvalidJwtException("None algorithm is not allowed for FAPI");
+                }
+                if (!validateSignature(cryptoProvider, sigAlg, client, signingInput, encodedSignature)) {
+                    throw new InvalidJwtException("The JWT signature is not valid");
+                }
+
+                loadPayload(payload);
+            } else {
+                throw new InvalidJwtException("The JWT is not well formed");
+            }
+
         } catch (Exception e) {
             throw new InvalidJwtException(e);
         }
@@ -255,6 +180,19 @@ public class JwtAuthorizationRequest {
                 }
             } else {
                 responseTypes.addAll(ResponseType.fromString(jsonPayload.getString("response_type"), " "));
+            }
+        }
+        if (jsonPayload.has("exp")) {
+            exp = jsonPayload.getInt("exp");
+        }
+        if (jsonPayload.has("aud")) {
+            final String audStr = jsonPayload.optString("aud");
+            if (StringUtils.isNotBlank(audStr)) {
+                this.aud.add(audStr);
+            }
+            final JSONArray audArray = jsonPayload.optJSONArray("aud");
+            if (audArray != null && audArray.length() > 0) {
+                this.aud.addAll(Util.asList(audArray));
             }
         }
         if (jsonPayload.has("client_id")) {
@@ -313,9 +251,7 @@ public class JwtAuthorizationRequest {
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
-        boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
-
-        return validSignature;
+        return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
     public String getKeyId() {
@@ -416,5 +352,18 @@ public class JwtAuthorizationRequest {
 
     public void setIdTokenMember(IdTokenMember idTokenMember) {
         this.idTokenMember = idTokenMember;
+    }
+
+    public Integer getExp() {
+        return exp;
+    }
+
+    public List<String> getAud() {
+        if (aud == null) aud = Lists.newArrayList();
+        return aud;
+    }
+
+    public void setAud(List<String> aud) {
+        this.aud = aud;
     }
 }

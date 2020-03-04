@@ -420,13 +420,22 @@ class PersonAuthentication(PersonAuthenticationType):
     def determineSkip2FA(self, userService, identity, foundUser, deviceInf):
 
         cmConfigs = self.getSettings()
+
         if cmConfigs == None:
             print "Casa. determineSkip2FA. Failed to read policy_2fa"
             return False
-        elif 'policy_2fa' in cmConfigs:
-            policy2FA = ','.join(cmConfigs['policy_2fa'])
+
+        missing = False
+        if not 'plugins_settings' in cmConfigs:
+            missing = True
+        elif not 'strong-authn-settings' in cmConfigs['plugins_settings']:
+            missing = True
         else:
-            policy2FA = 'EVERY_LOGIN'
+            cmConfigs = cmConfigs['plugins_settings']['strong-authn-settings']
+
+        policy2FA = 'EVERY_LOGIN'
+        if not missing and 'policy_2fa' in cmConfigs:
+            policy2FA = ','.join(cmConfigs['policy_2fa'])
 
         print "Casa. determineSkip2FA with general policy %s" % policy2FA
         policy2FA += ','

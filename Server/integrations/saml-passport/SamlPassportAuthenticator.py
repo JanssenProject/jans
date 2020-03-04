@@ -142,7 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif jsonp != None:
                 # Completion of profile takes place
                 user_profile = json.loads(jsonp)
-                user_profile["mail"] = mail
+                user_profile["mail"] = [ mail ]
 
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
@@ -441,6 +441,7 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
             appConfiguration.setKeyStoreSecret(self.keyStorePassword)
+            appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),

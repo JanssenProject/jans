@@ -18,7 +18,10 @@
 			var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
 
 			function setStatus(statusText) {
+			    try {
 				  document.getElementById('status').textContent = statusText;
+				  } catch (e) {
+				  }
 			}
 
 			function addMessage(message) {
