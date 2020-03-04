@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # The MIT License (MIT)
 #
@@ -26,6 +26,7 @@ import readline
 import sys
 import os
 import os.path
+import site
 import shutil
 import socket
 import string
@@ -46,20 +47,22 @@ import ssl
 import ldap
 import uuid
 import multiprocessing
-import StringIO
+import io
 import zipfile
 import datetime
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from collections import OrderedDict
 from xml.etree import ElementTree
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from pylib.ldif import LDIFParser, LDIFWriter
 from pylib.attribute_data_types import ATTRUBUTEDATATYPES
-from pylib import Properties
+from pylib.jproperties import Properties
 from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 class colors:
     HEADER = '\033[95m'
@@ -101,10 +104,30 @@ listAttrib = ['member']
 
 try:
     from pyDes import *
+except:
+    site_libdir = site.getsitepackages()[0]
+    shutil.copy(
+            os.path.join(cur_dir, 'pylib/pyDes.py'),
+            site_libdir
+            )
+    from pyDes import *
+
+try:    
     from pylib.cbm import CBM
 except:
     pass
 
+def read_properties_file(fn):
+    retDict = {}
+    p = Properties()
+    if os.path.exists(fn):
+        with open(fn, 'rb') as f:
+            p.load(f, 'utf-8')
+      
+        for k in p.keys():
+            retDict[str(k)] = str(p[k].data)
+            
+    return retDict
 
 class ProgressBar:
 
@@ -150,7 +173,7 @@ def get_key_shortcuter_rules():
             break
 
     oxcore_persistence_core_content = oxauth_zf.read(oxcore_persistence_core_path)
-    oxcore_persistence_core_io = StringIO.StringIO(oxcore_persistence_core_content)
+    oxcore_persistence_core_io = io.StringIO(oxcore_persistence_core_content)
     oxcore_persistence_core_zf = zipfile.ZipFile(oxcore_persistence_core_io)
     key_shortcuter_rules_str = oxcore_persistence_core_zf.read('key-shortcuter-rules.json')
     key_shortcuter_rules = json.loads(key_shortcuter_rules_str)
@@ -161,7 +184,7 @@ def get_key_shortcuter_rules():
 def get_mapped_entry(entry):
     rEntry = copy.deepcopy(entry)
     
-    for key in rEntry.keys():
+    for key in list(rEntry.keys()):
         mapped_key = key
         if key in key_shortcuter_rules['exclusions']:
             mapped_key = key_shortcuter_rules['exclusions'][key]
@@ -174,7 +197,7 @@ def get_mapped_entry(entry):
             mapped_key = mapped_key[0].lower() + mapped_key[1:]
             rEntry[mapped_key] = rEntry.pop(key)
 
-    for key in rEntry.keys():
+    for key in list(rEntry.keys()):
         if key in key_shortcuter_rules['exclusions']:
             continue
         for prefix in key_shortcuter_rules['prefixes']:
@@ -326,6 +349,8 @@ class Setup(object):
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
+                                        'oxd_hostname': 'localhost',
+                                        'oxd_port': '8443',
                                      }
 
         # OS commands
@@ -919,7 +944,7 @@ class Setup(object):
             return txt
         except:
             s = ""
-            for key in self.__dict__.keys():
+            for key in list(self.__dict__.keys()):
                 val = self.__dict__[key]
                 s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
@@ -927,7 +952,7 @@ class Setup(object):
     def initialize(self):
         self.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
         if not os.path.exists(self.distFolder):
-            print "Please ensure that you are running this script inside Gluu container."
+            print("Please ensure that you are running this script inside Gluu container.")
             sys.exit(1)
 
         self.non_setup_properties['oxauth_client_jar_fn'] = os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
@@ -943,7 +968,7 @@ class Setup(object):
         menifest = oxauth_client_jar_zf.read('META-INF/MANIFEST.MF')
 
         for l in menifest.splitlines():
-            ls = l.strip()
+            ls = l.strip().decode('utf-8')
             if ls.startswith('Main-Class'):
                 n = ls.find(':')
                 self.non_setup_properties['key_gen_path'] = ls[n+1:].strip()
@@ -1062,7 +1087,7 @@ class Setup(object):
                 testIP = self.getPrompt("Enter IP Address")
             if not self.isIP(testIP):
                 testIP = None
-                print 'ERROR: The IP Address is invalid. Try again\n'
+                print('ERROR: The IP Address is invalid. Try again\n')
 
         return testIP
 
@@ -1072,25 +1097,25 @@ class Setup(object):
     def check_properties(self):
         self.logIt('Checking properties')
         while not self.hostname:
-            testhost = raw_input('Hostname of this server: ').strip()
+            testhost = input('Hostname of this server: ').strip()
             if len(testhost.split('.')) >= 3:
                 self.hostname = testhost
             else:
-                print 'The hostname has to be at least three domain components. Try again\n'
+                print('The hostname has to be at least three domain components. Try again\n')
         while not self.ip:
             self.ip = self.get_ip()
         while not self.orgName:
-            self.orgName = raw_input('Organization Name: ').strip()
+            self.orgName = input('Organization Name: ').strip()
         while not self.countryCode:
-            testCode = raw_input('2 Character Country Code: ').strip()
+            testCode = input('2 Character Country Code: ').strip()
             if len(testCode) == 2:
                 self.countryCode = testCode
             else:
-                print 'Country code should only be two characters. Try again\n'
+                print('Country code should only be two characters. Try again\n')
         while not self.city:
-            self.city = raw_input('City: ').strip()
+            self.city = input('City: ').strip()
         while not self.state:
-            self.state = raw_input('State or Province: ').strip()
+            self.state = input('State or Province: ').strip()
         if not self.admin_email:
             tld = None
             try:
@@ -1139,11 +1164,11 @@ class Setup(object):
         return_value = None
         choice_map = {}
         chosen_index = 0
-        print "\nSelect the number for the %s from the following list:" % choice_name
+        print("\nSelect the number for the %s from the following list:" % choice_name)
         for choice in list_of_choices:
             choice_map[chosen_index] = choice
             chosen_index += 1
-            print "  [%i]   %s" % (chosen_index, choice)
+            print("  [%i]   %s" % (chosen_index, choice))
         while not return_value:
             choice_number = self.getPrompt("Please select a number listed above", str(default_choice_index + 1))
             try:
@@ -1151,9 +1176,9 @@ class Setup(object):
                 if (choice_number >= 0) & (choice_number < len(list_of_choices)):
                     return_value = choice_map[choice_number]
                 else:
-                    print '"%i" is not a valid choice' % (choice_number + 1)
+                    print('"%i" is not a valid choice' % (choice_number + 1))
             except:
-                print 'Cannot convert "%s" to a number' % choice_number
+                print('Cannot convert "%s" to a number' % choice_number)
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
@@ -1181,11 +1206,11 @@ class Setup(object):
 
     # = File system  =================================================================
 
-    def readFile(self, inFilePath, logError=True):
+    def readFile(self, inFilePath, logError=True, rmode='r'):
         inFilePathText = None
 
         try:
-            f = open(inFilePath)
+            f = open(inFilePath, rmode)
             inFilePathText = f.read()
             f.close()
         except:
@@ -1324,7 +1349,7 @@ class Setup(object):
     def createDirs(self, name):
         try:
             if not os.path.exists(name):
-                os.makedirs(name, 0700)
+                os.makedirs(name, 0o700)
                 self.logIt('Created dir: %s' % name)
         except:
             self.logIt("Error making directory %s" % name, True)
@@ -1360,7 +1385,7 @@ class Setup(object):
         f.close()
 
         if fatal:
-            print "FATAL:", errorLog
+            print("FATAL:", errorLog)
             sys.exit(1)
 
 
@@ -1400,7 +1425,7 @@ class Setup(object):
         output, err = p.communicate()
         
         if 'bad decrypt' in err:
-            print "Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd)
+            print("Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd))
             self.run(['rm', '-f', out_file])
             sys.exit(False)
 
@@ -1412,7 +1437,7 @@ class Setup(object):
         
         if fn.endswith('.enc'):
             if not self.properties_password:
-                print "setup.properties password was not supplied. Please run with argument -properties-password"
+                print("setup.properties password was not supplied. Please run with argument -properties-password")
                 sys.exit(False)
 
             fn = self.decrypt_properties(fn, self.properties_password)
@@ -1428,7 +1453,7 @@ class Setup(object):
             self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
             p.setProperty('ldap_type', 'opendj')
 
-        properties_list = p.keys()
+        properties_list = list(p.keys())
 
         for prop in properties_list:
             if prop in no_update:
@@ -1496,7 +1521,8 @@ class Setup(object):
         engine = triple_des(self.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
         data = data.encode('ascii')
         en_data = engine.encrypt(data)
-        return base64.b64encode(en_data)
+        encoded_pw = base64.b64encode(en_data)
+        return encoded_pw.decode('utf-8')
 
     # ================================================================================
 
@@ -1581,7 +1607,7 @@ class Setup(object):
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
 
-        for dest_fn in self.ce_templates.keys():
+        for dest_fn in list(self.ce_templates.keys()):
             if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
                 output_fn = os.path.join(self.outputFolder, fn)
@@ -1643,9 +1669,9 @@ class Setup(object):
 
     def determineApacheVersion(self, apache_cmd):
         cmd = "/usr/sbin/%s -v | egrep '^Server version'" % apache_cmd
-        PIPE = subprocess.PIPE
-        p = subprocess.Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, close_fds=True, cwd=None)
-        apache_version = p.stdout.read().strip().split(' ')[2].split('/')[1]
+        output = self.run(cmd, shell=True)
+        apache_version = output.split(' ')[2].split('/')[1]
+
         if re.match(r'2\.4\..*', apache_version):
             return "2.4"
 
@@ -2223,19 +2249,10 @@ class Setup(object):
         args = ['/bin/sh', '-c', cmd]
 
         self.logIt("Runnning: %s" % " ".join(args))
-        try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, err = p.communicate()
-            p.wait()
-            if err:
-                self.logIt(err, True)
-            if output:
-                return output.split(os.linesep)
-        except:
-            self.logIt("Error running command : %s" % " ".join(args), True)
-            self.logIt(traceback.format_exc(), True)
 
-        return None
+        output = self.run(args)
+        if output:
+            return output.splitlines()
 
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
         self.logIt("Exporting oxAuth OpenID Connect keys")
@@ -2285,7 +2302,7 @@ class Setup(object):
             return None
 
         plain_text = ''.join(lines)
-        plain_b64encoded_text = plain_text.encode('base64').strip()
+        plain_b64encoded_text = base64.encodestring(plain_text.encode('utf-8')).decode('utf-8').strip()
 
         if num_spaces > 0:
             plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
@@ -2326,24 +2343,23 @@ class Setup(object):
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
-                user_input = raw_input("%s [%s] : " % (prompt, defaultValue)).strip()
+                user_input = input("%s [%s] : " % (prompt, defaultValue)).strip()
                 if user_input == '':
                     return defaultValue
                 else:
                     return user_input
             else:
-                input = False
-                while not input:
-                    user_input = raw_input("%s : " % prompt).strip()
+                while True:
+                    user_input = input("%s : " % prompt).strip()
                     if user_input != '':
-                        input = True
                         return user_input
+
         except KeyboardInterrupt:
             sys.exit()
         except:
             return None
 
-    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
+    def getPW(self, size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase, special=''):
         
         if not special:
             random_password = [random.choice(chars) for _ in range(size)]
@@ -2359,7 +2375,7 @@ class Setup(object):
             
             for n, rc in ((ndigit, string.digits), (nspecial, special),
                         (ncletter, string.ascii_uppercase),
-                        (nsletter, string.lowercase)):
+                        (nsletter, string.ascii_lowercase)):
             
                 random_password += [random.choice(rc) for _ in range(n)]
             
@@ -2722,9 +2738,10 @@ class Setup(object):
 
     def ldap_encode(self, password):
         salt = os.urandom(4)
-        sha = hashlib.sha1(password)
+        sha = hashlib.sha1(password.encode('utf-8'))
         sha.update(salt)
-        b64encoded = '{0}{1}'.format(sha.digest(), salt).encode('base64').strip()
+        digest_ = sha.digest()
+        b64encoded = base64.b64encode(digest_+salt).decode('utf-8')
         encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
         return encrypted_password
 
@@ -2947,7 +2964,7 @@ class Setup(object):
         options = []
         options_text = []
         
-        bucket_list = self.couchbaseBucketDict.keys()
+        bucket_list = list(self.couchbaseBucketDict.keys())
 
         for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
@@ -2962,7 +2979,7 @@ class Setup(object):
             if re.match(re_pattern, prompt):
                 break
             else:
-                print "Please select one of {0}.".format(", ".join(options))
+                print("Please select one of {0}.".format(", ".join(options)))
 
         couchbase_mappings = bucket_list[:]
 
@@ -3002,13 +3019,13 @@ class Setup(object):
 
                 cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
                 if not thread_queue:
-                    print "    Checking Couchbase connection for " + cb_host
+                    print("    Checking Couchbase connection for " + cb_host)
 
                 cbm_result = cbm_.test_connection()
                 if not cbm_result.ok:
                     if not thread_queue:
-                        print "    Can't establish connection to Couchbase server with given parameters."
-                        print "**", cbm_result.reason
+                        print("    Can't establish connection to Couchbase server with given parameters.")
+                        print("**", cbm_result.reason)
                     retval['result'] = False
                     retval['reason'] = cb_host + ': ' + cbm_result.reason
                     return retval
@@ -3022,13 +3039,13 @@ class Setup(object):
 
             if cbm_result.ok and cb_query_node != None:
                 if not thread_queue:
-                    print "    Successfully connected to Couchbase server"
+                    print("    Successfully connected to Couchbase server")
                 cb_host_ = cb_hosts[self.cb_query_node]
                 self.cbm = CBM(cb_host_, self.couchebaseClusterAdmin, self.cb_password)
                 return retval
             if cb_query_node == None:
                 if not thread_queue:
-                    print "Can't find any query node"
+                    print("Can't find any query node")
                 retval['result'] = False
                 retval['reason'] = "Can't find any query node"
 
@@ -3063,7 +3080,7 @@ class Setup(object):
 
         oxd_url = os.path.join(oxd_url, 'health-check')
         try:
-            result = urllib2.urlopen(
+            result = urllib.request.urlopen(
                         oxd_url,
                         timeout = 2,
                         context=ssl._create_unverified_context()
@@ -3076,10 +3093,10 @@ class Setup(object):
             if thread_queue:
                 return str(e)
             if error_out:
-                print colors.DANGER
-                print "Can't connect to oxd-server with url {}".format(oxd_url)
-                print "Reason: ", e
-                print colors.ENDC
+                print(colors.DANGER)
+                print("Can't connect to oxd-server with url {}".format(oxd_url))
+                print("Reason: ", e)
+                print(colors.ENDC)
 
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
@@ -3097,7 +3114,7 @@ class Setup(object):
         if self.noPrompt:
             return
 
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the Apache-2.0 license?","N|y")[0].lower()
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the Apache-2.0 license?", "N|y")[0].lower()
         if promptForMITLicense != 'y':
             sys.exit(0)
 
@@ -3119,7 +3136,7 @@ class Setup(object):
             if self.hostname != 'localhost':
                 break
             else:
-                print "Hostname can't be \033[;1mlocalhost\033[0;0m"
+                print("Hostname can't be \033[;1mlocalhost\033[0;0m")
 
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
@@ -3130,7 +3147,7 @@ class Setup(object):
         while not long_enough:
             countryCode = self.getPrompt("Enter two letter Country Code")
             if len(countryCode) != 2:
-                print "Country code must be two characters"
+                print("Country code must be two characters")
             else:
                 self.countryCode = countryCode
                 long_enough = True
@@ -3195,7 +3212,7 @@ class Setup(object):
                 if conn_check['result']:
                     break
                 else:
-                    print "    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC)
+                    print("    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC))
 
             self.ldapPass = ldapPass
             self.ldap_hostname = ldapHost
@@ -3221,7 +3238,7 @@ class Setup(object):
             self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.cb_password)
 
         if not (self.wrends_install or self.cb_install):
-            print "{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC)
+            print("{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC))
             sys.exit(False)
 
         if self.cb_install:
@@ -3231,7 +3248,7 @@ class Setup(object):
                     '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
                     '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
 
-            print "{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC)
+            print("{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC))
 
 
         if not self.wrends_install and self.cb_install:
@@ -3251,7 +3268,7 @@ class Setup(object):
                 if java_type in '12':
                     break
                 else:
-                    print "Please enter 1 or 2"
+                    print("Please enter 1 or 2")
 
             if java_type == '1':
                 self.java_type = 'jre'
@@ -3287,13 +3304,13 @@ class Setup(object):
             isCBRoleOK = self.checkCBRoles(buckets_)
 
             if not isCBRoleOK[0]:
-                print "{}Please check user {} has roles {} on bucket(s) {}{}".format(
+                print("{}Please check user {} has roles {} on bucket(s) {}{}".format(
                                 colors.DANGER,
                                 self.cbm.auth.username,
                                 ', '.join(self.cb_bucket_roles),
                                 ', '.join(isCBRoleOK[1]),
                                 colors.ENDC
-                                )
+                                ))
                 sys.exit(False)
 
 
@@ -3348,30 +3365,30 @@ class Setup(object):
                 self.installCasa = False
 
             if self.installCasa:
-                print "Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443"
+                print("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
                 if self.oxd_package:
-                    print "Else leave blank to install oxd server locally."
+                    print("Else leave blank to install oxd server locally.")
 
                 while True:
-                    oxd_server_https = raw_input("oxd Server URL: ").lower()
+                    oxd_server_https = input("oxd Server URL: ").lower()
                     
                     if (not oxd_server_https) and self.oxd_package:
                         self.installOxd = True
                         break
 
-                    print "Checking oxd server ..."
+                    print("Checking oxd server ...")
                     if self.check_oxd_server(oxd_server_https) != True:
                         oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
                         oxd_ssl_result = self.check_oxd_ssl_cert(oxd_hostname, oxd_port)
                         if oxd_ssl_result:
-                            print ('Hostname of oxd ssl certificate is {0}{1}{2} '
+                            print(('Hostname of oxd ssl certificate is {0}{1}{2} '
                                     'which does not match {0}{3}{2}, \ncasa won\'t start '
                                     'properly').format(
                                             colors.DANGER,
                                             oxd_ssl_result['CN'],
                                             colors.ENDC,
                                             oxd_hostname
-                                            )
+                                            ))
                         else:
                             self.oxd_server_https = oxd_server_https
                             break
@@ -3543,7 +3560,7 @@ class Setup(object):
 
                     # Prepare key for dictionary
                     extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
-                    extensionScriptName = extensionScriptName.decode('utf-8').lower()
+                    extensionScriptName = extensionScriptName.lower()
 
                     self.templateRenderingDict[extensionScriptName] = base64ScriptFile
                     self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
@@ -3553,9 +3570,9 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def reindent(self, text, num_spaces):
-        text = string.split(text, '\n')
-        text = [(num_spaces * ' ') + string.lstrip(line) for line in text]
-        text = string.join(text, '\n')
+        text = text.splitlines()
+        text = [(num_spaces * ' ') + line.lstrip() for line in text]
+        text = '\n'.join(text)
 
         return text
 
@@ -3563,10 +3580,8 @@ class Setup(object):
         self.logIt('Loading file %s' % fn)
         plain_file_b64encoded_text = None
         try:
-            plain_file = open(fn)
-            plain_file_text = plain_file.read()
-            plain_file_b64encoded_text = base64.b64encode(plain_file_text).strip()
-            plain_file.close()
+            plain_file_text = self.readFile(fn, rmode='rb')
+            plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
         except:
             self.logIt("Error loading file", True)
             self.logIt(traceback.format_exc(), True)
@@ -3644,6 +3659,9 @@ class Setup(object):
                 self.logIt('Run: %s with result code: %d' % (' '.join(args), code) )
             else:
                 output, err = p.communicate()
+                output = output.decode('utf-8')
+                err = err.decode('utf-8')
+
                 if output:
                     self.logIt(output)
                 if err:
@@ -3675,7 +3693,7 @@ class Setup(object):
         
         try:
             p = Properties.Properties()
-            keys = obj.__dict__.keys()
+            keys = list(obj.__dict__.keys())
             keys.sort()
             for key in keys:
                 key = str(key)
@@ -4098,7 +4116,7 @@ class Setup(object):
 
         # Jetty services
         # Iterate through all components and start installed
-        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.items():
 
             # we will start casa later, after importing oxd certificate
             if applicationName == 'casa':
@@ -4267,7 +4285,7 @@ class Setup(object):
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
 
         # Iterate through all components into order to prepare all keys
-        for applicationName, applicationConfiguration in jetty_app_configuration.iteritems():
+        for applicationName, applicationConfiguration in jetty_app_configuration.items():
             if applicationName in allowedApplicationsMemory:
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
             else:
@@ -4326,8 +4344,8 @@ class Setup(object):
                           stderr=subprocess.PIPE, close_fds=True)
 
         sin, sout, serr = (p.stdin, p.stdout, p.stderr)
-        o = sout.read().strip()
-        e = serr.read().strip()
+        o = sout.read().strip().decode('utf-8')
+        e = serr.read().strip().decode('utf-8')
         
         self.logIt(o+'\n')
         
@@ -4389,9 +4407,9 @@ class Setup(object):
 
                 if not setupOptions['noPrompt']:
                     if install_type == 'mondatory':
-                        print "The following packages are required for Gluu Server"
-                        print packages
-                        r = raw_input("Do you want to install these now? [Y/n] ")
+                        print("The following packages are required for Gluu Server")
+                        print(packages)
+                        r = input("Do you want to install these now? [Y/n] ")
                         if r and r.lower()=='n':
                             install[install_type] = False
                             if install_type == 'mondatory':
@@ -4399,15 +4417,15 @@ class Setup(object):
                                 sys.exit()
 
                     elif install_type == 'optional':
-                        print "You may need the following packages"
-                        print packages
-                        r = raw_input("Do you want to install these now? [y/N] ")
+                        print("You may need the following packages")
+                        print(packages)
+                        r = input("Do you want to install these now? [y/N] ")
                         if r and r.lower()=='y':
                             install[install_type] = True
 
                 if install[install_type]:
                     self.logIt("Installing packages " + packages)
-                    print "Installing packages", packages
+                    print("Installing packages", packages)
                     if not self.os_type == 'fedora':
                         sout, serr = self.run_command(update_command)
                     self.run_command(install_command.format(packages))
@@ -4714,7 +4732,7 @@ class Setup(object):
                 return True
             else:
                 time.sleep(5)
-        print "Couchbase server was not ready. Giving up" + str(cbm_result.reason)
+        print("Couchbase server was not ready. Giving up" + str(cbm_result.reason))
         sys.exit(1)
 
     def couchbaseSSL(self):
@@ -4750,7 +4768,7 @@ class Setup(object):
 
         couchbase_mappings = []
 
-        for group in self.couchbaseBucketDict.keys()[1:]:
+        for group in list(self.couchbaseBucketDict.keys())[1:]:
             bucket = self.couchbase_bucket_prefix if group == 'default' else self.couchbase_bucket_prefix + '_' + group
             if bucket in self.couchbaseBuckets:
                 cb_key = 'couchbase_{}_mapping'.format(group)
@@ -4809,7 +4827,7 @@ class Setup(object):
         min_cb_ram += self.couchbaseBucketDict['default']['memory_allocation']
 
         if couchbaseClusterRamsize < min_cb_ram:
-            print "Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram)
+            print("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
             sys.exit(1)
 
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
@@ -5117,20 +5135,20 @@ class Setup(object):
  
 
     def load_test_data_exit(self):
-        print "Loading test data"
+        print("Loading test data")
         prop_file = os.path.join(self.install_dir, 'setup.properties.last')
         
         if not os.path.exists(prop_file):
             prop_file += '.enc'
             if not os.path.exists(prop_file):
-                print "setup.properties.last or setup.properties.last.enc were not found, exiting."
+                print("setup.properties.last or setup.properties.last.enc were not found, exiting.")
                 sys.exit(1)
 
         self.load_properties(prop_file)
         self.createLdapPw()
         self.load_test_data()
         self.deleteLdapPw()
-        print "Test data loaded. Exiting ..."
+        print("Test data loaded. Exiting ...")
         sys.exit()
 
     def fix_systemd_script(self):
@@ -5297,7 +5315,7 @@ class Setup(object):
 
         raidus_client_jwks_json = json.dumps(raidus_client_jwks, indent=2)
         
-        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = base64.encodestring(raidus_client_jwks_json).replace(' ','').replace('\n','')
+        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = base64.encodestring(raidus_client_jwks_json.encode('utf-8')).decode('utf-8').replace(' ','').replace('\n','')
 
         for k in raidus_client_jwks['keys']:
             if k.get('alg') == 'RS512':
@@ -5475,7 +5493,7 @@ class Setup(object):
                 self.pbar.progress("gluu", "Loading test data", False)
                 self.load_test_data()
 
-            if 'importLDIFDir' in setupOptions.keys():
+            if 'importLDIFDir' in list(setupOptions.keys()):
                 self.pbar.progress("gluu", "Importing LDIF files")
                 self.render_custom_templates(setupOptions['importLDIFDir'])
                 self.import_custom_ldif(setupOptions['importLDIFDir'])
@@ -5486,14 +5504,14 @@ class Setup(object):
 
             self.pbar.progress("gluu", "Completed")
             if not self.thread_queue:
-                print
+                print()
                 self.print_post_messages()
             
             if self.couchbaseInstallOutput:
-                print
-                print "-"*int(tty_columns)
-                print self.couchbaseInstallOutput
-                print "-"*int(tty_columns)
+                print()
+                print("-"*int(tty_columns))
+                print(self.couchbaseInstallOutput)
+                print("-"*int(tty_columns))
 
         except:
             if self.thread_queue:
@@ -5501,13 +5519,13 @@ class Setup(object):
             else:
                 installObject.logIt("***** Error caught in main loop *****", True)
                 installObject.logIt(traceback.format_exc(), True)
-                print "***** Error caught in main loop *****"
-                print traceback.format_exc()
+                print("***** Error caught in main loop *****")
+                print(traceback.format_exc())
 
     def print_post_messages(self):
-        print
+        print()
         for m in self.post_messages:
-            print m
+            print(m)
 
 ############################   Main Loop   #################################################
 
@@ -5528,48 +5546,48 @@ available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
 def resource_checkings():
 
     if file_max < 64000:
-        print("{0}Maximum number of files that can be opened on this computer is "
+        print(("{0}Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "
                   "host system and re-run setup.py{1}".format(colors.DANGER,
-                                                                colors.ENDC))
+                                                                colors.ENDC)))
         sys.exit(1)
 
     if current_mem_size < suggested_mem_size:
-        print ("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
+        print(("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
                "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
                                                         current_mem_size, 
                                                         suggested_mem_size,
-                                                        colors.ENDC)
+                                                        colors.ENDC))
 
 
-        result = raw_input("Proceed anyways? [Y|n] ")
+        result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
 
     if current_number_of_cpu < suggested_number_of_cpu:
 
-        print ("{0}Warning: Available CPU Units found was {1}. "
+        print(("{0}Warning: Available CPU Units found was {1}. "
             "This is less than the required amount of {2} CPU Units.{3}".format(
                                                         colors.WARNING,
                                                         current_number_of_cpu, 
                                                         suggested_number_of_cpu,
-                                                        colors.ENDC))
+                                                        colors.ENDC)))
                                                         
-        result = raw_input("Proceed anyways? [Y|n] ")
+        result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
 
 
 
     if available_disk_space < suggested_free_disk_space:
-        print ("{0}Warning: Available free disk space was determined to be {1} "
+        print(("{0}Warning: Available free disk space was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         colors.WARNING,
                                                         available_disk_space,
                                                         suggested_free_disk_space,
-                                                        colors.ENDC))
+                                                        colors.ENDC)))
 
-        result = raw_input("Proceed anyways? [Y|n] ")
+        result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
 
@@ -5634,7 +5652,7 @@ if __name__ == '__main__':
         try:
             import npyscreen
         except:
-            print "Can't start TUI, continuing command line"
+            print("Can't start TUI, continuing command line")
         else:
             from pylib import tui
             thread_queue = tui.queue
@@ -5698,9 +5716,6 @@ if __name__ == '__main__':
     if argsp.state:
         setupOptions['state'] = argsp.state
 
-    if argsp.state:
-        setupOptions['state'] = argsp.state
-
     if argsp.country:
         setupOptions['countryCode'] = argsp.country
 
@@ -5717,14 +5732,14 @@ if __name__ == '__main__':
         if os.path.exists(argsp.d):
             setupOptions['install_dir'] = argsp.d
         else:
-            print 'System folder %s does not exist. Installing in %s' % (argsp.d, os.getcwd())
+            print('System folder %s does not exist. Installing in %s' % (argsp.d, os.getcwd()))
 
     if argsp.f:
         if os.path.isfile(argsp.f):
             setupOptions['setup_properties'] = argsp.f
-            print "Found setup properties %s\n" % argsp.f
+            print("Found setup properties %s\n" % argsp.f)
         else:
-            print "\nOoops... %s file not found for setup properties.\n" %argsp.f
+            print("\nOoops... %s file not found for setup properties.\n" %argsp.f)
 
     setupOptions['noPrompt'] = argsp.n
 
@@ -5761,9 +5776,9 @@ if __name__ == '__main__':
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
             setupOptions['importLDIFDir'] = argsp.import_ldif
-            print "Found setup LDIF import directory %s\n" % (argsp.import_ldif)
+            print("Found setup LDIF import directory %s\n" % (argsp.import_ldif))
         else:
-            print 'The custom LDIF import directory %s does not exist. Exiting...' % (argsp.import_ldif)
+            print('The custom LDIF import directory %s does not exist. Exiting...' % (argsp.import_ldif))
             sys.exit(2)
 
     installObject = Setup(setupOptions['install_dir'])
@@ -5776,7 +5791,7 @@ if __name__ == '__main__':
         installObject.load_test_data_exit()
 
     if installObject.check_installed():
-        print "\nThis instance already configured. If you need to install new one you should reinstall package first."
+        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
         sys.exit(2)
 
     installObject.downloadWars = setupOptions['downloadWars']
@@ -5797,12 +5812,12 @@ if __name__ == '__main__':
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
 
-    print "\nInstalling Gluu Server..."
-    print "Detected OS  :  %s" % installObject.os_type
-    print "Detected init:  %s" % installObject.os_initdaemon
-    print "Detected Apache:  %s" % installObject.apache_version
+    print("\nInstalling Gluu Server...")
+    print("Detected OS  :  %s" % installObject.os_type)
+    print("Detected init:  %s" % installObject.os_initdaemon)
+    print("Detected Apache:  %s" % installObject.apache_version)
 
-    print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
+    print("\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError))
 
     try:
         os.remove(installObject.log)
@@ -5837,21 +5852,21 @@ if __name__ == '__main__':
         proceed = True
 
         # Show to properties for approval
-        print '\n%s\n' % `installObject`
+        print('\n%s\n' % repr(installObject))
         if not setupOptions['noPrompt']:
-            proceed_prompt = raw_input('Proceed with these values [Y|n] ').lower().strip()
+            proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
             if proceed_prompt and proceed_prompt[0] !='y':
                 proceed = False
 
         if setupOptions['noPrompt'] or proceed:
             installObject.do_installation()
-            print "\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname
+            print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
         else:
             installObject.save_properties()
     else:
 
             msg = tui.msg
-            msg.storages = installObject.couchbaseBucketDict.keys()
+            msg.storages = list(installObject.couchbaseBucketDict.keys())
             msg.installation_step_number = 33
             
             msg.os_type = installObject.os_type
