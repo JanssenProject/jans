@@ -2,12 +2,20 @@ package org.gluu.oxauth.model.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
@@ -49,9 +57,36 @@ public class CertUtils {
         if (org.apache.commons.lang.StringUtils.isBlank(certificateAsPem)) {
             return "";
         }
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
-        certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
-        certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
-        return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+        try {
+            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----BEGIN CERTIFICATE-----");
+            certificateAsPem = org.apache.commons.lang.StringUtils.remove(certificateAsPem, "-----END CERTIFICATE-----");
+            certificateAsPem = StringUtils.replace(certificateAsPem, "\n", "");
+            return Base64Util.base64urlencode(DigestUtils.sha256(Base64.decode(certificateAsPem)));
+        } catch (Exception e) {
+            log.error("Failed to hash certificate: " + certificateAsPem, e);
+            return "";
+        }
+    }
+
+    @NotNull
+    public static String getCN(@Nullable X509Certificate cert) {
+        try {
+            if (cert == null) {
+                return "";
+            }
+            X500Name x500name = new JcaX509CertificateHolder(cert).getSubject();
+            final RDN[] rdns = x500name.getRDNs(BCStyle.CN);
+            if (rdns == null || rdns.length == 0) {
+                return "";
+            }
+            RDN cn = rdns[0];
+
+            if (cn != null && cn.getFirst() != null && cn.getFirst().getValue() != null) {
+                return IETFUtils.valueToString(cn.getFirst().getValue());
+            }
+        } catch (CertificateEncodingException e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
     }
 }

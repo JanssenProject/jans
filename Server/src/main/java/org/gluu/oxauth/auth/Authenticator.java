@@ -196,6 +196,7 @@ public class Authenticator {
                     && servletRequest != null
                     && (servletRequest.getRequestURI().endsWith("/token")
                     || servletRequest.getRequestURI().endsWith("/revoke")
+                    || servletRequest.getRequestURI().endsWith("/userinfo")
                     || servletRequest.getRequestURI().endsWith("/bc-authorize")))) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
                 if (authenticated) {
@@ -418,6 +419,9 @@ public class Authenticator {
             }
 
             if (this.authStep == countAuthenticationSteps) {
+                // Store/Update extra parameters in session attributes map
+                updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
+
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
                 authenticationService.quietLogin(credentials.getUsername());

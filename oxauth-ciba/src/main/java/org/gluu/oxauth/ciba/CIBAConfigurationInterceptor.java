@@ -10,7 +10,6 @@ import org.gluu.oxauth.interception.CIBAConfigurationInterception;
 import org.gluu.oxauth.interception.CIBAConfigurationInterceptionInterface;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,8 +80,8 @@ public class CIBAConfigurationInterceptor implements CIBAConfigurationIntercepti
             }
 
             jsonConfiguration.put(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED, appConfiguration.getBackchannelUserCodeParameterSupported());
-        } catch (JSONException e) {
-            log.error("Failed to process configuration.", e);
+        } catch (Exception e) {
+            log.error("Failed to process CIBA configuration.", e);
         }
     }
 }
