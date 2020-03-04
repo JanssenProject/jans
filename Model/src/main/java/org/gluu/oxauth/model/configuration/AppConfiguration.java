@@ -29,6 +29,8 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
+
     private String issuer;
     private String baseEndpoint;
     private String authorizationEndpoint;
@@ -129,10 +131,12 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
+    private Boolean sessionIdRequestParameterEnabled = false; // #1195
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    private Integer sessionIdLifetime = 86400;
+    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantTypeUpdate;
@@ -164,7 +168,7 @@ public class AppConfiguration implements Configuration {
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
     private Boolean endSessionWithAccessToken;
-    private String сookieDomain;
+    private String cookieDomain;
     private Boolean enabledOAuthAuditLogging;
     private Set<String> jmsBrokerURISet;
     private String jmsUserName;
@@ -186,6 +190,7 @@ public class AppConfiguration implements Configuration {
     private Boolean disableU2fEndpoint = false;
 
     private Boolean useLocalCache = false;
+    private Boolean fapiCompatibility = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -205,6 +210,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getFapiCompatibility() {
+        if (fapiCompatibility == null) fapiCompatibility = false;
+        return fapiCompatibility;
+    }
+
+    public void setFapiCompatibility(Boolean fapiCompatibility) {
+        this.fapiCompatibility = fapiCompatibility;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -923,6 +937,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getDynamicRegistrationEnabled() {
+        if (dynamicRegistrationEnabled == null) dynamicRegistrationEnabled = false;
         return dynamicRegistrationEnabled;
     }
 
@@ -987,6 +1002,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {
+        if (allowPostLogoutRedirectWithoutValidation == null) allowPostLogoutRedirectWithoutValidation = false;
         return allowPostLogoutRedirectWithoutValidation;
     }
 
@@ -1092,6 +1108,17 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistOnPromptNone(Boolean sessionIdPersistOnPromptNone) {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
+    }
+
+    public Boolean getSessionIdRequestParameterEnabled() {
+        if (sessionIdRequestParameterEnabled == null) {
+            sessionIdRequestParameterEnabled = false;
+        }
+        return sessionIdRequestParameterEnabled;
+    }
+
+    public void setSessionIdRequestParameterEnabled(Boolean sessionIdRequestParameterEnabled) {
+        this.sessionIdRequestParameterEnabled = sessionIdRequestParameterEnabled;
     }
 
     public Boolean getSessionIdEnabled() {
@@ -1270,15 +1297,15 @@ public class AppConfiguration implements Configuration {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
     }
 
-    public String getСookieDomain() {
-        return сookieDomain;
-    }
+    public String getCookieDomain() {
+		return cookieDomain;
+	}
 
-    public void setСookieDomain(String сookieDomain) {
-        this.сookieDomain = сookieDomain;
-    }
+	public void setCookieDomain(String cookieDomain) {
+		this.cookieDomain = cookieDomain;
+	}
 
-    public Boolean getEnabledOAuthAuditLogging() {
+	public Boolean getEnabledOAuthAuditLogging() {
         return enabledOAuthAuditLogging;
     }
 
@@ -1413,6 +1440,14 @@ public class AppConfiguration implements Configuration {
         this.sessionIdLifetime = sessionIdLifetime;
     }
 
+    public Integer getServerSessionIdLifetime() {
+        return serverSessionIdLifetime;
+    }
+
+    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
+        this.serverSessionIdLifetime = serverSessionIdLifetime;
+    }
+
     public Boolean getLogClientIdOnClientAuthentication() {
         return logClientIdOnClientAuthentication;
     }
@@ -1534,6 +1569,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelTokenDeliveryModesSupported() {
+        if (backchannelTokenDeliveryModesSupported == null) backchannelTokenDeliveryModesSupported = Lists.newArrayList();
         return backchannelTokenDeliveryModesSupported;
     }
 

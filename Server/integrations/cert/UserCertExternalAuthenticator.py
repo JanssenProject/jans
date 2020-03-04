@@ -18,6 +18,7 @@ from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
 from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
 from org.gluu.oxauth.cert.validation.model import ValidationStatus
 from org.gluu.oxauth.util import CertUtil
+from org.gluu.oxauth.model.util import CertUtils
 from org.gluu.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
 
@@ -363,7 +364,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def certFromString(self, x509CertificateEncoded):
         x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
-        return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
+        return CertUtils.x509CertificateFromBytes(x509CertificateDecoded)
 
     def certFromPemString(self, pemCertificate):
         x509CertificateEncoded = pemCertificate.replace("-----BEGIN CERTIFICATE-----", "").replace("-----END CERTIFICATE-----", "").strip()

@@ -34,14 +34,38 @@
             var request = '${identity.getWorkingParameter('otp_enrollment_request')}';
             var label = '${identity.getWorkingParameter('qr_label')}';
             var qr_options = ${identity.getWorkingParameter('qr_options')};
-            $(document).ready(function() {
+			
+			$(document).ready(function() {
                 if (request == '') {
                     onSignInCallback('error');
                 }
                 gluu_auth.renderQrCode('#container', request, qr_options, label);
                 gluu_auth.startProgressBar('.progress-bar', 60, onSignInCallback);
                 
+				
+				
+				// render the details for the manual method
+				//$("account_name").innerHTML = account_name_manual_entry;
+				document.getElementById("otp_secret_key_manual_entry").innerHTML = getUrlVars()["secret"];
+				//$("issuer").innerHTML = account_name_manual_entry;
+				//$("user-name").innerHTML ='' ;
             });
+			
+			function showManualEntryDiv()
+			{
+				document.getElementById("manual_entry").style.display = 'block';
+			}
+	//<![CDATA[
+			function getUrlVars() {
+				var vars = {};
+				var parts = '${identity.getWorkingParameter('otp_enrollment_request')}'.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+					vars[key] = value;
+				});
+				return vars;
+			}
+
+//	]]>	
+			
         </script>
 		<style type="text/css"></style>
 	</ui:define>
@@ -53,7 +77,7 @@
 			action="#{request.contextPath}/postlogin.htm">
 			<input type="hidden" id="auth_result" name="auth_result" />
 		</form>
-		<div class="container text-center">
+		<div class="container">
 			<div id="content">
 				<div class="row-fluid">
 					<h:form id="loginForm">
@@ -65,11 +89,22 @@
 										<div class="row">
 											<div class="dialog">
 												<p>#{msgs['otp.scanQRCode']}</p>
-												<div id="container"></div>
+												<div id="container" class="container text-center"></div>
 											</div>
 										</div>
 									</div>
-								</h:panelGroup>
+                                                                        <div>
+                                                                                                <p>
+                                                                                                <a onclick="showManualEntryDiv();" style="cursor: pointer;"
+                                                                                                        target="_blank" class="sigin-a"><span
+                                                                                                        style="color: blue">Unable to scan the QR code?</span></a>
+                                                                                                </p>
+                                                                                                <div id="manual_entry" style="display:none">
+                                                                                                <p> Type the following key in your authenticator app:  <span id="otp_secret_key_manual_entry"></span></p>
+                                                                                                </div>
+                                                                        </div>
+                                                                </h:panelGroup>
+
 								<h:panelGroup rendered="#{not identity.loggedIn}">
 									<div class="progress">
 										<div

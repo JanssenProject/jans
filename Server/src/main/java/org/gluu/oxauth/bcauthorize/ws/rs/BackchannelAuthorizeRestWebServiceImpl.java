@@ -157,7 +157,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             if (Strings.isNotBlank(loginHintToken)) { // login_hint_token
                 Jwt jwt = Jwt.parse(loginHintToken);
 
-                SignatureAlgorithm algorithm = jwt.getHeader().getAlgorithm();
+                SignatureAlgorithm algorithm = jwt.getHeader().getSignatureAlgorithm();
                 String keyId = jwt.getHeader().getKeyId();
 
                 if (algorithm == null || Strings.isBlank(keyId)) {

@@ -6,42 +6,8 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import org.gluu.oxauth.util.ServerUtil;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.QueryStringDecoder;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.client.ResponseAsserter;
-import org.gluu.oxauth.client.UserInfoRequest;
+import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.Claim;
 import org.gluu.oxauth.client.model.authorize.ClaimValue;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -57,13 +23,33 @@ import org.gluu.oxauth.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenID Request Object (embedded)
@@ -73,7 +59,8 @@ import org.testng.annotations.Test;
  */
 public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
-	@ArquillianResource
+    public static final String ACR_VALUE = "basic";
+    @ArquillianResource
 	private URI url;
 
 	private static String clientId;
@@ -204,7 +191,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] {ACR_VALUE})));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -441,7 +428,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
-		authorizationRequest.setRequest("INVALID_OPENID_REQUEST_OBJECT");
+		authorizationRequest.setRequest("INVALID_REQUEST_OBJECT");
 		authorizationRequest.setAuthUsername(userId);
 		authorizationRequest.setAuthPassword(userSecret);
 
@@ -510,7 +497,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt + "INVALID_SIGNATURE");
@@ -584,7 +571,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
 			jwtAuthorizationRequest.setClientId("INVALID_CLIENT_ID");
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -724,7 +711,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
@@ -804,7 +791,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
@@ -1001,7 +988,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			String hash = "INVALID_HASH";
@@ -1120,7 +1107,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);

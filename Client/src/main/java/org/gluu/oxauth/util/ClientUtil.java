@@ -41,6 +41,7 @@ public class ClientUtil {
                 for (int i = 0; i < arrayOfValues.length(); i++) {
                     result.add(arrayOfValues.getString(i));
                 }
+                return result;
             }
             String listString = jsonObject.optString(key);
             if (StringUtils.isNotBlank(listString)) {

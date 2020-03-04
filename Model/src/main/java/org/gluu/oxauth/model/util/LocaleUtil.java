@@ -22,7 +22,9 @@ public class LocaleUtil {
         }
 
         for (String requestedLocale : requestedLocales) {
-            Locale reqInQuestion = LocaleUtils.toLocale(requestedLocale);
+            // LocaleUtils uses an underscore format (e.g. en_US), but the new Java standard
+            // is a hyphenated format (e.g. en-US). This allows us to use LocaleUtils' validation.
+            Locale reqInQuestion = LocaleUtils.toLocale(requestedLocale.replace('-', '_'));
             List<Locale> lookupList = LocaleUtils.localeLookupList(reqInQuestion);
 
             for (Locale localeInQuestion : lookupList) {

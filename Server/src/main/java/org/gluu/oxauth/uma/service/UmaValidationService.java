@@ -7,6 +7,7 @@
 package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -48,6 +49,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
@@ -166,13 +168,13 @@ public class UmaValidationService {
         }
     }
 
-    public void validatePermissions(UmaPermissionList permissions) {
+    public void validatePermissions(UmaPermissionList permissions, Client client) {
         for (org.gluu.oxauth.model.uma.UmaPermission permission : permissions) {
-            validatePermission(permission);
+            validatePermission(permission, client);
         }
     }
 
-    public void validatePermission(org.gluu.oxauth.model.uma.UmaPermission permission) {
+    public void validatePermission(org.gluu.oxauth.model.uma.UmaPermission permission, Client client) {
         String resourceId = permission.getResourceId();
         if (StringHelper.isEmpty(resourceId)) {
             log.error("Resource id is empty");
@@ -186,13 +188,18 @@ public class UmaValidationService {
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "Resource is not registered.");
             }
 
-            final List<String> scopeUrls = umaScopeService.getScopeIdsByDns(resource.getScopes());
-            if (!scopeUrls.containsAll(permission.getScopes())) {
-                log.error("At least one of the scope isn't registered");
-                throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE, "At least one of the scope isn't registered");
-            } else {
-                return;
+            for (String s : permission.getScopes()) {
+                if (resource.getScopes().contains(s)) {
+                    continue;
+                }
+
+                final Scope spontaneousScope = umaScopeService.getOrCreate(client, s, Sets.newHashSet(umaScopeService.getScopeIdsByDns(resource.getScopes())));
+                if (spontaneousScope == null) {
+                    log.error("Scope isn't registered and is not allowed by spontaneous scopes. Scope: " + s);
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_SCOPE, "At least one of the scopes isn't registered");
+                }
             }
+            return;
         } catch (EntryPersistenceException ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -346,15 +353,21 @@ public class UmaValidationService {
      * @param permissions permissions
      * @return map of loaded scope and boolean, true - if client requested scope and false if it is permission ticket scope
      */
-    public Map<Scope, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
+    public Map<Scope, Boolean> validateScopes(String scope, List<UmaPermission> permissions, Client client) {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
         final Map<Scope, Boolean> result = new HashMap<Scope, Boolean>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-            for (Scope s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
-                result.put(s, true);
+            final Set<String> resourceScopes = resourceService.getResourceScopes(permissions.stream().map(UmaPermission::getResourceId).collect(Collectors.toSet()));
+            for (String scopeId : scopesRequested) {
+                final Scope ldapScope = umaScopeService.getOrCreate(client, scopeId, resourceScopes);
+                if (ldapScope != null) {
+                    result.put(ldapScope, true);
+                } else {
+                    log.trace("Skip requested scope because it's not allowed, scope: " + scopeId);
+                }
             }
         }
         for (UmaPermission permission : permissions) {
@@ -363,8 +376,8 @@ public class UmaValidationService {
             }
         }
         if (result.isEmpty()) {
-            log.error("There are no any scopes requested in give request.");
-            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "There are no any scopes requested in give request.");
+            log.error("There are no any scopes requested in the request.");
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "There are no any scopes requested in give request.");
         }
         log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<Scope, String>() {
             @Override
@@ -378,7 +391,7 @@ public class UmaValidationService {
     public void validateScopeExpression(String scopeExpression) {
         if (StringUtils.isNotBlank(scopeExpression) && !expressionService.isExpressionValid(scopeExpression)) {
             log.error("Scope expression is invalid. Expression: " + scopeExpression);
-            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Scope expression is invalid. Expression: " + scopeExpression);
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Scope expression is invalid. Expression: " + scopeExpression);
         }
     }
 
@@ -468,7 +481,15 @@ public class UmaValidationService {
         List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
         if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression()) ) {
             log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
-            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");
         }
+    }
+
+    public Client validate(Client client) {
+        if (client == null || client.isDisabled()) {
+            log.debug("Client is not found or otherwise disabled.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.DISABLED_CLIENT, "Client is disabled.");
+        }
+        return client;
     }
 }

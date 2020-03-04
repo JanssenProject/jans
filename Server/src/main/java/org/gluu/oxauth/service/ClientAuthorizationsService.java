@@ -56,6 +56,11 @@ public class ClientAuthorizationsService {
     }
 
     public void prepareBranch() {
+        String baseDn = createDn(null);
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
         // Create client authorizations branch if needed
         if (!containsBranch()) {
             addBranch();
