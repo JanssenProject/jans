@@ -25,11 +25,10 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.AUTH_REQ_ID;
 
 /**
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version March 4, 2020
  */
 @Interceptor
 @CIBAEndUserNotificationInterception
@@ -81,7 +80,7 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
         authorizationRequestUri.addResponseParameter(REDIRECT_URI, redirectUri);
         authorizationRequestUri.addResponseParameter(STATE, UUID.randomUUID().toString());
         authorizationRequestUri.addResponseParameter(NONCE, UUID.randomUUID().toString());
-        authorizationRequestUri.addResponseParameter(PROMPT, "login consent");
+        authorizationRequestUri.addResponseParameter(PROMPT, "consent");
         authorizationRequestUri.addResponseParameter(AUTH_REQ_ID, authReqId);
 
         String clickAction = authorizationRequestUri.toString();

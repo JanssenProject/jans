@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.ciba;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -41,7 +43,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version March 4, 2020
  */
 public class BackchannelAuthenticationPingMode extends BaseTest {
 
@@ -109,6 +111,8 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String bindingMessage = RandomStringUtils.randomAlphanumeric(6);
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "email", "address", "phone"));
         backchannelAuthenticationRequest.setLoginHint(userId);
@@ -116,6 +120,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         backchannelAuthenticationRequest.setUserCode("qwerty");
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
+        backchannelAuthenticationRequest.setBindingMessage(bindingMessage);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
 
@@ -133,6 +138,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
 
         // 3. Token Request Using CIBA Grant Type
         TokenResponse tokenResponse = null;
+        int pollCount = 0;
         do {
             Thread.sleep(5000);
 
@@ -146,7 +152,8 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
             tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-        } while (tokenResponse.getStatus() == 400);
+            pollCount++;
+        } while (tokenResponse.getStatus() == 400 && pollCount < 5);
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -1699,6 +1706,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 401, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
@@ -1752,6 +1760,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 401, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
@@ -1807,6 +1816,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
@@ -1865,6 +1875,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
@@ -1922,6 +1933,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
@@ -1980,6 +1992,69 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
         assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE, backchannelAuthenticationResponse.getErrorType());
+        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "userId"})
+    @Test
+    public void backchannelTokenDeliveryModePingFail7(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String userId) throws InterruptedException {
+        showTitle("backchannelTokenDeliveryModePingFail7");
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+
+        registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+        registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
+        registerRequest.setBackchannelUserCodeParameter(true);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PING.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), new Boolean(true).toString());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Authentication Request
+        BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "email", "address", "phone"));
+        backchannelAuthenticationRequest.setLoginHint(userId);
+        backchannelAuthenticationRequest.setClientNotificationToken("123");
+        backchannelAuthenticationRequest.setUserCode("qwerty");
+        backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
+        backchannelAuthenticationRequest.setBindingMessage("####"); // Invalid binding message
+        backchannelAuthenticationRequest.setAuthUsername(clientId);
+        backchannelAuthenticationRequest.setAuthPassword(clientSecret);
+
+        BackchannelAuthenticationClient backchannelAuthenticationClient = new BackchannelAuthenticationClient(backchannelAuthenticationEndpoint);
+        backchannelAuthenticationClient.setRequest(backchannelAuthenticationRequest);
+        BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
+
+        showClient(backchannelAuthenticationClient);
+        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
+        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
+        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE, backchannelAuthenticationResponse.getErrorType());
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
