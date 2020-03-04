@@ -247,22 +247,43 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private void validateIdTokenHint(String idTokenHint, String postLogoutRedirectUri) {
-        // id_token_hint is not required but if it is present then we must validate it #831
-        if (StringUtils.isNotBlank(idTokenHint)) {
-            AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
-            if (authorizationGrant == null) {
-                Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
-                if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
-                    authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
-                }
+        if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(idTokenHint)) { // must be present for logout tests #1279
+            final String reason = "id_token_hint is not set";
+            log.trace(reason);
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_REQUEST, reason));
+        }
 
-                if (authorizationGrant == null) {
-                    final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
-                    throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
-                }
-            }
+        final AuthorizationGrant tokenHintGrant = getTokenHintGrant(idTokenHint);
+        if (appConfiguration.getFapiCompatibility() && tokenHintGrant == null) { // must be present for logout tests #1279
+            final String reason = "id_token_hint is not set";
+            log.trace(reason);
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_REQUEST, reason));
+        }
+
+        // id_token_hint is not required but if it is present then we must validate it #831
+        if (StringUtils.isNotBlank(idTokenHint) && tokenHintGrant == null) {
+            final String reason = "id_token_hint is not valid. Logout is rejected. id_token_hint can be skipped or otherwise valid value must be provided.";
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
         }
     }
+
+    private AuthorizationGrant getTokenHintGrant(String idTokenHint) {
+        if (StringUtils.isBlank(idTokenHint)) {
+            return null;
+        }
+
+        AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
+        if (authorizationGrant != null) {
+            return authorizationGrant;
+        }
+
+        Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
+        if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+            return authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+        }
+        return null;
+    }
+
 
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
