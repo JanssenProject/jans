@@ -470,7 +470,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return "/auth/super-gluu/login.xhtml"
                 else:
                     #Modified for Casa compliance
-                    return "/casa/sg_login.xhtml"
+                    return "/casa/sg.xhtml"
 
         return ""
 
