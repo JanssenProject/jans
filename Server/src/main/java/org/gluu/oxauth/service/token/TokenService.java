@@ -6,14 +6,13 @@
 
 package org.gluu.oxauth.service.token;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.util.StringHelper;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Token specific service methods
@@ -37,6 +36,18 @@ public class TokenService {
         }
         return null;
 	}
+
+	public String getTokenAfterPrefix(String authorization, String... prefix) {
+	    if (StringUtils.isBlank(authorization) || prefix == null || prefix.length == 0) {
+	        return null;
+        }
+	    for (String pref : prefix) {
+            if (authorization.startsWith(pref)) {
+                return authorization.substring(pref.length());
+            }
+        }
+        return null;
+    }
 
     public AuthorizationGrant getAuthorizationGrant(String p_authorization) {
         final String token = getTokenFromAuthorizationParameter(p_authorization);

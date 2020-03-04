@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.token.JsonWebResponse;
+import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
@@ -157,6 +158,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
+            final SessionId sessionIdObj = sessionIdService.getSessionId(request);
+            final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getId() : null);
+
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
@@ -212,9 +216,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         }
                         return null;
                     };
+
                     idToken = authorizationCodeGrant.createIdToken(
                             nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null,
-                            authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
+                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getId() : null));
                 }
 
 
@@ -255,7 +260,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     idToken = authorizationGrant.createIdToken(
                             null, null, accToken, null,
-                            null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                            null, authorizationGrant, includeIdTokenClaims, idTokenPreProcessing);
                 }
 
                 builder.entity(getJSonResponse(accToken,
@@ -284,7 +289,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             appConfiguration.getLegacyIdTokenClaims());
                     idToken = clientCredentialsGrant.createIdToken(
                             null, null, null, null,
-                            null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                            null, clientCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
                 }
 
                 oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
@@ -365,7 +370,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 appConfiguration.getLegacyIdTokenClaims());
                         idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
                                 null, null, null, null,
-                                null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                                null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
                     }
 
                     oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
