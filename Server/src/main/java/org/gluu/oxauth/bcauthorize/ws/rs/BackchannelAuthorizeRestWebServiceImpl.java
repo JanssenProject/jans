@@ -59,7 +59,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * Implementation for request backchannel authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version March 4, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/bc-authorize", description = "Backchannel Authorization Endpoint")
@@ -241,6 +241,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     expiresIn);
             cibaGrant.setScopes(scopeList);
             cibaGrant.setClientNotificationToken(clientNotificationToken);
+            cibaGrant.setBindingMessage(bindingMessage);
             cibaGrant.setLastAccessControl(currentTime);
             cibaGrant.setAcrValues(acrValues);
             cibaGrant.save(); // call save after object modification!!!

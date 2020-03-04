@@ -12,12 +12,13 @@ import org.gluu.oxauth.model.registration.Client;
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
  * @author Javier Rojas Blum
- * @version February 25, 2020
+ * @version March 4, 2020
  */
 public class CIBAGrant extends AuthorizationGrant {
 
     private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
     private String clientNotificationToken;
+    private String bindingMessage;
     private Long lastAccessControl;
     private boolean userAuthorization;
     private boolean tokensDelivered;
@@ -45,6 +46,14 @@ public class CIBAGrant extends AuthorizationGrant {
 
     public void setClientNotificationToken(String clientNotificationToken) {
         this.clientNotificationToken = clientNotificationToken;
+    }
+
+    public String getBindingMessage() {
+        return bindingMessage;
+    }
+
+    public void setBindingMessage(String bindingMessage) {
+        this.bindingMessage = bindingMessage;
     }
 
     public Long getLastAccessControl() {
