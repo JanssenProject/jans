@@ -32,6 +32,7 @@ import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
@@ -504,7 +505,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 IdToken idToken = authorizationGrant.createIdToken(
                         nonce, authorizationCode, newAccessToken, null,
                         state, authorizationGrant, includeIdTokenClaims,
-                        TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
+                        JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getId()));
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
             }
