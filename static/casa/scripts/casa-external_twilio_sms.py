@@ -109,7 +109,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
             success = False
-            form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
+            form_passcode = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:passcode")
 
             if form_passcode != None and code == form_passcode:
                 print "TwilioSMS. authenticate. 6-digit code matches with code sent via SMS"
