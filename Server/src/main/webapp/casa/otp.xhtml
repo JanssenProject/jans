@@ -11,22 +11,23 @@
 	<ui:define name="pageTitle">#{msgs['casa.login.title']}</ui:define>
 	
 	<ui:define name="maincontent">
-		<section class="pa4 shadow-4 bg-blank gray cust-section" id="otp_sms_section">
+		<section class="pa4 shadow-4 bg-blank gray cust-section" id="otp_section">
 			<h2 class="f3 dark-blue2">#{msgs['casa.snd_step']}</h2>
 			<h:messages class="list dark-red tc pv2 ph0 ma0 f5" />
 			
-			<div class="flex justify-center pa3">
-				<img src="#{request.contextPath}/img/phone-ver.png" />
+			<div class="flex flex-column items-center pa3">
+				<img src="#{request.contextPath}/img/ver_code.png" />
+				<div class="db w5 tc f7-cust">#{msgs['casa.otp.text']}</div>
 			</div>
 			
-			<h:form id="OtpSmsloginForm" class="pt2">
+			<h:form id="loginForm" class="pt2">
 				<div class="relative w5 mt4 pb2">
 					<h:inputText id="otpCode" styleClass="focused-text w-100 pb1 dark-gray" autocomplete="off" />
-					<label class="focused-label-big">#{msgs['casa.sms.enter']}</label>
+                        	<label class="focused-label-big">#{msgs['casa.enter_code']}</label>
 				</div>
 				<div class="flex justify-between items-center mt4">
 					<div class="pr4">
-						<a href="javascript:showAlternative('otp_sms_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
+						<a href="javascript:showAlternative('otp_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
 					</div>
 					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
 						value="#{msgs['login.login']}" action="#{authenticator.authenticate}" />
