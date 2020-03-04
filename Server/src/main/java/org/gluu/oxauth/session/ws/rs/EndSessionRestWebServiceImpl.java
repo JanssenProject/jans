@@ -111,18 +111,18 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             validateIdTokenHint(idTokenHint, postLogoutRedirectUri);
             validateSessionIdRequestParameter(sessionId, postLogoutRedirectUri);
 
-            final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, postLogoutRedirectUri);
-
-            auditLogging(httpRequest, pair);
-
-            if (pair.getFirst() == null && pair.getSecond() == null) {
-                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, ""));
+            final Pair<SessionId, AuthorizationGrant> pair = getPair(idTokenHint, sessionId, httpRequest);
+            if (pair.getFirst() == null) {
+                final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
             }
 
             postLogoutRedirectUri = validatePostLogoutRedirectUri(postLogoutRedirectUri, pair);
 
-            Set<Client> clients = getSsoClients(pair);
+            endSession(pair, httpRequest, httpResponse);
+            auditLogging(httpRequest, pair);
 
+            Set<Client> clients = getSsoClients(pair);
             Set<String> frontchannelUris = Sets.newHashSet();
             Map<String, Client> backchannelUris = Maps.newHashMap();
 
@@ -267,13 +267,29 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
             if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
+                log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true)");
                 return postLogoutRedirectUri;
             }
+
+            boolean isNotBlank = StringUtils.isNotBlank(postLogoutRedirectUri);
+
+            final String result;
             if (pair.getSecond() == null) {
-                return redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
+                result = redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
             } else {
-                return redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+                result = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
             }
+
+            if (isNotBlank && StringUtils.isBlank(result)) {
+                log.trace("Failed to valistdate post_logout_redirect_uri.");
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
+            }
+
+            if (StringUtils.isNotBlank(result)) {
+                return result;
+            }
+            log.trace("Unable to validate post_logout_redirect_uri.");
+            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
         } catch (WebApplicationException e) {
             if (pair.getFirst() != null) { // session_id was found and removed
                 String reason = "Session was removed successfully but post_logout_redirect_uri validation fails since AS failed to validate it against clients associated with session (which was just removed).";
@@ -311,7 +327,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 build();
     }
 
-    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse, String postLogoutRedirectUri) {
+    private Pair<SessionId, AuthorizationGrant> getPair(String idTokenHint, String sessionId, HttpServletRequest httpRequest) {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
             Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
@@ -320,22 +336,35 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
         }
 
+        SessionId ldapSessionId = null;
+
+        try {
+            String id = sessionId;
+            if (StringHelper.isEmpty(id)) {
+                id = sessionIdService.getSessionIdFromCookie(httpRequest);
+            }
+            if (StringHelper.isNotEmpty(id)) {
+                ldapSessionId = sessionIdService.getSessionId(id);
+            }
+        } catch (Exception e) {
+            log.error("Failed to current session id.", e);
+        }
+        return new Pair<>(ldapSessionId, authorizationGrant);
+    }
+
+    private void endSession(Pair<SessionId, AuthorizationGrant> pair, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         // Clean up authorization session
         removeConsentSessionId(httpRequest, httpResponse);
 
-        SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
-        if (ldapSessionId == null) {
-            final String reason = "Failed to identify session by session_id query parameter or by session_id cookie.";
-            throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION, reason));
-        }
+        removeSessionId(pair, httpResponse);
 
         boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
         if (isExternalLogoutPresent) {
-            String userName = ldapSessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
-            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionId);
+            String userName = pair.getFirst().getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, pair.getFirst());
             log.info("End session result for '{}': '{}'", userName, "logout", externalLogoutResult);
         }
 
@@ -344,13 +373,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, EndSessionErrorResponseType.INVALID_GRANT, "External logout is present but executed external logout script returned failed result.");
         }
 
-        grantService.removeAllTokensBySession(ldapSessionId.getDn());
+        grantService.removeAllTokensBySession(pair.getFirst().getDn());
 
         if (identity != null) {
             identity.logout();
         }
-
-        return new Pair<>(ldapSessionId, authorizationGrant);
     }
 
     private Set<Client> getSsoClients(Pair<SessionId, AuthorizationGrant> pair) {
@@ -370,25 +397,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return clients;
     }
 
-    private SessionId removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        SessionId ldapSessionId = null;
-
+    private void removeSessionId(Pair<SessionId, AuthorizationGrant> pair, HttpServletResponse httpResponse) {
         try {
-            String id = sessionId;
-            if (StringHelper.isEmpty(id)) {
-                id = sessionIdService.getSessionIdFromCookie(httpRequest);
-            }
-
-            if (StringHelper.isNotEmpty(id)) {
-                ldapSessionId = sessionIdService.getSessionId(id);
-                if (ldapSessionId != null) {
-                    boolean result = sessionIdService.remove(ldapSessionId);
-                    if (!result) {
-                        log.error("Failed to remove session_id '{}'", id);
-                    }
-                } else {
-                    log.error("Failed to load session by session_id: '{}'", id);
-                }
+            boolean result = sessionIdService.remove(pair.getFirst());
+            if (!result) {
+                log.error("Failed to remove session_id '{}'", pair.getFirst().getId());
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -396,7 +409,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             sessionIdService.removeSessionIdCookie(httpResponse);
             sessionIdService.removeOPBrowserStateCookie(httpResponse);
         }
-        return ldapSessionId;
     }
 
     private void removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
