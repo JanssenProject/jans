@@ -27,6 +27,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
@@ -60,7 +61,6 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
-    private static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
     private static final String REALM = "oxAuth";
 
     @Inject
@@ -96,6 +96,9 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private MTLSService mtlsService;
 
+    @Inject
+    private TokenService tokenService;
+
     private String realm;
 
     @Override
@@ -125,8 +128,9 @@ public class AuthenticationFilter implements Filter {
                 log.debug("Starting token endpoint authentication");
 
                 // #686 : allow authenticated client via user access_token
-                if (StringUtils.isNotBlank(authorizationHeader) && authorizationHeader.startsWith(ACCESS_TOKEN_PREFIX)) {
-                    processAuthByAccessToken(httpRequest, httpResponse, filterChain);
+                final String accessToken = tokenService.getTokenAfterPrefix(authorizationHeader, "Bearer ", "AccessToken ");
+                if (StringUtils.isNotBlank(accessToken)) {
+                    processAuthByAccessToken(accessToken, httpRequest, httpResponse, filterChain);
                     return;
                 }
 
@@ -223,20 +227,29 @@ public class AuthenticationFilter implements Filter {
         return false;
     }
 
-    private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
+    private void processAuthByAccessToken(String accessToken, HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
         try {
-            String accessToken = httpRequest.getHeader("Authorization").substring(ACCESS_TOKEN_PREFIX.length());
-            if (StringUtils.isNotBlank(accessToken)) {
-                AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
-                if (grant != null && grant.getAccessToken(accessToken).isValid()) {
-                    Client client = grant.getClient();
-
-                    authenticator.configureSessionClient(client);
-
-                    filterChain.doFilter(httpRequest, httpResponse);
-                    return;
-                }
+            log.trace("Authenticating client by access token {} ...", accessToken);
+            if (StringUtils.isBlank(accessToken)) {
+                sendError(httpResponse);
+                return;
             }
+
+            AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+            if (grant == null) {
+                sendError(httpResponse);
+                return;
+            }
+            final AbstractToken accessTokenObj = grant.getAccessToken(accessToken);
+            if (accessTokenObj == null || !accessTokenObj.isValid()) {
+                sendError(httpResponse);
+                return;
+            }
+
+            Client client = grant.getClient();
+            authenticator.configureSessionClient(client);
+            filterChain.doFilter(httpRequest, httpResponse);
+            return;
         } catch (Exception ex) {
             log.error("Failed to authenticate client by access_token", ex);
         }

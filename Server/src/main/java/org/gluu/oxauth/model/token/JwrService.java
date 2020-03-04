@@ -1,5 +1,7 @@
 package org.gluu.oxauth.model.token;
 
+import com.google.common.base.Function;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -133,4 +135,20 @@ public class JwrService {
     public void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) throws Exception {
         jwr.getClaims().setSubjectIdentifier(sectorIdentifierService.getSub(authorizationGrant.getClient(), authorizationGrant.getUser()));
     }
+
+    public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String sessionId) {
+        return jwr -> {
+            if (jwr == null) {
+                return null;
+            }
+            if (input != null) {
+                input.apply(jwr);
+            }
+            if (StringUtils.isNotEmpty(sessionId)) {
+                jwr.setClaim("sid", sessionId);
+            }
+            return null;
+        };
+    }
+
 }

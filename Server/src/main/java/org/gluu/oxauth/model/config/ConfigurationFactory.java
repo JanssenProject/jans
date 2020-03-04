@@ -474,10 +474,11 @@ public class ConfigurationFactory {
 
 		String newWebKeys = null;
 		try {
+            final AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(getAppConfiguration());
+
 			// Generate new JWKS
-			JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
-					getAppConfiguration().getKeyRegenerationInterval(), getAppConfiguration().getIdTokenLifetime(),
-					getAppConfiguration());
+			JSONObject jsonObject = AbstractCryptoProvider.generateJwks(cryptoProvider, getAppConfiguration().getKeyRegenerationInterval(),
+                    getAppConfiguration().getIdTokenLifetime(),	getAppConfiguration());
 			newWebKeys = jsonObject.toString();
 
 			// Attempt to load new JWKS
@@ -495,7 +496,8 @@ public class ConfigurationFactory {
 
 			log.info("Generated new JWKS successfully.");
             log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
-            log.trace("KeyStore keys: " + CryptoProviderFactory.getCryptoProvider(getAppConfiguration()).getKeys());
+
+            log.trace("KeyStore keys: " + cryptoProvider.getKeys());
         } catch (Exception ex2) {
 			log.error("Failed to re-generate JWKS keys", ex2);
 		}
