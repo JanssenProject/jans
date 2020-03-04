@@ -16,9 +16,9 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;

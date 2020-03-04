@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.model.common;
 
+import org.gluu.oxauth.model.registration.Client;
+
 import java.util.Date;
 import java.util.List;
-
-import org.gluu.oxauth.model.registration.Client;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,7 +32,7 @@ public interface IAuthorizationGrantList {
 
     CIBAGrant createCIBAGrant(User user, Client client, int expiresIn);
 
-    AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode);
+    AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode);
 
     AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode);
 

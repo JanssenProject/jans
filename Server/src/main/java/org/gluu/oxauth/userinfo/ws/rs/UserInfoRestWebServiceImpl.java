@@ -6,26 +6,6 @@
 
 package org.gluu.oxauth.userinfo.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
@@ -33,14 +13,7 @@ import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
-import org.gluu.oxauth.model.common.AbstractToken;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.AuthorizationGrantType;
-import org.gluu.oxauth.model.common.DefaultScope;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -66,23 +39,29 @@ import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
-import org.gluu.oxauth.service.ScopeService;
-import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
-import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.security.PublicKey;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
@@ -255,7 +234,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = cryptoProvider.getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+        String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -306,10 +285,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
+            String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
                     Use.ENCRYPTION);
-            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
+            PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
 
             if (publicKey != null) {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
@@ -323,10 +302,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
-            } catch (UnsupportedEncodingException e) {
-                throw new InvalidJweException(e);
-            } catch (StringEncrypter.EncryptionException e) {
-                throw new InvalidJweException(e);
             } catch (Exception e) {
                 throw new InvalidJweException(e);
             }

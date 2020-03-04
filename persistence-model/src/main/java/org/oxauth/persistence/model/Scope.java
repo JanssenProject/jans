@@ -7,10 +7,7 @@
 package org.oxauth.persistence.model;
 
 import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.DeletableEntity;
 
 import java.io.Serializable;
@@ -50,7 +47,7 @@ public class Scope extends DeletableEntity implements Serializable {
     private List<String> oxAuthClaims;
 
     @AttributeName(name = "defaultScope")
-    private Boolean defaultScope = false;
+    private Boolean defaultScope;
 
     @AttributeName(name = "oxAuthGroupClaims")
     private Boolean oxAuthGroupClaims;
@@ -60,6 +57,21 @@ public class Scope extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "oxUmaPolicyScriptDn")
     private List<String> umaAuthorizationPolicies;
+
+    @AttributeName(name = "oxAttributes")
+    @JsonObject
+    private ScopeAttributes attributes;
+
+    public ScopeAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new ScopeAttributes();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(ScopeAttributes attributes) {
+        this.attributes = attributes;
+    }
 
     public String getDn() {
         return dn;
@@ -186,6 +198,7 @@ public class Scope extends DeletableEntity implements Serializable {
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
                 ", deletable=" + isDeletable() +
                 ", expirationDate=" + getExpirationDate() +
+                ", attributes=" + attributes +
                 '}';
     }
 }

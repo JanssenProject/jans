@@ -235,6 +235,16 @@ public enum RegisterRequestParam {
     FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED("frontchannel_logout_session_required"),
 
     /**
+     * RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+     */
+    BACKCHANNEL_LOGOUT_URI("backchannel_logout_uri"),
+
+    /**
+     * Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in the Logout Token to identify the RP session with the OP when the backchannel_logout_uri is used. If omitted, the default value is false.
+     */
+    BACKCHANNEL_LOGOUT_SESSION_REQUIRED("backchannel_logout_session_required"),
+
+    /**
      * Array of request_uri values that are pre-registered by the Client for use at the Authorization Server.
      */
     REQUEST_URIS("request_uris"),

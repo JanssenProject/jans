@@ -8,7 +8,6 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -22,16 +21,12 @@ import org.gluu.oxauth.model.token.IdTokenFactory;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalIntrospectionService;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.service.CacheService;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +34,6 @@ import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Base class for all the types of authorization grant.
@@ -75,6 +69,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private AttributeService attributeService;
+
+    @Inject
+    private SectorIdentifierService sectorIdentifierService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -363,41 +360,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        final User user = getUser();
-        if (user == null) {
-            log.trace("User is null for grant " + getGrantId());
-            return "";
-        }
-        final String subjectType = getClient().getSubjectType();
-        if (SubjectType.PAIRWISE.equals(SubjectType.fromString(subjectType))) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = !ArrayUtils.isEmpty(getClient().getRedirectUris()) ? getClient().getRedirectUris()[0] : null;
-            }
-
-            String userInum = user.getAttribute("inum");
-            String clientId = getClientId();
-
-            try {
-                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum,
-                        sectorIdentifierUri, clientId);
-                if (pairwiseIdentifier == null) {
-                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                    pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                    pairwiseIdentifier.setDn(
-                            pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
-                    pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-                }
-                return pairwiseIdentifier.getId();
-            } catch (Exception e) {
-                log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
-                return "";
-            }
-        } else {
-            return user.getAttribute(appConfiguration.getOpenidSubAttribute());
-        }
+        return sectorIdentifierService.getSub(getClient(), getUser());
     }
 
     public boolean isCachedWithNoPersistence() {

@@ -5,6 +5,7 @@
  */
 package org.gluu.oxauth.model.crypto;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
@@ -32,10 +33,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.ECPublicKeySpec;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -63,9 +61,16 @@ public abstract class AbstractCryptoProvider {
 
     public abstract boolean containsKey(String keyId);
 
+    public List<String> getKeys() {
+        return Lists.newArrayList();
+    }
+
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+            return null;
+        }
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 return key.getKid();
@@ -182,7 +187,7 @@ public abstract class AbstractCryptoProvider {
         }
     }
 
-    public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
+    public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws Exception {
         java.security.PublicKey publicKey = null;
 
         JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
@@ -192,6 +197,11 @@ public abstract class AbstractCryptoProvider {
                 AlgorithmFamily family = null;
                 if (key.has(ALGORITHM)) {
                     Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
+
+                    if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
+                        LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                        continue;
+                    }
                     family = algorithm.getFamily();
                 } else if (key.has(KEY_TYPE)) {
                     family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
