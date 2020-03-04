@@ -244,7 +244,7 @@ public class SessionId implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SessionState {");
+        sb.append("SessionId {");
         sb.append("dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);

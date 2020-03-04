@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.registration.Client;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the authorize web service.
@@ -27,29 +27,21 @@ public class AuthorizeParamsValidator {
     /**
      * Validates the parameters for an authorization request.
      *
-     * @param responseType The response type string. This parameter is mandatory, its
-     *                     value must be set to <strong>code</strong> or
-     *                     <strong>token</strong>.
-     * @param clientId     The client identifier. This parameter is mandatory.
+     * @param responseTypes The response types. This parameter is mandatory.
      * @return Returns <code>true</code> when all the parameters are valid.
      */
-    public static boolean validateParams(String responseType, String clientId,
-                                         List<Prompt> prompts, String nonce,
-                                         String request, String requestUri) {
-        List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
+    public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, boolean fapiCompatibility) {
+        if (fapiCompatibility && responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
+            return false;
+        }
+
         if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
             if (StringUtils.isBlank(nonce)) {
                 return false;
             }
         }
 
-        if (StringUtils.isNotBlank(request) && StringUtils.isNotBlank(requestUri)) {
-            return false;
-        }
-
-        boolean validParams = responseType != null && !responseType.isEmpty()
-                && clientId != null && !clientId.isEmpty();
-
+        boolean validParams = !responseTypes.isEmpty();
         return validParams && noNonePrompt(prompts);
     }
 

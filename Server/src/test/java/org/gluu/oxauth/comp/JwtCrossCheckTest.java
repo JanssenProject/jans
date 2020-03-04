@@ -109,7 +109,7 @@ public class JwtCrossCheckTest extends BaseTest {
                 final ECKey ecKey = ECKey.load(cryptoProvider.getKeyStore(), kid, cryptoProvider.getKeyStoreSecret().toCharArray());
                 final ECPublicKey ecPublicKey = ecKey.toECPublicKey();
                 nimbusVerifier = new ECDSAVerifier(ecKey);
-                oxauthVerifier = new ECDSASigner(jwt.getHeader().getAlgorithm(), new ECDSAPublicKey(jwt.getHeader().getAlgorithm(), ecPublicKey.getW().getAffineX(), ecPublicKey.getW().getAffineY()));
+                oxauthVerifier = new ECDSASigner(jwt.getHeader().getSignatureAlgorithm(), new ECDSAPublicKey(jwt.getHeader().getSignatureAlgorithm(), ecPublicKey.getW().getAffineX(), ecPublicKey.getW().getAffineY()));
                 break;
             case RSA:
                 RSAKey rsaKey = RSAKey.load(cryptoProvider.getKeyStore(), kid, cryptoProvider.getKeyStoreSecret().toCharArray());
@@ -127,7 +127,7 @@ public class JwtCrossCheckTest extends BaseTest {
 
         // oxauth cryptoProvider
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), kid,
-                null, null, jwt.getHeader().getAlgorithm());
+                null, null, jwt.getHeader().getSignatureAlgorithm());
         assertTrue(validJwt);
 
         // oxauth verifier
@@ -183,7 +183,7 @@ public class JwtCrossCheckTest extends BaseTest {
     }
 
     private static String getKeyIdByAlgorithm(SignatureAlgorithm algorithm, Use use, OxAuthCryptoProvider cryptoProvider) throws KeyStoreException {
-        final List<String> aliases = cryptoProvider.getKeyAliases();
+        final List<String> aliases = cryptoProvider.getKeys();
         for (String keyId : aliases) {
             if (keyId.endsWith(use.getParamName()  + "_" + algorithm.getName().toLowerCase())) {
                 return keyId;

@@ -5,7 +5,7 @@ The module has a few properties:
 1) chain_cert_file_path - It's mandatory property. It's path to file with cert chains in pem format.
    Example: '/etc/certs/chain_cert.pem'
 
-2) map_user_cert - Specify if script should map new user to local account.
+2) map_user_cert - Specify if script should map new user to local account. If true, then on the first authentication, the script will prompt for a username/password in step 2, and then store the certificate fingerprint in the `oxExternalUid` attribute. 
    Allowed values: true/false
    Example: true
 

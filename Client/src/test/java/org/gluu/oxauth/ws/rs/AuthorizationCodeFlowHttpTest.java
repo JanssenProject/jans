@@ -662,7 +662,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         TokenResponse response5 = tokenClient3.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient3);
-        assertEquals(response5.getStatus(), 401, "Unexpected response code: " + response5.getStatus());
+        assertEquals(response5.getStatus(), 400, "Unexpected response code: " + response5.getStatus());
         assertNotNull(response5.getEntity(), "The entity is null");
         assertNotNull(response5.getErrorType(), "The error type is null");
         assertNotNull(response5.getErrorDescription(), "The error description is null");

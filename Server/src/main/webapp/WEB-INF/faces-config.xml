@@ -20,10 +20,16 @@
             <base-name>org.gluu.oxauth.i18n.CustomResourceBundle</base-name>
             <var>msgs</var>
         </resource-bundle>
-        <message-bundle>
-           OxtrustCustomValidationMessage
+<!--
+        <resource-bundle>
+            <base-name>org.gluu.oxauth.i18n.CustomMessageBundle</base-name>
+            <var>validation_messages</var>
+        </resource-bundle>
+         <message-bundle>
+        	oxauth
         </message-bundle>
-    </application>
+ -->
+     </application>
     <factory>
         <exception-handler-factory>
             org.gluu.oxauth.exception.GlobalExceptionHandlerFactory

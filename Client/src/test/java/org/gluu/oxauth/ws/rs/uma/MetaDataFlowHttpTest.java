@@ -10,10 +10,10 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaMetadataService;
 import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * Test cases for getting meta data configuration flow (HTTP)
@@ -30,7 +30,7 @@ public class MetaDataFlowHttpTest extends BaseTest {
     public void testGetUmaMetaDataConfiguration(final String umaMetaDataUrl) throws Exception {
         showTitle("testGetUmaMetaDataConfiguration");
 
-        UmaMetadataService metaDataConfigurationService = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true));
+        UmaMetadataService metaDataConfigurationService = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true));
 
         // Get meta data
         UmaMetadata c = null;
