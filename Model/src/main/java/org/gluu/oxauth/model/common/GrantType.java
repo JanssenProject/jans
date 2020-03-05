@@ -18,7 +18,7 @@ import java.util.Map;
  * parameter grant_type for access token requests.
  *
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version February 25, 2020
  */
 public enum GrantType implements HasParamName, AttributeEnum {
 
@@ -77,7 +77,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
     OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket"),
 
     /**
-     * CIBA (Client Initiated Backchannel Authentication) Grant Type
+     * CIBA (Client Initiated Backchannel Authentication) Grant Type.
      */
     CIBA("urn:openid:params:grant-type:ciba");
 
