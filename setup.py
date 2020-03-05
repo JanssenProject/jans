@@ -1533,6 +1533,12 @@ class Setup(object):
                 print("Can't connect to remote Couchbase Server with credentials found in setup.properties.")
                 sys.exit(1)
 
+        if self.wrends_install == REMOTE:
+            conn_check = self.check_remote_ldap(self.ldap_hostname, self.ldap_binddn, self.ldapPass)
+            if not conn_check['result']:
+                print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
+                sys.exit(1)
+
         for si, se in ( 
                         ('installPassport', 'gluuPassportEnabled'),
                         ('gluuRadiusEnabled', 'gluuRadiusEnabled'),
@@ -1780,6 +1786,9 @@ class Setup(object):
 
         realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
         self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+
+        if self.wrends_install == REMOTE:
+            self.run(['ln', '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
 
     def installJetty(self):
         self.logIt("Installing jetty %s...")
@@ -3245,7 +3254,6 @@ class Setup(object):
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(self.ldap_binddn))
-                conn = ldap.initialize('ldaps://{}:{}'.format(ldapHost, self.ldaps_port))
                 conn_check = self.check_remote_ldap(ldapHost, self.ldap_binddn, ldapPass)
                 if conn_check['result']:
                     break
@@ -3849,7 +3857,7 @@ class Setup(object):
                           ]
 
 
-        if not self.listenAllInterfaces:
+        if (not self.listenAllInterfaces) and (self.wrends_install == LOCAL):
             config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
             config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
                           
@@ -4267,11 +4275,12 @@ class Setup(object):
             if self.wrends_install == LOCAL:
                 self.install_opendj()
 
-            if self.wrends_install:
                 self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
                 self.pbar.progress("opendj", "OpenDJ: setting up service", False)
                 self.setup_opendj_service()
+
+            if self.wrends_install:
                 self.pbar.progress("opendj", "OpenDJ: configuring", False)
                 self.configure_opendj()
                 self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
@@ -4295,9 +4304,9 @@ class Setup(object):
 
                 self.import_ldif_opendj(ldif_files)
                 
-            self.pbar.progress("opendj", "OpenDJ: post installation", False)
-            if self.wrends_install == LOCAL:
-                self.post_install_opendj()
+                self.pbar.progress("opendj", "OpenDJ: post installation", False)
+                if self.wrends_install == LOCAL:
+                    self.post_install_opendj()
         except:
             self.logIt(traceback.format_exc(), True)
 
@@ -5895,8 +5904,8 @@ if __name__ == '__main__':
         installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
         installObject.promptForProperties()
 
-        # Validate Properties
-        installObject.check_properties()
+    # Validate Properties
+    installObject.check_properties()
 
     proceed = True
 
