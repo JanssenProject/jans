@@ -34,7 +34,7 @@ import java.util.List;
  * Component to hold in memory authorization grant objects.
  *
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version February 25, 2020
  */
 @Dependent
 public class AuthorizationGrantList implements IAuthorizationGrantList {
@@ -195,7 +195,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken, boolean onlyFromCache) {
         final TokenLdap tokenLdap = grantService.getGrantByCode(accessToken, onlyFromCache);
-        if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        if (tokenLdap != null    && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
         return null;
@@ -247,6 +247,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         resourceOwnerPasswordCredentialsGrant.init(user, client);
 
                         result = resourceOwnerPasswordCredentialsGrant;
+                        break;
+                    case CIBA:
+                        CIBAGrant cibaGrant = grantInstance.select(CIBAGrant.class).get();
+                        cibaGrant.init(user, AuthorizationGrantType.CIBA, client, tokenLdap.getCreationDate());
+
+                        result = cibaGrant;
                         break;
                     default:
                         return null;
