@@ -117,6 +117,11 @@ try:
 except:
     pass
 
+try:
+    from ldap.dn import str2dn
+except:
+    pass
+
 def read_properties_file(fn):
     retDict = {}
     p = Properties()
@@ -268,6 +273,10 @@ class myLdifParser(LDIFParser):
         self.entries = []
 
     def handle(self, dn, entry):
+        for e in entry:
+            for i, v in enumerate(entry[e][:]):
+                if isinstance(v, bytes):
+                    entry[e][i] = v.decode('utf-8')
         self.entries.append((dn, entry))
 
 
@@ -5045,6 +5054,12 @@ class Setup(object):
             with open(tmp_fn, 'w') as w:
                 ldif_writer = LDIFWriter(w)
                 for dn, entry in obcl_parser.entries:
+
+                    for e in entry:
+                        for i, v in enumerate(entry[e][:]):
+                            if isinstance(v, str):
+                                entry[e][i] = v.encode('utf-8')
+                
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, self.openDjSchemaFolder)
@@ -5808,6 +5823,7 @@ if __name__ == '__main__':
     #it is time to import pyDes library
     from pyDes import *
     from pylib.cbm import CBM
+    from ldap.dn import str2dn
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
