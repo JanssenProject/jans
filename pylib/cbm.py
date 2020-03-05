@@ -37,7 +37,7 @@ class CBM:
             result = requests.get(api, auth=self.auth, verify=False)
         except Exception as e:
             result = FakeResult()
-            result.reason = 'Connection failed. Reason: ' + str(e.message)
+            result.reason = 'Connection failed. Reason: ' + str(e)
 
         return result
 
