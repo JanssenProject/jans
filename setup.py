@@ -331,6 +331,7 @@ class Setup(object):
         self.install_dir = install_dir
         self.thread_queue = None
         self.properties_password = None
+        self.noPrompt = False
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
@@ -1442,8 +1443,7 @@ class Setup(object):
 
     def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
-        p = Properties.Properties()
-        
+
         if fn.endswith('.enc'):
             if not self.properties_password:
                 print("setup.properties password was not supplied. Please run with argument -properties-password")
@@ -1452,15 +1452,14 @@ class Setup(object):
             fn = self.decrypt_properties(fn, self.properties_password)
 
         try:
-            with open(fn) as pf:
-                p.load(pf)
+            p = read_properties_file(fn)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
 
-        if p.getProperty('ldap_type') == 'openldap':
+        if p.get('ldap_type') == 'openldap':
             self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
-            p.setProperty('ldap_type', 'opendj')
+            p['ldap_type'] = 'opendj'
 
         properties_list = list(p.keys())
 
@@ -1486,27 +1485,27 @@ class Setup(object):
             self.oxtrust_admin_password = p['ldapPass']
             
         if not 'wrends_install' in properties_list:
-            if p['remoteLdap'].lower() == 'true':
+            if p.get('remoteLdap','').lower() == 'true':
                 self.wrends_install = REMOTE
-            elif p['installLdap'].lower() == 'true':
+            elif p.get('installLdap','').lower() == 'true':
                 self.wrends_install = LOCAL
             else:
                 self.wrends_install = NONE
 
         if not 'cb_install' in properties_list:
-            if 'remoteCouchbase' in properties_list and p['remoteCouchbase'].lower() == 'true':
+            if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
                 self.cb_install = REMOTE
-            elif 'persistence_type' in properties_list and p['persistence_type'] in ('couchbase', 'hybrid'):
+            elif 'persistence_type' in properties_list and p.get('persistence_type') in ('couchbase', 'hybrid'):
                 self.cb_install = LOCAL
             else:
                 self.cb_install = NONE
 
         if (not 'cb_password' in properties_list) and self.cb_install:
-            self.cb_password = p['ldapPass']
+            self.cb_password = p.get('ldapPass')
 
         for si, se in ( 
                         ('installPassport', 'gluuPassportEnabled'),
-                        ('gluuRadiusEnabled', 'installGluuRadius'),
+                        ('gluuRadiusEnabled', 'gluuRadiusEnabled'),
                         ('installSaml', 'gluuSamlEnabled'),
                         ):
             if getattr(self, si):
@@ -3701,7 +3700,7 @@ class Setup(object):
                 return ''
         
         try:
-            p = Properties.Properties()
+            p = Properties()
             keys = list(obj.__dict__.keys())
             keys.sort()
             for key in keys:
@@ -3715,8 +3714,8 @@ class Setup(object):
                     if value != '':
                         p[key] = value
 
-            with open(prop_fn, 'w') as f:
-                p.store(f)
+            with open(prop_fn, 'wb') as f:
+                p.store(f, encoding="utf-8")
             
             self.run(['openssl', 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', self.oxtrust_admin_password])
             
@@ -4684,7 +4683,7 @@ class Setup(object):
     def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
         
         self.processedKeys = []
-        
+
         key_prefixes = {}
         for cb in self.couchbaseBucketDict:
             for prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
@@ -5848,53 +5847,56 @@ if __name__ == '__main__':
 
     installObject.logIt("Installing Gluu Server", True)
 
+    setup_loaded = None
+
     if setupOptions['setup_properties']:
         installObject.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
-        installObject.load_properties(setupOptions['setup_properties'])
+        setup_loaded = installObject.load_properties(setupOptions['setup_properties'])
     elif os.path.isfile(installObject.setup_properties_fn):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
-        installObject.load_properties(installObject.setup_properties_fn)
+        setup_loaded = installObject.load_properties(installObject.setup_properties_fn)
     elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
-        installObject.load_properties(installObject.setup_properties_fn+'.enc')
+        setup_loaded = installObject.load_properties(installObject.setup_properties_fn+'.enc')
     
-    if not thread_queue:
+    if not setup_loaded:
         installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
         installObject.promptForProperties()
 
         # Validate Properties
         installObject.check_properties()
 
-        proceed = True
+    proceed = True
 
-        # Show to properties for approval
-        print('\n%s\n' % repr(installObject))
-        if not setupOptions['noPrompt']:
-            proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
-            if proceed_prompt and proceed_prompt[0] !='y':
-                proceed = False
+    # Show to properties for approval
+    print('\n%s\n' % repr(installObject))
+    if not setupOptions['noPrompt']:
+        proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
+        if proceed_prompt and proceed_prompt[0] !='y':
+            proceed = False
 
-        if setupOptions['noPrompt'] or proceed:
-            installObject.do_installation()
-            print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
-        else:
-            installObject.save_properties()
+    if setupOptions['noPrompt'] or proceed:
+        installObject.do_installation()
+        print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
     else:
+        installObject.save_properties()
+    
+    if thread_queue:
 
-            msg = tui.msg
-            msg.storages = list(installObject.couchbaseBucketDict.keys())
-            msg.installation_step_number = 33
-            
-            msg.os_type = installObject.os_type
-            msg.os_initdaemon = installObject.os_initdaemon
-            msg.apache_version = installObject.apache_version
-            msg.current_mem_size = current_mem_size
-            msg.current_number_of_cpu = current_number_of_cpu
-            msg.current_free_disk_space = available_disk_space
-            msg.current_file_max = file_max
+        msg = tui.msg
+        msg.storages = list(installObject.couchbaseBucketDict.keys())
+        msg.installation_step_number = 33
+        
+        msg.os_type = installObject.os_type
+        msg.os_initdaemon = installObject.os_initdaemon
+        msg.apache_version = installObject.apache_version
+        msg.current_mem_size = current_mem_size
+        msg.current_number_of_cpu = current_number_of_cpu
+        msg.current_free_disk_space = available_disk_space
+        msg.current_file_max = file_max
 
-            GSA = tui.GluuSetupApp()
-            GSA.installObject = installObject
+        GSA = tui.GluuSetupApp()
+        GSA.installObject = installObject
 
-            GSA.run()
+        GSA.run()
 # END
