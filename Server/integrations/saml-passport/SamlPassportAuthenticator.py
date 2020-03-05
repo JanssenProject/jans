@@ -445,7 +445,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getAlgorithm())
+                                                        None, None, jwt.getHeader().getSignatureAlgorithm())
         except:
             print "Exception: ", sys.exc_info()[1]
 
@@ -596,7 +596,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return user
 
 
-    def setMessageError(self, msg, severity):
+    def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()
