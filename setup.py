@@ -1444,6 +1444,11 @@ class Setup(object):
     def load_properties(self, fn, no_update=[]):
         self.logIt('Loading Properties %s' % fn)
 
+        no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
+
+        cb_install = False
+        map_db = []
+
         if fn.endswith('.enc'):
             if not self.properties_password:
                 print("setup.properties password was not supplied. Please run with argument -properties-password")
@@ -1469,7 +1474,12 @@ class Setup(object):
             try:
                 self.__dict__[prop] = p[prop]
                 if prop == 'mappingLocations':
-                    self.__dict__[prop] = json.loads(p[prop])                    
+                    mappingLocations = json.loads(p[prop])
+                    self.__dict__[prop] = mappingLocations
+                    for l in mappingLocations:
+                        if not mappingLocations[l] in map_db:
+                            map_db.append(mappingLocations[l])
+                            
                 if p[prop] == 'True':
                     self.__dict__[prop] = True
                 elif p[prop] == 'False':
@@ -1484,7 +1494,7 @@ class Setup(object):
         if not 'oxtrust_admin_password' in properties_list:
             self.oxtrust_admin_password = p['ldapPass']
             
-        if not 'wrends_install' in properties_list:
+        if p.get('ldap_hostname') != 'localhost':
             if p.get('remoteLdap','').lower() == 'true':
                 self.wrends_install = REMOTE
             elif p.get('installLdap','').lower() == 'true':
@@ -1492,13 +1502,22 @@ class Setup(object):
             else:
                 self.wrends_install = NONE
 
-        if not 'cb_install' in properties_list:
+        if map_db and not 'ldap' in map_db:
+            self.wrends_install = NONE
+            
+        if 'couchbase' in map_db:
             if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
                 self.cb_install = REMOTE
             elif 'persistence_type' in properties_list and p.get('persistence_type') in ('couchbase', 'hybrid'):
                 self.cb_install = LOCAL
             else:
                 self.cb_install = NONE
+
+        if self.cb_install == LOCAL:
+            available_backends = self.getBackendTypes()
+            if not 'couchbase' in available_backends:
+                print("Couchbase package is not available exiting.")
+                sys.exit(1)
 
         if (not 'cb_password' in properties_list) and self.cb_install:
             self.cb_password = p.get('ldapPass')
@@ -4888,6 +4907,9 @@ class Setup(object):
     def install_couchbase_server(self):
         # prepare multivalued list
         self.prepare_multivalued_list()
+
+        if not self.cbm:
+             self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
 
         if self.cb_install == LOCAL:
             self.couchbaseInstall()
