@@ -191,6 +191,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
+    private Boolean forceIdTokenHintPrecense = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -218,6 +219,15 @@ public class AppConfiguration implements Configuration {
 
     public void setFapiCompatibility(Boolean fapiCompatibility) {
         this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getForceIdTokenHintPrecense() {
+        if (forceIdTokenHintPrecense == null) forceIdTokenHintPrecense = false;
+        return forceIdTokenHintPrecense;
+    }
+
+    public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
+        this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
     }
 
     public Boolean getDisableJdkLogger() {

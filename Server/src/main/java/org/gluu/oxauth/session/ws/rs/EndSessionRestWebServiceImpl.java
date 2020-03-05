@@ -247,14 +247,14 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     }
 
     private void validateIdTokenHint(String idTokenHint, String postLogoutRedirectUri) {
-        if (appConfiguration.getFapiCompatibility() && StringUtils.isBlank(idTokenHint)) { // must be present for logout tests #1279
+        if (appConfiguration.getForceIdTokenHintPrecense() && StringUtils.isBlank(idTokenHint)) { // must be present for logout tests #1279
             final String reason = "id_token_hint is not set";
             log.trace(reason);
             throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_REQUEST, reason));
         }
 
         final AuthorizationGrant tokenHintGrant = getTokenHintGrant(idTokenHint);
-        if (appConfiguration.getFapiCompatibility() && tokenHintGrant == null) { // must be present for logout tests #1279
+        if (appConfiguration.getForceIdTokenHintPrecense() && tokenHintGrant == null) { // must be present for logout tests #1279
             final String reason = "id_token_hint is not set";
             log.trace(reason);
             throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.INVALID_REQUEST, reason));
