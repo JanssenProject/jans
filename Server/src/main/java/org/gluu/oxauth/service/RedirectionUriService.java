@@ -87,7 +87,7 @@ public class RedirectionUriService {
                 log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                         client.getClientId(), redirectionUri, redirectUris.length);
 
-                if (isUriWithoutParamsEqual(redirectionUri, redirectUris)) {
+                if (isUriEqual(redirectionUri, redirectUris)) {
                     return redirectionUri;
                 }
             } else {
@@ -102,7 +102,7 @@ public class RedirectionUriService {
         return null;
     }
 
-    public boolean isUriWithoutParamsEqual(String redirectionUri, String[] redirectUris) {
+    public boolean isUriEqual(String redirectionUri, String[] redirectUris) {
         final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
 
         for (String uri : redirectUris) {
@@ -176,7 +176,7 @@ public class RedirectionUriService {
         }
 
         if (allowedPostLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
-            if (isUriWithoutParamsEqual(postLogoutRedirectUri, allowedPostLogoutRedirectUris)) {
+            if (isUriEqual(postLogoutRedirectUri, allowedPostLogoutRedirectUris)) {
                 return postLogoutRedirectUri;
             }
         } else {
