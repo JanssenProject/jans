@@ -47,13 +47,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Provides interface for token REST web services
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version March 5, 2020
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -105,7 +106,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
-                                       String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
+                                       String ticket, String claimToken, String claimTokenFormat, String pctCode,
+                                       String rptCode, String authReqId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
@@ -378,6 +380,81 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 } else {
                     log.debug("Invalid user", new RuntimeException("User is empty"));
                     builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
+                }
+            } else if (gt == GrantType.CIBA) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
+                }
+
+                log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
+                final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+                log.trace("AuthorizationGrant : '{}'", cibaGrant);
+
+                if (cibaGrant != null) {
+                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
+                            cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                        long currentTime = new Date().getTime();
+                        Long lastAccess = cibaGrant.getLastAccessControl();
+                        if (lastAccess == null) {
+                            lastAccess = currentTime;
+                        }
+                        cibaGrant.setLastAccessControl(currentTime);
+                        cibaGrant.save();
+
+                        if (cibaGrant.isUserAuthorization() && !cibaGrant.isTokensDelivered()) {
+                            RefreshToken refToken = cibaGrant.createRefreshToken();
+                            log.debug("Issuing refresh token: {}", refToken.getCode());
+
+                            AccessToken accessToken = cibaGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
+                            log.debug("Issuing access token: {}", accessToken.getCode());
+
+                            IdToken idToken = cibaGrant.createIdToken(
+                                    null, null, accessToken, refToken,
+                                    null, cibaGrant, false, null);
+
+                            cibaGrant.setUserAuthorization(true);
+                            cibaGrant.setTokensDelivered(true);
+                            cibaGrant.save();
+
+                            RefreshToken reToken = null;
+                            if (client.getGrantTypes() != null
+                                    && client.getGrantTypes().length > 0
+                                    && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                                reToken = refToken;
+                            }
+
+                            if (scope != null && !scope.isEmpty()) {
+                                scope = cibaGrant.checkScopesPolicy(scope);
+                            }
+
+                            builder.entity(getJSonResponse(accessToken,
+                                    accessToken.getTokenType(),
+                                    accessToken.getExpiresIn(),
+                                    reToken,
+                                    scope,
+                                    idToken));
+
+                            oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
+                        } else {
+                            int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                            long timeFromLastAccess = currentTime - lastAccess;
+
+                            if (timeFromLastAccess > intervalSeconds * 1000) {
+                                log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
+                                builder = error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet");
+                            } else {
+                                log.debug("Slow down protection authReqId: '{}'", authReqId);
+                                builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
+                            }
+                        }
+                    } else {
+                        log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
+                        builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
+                    }
+                } else {
+                    log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
+                    builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                 }
             }
         } catch (WebApplicationException e) {
