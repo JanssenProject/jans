@@ -1434,7 +1434,7 @@ class Setup(object):
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, err = p.communicate()
         
-        if 'bad decrypt' in err:
+        if b'bad decrypt' in err:
             print("Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd))
             self.run(['rm', '-f', out_file])
             sys.exit(False)
@@ -1499,15 +1499,19 @@ class Setup(object):
                 self.wrends_install = REMOTE
             elif p.get('installLdap','').lower() == 'true':
                 self.wrends_install = LOCAL
+            elif p.get('wrends_install'):
+                self.wrends_install = p['wrends_install']   
             else:
                 self.wrends_install = NONE
 
         if map_db and not 'ldap' in map_db:
             self.wrends_install = NONE
-            
+
         if 'couchbase' in map_db:
             if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
                 self.cb_install = REMOTE
+            elif p.get('cb_install'):
+                self.cb_install = p['cb_install']
             elif 'persistence_type' in properties_list and p.get('persistence_type') in ('couchbase', 'hybrid'):
                 self.cb_install = LOCAL
             else:
@@ -1519,8 +1523,15 @@ class Setup(object):
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
 
+
         if (not 'cb_password' in properties_list) and self.cb_install:
             self.cb_password = p.get('ldapPass')
+
+        if self.cb_install == REMOTE:
+            cbm_ = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
+            if not cbm_.test_connection().ok:
+                print("Can't connect to remote Couchbase Server with credentials found in setup.properties.")
+                sys.exit(1)
 
         for si, se in ( 
                         ('installPassport', 'gluuPassportEnabled'),
@@ -3262,7 +3273,7 @@ class Setup(object):
                         print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
                 self.cb_password = cbPass
-            self.cbm = CBM(self.hostname, self.couchebaseClusterAdmin, self.cb_password)
+            self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
 
         if not (self.wrends_install or self.cb_install):
             print("{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC))
@@ -4839,7 +4850,6 @@ class Setup(object):
 
 
     def create_couchbase_buckets(self):
-        
         #Determine ram_size for buckets
         system_info = self.cbm.get_system_info()
         couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
