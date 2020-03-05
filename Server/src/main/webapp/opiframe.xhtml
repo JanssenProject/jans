@@ -25,11 +25,7 @@
 
             var ss = CryptoJS.SHA256(clientId + ' ' + e.origin + ' ' + opbs + ' ' + salt) + "." + salt;
 
-            if (sessionState == ss) {
-                stat = "unchanged";
-            } else {
-                stat = "changed";
-            }
+            var stat = sessionState == ss ? "unchanged" : "changed";
 
             e.source.postMessage(stat, e.origin);
         }
