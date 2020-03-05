@@ -65,8 +65,11 @@
 					})
 				})
 			}
-        	</script>
-	
+        </script>
+
+        <form method="post" id="response" action="#{request.contextPath}/postlogin.htm">
+            <input type="hidden" id="auth_result" name="auth_result" />
+        </form>
 		<section class="pa4 shadow-4 bg-blank gray cust-section" id="sg_section">
 			<h2 class="f3 dark-blue2 mb0">#{msgs['casa.snd_step']}</h2>
 			<h:messages class="list dark-red tc pv2 ph0 ma0 f5" />
