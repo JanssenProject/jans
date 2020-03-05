@@ -34,6 +34,8 @@
 		<slf4j.version>1.7.26</slf4j.version>
 
 		<guava.version>27.1-jre</guava.version>
+
+		<aws.sns.version>1.11.300</aws.sns.version>
 	</properties>
 
 	<repositories>
@@ -489,6 +491,13 @@
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
+			</dependency>
+
+			<!-- AWS SNS -->
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-sns</artifactId>
+				<version>${aws.sns.version}</version>
 			</dependency>
 
 			<!-- Other -->
