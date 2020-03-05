@@ -116,7 +116,7 @@ class CBM:
             result = self._post('node/controller/rename', data)
         except Exception as e:
             result = FakeResult()
-            result.reason = 'Node rename failed. Reason: ' + str(e.message)
+            result.reason = 'Node rename failed. Reason: ' + str(e)
 
         return result
 
