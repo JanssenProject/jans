@@ -48,6 +48,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * Implementation for request backchannel authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version March 4, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/bc-authorize", description = "Backchannel Authorization Endpoint")
@@ -232,22 +233,25 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             int expiresIn = requestedExpiry != null ? requestedExpiry : appConfiguration.getBackchannelAuthenticationResponseExpiresIn();
             Integer interval = client.getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH ?
                     null : appConfiguration.getBackchannelAuthenticationResponseInterval();
+            long currentTime = new Date().getTime();
 
-            // TODO: Validate and save client_notification_token acr_values binding_message user_code
-            CIBAGrant authorizationGrant = authorizationGrantList.createCIBAGrant(
+            CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(
                     user,
                     client,
                     expiresIn);
-            authorizationGrant.setScopes(scopeList);
-            authorizationGrant.setClientNotificationToken(clientNotificationToken);
-            authorizationGrant.save(); // call save after object modification!!!
+            cibaGrant.setScopes(scopeList);
+            cibaGrant.setClientNotificationToken(clientNotificationToken);
+            cibaGrant.setBindingMessage(bindingMessage);
+            cibaGrant.setLastAccessControl(currentTime);
+            cibaGrant.setAcrValues(acrValues);
+            cibaGrant.save(); // call save after object modification!!!
 
-            String authReqId = authorizationGrant.getCIBAAuthenticationRequestId().getCode();
+            String authReqId = cibaGrant.getCIBAAuthenticationRequestId().getCode();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
-                    authorizationGrant.getScopesAsString(),
-                    authorizationGrant.getAcrValues(),
+                    cibaGrant.getScopesAsString(),
+                    cibaGrant.getAcrValues(),
                     authReqId,
                     deviceRegistrationToken);
 
