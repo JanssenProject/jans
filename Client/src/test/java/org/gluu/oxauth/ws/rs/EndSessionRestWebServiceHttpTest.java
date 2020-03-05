@@ -122,7 +122,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
         showClient(endSessionClient2);
         assertStatusOrRedirect(endSessionResponse2.getStatus(), Status.BAD_REQUEST.getStatusCode());
-        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_REQUEST);
     }
 
     public static void assertStatusOrRedirect(int actualStatus, int expectedStatus) {
@@ -144,8 +144,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
