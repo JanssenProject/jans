@@ -29,7 +29,6 @@ import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.LocaleUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -38,6 +37,7 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
 import org.gluu.util.StringHelper;
+import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
@@ -181,18 +181,22 @@ public class AuthorizeAction {
         if (StringUtils.isNotBlank(uiLocales)) {
             uiLocalesList = Util.splittedStringAsList(uiLocales, " ");
 
-            List<Locale> supportedLocales = new ArrayList<Locale>();
-            for (Iterator<Locale> it = facesContext.getApplication().getSupportedLocales(); it.hasNext(); ) {
-                supportedLocales.add(it.next());
-            }
+            List<Locale> supportedLocales = languageBean.getSupportedLocales();
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
-            if (matchingLocale != null)
-                languageBean.setLocaleCode(matchingLocale.getLanguage());
+            if (matchingLocale != null) {
+                languageBean.setLocale(matchingLocale);
+            }
         } else {
+            Locale requestedLocale = facesContext.getExternalContext().getRequestLocale();
+            if (requestedLocale != null) {
+                languageBean.setLocale(requestedLocale);
+                return;
+            }
+            
             Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
             if (defaultLocale != null) {
-                languageBean.setLocaleCode(defaultLocale.getLanguage());
+                languageBean.setLocale(defaultLocale);
             }
         }
     }

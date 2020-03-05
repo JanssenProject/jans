@@ -1,131 +1,65 @@
-<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                xmlns:h="http://xmlns.jcp.org/jsf/html"
-                template="/WEB-INF/incl/layout/login-extended-template.xhtml">
-    <f:metadata>
-        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
-    </f:metadata>
-    
-    <ui:define name="head">
-        <style type="text/css">
-            .login-panel {
-                border-style: solid;
-                border-width: 1px;
-                padding: 1px;
-                background-color: #FFFFFF;
-                border-color: #C4C0B9;
-            }
-
-            .login-panel-header {
-                background-color: #D4CFC7;
-                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
-                background-position: left top;
-                background-repeat: repeat-x;
-                border-style: solid;
-                border-width: 1px;
-                padding: 2px;
-                border-color: #D4CFC7;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-                font-weight: bold;
-            }
-
-            .login-panel-body {
-                padding: 10px;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-            }
-
-            .h4, h4 {
-    			font-size: 18px;
-			}
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/casa/login-template.xhtml">
+	
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
+	</f:metadata>
+	
+	<ui:define name="pageTitle">#{msgs['casa.login.title']}</ui:define>
+	
+	<ui:define name="maincontent">
+		<section class="pa4 shadow-4 bg-blank gray cust-section" id="phone_sel_section">
+			<h2 class="f3 dark-blue2">#{msgs['casa.snd_step']}</h2>
+			<h:messages class="list dark-red tc pv2 ph0 ma0 f5" />
 			
-			.h4, .h5, .h6, h4, h5, h6 {
-			    margin-top: 10px;
-			    margin-bottom: 10px;
-			}
+			<div class="flex flex-column justify-center items-center pa3">
+				<img src="#{request.contextPath}/img/phone-ver.png" />
+				<span class="db w5 tc f7-cust pt2">#{msgs['casa.sms.choose']}</span>
+			</div>
 			
-			p {
-			    margin: 0 0 10px !important;
-			}
-			
-			body {
-			    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-			    font-size: 14px;
-			    line-height: 1.42857143 !important;
-			    color: #333;
-			}
-			
-			input.btn.btn-done {
-			    background: #1ab26b;
-			    color: #fff !important;
-			    width: 100%;
-			    padding: 10px 10px;
-			    margin-top: 12px;
-			}
-			
-            .step_bx {
-                margin: 0 30% auto;
-                border-radius: 5px !important;
-                max-height: 80%;
-                margin-bottom: 50px;
-            }
-        </style>
-    </ui:define>
-    <ui:define name="pageTitle">#{msgs['otp_sms.pageTitle']}</ui:define>
-    <ui:define name="body">
-        <h:form id="OtpSmsloginForm">
-            <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
-                        <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+			<h:form id="OtpSmsloginForm" class="pt2">
 
-                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
-                            <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </h:panelGroup>
-				<div class="container">
-					<div class="step_bx">
-						<h2>#{msgs['otp_sms.verification']}</h2>
-						<p>#{msgs['otp_sms.usedevice']}</p>
-						<img
-							src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
-							alt="phone-ver" />
-						<h4>#{msgs['otp_sms.choose']}</h4>
-						<div id="phones"></div>
-
-							<h:commandButton styleClass="btn btn-done" value="#{msgs['otp_sms.send']}" action="#{authenticator.authenticate}"/>
+				<ul id="phones" class="list-group f7-cust pt1 mb3">
+				</ul>
+				<div class="flex justify-between items-center mt4">
+					<div class="pr4">
+						<a href="javascript:showAlternative('phone_sel_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
 					</div>
+					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
+						value="#{msgs['casa.sms.send']}" action="#{authenticator.authenticate}" />
 				</div>
-                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
-                            <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['otp_sms.termsPrivacy']}</a>
-                            </p>
-                        </h:panelGroup>
-            </h:panelGroup>
-            <h:inputHidden id="indexOfNumber" value="0" />
-        </h:form>
-        <script type="text/javascript">
-        	var ast = "XXXXXX ";
-        	var numbs = "${identity.getWorkingParameter('choppedNos')}";
-        	numbs = numbs.split(",");
-        	for (var i=0; i &lt; numbs.length; i++) {
-        		var checked = (i == 0) ? "checked" : "";
-        		//very ugly... yes
-        		var line ='&lt;input type="radio" id="optionPhone" name="optionPhone" onchange="changeOption(' + i + ')"' + checked +  '/&gt; '
-        		line = '&lt;label&gt;' + line + ast + numbs[i] + '&lt;/label&gt;';        		
-        		line = '&lt;div class="checkbox"&gt;' + line + '&lt;/&gt;';
-        		var option = $(line);
-        		$('#phones').append(option);
-        	}
-        	function changeOption(index) {        
-        		document.getElementById("OtpSmsloginForm:indexOfNumber").value = index;
-        	}
-        </script>
-        <ui:include src="/casa/casa.xhtml">
-            <ui:param name="methods" value="${identity.getWorkingParameter('methods')}"/>
-        </ui:include>
-    </ui:define>
+				<h:inputHidden id="indexOfNumber" value="0" />
+			</h:form>
+		</section>
+		<ui:include src="/casa/casa.xhtml" />
+		
+		<script>
+			let ast = "XXXXXX "
+			var numbs = "${identity.getWorkingParameter('choppedNos')}"
+			numbs = numbs.split(",")
+		
+			for (let i=0; i &lt; numbs.length; i++) {
+				let checked = (i == 0) ? " checked" : ""
+				//very ugly... yes
+				var line = '&lt;li class="list-group-item hover-bg-light-gray gray hover-dark-gray pv1"&gt; '
+				line = line + '&lt;label&gt; '
+				line = line + '&lt;input type="radio" id="optionPhone" class="mr1" onchange="changeOption(' + i + ')"' + checked + '/&gt; ' 
+				line = line + '&lt;span class="mb1">'+ ast + numbs[i] + '&lt;/span&gt; '
+				line = line + '&lt;/label&gt; '
+				line = line + '&lt;/li&gt; '
+			
+				var option = $(line)
+				$('#phones').append(option)
+			}
+		
+			function changeOption(index) {        
+				document.getElementById("OtpSmsloginForm:indexOfNumber").value = index;
+			}
+		</script>
+
+	</ui:define>
+
 </ui:composition>
