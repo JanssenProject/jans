@@ -13,6 +13,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -41,7 +42,7 @@ public class UmaClientFactory {
     }
 
     public UmaResourceService createResourceService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getResourceRegistrationEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getResourceRegistrationEndpoint()));
         return target.proxy(UmaResourceService.class);
     }
 
@@ -50,7 +51,7 @@ public class UmaClientFactory {
     }
 
     public UmaPermissionService createPermissionService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getPermissionEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getPermissionEndpoint()));
         return target.proxy(UmaPermissionService.class);
     }
 
@@ -59,7 +60,7 @@ public class UmaClientFactory {
     }
 
     public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getIntrospectionEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getIntrospectionEndpoint()));
         return target.proxy(UmaRptIntrospectionService.class);
     }
 
@@ -68,7 +69,7 @@ public class UmaClientFactory {
     }
 
     public UmaMetadataService createMetadataService(String umaMetadataUri, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(umaMetadataUri));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(umaMetadataUri));
         return target.proxy(UmaMetadataService.class);
     }
 
@@ -77,7 +78,7 @@ public class UmaClientFactory {
     }
 
     public UmaScopeService createScopeService(String scopeEndpointUri, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(scopeEndpointUri));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(scopeEndpointUri));
         return target.proxy(UmaScopeService.class);
     }
 
@@ -86,7 +87,7 @@ public class UmaClientFactory {
     }
 
     public UmaTokenService createTokenService(UmaMetadata metadata, ClientHttpEngine engine) {
-        ResteasyWebTarget target = newClient(engine).target(UriBuilder.fromPath(metadata.getTokenEndpoint()));
+        ResteasyWebTarget target = newClient(engine).target(new ResteasyUriBuilder().uri(metadata.getTokenEndpoint()));
         return target.proxy(UmaTokenService.class);
     }
 
