@@ -59,7 +59,9 @@ class CBM:
     
     def get_system_info(self):
         result = self._get('pools/default')
-        return result.json()
+        if result.ok:
+            return result.json()
+        return {}
 
     def get_buckets(self):
         
