@@ -7,6 +7,7 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.AuthenticationScriptUsageType;
@@ -65,7 +66,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 7, 2019
+ * @version March 4, 2020
  */
 @RequestScoped
 @Named
@@ -139,6 +140,9 @@ public class AuthorizeAction {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -809,6 +813,20 @@ public class AuthorizeAction {
 
     public void setAuthReqId(String authReqId) {
         this.authReqId = authReqId;
+    }
+
+    public String getBindingMessage() {
+        String bindingMessage = null;
+
+        if (Strings.isNotBlank(getAuthReqId())) {
+            final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+            if (cibaGrant != null) {
+                bindingMessage = cibaGrant.getBindingMessage();
+            }
+        }
+
+        return bindingMessage;
     }
 
     public String encodeParameters(String url, Map<String, Object> parameters) {
