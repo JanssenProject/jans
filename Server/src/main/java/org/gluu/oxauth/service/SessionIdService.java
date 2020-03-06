@@ -120,7 +120,7 @@ public class SessionIdService {
     private StaticConfiguration staticConfiguration;
 
     private String buildDn(String sessionId) {
-        return String.format("oxAuthSessionId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
+        return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
 
     public String getAcr(SessionId session) {
@@ -827,7 +827,7 @@ public class SessionIdService {
             return null;
         }
         try {
-            return persistenceEntryManager.find(SessionId.class, sessionId);
+            return persistenceEntryManager.find(SessionId.class, buildDn(sessionId));
         } catch (Exception e) {
             log.error("Failed to get session by id: " + sessionId, e);
         }
