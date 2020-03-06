@@ -11,7 +11,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "ACR Router. Initialization"
         if not configurationAttributes.containsKey("new_acr_value"):
             print "ACR Router. Initialization. Property acr_router_value is mandatory"
@@ -26,7 +26,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return False
