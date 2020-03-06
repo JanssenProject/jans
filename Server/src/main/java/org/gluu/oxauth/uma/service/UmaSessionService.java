@@ -8,20 +8,20 @@ package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -36,8 +36,6 @@ public class UmaSessionService {
     private Logger log;
     @Inject
     private SessionIdService sessionIdService;
-    @Inject
-    private UserService userService;
     @Inject
     private ClientService clientService;
 
@@ -67,7 +65,9 @@ public class UmaSessionService {
         }
 
         log.trace("Generating new uma_session_id ...");
-        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "");
+        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "", new HashMap<String, String>() {{
+            put("uma", "true");
+        }});
 
         sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, true);
         log.trace("uma_session_id cookie created.");
