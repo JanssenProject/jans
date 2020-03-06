@@ -76,7 +76,8 @@ public class UmaSessionService {
 
     public boolean persist(SessionId session) {
         try {
-            if (sessionIdService.persistSessionId(session, true)) {
+
+            if (sessionIdService.updateSessionId(session, true, true, true)) {
                 log.trace("Session persisted successfully. Session: " + session);
                 return true;
             }
