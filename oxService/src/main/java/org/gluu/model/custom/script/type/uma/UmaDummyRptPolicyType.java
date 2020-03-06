@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.uma.ClaimDefinition;
-
+import org.gluu.model.custom.script.model.CustomScript;
 /**
  * @author yuriyz on 05/30/2017.
  */
@@ -16,7 +16,10 @@ public class UmaDummyRptPolicyType implements UmaRptPolicyType {
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
-
+    @Override
+    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
     @Override
     public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;

@@ -401,7 +401,12 @@ public class CustomScriptManager implements Serializable {
 
 		boolean initialized = false;
 		try {
-			initialized = externalType.init(configurationAttributes);
+			if (externalType.getApiVersion() > 10) {
+				initialized = externalType.init(customScript, configurationAttributes);
+			} else {
+				initialized = externalType.init(configurationAttributes);
+				log.warn(" Update the script's init method to init(self, customScript, configurationAttributes)",  customScript.getName());
+			}
 		} catch (Exception ex) {
 			log.error("Failed to initialize custom script: '{}'", ex, customScript.getName());
 		}
