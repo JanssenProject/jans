@@ -21,7 +21,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, current_time_millis):
         self.currentTimeMillis = current_time_millis
 
-    def init(self, configuration_attributes):
+    def init(self, customScript,  configuration_attributes):
         print "AzureAD. Initialization"
 
         global azure_tenant_id
@@ -249,7 +249,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usage_type, configuration_attributes):
         return True

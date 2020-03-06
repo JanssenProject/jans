@@ -30,7 +30,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.mobile_number = None
         self.identity = CdiUtil.bean(Identity)
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Twilio SMS. Initialization"
         self.ACCOUNT_SID = None
         self.AUTH_TOKEN = None
@@ -65,7 +65,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
