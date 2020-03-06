@@ -770,7 +770,6 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
@@ -922,7 +921,7 @@ class Setup(object):
             txt += 'city'.ljust(30) + self.city.rjust(35) + "\n"
             txt += 'state'.ljust(30) + self.state.rjust(35) + "\n"
             txt += 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
-            txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
+            txt += 'Applications max ram'.ljust(30) + str(self.application_max_ram).rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
             
@@ -3155,6 +3154,18 @@ class Setup(object):
         if ssl_subjects['CN'] != oxd_hostname:
             return ssl_subjects
 
+    def add_couchbase_post_messages(self):
+        self.post_messages.append( 
+                "Please note that you have to update your firewall configuration to\n"
+                "allow connections to the following ports on Couchbase Server:\n"
+                "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
+                "11214, 11215, 18091 to 18093, and from 21100 to 21299."
+            )
+        (w, e) = ('', '') if thread_queue else (colors.WARNING, colors.ENDC)
+        self.post_messages.append(
+            w+"By using Couchbase Server you agree to the End User License Agreement.\n"
+            "See /opt/couchbase/LICENSE.txt"+e
+            )
 
     def promptForProperties(self):
 
@@ -3209,7 +3220,7 @@ class Setup(object):
                 print("Please enter valid email address")
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
-        
+
         oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
 
         while True:
@@ -3289,13 +3300,7 @@ class Setup(object):
 
         if self.cb_install:
             self.cache_provider_type = 'NATIVE_PERSISTENCE'
-            print ('  Please note that you have to update your firewall configuration to\n'
-                    '  allow connections to the following ports:\n'
-                    '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                    '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-            print("{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC))
-
+            self.add_couchbase_post_messages()
 
         if not self.wrends_install and self.cb_install:
             self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
@@ -3732,11 +3737,11 @@ class Setup(object):
         def getString(value):
             if isinstance(value, str):
                 return value.strip()
-            elif isinstance(value, bool):
+            elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
                 return str(value)
             else:
                 return ''
-        
+
         try:
             p = Properties()
             keys = list(obj.__dict__.keys())
@@ -4512,7 +4517,8 @@ class Setup(object):
 
         packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
         self.logIt("Found package '%s' for install" % packageName)
-        self.couchbaseInstallOutput = self.installPackage(packageName)
+        installOutput = self.installPackage(packageName)
+        self.post_messages.append(installOutput)
 
         if self.os_type == 'ubuntu' and self.os_version == '16':
             script_name = os.path.basename(self.couchbaseInitScript)
@@ -5561,12 +5567,6 @@ class Setup(object):
             if not self.thread_queue:
                 print()
                 self.print_post_messages()
-            
-            if self.couchbaseInstallOutput:
-                print()
-                print("-"*int(tty_columns))
-                print(self.couchbaseInstallOutput)
-                print("-"*int(tty_columns))
 
         except:
             if self.thread_queue:
@@ -5899,29 +5899,7 @@ if __name__ == '__main__':
     elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
         setup_loaded = installObject.load_properties(installObject.setup_properties_fn+'.enc')
-    
-    if not setup_loaded:
-        installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
-        installObject.promptForProperties()
 
-    # Validate Properties
-    installObject.check_properties()
-
-    proceed = True
-
-    # Show to properties for approval
-    print('\n%s\n' % repr(installObject))
-    if not setupOptions['noPrompt']:
-        proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
-        if proceed_prompt and proceed_prompt[0] !='y':
-            proceed = False
-
-    if setupOptions['noPrompt'] or proceed:
-        installObject.do_installation()
-        print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
-    else:
-        installObject.save_properties()
-    
     if thread_queue:
 
         msg = tui.msg
@@ -5940,4 +5918,30 @@ if __name__ == '__main__':
         GSA.installObject = installObject
 
         GSA.run()
+    else:
+
+        if not setup_loaded:
+            installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
+            installObject.promptForProperties()
+        else:
+            # Validate Properties
+            installObject.check_properties()
+
+        proceed = True
+
+        # Show to properties for approval
+        print('\n%s\n' % repr(installObject))
+        if not setupOptions['noPrompt']:
+            proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
+            if proceed_prompt and proceed_prompt[0] !='y':
+                proceed = False
+
+
+        if setupOptions['noPrompt'] or proceed:
+            installObject.do_installation()
+            print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
+        else:
+            installObject.save_properties()
+    
+
 # END

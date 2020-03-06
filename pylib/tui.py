@@ -11,22 +11,17 @@ import curses
 import string
 import inspect
 import threading
-from Queue import Queue
-from messages import msg
-
+from queue import Queue
+from .messages import msg
 
 import npyscreen
 
-
 queue = Queue()
-
-
-#Todo: check min lines:25 comumns: 80
 
 #install types
 NONE = 0
-LOCAL = 1
-REMOTE = 2
+LOCAL = '1'
+REMOTE = '2'
 
 COMPLETED = -99
 ERROR = -101
@@ -47,30 +42,7 @@ random_marketing_strings = [
 
 marketing_text_period = 20 
 
-def getPW(size=12, chars=string.ascii_uppercase + string.digits + string.lowercase, special=''):
-        
-        if not special:
-            random_password = [random.choice(chars) for _ in range(size)]
-        else:
-            ndigit = random.randint(1, 3)
-            nspecial = random.randint(1, 2)
 
-
-            ncletter = random.randint(2, 5)
-            nsletter = size - ndigit - nspecial - ncletter
-            
-            random_password = []
-            
-            for n, rc in ((ndigit, string.digits), (nspecial, special),
-                        (ncletter, string.ascii_uppercase),
-                        (nsletter, string.lowercase)):
-            
-                random_password += [random.choice(rc) for _ in range(n)]
-            
-        random.shuffle(random_password)
-                
-        return ''.join(random_password)
-        
 def getClassName(c):
     try:
         return getattr(c, '__class__').__name__
@@ -86,9 +58,9 @@ class GluuSetupApp(npyscreen.StandardApp):
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
 
-        for obj in globals().items():
+        for obj in list(globals().items()):
             if not obj[0]=='GluuSetupForm' and obj[0].endswith('Form') and inspect.isclass(obj[1]):
-                print "Adding form", obj[0]
+                print("Adding form", obj[0])
                 self.addForm(obj[0], obj[1], name=getattr(msg, obj[0]+'_label'))
 
     def onCleanExit(self):
@@ -386,7 +358,7 @@ class DBBackendForm(GluuSetupForm):
         self.cb_option_changed(self.ask_cb)
 
     def do_beforeEditing(self):
-        self.ask_wrends.value = [self.parentApp.installObject.wrends_install]
+        self.ask_wrends.value = [int(self.parentApp.installObject.wrends_install)]
 
         if self.parentApp.installObject.wrends_install == REMOTE:
             self.wrends_hosts.hidden = False
@@ -404,7 +376,7 @@ class DBBackendForm(GluuSetupForm):
 
         self.wrends_hosts.value = self.parentApp.installObject.ldap_hostname        
 
-        self.ask_cb.value = [self.parentApp.installObject.cb_install]
+        self.ask_cb.value = [int(self.parentApp.installObject.cb_install)]
 
         if not self.parentApp.installObject.cb_install:
             self.cb_admin.hidden = True
@@ -443,7 +415,7 @@ class DBBackendForm(GluuSetupForm):
 
         msg.backend_types = []
 
-        self.parentApp.installObject.wrends_install = self.ask_wrends.value[0]
+        self.parentApp.installObject.wrends_install = str(self.ask_wrends.value[0]) if self.ask_wrends.value[0] else 0
 
         if self.parentApp.installObject.wrends_install == LOCAL:
             self.parentApp.installObject.ldap_hostname = 'localhost'
@@ -462,7 +434,7 @@ class DBBackendForm(GluuSetupForm):
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
-        self.parentApp.installObject.cb_install = self.ask_cb.value[0]
+        self.parentApp.installObject.cb_install =  str(self.ask_cb.value[0]) if self.ask_cb.value[0] else 0
 
         if self.parentApp.installObject.cb_install == LOCAL:
             self.parentApp.installObject.couchbase_hostname = 'localhost'
@@ -475,6 +447,10 @@ class DBBackendForm(GluuSetupForm):
             if not result['result']:
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
+
+        if self.parentApp.installObject.cb_install:
+            self.parentApp.installObject.cache_provider_type = 'NATIVE_PERSISTENCE'
+            self.parentApp.installObject.add_couchbase_post_messages()
 
         if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
@@ -489,7 +465,7 @@ class DBBackendForm(GluuSetupForm):
                 self.parentApp.installObject.persistence_type = 'hybrid'
                 self.parentApp.switchForm('StorageSelectionForm')
             else:
-                storage_list = self.parentApp.installObject.couchbaseBucketDict.keys()
+                storage_list = list(self.parentApp.installObject.couchbaseBucketDict.keys())
                 storage = 'ldap'
 
                 if self.parentApp.installObject.cb_install:
@@ -510,10 +486,10 @@ class DBBackendForm(GluuSetupForm):
             if not self.ask_wrends.value[0]:
                 self.wrends_password.hidden = True
                 self.wrends_hosts.hidden = True
-            elif self.ask_wrends.value[0] == LOCAL:
+            elif str(self.ask_wrends.value[0]) == LOCAL:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = True
-            elif self.ask_wrends.value[0] == REMOTE:
+            elif str(self.ask_wrends.value[0]) == REMOTE:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = False
                 
@@ -526,16 +502,16 @@ class DBBackendForm(GluuSetupForm):
                 self.cb_admin.hidden = True
                 self.cb_password.hidden = True
                 self.cb_hosts.hidden = True
-            elif self.ask_cb.value[0] == LOCAL:
+            elif str(self.ask_cb.value[0]) == LOCAL:
                 self.cb_admin.hidden = False
                 self.cb_hosts.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = True
-            elif self.ask_cb.value[0] == REMOTE:
+            elif str(self.ask_cb.value[0]) == REMOTE:
                 self.cb_admin.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = False
-            
+
             self.cb_admin.update()
             self.cb_password.update()
             self.cb_hosts.update()
@@ -556,7 +532,7 @@ class StorageSelectionForm(GluuSetupForm):
         self.parentApp.switchForm('DBBackendForm')
 
     def do_beforeEditing(self):
-        self.wrends_storage.values = self.parentApp.installObject.couchbaseBucketDict.keys()
+        self.wrends_storage.values = list(self.parentApp.installObject.couchbaseBucketDict.keys())
 
         value = []
         for i, s in enumerate(self.parentApp.installObject.couchbaseBucketDict.keys()):
@@ -567,7 +543,7 @@ class StorageSelectionForm(GluuSetupForm):
         self.wrends_storage.update()
 
     def nextButtonPressed(self):
-        storage_list = self.parentApp.installObject.couchbaseBucketDict.keys()
+        storage_list = list(self.parentApp.installObject.couchbaseBucketDict.keys())
 
         for i, s in enumerate(storage_list):
             if i in self.wrends_storage.value:
