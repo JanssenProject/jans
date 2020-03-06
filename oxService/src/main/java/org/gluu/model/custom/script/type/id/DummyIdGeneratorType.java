@@ -7,7 +7,7 @@
 import java.util.Map;
 
 import org.gluu.model.SimpleCustomProperty;
-
+import org.gluu.model.custom.script.model.CustomScript;
 /**
  * Dummy implementation of interface IdGeneratorType
  *
@@ -19,7 +19,10 @@ public class DummyIdGeneratorType implements IdGeneratorType {
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
-
+    @Override
+    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
     @Override
     public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;

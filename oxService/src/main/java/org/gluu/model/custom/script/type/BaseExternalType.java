@@ -7,7 +7,7 @@
 import java.util.Map;
 
 import org.gluu.model.SimpleCustomProperty;
-
+import org.gluu.model.custom.script.model.CustomScript;
 /**
  * Base interface for external python script
  *
@@ -16,6 +16,8 @@ import org.gluu.model.SimpleCustomProperty;
 public interface BaseExternalType {
 
     boolean init(Map<String, SimpleCustomProperty> configurationAttributes);
+    
+    boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes);
 
     boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes);
 
