@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
 import org.gluu.persist.annotation.*;
+import org.gluu.persist.model.base.Deletable;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
@@ -26,7 +27,7 @@ import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 @Named("sessionUser")
 @DataEntry
 @ObjectClass(value = "oxAuthSessionId")
-public class SessionId implements Serializable {
+public class SessionId implements Deletable, Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
@@ -48,7 +49,7 @@ public class SessionId implements Serializable {
     @AttributeName(name = "oxState")
     private SessionIdState state;
 
-    @AttributeName(name = "oxAuthSessionState")
+    @AttributeName(name = "oxSessionState")
     private String sessionState;
 
     @AttributeName(name = "oxAuthPermissionGranted")
@@ -71,6 +72,15 @@ public class SessionId implements Serializable {
     @JsonObject
     @AttributeName(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
+
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private Boolean deletable = true;
+
+    @AttributeName(name = "creationDate")
+    private Date creationDate = new Date();
 
     @Transient
     private transient boolean persisted;
@@ -224,6 +234,30 @@ public class SessionId implements Serializable {
 
     public void setPersisted(boolean persisted) {
         this.persisted = persisted;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public Boolean isDeletable() {
+        return deletable != null ? deletable : true;
+    }
+
+    public void setDeletable(Boolean deletable) {
+        this.deletable = deletable;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     @Override
