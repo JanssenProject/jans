@@ -3,6 +3,7 @@ package org.gluu.model.custom.script.type.logout;
 import org.gluu.model.SimpleCustomProperty;
 
 import java.util.Map;
+import org.gluu.model.custom.script.model.CustomScript;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -12,7 +13,10 @@ public class DummyEndSessionType implements EndSessionType {
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
-
+    @Override
+    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
     @Override
     public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
