@@ -5326,8 +5326,11 @@
         {
             "kind": "STRUCTURAL", 
             "may": [
-                "oxAuthSessionId", 
-                "oxLastAccessTime", 
+                "oxId",
+                "creationDate",
+                "exp",
+                "del",
+                "oxLastAccessTime",
                 "oxAuthUserDN", 
                 "authnTime", 
                 "oxState", 
