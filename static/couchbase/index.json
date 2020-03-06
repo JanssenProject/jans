@@ -41,6 +41,9 @@
       ["ssnId"],
       ["oxAuthClientId"],
       ["clnId"],
+      ["oxAuthSessionId"],
+      ["oxAuthUserDN"],
+      ["oxState"],
       ["del","exp"],
       ["objectClass","creationDate","oxStatus"]
     ],
