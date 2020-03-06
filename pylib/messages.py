@@ -36,6 +36,8 @@ class msg:
     installGluuRadius_label = "Install Radius"
     wrends_storages_label = "Store on WrenDS"
     installing_label = "Installing"
+    installOxd_label = "Install Oxd"
+    installCasa_label = "Install Casa"
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
@@ -73,9 +75,14 @@ class msg:
     ask_installOxAuthRP  = "Install oxAuth RP"
     ask_installPassport  = "Install Passport"
     ask_installGluuRadius = "Install Gluu Radius"
-
+    ask_installCasa = "Install Casa"
+    ask_installOxd = "Install Oxd"
     ask_wrends_install = "WrenDS Installation"
     wrends_install_options = ["Don't Install","Install Locally","Use Remote WrenDS"]
+    oxd_url_label = "oxd Server URL"
+    install_oxd_or_url_warning = "Please either enter oxd Server URL or check Install Oxd"
+    oxd_connection_error = "Can't connect to oxd-server with url {}. Reason: {}"
+    oxd_ssl_cert_error = "Hostname of oxd ssl certificate is {} which does not match {} casa won't start properly"
 
     ask_cb_install = "Couchbase Installation"
     cb_install_options = ["Don't Install","Install Locally","Use Remote Couchbase"]
@@ -104,6 +111,10 @@ class msg:
     installation_description_jetty = "Eclipse Jetty provides a Web server and javax.servlet container, plus support for HTTP/2, WebSocket, OSGi, JMX, JNDI, JAAS and many other integrations."
     installation_description_jython = "Jython is a Java implementation of Python that combines expressive power with clarity. Jython is freely available for both commercial and non-commercial use and is distributed with source code under the PSF License v2."
     installation_description_node = "As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications."
+    installation_description_oxd = "oxd exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Gluu."
+    installation_description_casa = "Gluu Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Gluu Server."
+    
+    
     installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code."
     
     

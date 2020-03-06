@@ -161,7 +161,13 @@
     ],
     "uiLocalesSupported":[
         "en",
-        "es"
+        "bg",
+        "de",
+        "es",
+        "fr",
+        "it",
+        "ru",
+        "tr"
     ],
     "dynamicGrantTypeDefault":[
         "authorization_code",
