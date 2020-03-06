@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import base64
@@ -15,18 +15,18 @@ def obscure(data=""):
     engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
     data = data.encode('ascii')
     en_data = engine.encrypt(data)
-    return base64.b64encode(en_data)
+    return base64.b64encode(en_data).decode('utf-8')
 
 def unobscure(s=""):
     engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
     cipher = triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=PAD_PKCS5)
-    return decrypted
+    return decrypted.decode('utf-8')
 
 def Usage():
-    print "To encode:   encode <string>"
-    print "To decode:   encode -D <string>"
-    print
+    print("To encode:   encode <string>")
+    print("To decode:   encode -D <string>")
+    print()
     sys.exit(0)
 
 arg = ""
@@ -40,6 +40,6 @@ if len(sys.argv) == 2:
     arg = sys.argv[1]
 
 if decode:
-    print unobscure(arg)
+    print(unobscure(arg))
 else:
-    print obscure(arg)
+    print(obscure(arg))

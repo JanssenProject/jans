@@ -5,6 +5,7 @@ See https://www.python-ldap.org/ for details.
 """
 
 from __future__ import unicode_literals
+import sys
 
 __version__ = '3.2.0'
 
@@ -25,7 +26,16 @@ from base64 import b64encode, b64decode
 from io import StringIO
 import warnings
 
-from compat import urlparse, urlopen
+try:
+    from urllib.request import urlopen
+except:
+    from urllib2 import urlopen
+
+
+if ((3, 0) <= sys.version_info <= (3, 9)):
+    from urllib.parse import urlparse
+elif ((2, 0) <= sys.version_info <= (2, 9)):
+    from urlparse import urlparse
 
 attrtype_pattern = r'[\w;.-]+(;[\w_-]+)*'
 attrvalue_pattern = r'(([^,]|\\,)+|".*?")'

@@ -276,7 +276,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     return False
 
-            form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
+            form_passcode = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:passcode")
             if form_passcode and code == form_passcode:
                 print("SMPP authenticate. 6-digit code matches with code sent via SMS")
                 return True
