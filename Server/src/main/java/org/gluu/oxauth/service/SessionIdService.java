@@ -569,10 +569,8 @@ public class SessionIdService {
 
         Preconditions.checkNotNull(dn);
 
-        if (SessionIdState.AUTHENTICATED == state) {
-            if (StringUtils.isBlank(userDn)) {
-                return null;
-            }
+        if (SessionIdState.AUTHENTICATED == state && StringUtils.isBlank(userDn) && !sessionIdAttributes.containsKey("uma")) {
+            return null;
         }
 
         final SessionId sessionId = new SessionId();
