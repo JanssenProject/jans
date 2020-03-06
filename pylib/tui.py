@@ -448,6 +448,10 @@ class DBBackendForm(GluuSetupForm):
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
+        if self.parentApp.installObject.cb_install:
+            self.parentApp.installObject.cache_provider_type = 'NATIVE_PERSISTENCE'
+            self.parentApp.installObject.add_couchbase_post_messages()
+
         if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
@@ -482,10 +486,10 @@ class DBBackendForm(GluuSetupForm):
             if not self.ask_wrends.value[0]:
                 self.wrends_password.hidden = True
                 self.wrends_hosts.hidden = True
-            elif self.ask_wrends.value[0] == LOCAL:
+            elif str(self.ask_wrends.value[0]) == LOCAL:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = True
-            elif self.ask_wrends.value[0] == REMOTE:
+            elif str(self.ask_wrends.value[0]) == REMOTE:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = False
                 
@@ -498,16 +502,16 @@ class DBBackendForm(GluuSetupForm):
                 self.cb_admin.hidden = True
                 self.cb_password.hidden = True
                 self.cb_hosts.hidden = True
-            elif self.ask_cb.value[0] == LOCAL:
+            elif str(self.ask_cb.value[0]) == LOCAL:
                 self.cb_admin.hidden = False
                 self.cb_hosts.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = True
-            elif self.ask_cb.value[0] == REMOTE:
+            elif str(self.ask_cb.value[0]) == REMOTE:
                 self.cb_admin.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = False
-            
+
             self.cb_admin.update()
             self.cb_password.update()
             self.cb_hosts.update()
