@@ -34,7 +34,7 @@ public class SessionId implements Deletable, Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "oxAuthSessionId")
+    @AttributeName(name = "oxId")
     private String id;
 
     @AttributeName(name = "oxLastAccessTime")
