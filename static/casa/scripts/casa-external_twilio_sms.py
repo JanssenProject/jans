@@ -100,7 +100,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if step == 2 and numbers != None:
                 #Means the selection number page was used
-                idx = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm:indexOfNumber")
+                idx = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:indexOfNumber")
                 if idx != None and code != None:
                     sendToNumber = numbers.split(",")[int(idx)]
                     self.sendMessage(code, sendToNumber)
@@ -109,7 +109,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
             success = False
-            form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
+            form_passcode = ServerUtil.getFirstValue(requestParameters, "OtpSmsloginForm:passcode")
 
             if form_passcode != None and code == form_passcode:
                 print "TwilioSMS. authenticate. 6-digit code matches with code sent via SMS"

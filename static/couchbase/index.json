@@ -10,23 +10,14 @@
       ["oxStatus"], 
       ["oxApplication"], 
       ["oxDeviceHashCode"], 
-      ["oxDeviceKeyHandle"]
+      ["oxDeviceKeyHandle"],
+      ["oxAuthClientId"],
+      ["oxAuthUserId"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
       [["LOWER(`mail`)"], "objectClass = \"gluuPerson\""], 
       [["exp", "oxAuthExpiration"], "del=true"] 
-    ]
-  },
-
-  "!bucket_prefix!_authorization": {
-     "attributes": [
-        ["oxAuthExpiration"],
-        ["del"],
-        ["oxAuthClientId"],
-        ["oxAuthUserId"]
-      ],
-    "static" : [
     ]
   },
 
