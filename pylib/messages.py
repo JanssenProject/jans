@@ -59,8 +59,8 @@ class msg:
     
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
-    acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the MIT license"
-    acknowledge_lisence_ask = "Please acknowledge that use of the Gluu Server is under the MIT license"
+    acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the Apache-2.0 license"
+    acknowledge_lisence_ask = "Please check License Agreement"
     setup_properties_warning = "** All clear text passwords contained in\n/install/community-edition-setup/setup.properties.last."
     
     enter_hostname = "Please enter hostname"

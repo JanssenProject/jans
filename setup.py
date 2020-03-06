@@ -770,7 +770,6 @@ class Setup(object):
         self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
         self.couchbaseIndexJson = '%s/static/couchbase/index.json' % self.install_dir
         self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchbaseInstallOutput = ''
         self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
@@ -3155,6 +3154,18 @@ class Setup(object):
         if ssl_subjects['CN'] != oxd_hostname:
             return ssl_subjects
 
+    def add_couchbase_post_messages(self):
+        self.post_messages.append( 
+                "Please note that you have to update your firewall configuration to\n"
+                "allow connections to the following ports on Couchbase Server:\n"
+                "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
+                "11214, 11215, 18091 to 18093, and from 21100 to 21299."
+            )
+        (w, e) = ('', '') if thread_queue else (colors.WARNING, colors.ENDC)
+        self.post_messages.append(
+            w+"By using Couchbase Server you agree to the End User License Agreement.\n"
+            "See /opt/couchbase/LICENSE.txt"+e
+            )
 
     def promptForProperties(self):
 
@@ -3289,13 +3300,7 @@ class Setup(object):
 
         if self.cb_install:
             self.cache_provider_type = 'NATIVE_PERSISTENCE'
-            print ('  Please note that you have to update your firewall configuration to\n'
-                    '  allow connections to the following ports:\n'
-                    '  4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n'
-                    '  11214, 11215, 18091 to 18093, and from 21100 to 21299.')
-
-            print("{}By using Couchbase Server you agree to the End User License Agreement.\nSee /opt/couchbase/LICENSE.txt.{}\n".format(colors.WARNING, colors.ENDC))
-
+            self.add_couchbase_post_messages()
 
         if not self.wrends_install and self.cb_install:
             self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
@@ -4512,7 +4517,8 @@ class Setup(object):
 
         packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
         self.logIt("Found package '%s' for install" % packageName)
-        self.couchbaseInstallOutput = self.installPackage(packageName)
+        installOutput = self.installPackage(packageName)
+        self.post_messages.append(installOutput)
 
         if self.os_type == 'ubuntu' and self.os_version == '16':
             script_name = os.path.basename(self.couchbaseInitScript)
@@ -5561,12 +5567,6 @@ class Setup(object):
             if not self.thread_queue:
                 print()
                 self.print_post_messages()
-            
-            if self.couchbaseInstallOutput:
-                print()
-                print("-"*int(tty_columns))
-                print(self.couchbaseInstallOutput)
-                print("-"*int(tty_columns))
 
         except:
             if self.thread_queue:
