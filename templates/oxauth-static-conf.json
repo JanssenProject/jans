@@ -4,6 +4,7 @@
         "people":"ou=people,o=gluu",
         "groups":"ou=groups,o=gluu",
         "clients":"ou=clients,o=gluu",
+        "sessions":"ou=sessions,o=gluu",
         "tokens":"ou=tokens,o=gluu",
         "authorizations": "ou=authorizations,o=gluu",
         "scopes":"ou=scopes,o=gluu",
