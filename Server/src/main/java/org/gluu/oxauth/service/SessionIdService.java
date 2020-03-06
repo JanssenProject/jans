@@ -789,6 +789,7 @@ public class SessionIdService {
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
                 persistenceEntryManager.merge(sessionId);
+                return;
             } catch (EntryPersistenceException ex) {
                 lastException = ex;
                 if (ex.getCause() instanceof LDAPException) {
