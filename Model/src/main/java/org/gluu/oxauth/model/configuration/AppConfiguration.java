@@ -1588,6 +1588,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        if (backchannelAuthenticationRequestSigningAlgValuesSupported == null) backchannelAuthenticationRequestSigningAlgValuesSupported = Lists.newArrayList();
         return backchannelAuthenticationRequestSigningAlgValuesSupported;
     }
 
