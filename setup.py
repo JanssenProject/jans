@@ -40,7 +40,6 @@ import hashlib
 import re
 import glob
 import base64
-import platform
 import copy
 import random
 import ssl
@@ -56,24 +55,26 @@ from collections import OrderedDict
 from xml.etree import ElementTree
 from urllib.parse import urlparse
 
-from pylib.ldif import LDIFParser, LDIFWriter
-from pylib.attribute_data_types import ATTRUBUTEDATATYPES
+from pylib import gluu_utils
+from pylib.ldif import LDIFWriter
 from pylib.jproperties import Properties
 from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-class colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    DANGER = '\033[31m'
+os_type, os_version = gluu_utils.get_os_type()
+
+if not os_version in gluu_utils.supportes_os_types.get(os_type, []):
+    print("Gluu Server supports these OSes")
+    for os_ in gluu_utils.supportes_os_types:
+        if gluu_utils.supportes_os_types[os_]:
+            print("{}: {}".format(
+                    os_.title(), 
+                    ', '.join(gluu_utils.supportes_os_types[os_]))
+                )
+    sys.exit("Exiting...\n")
+
 
 #install types
 NONE = 0
@@ -100,7 +101,6 @@ except:
     tty_rows = 60
     tty_columns = 120
 
-listAttrib = ['member']
 
 try:
     from pyDes import *
@@ -122,17 +122,7 @@ try:
 except:
     pass
 
-def read_properties_file(fn):
-    retDict = {}
-    p = Properties()
-    if os.path.exists(fn):
-        with open(fn, 'rb') as f:
-            p.load(f, 'utf-8')
-      
-        for k in p.keys():
-            retDict[str(k)] = str(p[k].data)
-            
-    return retDict
+
 
 class ProgressBar:
 
@@ -167,163 +157,6 @@ class ProgressBar:
 
             sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
             sys.stdout.flush()
-
-def get_key_shortcuter_rules():
-    ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
-    oxauth_zf = zipfile.ZipFile(ox_auth_war_file)
-
-    for file_info in oxauth_zf.infolist():
-        if 'oxcore-persistence-core' in file_info.filename:
-            oxcore_persistence_core_path = file_info.filename
-            break
-
-    oxcore_persistence_core_content = oxauth_zf.read(oxcore_persistence_core_path)
-    oxcore_persistence_core_io = io.StringIO(oxcore_persistence_core_content)
-    oxcore_persistence_core_zf = zipfile.ZipFile(oxcore_persistence_core_io)
-    key_shortcuter_rules_str = oxcore_persistence_core_zf.read('key-shortcuter-rules.json')
-    key_shortcuter_rules = json.loads(key_shortcuter_rules_str)
-
-    return key_shortcuter_rules
-
-
-def get_mapped_entry(entry):
-    rEntry = copy.deepcopy(entry)
-    
-    for key in list(rEntry.keys()):
-        mapped_key = key
-        if key in key_shortcuter_rules['exclusions']:
-            mapped_key = key_shortcuter_rules['exclusions'][key]
-        else:
-            for map_key in key_shortcuter_rules['replaces']:
-                if map_key in mapped_key:
-                    mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
-                
-        if mapped_key != key:
-            mapped_key = mapped_key[0].lower() + mapped_key[1:]
-            rEntry[mapped_key] = rEntry.pop(key)
-
-    for key in list(rEntry.keys()):
-        if key in key_shortcuter_rules['exclusions']:
-            continue
-        for prefix in key_shortcuter_rules['prefixes']:
-            if key.startswith(prefix):
-                mapped_key = key.replace(prefix, '',1)
-                mapped_key = mapped_key[0].lower() + mapped_key[1:]
-                rEntry[mapped_key] = rEntry.pop(key)
-                break
-
-
-    return rEntry
-
-def getTypedValue(dtype, val):
-    retVal = val
-    
-    if dtype == 'json':
-        try:
-            retVal = json.loads(val)
-        except Exception as e:
-            pass
-
-    if dtype == 'integer':
-        try:
-            retVal = int(retVal)
-        except:
-            pass
-    elif dtype == 'datetime':
-        if '.' in val:
-            date_format = '%Y%m%d%H%M%S.%fZ'
-        else:
-            date_format = '%Y%m%d%H%M%SZ'
-        
-        if not val.lower().endswith('z'):
-            val += 'Z'
-
-        dt = datetime.datetime.strptime(val, date_format)
-        retVal = dt.isoformat()
-
-    elif dtype == 'boolean':
-        if retVal.lower() in ('true', 'yes', '1', 'on'):
-            retVal = True
-        else:
-            retVal = False
-
-    return retVal
-
-
-def get_key_from(dn):
-    dns = []
-    for d in str2dn(dn):
-        for rd in d:
-            if rd[0] == 'o' and rd[1] == 'gluu':
-                continue
-            dns.append(rd[1])
-
-    dns.reverse()
-    key = '_'.join(dns)
-
-    if not key:
-        key = '_'
-
-    return key
-
-
-class myLdifParser(LDIFParser):
-    def __init__(self, ldif_file):
-        LDIFParser.__init__(self, open(ldif_file,'rb'))
-        self.entries = []
-
-    def handle(self, dn, entry):
-        for e in entry:
-            for i, v in enumerate(entry[e][:]):
-                if isinstance(v, bytes):
-                    entry[e][i] = v.decode('utf-8')
-        self.entries.append((dn, entry))
-
-
-def get_documents_from_ldif(ldif_file):
-    parser = myLdifParser(ldif_file)
-    parser.parse()
-    documents = []
-
-    for dn, entry in parser.entries:
-        if len(entry) > 2:
-            key = get_key_from(dn)
-            entry['dn'] = dn
-            for k in copy.deepcopy(entry):
-                if len(entry[k]) == 1:
-                    if not k in listAttrib:
-                        entry[k] = entry[k][0]
-
-            for k in entry:
-                dtype = attribDataTypes.getAttribDataType(k)
-                if dtype != 'string':
-                    if type(entry[k]) == type([]):
-                        for i in range(len(entry[k])):
-                            entry[k][i] = getTypedValue(dtype, entry[k][i])
-                            if entry[k][i] == 'true':
-                                entry[k][i] = True
-                            elif entry[k][i] == 'false':
-                                entry[k][i] = False
-                    else:
-                        entry[k] = getTypedValue(dtype, entry[k])
-
-                if k == 'objectClass':
-                    entry[k].remove('top')
-                    oc_list = entry[k]
-
-                    for oc in oc_list[:]:
-                        if 'Custom' in oc and len(oc_list) > 1:
-                            oc_list.remove(oc)
-
-                        if not 'gluu' in oc.lower() and len(oc_list) > 1:
-                            oc_list.remove(oc)
-
-                    entry[k] = oc_list[0]
-
-            #mapped_entry = get_mapped_entry(entry)
-            documents.append((key, entry))
-
-    return documents
 
 
 class Setup(object):
@@ -417,7 +250,6 @@ class Setup(object):
         
         self.allowPreReleasedFeatures = False
 
-        self.os_types = ['centos', 'red', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
 
@@ -1456,7 +1288,7 @@ class Setup(object):
             fn = self.decrypt_properties(fn, self.properties_password)
 
         try:
-            p = read_properties_file(fn)
+            p = gluu_utils.read_properties_file(fn)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -1698,14 +1530,10 @@ class Setup(object):
             self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-certs.txt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
             self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-certs.json" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
 
+    # keep this for backward compatibility
     def detect_os_type(self):
-        try:
-            p = platform.linux_distribution()
-            os_type = p[0].split()[0].lower()
-            os_version = p[1].split('.')[0]
-            return os_type, os_version
-        except:
-            return self.choose_from_list(self.os_types, "Operating System")
+        return os_type, os_version
+
 
     def detect_initd(self):
         return open(os.path.join('/proc/1/status'), 'r').read().split()[1]
@@ -3139,10 +2967,10 @@ class Setup(object):
             if thread_queue:
                 return str(e)
             if error_out:
-                print(colors.DANGER)
+                print(gluu_utils.colors.DANGER)
                 print("Can't connect to oxd-server with url {}".format(oxd_url))
                 print("Reason: ", e)
-                print(colors.ENDC)
+                print(gluu_utils.colors.ENDC)
 
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
@@ -3161,7 +2989,7 @@ class Setup(object):
                 "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
                 "11214, 11215, 18091 to 18093, and from 21100 to 21299."
             )
-        (w, e) = ('', '') if thread_queue else (colors.WARNING, colors.ENDC)
+        (w, e) = ('', '') if thread_queue else (gluu_utils.colors.WARNING, gluu_utils.colors.ENDC)
         self.post_messages.append(
             w+"By using Couchbase Server you agree to the End User License Agreement.\n"
             "See /opt/couchbase/LICENSE.txt"+e
@@ -3269,7 +3097,7 @@ class Setup(object):
                 if conn_check['result']:
                     break
                 else:
-                    print("    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC))
+                    print("    {}Error connecting to LDAP server: {} {}".format(gluu_utils.colors.FAIL, conn_check['reason'], gluu_utils.colors.ENDC))
 
             self.ldapPass = ldapPass
             self.ldap_hostname = ldapHost
@@ -3284,7 +3112,7 @@ class Setup(object):
                 self.isCouchbaseUserAdmin = True
 
                 while True:
-                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), self.oxtrust_admin_password)
+                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(gluu_utils.colors.BOLD, gluu_utils.colors.ENDC), self.oxtrust_admin_password)
 
                     if self.checkPassword(cbPass):
                         break
@@ -3295,7 +3123,7 @@ class Setup(object):
             self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
 
         if not (self.wrends_install or self.cb_install):
-            print("{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC))
+            print("{}You must have at least one DB backend. Exiting...{}".format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
             sys.exit(False)
 
         if self.cb_install:
@@ -3356,11 +3184,11 @@ class Setup(object):
 
             if not isCBRoleOK[0]:
                 print("{}Please check user {} has roles {} on bucket(s) {}{}".format(
-                                colors.DANGER,
+                                gluu_utils.colors.DANGER,
                                 self.cbm.auth.username,
                                 ', '.join(self.cb_bucket_roles),
                                 ', '.join(isCBRoleOK[1]),
-                                colors.ENDC
+                                gluu_utils.colors.ENDC
                                 ))
                 sys.exit(False)
 
@@ -3435,9 +3263,9 @@ class Setup(object):
                             print(('Hostname of oxd ssl certificate is {0}{1}{2} '
                                     'which does not match {0}{3}{2}, \ncasa won\'t start '
                                     'properly').format(
-                                            colors.DANGER,
+                                            gluu_utils.colors.DANGER,
                                             oxd_ssl_result['CN'],
-                                            colors.ENDC,
+                                            gluu_utils.colors.ENDC,
                                             oxd_hostname
                                             ))
                         else:
@@ -4739,7 +4567,7 @@ class Setup(object):
         
         for ldif in ldif_file_list:
             self.logIt("Importing ldif file %s to Couchebase bucket %s" % (ldif, bucket))
-            documents = get_documents_from_ldif(ldif)
+            documents = gluu_utils.get_documents_from_ldif(ldif)
 
             ldif_base_name = os.path.basename(ldif)
             name, ext = os.path.splitext(ldif_base_name)
@@ -4852,17 +4680,6 @@ class Setup(object):
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
-    def prepare_multivalued_list(self):
-        global listAttrib
-        gluu_schema_fn = os.path.join(self.install_dir, 'schema/gluu_schema.json')
-        gluu_schema = json.load(open(gluu_schema_fn))
-
-        for obj_type in ['objectClasses', 'attributeTypes']:
-            for obj in gluu_schema[obj_type]:
-                if obj.get('multivalued'):
-                    for name in obj['names']:
-                        listAttrib.append(name)
-
 
     def create_couchbase_buckets(self):
         #Determine ram_size for buckets
@@ -4924,14 +4741,15 @@ class Setup(object):
                 self.logIt("Creating couchbase readonly user for shib")
                 self.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
             else:
-                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(colors.WARNING, colors.ENDC))
+                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
                 self.post_messages.append('Username: {}'.format(shib_user))
                 self.post_messages.append('Password: {}'.format(shib_user_password))
                 self.post_messages.append('Roles: {}'.format(shib_user_roles))
 
     def install_couchbase_server(self):
         # prepare multivalued list
-        self.prepare_multivalued_list()
+        gluu_utils.attribDataTypes.startup(gluu_utils.ces_dir)
+        gluu_utils.prepare_multivalued_list()
 
         if not self.cbm:
              self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
@@ -5081,7 +4899,7 @@ class Setup(object):
 
             schema_fn = os.path.join(self.openDjSchemaFolder,'77-customAttributes.ldif')
 
-            obcl_parser = myLdifParser(schema_fn)
+            obcl_parser = gluu_utils.myLdifParser(schema_fn)
             obcl_parser.parse()
 
             for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
@@ -5586,7 +5404,6 @@ class Setup(object):
 
 
 
-attribDataTypes = ATTRUBUTEDATATYPES()
 
 file_max = int(open("/proc/sys/fs/file-max").read().strip())
 
@@ -5603,16 +5420,16 @@ def resource_checkings():
     if file_max < 64000:
         print(("{0}Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "
-                  "host system and re-run setup.py{1}".format(colors.DANGER,
-                                                                colors.ENDC)))
+                  "host system and re-run setup.py{1}".format(gluu_utils.colors.DANGER,
+                                                                gluu_utils.colors.ENDC)))
         sys.exit(1)
 
     if current_mem_size < suggested_mem_size:
         print(("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
-               "than the suggested RAM size of {2} GB.{3}").format(colors.WARNING,
+               "than the suggested RAM size of {2} GB.{3}").format(gluu_utils.colors.WARNING,
                                                         current_mem_size, 
                                                         suggested_mem_size,
-                                                        colors.ENDC))
+                                                        gluu_utils.colors.ENDC))
 
 
         result = input("Proceed anyways? [Y|n] ")
@@ -5623,10 +5440,10 @@ def resource_checkings():
 
         print(("{0}Warning: Available CPU Units found was {1}. "
             "This is less than the required amount of {2} CPU Units.{3}".format(
-                                                        colors.WARNING,
+                                                        gluu_utils.colors.WARNING,
                                                         current_number_of_cpu, 
                                                         suggested_number_of_cpu,
-                                                        colors.ENDC)))
+                                                        gluu_utils.colors.ENDC)))
                                                         
         result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
@@ -5637,10 +5454,10 @@ def resource_checkings():
     if available_disk_space < suggested_free_disk_space:
         print(("{0}Warning: Available free disk space was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
-                                                        colors.WARNING,
+                                                        gluu_utils.colors.WARNING,
                                                         available_disk_space,
                                                         suggested_free_disk_space,
-                                                        colors.ENDC)))
+                                                        gluu_utils.colors.ENDC)))
 
         result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
@@ -5716,7 +5533,7 @@ if __name__ == '__main__':
     if not argsp.n and not thread_queue:
         resource_checkings()
     
-    #key_shortcuter_rules = get_key_shortcuter_rules()
+    #key_shortcuter_rules = gluu_utils.get_key_shortcuter_rules()
 
     setupOptions = {
         'install_dir': cur_dir,
@@ -5837,7 +5654,6 @@ if __name__ == '__main__':
             sys.exit(2)
 
     installObject = Setup(setupOptions['install_dir'])
-    attribDataTypes.startup(setupOptions['install_dir'])
 
     installObject.properties_password = argsp.properties_password
 
@@ -5923,9 +5739,9 @@ if __name__ == '__main__':
         if not setup_loaded:
             installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
             installObject.promptForProperties()
-        else:
-            # Validate Properties
-            installObject.check_properties()
+
+        # Validate Properties
+        installObject.check_properties()
 
         proceed = True
 
