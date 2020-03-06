@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Please place this script in the same directory as setup.py
 
 import os
@@ -34,7 +36,7 @@ oxtrust_api_server_version = '4.0.rc2'
 oxtrust_api_server_url = 'https://ox.gluu.org/maven/org/gluu/oxtrust-api-server/{0}/oxtrust-api-server-{0}.jar'.format(oxtrust_api_server_version)
 oxtrust_api_server_path = '/opt/gluu/jetty/identity/custom/libs/oxtrust-api-server.jar'
 
-print "Downloading oxtrust-api-server-{}.jar".format(oxtrust_api_server_version)
+print("Downloading oxtrust-api-server-{}.jar".format(oxtrust_api_server_version))
 os.system('wget -nv {} -O {}'.format(oxtrust_api_server_url, oxtrust_api_server_path))
 os.system('chown jetty:jetty {}'.format(oxtrust_api_server_path))
 
@@ -43,7 +45,7 @@ for child in root:
         if 'oxtrust-api-server.jar' in child.text:
             break
 else:
-    print "Adding oxtrust-api-server-{}.jar to identity extraClasspath".format(oxtrust_api_server_version)
+    print("Adding oxtrust-api-server-{}.jar to identity extraClasspath".format(oxtrust_api_server_version))
     
     with open(identtiy_xml_fn) as f:
         identtiy_xml = f.readlines()
@@ -66,7 +68,7 @@ else:
         shutil.copyfile(identtiy_xml_fn+'~', identtiy_xml_fn)
         os.remove(identtiy_xml_fn+'~')
 
-print "Enabling custom script oxtrust_api_access_policy"
+print("Enabling custom script oxtrust_api_access_policy")
 
 if scripts_location == 'ldap':
     # Obtain ldap binddn, server and password
@@ -109,5 +111,5 @@ else:
     cbm = CBM(server, userName, userPassword)
     result = cbm.exec_query('UPDATE `gluu` USE KEYS "scripts_OO11-BAFE" SET `oxEnabled`=true')
 
-print "Restarting identity, this will take a while"
+print("Restarting identity, this will take a while")
 setupObject.run_service_command('identity', 'restart')
