@@ -922,7 +922,7 @@ class Setup(object):
             txt += 'city'.ljust(30) + self.city.rjust(35) + "\n"
             txt += 'state'.ljust(30) + self.state.rjust(35) + "\n"
             txt += 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n"
-            txt += 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n"
+            txt += 'Applications max ram'.ljust(30) + str(self.application_max_ram).rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
             
@@ -3209,7 +3209,7 @@ class Setup(object):
                 print("Please enter valid email address")
         
         self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
-        
+
         oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
 
         while True:
@@ -3732,11 +3732,11 @@ class Setup(object):
         def getString(value):
             if isinstance(value, str):
                 return value.strip()
-            elif isinstance(value, bool):
+            elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
                 return str(value)
             else:
                 return ''
-        
+
         try:
             p = Properties()
             keys = list(obj.__dict__.keys())
