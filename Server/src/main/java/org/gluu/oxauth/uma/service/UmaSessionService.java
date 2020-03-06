@@ -67,7 +67,7 @@ public class UmaSessionService {
         }
 
         log.trace("Generating new uma_session_id ...");
-        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "no");
+        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "");
 
         sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, true);
         log.trace("uma_session_id cookie created.");
