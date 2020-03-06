@@ -16,7 +16,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Basic (with external logout). Initialization"
         print "Basic (with external logout). Initialized successfully"
         return True   
@@ -27,7 +27,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 3
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

@@ -34,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Passport. init called"
 
         self.extensionModule = self.loadExternalModule(configurationAttributes.get("extension_module"))
@@ -61,7 +61,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getApiVersion(self):
-        return 2
+        return 11
 
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
