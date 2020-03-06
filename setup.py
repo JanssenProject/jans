@@ -5899,29 +5899,7 @@ if __name__ == '__main__':
     elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
         installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
         setup_loaded = installObject.load_properties(installObject.setup_properties_fn+'.enc')
-    
-    if not setup_loaded:
-        installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
-        installObject.promptForProperties()
 
-    # Validate Properties
-    installObject.check_properties()
-
-    proceed = True
-
-    # Show to properties for approval
-    print('\n%s\n' % repr(installObject))
-    if not setupOptions['noPrompt']:
-        proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
-        if proceed_prompt and proceed_prompt[0] !='y':
-            proceed = False
-
-    if setupOptions['noPrompt'] or proceed:
-        installObject.do_installation()
-        print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
-    else:
-        installObject.save_properties()
-    
     if thread_queue:
 
         msg = tui.msg
@@ -5940,4 +5918,30 @@ if __name__ == '__main__':
         GSA.installObject = installObject
 
         GSA.run()
+    else:
+
+        if not setup_loaded:
+            installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
+            installObject.promptForProperties()
+        else:
+            # Validate Properties
+            installObject.check_properties()
+
+        proceed = True
+
+        # Show to properties for approval
+        print('\n%s\n' % repr(installObject))
+        if not setupOptions['noPrompt']:
+            proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
+            if proceed_prompt and proceed_prompt[0] !='y':
+                proceed = False
+
+
+        if setupOptions['noPrompt'] or proceed:
+            installObject.do_installation()
+            print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
+        else:
+            installObject.save_properties()
+    
+
 # END
