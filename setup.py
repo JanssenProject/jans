@@ -3484,7 +3484,7 @@ class Setup(object):
         return argsc
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None, env=None, useWait=False, shell=False):
+    def run(self, args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
         output = ''
         log_arg = ' '.join(args) if type(args) is list else args
         self.logIt('Running: %s' % log_arg)
@@ -3524,6 +3524,8 @@ class Setup(object):
             self.logIt("Error running command : %s" % " ".join(args), True)
             self.logIt(traceback.format_exc(), True)
 
+        if get_stderr:
+            return output, err
 
         return output
 
@@ -4196,24 +4198,6 @@ class Setup(object):
 
         return result
 
-    def run_command(self, cmd):
-        
-        self.logIt("Running command: "+cmd)
-
-        p = subprocess.Popen(cmd, shell=True,
-                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, close_fds=True)
-
-        sin, sout, serr = (p.stdin, p.stdout, p.stderr)
-        o = sout.read().strip().decode('utf-8')
-        e = serr.read().strip().decode('utf-8')
-        
-        self.logIt(o+'\n')
-        
-        if e:
-            self.logIt(e+'\n', True)
-
-        return o, e
 
     def get_install_commands(self):
         if self.os_type in ('ubuntu', 'debian'):
@@ -4252,7 +4236,7 @@ class Setup(object):
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
-                sout, serr = self.run_command(query_command.format(package))
+                sout, serr = self.run(query_command.format(package), shell=True, get_stderr=True)
                 if check_text in sout+serr:
                     self.logIt('Package {0} was not installed'.format(package))
                     install_list[install_type].append(package)
@@ -4287,13 +4271,11 @@ class Setup(object):
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
                     if not self.os_type == 'fedora':
-                        sout, serr = self.run_command(update_command)
-                    self.run_command(install_command.format(packages))
-
-        self.run_command('pip install pyDes')
+                        sout, serr = self.run(update_command, shell=True)
+                    self.run(install_command.format(packages), shell=True)
 
         if self.os_type in ('ubuntu', 'debian'):
-            self.run_command('a2enmod ssl headers proxy proxy_http proxy_ajp')
+            self.run('a2enmod ssl headers proxy proxy_http proxy_ajp', shell=True)
             default_site = '/etc/apache2/sites-enabled/000-default.conf'
             if os.path.exists(default_site):
                 os.remove(default_site)
