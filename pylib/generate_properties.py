@@ -113,7 +113,11 @@ if needs_restart:
 from ldap.dn import explode_dn, str2dn, dn2str
 import ldap
 
-from jproperties import Properties
+
+if ((3, 0) <= sys.version_info <= (3, 9)):
+    from .jproperties import Properties
+elif ((2, 0) <= sys.version_info <= (2, 9)):
+    from jproperties import Properties
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
@@ -247,7 +251,11 @@ def generate_properties(as_dict=False):
                 setup_prop['encoded_couchbaseTrustStorePass'] = gluu_cb_prop['ssl.trustStore.pin']
                 setup_prop['couchbaseTrustStorePass'] = unobscure(gluu_cb_prop['ssl.trustStore.pin'])
 
-                from cbm import CBM
+
+                if ((3, 0) <= sys.version_info <= (3, 9)):
+                    from .cbm import CBM
+                elif ((2, 0) <= sys.version_info <= (2, 9)):
+                    from cbm import CBM
 
                 cbm = CBM(setup_prop['couchbase_hostname'], setup_prop['couchebaseClusterAdmin'], setup_prop['cb_password'])
                 cb_who = cbm.whoami()
