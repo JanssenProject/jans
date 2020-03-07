@@ -3810,44 +3810,42 @@ class Setup(object):
             with open(self.openDjIndexJson) as f:
                 index_json = json.load(f)
 
-            if index_json:
-                for attrDict in index_json:
-                    attr_name = attrDict['attribute']
-                    index_types = attrDict['index']
-                    for index_type in index_types:
-                        backend_names = attrDict['backend']
-                        for backend_name in backend_names:
-                            if (backend_name == backend):
-                                self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                                indexCmd = " ".join([
-                                                     self.ldapDsconfigCommand,
-                                                     index_command,
-                                                     '--backend-name',
-                                                     backend,
-                                                     '--type',
-                                                     'generic',
-                                                     '--index-name',
-                                                     attr_name,
-                                                     '--set',
-                                                     'index-type:%s' % index_type,
-                                                     '--set',
-                                                     'index-entry-limit:4000',
-                                                     '--hostName',
-                                                     self.ldap_hostname,
-                                                     '--port',
-                                                     self.ldap_admin_port,
-                                                     '--bindDN',
-                                                     '"%s"' % self.ldap_binddn,
-                                                     '-j', self.ldapPassFn,
-                                                     '--trustAll',
-                                                     '--noPropertiesFile',
-                                                     '--no-prompt'])
-                                self.run(['/bin/su',
-                                          'ldap',
-                                          '-c',
-                                          indexCmd], cwd=cwd)
-            else:
-                self.logIt('NO indexes found %s' % self.openDjIndexJson, True)
+            for attrDict in index_json:
+                attr_name = attrDict['attribute']
+                index_types = attrDict['index']
+                for index_type in index_types:
+                    backend_names = attrDict['backend']
+                    for backend_name in backend_names:
+                        if (backend_name == backend):
+                            self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
+                            indexCmd = " ".join([
+                                                 self.ldapDsconfigCommand,
+                                                 index_command,
+                                                 '--backend-name',
+                                                 backend,
+                                                 '--type',
+                                                 'generic',
+                                                 '--index-name',
+                                                 attr_name,
+                                                 '--set',
+                                                 'index-type:%s' % index_type,
+                                                 '--set',
+                                                 'index-entry-limit:4000',
+                                                 '--hostName',
+                                                 self.ldap_hostname,
+                                                 '--port',
+                                                 self.ldap_admin_port,
+                                                 '--bindDN',
+                                                 '"%s"' % self.ldap_binddn,
+                                                 '-j', self.ldapPassFn,
+                                                 '--trustAll',
+                                                 '--noPropertiesFile',
+                                                 '--no-prompt'])
+                            self.run(['/bin/su',
+                                      'ldap',
+                                      '-c',
+                                      indexCmd], cwd=cwd)
+
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
             self.logIt(traceback.format_exc(), True)
