@@ -4215,7 +4215,6 @@ class Setup(object):
 
         return o, e
 
-
     def get_install_commands(self):
         if self.os_type in ('ubuntu', 'debian'):
             install_command = 'DEBIAN_FRONTEND=noninteractive apt-get install -y {0}'
