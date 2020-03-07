@@ -1358,18 +1358,6 @@ class Setup(object):
 
         return p
 
-    def load_json(self, fn):
-        self.logIt('Loading JSON from %s' % fn)
-        try:
-            json_file = open(fn)
-            json_text = json_file.read()
-            json_file.close()
-            return json.loads(json_text)
-        except:
-            self.logIt("Unable to read or parse json file from %s" % fn, True)
-            self.logIt(traceback.format_exc(), True)
-        return None
-
     def obscure(self, data=""):
         engine = triple_des(self.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
         data = data.encode('ascii')
@@ -3818,7 +3806,10 @@ class Setup(object):
             self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
             # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
-            index_json = self.load_json(self.openDjIndexJson)
+
+            with open(self.openDjIndexJson) as f:
+                index_json = json.load(f)
+
             if index_json:
                 for attrDict in index_json:
                     attr_name = attrDict['attribute']
