@@ -61,7 +61,7 @@ class ATTRUBUTEDATATYPES:
             self.startup(installDir)
 
     def startup(self, installDir):
-
+        print("Initilizing attribute data types")
         self.installDir = installDir
         opendjTypesFn = os.path.join(self.installDir, 'schema/opendj_types.json')
         self.attribTypes = json.load(open(opendjTypesFn))
