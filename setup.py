@@ -743,7 +743,9 @@ class Setup(object):
                     ))
 
         self.mappingLocations = { group: 'ldap' for group in self.couchbaseBucketDict }  #default locations are OpenDJ
-        self.non_setup_properties = {}
+        self.non_setup_properties = {
+            'oxauth_client_jar_fn': os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
+                }
 
     def __repr__(self):
         try:
@@ -795,8 +797,6 @@ class Setup(object):
         if not os.path.exists(self.distFolder):
             print("Please ensure that you are running this script inside Gluu container.")
             sys.exit(1)
-
-        self.non_setup_properties['oxauth_client_jar_fn'] = os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
 
         #Download oxauth-client-jar-with-dependencies
         if not os.path.exists(self.non_setup_properties['oxauth_client_jar_fn']):
@@ -2995,6 +2995,51 @@ class Setup(object):
             "See /opt/couchbase/LICENSE.txt"+e
             )
 
+    def promptForCasaInstallation(self, promptForCasa='n'):
+        
+        if promptForCasa == 'n':
+            promptForCasa = self.getPrompt("Install Casa?", 
+                                            self.getDefaultOption(self.installCasa)
+                                            )[0].lower()
+        if promptForCasa == 'y':
+            self.installCasa = True
+            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+        else:
+            self.installCasa = False
+
+        if self.installCasa:
+            print ("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
+            if self.oxd_package:
+                print ("Else leave blank to install oxd server locally.")
+
+            while True:
+                oxd_server_https = input("oxd Server URL: ").lower()
+                
+                if (not oxd_server_https) and self.oxd_package:
+                    self.installOxd = True
+                    break
+
+                print ("Checking oxd server ...")
+                if self.check_oxd_server(oxd_server_https):
+                    oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
+                    oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+                    oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+                    self.writeFile(oxd_crt_fn, oxd_cert)
+                    ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+                    
+                    if not ssl_subjects['CN'] == oxd_hostname:
+                        print (('Hostname of oxd ssl certificate is {0}{1}{2} '
+                                'which does not match {0}{3}{2}, \ncasa won\'t start '
+                                'properly').format(
+                                        colors.DANGER,
+                                        ssl_subjects['CN'],
+                                        colors.ENDC,
+                                        oxd_hostname
+                                        ))
+                    else:
+                        self.oxd_server_https = oxd_server_https
+                        break
+
     def promptForProperties(self):
 
         if self.noPrompt:
@@ -3234,43 +3279,7 @@ class Setup(object):
             self.installPassport = False
 
         if os.path.exists(os.path.join(self.distGluuFolder, 'casa.war')):
-
-            promptForCasa = self.getPrompt("Install Casa?", 
-                                                self.getDefaultOption(self.installCasa)
-                                                )[0].lower()
-            if promptForCasa == 'y':
-                self.installCasa = True
-            else:
-                self.installCasa = False
-
-            if self.installCasa:
-                print("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
-                if self.oxd_package:
-                    print("Else leave blank to install oxd server locally.")
-
-                while True:
-                    oxd_server_https = input("oxd Server URL: ").lower()
-                    
-                    if (not oxd_server_https) and self.oxd_package:
-                        self.installOxd = True
-                        break
-
-                    print("Checking oxd server ...")
-                    if self.check_oxd_server(oxd_server_https) != True:
-                        oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
-                        oxd_ssl_result = self.check_oxd_ssl_cert(oxd_hostname, oxd_port)
-                        if oxd_ssl_result:
-                            print(('Hostname of oxd ssl certificate is {0}{1}{2} '
-                                    'which does not match {0}{3}{2}, \ncasa won\'t start '
-                                    'properly').format(
-                                            gluu_utils.colors.DANGER,
-                                            oxd_ssl_result['CN'],
-                                            gluu_utils.colors.ENDC,
-                                            oxd_hostname
-                                            ))
-                        else:
-                            self.oxd_server_https = oxd_server_https
-                            break
+            self.promptForCasaInstallation()
 
         oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
         if not oxd_port: 
@@ -4020,29 +4029,9 @@ class Setup(object):
 
         # casa service
         if self.installCasa:
-            
             # import_oxd_certificate2javatruststore:
             self.logIt("Importing oxd certificate")
-
-            try:
-
-                oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-                if not oxd_port: oxd_port=8443
-
-                oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-                oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
-                oxd_cert_tmp_fn = '/tmp/{}.crt'.format(oxd_alias)
-
-                with open(oxd_cert_tmp_fn,'w') as w:
-                    w.write(oxd_cert)
-
-                self.run(['/opt/jre/jre/bin/keytool', '-import', '-trustcacerts', '-keystore', 
-                                '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
-                                '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
-                        
-            except:
-                self.logIt(traceback.format_exc(), True)
-
+            self.import_oxd_certificate()
 
             self.pbar.progress("gluu", "Starting Casa Service")
             self.run_service_command('casa', 'start')
@@ -4051,7 +4040,32 @@ class Setup(object):
         if self.installGluuRadius:
             self.pbar.progress("gluu", "Starting Gluu Radius Service")
             self.run_service_command('gluu-radius', 'start')
-        
+
+    def import_oxd_certificate(self):
+
+        # import_oxd_certificate2javatruststore:
+        self.logIt("Importing oxd certificate")
+
+        try:
+
+            oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
+            if not oxd_port: oxd_port=8443
+
+            oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+            oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
+            oxd_cert_tmp_fn = '/tmp/{}.crt'.format(oxd_alias)
+
+            with open(oxd_cert_tmp_fn,'w') as w:
+                w.write(oxd_cert)
+
+            self.run(['/opt/jre/jre/bin/keytool', '-import', '-trustcacerts', '-keystore', 
+                            '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
+                            '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
+                    
+        except:
+            self.logIt(traceback.format_exc(), True)
+
+
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
@@ -4747,9 +4761,6 @@ class Setup(object):
                 self.post_messages.append('Roles: {}'.format(shib_user_roles))
 
     def install_couchbase_server(self):
-        # prepare multivalued list
-        gluu_utils.attribDataTypes.startup(gluu_utils.ces_dir)
-        gluu_utils.prepare_multivalued_list()
 
         if not self.cbm:
              self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)

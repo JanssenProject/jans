@@ -17,9 +17,7 @@ ces_dir = os.path.split(cur_dir)[0]
 
 attribDataTypes = ATTRUBUTEDATATYPES()
 
-
 listAttrib = ['member']
-
 
 supportes_os_types = {
                 'centos': ['7'],
@@ -192,6 +190,9 @@ def get_documents_from_ldif(ldif_file):
     parser.parse()
     documents = []
 
+    if not hasattr(attribDataTypes, 'attribTypes'):
+        attribDataTypes.startup(ces_dir)
+
     for dn, entry in parser.entries:
         if len(entry) > 2:
             key = get_key_from(dn)
@@ -231,3 +232,5 @@ def get_documents_from_ldif(ldif_file):
             documents.append((key, entry))
 
     return documents
+
+prepare_multivalued_list()
