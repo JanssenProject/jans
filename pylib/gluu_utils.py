@@ -183,7 +183,7 @@ def get_key_from(dn):
     return key
 
 
-prepare_multivalued_list()
+
 
 def get_documents_from_ldif(ldif_file):
     parser = myLdifParser(ldif_file)
@@ -192,6 +192,7 @@ def get_documents_from_ldif(ldif_file):
 
     if not hasattr(attribDataTypes, 'attribTypes'):
         attribDataTypes.startup(ces_dir)
+        prepare_multivalued_list()
 
     for dn, entry in parser.entries:
         if len(entry) > 2:
@@ -233,4 +234,4 @@ def get_documents_from_ldif(ldif_file):
 
     return documents
 
-prepare_multivalued_list()
+
