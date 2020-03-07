@@ -1,3 +1,4 @@
+
 #!/usr/bin/python3
 
 # The MIT License (MIT)
@@ -1000,29 +1001,6 @@ class Setup(object):
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
-
-    def choose_from_list(self, list_of_choices, choice_name="item", default_choice_index=0):
-        return_value = None
-        choice_map = {}
-        chosen_index = 0
-        print("\nSelect the number for the %s from the following list:" % choice_name)
-        for choice in list_of_choices:
-            choice_map[chosen_index] = choice
-            chosen_index += 1
-            print("  [%i]   %s" % (chosen_index, choice))
-        while not return_value:
-            choice_number = self.getPrompt("Please select a number listed above", str(default_choice_index + 1))
-            try:
-                choice_number = int(choice_number) - 1
-                if (choice_number >= 0) & (choice_number < len(list_of_choices)):
-                    return_value = choice_map[choice_number]
-                else:
-                    print('"%i" is not a valid choice' % (choice_number + 1))
-            except:
-                print('Cannot convert "%s" to a number' % choice_number)
-                self.logIt(traceback.format_exc(), True)
-        return return_value
-
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
@@ -4061,7 +4039,7 @@ class Setup(object):
             self.run(['/opt/jre/jre/bin/keytool', '-import', '-trustcacerts', '-keystore', 
                             '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
                             '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
-                    
+
         except:
             self.logIt(traceback.format_exc(), True)
 
