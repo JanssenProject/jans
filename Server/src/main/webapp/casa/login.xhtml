@@ -17,14 +17,14 @@
 			<h:form id="loginForm" class="pt2">
 				<div class="relative w5 mt4 pb2">
 					<h:inputText id="username" value="#{credentials.username}" styleClass="focused-text w-100 pb1 dark-gray" />
-                        	<label class="focused-label-big">#{msgs['login.username']}</label>
+					<label class="focused-label-big">#{msgs['login.username']}</label>
 				</div>
 				<div class="relative w5 mt4 pb1">
 					<h:inputSecret id="password" value="#{credentials.password}" styleClass="focused-text w-100 pb1 dark-gray" />
-                        	<label class="focused-label-big">#{msgs['login.password']}</label>
+					<label class="focused-label-big">#{msgs['login.password']}</label>
 				</div>
 				<div class="w5 mt2 pb3">
-					<a href="/identity/person/passwordReminder.htm" class="green hover-green f7-cust">#{msgs['login.forgotYourPassword']}</a>
+					<a href="/identity/person/passwordReminder.htm" class="green hover-green f7">#{msgs['login.forgotYourPassword']}</a>
 				</div>
 				<div class="mt4">
 					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
@@ -32,22 +32,23 @@
 				</div>
 				
 				<h:inputHidden id="platform" />
-				<h:inputHidden id="geolocation" />
 			</h:form>
 		</section>
 		<script>
 			//This is needed since JSF does not allow to set required attribute
-		 	$(".focused-text").attr("required", "true")
-		 	
-		 	$(document).ready(function () {
-		 		fillPlatformField()
-		 	})
-		 	
+			$(".focused-text").attr("required", "true")
+			
+			$(document).ready(function () {
+				fillPlatformField()
+			})
+			
 			function fillPlatformField() {
 				try {
+					//Fix browser version to contain major.minor portion only
 					re = /^([^\.]+\.[^\.]+)\..+/
 					result = re.exec(platform.version)
 					if (result != null) {
+						//There was a match against the regexp
 						platform.version = result[1]
 					}
 					document.getElementById("loginForm:platform").value = JSON.stringify(platform)
