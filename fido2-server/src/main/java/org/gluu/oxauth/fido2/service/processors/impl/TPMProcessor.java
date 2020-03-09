@@ -91,7 +91,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             CredAndCounterData credIdAndCounters) {
         JsonNode cborPublicKey;
         try {
-            cborPublicKey = dataMapperService.cborReadTree(authData.getCOSEPublicKey());
+            cborPublicKey = dataMapperService.cborReadTree(authData.getCosePublicKey());
         } catch (IOException e) {
             throw new Fido2RPRuntimeException("Problem with TPM attestation");
         }
