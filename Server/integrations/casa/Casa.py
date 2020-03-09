@@ -35,7 +35,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.modulePrefix = "casa-external_"
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
 
         print "Casa. init called"
         self.authenticators = {}
@@ -86,7 +86,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getApiVersion(self):
-        return 2
+        return 11
 
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
