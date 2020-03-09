@@ -79,7 +79,7 @@ public class CommonVerifiers {
         bufferSize += clientDataHash.length;
         byte[] credId = authData.getCredId();
         bufferSize += credId.length;
-        byte[] publicKey = convertCOSEtoPublicKey(authData.getCOSEPublicKey());
+        byte[] publicKey = convertCOSEtoPublicKey(authData.getCosePublicKey());
         bufferSize += publicKey.length;
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(reserved).put(rpIdHash).put(clientDataHash).put(credId).put(publicKey).array();
@@ -397,6 +397,10 @@ public class CommonVerifiers {
 
     public boolean verifyAtFlag(byte[] flags) {
         return (flags[0] & FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED) == FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED;
+    }
+
+    public boolean verifyEdFlag(byte[] flags) {
+        return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
     }
 
     public void verifyAttestationBuffer(boolean hasAtFlag, byte[] attestationBuffer) {
