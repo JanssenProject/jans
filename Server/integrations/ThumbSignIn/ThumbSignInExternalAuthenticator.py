@@ -20,7 +20,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = current_time_millis
         self.thumbsigninApiController = ThumbsigninApiController()
 
-    def init(self, configuration_attributes):
+    def init(self, customScript, configuration_attributes):
         print "ThumbSignIn. Initialization"
 
         global ts_host
@@ -297,7 +297,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

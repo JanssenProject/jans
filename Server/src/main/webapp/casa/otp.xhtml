@@ -23,7 +23,7 @@
 			<h:form id="loginForm" class="pt2">
 				<div class="relative w5 mt4 pb2">
 					<h:inputText id="otpCode" styleClass="focused-text w-100 pb1 dark-gray" autocomplete="off" />
-                        	<label class="focused-label-big">#{msgs['casa.enter_code']}</label>
+					<label class="focused-label-big">#{msgs['casa.enter_code']}</label>
 				</div>
 				<div class="flex justify-between items-center mt4">
 					<div class="pr4">
@@ -37,7 +37,7 @@
 		<ui:include src="/casa/casa.xhtml" />
 		<script>
 			//This is needed since JSF does not allow to set required attribute
-		 	$(".focused-text").attr("required", "true")
+			$(".focused-text").attr("required", "true")
 		</script>
 	</ui:define>
 
