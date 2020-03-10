@@ -24,7 +24,7 @@
           </elementProp>
           <elementProp name="oxd_port" elementType="Argument">
             <stringProp name="Argument.name">oxd_port</stringProp>
-            <stringProp name="Argument.value">57267</stringProp>
+            <stringProp name="Argument.value">8443</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="nonce" elementType="Argument">
@@ -234,7 +234,7 @@
 	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
 	&quot;username&quot; : &quot;${username}&quot;,&#xd;
 	&quot;password&quot; : &quot;${password}&quot;,&#xd;
-	&quot;state&quot; : &quot;${state}&quot;,&#xd;
+	&quot;state&quot; : &quot;${state}${session_state_counter}&quot;,&#xd;
 	&quot;nonce&quot; : &quot;${nonce}&quot;&#xd;
 }&#xd;
 </stringProp>
@@ -318,7 +318,7 @@
                   <stringProp name="Argument.value">{&#xd;
 	&quot;oxd_id&quot; : &quot;${oxd_id}&quot;,&#xd;
 	&quot;code&quot; : &quot;${code}&quot;,&#xd;
-	&quot;state&quot; : &quot;${state}&quot;&#xd;
+	&quot;state&quot; : &quot;${state}${session_state_counter}&quot;&#xd;
 }&#xd;
 </stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
@@ -327,7 +327,7 @@
             </elementProp>
             <stringProp name="HTTPSampler.domain"></stringProp>
             <stringProp name="HTTPSampler.port"></stringProp>
-            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/get-tokens-by-code</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -407,7 +407,7 @@
             </elementProp>
             <stringProp name="HTTPSampler.domain"></stringProp>
             <stringProp name="HTTPSampler.port"></stringProp>
-            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/get-user-info</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -476,7 +476,7 @@
   &quot;id_token_hint&quot;: &quot;${id_token_hint}&quot;,&#xd;
   &quot;post_logout_redirect_uri&quot;: &quot;${post_logout_redirect_uri}&quot;,&#xd;
   &quot;session_state&quot;: &quot;${session_state}&quot;,&#xd;
-  &quot;state&quot;: &quot;${state}&quot;&#xd;
+  &quot;state&quot;: &quot;${state}${session_state_counter}&quot;&#xd;
 }</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
@@ -484,7 +484,7 @@
             </elementProp>
             <stringProp name="HTTPSampler.domain"></stringProp>
             <stringProp name="HTTPSampler.port"></stringProp>
-            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.protocol">http</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/get-logout-uri</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
