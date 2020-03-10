@@ -115,7 +115,7 @@ public class DeviceRegistrationService {
 
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
-        deviceRegistration.setDeletable(false);
+
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
@@ -135,7 +135,11 @@ public class DeviceRegistrationService {
 		String deviceDn = getDnForU2fDevice(userInum, deviceRegistration.getId());
 
 		deviceRegistration.setDn(deviceDn);
-		addUserDeviceRegistration(userInum, deviceRegistration);
+
+		// Final registration entry should be without expiration
+        deviceRegistration.clearExpiration();
+
+        addUserDeviceRegistration(userInum, deviceRegistration);
 
 		return true;
 	}

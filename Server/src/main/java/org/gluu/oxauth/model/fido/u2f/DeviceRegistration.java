@@ -219,6 +219,11 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
         }
     }
 
+	public void clearExpiration() {
+        this.expirationDate = null;
+        this.deletable = false;
+	}
+
     public DeviceData getDeviceData() {
 		return deviceData;
 	}
