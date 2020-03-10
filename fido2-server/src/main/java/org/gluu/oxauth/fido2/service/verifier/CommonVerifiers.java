@@ -145,6 +145,20 @@ public class CommonVerifiers {
         verifySignature(signatureBytes, signatureBase, publicKey, signatureAlgorithm);
     }
 
+    public boolean verifyFlags(AuthData authData, UserVerification userVerification) {
+    	boolean userPresent = verifyUserPresent(authData);
+    	boolean userVerified = verifyUserVerified(authData);
+    	
+    	if (UserVerification.required == userVerification) {
+    		if (!(userPresent || userVerified)) {
+                throw new Fido2RPRuntimeException("User verification is required");
+    		}
+    	}
+
+    	
+    	return true;
+    }
+
     public boolean verifyUserPresent(AuthData authData) {
         if ((authData.getFlags()[0] & FLAG_USER_PRESENT) == 1) {
             return true;
@@ -533,9 +547,9 @@ public class CommonVerifiers {
 
     }
 
-    public String verifyUserVerification(JsonNode userVerification) {
+    public UserVerification verifyUserVerification(JsonNode userVerification) {
         try {
-            return UserVerification.valueOf(userVerification.asText()).name();
+            return UserVerification.valueOf(userVerification.asText());
         } catch (Exception e) {
             throw new Fido2RPRuntimeException("Wrong user verification parameter " + e.getMessage());
         }
