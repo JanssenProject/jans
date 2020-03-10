@@ -5770,6 +5770,7 @@
                 "oxStatus", 
                 "del", 
                 "oxAuthExpiration", 
+                "personInum",
                 "creationDate", 
                 "oxLastAccessTime", 
                 "oxTrustMetaLastModified", 
