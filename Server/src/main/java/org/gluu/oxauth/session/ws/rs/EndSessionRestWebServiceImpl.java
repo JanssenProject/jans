@@ -151,12 +151,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getId());
 
-            if (frontchannelUris.isEmpty()) { // no front-channel
+            if (frontchannelUris.isEmpty() && StringUtils.isNotBlank(postLogoutRedirectUri)) { // no front-channel
                 log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
-                if (StringUtils.isBlank(postLogoutRedirectUri)) {
-                    log.trace("postlogout_redirect_uri is missed");
-                    return Response.ok().build();
-                }
+
                 try {
                     log.trace("Redirect to postlogout_redirect_uri: " + postLogoutRedirectUri);
                     return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
