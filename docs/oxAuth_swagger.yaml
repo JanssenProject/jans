@@ -182,6 +182,8 @@ paths:
         200:
           description: OK
           content: {}
+        302:
+          $ref: '#/components/responses/Found'   
         400:
           $ref: '#/components/responses/InvalidRequest'        
         401:
@@ -283,6 +285,8 @@ paths:
         200:
           description: OK
           content: {}
+        302:
+          $ref: '#/components/responses/Found'   
         400:
           $ref: '#/components/responses/InvalidRequest'        
         401:
@@ -564,13 +568,11 @@ paths:
           example: token=2YotnFZFEjr1zCsicMWpAA
         - name: token_type_hint
           in: query
-          required: true
           description: ID Token previously issued by the Authorization Server being passed as a hint about the End-User.            
           schema:
             type : string
         - name: response_as_jwt
           in: query
-          required: false
           description: OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
           schema:
             type : string 
@@ -656,20 +658,11 @@ paths:
               type: object
               required:
               - token
-              - token_type_hint
-              - response_as_jwt
               properties:
                 token:
                   type : string
                   description: Client access token.
                   example: token=2YotnFZFEjr1zCsicMWpAA
-                token_type_hint:
-                  type : string  
-                  description: ID Token previously issued by the Authorization Server being passed as a hint about the End-User.
-                response_as_jwt:
-                  type : string
-                  description: OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
-                  example: response_as_jwt=false
       parameters:
         - name: Authorization
           in: header
@@ -1268,8 +1261,8 @@ paths:
                     type: string
                 run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
                   type: boolean
-                  description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script 
-                              and transfer claims into JWT.
+                  description: If true and access_token_as_jwt value is true then introspection script to be executed to transfer claims into JWT.
+                               The default value is false.                
                 keep_client_authorization_after_expiration:
                   type: boolean
                   description: Boolean value indicating if the client authorization will not be removed afer expiration
@@ -1686,7 +1679,6 @@ paths:
               type: object
               required:
               - token
-              - token_type_hint
               properties:
                 token:
                   type : string
@@ -2043,12 +2035,15 @@ paths:
                   introspection_endpoint:
                     type: string 
                     example: https://sample.com/oxauth/restv1/rpt/status
+                    description: If the authorization server supports token introspection as defined in this specification, it MUST supply this metadata value.
                   resource_registration_endpoint:
                     type: string
                     example: https://sample.com/oxauth/restv1/host/rsrc/resource_set
+                    description: The endpoint URI at which the resource server registers resources to put them under authorization manager protection.
                   permission_endpoint:
                     type: string
                     example: https://sample.com/oxauth/restv1/host/rsrc_pr
+                    description: The endpoint URI at which the resource server requests permissions on the client's behalf.
                   scope_endpoint:
                     type: string
                     example: https://sample.com/oxauth/restv1/uma/scopes
@@ -2077,6 +2072,8 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               title: UmaPermission
+              description: A permission is (requested or granted) authorized access to a particular resource with some number of scopes 
+                           bound to that resource. 
               type: object
               required:
               - resource_id
@@ -2435,7 +2432,6 @@ paths:
             type : string
         - name: token_type_hint
           in: query
-          required: true
           schema:
             type : string 
       responses:
@@ -2477,7 +2473,9 @@ paths:
                     type: array
                     items:
                       type: object
-                      description: List of UmaPermission granted to RPT.
+                      properties: {}
+                      description: List of UmaPermission granted to RPT. A permission is (requested or granted) authorized access to a 
+                                   particular resource with some number of scopes  bound to that resource.  
                   pct_claims:
                     type: object
                     additionalProperties:
@@ -2521,7 +2519,6 @@ paths:
               type: object
               required:
               - token
-              - token_type_hint
               properties:
                 token:
                   type : string
@@ -2575,7 +2572,9 @@ paths:
                     type: array
                     items:
                       type: object
-                      description: List of UmaPermission granted to RPT.
+                      properties: {}
+                      description: List of UmaPermission granted to RPT. A permission is (requested or granted) authorized access to a 
+                                   particular resource with some number of scopes  bound to that resource.  
                   pct_claims:
                     type: object
                     additionalProperties:
