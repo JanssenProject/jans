@@ -1261,8 +1261,8 @@ paths:
                     type: string
                 run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
                   type: boolean
-                  description: If true and access_token_as_jwt value is true then introspection script to be executed to transfer claims into JWT.
-                               The default value is false.                
+                  description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script 
+                              and transfer claims into JWT.         
                 keep_client_authorization_after_expiration:
                   type: boolean
                   description: Boolean value indicating if the client authorization will not be removed afer expiration
@@ -2081,11 +2081,15 @@ paths:
               properties:
                 resource_id:
                   type : string
-                  description: The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource that was previously registered.
+                  description: The identifier for a resource to which this client is seeking access. 
+                               The identifier MUST correspond to a resource that was previously registered.
                   example: 112210f47de98100
                 resource_scopes:
-                  type : string
-                  description: An array referencing one or more identifiers of scopes to which access is needed for this resource. Each scope identifier MUST correspond to a scope that was registered by RS for the referenced resource.
+                  type : array
+                  description: An array referencing zero or more strings representing scopes to which access was granted for this resource.
+                               Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.
+                  items:
+                    type: string                  
                 params:
                   type: object
                   description: A key/value map that can contain custom parameters.
@@ -2108,11 +2112,15 @@ paths:
                   properties:
                     resource_id:
                       type : string
-                      description: The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource that was previously registered.
+                      description: The identifier for a resource to which this client is seeking access. 
+                               The identifier MUST correspond to a resource that was previously registered.
                       example: 112210f47de98100
                     resource_scopes:
-                      type : string
-                      description: An array referencing one or more identifiers of scopes to which access is needed for this resource. Each scope identifier MUST correspond to a scope that was registered by RS for the referenced resource.
+                      type : array
+                      description: An array referencing zero or more strings representing scopes to which access was granted for this resource.
+                                   Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.
+                      items:
+                        type: string                      
                     params:
                       type: object
                       description: A key/value map that can contain custom parameters.
@@ -2473,9 +2481,37 @@ paths:
                     type: array
                     items:
                       type: object
-                      properties: {}
                       description: List of UmaPermission granted to RPT. A permission is (requested or granted) authorized access to a 
-                                   particular resource with some number of scopes  bound to that resource.  
+                                   particular resource with some number of scopes  bound to that resource.
+                      required:
+                      - resource_id
+                      - resource_scopes
+                      properties: 
+                        resource_id:
+                          type: string
+                          description: A string that uniquely identifies the protected resource, access to which has been granted to this client on 
+                                     behalf of this requesting party. The identifier MUST correspond to a resource that was previously registered as protected.
+                        resource_scopes:
+                          type : array
+                          description: An array referencing zero or more strings representing scopes to which access was granted for this resource.
+                               Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.
+                          items:
+                            type: string 
+                        exp:
+                          type: integer
+                          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission 
+                                       will expire. If the token-level exp value pre-dates a permission-level exp value, the token-level value takes
+                                       precedence.   
+                        iat: 
+                            type: integer
+                            description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this 
+                                         permission was originally issued. If the token-level iat value post-dates a permission-level iat value,
+                                         the token-level value takes precedence.
+                        nbf:
+                          type: integer
+                          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating the time before 
+                                       which this permission is not valid. If the token-level nbf value post-dates a permission-level nbf value, 
+                                       the token-level value takes precedence.                        
                   pct_claims:
                     type: object
                     additionalProperties:
@@ -2572,9 +2608,37 @@ paths:
                     type: array
                     items:
                       type: object
-                      properties: {}
                       description: List of UmaPermission granted to RPT. A permission is (requested or granted) authorized access to a 
-                                   particular resource with some number of scopes  bound to that resource.  
+                                   particular resource with some number of scopes  bound to that resource.
+                      required:
+                      - resource_id
+                      - resource_scopes
+                      properties: 
+                        resource_id:
+                          type: string
+                          description: A string that uniquely identifies the protected resource, access to which has been granted to this client on 
+                                     behalf of this requesting party. The identifier MUST correspond to a resource that was previously registered as protected.
+                        resource_scopes:
+                          type : array
+                          description: An array referencing zero or more strings representing scopes to which access was granted for this resource.
+                               Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.
+                          items:
+                            type: string 
+                        exp:
+                          type: integer
+                          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission 
+                                       will expire. If the token-level exp value pre-dates a permission-level exp value, the token-level value takes
+                                       precedence.   
+                        iat: 
+                            type: integer
+                            description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this 
+                                         permission was originally issued. If the token-level iat value post-dates a permission-level iat value,
+                                         the token-level value takes precedence.
+                        nbf:
+                          type: integer
+                          description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating the time before 
+                                       which this permission is not valid. If the token-level nbf value post-dates a permission-level nbf value, 
+                                       the token-level value takes precedence.  
                   pct_claims:
                     type: object
                     additionalProperties:
