@@ -33,6 +33,12 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "uid", consistency = true)
     private String userId;
 
+    @AttributeName
+    private String updatedAt;
+
+    @AttributeName(name = "oxCreationTimestamp")
+    private String createdAt;
+
     @AttributeName(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
 
@@ -64,6 +70,22 @@ public class SimpleUser implements Serializable {
 
     public void setOxAuthPersistentJwt(String[] oxAuthPersistentJwt) {
         this.oxAuthPersistentJwt = oxAuthPersistentJwt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
