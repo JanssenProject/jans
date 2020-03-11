@@ -8,6 +8,7 @@ package org.gluu.persist.model.base;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.gluu.persist.annotation.AttributeName;
@@ -34,10 +35,10 @@ public class SimpleUser implements Serializable {
     private String userId;
 
     @AttributeName
-    private String updatedAt;
+    private Date updatedAt;
 
     @AttributeName(name = "oxCreationTimestamp")
-    private String createdAt;
+    private Date createdAt;
 
     @AttributeName(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
@@ -72,19 +73,19 @@ public class SimpleUser implements Serializable {
         this.oxAuthPersistentJwt = oxAuthPersistentJwt;
     }
 
-    public String getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(String updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 
-    public String getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
