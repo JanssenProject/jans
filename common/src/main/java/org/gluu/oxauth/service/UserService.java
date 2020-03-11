@@ -114,6 +114,7 @@ public class UserService {
 	}
 
     public User updateUser(User user) {
+        user.setUpdatedAt(new Date());
 		return ldapEntryManager.merge(user);
 	}
 
@@ -134,7 +135,8 @@ public class UserService {
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
     		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
     	}
-    	
+
+    	user.setCreatedAt(new Date());
 		ldapEntryManager.persist(user);
 		
 		return getUser(uid);
@@ -153,7 +155,7 @@ public class UserService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		Set<String> allObjectClasses = new HashSet<String>();
+    		Set<String> allObjectClasses = new HashSet<>();
     		allObjectClasses.addAll(personCustomObjectClassList);
 
     		String currentObjectClasses[] = user.getCustomObjectClasses();
@@ -164,6 +166,7 @@ public class UserService {
     		user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
     	}
 
+    	user.setCreatedAt(new Date());
     	ldapEntryManager.persist(user);
 
 		return getUserByDn(user.getDn());
