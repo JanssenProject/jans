@@ -71,8 +71,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public String scriptName(String acr) {
-		if (scriptAliasMap.containsKey(acr))
+		if (scriptAliasMap.containsKey(acr)) {
 			return scriptAliasMap.get(acr);
+		}
+
 		return acr;
 	}
 
@@ -80,21 +82,33 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	protected void reloadExternal() {
 		// Group external authenticator configurations by usage type
 		this.customScriptConfigurationsMapByUsageType = groupCustomScriptConfigurationsMapByUsageType(this.customScriptConfigurationsNameMap);
-		scriptAliasMap = new HashMap();
-		for (String name: customScriptConfigurationsNameMap.keySet()) {
-			scriptAliasMap.put(name, name);
-			if (null != customScriptConfigurationsNameMap.get(name).getCustomScript()) {
-				if (null != customScriptConfigurationsNameMap.get(name).getCustomScript().getAliases()) {
-					for (String acr: customScriptConfigurationsNameMap.get(name).getCustomScript().getAliases())
-						if (StringUtils.isNotBlank(acr))
-							scriptAliasMap.put(acr, name);
+
+		// Build aliases map
+		this.scriptAliasMap = buildScriptAliases();
+
+		// Determine default authenticator for every usage type
+		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
+	}
+
+	private HashMap<String, String> buildScriptAliases() {
+		HashMap<String, String> newScriptAliases = new HashMap<String, String>();
+		for (Entry<String, CustomScriptConfiguration> script : customScriptConfigurationsNameMap.entrySet()) {
+			String name = script.getKey();
+			CustomScript customScript = script.getValue().getCustomScript();
+
+			newScriptAliases.put(name, name);
+
+			List<String> aliases = customScript.getAliases();
+			if (aliases != null) {
+				for (String alias : aliases) {
+					if (StringUtils.isNotBlank(alias)) {
+						newScriptAliases.put(alias, name);
+					}
 				}
 			}
 		}
 		
-
-		// Determine default authenticator for every usage type
-		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
+		return newScriptAliases;
 	}
 
 	@Override
