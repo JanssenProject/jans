@@ -25,8 +25,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     private PersistenceService persistenceService;
 
     @Inject
-    public PersistenceServiceImpl(SqlPersistenceProvider sqlProvider, ConfigurationService configurationService) {
-        this.sqlProvider = sqlProvider;
+    public PersistenceServiceImpl(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
@@ -38,11 +37,15 @@ public class PersistenceServiceImpl implements PersistenceService {
     private PersistenceService createServiceInstance() {
         String storage = configurationService.getConfiguration().getStorage();
         if ("h2".equalsIgnoreCase(storage)) {
+            sqlProvider = new H2PersistenceProvider(configurationService);
             setTimerForDBCleanUpTask();
-
             return new SqlPersistenceServiceImpl(sqlProvider);
         } else if ("redis".equalsIgnoreCase(storage)) {
             return new RedisPersistenceService(configurationService.getConfiguration());
+        } else if ("jdbc".equalsIgnoreCase(storage)) {
+            sqlProvider = new JDBCPersistenceProvider(configurationService);
+            setTimerForDBCleanUpTask();
+            return new SqlPersistenceServiceImpl(sqlProvider);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + configurationService.get());
     }
