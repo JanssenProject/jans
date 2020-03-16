@@ -7,10 +7,8 @@
 package org.oxauth.persistence.model;
 
 import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
+import org.gluu.persist.model.base.DeletableEntity;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,7 +19,7 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "oxAuthCustomScope")
-public class Scope implements Serializable {
+public class Scope extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
@@ -44,7 +42,7 @@ public class Scope implements Serializable {
 
     @AttributeName(name = "oxScopeType")
     private ScopeType scopeType;
- 
+
     @AttributeName(name = "oxAuthClaim")
     private List<String> oxAuthClaims;
 
@@ -59,6 +57,21 @@ public class Scope implements Serializable {
 
     @AttributeName(name = "oxUmaPolicyScriptDn")
     private List<String> umaAuthorizationPolicies;
+
+    @AttributeName(name = "oxAttributes")
+    @JsonObject
+    private ScopeAttributes attributes;
+
+    public ScopeAttributes getAttributes() {
+        if (attributes == null) {
+            attributes = new ScopeAttributes();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(ScopeAttributes attributes) {
+        this.attributes = attributes;
+    }
 
     public String getDn() {
         return dn;
@@ -93,14 +106,14 @@ public class Scope implements Serializable {
     }
 
     public ScopeType getScopeType() {
-		return scopeType;
-	}
+        return scopeType;
+    }
 
-	public void setScopeType(ScopeType scopeType) {
-		this.scopeType = scopeType;
-	}
+    public void setScopeType(ScopeType scopeType) {
+        this.scopeType = scopeType;
+    }
 
-	public List<String> getOxAuthClaims() {
+    public List<String> getOxAuthClaims() {
         return this.oxAuthClaims;
     }
 
@@ -125,10 +138,10 @@ public class Scope implements Serializable {
     }
 
     public List<String> getDynamicScopeScripts() {
-		return dynamicScopeScripts;
-	}
+        return dynamicScopeScripts;
+    }
 
-	public void setDynamicScopeScripts(List<String> dynamicScopeScripts) {
+    public void setDynamicScopeScripts(List<String> dynamicScopeScripts) {
         this.dynamicScopeScripts = dynamicScopeScripts;
     }
 
@@ -183,6 +196,9 @@ public class Scope implements Serializable {
                 ", oxAuthGroupClaims=" + oxAuthGroupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
+                ", deletable=" + isDeletable() +
+                ", expirationDate=" + getExpirationDate() +
+                ", attributes=" + attributes +
                 '}';
     }
 }

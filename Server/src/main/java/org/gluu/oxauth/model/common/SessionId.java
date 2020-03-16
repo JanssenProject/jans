@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
 import org.gluu.persist.annotation.*;
+import org.gluu.persist.model.base.Deletable;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
@@ -26,14 +27,14 @@ import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 @Named("sessionUser")
 @DataEntry
 @ObjectClass(value = "oxAuthSessionId")
-public class SessionId implements Serializable {
+public class SessionId implements Deletable, Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
     @DN
     private String dn;
 
-    @AttributeName(name = "oxAuthSessionId")
+    @AttributeName(name = "oxId")
     private String id;
 
     @AttributeName(name = "oxLastAccessTime")
@@ -48,7 +49,7 @@ public class SessionId implements Serializable {
     @AttributeName(name = "oxState")
     private SessionIdState state;
 
-    @AttributeName(name = "oxAuthSessionState")
+    @AttributeName(name = "oxSessionState")
     private String sessionState;
 
     @AttributeName(name = "oxAuthPermissionGranted")
@@ -71,6 +72,15 @@ public class SessionId implements Serializable {
     @JsonObject
     @AttributeName(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
+
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private Boolean deletable = true;
+
+    @AttributeName(name = "creationDate")
+    private Date creationDate = new Date();
 
     @Transient
     private transient boolean persisted;
@@ -185,6 +195,9 @@ public class SessionId implements Serializable {
     }
 
     public SessionIdAccessMap getPermissionGrantedMap() {
+        if (permissionGrantedMap == null) {
+            permissionGrantedMap = new SessionIdAccessMap();
+        }
         return permissionGrantedMap;
     }
 
@@ -223,6 +236,30 @@ public class SessionId implements Serializable {
         this.persisted = persisted;
     }
 
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public Boolean isDeletable() {
+        return deletable != null ? deletable : true;
+    }
+
+    public void setDeletable(Boolean deletable) {
+        this.deletable = deletable;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -241,7 +278,7 @@ public class SessionId implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SessionState {");
+        sb.append("SessionId {");
         sb.append("dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);

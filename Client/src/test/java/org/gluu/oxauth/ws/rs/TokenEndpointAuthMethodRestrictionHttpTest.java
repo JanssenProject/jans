@@ -9378,7 +9378,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS384_keyId", "dnName",
             "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384(

@@ -60,6 +60,11 @@ public class DeviceRegistrationService {
 	}
 
 	public void prepareBranch(final String userInum) {
+        String baseDn = getBaseDnForU2fUserDevices(userInum);
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
 		// Create U2F user device registrations branch if needed
 		if (!containsBranch(userInum)) {
 			addBranch(userInum);
@@ -93,7 +98,7 @@ public class DeviceRegistrationService {
 		String baseDn = userService.getDnForUser(null);
 
 		Filter deviceObjectClassFilter = Filter.createEqualityFilter("objectClass", "oxDeviceRegistration");
-		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", String.valueOf(getKeyHandleHashCode(keyHandleDecoded)));
+		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", getKeyHandleHashCode(keyHandleDecoded));
 		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("oxDeviceKeyHandle", keyHandle);
 		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
 
@@ -110,7 +115,7 @@ public class DeviceRegistrationService {
 
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
-        deviceRegistration.setDeletable(false);
+
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
@@ -130,7 +135,11 @@ public class DeviceRegistrationService {
 		String deviceDn = getDnForU2fDevice(userInum, deviceRegistration.getId());
 
 		deviceRegistration.setDn(deviceDn);
-		addUserDeviceRegistration(userInum, deviceRegistration);
+
+		// Final registration entry should be without expiration
+        deviceRegistration.clearExpiration();
+
+        addUserDeviceRegistration(userInum, deviceRegistration);
 
 		return true;
 	}

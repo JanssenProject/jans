@@ -50,7 +50,9 @@ import static org.testng.Assert.*;
  */
 public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 
-	@ArquillianResource
+    public static final String ACR_VALUE = "basic";
+    
+    @ArquillianResource
 	private URI url;
 
 	private static String clientId1;
@@ -127,7 +129,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] {ACR_VALUE})));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -233,7 +235,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -337,7 +339,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -440,7 +442,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -544,7 +546,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);
@@ -648,7 +650,7 @@ public class OpenIDRequestObjectWithESAlgEmbeddedTest extends BaseTest {
 			jwtAuthorizationRequest
 					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
 			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
-					ClaimValue.createValueList(new String[] { "2" })));
+					ClaimValue.createValueList(new String[] { ACR_VALUE })));
 			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
 			authorizationRequest.setRequest(authJwt);
 			System.out.println("Request JWT: " + authJwt);

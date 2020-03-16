@@ -24,7 +24,7 @@ import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version July 10, 2019
+ * @version August 22, 2019
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -71,14 +71,18 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         clientRequest.accept(mediaTypes);
         clientRequest.setHttpMethod(getHttpMethod());
 
+        // Support AWS LB
+        clientRequest.followRedirects(true);
+
         // Call REST Service and handle response
+        String entity = null;
         try {
             clientResponse = clientRequest.get(String.class);
             int status = clientResponse.getStatus();
 
             setResponse(new OpenIdConfigurationResponse(status));
 
-            String entity = clientResponse.getEntity(String.class);
+            entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
@@ -166,6 +170,12 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 if (jsonObj.has(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
                     getResponse().setFrontChannelLogoutSessionSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED));
                 }
+                if (jsonObj.has(BACKCHANNEL_LOGOUT_SUPPORTED)) {
+                    getResponse().setBackchannelLogoutSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SUPPORTED));
+                }
+                if (jsonObj.has(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
+                    getResponse().setBackchannelLogoutSessionSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED));
+                }
                 if (jsonObj.has(REQUIRE_REQUEST_URI_REGISTRATION)) {
                     getResponse().setRequireRequestUriRegistration(jsonObj.getBoolean(REQUIRE_REQUEST_URI_REGISTRATION));
                 }
@@ -175,9 +185,22 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 if (jsonObj.has(OP_TOS_URI)) {
                     getResponse().setOpTosUri(jsonObj.getString(OP_TOS_URI));
                 }
+
+                // CIBA
+                if (jsonObj.has(BACKCHANNEL_AUTHENTICATION_ENDPOINT)) {
+                    getResponse().setBackchannelAuthenticationEndpoint(jsonObj.getString(BACKCHANNEL_AUTHENTICATION_ENDPOINT));
+                }
+                Util.addToListIfHas(getResponse().getBackchannelTokenDeliveryModesSupported(), jsonObj, BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED);
+                Util.addToListIfHas(getResponse().getBackchannelAuthenticationRequestSigningAlgValuesSupported(), jsonObj, BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED);
+                if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
+                    getResponse().setBackchannelUserCodeParameterSupported(jsonObj.getBoolean(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
+                }
             }
         } catch (JSONException e) {
             LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
+            if (entity != null) {
+            	LOG.error("Invalid JSON: " + entity);
+            }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             throw e;

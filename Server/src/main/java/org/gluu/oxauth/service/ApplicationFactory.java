@@ -68,8 +68,8 @@ public class ApplicationFactory {
 	public CacheConfiguration getCacheConfiguration() {
 		CacheConfiguration cacheConfiguration = configurationService.getConfiguration().getCacheConfiguration();
 		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-			log.error("Failed to read cache configuration from LDAP. Please check configuration oxCacheConfiguration attribute " +
-					"that must contain cache configuration JSON represented by CacheConfiguration.class. Applieance DN: " + configurationService.getConfiguration().getDn());
+			log.error("Failed to read cache configuration from DB. Please check configuration oxCacheConfiguration attribute " +
+					"that must contain cache configuration JSON represented by CacheConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
 			log.info("Creating fallback IN-MEMORY cache configuration ... ");
 
 			cacheConfiguration = new CacheConfiguration();
