@@ -3,30 +3,37 @@
  */
 package org.gluu.oxd.common;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
+import org.gluu.oxd.common.proxy.ProxyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
-import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -48,7 +55,6 @@ public class CoreUtils {
     public static boolean isExpired(Date expiredAt) {
         return expiredAt != null && expiredAt.before(new Date());
     }
-
 
 
     /**
@@ -179,53 +185,70 @@ public class CoreUtils {
      * @return http client
      * @throws Exception
      */
-    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password) throws Exception {
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        try (FileInputStream instream = new FileInputStream(pathToKeyStore)) {
-            keyStore.load(instream, password.toCharArray());
-        }
 
-        HttpClient httpClient = new DefaultHttpClient();
 
-        SSLSocketFactory socketFactory = new SSLSocketFactory(keyStore);
-        socketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, ProxyConfiguration proxyConfiguration) throws Exception {
 
-        httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", socketFactory, 443));
-        httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        SSLContext sslcontext = SSLContexts.custom()
+                .loadTrustMaterial(pathToKeyStore, password.toCharArray())
+                .build();
 
-        return httpClient;
+        SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(
+                sslcontext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+        /*Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("https", sslConSocFactory)
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .build();
+        HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);*/
+
+        return createClient(sslConSocFactory, proxyConfiguration);
     }
 
-    public static HttpClient createHttpClientTrustAll() throws NoSuchAlgorithmException, KeyManagementException {
-//        System.setProperty("javax.net.debug", "SSL,handshake,trustmanager");
+    public static HttpClient createHttpClientTrustAll(ProxyConfiguration proxyConfiguration) throws NoSuchAlgorithmException, KeyManagementException,
+            KeyStoreException {
 
-//        SSLSocketFactory sf = new SSLSocketFactory(new TrustStrategy() {
-//            @Override
-//            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-//                return true;
-//            }
-//        }, new AllowAllHostnameVerifier());
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
+        SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true;
             }
+        }).build();
+        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
 
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+        return createClient(sslContextFactory, proxyConfiguration);
+    }
+
+    public static HttpClient createClient(SSLConnectionSocketFactory connectionFactory, ProxyConfiguration proxyConfiguration) {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        HttpClientBuilder httClientBuilder = HttpClients.custom();
+
+        if (connectionFactory != null) {
+            httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
+        }
+
+        if (proxyConfiguration != null && !Strings.isNullOrEmpty(proxyConfiguration.getHost())) {
+            HttpHost proxyhost = null;
+            if (isSafePort(proxyConfiguration.getPort()) && !Strings.isNullOrEmpty(proxyConfiguration.getProtocol())) {
+                proxyhost = new HttpHost(proxyConfiguration.getHost(), proxyConfiguration.getPort(), proxyConfiguration.getProtocol());
+            } else if (isSafePort(proxyConfiguration.getPort())) {
+                proxyhost = new HttpHost(proxyConfiguration.getHost(), proxyConfiguration.getPort());
+            } else {
+                proxyhost = new HttpHost(proxyConfiguration.getHost());
             }
+            //HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyhost);
+            //httClientBuilder = httClientBuilder.setRoutePlanner(routePlanner);
+            httClientBuilder = httClientBuilder.setProxy(proxyhost);
+        }
 
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        }}, new SecureRandom());
+        CloseableHttpClient httpClient = httClientBuilder
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .setConnectionManager(cm).build();
 
-        SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-        sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
 
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        registry.register(new Scheme("https", 443, sf));
-        ClientConnectionManager ccm = new PoolingClientConnectionManager(registry);
-        return new DefaultHttpClient(ccm);
+        return httpClient;
     }
 
     public static String secureRandomString() {
@@ -259,5 +282,9 @@ public class CoreUtils {
             LOG.error(e.getMessage(), e);
         }
         return log;
+    }
+
+    private static boolean isSafePort(Integer input) {
+        return input != null && input > 0;
     }
 }
