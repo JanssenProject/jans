@@ -77,7 +77,7 @@ public class UmaPermissionService {
        return UUID.randomUUID().toString();
     }
 
-    public String addPermission(UmaPermissionList permissionList, String clientDn) throws Exception {
+    public String addPermission(UmaPermissionList permissionList, String clientDn) {
         try {
             List<UmaPermission> created = createPermissions(permissionList, ticketExpirationDate());
             for (UmaPermission permission : created) {

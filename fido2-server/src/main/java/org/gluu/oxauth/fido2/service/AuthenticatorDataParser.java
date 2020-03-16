@@ -31,6 +31,10 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
+/**
+ * @author Yuriy Movchan
+ * @version March 9, 2020
+ */
 @ApplicationScoped
 public class AuthenticatorDataParser {
 
@@ -58,84 +62,104 @@ public class AuthenticatorDataParser {
         AuthData authData = new AuthData();
         byte[] buffer;
 
+        // TODO: Fido2. Why there is difference there???
         if (isAttestation)
             buffer = base64Service.decode(incomingAuthData.getBytes());
         else {
             buffer = base64Service.urlDecode(incomingAuthData.getBytes());
         }
         authData.setAuthDataDecoded(buffer);
+
         int offset = 0;
         byte[] rpIdHashBuffer = Arrays.copyOfRange(buffer, offset, offset += 32);
-        log.info("RPIDHASH hex {}", Hex.encodeHexString(rpIdHashBuffer));
-        byte[] flagsBuffer = Arrays.copyOfRange(buffer, offset, offset += 1);
+        log.debug("RPIDHASH hex {}", Hex.encodeHexString(rpIdHashBuffer));
 
+        byte[] flagsBuffer = Arrays.copyOfRange(buffer, offset, offset += 1);
         boolean hasAtFlag = commonVerifiers.verifyAtFlag(flagsBuffer);
-        log.info("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
+        log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
-        log.info("COUNTERS hex {}", Hex.encodeHexString(counterBuffer));
+        log.debug("COUNTERS hex {}", Hex.encodeHexString(counterBuffer));
         authData.setRpIdHash(rpIdHashBuffer).setFlags(flagsBuffer).setCounters(counterBuffer);
+
         byte[] attestationBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
         commonVerifiers.verifyAttestationBuffer(hasAtFlag, attestationBuffer);
 
         if (hasAtFlag) {
             byte[] aaguidBuffer = Arrays.copyOfRange(buffer, offset, offset += 16);
-            log.info("AAGUID hex {}", Hex.encodeHexString(aaguidBuffer));
+            log.debug("AAGUID hex {}", Hex.encodeHexString(aaguidBuffer));
 
             byte[] credIDLenBuffer = Arrays.copyOfRange(buffer, offset, offset += 2);
-            log.info("CredIDLen hex {}", Hex.encodeHexString(credIDLenBuffer));
+            log.debug("CredIDLen hex {}", Hex.encodeHexString(credIDLenBuffer));
             int size = ByteBuffer.wrap(credIDLenBuffer).asShortBuffer().get();
-            log.info("size {}", size);
+            log.debug("CredIDLen size {}", size);
             byte[] credIDBuffer = Arrays.copyOfRange(buffer, offset, offset += size);
-            log.info("credID hex {}", Hex.encodeHexString(credIDBuffer));
+            log.debug("CredID hex {}", Hex.encodeHexString(credIDBuffer));
 
             byte[] cosePublicKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
-            log.info("cosePublicKey hex {}", Hex.encodeHexString(cosePublicKeyBuffer));
+            log.debug("CosePublicKey hex {}", Hex.encodeHexString(cosePublicKeyBuffer));
 
-            long keySize = 0;
-            CBORParser parser = null;
-            try {
-                parser = dataMapperService.cborCreateParser(cosePublicKeyBuffer);
-                while (!parser.isClosed()) {
-                    JsonToken t = parser.nextToken();
-                    JsonLocation tocloc = parser.getTokenLocation();
-                    if (t.isStructEnd()) {
-                        keySize = tocloc.getByteOffset();
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                throw new Fido2RPRuntimeException(e.getMessage());
-            } finally {
-                if (parser != null) {
-                    try {
-                        parser.close();
-                    } catch (IOException e) {
-                        log.info("exception when closing a parser {}", e.getMessage());
-                    }
-                }
-            }
+            long keySize = getCborDataSize(cosePublicKeyBuffer);
             offset += keySize;
 
             int keyType = -100;
             try {
                 JsonNode key = dataMapperService.cborReadTree(cosePublicKeyBuffer);
                 keyType = key.get("3").asInt();
-                log.info("cosePublicKey {}", key);
+                log.debug("AttestedCredentialData cosePublicKey {}", key);
             } catch (IOException e) {
-                throw new Fido2RPRuntimeException("Unable to parse public key CBOR");
+                throw new Fido2RPRuntimeException("Unable to parse public key CBOR", e);
             }
-            authData.setAaguid(aaguidBuffer).setCredId(credIDBuffer).setCOSEPublicKey(cosePublicKeyBuffer).setKeyType(keyType);
+            authData.setAaguid(aaguidBuffer).setCredId(credIDBuffer).setCosePublicKey(cosePublicKeyBuffer).setKeyType(keyType);
+            
+            // Process extensions
+            boolean hasEdFlag = commonVerifiers.verifyEdFlag(flagsBuffer);
+            if (hasEdFlag) {
+                byte[] extensionKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
+                log.debug("ExtensionKeyBuffer hex {}", Hex.encodeHexString(extensionKeyBuffer));
+                long extSize = getCborDataSize(extensionKeyBuffer);
+	            offset += extSize;
+            }
+
             byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
-            commonVerifiers.verifyNoLeftovers(leftovers);
+        	commonVerifiers.verifyNoLeftovers(leftovers);
         }
         authData.setAttestationBuffer(buffer);
 
         return authData;
     }
 
+	private long getCborDataSize(byte[] cosePublicKeyBuffer) {
+		long keySize = 0;
+		CBORParser parser = null;
+		try {
+		    parser = dataMapperService.cborCreateParser(cosePublicKeyBuffer);
+		    while (!parser.isClosed()) {
+		        JsonToken t = parser.nextToken();
+		        if (t.isStructEnd()) {
+		            JsonLocation tocloc = parser.getTokenLocation();
+		            keySize = tocloc.getByteOffset();
+		            break;
+		        }
+		    }
+		} catch (IOException e) {
+		    throw new Fido2RPRuntimeException(e.getMessage(), e);
+		} finally {
+		    if (parser != null) {
+		        try {
+		            parser.close();
+		        } catch (IOException e) {
+		            log.error("Exception when closing a parser {}", e.getMessage());
+		        }
+		    }
+		}
+
+		return keySize;
+	}
+
     public int parseCounter(byte[] counter) {
         int cnt = ByteBuffer.wrap(counter).asIntBuffer().get();
         return cnt;
     }
+
 }

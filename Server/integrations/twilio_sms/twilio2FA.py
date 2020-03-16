@@ -30,7 +30,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.mobile_number = None
         self.identity = CdiUtil.bean(Identity)
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Twilio SMS. Initialization"
         self.ACCOUNT_SID = None
         self.AUTH_TOKEN = None
@@ -65,7 +65,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -179,7 +179,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
-            facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
 
             return False
 
@@ -207,7 +207,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
-            return "/auth/twiliosms/twiliosms.xhtml"
+            return "/auth/otp_sms/otp_sms.xhtml"
 
         return ""
 

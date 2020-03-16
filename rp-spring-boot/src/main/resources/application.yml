@@ -21,7 +21,5 @@ spring:
             issuer-uri: https://ce-dev5.gluu.org
         registration:
           oxauth:
-#            client-id: your-app-client-id
-#            client-secret: your-app-client-secret
-            client-id: a48f0d8c-8c67-472d-9126-0913ebb36e74
-            client-secret: MdoMEajZYTNT5ONqdwINeh24
+            client-id: your-app-client-id
+            client-secret: your-app-client-secret

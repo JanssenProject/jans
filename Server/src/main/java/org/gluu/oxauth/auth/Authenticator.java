@@ -49,7 +49,7 @@ import java.util.Map.Entry;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version January 16, 2019
+ * @version August 20, 2019
  */
 @RequestScoped
 @Named
@@ -192,8 +192,12 @@ public class Authenticator {
             logger.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword
                     + ", credentials.username: " + credentials.getUsername() + ")");
             if (service && (StringHelper.isNotEmpty(credentials.getUsername())
-                    && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword())) && servletRequest != null
-                    && (servletRequest.getRequestURI().endsWith("/token") || servletRequest.getRequestURI().endsWith("/revoke")))) {
+                    && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword()))
+                    && servletRequest != null
+                    && (servletRequest.getRequestURI().endsWith("/token")
+                    || servletRequest.getRequestURI().endsWith("/revoke")
+                    || servletRequest.getRequestURI().endsWith("/userinfo")
+                    || servletRequest.getRequestURI().endsWith("/bc-authorize")))) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
                 if (authenticated) {
                     result = Constants.RESULT_SUCCESS;
@@ -415,6 +419,9 @@ public class Authenticator {
             }
 
             if (this.authStep == countAuthenticationSteps) {
+                // Store/Update extra parameters in session attributes map
+                updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
+
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
                 authenticationService.quietLogin(credentials.getUsername());
@@ -825,7 +832,7 @@ public class Authenticator {
         facesMessages.add(severity, message);
     }
 
-    public String getTwilioNumber() {
+    public String getMaskedNumber() {
         String result = getFullNumber();
         if (result != null && result.length() > 7) {
             String sub = result.substring(4, 6);

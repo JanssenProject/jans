@@ -6,38 +6,32 @@
 
 package org.gluu.oxauth.model.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.HasParamName;
 import org.gluu.persist.annotation.AttributeEnum;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version September 4, 2019
  */
 
 public class Util {
@@ -126,6 +120,12 @@ public class Util {
         }
     }
 
+    public static void addToJSONObjectIfNotNull(JSONObject p_jsonObject, String key, AttributeEnum value) throws JSONException {
+        if (p_jsonObject != null && value != null && StringUtils.isNotBlank(key)) {
+            p_jsonObject.put(key, value.getValue());
+        }
+    }
+
     public static void addToJSONObjectIfNotNull(JSONObject p_jsonObject, String key, String[] value) throws JSONException {
         if (p_jsonObject != null && value != null && StringUtils.isNotBlank(key)) {
             p_jsonObject.put(key, new JSONArray(Arrays.asList(value)));
@@ -182,9 +182,9 @@ public class Util {
 
     public static List<String> splittedStringAsList(String p_string, String p_delimiter) {
         final List<String> result = new ArrayList<String>();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(p_string) && org.apache.commons.lang.StringUtils.isNotEmpty(p_delimiter)) {
+        if (StringUtils.isNotBlank(p_string)) {
             final String[] array = p_string.split(p_delimiter);
-            if (array != null && array.length > 0) {
+            if (array.length > 0) {
                 result.addAll(Arrays.asList(array));
             }
         }
@@ -259,4 +259,26 @@ public class Util {
         }
     }
 
+    // SHA-1 (160 bits)
+    public static String toSHA1HexString(String input) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+            return byteArrayToHexString(md.digest(input.getBytes()));
+        }
+        catch(NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static String byteArrayToHexString(byte[] b) {
+        String result = "";
+        for (int i=0; i < b.length; i++) {
+            result +=
+                    Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+        }
+        return result;
+    }
 }

@@ -50,6 +50,11 @@
 			<class name="org.gluu.oxauth.ws.rs.EndSessionRestWebServiceEmbeddedTest" />
 		</classes>
 	</test>
+    <test name="End Session Backchannel test (embedded)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.EndSessionBackchannelRestServerTest" />
+        </classes>
+    </test>
 
 	<!-- JWK test -->
 	<test name="JWK test (embedded)" enabled="true">
@@ -260,6 +265,13 @@
 			<class name="org.gluu.oxauth.comp.CleanUpClientTest" />
 		</classes>
 	</test>
+
+    <!-- Enable it when client jks is regenerated -->
+    <test name="JWT cross-check test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.comp.JwtCrossCheckTest" />
+        </classes>
+    </test>
 
 	<parameter name="serverUri" value="https://${test.server.name}" />
 	<parameter name="authorizePath" value="restv1/authorize" />

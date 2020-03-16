@@ -1,1 +1,1 @@
-mvn -Dmaven.test.skip=true clean compile install
+mvn -Dmaven.test.skip=true -Ddependency-check.skip=true clean compile install

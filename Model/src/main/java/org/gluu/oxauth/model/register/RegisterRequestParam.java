@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 
 public enum RegisterRequestParam {
@@ -235,6 +235,16 @@ public enum RegisterRequestParam {
     FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED("frontchannel_logout_session_required"),
 
     /**
+     * RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
+     */
+    BACKCHANNEL_LOGOUT_URI("backchannel_logout_uri"),
+
+    /**
+     * Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in the Logout Token to identify the RP session with the OP when the backchannel_logout_uri is used. If omitted, the default value is false.
+     */
+    BACKCHANNEL_LOGOUT_SESSION_REQUIRED("backchannel_logout_session_required"),
+
+    /**
      * Array of request_uri values that are pre-registered by the Client for use at the Authorization Server.
      */
     REQUEST_URIS("request_uris"),
@@ -260,6 +270,16 @@ public enum RegisterRequestParam {
      * use in mutual TLS authentication.
      */
     TLS_CLIENT_AUTH_SUBJECT_DN("tls_client_auth_subject_dn"),
+
+    /**
+     * boolean, whether to allow spontaneous scopes for client
+     */
+    ALLOW_SPONTANEOUS_SCOPES("allow_spontaneous_scopes"),
+
+    /**
+     * list of spontaneous scopes
+     */
+    SPONTANEOUS_SCOPES("spontaneous_scopes"),
 
     /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
@@ -303,7 +323,15 @@ public enum RegisterRequestParam {
      * A software statement containing client metadata values about the client software as claims.
      * This is a string value containing the entire signed JWT.
      */
-    SOFTWARE_STATEMENT("software_statement");
+    SOFTWARE_STATEMENT("software_statement"),
+
+    BACKCHANNEL_TOKEN_DELIVERY_MODE("backchannel_token_delivery_mode"),
+
+    BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT("backchannel_client_notification_endpoint"),
+
+    BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG("backchannel_authentication_request_signing_alg"),
+
+    BACKCHANNEL_USER_CODE_PARAMETER("backchannel_user_code_parameter");
 
     /**
      * Parameter name

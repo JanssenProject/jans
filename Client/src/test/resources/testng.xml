@@ -31,6 +31,18 @@
         </classes>
     </test>
 
+    <!-- Spontaneous scopes tests -->
+    <test name="Spontaneous Scope test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.SpontaneousScopeHttpTest"/>
+        </classes>
+    </test>
+    <test name="UMA Spontaneous Scope test (HTTP)" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.uma.UmaSpontaneousScopeHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Authorization Code Flow test -->
     <test name="Authorization Code Flow test (HTTP)" enabled="true">
         <classes>
@@ -768,4 +780,15 @@
         </classes>
     </test>
 
+    <!-- CIBA -->
+    <test name="CIBA Configuration Test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.ConfigurationTest"/>
+        </classes>
+    </test>
+    <test name="CIBA Dynamic Client Registration Test" enabled="false">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.RegistrationTest"/>
+        </classes>
+    </test>
 </suite>

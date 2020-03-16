@@ -7,6 +7,7 @@
 package org.gluu.oxauth.model.uma.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
@@ -160,6 +161,7 @@ public class UmaResource implements Serializable {
     }
 
     public List<String> getScopes() {
+        if (scopes == null) scopes = Lists.newArrayList();
         return scopes;
     }
 

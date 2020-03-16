@@ -11,6 +11,7 @@ import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
@@ -31,6 +32,7 @@ import javax.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -125,6 +127,7 @@ public class KeyGeneratorTimer {
 	}
 
     private void updateKeysImpl() throws JSONException, Exception {
+        log.info("Updating JWKS keys ...");
         String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);
 
@@ -136,10 +139,14 @@ public class KeyGeneratorTimer {
         long nextRevision = conf.getRevision() + 1;
         conf.setRevision(nextRevision);
         ldapEntryManager.merge(conf);
+
+        log.info("Updated JWKS successfully");
+        log.trace("JWKS keys: " + conf.getWebKeys().getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        log.trace("KeyStore keys: " + cryptoProvider.getKeys());
     }
 
     private JSONObject updateKeys(JSONObject jwks) throws Exception {
-        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(appConfiguration.getKeyRegenerationInterval(),
+        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(cryptoProvider, appConfiguration.getKeyRegenerationInterval(),
                 appConfiguration.getIdTokenLifetime(), appConfiguration);
 
         JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
@@ -153,10 +160,11 @@ public class KeyGeneratorTimer {
 
                 if (expirationDate.before(now)) {
                     // The expired key is not added to the array of keys
-                    log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
+                    log.trace("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
                             key.getLong(EXPIRATION_TIME));
                     cryptoProvider.deleteKey(key.getString(KEY_ID));
                 } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
+                    log.trace("Contains kid: {}", key.getString(KEY_ID));
                     jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
                 }
             } else if (cryptoProvider.containsKey(key.getString(KEY_ID))) {
@@ -164,6 +172,8 @@ public class KeyGeneratorTimer {
                 expirationTime.add(GregorianCalendar.HOUR, appConfiguration.getKeyRegenerationInterval());
                 expirationTime.add(GregorianCalendar.SECOND, appConfiguration.getIdTokenLifetime());
                 key.put(EXPIRATION_TIME, expirationTime.getTimeInMillis());
+
+                log.trace("Contains kid {} without exp {}", key.getString(KEY_ID), expirationTime);
 
                 jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
             }
