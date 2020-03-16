@@ -8,8 +8,7 @@
 	template="/WEB-INF/incl/layout/authorize-template.xhtml">
 
 	<ui:define name="head">
-		<style type="text/css">
-</style>
+		<style type="text/css"/>
 	</ui:define>
 
 	<ui:define name="pageTitle">
@@ -91,6 +90,15 @@
 							</ui:fragment>
 						</ui:fragment>
 					</ul>
+					<h:panelGroup layout="block"
+								  rendered="#{!empty authorizeAction.bindingMessage}">
+						<p>
+							#{msgs['ciba.bindingMessage']}
+							<strong>
+								#{authorizeAction.bindingMessage}
+							</strong>
+						</p>
+					</h:panelGroup>
 					<h:panelGroup layout="block"
 						rendered='#{!empty client.getPolicyUri()}'>
 						<p>

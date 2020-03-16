@@ -8,12 +8,11 @@ package org.gluu.oxauth.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SubjectType;
+import org.apache.log4j.Logger;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterRequestParam;
@@ -34,9 +33,11 @@ import static org.gluu.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 public class RegisterRequest extends BaseRequest {
+
+    private static final Logger log = Logger.getLogger(RegisterRequest.class);
 
     private String registrationAccessToken;
     private List<String> redirectUris;
@@ -51,12 +52,16 @@ public class RegisterRequest extends BaseRequest {
     private String policyUri;
     private List<String> frontChannelLogoutUris;
     private Boolean frontChannelLogoutSessionRequired;
+    private List<String> backchannelLogoutUris;
+    private Boolean backchannelLogoutSessionRequired;
     private String tosUri;
     private String jwksUri;
     private String jwks;
     private String sectorIdentifierUri;
     private String idTokenTokenBindingCnf;
     private String tlsClientAuthSubjectDn;
+    private Boolean allowSpontaneousScopes;
+    private List<String> spontaneousScopes;
     private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
@@ -85,6 +90,10 @@ public class RegisterRequest extends BaseRequest {
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
+    private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
+    private String backchannelClientNotificationEndpoint;
+    private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
+    private Boolean backchannelUserCodeParameter;
 
     /**
      * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
@@ -162,6 +171,22 @@ public class RegisterRequest extends BaseRequest {
         this.tlsClientAuthSubjectDn = tlsClientAuthSubjectDn;
     }
 
+    public Boolean getAllowSpontaneousScopes() {
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
+    public List<String> getSpontaneousScopes() {
+        return spontaneousScopes;
+    }
+
+    public void setSpontaneousScopes(List<String> spontaneousScopes) {
+        this.spontaneousScopes = spontaneousScopes;
+    }
+
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
         return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
     }
@@ -194,6 +219,22 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setAccessToken(String registrationAccessToken) {
         this.registrationAccessToken = registrationAccessToken;
+    }
+
+    public List<String> getBackchannelLogoutUris() {
+        return backchannelLogoutUris;
+    }
+
+    public void setBackchannelLogoutUris(List<String> backchannelLogoutUris) {
+        this.backchannelLogoutUris = backchannelLogoutUris;
+    }
+
+    public Boolean getBackchannelLogoutSessionRequired() {
+        return backchannelLogoutSessionRequired;
+    }
+
+    public void setBackchannelLogoutSessionRequired(Boolean backchannelLogoutSessionRequired) {
+        this.backchannelLogoutSessionRequired = backchannelLogoutSessionRequired;
     }
 
     /**
@@ -1007,6 +1048,38 @@ public class RegisterRequest extends BaseRequest {
         this.softwareStatement = softwareStatement;
     }
 
+    public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
+        return backchannelTokenDeliveryMode;
+    }
+
+    public void setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
+        this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
+    }
+
+    public String getBackchannelClientNotificationEndpoint() {
+        return backchannelClientNotificationEndpoint;
+    }
+
+    public void setBackchannelClientNotificationEndpoint(String backchannelClientNotificationEndpoint) {
+        this.backchannelClientNotificationEndpoint = backchannelClientNotificationEndpoint;
+    }
+
+    public AsymmetricSignatureAlgorithm getBackchannelAuthenticationRequestSigningAlg() {
+        return backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg) {
+        this.backchannelAuthenticationRequestSigningAlg = backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public Boolean getBackchannelUserCodeParameter() {
+        return backchannelUserCodeParameter;
+    }
+
+    public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
+        this.backchannelUserCodeParameter = backchannelUserCodeParameter;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1149,6 +1222,12 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
+        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
+            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
+        }
+        if (backchannelLogoutSessionRequired != null) {
+            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+        }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
         }
@@ -1166,6 +1245,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (allowSpontaneousScopes != null) {
+            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            parameters.put(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
         }
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
@@ -1187,6 +1272,18 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(softwareStatement)) {
             parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
+        }
+        if (backchannelTokenDeliveryMode != null) {
+            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
+        }
+        if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
+            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
+        }
+        if (backchannelAuthenticationRequestSigningAlg != null) {
+            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
+        }
+        if (backchannelUserCodeParameter) {
+            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
         }
 
         // Custom params
@@ -1315,17 +1412,6 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        final List<String> frontChannelLogoutUris = new ArrayList<String>();
-        if (requestObject.has(FRONT_CHANNEL_LOGOUT_URI.toString())) {
-            try {
-                JSONArray frontChannelLogoutUriJsonArray = requestObject.getJSONArray(FRONT_CHANNEL_LOGOUT_URI.toString());
-                for (int i = 0; i < frontChannelLogoutUriJsonArray.length(); i++) {
-                    frontChannelLogoutUris.add(frontChannelLogoutUriJsonArray.getString(i));
-                }
-            } catch (JSONException e) {
-                frontChannelLogoutUris.add(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
-            }
-        }
 
         final RegisterRequest result = new RegisterRequest();
         result.setJsonObject(requestObject);
@@ -1336,13 +1422,17 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
-        result.setFrontChannelLogoutUris(frontChannelLogoutUris);
+        result.setFrontChannelLogoutUris(extractList(requestObject, FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        result.setBackchannelLogoutUris(extractList(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
+        result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(requestObject.has(ACCESS_TOKEN_LIFETIME.toString()) ?
                 requestObject.getInt(ACCESS_TOKEN_LIFETIME.toString()) : null);
         result.setDefaultMaxAge(requestObject.has(DEFAULT_MAX_AGE.toString()) ?
                 requestObject.getInt(DEFAULT_MAX_AGE.toString()) : null);
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
+        result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
+        result.setSpontaneousScopes(ClientUtil.extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
         result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
@@ -1393,7 +1483,29 @@ public class RegisterRequest extends BaseRequest {
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
+        result.setBackchannelTokenDeliveryMode(requestObject.has(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()) ?
+                BackchannelTokenDeliveryMode.fromString(requestObject.getString(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())) : null);
+        result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        result.setBackchannelAuthenticationRequestSigningAlg(requestObject.has(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()) ?
+                AsymmetricSignatureAlgorithm.fromString(requestObject.getString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())) : null);
+        result.setBackchannelUserCodeParameter(requestObject.has(BACKCHANNEL_USER_CODE_PARAMETER.toString()) ?
+                requestObject.getBoolean(BACKCHANNEL_USER_CODE_PARAMETER.toString()) : null);
 
+        return result;
+    }
+
+    private static List<String> extractList(JSONObject requestObject, String key) {
+        final List<String> result = new ArrayList<>();
+        if (requestObject.has(key)) {
+            try {
+                JSONArray jsonArray = requestObject.getJSONArray(key);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    result.add(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                result.add(requestObject.optString(key));
+            }
+        }
         return result;
     }
 
@@ -1427,6 +1539,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
             parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (allowSpontaneousScopes != null) {
+            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes);
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            parameters.put(SPONTANEOUS_SCOPES.toString(), toJSONArray(spontaneousScopes));
         }
         if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
             parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
@@ -1521,6 +1639,12 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
+        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
+            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+        }
+        if (backchannelLogoutSessionRequired != null) {
+            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+        }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
         }
@@ -1548,6 +1672,18 @@ public class RegisterRequest extends BaseRequest {
         if (StringUtils.isNotBlank(softwareStatement)) {
             parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
+        if (backchannelTokenDeliveryMode != null) {
+            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode);
+        }
+        if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
+            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
+        }
+        if (backchannelAuthenticationRequestSigningAlg != null) {
+            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
+        }
+        if (backchannelUserCodeParameter != null) {
+            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter);
+        }
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
@@ -1571,16 +1707,11 @@ public class RegisterRequest extends BaseRequest {
 
     @Override
     public String getQueryString() {
-        String jsonQueryString = null;
-
         try {
-            jsonQueryString = ClientUtil.toPrettyJson(getJSONParameters()).replace("\\/", "/");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-
-        return jsonQueryString;
+            return ClientUtil.toPrettyJson(getJSONParameters()).replace("\\/", "/");
+        } catch (JSONException | JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
     }
 }

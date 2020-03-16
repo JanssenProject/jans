@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
@@ -17,10 +15,11 @@ import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -263,7 +262,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
 
         showResponse("refreshingAccessTokenFail", response, entity);
 
-        assertEquals(response.getStatus(), 401, "Unexpected response code.");
+        assertEquals(response.getStatus(), 400, "Unexpected response code.");
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             JSONObject jsonObj = new JSONObject(entity);

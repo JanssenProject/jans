@@ -16,9 +16,9 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,7 +27,8 @@ import java.util.*;
 /**
  * Provides operations with users.
  *
- * @author Javier Rojas Blum Date: 11.30.2011
+ * @author Javier Rojas Blum
+ * @version @version August 20, 2019
  */
 @ApplicationScoped
 @Named
@@ -113,6 +114,7 @@ public class UserService {
 	}
 
     public User updateUser(User user) {
+        user.setUpdatedAt(new Date());
 		return ldapEntryManager.merge(user);
 	}
 
@@ -133,7 +135,8 @@ public class UserService {
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
     		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
     	}
-    	
+
+    	user.setCreatedAt(new Date());
 		ldapEntryManager.persist(user);
 		
 		return getUser(uid);
@@ -152,7 +155,7 @@ public class UserService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		Set<String> allObjectClasses = new HashSet<String>();
+    		Set<String> allObjectClasses = new HashSet<>();
     		allObjectClasses.addAll(personCustomObjectClassList);
 
     		String currentObjectClasses[] = user.getCustomObjectClasses();
@@ -163,6 +166,7 @@ public class UserService {
     		user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
     	}
 
+    	user.setCreatedAt(new Date());
     	ldapEntryManager.persist(user);
 
 		return getUserByDn(user.getDn());
@@ -192,6 +196,42 @@ public class UserService {
             return null;
         }
     }
+
+	public User getUniqueUserByAttributes(List<String> attributeNames, String attributeValue) {
+		log.debug("Getting user information from LDAP: attributeNames = '{}', attributeValue = '{}'", attributeNames, attributeValue);
+
+		User user = null;
+
+		if (attributeNames != null) {
+			for (String attributeName : attributeNames) {
+				User searchUser = new User();
+				searchUser.setDn(staticConfiguration.getBaseDn().getPeople());
+
+				List<CustomAttribute> customAttributes =  new ArrayList<>();
+				customAttributes.add(new CustomAttribute(attributeName, attributeValue));
+
+				searchUser.setCustomAttributes(customAttributes);
+
+				try {
+					List<User> entries = ldapEntryManager.findEntries(searchUser);
+					log.debug("Found '{}' entries", entries.size());
+
+					if (entries.size() == 0) {
+						continue;
+					} else if (entries.size() == 1) {
+						user = entries.get(0);
+						break;
+					} else if (entries.size() > 0) {
+						break;
+					}
+				} catch (Exception e) {
+					log.debug(e.getMessage());
+				}
+			}
+		}
+
+		return user;
+	}
 
     public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");

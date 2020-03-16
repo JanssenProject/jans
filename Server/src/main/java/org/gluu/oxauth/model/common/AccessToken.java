@@ -34,7 +34,7 @@ import org.gluu.oxauth.model.common.TokenType;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-public class AccessToken extends AbstractToken {
+public class    AccessToken extends AbstractToken {
 
     private TokenType tokenType;
 

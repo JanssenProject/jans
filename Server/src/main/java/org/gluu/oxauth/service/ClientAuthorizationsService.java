@@ -23,7 +23,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 17, 2018
+ * @version March 4, 2020
  */
 @Named
 public class ClientAuthorizationsService {
@@ -56,6 +56,11 @@ public class ClientAuthorizationsService {
     }
 
     public void prepareBranch() {
+        String baseDn = createDn(null);
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
         // Create client authorizations branch if needed
         if (!containsBranch()) {
             addBranch();
@@ -91,6 +96,19 @@ public class ClientAuthorizationsService {
         }
 
         return null;
+    }
+
+    public void clearAuthorizations(ClientAuthorization clientAuthorization, boolean persistInLdap) {
+        if (clientAuthorization == null) {
+            return;
+        }
+
+        if (persistInLdap) {
+            ldapEntryManager.remove(clientAuthorization);
+        } else {
+            String key = getCacheKey(clientAuthorization.getUserId(), clientAuthorization.getClientId());
+            cacheService.remove(key);
+        }
     }
 
     public void add(String userInum, String clientId, Set<String> scopes, boolean persistInLdap) {

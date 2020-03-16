@@ -8,12 +8,19 @@ package org.gluu.oxauth;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.dev.HostnameVerifierType;
@@ -26,6 +33,8 @@ import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
@@ -37,9 +46,9 @@ import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -61,7 +70,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version August 20, 2019
  */
 public abstract class BaseTest {
 	
@@ -83,6 +92,7 @@ public abstract class BaseTest {
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
+    protected String backchannelAuthenticationEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
 
     // Form Interaction
@@ -93,7 +103,7 @@ public abstract class BaseTest {
     private String authorizeFormDoNotAllowButton;
 
     @BeforeSuite
-    public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
+    public void initTestSuite(ITestContext context) throws IOException {
         SecurityProviderUtility.installBCProvider();
 
         Reporter.log("Invoked init test suite method \n", true);
@@ -101,8 +111,6 @@ public abstract class BaseTest {
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
             propertiesFile = "target/test-classes/testng.properties";
-            //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy_ce_dev3.properties";
-            //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
         FileInputStream conf = new FileInputStream(propertiesFile);
@@ -206,6 +214,14 @@ public abstract class BaseTest {
 
     public void setIntrospectionEndpoint(String p_introspectionEndpoint) {
         introspectionEndpoint = p_introspectionEndpoint;
+    }
+
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
     }
 
     public Map<String, List<String>> getScopeToClaimsMapping() {
@@ -766,6 +782,7 @@ public abstract class BaseTest {
             registrationEndpoint = response.getRegistrationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
+            backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
         } else {
@@ -783,6 +800,7 @@ public abstract class BaseTest {
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
+            backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
 
@@ -803,12 +821,6 @@ public abstract class BaseTest {
         System.out.println("#######################################################");
         System.out.println(title);
         System.out.println("#######################################################");
-    }
-
-    public void showEntity(String entity) {
-        if (entity != null) {
-            System.out.println("Entity: " + entity.replace("\\n", "\n"));
-        }
     }
 
     public static void showClient(BaseClient client) {
@@ -838,12 +850,16 @@ public abstract class BaseTest {
         if (p_verifierType != null && p_verifierType != HostnameVerifierType.DEFAULT) {
             switch (p_verifierType) {
                 case ALLOW_ALL:
-                	return HttpClients.custom().setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+					return HttpClients.custom()
+							.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+							.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
 
             }
         }
 
-        return HttpClients.custom().build();
+        return HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+        		.build();
     }
 
     public static ClientExecutor clientExecutor() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
@@ -857,6 +873,60 @@ public abstract class BaseTest {
         return ClientRequest.getDefaultExecutor();
     }
 
+    public static ClientHttpEngine clientEngine() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        return clientEngine(false);
+    }
+
+    public static ClientHttpEngine clientEngine(boolean trustAll) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        if (trustAll) {
+            return new ApacheHttpClient4Engine(createAcceptSelfSignedCertificateClient());
+        }
+        return new ApacheHttpClient4Engine(createClient());
+    }
+
+    public static HttpClient createClient() {
+	    return createClient(null);
+	}
+
+    public static HttpClient createAcceptSelfSignedCertificateClient()
+            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        SSLConnectionSocketFactory connectionFactory = createAcceptSelfSignedSocketFactory();
+
+	    return createClient(connectionFactory);
+    }
+
+	private static HttpClient createClient(SSLConnectionSocketFactory connectionFactory) {
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		HttpClientBuilder httClientBuilder = HttpClients.custom();
+		if (connectionFactory != null) {
+			httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
+		}
+
+		HttpClient httpClient = httClientBuilder
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+	    		.setConnectionManager(cm).build();
+	    cm.setMaxTotal(200); // Increase max total connection to 200
+	    cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+
+	    return httpClient;
+	}
+
+	private static SSLConnectionSocketFactory createAcceptSelfSignedSocketFactory()
+			throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+		// Use the TrustSelfSignedStrategy to allow Self Signed Certificates
+        SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+
+        // We can optionally disable hostname verification. 
+        // If you don't want to further weaken the security, you don't have to include this.
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+
+        // Create an SSL Socket Factory to use the SSLContext with the trust self signed certificate strategy
+        // and allow all hosts verifier.
+        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
+
+        return connectionFactory;
+	}
+
 	public static CloseableHttpClient createHttpClientTrustAll()
 			throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
 		SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
@@ -866,7 +936,9 @@ public abstract class BaseTest {
 			}
 		}).build();
 		SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-		CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslContextFactory)
+		CloseableHttpClient httpclient = HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+				.setSSLSocketFactory(sslContextFactory)
 				.setRedirectStrategy(new LaxRedirectStrategy()).build();
 
 		return httpclient;
@@ -880,4 +952,51 @@ public abstract class BaseTest {
 		}
 	}
 
+	private ClientExecutor getClientExecutor() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        return clientExecutor(true);
+    }
+
+	protected RegisterClient newRegisterClient(RegisterRequest request) {
+        try {
+            final RegisterClient client = new RegisterClient(registrationEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected UserInfoClient newUserInfoClient(UserInfoRequest request) {
+        try {
+            final UserInfoClient client = new UserInfoClient(userInfoEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected AuthorizeClient newAuthorizeClient(AuthorizationRequest request) {
+        try {
+            final AuthorizeClient client = new AuthorizeClient(authorizationEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected TokenClient newTokenClient(TokenRequest request) {
+        try {
+            final TokenClient client = new TokenClient(tokenEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
 }

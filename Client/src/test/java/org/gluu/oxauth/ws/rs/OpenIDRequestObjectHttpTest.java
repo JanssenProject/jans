@@ -49,6 +49,8 @@ import static org.testng.Assert.*;
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
+    public static final String ACR_VALUE = "basic";
+
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethod1(
@@ -99,7 +101,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -181,7 +183,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
@@ -496,7 +498,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -585,7 +587,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -672,7 +674,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -760,7 +762,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -796,7 +798,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -817,6 +819,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
@@ -850,13 +853,14 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
 
         AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
         authorizeClient.setRequest(request);
+        authorizeClient.setExecutor(clientExecutor(true));
         AuthorizationResponse response1 = authorizeClient.exec();
 
         showClient(authorizeClient);
@@ -871,6 +875,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
         // 3. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setExecutor(clientExecutor(true));
         UserInfoResponse response3 = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
@@ -886,7 +891,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -939,7 +944,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1027,7 +1032,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1115,7 +1120,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1203,7 +1208,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1291,7 +1296,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1379,7 +1384,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1467,7 +1472,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1555,7 +1560,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1644,7 +1649,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1733,7 +1738,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         request.setRequest(authJwt);
@@ -1804,7 +1809,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
-            authorizationRequest.setRequest("INVALID_OPENID_REQUEST_OBJECT");
+            authorizationRequest.setRequest("INVALID_REQUEST_OBJECT");
             authorizationRequest.setAuthUsername(userId);
             authorizationRequest.setAuthPassword(userSecret);
 
@@ -1873,7 +1878,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             authorizationRequest.setRequest(authJwt + "INVALID_KEY");
@@ -1943,7 +1948,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             jwtAuthorizationRequest.setClientId("INVALID_CLIENT_ID");
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
@@ -2081,7 +2086,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(authJwt));
@@ -2198,8 +2203,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-            RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-            registerClient.setRequest(registerRequest);
+            RegisterClient registerClient = newRegisterClient(registerRequest);
             RegisterResponse registerResponse = registerClient.exec();
 
             showClient(registerClient);
@@ -2224,15 +2228,14 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
 
             authorizationRequest.setRequestUri(requestFileBaseUrl + "/FAKE_REQUEST_URI");
 
-            AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-            authorizeClient.setRequest(authorizationRequest);
+            AuthorizeClient authorizeClient = newAuthorizeClient(authorizationRequest);
             AuthorizationResponse response = authorizeClient.exec();
 
             showClient(authorizeClient);
             assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
             assertNotNull(response.getLocation(), "The location is null");
-            // assertNotNull(response.getErrorType(), "The error type is null");
-            // assertNotNull(response.getErrorDescription(), "The error description is null");
+            assertNotNull(response.getErrorType(), "The error type is null");
+            assertNotNull(response.getErrorDescription(), "The error description is null");
             assertNotNull(response.getState(), "The state is null");
         } catch (Exception e) {
             fail(e.getMessage(), e);
@@ -2296,7 +2299,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             String hash = "INVALID_HASH";
@@ -2380,7 +2383,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             request.setRequest(authJwt);
@@ -2477,7 +2480,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
             request.setRequest(authJwt);
@@ -2574,7 +2577,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
             request.setRequest(authJwt);
@@ -2671,7 +2674,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt(jwks);
             request.setRequest(authJwt);
@@ -2759,7 +2762,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             request.setRequest(authJwt);
@@ -2847,7 +2850,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
             jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
             jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+            jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             request.setRequest(authJwt);

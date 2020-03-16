@@ -18,7 +18,9 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
+import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
@@ -53,6 +55,9 @@ public class ClientService {
 
 	@Inject
 	private CacheService cacheService;
+
+    @Inject
+    private LocalCacheService localCacheService;
 
 	@Inject
 	private ScopeService scopeService;
@@ -171,8 +176,9 @@ public class ClientService {
 	 * @return Client
 	 */
 	public Client getClientByDn(String dn) {
+		BaseCacheService usedCacheService = getCacheService();
 	    try {
-            return cacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
+            return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Client.class, dn), 60);
         } catch (Exception e) {
 	        log.trace(e.getMessage(), e);
 	        return null;
@@ -216,14 +222,6 @@ public class ClientService {
 		return result;
 	}
 
-	public List<Client> getClientsWithExpirationDate(BatchOperation<Client> batchOperation, String[] returnAttributes,
-			int sizeLimit, int chunkSize) {
-		String baseDN = staticConfiguration.getBaseDn().getClients();
-		Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
-		return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, returnAttributes,
-				batchOperation, 0, sizeLimit, chunkSize);
-	}
-
 	public String buildClientDn(String p_clientId) {
 		final StringBuilder dn = new StringBuilder();
 		dn.append(String.format("inum=%s,", p_clientId));
@@ -241,8 +239,9 @@ public class ClientService {
 	}
 
 	private void removeFromCache(Client client) {
+		BaseCacheService usedCacheService = getCacheService();
 		try {
-			cacheService.remove(client.getDn());
+			usedCacheService.remove(client.getDn());
 		} catch (Exception e) {
 			log.error("Failed to remove client from cache." + client.getDn(), e);
 		}
@@ -339,5 +338,13 @@ public class ClientService {
 	public String encryptSecret(String clientSecret) throws EncryptionException {
 		return encryptionService.encrypt(clientSecret);
 	}
+
+    private BaseCacheService getCacheService() {
+    	if (appConfiguration.getUseLocalCache()) {
+    		return localCacheService;
+    	}
+    	
+    	return cacheService;
+    }
 
 }

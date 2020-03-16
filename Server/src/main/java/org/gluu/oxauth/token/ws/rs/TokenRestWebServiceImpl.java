@@ -14,12 +14,14 @@ import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.CodeVerifier;
 import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.token.JsonWebResponse;
+import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
@@ -28,6 +30,8 @@ import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentials
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.util.OxConstants;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,13 +48,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Provides interface for token REST web services
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version March 5, 2020
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -94,12 +99,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private AttributeService attributeService;
 
+    @Inject
+    private SessionIdService sessionIdService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
-                                       String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
+                                       String ticket, String claimToken, String claimTokenFormat, String pctCode,
+                                       String rptCode, String authReqId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
@@ -127,234 +136,330 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             if (!TokenParamsValidator.validateParams(grantType, code, redirectUri, username, password,
                     scope, assertion, refreshToken)) {
                 log.trace("Failed to validate request parameters");
-                builder = error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters");
-            } else {
-                log.trace("Request parameters are right");
-                GrantType gt = GrantType.fromString(grantType);
-                log.debug("Grant type: '{}'", gt);
+                return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters"), oAuth2AuditLog);
+            }
 
-                SessionClient sessionClient = identity.getSessionClient();
-                Client client = null;
-                if (sessionClient != null) {
-                    client = sessionClient.getClient();
-                    log.debug("Get sessionClient: '{}'", sessionClient);
+            GrantType gt = GrantType.fromString(grantType);
+            log.debug("Grant type: '{}'", gt);
+
+            SessionClient sessionClient = identity.getSessionClient();
+            Client client = null;
+            if (sessionClient != null) {
+                client = sessionClient.getClient();
+                log.debug("Get sessionClient: '{}'", sessionClient);
+            }
+
+            if (client == null) {
+                return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find client."), oAuth2AuditLog);
+            }
+
+            log.debug("Get client from session: '{}'", client.getClientId());
+            if (client.isDisabled()) {
+                return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), oAuth2AuditLog);
+            }
+
+            final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
+                    tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
+            final SessionId sessionIdObj = sessionIdService.getSessionId(request);
+            final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getId() : null);
+
+
+            if (gt == GrantType.AUTHORIZATION_CODE) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                 }
 
-                if (client != null) {
-                    log.debug("Get client from session: '{}'", client.getClientId());
-                    if (client.isDisabled()) {
-                        return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT, "Client is disabled."), oAuth2AuditLog);
-                    }
-                } else {
-                    return response(error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find client."), oAuth2AuditLog);
+                log.debug("Attempting to find authorizationCodeGrant by clientId: '{}', code: '{}'", client.getClientId(), code);
+                final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
+                log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
+
+                if (authorizationCodeGrant == null) {
+                    log.debug("AuthorizationCodeGrant is empty by clientId: '{}', code: '{}'", client.getClientId(), code);
+                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
+                    grantService.removeAllByAuthorizationCode(code);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code."), oAuth2AuditLog);
                 }
 
-                final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
-                        tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
+                if (!client.getClientId().equals(authorizationCodeGrant.getClientId())) {
+                    log.debug("AuthorizationCodeGrant is found but belongs to another client. Grant's clientId: '{}', code: '{}'", authorizationCodeGrant.getClientId(), code);
+                    // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
+                    grantService.removeAllByAuthorizationCode(code);
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Client mismatch."), oAuth2AuditLog);
+                }
 
-                if (gt == GrantType.AUTHORIZATION_CODE) {
-                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
+                validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
+
+                authorizationCodeGrant.setIsCachedWithNoPersistence(false);
+                authorizationCodeGrant.save();
+
+                RefreshToken reToken = null;
+                if (client.getGrantTypes() != null
+                        && client.getGrantTypes().length > 0
+                        && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                    reToken = authorizationCodeGrant.createRefreshToken();
+                }
+
+                if (scope != null && !scope.isEmpty()) {
+                    scope = authorizationCodeGrant.checkScopesPolicy(scope);
+                }
+
+                AccessToken accToken = authorizationCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+                log.debug("Issuing access token: {}", accToken.getCode());
+
+                IdToken idToken = null;
+                if (authorizationCodeGrant.getScopes().contains("openid")) {
+                    String nonce = authorizationCodeGrant.getNonce();
+                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                            appConfiguration.getLegacyIdTokenClaims());
+                    final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
+                    Function<JsonWebResponse, Void> authorizationCodePreProcessing = jsonWebResponse -> {
+                        if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
+                            TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
+                        }
+                        return null;
+                    };
+
+                    idToken = authorizationCodeGrant.createIdToken(
+                            nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null,
+                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getId() : null));
+                }
+
+
+                oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
+
+                grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode());
+
+                final String entity = getJSonResponse(accToken, accToken.getTokenType(), accToken.getExpiresIn(), reToken, scope, idToken);
+                return response(Response.ok().entity(entity), oAuth2AuditLog);
+            }
+
+            if (gt == GrantType.REFRESH_TOKEN) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
+                }
+
+                AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
+
+                if (authorizationGrant == null) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
+                }
+
+                // The authorization server MAY issue a new refresh token, in which case
+                // the client MUST discard the old refresh token and replace it with the new refresh token.
+                RefreshToken reToken = authorizationGrant.createRefreshToken();
+                grantService.removeByCode(refreshToken);
+
+                if (scope != null && !scope.isEmpty()) {
+                    scope = authorizationGrant.checkScopesPolicy(scope);
+                }
+
+                AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+
+                IdToken idToken = null;
+                if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
+                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                            appConfiguration.getLegacyIdTokenClaims());
+
+                    idToken = authorizationGrant.createIdToken(
+                            null, null, accToken, null,
+                            null, authorizationGrant, includeIdTokenClaims, idTokenPreProcessing);
+                }
+
+                builder.entity(getJSonResponse(accToken,
+                        accToken.getTokenType(),
+                        accToken.getExpiresIn(),
+                        reToken,
+                        scope,
+                        idToken));
+                oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
+            } else if (gt == GrantType.CLIENT_CREDENTIALS) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
+                }
+
+                ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
+
+                if (scope != null && !scope.isEmpty()) {
+                    scope = clientCredentialsGrant.checkScopesPolicy(scope);
+                }
+
+                AccessToken accessToken = clientCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+
+                IdToken idToken = null;
+                if (appConfiguration.getOpenidScopeBackwardCompatibility() && clientCredentialsGrant.getScopes().contains("openid")) {
+                    boolean includeIdTokenClaims = Boolean.TRUE.equals(
+                            appConfiguration.getLegacyIdTokenClaims());
+                    idToken = clientCredentialsGrant.createIdToken(
+                            null, null, null, null,
+                            null, clientCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
+                }
+
+                oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
+                builder.entity(getJSonResponse(accessToken,
+                        accessToken.getTokenType(),
+                        accessToken.getExpiresIn(),
+                        null,
+                        scope,
+                        idToken));
+            } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
+                }
+
+                boolean authenticated = false;
+                User user = null;
+                if (authenticationFilterService.isEnabled()) {
+                    String userDn = authenticationFilterService.processAuthenticationFilters(request.getParameterMap());
+                    if (StringHelper.isNotEmpty(userDn)) {
+                        user = userService.getUserByDn(userDn);
+                        authenticated = true;
                     }
+                }
 
-                    log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
-                    final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
-                    log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
-                    if (authorizationCodeGrant != null) {
-                        validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
-
-                        authorizationCodeGrant.setIsCachedWithNoPersistence(false);
-                        authorizationCodeGrant.save();
-
-                        RefreshToken reToken = null;
-                        if (client.getGrantTypes() != null
-                                && client.getGrantTypes().length > 0
-                                && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
-                            reToken = authorizationCodeGrant.createRefreshToken();
+                if (!authenticated) {
+                    if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
+                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
+                        context.setUser(user);
+                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
+                            log.trace("RO PC - User is authenticated successfully by external script.");
+                            user = context.getUser();
                         }
-
-                        if (scope != null && !scope.isEmpty()) {
-                            scope = authorizationCodeGrant.checkScopesPolicy(scope);
-                        }
-
-                        AccessToken accToken = authorizationCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
-                        log.debug("Issuing access token: {}", accToken.getCode());
-
-                        IdToken idToken = null;
-                        if (authorizationCodeGrant.getScopes().contains("openid")) {
-                            String nonce = authorizationCodeGrant.getNonce();
-                            boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                    appConfiguration.getLegacyIdTokenClaims());
-                            final String idTokenTokenBindingCnf = client.getIdTokenTokenBindingCnf();
-                            Function<JsonWebResponse, Void> authorizationCodePreProcessing = new Function<JsonWebResponse, Void>() {
-                                @Override
-                                public Void apply(JsonWebResponse jsonWebResponse) {
-                                    if (StringUtils.isNotBlank(idTokenTokenBindingCnf) && StringUtils.isNotBlank(authorizationCodeGrant.getTokenBindingHash())) {
-                                        TokenBindingMessage.setCnfClaim(jsonWebResponse, authorizationCodeGrant.getTokenBindingHash(), idTokenTokenBindingCnf);
-                                    }
-                                    return null;
-                                }
-                            };
-                            idToken = authorizationCodeGrant.createIdToken(
-                                    nonce, null, accToken, null, authorizationCodeGrant, includeIdTokenClaims, authorizationCodePreProcessing);
-                        }
-
-                        builder.entity(getJSonResponse(accToken,
-                                accToken.getTokenType(),
-                                accToken.getExpiresIn(),
-                                reToken,
-                                scope,
-                                idToken));
-
-                        oAuth2AuditLog.updateOAuth2AuditLog(authorizationCodeGrant, true);
-
-                        grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
-                        log.debug("AuthorizationCodeGrant is empty by clinetId: '{}', code: '{}'", client.getClientId(), code);
-                        // if authorization code is not found then code was already used = remove all grants with this auth code
-                        grantService.removeAllByAuthorizationCode(code);
-                        builder = error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object for given code.");
-                    }
-                } else if (gt == GrantType.REFRESH_TOKEN) {
-                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
-                    }
-
-                    AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
-
-                    if (authorizationGrant != null) {
-
-
-                        /*
-                        The authorization server MAY issue a new refresh token, in which case
-                        the client MUST discard the old refresh token and replace it with the
-                        new refresh token.
-                        */
-                        RefreshToken reToken = authorizationGrant.createRefreshToken();
-                        grantService.removeByCode(refreshToken, client.getClientId());
-
-                        if (scope != null && !scope.isEmpty()) {
-                            scope = authorizationGrant.checkScopesPolicy(scope);
+                        try {
+                            authenticated = authenticationService.authenticate(username, password);
+                            if (authenticated) {
+                                user = authenticationService.getAuthenticatedUser();
+                            }
+                        } catch (AuthenticationException ex) {
+                            log.trace("Failed to authenticate user ", new RuntimeException("User name or password is invalid"));
                         }
+                    }
+                }
 
-                        AccessToken accToken = authorizationGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+                if (user != null) {
+                    ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                    SessionId sessionId = identity.getSessionId();
+                    if (sessionId != null) {
+                        resourceOwnerPasswordCredentialsGrant.setAcrValues(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+                        resourceOwnerPasswordCredentialsGrant.setSessionDn(sessionId.getDn());
+                        resourceOwnerPasswordCredentialsGrant.save(); // call save after object modification!!!
 
-                        IdToken idToken = null;
-                        if (appConfiguration.getOpenidScopeBackwardCompatibility() && authorizationGrant.getScopes().contains("openid")) {
-                            boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                    appConfiguration.getLegacyIdTokenClaims());
-
-                            idToken = authorizationGrant.createIdToken(
-                            		null, null, accToken, null, authorizationGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                        sessionId.getSessionAttributes().put(Constants.AUTHORIZED_GRANT, gt.getValue());
+                        boolean updateResult = sessionIdService.updateSessionId(sessionId, false, true, true);
+                        if (!updateResult) {
+                            log.debug("Failed to update session entry: '{}'", sessionId.getId());
                         }
-
-                        builder.entity(getJSonResponse(accToken,
-                                accToken.getTokenType(),
-                                accToken.getExpiresIn(),
-                                reToken,
-                                scope,
-                                idToken));
-                        oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
-                    } else {
-                        builder = error(401, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token.");
-                    }
-                } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                     }
 
-                    ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
+
+                    RefreshToken reToken = null;
+                    if (client.getGrantTypes() != null
+                            && client.getGrantTypes().length > 0
+                            && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                        reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
+                    }
 
                     if (scope != null && !scope.isEmpty()) {
-                        scope = clientCredentialsGrant.checkScopesPolicy(scope);
+                        scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
                     }
 
-                    AccessToken accessToken = clientCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
+                    AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
 
                     IdToken idToken = null;
-                    if (appConfiguration.getOpenidScopeBackwardCompatibility() && clientCredentialsGrant.getScopes().contains("openid")) {
+                    if (appConfiguration.getOpenidScopeBackwardCompatibility() && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
                                 appConfiguration.getLegacyIdTokenClaims());
-                        idToken = clientCredentialsGrant.createIdToken(
-                                null, null, null, null, clientCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
+                        idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
+                                null, null, null, null,
+                                null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenPreProcessing);
                     }
 
-                    oAuth2AuditLog.updateOAuth2AuditLog(clientCredentialsGrant, true);
+                    oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
                     builder.entity(getJSonResponse(accessToken,
                             accessToken.getTokenType(),
                             accessToken.getExpiresIn(),
-                            null,
+                            reToken,
                             scope,
                             idToken));
-                } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT,"grant_type is not present in client."), oAuth2AuditLog);
-                    }
+                } else {
+                    log.debug("Invalid user", new RuntimeException("User is empty"));
+                    builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
+                }
+            } else if (gt == GrantType.CIBA) {
+                if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
+                }
 
-                    boolean authenticated = false;
-                    User user = null;
-                    if (authenticationFilterService.isEnabled()) {
-                        String userDn = authenticationFilterService.processAuthenticationFilters(request.getParameterMap());
-                        if (StringHelper.isNotEmpty(userDn)) {
-                            user = userService.getUserByDn(userDn);
-                            authenticated = true;
+                log.debug("Attempting to find authorizationGrant by authReqId: '{}'", authReqId);
+                final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+                log.trace("AuthorizationGrant : '{}'", cibaGrant);
+
+                if (cibaGrant != null) {
+                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
+                            cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                        long currentTime = new Date().getTime();
+                        Long lastAccess = cibaGrant.getLastAccessControl();
+                        if (lastAccess == null) {
+                            lastAccess = currentTime;
                         }
-                    }
+                        cibaGrant.setLastAccessControl(currentTime);
+                        cibaGrant.save();
 
+                        if (cibaGrant.isUserAuthorization() && !cibaGrant.isTokensDelivered()) {
+                            RefreshToken refToken = cibaGrant.createRefreshToken();
+                            log.debug("Issuing refresh token: {}", refToken.getCode());
 
-                    if (!authenticated) {
-	                    if (externalResourceOwnerPasswordCredentialsService.isEnabled()) {
-	                        final ExternalResourceOwnerPasswordCredentialsContext context = new ExternalResourceOwnerPasswordCredentialsContext(request, response, appConfiguration, attributeService, userService);
-	                        context.setUser(user);
-	                        if (externalResourceOwnerPasswordCredentialsService.executeExternalAuthenticate(context)) {
-	                            log.trace("RO PC - User is authenticated successfully by external script.");
-	                            user = context.getUser();
-	                        }
-	                    } else {
-	                    	authenticated = authenticationService.authenticate(username, password);
-	                        if (authenticated) {
-	                            user = authenticationService.getAuthenticatedUser();
-	                        }
-	                    	
-	                    }
-                    }
+                            AccessToken accessToken = cibaGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
+                            log.debug("Issuing access token: {}", accessToken.getCode());
 
-                    if (user != null) {
-                        ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = authorizationGrantList.createResourceOwnerPasswordCredentialsGrant(user, client);
+                            IdToken idToken = cibaGrant.createIdToken(
+                                    null, null, accessToken, refToken,
+                                    null, cibaGrant, false, null);
 
-                        RefreshToken reToken = null;
-                        if (client.getGrantTypes() != null
-                                && client.getGrantTypes().length > 0
-                                && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
-                            reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
+                            cibaGrant.setUserAuthorization(true);
+                            cibaGrant.setTokensDelivered(true);
+                            cibaGrant.save();
+
+                            RefreshToken reToken = null;
+                            if (client.getGrantTypes() != null
+                                    && client.getGrantTypes().length > 0
+                                    && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                                reToken = refToken;
+                            }
+
+                            if (scope != null && !scope.isEmpty()) {
+                                scope = cibaGrant.checkScopesPolicy(scope);
+                            }
+
+                            builder.entity(getJSonResponse(accessToken,
+                                    accessToken.getTokenType(),
+                                    accessToken.getExpiresIn(),
+                                    reToken,
+                                    scope,
+                                    idToken));
+
+                            oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
+                        } else {
+                            int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                            long timeFromLastAccess = currentTime - lastAccess;
+
+                            if (timeFromLastAccess > intervalSeconds * 1000) {
+                                log.debug("Access hasn't been granted yet for authReqId: '{}'", authReqId);
+                                builder = error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet");
+                            } else {
+                                log.debug("Slow down protection authReqId: '{}'", authReqId);
+                                builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
+                            }
                         }
-
-                        if (scope != null && !scope.isEmpty()) {
-                            scope = resourceOwnerPasswordCredentialsGrant.checkScopesPolicy(scope);
-                        }
-
-                        AccessToken accessToken = resourceOwnerPasswordCredentialsGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response)); // create token after scopes are checked
-
-                        IdToken idToken = null;
-                        if (appConfiguration.getOpenidScopeBackwardCompatibility() && resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
-                            boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                    appConfiguration.getLegacyIdTokenClaims());
-                            idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
-                                    null, null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims, idTokenTokingBindingPreprocessing);
-                        }
-
-                        oAuth2AuditLog.updateOAuth2AuditLog(resourceOwnerPasswordCredentialsGrant, true);
-                        builder.entity(getJSonResponse(accessToken,
-                                accessToken.getTokenType(),
-                                accessToken.getExpiresIn(),
-                                reToken,
-                                scope,
-                                idToken));
                     } else {
-                        log.debug("Invalid user", new RuntimeException("User is empty"));
-                        builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
+                        log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
+                        builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
                     }
+                } else {
+                    log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
+                    builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                 }
             }
         } catch (WebApplicationException e) {

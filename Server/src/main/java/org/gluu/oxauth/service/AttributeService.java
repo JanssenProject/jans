@@ -6,17 +6,20 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.model.GluuAttribute;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.service.CacheService;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.gluu.model.GluuAttribute;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.service.BaseCacheService;
+import org.gluu.service.CacheService;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 /**
  * @author Javier Rojas Blum
@@ -35,10 +38,10 @@ public class AttributeService extends org.gluu.service.AttributeService {
     private Logger log;
 
     @Inject
-    private CacheService cacheService;
+    private StaticConfiguration staticConfiguration;
 
     @Inject
-    private StaticConfiguration staticConfiguration;
+	private AppConfiguration appConfiguration;
 
     /**
      * returns GluuAttribute by Dn
@@ -46,7 +49,9 @@ public class AttributeService extends org.gluu.service.AttributeService {
      * @return GluuAttribute
      */
     public GluuAttribute getAttributeByDn(String dn) {
-        return cacheService.getWithPut(dn, () -> ldapEntryManager.find(GluuAttribute.class, dn), 60);
+    	BaseCacheService usedCacheService = getCacheService();
+
+    	return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(GluuAttribute.class, dn), 60);
     }
 
     public GluuAttribute getByLdapName(String name) {
@@ -100,4 +105,13 @@ public class AttributeService extends org.gluu.service.AttributeService {
 
         return claims;
     }
+
+    protected BaseCacheService getCacheService() {
+    	if (appConfiguration.getUseLocalCache()) {
+    		return localCacheService;
+    	}
+    	
+    	return cacheService;
+    }
+
 }

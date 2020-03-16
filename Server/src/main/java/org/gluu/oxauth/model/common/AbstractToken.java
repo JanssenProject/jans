@@ -232,7 +232,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
     }
 
     @Override
-    public boolean isDeletable() {
+    public Boolean isDeletable() {
         return deletable;
     }
 

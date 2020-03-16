@@ -21,7 +21,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.cas2ExternalAuthenticator = Cas2ExternalAuthenticator(currentTimeMillis)
         self.duoExternalAuthenticator = DuoExternalAuthenticator(currentTimeMillis)
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "CAS2 + Duo. Initialization"
         
         cas2_result = self.cas2ExternalAuthenticator.init(configurationAttributes)
@@ -42,7 +42,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return cas2_result and duo_result
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         cas2_result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)

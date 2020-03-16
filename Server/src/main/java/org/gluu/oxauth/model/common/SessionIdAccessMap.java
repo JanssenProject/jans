@@ -6,16 +6,15 @@
 
 package org.gluu.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import com.google.common.collect.Sets;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,6 +35,7 @@ public class SessionIdAccessMap implements Serializable {
     }
 
     public Map<String, Boolean> getPermissionGranted() {
+        ensureInitialized();
         return permissionGranted;
     }
 
@@ -45,12 +45,12 @@ public class SessionIdAccessMap implements Serializable {
 
     @XmlTransient
     public Set<String> clientIds() {
-        return Sets.newHashSet(permissionGranted.keySet());
+        return Sets.newHashSet(getPermissionGranted().keySet());
     }
 
     public Set<String> getClientIds(boolean granted) {
         Set<String> clientIds = Sets.newHashSet();
-        for (Map.Entry<String, Boolean> entry : permissionGranted.entrySet()) {
+        for (Map.Entry<String, Boolean> entry : getPermissionGranted().entrySet()) {
             if (entry.getValue().equals(granted) ) {
                 clientIds.add(entry.getKey());
             }
@@ -59,8 +59,7 @@ public class SessionIdAccessMap implements Serializable {
     }
 
     public Boolean get(String clientId) {
-        ensureInitialized();
-        final Boolean result = permissionGranted.get(clientId);
+        final Boolean result = getPermissionGranted().get(clientId);
         return result != null ? result : false;
     }
 
@@ -71,8 +70,7 @@ public class SessionIdAccessMap implements Serializable {
     }
 
     public void put(String clientId, Boolean granted) {
-        ensureInitialized();
-        permissionGranted.put(clientId, granted);
+        getPermissionGranted().put(clientId, granted);
     }
 
     public void putIfAbsent(String clientId) {
@@ -80,5 +78,12 @@ public class SessionIdAccessMap implements Serializable {
         if (permissionGranted.get(clientId) == null) {
             permissionGranted.put(clientId, false);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SessionIdAccessMap{" +
+                "permissionGranted=" + permissionGranted +
+                '}';
     }
 }
