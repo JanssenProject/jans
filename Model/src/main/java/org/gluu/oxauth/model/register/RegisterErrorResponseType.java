@@ -43,6 +43,11 @@ public enum RegisterErrorResponseType implements IErrorType {
     INVALID_LOGOUT_URI("invalid_logout_uri"),
 
     /**
+     * Invalid software statement.
+     */
+    INVALID_SOFTWARE_STATEMENT("invalid_software_statement"),
+
+    /**
      * The authorization server denied the request.
      */
     ACCESS_DENIED("access_denied");

@@ -6,26 +6,7 @@
 
 package org.gluu.oxauth.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Lists;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
@@ -41,11 +22,9 @@ import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
-import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.JsonService;
@@ -70,6 +49,25 @@ import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -182,18 +180,18 @@ public class AppInitializer {
 		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
 
 		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
-		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Initialize python interpreter
 		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration()
 				.getString("pythonModulesDir", null));
 
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION,
-				CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR,
-				CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
-				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.INTROSPECTION,
-				CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
+
+		supportedCustomScriptTypes.remove(CustomScriptType.CACHE_REFRESH);
+		supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
+		supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
+		supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
 
 		// Start timer
 		initSchedulerService();
@@ -207,6 +205,9 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
 		initTimer();
+
+		// Set default authentication method after 
+		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
@@ -562,7 +563,12 @@ public class AppInitializer {
 			return configuration.getAuthenticationMode();
 		}
 		
-		return externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE).getName();
+		CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
+		if (defaultExternalAuthenticator != null) {
+			return defaultExternalAuthenticator.getName();
+		}
+
+		return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME;
 	}
 
 	@Produces

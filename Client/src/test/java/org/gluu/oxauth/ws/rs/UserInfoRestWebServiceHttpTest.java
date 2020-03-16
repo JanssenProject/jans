@@ -24,7 +24,7 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.security.PrivateKey;
+import java.security.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -376,7 +376,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
+        assertNull(authorizationResponse.getScope(), "The scope must be null"); // null because picture scope is not sufficient
         assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
 
         String accessToken = authorizationResponse.getAccessToken();

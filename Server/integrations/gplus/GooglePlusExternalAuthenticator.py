@@ -21,7 +21,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Google+ Initialization"
 
         if (not configurationAttributes.containsKey("gplus_client_secrets_file")):
@@ -74,7 +74,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Google+ Destroyed successfully"
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

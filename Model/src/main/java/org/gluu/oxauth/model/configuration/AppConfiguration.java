@@ -24,10 +24,12 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 10, 2019
+ * @version November 20, 2019
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
+
+    public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
 
     private String issuer;
     private String baseEndpoint;
@@ -58,6 +60,7 @@ public class AppConfiguration implements Configuration {
     private Boolean umaGrantAccessIfNoPolicies = false;
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
+    private int spontaneousScopeLifetime;
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
     private Set<ResponseMode> responseModesSupported;
@@ -128,10 +131,12 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
+    private Boolean sessionIdRequestParameterEnabled = false; // #1195
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    private Integer sessionIdLifetime = 86400;
+    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantTypeUpdate;
@@ -163,6 +168,7 @@ public class AppConfiguration implements Configuration {
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
     private Boolean endSessionWithAccessToken;
+    private String cookieDomain;
     private Boolean enabledOAuthAuditLogging;
     private Set<String> jmsBrokerURISet;
     private String jmsUserName;
@@ -183,10 +189,46 @@ public class AppConfiguration implements Configuration {
     private Boolean openidScopeBackwardCompatibility = false;
     private Boolean disableU2fEndpoint = false;
 
+    private Boolean useLocalCache = false;
+    private Boolean fapiCompatibility = false;
+    private Boolean forceIdTokenHintPrecense = false;
+
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+
+    // CIBA
+    private String backchannelClientId;
+    private String backchannelRedirectUri;
+    private String backchannelAuthenticationEndpoint;
+    private String backchannelDeviceRegistrationEndpoint;
+    private List<String> backchannelTokenDeliveryModesSupported;
+    private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+    private Boolean backchannelUserCodeParameterSupported;
+    private String backchannelBindingMessagePattern;
+    private int backchannelAuthenticationResponseExpiresIn;
+    private int backchannelAuthenticationResponseInterval;
+    private List<String> backchannelLoginHintClaims;
+    private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getFapiCompatibility() {
+        if (fapiCompatibility == null) fapiCompatibility = false;
+        return fapiCompatibility;
+    }
+
+    public void setFapiCompatibility(Boolean fapiCompatibility) {
+        this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getForceIdTokenHintPrecense() {
+        if (forceIdTokenHintPrecense == null) forceIdTokenHintPrecense = false;
+        return forceIdTokenHintPrecense;
+    }
+
+    public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
+        this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -829,6 +871,14 @@ public class AppConfiguration implements Configuration {
         this.umaPctLifetime = umaPctLifetime;
     }
 
+    public int getSpontaneousScopeLifetime() {
+        return spontaneousScopeLifetime;
+    }
+
+    public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
+        this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
     public int getCleanServiceInterval() {
         return cleanServiceInterval;
     }
@@ -897,6 +947,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getDynamicRegistrationEnabled() {
+        if (dynamicRegistrationEnabled == null) dynamicRegistrationEnabled = false;
         return dynamicRegistrationEnabled;
     }
 
@@ -961,6 +1012,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {
+        if (allowPostLogoutRedirectWithoutValidation == null) allowPostLogoutRedirectWithoutValidation = false;
         return allowPostLogoutRedirectWithoutValidation;
     }
 
@@ -1066,6 +1118,17 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistOnPromptNone(Boolean sessionIdPersistOnPromptNone) {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
+    }
+
+    public Boolean getSessionIdRequestParameterEnabled() {
+        if (sessionIdRequestParameterEnabled == null) {
+            sessionIdRequestParameterEnabled = false;
+        }
+        return sessionIdRequestParameterEnabled;
+    }
+
+    public void setSessionIdRequestParameterEnabled(Boolean sessionIdRequestParameterEnabled) {
+        this.sessionIdRequestParameterEnabled = sessionIdRequestParameterEnabled;
     }
 
     public Boolean getSessionIdEnabled() {
@@ -1244,7 +1307,15 @@ public class AppConfiguration implements Configuration {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
     }
 
-    public Boolean getEnabledOAuthAuditLogging() {
+    public String getCookieDomain() {
+		return cookieDomain;
+	}
+
+	public void setCookieDomain(String cookieDomain) {
+		this.cookieDomain = cookieDomain;
+	}
+
+	public Boolean getEnabledOAuthAuditLogging() {
         return enabledOAuthAuditLogging;
     }
 
@@ -1379,6 +1450,14 @@ public class AppConfiguration implements Configuration {
         this.sessionIdLifetime = sessionIdLifetime;
     }
 
+    public Integer getServerSessionIdLifetime() {
+        return serverSessionIdLifetime;
+    }
+
+    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
+        this.serverSessionIdLifetime = serverSessionIdLifetime;
+    }
+
     public Boolean getLogClientIdOnClientAuthentication() {
         return logClientIdOnClientAuthentication;
     }
@@ -1459,4 +1538,124 @@ public class AppConfiguration implements Configuration {
         this.errorHandlingMethod = errorHandlingMethod;
     }
 
+    public Boolean getUseLocalCache() {
+        return useLocalCache;
+    }
+
+    public void setUseLocalCache(Boolean useLocalCache) {
+        this.useLocalCache = useLocalCache;
+    }
+
+    public String getBackchannelClientId() {
+        return backchannelClientId;
+    }
+
+    public void setBackchannelClientId(String backchannelClientId) {
+        this.backchannelClientId = backchannelClientId;
+    }
+
+    public String getBackchannelRedirectUri() {
+        return backchannelRedirectUri;
+    }
+
+    public void setBackchannelRedirectUri(String backchannelRedirectUri) {
+        this.backchannelRedirectUri = backchannelRedirectUri;
+    }
+
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
+    }
+
+    public String getBackchannelDeviceRegistrationEndpoint() {
+        return backchannelDeviceRegistrationEndpoint;
+    }
+
+    public void setBackchannelDeviceRegistrationEndpoint(String backchannelDeviceRegistrationEndpoint) {
+        this.backchannelDeviceRegistrationEndpoint = backchannelDeviceRegistrationEndpoint;
+    }
+
+    public List<String> getBackchannelTokenDeliveryModesSupported() {
+        if (backchannelTokenDeliveryModesSupported == null) backchannelTokenDeliveryModesSupported = Lists.newArrayList();
+        return backchannelTokenDeliveryModesSupported;
+    }
+
+    public void setBackchannelTokenDeliveryModesSupported(List<String> backchannelTokenDeliveryModesSupported) {
+        this.backchannelTokenDeliveryModesSupported = backchannelTokenDeliveryModesSupported;
+    }
+
+    public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        if (backchannelAuthenticationRequestSigningAlgValuesSupported == null) backchannelAuthenticationRequestSigningAlgValuesSupported = Lists.newArrayList();
+        return backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlgValuesSupported(List<String> backchannelAuthenticationRequestSigningAlgValuesSupported) {
+        this.backchannelAuthenticationRequestSigningAlgValuesSupported = backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public Boolean getBackchannelUserCodeParameterSupported() {
+        return backchannelUserCodeParameterSupported;
+    }
+
+    public void setBackchannelUserCodeParameterSupported(Boolean backchannelUserCodeParameterSupported) {
+        this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
+    }
+
+    public String getBackchannelBindingMessagePattern() {
+        return backchannelBindingMessagePattern;
+    }
+
+    public void setBackchannelBindingMessagePattern(String backchannelBindingMessagePattern) {
+        this.backchannelBindingMessagePattern = backchannelBindingMessagePattern;
+    }
+
+    /**
+     * Returns a number with a positive integer value indicating the expiration time
+     * of the "auth_req_id" in seconds since the authentication request was received.
+     *
+     * @return Default expires_in value.
+     */
+    public int getBackchannelAuthenticationResponseExpiresIn() {
+        return backchannelAuthenticationResponseExpiresIn;
+    }
+
+    public void setBackchannelAuthenticationResponseExpiresIn(int backchannelAuthenticationResponseExpiresIn) {
+        this.backchannelAuthenticationResponseExpiresIn = backchannelAuthenticationResponseExpiresIn;
+    }
+
+    /**
+     * Returns a number with a positive integer value indicating the minimum amount
+     * of time in seconds that the Client must wait between polling requests to the
+     * token endpoint.
+     * This parameter will only be present if the Client is registered to use the
+     * Poll or Ping modes.
+     *
+     * @return Interval value.
+     */
+    public int getBackchannelAuthenticationResponseInterval() {
+        return backchannelAuthenticationResponseInterval;
+    }
+
+    public void setBackchannelAuthenticationResponseInterval(int backchannelAuthenticationResponseInterval) {
+        this.backchannelAuthenticationResponseInterval = backchannelAuthenticationResponseInterval;
+    }
+
+    public List<String> getBackchannelLoginHintClaims() {
+        return backchannelLoginHintClaims;
+    }
+
+    public void setBackchannelLoginHintClaims(List<String> backchannelLoginHintClaims) {
+        this.backchannelLoginHintClaims = backchannelLoginHintClaims;
+    }
+
+    public CIBAEndUserNotificationConfig getCibaEndUserNotificationConfig() {
+        return cibaEndUserNotificationConfig;
+    }
+
+    public void setCibaEndUserNotificationConfig(CIBAEndUserNotificationConfig cibaEndUserNotificationConfig) {
+        this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
+    }
 }

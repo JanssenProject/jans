@@ -16,6 +16,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -67,6 +68,9 @@ public class UmaPermission implements Serializable {
     @JsonProperty(value = "resource_scopes")
     @XmlElement(name = "resource_scopes")
     public List<String> getScopes() {
+        if (scopes == null) {
+            scopes = new ArrayList<>();
+        }
         return scopes;
     }
 

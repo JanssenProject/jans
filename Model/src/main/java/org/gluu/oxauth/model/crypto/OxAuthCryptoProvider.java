@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.crypto;
 
+import com.google.common.collect.Lists;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.impl.ECDSA;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -24,6 +27,8 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
@@ -34,15 +39,12 @@ import org.json.JSONObject;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.math.BigInteger;
-import java.security.*;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -53,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -94,6 +97,18 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+    }
+
+    public void load(String keyStoreSecret) {
+        this.keyStoreSecret = keyStoreSecret;
+        try(InputStream is = new FileInputStream(keyStoreFile)) {
+            keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(is, keyStoreSecret.toCharArray());
+            LOG.debug("Loaded keys from JKS.");
+            LOG.trace("Loaded keys:"+ getKeys());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -230,11 +245,17 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 throw new RuntimeException(error);
             }
 
-            Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
-            signature.initSign(privateKey);
-            signature.update(signingInput.getBytes());
+            Signature signer = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+            signer.initSign(privateKey);
+            signer.update(signingInput.getBytes());
 
-            return Base64Util.base64urlencode(signature.sign());
+            byte[] signature = signer.sign();
+            if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+            	int signatureLenght = ECDSA.getSignatureByteArrayLength(JWSAlgorithm.parse(signatureAlgorithm.getName()));
+                signature = ECDSA.transcodeSignatureToConcat(signature, signatureLenght);
+            }
+
+            return Base64Util.base64urlencode(signature);
         }
     }
 
@@ -254,18 +275,28 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 if (jwks == null) {
                     publicKey = getPublicKey(alias);
                 } else {
-                    publicKey = getPublicKey(alias, jwks);
+                    publicKey = getPublicKey(alias, jwks, signatureAlgorithm.getAlg());
                 }
                 if (publicKey == null) {
                     return false;
                 }
 
                 byte[] signature = Base64Util.base64urldecode(encodedSignature);
+                byte[] signatureDer = signature;
+                if (AlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
+                	signatureDer = ECDSA.transcodeSignatureToDER(signatureDer);
+                }
 
                 Signature verifier = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
-                verified = verifier.verify(signature);
+                try {
+                	verified = verifier.verify(signatureDer);
+                } catch (SignatureException e) {
+                	// Fall back to old format
+                	// TODO: remove in Gluu 5.0
+                	verified = verifier.verify(signature);
+                }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error(e.getMessage(), e);
                 verified = false;
@@ -323,6 +354,28 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return publicKey;
     }
 
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+            return null;
+        }
+
+        String kid = null;
+        LOG.trace("WebKeys:" + jsonWebKeySet.getKeys().stream().map(JSONWebKey::getKid).collect(Collectors.toList()));
+        LOG.trace("KeyStoreKeys:" + getKeys());
+        for (JSONWebKey key : jsonWebKeySet.getKeys()) {
+            if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
+                kid = key.getKid();
+                Key keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
+                if (keyFromStore != null) {
+                    return kid;
+                }
+            }
+        }
+
+        LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
+        return kid;
+    }
+
     public PrivateKey getPrivateKey(String alias)
             throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException {
         if (Util.isNullOrEmpty(alias)) {
@@ -375,8 +428,13 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         return cert;
     }
 
-    public List<String> getKeyAliases() throws KeyStoreException {
-        return Collections.list(this.keyStore.aliases());
+    public List<String> getKeys() {
+        try {
+            return Collections.list(this.keyStore.aliases());
+        } catch (KeyStoreException e) {
+            LOG.error(e.getMessage(), e);
+            return Lists.newArrayList();
+        }
     }
 
     public SignatureAlgorithm getSignatureAlgorithm(String alias) throws KeyStoreException {
@@ -407,4 +465,9 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
             e.printStackTrace();
         }
     }
+
+    public KeyStore getKeyStore() {
+        return keyStore;
+    }
+
 }

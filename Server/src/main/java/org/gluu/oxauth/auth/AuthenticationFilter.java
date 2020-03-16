@@ -6,37 +6,19 @@
 
 package org.gluu.oxauth.auth;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLDecoder;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.apache.logging.log4j.util.Strings;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.SessionIdState;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.ref.AuthenticatorReference;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
 import org.gluu.oxauth.model.token.ClientAssertionType;
@@ -45,18 +27,41 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.WebApplicationException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
+
 /**
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @version August 20, 2019
  */
-@WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo", "/restv1/revoke"}, displayName = "oxAuth")
+@WebFilter(
+        asyncSupported = true,
+        urlPatterns = {
+                "/restv1/authorize",
+                "/restv1/token",
+                "/restv1/userinfo",
+                "/restv1/revoke",
+                "/restv1/bc-authorize"},
+        displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
-    public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
+    private static final String REALM = "oxAuth";
 
     @Inject
     private Logger log;
@@ -89,18 +94,19 @@ public class AuthenticationFilter implements Filter {
     private AbstractCryptoProvider cryptoProvider;
 
     @Inject
-    private MTLSProxy mtlsProxy;
+    private MTLSService mtlsService;
+
+    @Inject
+    private TokenService tokenService;
 
     private String realm;
-    public static final String REALM = "oxAuth";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, final FilterChain filterChain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, final FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
@@ -110,6 +116,7 @@ public class AuthenticationFilter implements Filter {
 
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
+            boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
@@ -121,8 +128,9 @@ public class AuthenticationFilter implements Filter {
                 log.debug("Starting token endpoint authentication");
 
                 // #686 : allow authenticated client via user access_token
-                if (StringUtils.isNotBlank(authorizationHeader) && authorizationHeader.startsWith(ACCESS_TOKEN_PREFIX)) {
-                    processAuthByAccessToken(httpRequest, httpResponse, filterChain);
+                final String accessToken = tokenService.getTokenAfterPrefix(authorizationHeader, "Bearer ", "AccessToken ");
+                if (StringUtils.isNotBlank(accessToken)) {
+                    processAuthByAccessToken(accessToken, httpRequest, httpResponse, filterChain);
                     return;
                 }
 
@@ -132,37 +140,48 @@ public class AuthenticationFilter implements Filter {
                     processJwtAuth(httpRequest, httpResponse, filterChain);
                 } else if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
                     log.debug("Starting Basic Auth token endpoint authentication");
-                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+                    processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     log.debug("Starting POST Auth token endpoint authentication");
-                    processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse,
-                            filterChain, tokenEndpoint);
+                    processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
                 }
             } else if (tokenRevocationEndpoint) {
                 if (authorizationHeader.startsWith("Basic ")) {
-                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+                    processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
 
                     httpResponse.sendError(401, "Not authorized");
                 }
+            } else if (backchannelAuthenticationEnpoint) {
+                if (Strings.isNotBlank(authorizationHeader) && authorizationHeader.startsWith("Basic ")) {
+                    processBasicAuth(httpRequest, httpResponse, filterChain);
+                } else {
+                    String entity = errorResponseFactory.getErrorAsJson(INVALID_CLIENT);
+                    httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
+                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+                    httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
+                    httpResponse.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(entity.length()));
+                    PrintWriter out = httpResponse.getWriter();
+                    out.print(entity);
+                    out.flush();
+                }
             } else if (authorizationHeader != null) {
                 if (authorizationHeader.startsWith("Bearer ")) {
                     processBearerAuth(httpRequest, httpResponse, filterChain);
                 } else if (authorizationHeader.startsWith("Basic ")) {
-                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+                    processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
 
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else {
-                String sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
+                String sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
                 List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
-                if (StringUtils.isBlank(sessionId)) {
-                    // OXAUTH-297 : check whether session_id is present in cookie
-                    sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
+                if (StringUtils.isBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
+                    sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
                 }
 
                 SessionId sessionIdObject = null;
@@ -171,11 +190,17 @@ public class AuthenticationFilter implements Filter {
                 }
                 if (sessionIdObject != null && SessionIdState.AUTHENTICATED == sessionIdObject.getState()
                         && !prompts.contains(Prompt.LOGIN)) {
-                    processSessionAuth(errorResponseFactory, sessionId, httpRequest, httpResponse, filterChain);
+                    processSessionAuth(sessionId, httpRequest, httpResponse, filterChain);
                 } else {
                     filterChain.doFilter(httpRequest, httpResponse);
                 }
             }
+        } catch (WebApplicationException ex) {
+            if (ex.getResponse() != null) {
+                sendResponse(httpResponse, ex);
+                return;
+            }
+            log.error(ex.getMessage(), ex);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -196,31 +221,35 @@ public class AuthenticationFilter implements Filter {
             if (client != null &&
                     (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
                             client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
-                return mtlsProxy.processMTLS(httpRequest, httpResponse, filterChain, client, new AuthenticatorReference() {
-                    @Override
-                    public void configureSessionClient() {
-                        authenticator.configureSessionClient(client);
-                    }
-                }, cryptoProvider);
+                return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }
         }
         return false;
     }
 
-    private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
+    private void processAuthByAccessToken(String accessToken, HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
         try {
-            String accessToken = httpRequest.getHeader("Authorization").substring(ACCESS_TOKEN_PREFIX.length());
-            if (StringUtils.isNotBlank(accessToken)) {
-                AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
-                if (grant != null && grant.getAccessToken(accessToken).isValid()) {
-                    Client client = grant.getClient();
-
-                    authenticator.configureSessionClient(client);
-
-                    filterChain.doFilter(httpRequest, httpResponse);
-                    return;
-                }
+            log.trace("Authenticating client by access token {} ...", accessToken);
+            if (StringUtils.isBlank(accessToken)) {
+                sendError(httpResponse);
+                return;
             }
+
+            AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+            if (grant == null) {
+                sendError(httpResponse);
+                return;
+            }
+            final AbstractToken accessTokenObj = grant.getAccessToken(accessToken);
+            if (accessTokenObj == null || !accessTokenObj.isValid()) {
+                sendError(httpResponse);
+                return;
+            }
+
+            Client client = grant.getClient();
+            authenticator.configureSessionClient(client);
+            filterChain.doFilter(httpRequest, httpResponse);
+            return;
         } catch (Exception ex) {
             log.error("Failed to authenticate client by access_token", ex);
         }
@@ -228,9 +257,7 @@ public class AuthenticationFilter implements Filter {
         sendError(httpResponse);
     }
 
-    private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionId,
-                                    HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain)
-            throws IOException, ServletException {
+    private void processSessionAuth(String p_sessionId, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) {
         boolean requireAuth;
 
         requireAuth = !authenticator.authenticateBySessionId(p_sessionId);
@@ -250,15 +277,14 @@ public class AuthenticationFilter implements Filter {
         }
     }
 
-    private void processBasicAuth(ClientService clientService, ErrorResponseFactory errorResponseFactory,
-                                  HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) {
+    private void processBasicAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) {
         boolean requireAuth = true;
 
         try {
             String header = servletRequest.getHeader("Authorization");
             if (header != null && header.startsWith("Basic ")) {
                 String base64Token = header.substring(6);
-                String token = new String(Base64.decodeBase64(base64Token), Util.UTF8_STRING_ENCODING);
+                String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
 
                 String username = "";
                 String password = "";
@@ -281,7 +307,9 @@ public class AuthenticationFilter implements Filter {
                         identity.getCredentials().setPassword(password);
 
                         if (servletRequest.getRequestURI().endsWith("/token")
-                                || servletRequest.getRequestURI().endsWith("/revoke")) {
+                                || servletRequest.getRequestURI().endsWith("/revoke")
+                                || servletRequest.getRequestURI().endsWith("/userinfo")
+                                || servletRequest.getRequestURI().endsWith("/bc-authorize")) {
                             Client client = clientService.getClient(username);
                             if (client == null
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
@@ -318,17 +346,12 @@ public class AuthenticationFilter implements Filter {
                 // String[]{accessToken});
                 filterChain.doFilter(servletRequest, servletResponse);
             }
-        } catch (ServletException ex) {
-            log.info("Bearer authorization failed: {}", ex);
-        } catch (IOException ex) {
-            log.info("Bearer authorization failed: {}", ex);
         } catch (Exception ex) {
             log.info("Bearer authorization failed: {}", ex);
         }
     }
 
-    private void processPostAuth(ClientService clientService, ClientFilterService clientFilterService,
-                                 ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest,
+    private void processPostAuth(ClientFilterService clientFilterService, HttpServletRequest servletRequest,
                                  HttpServletResponse servletResponse, FilterChain filterChain, boolean tokenEndpoint) {
         try {
             String clientId = "";
@@ -394,13 +417,9 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (requireAuth && !identity.isLoggedIn()) {
+            if (!identity.isLoggedIn()) {
                 sendError(servletResponse);
             }
-        } catch (ServletException ex) {
-            log.error("Post authentication failed: {}", ex);
-        } catch (IOException ex) {
-            log.error("Post authentication failed: {}", ex);
         } catch (Exception ex) {
             log.error("Post authentication failed: {}", ex);
         }
@@ -438,11 +457,7 @@ public class AuthenticationFilter implements Filter {
             }
 
             filterChain.doFilter(servletRequest, servletResponse);
-        } catch (ServletException ex) {
-            log.info("JWT authentication failed: {}", ex);
-        } catch (IOException ex) {
-            log.info("JWT authentication failed: {}", ex);
-        } catch (InvalidJwtException ex) {
+        } catch (ServletException | IOException | InvalidJwtException ex) {
             log.info("JWT authentication failed: {}", ex);
         }
 
@@ -452,20 +467,24 @@ public class AuthenticationFilter implements Filter {
     }
 
     private void sendError(HttpServletResponse servletResponse) {
-        PrintWriter out = null;
-        try {
-            out = servletResponse.getWriter();
-
+        try (PrintWriter out = servletResponse.getWriter()) {
             servletResponse.setStatus(401);
             servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
             servletResponse.setContentType("application/json;charset=UTF-8");
             out.write(errorResponseFactory.errorAsJson(TokenErrorResponseType.INVALID_CLIENT, "Unable to authenticate client."));
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+        }
+    }
+
+    private void sendResponse(HttpServletResponse servletResponse, WebApplicationException e) {
+        try (PrintWriter out = servletResponse.getWriter()) {
+            servletResponse.setStatus(e.getResponse().getStatus());
+            servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+            servletResponse.setContentType("application/json;charset=UTF-8");
+            out.write(e.getResponse().getEntity().toString());
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
         }
     }
 

@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.client.model.authorize;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.client.AuthorizationRequest;
@@ -28,10 +29,6 @@ import org.gluu.oxauth.util.ClientUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -336,7 +333,7 @@ public class JwtAuthorizationRequest {
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             JweEncrypterImpl jweEncrypter;
             if (cryptoProvider != null && jwks != null) {
-                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks);
+                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
             } else {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));

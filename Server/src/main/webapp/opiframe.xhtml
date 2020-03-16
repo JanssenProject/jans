@@ -1,12 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+<f:view transient="true" contentType="text/html">
+<h:head>
     <meta charset="UTF-8"/>
     <title>
         oxAuth - OP iFrame
     </title>
     <script type="text/javascript" src="js/crypto-js-3.1.9-1/crypto-js.js"></script>
-    <script>
+    <script type="text/javascript">
         //<![CDATA[
         window.addEventListener("message", receiveMessage, false);
 
@@ -20,11 +25,7 @@
 
             var ss = CryptoJS.SHA256(clientId + ' ' + e.origin + ' ' + opbs + ' ' + salt) + "." + salt;
 
-            if (sessionState == ss) {
-                stat = "unchanged";
-            } else {
-                stat = "changed";
-            }
+            var stat = sessionState == ss ? "unchanged" : "changed";
 
             e.source.postMessage(stat, e.origin);
         }
@@ -42,6 +43,7 @@
         }
         //]]>
     </script>
-</head>
-<body></body>
+</h:head>
+<h:body></h:body>
+</f:view>
 </html>

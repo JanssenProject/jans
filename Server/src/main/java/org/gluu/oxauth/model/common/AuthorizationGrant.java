@@ -8,7 +8,6 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -22,16 +21,12 @@ import org.gluu.oxauth.model.token.IdTokenFactory;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.PairwiseIdentifierService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalIntrospectionService;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.service.CacheService;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +34,13 @@ import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -76,6 +70,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Inject
     private AttributeService attributeService;
 
+    @Inject
+    private SectorIdentifierService sectorIdentifierService;
+
     private boolean isCachedWithNoPersistence = false;
 
     public AuthorizationGrant() {
@@ -90,11 +87,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         super.init(user, authorizationGrantType, client, authenticationTime);
     }
 
-    public IdToken createIdToken(IAuthorizationGrant grant, String nonce,
-                                 AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                 Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
-        JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, state,
-                scopes, includeIdTokenClaims, preProcessing);
+    public IdToken createIdToken(
+            IAuthorizationGrant grant, String nonce,
+            AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+        JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, refreshToken,
+                state, scopes, includeIdTokenClaims, preProcessing);
         return new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
@@ -111,6 +109,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (isCachedWithNoPersistence) {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
                 saveInCache();
+            } else if (getAuthorizationGrantType() == AuthorizationGrantType.CIBA) {
+                saveCIBAInCache();
+                saveInCache();
             } else {
                 throw new UnsupportedOperationException(
                         "Grant caching is not supported for : " + getAuthorizationGrantType());
@@ -126,6 +127,11 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveInCache() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
+        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
+    }
+
+    private void saveCIBAInCache() {
+        CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
         cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
     }
 
@@ -147,24 +153,24 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-	private void initTokenFromGrant(TokenLdap token) {
+    private void initTokenFromGrant(TokenLdap token) {
         final String nonce = getNonce();
         if (nonce != null) {
-        	token.setNonce(nonce);
+            token.setNonce(nonce);
         }
-		token.setScope(getScopesAsString());
-		token.setAuthMode(getAcrValues());
-		token.setSessionDn(getSessionDn());
-		token.setAuthenticationTime(getAuthenticationTime());
-		token.setCodeChallenge(getCodeChallenge());
-		token.setCodeChallengeMethod(getCodeChallengeMethod());
-		token.setClaims(getClaims());
+        token.setScope(getScopesAsString());
+        token.setAuthMode(getAcrValues());
+        token.setSessionDn(getSessionDn());
+        token.setAuthenticationTime(getAuthenticationTime());
+        token.setCodeChallenge(getCodeChallenge());
+        token.setCodeChallengeMethod(getCodeChallengeMethod());
+        token.setClaims(getClaims());
 
-		final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
-		if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
-		    token.setJwtRequest(jwtRequest.getEncodedJwt());
-		}
-	}
+        final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
+        if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
+            token.setJwtRequest(jwtRequest.getEncodedJwt());
+        }
+    }
 
     @Override
     public AccessToken createAccessToken(String certAsPem, ExecutionContext context) {
@@ -245,11 +251,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     @Override
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
+    public IdToken createIdToken(
+            String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
         try {
-            final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, state,
-                    getScopes(), includeIdTokenClaims, preProcessing);
+            final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, refreshToken,
+                    state, getScopes(), includeIdTokenClaims, preProcessing);
             final String acrValues = authorizationGrant.getAcrValues();
             final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
@@ -353,41 +360,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        final User user = getUser();
-        if (user == null) {
-            log.trace("User is null for grant " + getGrantId());
-            return "";
-        }
-        final String subjectType = getClient().getSubjectType();
-        if (SubjectType.PAIRWISE.equals(SubjectType.fromString(subjectType))) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = !ArrayUtils.isEmpty(getClient().getRedirectUris()) ? getClient().getRedirectUris()[0] : null;
-            }
-
-            String userInum = user.getAttribute("inum");
-            String clientId = getClientId();
-
-            try {
-                PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum,
-                        sectorIdentifierUri, clientId);
-                if (pairwiseIdentifier == null) {
-                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                    pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                    pairwiseIdentifier.setDn(
-                            pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
-                    pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-                }
-                return pairwiseIdentifier.getId();
-            } catch (Exception e) {
-                log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
-                return "";
-            }
-        } else {
-            return user.getAttribute(appConfiguration.getOpenidSubAttribute());
-        }
+        return sectorIdentifierService.getSub(getClient(), getUser());
     }
 
     public boolean isCachedWithNoPersistence() {

@@ -7,6 +7,7 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.AuthenticationScriptUsageType;
@@ -28,7 +29,6 @@ import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.LocaleUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -37,6 +37,7 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
 import org.gluu.util.StringHelper;
+import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 8, 2018
+ * @version March 4, 2020
  */
 @RequestScoped
 @Named
@@ -140,6 +141,9 @@ public class AuthorizeAction {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -164,6 +168,9 @@ public class AuthorizeAction {
     private String codeChallengeMethod;
     private String claims;
 
+    // CIBA Request parameter
+    private String authReqId;
+
     // custom oxAuth parameters
     private String sessionId;
 
@@ -174,18 +181,22 @@ public class AuthorizeAction {
         if (StringUtils.isNotBlank(uiLocales)) {
             uiLocalesList = Util.splittedStringAsList(uiLocales, " ");
 
-            List<Locale> supportedLocales = new ArrayList<Locale>();
-            for (Iterator<Locale> it = facesContext.getApplication().getSupportedLocales(); it.hasNext(); ) {
-                supportedLocales.add(it.next());
-            }
+            List<Locale> supportedLocales = languageBean.getSupportedLocales();
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
-            if (matchingLocale != null)
-                languageBean.setLocaleCode(matchingLocale.getLanguage());
+            if (matchingLocale != null) {
+                languageBean.setLocale(matchingLocale);
+            }
         } else {
+            Locale requestedLocale = facesContext.getExternalContext().getRequestLocale();
+            if (requestedLocale != null) {
+                languageBean.setLocale(requestedLocale);
+                return;
+            }
+            
             Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
             if (defaultLocale != null) {
-                languageBean.setLocaleCode(defaultLocale.getLanguage());
+                languageBean.setLocale(defaultLocale);
             }
         }
     }
@@ -794,6 +805,28 @@ public class AuthorizeAction {
 
     public void setClaims(String claims) {
         this.claims = claims;
+    }
+
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
+    }
+
+    public String getBindingMessage() {
+        String bindingMessage = null;
+
+        if (Strings.isNotBlank(getAuthReqId())) {
+            final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+            if (cibaGrant != null) {
+                bindingMessage = cibaGrant.getBindingMessage();
+            }
+        }
+
+        return bindingMessage;
     }
 
     public String encodeParameters(String url, Map<String, Object> parameters) {

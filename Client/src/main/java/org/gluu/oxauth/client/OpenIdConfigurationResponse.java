@@ -21,7 +21,7 @@ import java.util.Map;
  * Represents an OpenId Configuration received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version July 10, 2019
+ * @version August 22, 2019
  */
 public class OpenIdConfigurationResponse extends BaseResponse implements Serializable {
 
@@ -68,9 +68,17 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private Boolean tlsClientCertificateBoundAccessTokens;
     private Boolean frontChannelLogoutSupported;
     private Boolean frontChannelLogoutSessionSupported;
+    private Boolean backchannelLogoutSupported;
+    private Boolean backchannelLogoutSessionSupported;
     private String opPolicyUri;
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
+
+    // CIBA
+    private String backchannelAuthenticationEndpoint;
+    private List<String> backchannelTokenDeliveryModesSupported;
+    private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+    private Boolean backchannelUserCodeParameterSupported;
 
     /**
      * Constructs an OpenID Configuration Response.
@@ -103,6 +111,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         idTokenTokenBindingCnfValuesSupported = new ArrayList<String>();
         claimsLocalesSupported = new ArrayList<String>();
         uiLocalesSupported = new ArrayList<String>();
+        backchannelTokenDeliveryModesSupported = new ArrayList<>();
+        backchannelAuthenticationRequestSigningAlgValuesSupported = new ArrayList<>();
     }
 
     public static Map<String, List<String>> parseScopeToClaimsMapping(String p_scopeToClaimsJson) throws JSONException {
@@ -996,6 +1006,22 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.frontChannelLogoutSupported = frontChannelLogoutSupported;
     }
 
+    public Boolean getBackchannelLogoutSupported() {
+        return backchannelLogoutSupported;
+    }
+
+    public void setBackchannelLogoutSupported(Boolean backchannelLogoutSupported) {
+        this.backchannelLogoutSupported = backchannelLogoutSupported;
+    }
+
+    public Boolean getBackchannelLogoutSessionSupported() {
+        return backchannelLogoutSessionSupported;
+    }
+
+    public void setBackchannelLogoutSessionSupported(Boolean backchannelLogoutSessionSupported) {
+        this.backchannelLogoutSessionSupported = backchannelLogoutSessionSupported;
+    }
+
     public Boolean getTlsClientCertificateBoundAccessTokens() {
         return tlsClientCertificateBoundAccessTokens;
     }
@@ -1010,6 +1036,38 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
     public void setFrontChannelLogoutSessionSupported(Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
+
+    public String getBackchannelAuthenticationEndpoint() {
+        return backchannelAuthenticationEndpoint;
+    }
+
+    public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
+        this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
+    }
+
+    public List<String> getBackchannelTokenDeliveryModesSupported() {
+        return backchannelTokenDeliveryModesSupported;
+    }
+
+    public void setBackchannelTokenDeliveryModesSupported(List<String> backchannelTokenDeliveryModesSupported) {
+        this.backchannelTokenDeliveryModesSupported = backchannelTokenDeliveryModesSupported;
+    }
+
+    public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        return backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlgValuesSupported(List<String> backchannelAuthenticationRequestSigningAlgValuesSupported) {
+        this.backchannelAuthenticationRequestSigningAlgValuesSupported = backchannelAuthenticationRequestSigningAlgValuesSupported;
+    }
+
+    public Boolean getBackchannelUserCodeParameterSupported() {
+        return backchannelUserCodeParameterSupported;
+    }
+
+    public void setBackchannelUserCodeParameterSupported(Boolean backchannelUserCodeParameterSupported) {
+        this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
     }
 
     @Override
@@ -1057,10 +1115,16 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", tlsClientCertificateBoundAccessTokens=" + tlsClientCertificateBoundAccessTokens +
                 ", frontChannelLogoutSupported=" + frontChannelLogoutSupported +
                 ", frontChannelLogoutSessionSupported=" + frontChannelLogoutSessionSupported +
+                ", backchannelLogoutSupported=" + backchannelLogoutSupported +
+                ", backchannelLogoutSessionSupported=" + backchannelLogoutSessionSupported +
                 ", requireRequestUriRegistration=" + requireRequestUriRegistration +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
-                ", scopeToClaimsMapping=" + scopeToClaimsMapping +
+                ", scopeToClaimsMapping=" + scopeToClaimsMapping + '\'' +
+                ", backchannelAuthenticationEndpoint=" + backchannelAuthenticationEndpoint + '\'' +
+                ", backchannelTokenDeliveryModesSupported=" + backchannelTokenDeliveryModesSupported + '\'' +
+                ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
+                ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 '}';
     }
 }
