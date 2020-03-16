@@ -19,7 +19,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(JDBCPersistenceProvider.class);
 
     private ConfigurationService configurationService;
-    private static BasicDataSource dataSource = null;
+    private BasicDataSource dataSource = null;
 
     public JDBCPersistenceProvider(ConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -27,9 +27,9 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
 
     @Override
     public void onCreate() {
-        JDBCConfiguration jdbcConfiguration = asJDBCConfiguration(configurationService.getConfiguration());
-        validate(jdbcConfiguration);
-        if (dataSource == null) {
+        try {
+            JDBCConfiguration jdbcConfiguration = asJDBCConfiguration(configurationService.getConfiguration());
+            validate(jdbcConfiguration);
             dataSource = new BasicDataSource();
             dataSource.setDriverClassName(jdbcConfiguration.getDriver());
             dataSource.setUrl(jdbcConfiguration.getJdbcUrl());
@@ -39,6 +39,9 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
             dataSource.setMinIdle(5);
             dataSource.setMaxIdle(10);
             dataSource.setMaxOpenPreparedStatements(100);
+        } catch (Exception e) {
+            LOG.error("Error in creating jdbc connection.", e);
+            throw new HttpException(ErrorResponseCode.FAILED_TO_CREATE_JDBC_CONNECTION);
         }
     }
 
@@ -48,7 +51,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
             try {
                 dataSource.close();
             } catch (SQLException e) {
-                LOG.error("Failed to cloase JDBC dataSource.", e);
+                LOG.error("Failed to close JDBC dataSource.", e);
             }
         }
     }
@@ -58,16 +61,18 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
         return dataSource.getConnection();
     }
 
-    public static JDBCConfiguration asJDBCConfiguration(OxdServerConfiguration configuration) {
+    public static JDBCConfiguration asJDBCConfiguration(OxdServerConfiguration configuration) throws Exception {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
                 return Jackson2.createJsonMapper().treeToValue(node, JDBCConfiguration.class);
             }
+            LOG.error("JDBC Configuration not provided.");
+            throw new HttpException(ErrorResponseCode.NO_JDBC_CONFIGURATION);
         } catch (Exception e) {
             LOG.error("Failed to parse JDBCConfiguration.", e);
+            throw e;
         }
-        return new JDBCConfiguration();
     }
 
     private void validate(JDBCConfiguration jdbcConfiguration) {
