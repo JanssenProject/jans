@@ -10,8 +10,6 @@
     <url>http://ox.gluu.org</url>
 
     <properties>
-        <postgresql.version>42.2.9</postgresql.version>
-        <mysql.version>8.0.19</mysql.version>
         <dbcp.version>1.4</dbcp.version>
         <h2.version>1.4.194</h2.version>
         <jedis.version>2.9.0</jedis.version>
@@ -296,16 +294,6 @@
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>${jedis.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
