@@ -833,6 +833,20 @@ public class SessionIdService {
         return null;
     }
 
+    @Nullable
+    public SessionId getSessionByDn(@Nullable String dn) {
+        if (StringUtils.isBlank(dn)) {
+            return null;
+        }
+        try {
+            return persistenceEntryManager.find(SessionId.class, dn);
+        } catch (Exception e) {
+            log.error("Failed to get session by dn: " + dn, e);
+        }
+        return null;
+    }
+
+
     public SessionId getSessionId(HttpServletRequest request) {
         return getSessionId(getSessionIdFromCookie(request));
     }
