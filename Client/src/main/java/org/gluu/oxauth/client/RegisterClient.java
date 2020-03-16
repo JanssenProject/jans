@@ -29,7 +29,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 4, 2018
+ * @version August 20, 2019
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -159,6 +159,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getTlsClientAuthSubjectDn() != null) {
                     requestBody.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), getRequest().getTlsClientAuthSubjectDn());
                 }
+                if (getRequest().getAllowSpontaneousScopes() != null) {
+                    requestBody.put(ALLOW_SPONTANEOUS_SCOPES.toString(), getRequest().getAllowSpontaneousScopes());
+                }
+                if (getRequest().getSpontaneousScopes() != null) {
+                    requestBody.put(SPONTANEOUS_SCOPES.toString(), new JSONArray(getRequest().getSpontaneousScopes()));
+                }
                 if (getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() != null) {
                     requestBody.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), getRequest().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims().toString());
                 }
@@ -219,6 +225,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
                     requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
                 }
+                if (getRequest().getBackchannelLogoutUris() != null && !getRequest().getBackchannelLogoutUris().isEmpty()) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_URI.getName(), getRequest().getBackchannelLogoutUris());
+                }
+                if (getRequest().getBackchannelLogoutSessionRequired() != null) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getBackchannelLogoutSessionRequired());
+                }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
                 }
@@ -250,6 +262,20 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(CLAIMS.toString(), spaceSeparatedClaims);
                 }
 
+                // CIBA
+                if (getRequest().getBackchannelTokenDeliveryMode() != null) {
+                    requestBody.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), getRequest().getBackchannelTokenDeliveryMode());
+                }
+                if (StringUtils.isNotBlank(getRequest().getBackchannelClientNotificationEndpoint())) {
+                    requestBody.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), getRequest().getBackchannelClientNotificationEndpoint());
+                }
+                if (getRequest().getBackchannelAuthenticationRequestSigningAlg() != null) {
+                    requestBody.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), getRequest().getBackchannelAuthenticationRequestSigningAlg());
+                }
+                if (getRequest().getBackchannelUserCodeParameter() != null) {
+                    requestBody.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), getRequest().getBackchannelUserCodeParameter());
+                }
+
                 // Custom params
                 final Map<String, String> customAttributes = getRequest().getCustomAttributes();
                 if (customAttributes != null && !customAttributes.isEmpty()) {
@@ -276,6 +302,8 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 clientResponse = clientRequest.post(String.class);
             } else if (getHttpMethod().equals(HttpMethod.PUT)) {
                 clientResponse = clientRequest.put(String.class);
+            } else if (getHttpMethod().equals(HttpMethod.DELETE)) {
+                clientResponse = clientRequest.delete(String.class);
             } else { // GET
                 clientResponse = clientRequest.get(String.class);
             }

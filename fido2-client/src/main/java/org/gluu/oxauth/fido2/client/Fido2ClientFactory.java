@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.fido2.client;
 
-import java.io.IOException;
-
-import javax.ws.rs.core.UriBuilder;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -18,8 +18,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
 
 /**
  * Helper class which creates proxy Fido2 services
@@ -76,10 +76,13 @@ public class Fido2ClientFactory {
 
     private ApacheHttpClient4Engine createEngine() {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        CloseableHttpClient httpClient = HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+        		.setConnectionManager(cm).build();
         cm.setMaxTotal(200); // Increase max total connection to 200
         cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
         ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+        engine.setFollowRedirects(true);
         
         return engine;
     }

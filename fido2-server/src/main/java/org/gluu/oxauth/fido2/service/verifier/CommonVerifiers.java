@@ -79,7 +79,7 @@ public class CommonVerifiers {
         bufferSize += clientDataHash.length;
         byte[] credId = authData.getCredId();
         bufferSize += credId.length;
-        byte[] publicKey = convertCOSEtoPublicKey(authData.getCOSEPublicKey());
+        byte[] publicKey = convertCOSEtoPublicKey(authData.getCosePublicKey());
         bufferSize += publicKey.length;
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(reserved).put(rpIdHash).put(clientDataHash).put(credId).put(publicKey).array();
@@ -143,6 +143,20 @@ public class CommonVerifiers {
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
         verifySignature(signatureBytes, signatureBase, publicKey, signatureAlgorithm);
+    }
+
+    public boolean verifyFlags(AuthData authData, UserVerification userVerification) {
+    	boolean userPresent = verifyUserPresent(authData);
+    	boolean userVerified = verifyUserVerified(authData);
+    	
+    	if (UserVerification.required == userVerification) {
+    		if (!(userPresent || userVerified)) {
+                throw new Fido2RPRuntimeException("User verification is required");
+    		}
+    	}
+
+    	
+    	return true;
     }
 
     public boolean verifyUserPresent(AuthData authData) {
@@ -399,6 +413,10 @@ public class CommonVerifiers {
         return (flags[0] & FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED) == FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED;
     }
 
+    public boolean verifyEdFlag(byte[] flags) {
+        return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
+    }
+
     public void verifyAttestationBuffer(boolean hasAtFlag, byte[] attestationBuffer) {
         if (!hasAtFlag && attestationBuffer.length > 0) {
             throw new Fido2RPRuntimeException("Invalid attestation data buffer");
@@ -529,9 +547,9 @@ public class CommonVerifiers {
 
     }
 
-    public String verifyUserVerification(JsonNode userVerification) {
+    public UserVerification verifyUserVerification(JsonNode userVerification) {
         try {
-            return UserVerification.valueOf(userVerification.asText()).name();
+            return UserVerification.valueOf(userVerification.asText());
         } catch (Exception e) {
             throw new Fido2RPRuntimeException("Wrong user verification parameter " + e.getMessage());
         }

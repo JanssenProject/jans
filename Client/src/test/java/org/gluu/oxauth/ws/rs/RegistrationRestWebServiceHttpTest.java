@@ -150,6 +150,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
         registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setFrontChannelLogoutSessionRequired(true);
+        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setBackchannelLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
@@ -174,10 +176,12 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getClaims().get(SCOPE.toString()));
+        assertTrue(Boolean.parseBoolean(response.getClaims().get(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
+        assertEquals(logoutUri, new JSONArray(response.getClaims().get(BACKCHANNEL_LOGOUT_URI.toString())).getString(0));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertEquals(logoutUri, new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
@@ -438,25 +442,16 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
     }
 
     @Test
-    public void requestClientRegistrationFail1() throws Exception {
-        showTitle("requestClientRegistrationFail1");
+    public void failRegistration_whenRedirectUriIsNotSetForResponseTypeCode() throws Exception {
+        showTitle("failRegistration_whenRedirectUriIsNotSetForResponseTypeCode");
+
+        RegisterRequest request = new RegisterRequest();
+        request.setResponseTypes(Lists.newArrayList(ResponseType.CODE));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(null, null, null);
-
-        showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
-    }
-
-    @Test
-    public void requestClientRegistrationFail2() throws Exception {
-        showTitle("requestClientRegistrationFail2");
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse response = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app", null); // Missing redirect URIs
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(request);
+        RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
@@ -624,5 +619,38 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getEntity());
         assertNotNull(response.getErrorType());
         assertNotNull(response.getErrorDescription());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void deleteClient(final String redirectUris) throws Exception {
+        showTitle("deleteClient");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI", redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+
+        registerRequest = new RegisterRequest(response.getRegistrationAccessToken());
+        registerRequest.setHttpMethod(HttpMethod.DELETE);
+
+        RegisterClient deleteClient = new RegisterClient(response.getRegistrationClientUri());
+        deleteClient.setRequest(registerRequest);
+        deleteClient.setExecutor(clientExecutor(true));
+        RegisterResponse deleteResponse = deleteClient.exec();
+
+        assertEquals(deleteResponse.getStatus(), 204, "Unexpected response code: " + response.getEntity());
     }
 }

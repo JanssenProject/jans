@@ -35,6 +35,10 @@
 		<f:viewParam name="code_challenge_method" value="#{authorizeAction.codeChallengeMethod}" />
 		<f:viewParam name="claims" value="#{authorizeAction.claims}" />
 
+		<!-- CIBA request parameter -->
+		<f:viewParam name="auth_req_id" value="#{authorizeAction.authReqId}" />
+		<f:viewParam name="binding_message" value="#{authorizeAction.bindingMessage}" />
+
 		<!-- custom oxAuth parameters -->
 		<f:viewParam name="session_id" value="#{authorizeAction.sessionId}" />
 	</f:metadata>

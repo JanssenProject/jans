@@ -32,6 +32,6 @@ value: oxPreferredMethod
 
 where `oxPreferredMethod` is an LDAP attribute part of GluuPerson object class.
 
-* Copy the accompanying custom pages to `/opt/gluu/jetty/oxauth/custom/pages/idfirst`, namely `alter_login.xhtml`, `alter_login.page.xml` (3.0.2 only), and `idfirst_login.xhtml`. This is only required if your Gluu Server wasn't originally bundled with this script
+* Copy the accompanying [custom pages](https://github.com/GluuFederation/oxAuth/tree/master/Server/src/main/webapp/auth/idfirst) to `/opt/gluu/jetty/oxauth/custom/pages/idfirst`, namely `alter_login.xhtml`, `alter_login.page.xml` (3.0.2 only), and `idfirst_login.xhtml`. This is only required if your Gluu Server wasn't originally bundled with this script
 
 * Ensure this script has a low level set in oxTrust. All other scripts to which this scripts forwards to must be greater in level than this.

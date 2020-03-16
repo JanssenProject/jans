@@ -14,6 +14,7 @@ from org.gluu.util import StringHelper
 from org.gluu.util import ArrayHelper
 from org.gluu.persist.service import PersistanceFactoryService
 from org.gluu.persist.ldap.impl import LdapEntryManagerFactory
+from org.gluu.model.ldap import GluuLdapConfiguration
 from java.util import Arrays, Properties
 
 import java
@@ -23,7 +24,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Basic (multi auth conf). Initialization"
 
         if (not configurationAttributes.containsKey("auth_configuration_file")):
@@ -66,7 +67,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return result
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -214,10 +215,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         ldapExtendedEntryManagers = []
         for ldapExtendedConfiguration in ldapExtendedConfigurations:
-            ldapExtendedConfiguration = ldapExtendedConfiguration["ldapConfiguration"]
+            connectionConfiguration = ldapExtendedConfiguration["connectionConfiguration"]
 
             ldapProperties = Properties()
-            for key, value in ldapExtendedConfiguration.items():
+            for key, value in connectionConfiguration.items():
                 value_string = value
                 if isinstance(value_string, list):
                     value_string = ", ".join(value)
@@ -227,6 +228,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 ldapProperties.setProperty(persistenceType + "." + key, value_string)
 
             ldapEntryManager = ldapEntryManagerFactory.createEntryManager(ldapProperties)
+
             ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapExtendedConfiguration["ldapConfiguration"], "ldapProperties" : ldapProperties, "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
         
         return ldapExtendedEntryManagers
@@ -234,11 +236,38 @@ class PersonAuthentication(PersonAuthenticationType):
     def createLdapExtendedConfigurations(self, authConfiguration):
         ldapExtendedConfigurations = []
 
-        for ldapConfiguration in authConfiguration["ldap_configuration"]:
-            loginAttributes = ldapConfiguration["loginAttributes"]
-            localLoginAttributes = ldapConfiguration["localLoginAttributes"]
+        for connectionConfiguration in authConfiguration["ldap_configuration"]:
+            configId = connectionConfiguration["configId"]
             
-            ldapExtendedConfigurations.append({ "ldapConfiguration" : ldapConfiguration, "loginAttributes" : loginAttributes, "localLoginAttributes" : localLoginAttributes })
+            servers = connectionConfiguration["servers"]
+
+            bindDN = None
+            bindPassword = None
+            useAnonymousBind = True
+            if (self.containsAttributeString(connectionConfiguration, "bindDN")):
+                useAnonymousBind = False
+                bindDN = connectionConfiguration["bindDN"]
+                bindPassword = connectionConfiguration["bindPassword"]
+
+            useSSL = connectionConfiguration["useSSL"]
+            maxConnections = connectionConfiguration["maxConnections"]
+            baseDNs = connectionConfiguration["baseDNs"]
+            loginAttributes = connectionConfiguration["loginAttributes"]
+            localLoginAttributes = connectionConfiguration["localLoginAttributes"]
+            
+            ldapConfiguration = GluuLdapConfiguration()
+            ldapConfiguration.setConfigId(configId)
+            ldapConfiguration.setBindDN(bindDN)
+            ldapConfiguration.setBindPassword(bindPassword)
+            ldapConfiguration.setServers(Arrays.asList(servers))
+            ldapConfiguration.setMaxConnections(maxConnections)
+            ldapConfiguration.setUseSSL(useSSL)
+            ldapConfiguration.setBaseDNs(Arrays.asList(baseDNs))
+            ldapConfiguration.setPrimaryKey(loginAttributes[0])
+            ldapConfiguration.setLocalPrimaryKey(localLoginAttributes[0])
+            ldapConfiguration.setUseAnonymousBind(useAnonymousBind)
+
+            ldapExtendedConfigurations.append({ "ldapConfiguration" : ldapConfiguration, "connectionConfiguration" : connectionConfiguration, "loginAttributes" : loginAttributes, "localLoginAttributes" : localLoginAttributes })
         
         return ldapExtendedConfigurations
 

@@ -12,7 +12,7 @@ from org.gluu.oxauth.model.configuration import AppConfiguration
 from org.gluu.oxauth.model.crypto import CryptoProviderFactory
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
 from org.gluu.oxauth.model.util import Base64Util
-from org.gluu.oxauth.service import AppInitializer, AuthenticationService, UserService
+from org.gluu.oxauth.service import AppInitializer, AuthenticationService, UserService, EncryptionService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.util import ServerUtil
@@ -27,12 +27,13 @@ from javax.faces.context import FacesContext
 
 import json
 import sys
+import datetime
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Passport. init called"
 
         self.extensionModule = self.loadExternalModule(configurationAttributes.get("extension_module"))
@@ -59,7 +60,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getApiVersion(self):
-        return 2
+        return 11
 
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
@@ -135,7 +136,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif jsonp != None:
                 # Completion of profile takes place
                 user_profile = json.loads(jsonp)
-                user_profile["mail"] = mail
+                user_profile["mail"] = [ mail ]
 
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
@@ -429,10 +430,11 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
             appConfiguration.setKeyStoreSecret(self.keyStorePassword)
+            appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getAlgorithm())
+                                                        None, None, jwt.getHeader().getSignatureAlgorithm())
         except:
             print "Exception: ", sys.exc_info()[1]
 
@@ -445,7 +447,7 @@ class PersonAuthentication(PersonAuthenticationType):
         jwt_claims = jwt.getClaims()
         try:
             exp_date = jwt_claims.getClaimAsDate(JwtClaimName.EXPIRATION_TIME)
-            hasExpired = exp_date < datetime.now()
+            hasExpired = exp_date < datetime.datetime.now()
         except:
             print "Exception: The JWT does not have '%s' attribute" % JwtClaimName.EXPIRATION_TIME
             return False
@@ -454,14 +456,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getUserProfile(self, jwt):
-        # Check if there is user profile
         jwt_claims = jwt.getClaims()
-        user_profile_json = jwt_claims.getClaimAsString("data")
-        if StringHelper.isEmpty(user_profile_json):
-            print "Passport. getUserProfile. User profile missing in JWT token"
-            user_profile = None
-        else:
+        user_profile_json = None
+
+        try:
+            user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt_claims.getClaimAsString("data"))
             user_profile = json.loads(user_profile_json)
+        except:
+            print "Passport. getUserProfile. Problem obtaining user profile json representation"
 
         return (user_profile, user_profile_json)
 
@@ -563,7 +565,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return logged_in
 
 
-    def setMessageError(self, msg, severity):
+    def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()

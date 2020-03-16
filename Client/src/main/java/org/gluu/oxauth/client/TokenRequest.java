@@ -77,6 +77,7 @@ public class TokenRequest extends BaseRequest {
     private String refreshToken;
     private String audience;
     private String codeVerifier;
+    private String authReqId;
 
     private SignatureAlgorithm algorithm;
     private String sharedKey;
@@ -304,6 +305,14 @@ public class TokenRequest extends BaseRequest {
         this.keyId = keyId;
     }
 
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
+    }
+
     public String getClientAssertion() {
         if (cryptoProvider == null) {
             LOG.error("Crypto provider is not specified");
@@ -394,6 +403,10 @@ public class TokenRequest extends BaseRequest {
             if (refreshToken != null && !refreshToken.isEmpty()) {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append("refresh_token=").append(refreshToken);
+            }
+            if ( StringUtils.isNotBlank(authReqId)) {
+                queryStringBuilder.append("&");
+                queryStringBuilder.append("auth_req_id=").append(authReqId);
             }
             if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
                 if (getAuthUsername() != null && !getAuthUsername().isEmpty()) {

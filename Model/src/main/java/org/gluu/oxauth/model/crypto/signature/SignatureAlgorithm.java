@@ -8,6 +8,8 @@ package org.gluu.oxauth.model.crypto.signature;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.nimbusds.jose.JWSAlgorithm;
+import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwt.JwtType;
 
 import java.util.ArrayList;
@@ -20,39 +22,47 @@ import java.util.List;
 public enum SignatureAlgorithm {
 
     NONE("none"),
-    HS256("HS256", AlgorithmFamily.HMAC, "HMACSHA256"),
-    HS384("HS384", AlgorithmFamily.HMAC, "HMACSHA384"),
-    HS512("HS512", AlgorithmFamily.HMAC, "HMACSHA512"),
-    RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA"),
-    RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA"),
-    RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA"),
-    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256),
-    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384),
-    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521),
-    PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1"),
-    PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1"),
-    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1");
+    HS256("HS256", AlgorithmFamily.HMAC, "HMACSHA256", JWSAlgorithm.HS256),
+    HS384("HS384", AlgorithmFamily.HMAC, "HMACSHA384", JWSAlgorithm.HS384),
+    HS512("HS512", AlgorithmFamily.HMAC, "HMACSHA512", JWSAlgorithm.HS512),
+    RS256("RS256", AlgorithmFamily.RSA, "SHA256WITHRSA", JWSAlgorithm.RS256),
+    RS384("RS384", AlgorithmFamily.RSA, "SHA384WITHRSA", JWSAlgorithm.RS384),
+    RS512("RS512", AlgorithmFamily.RSA, "SHA512WITHRSA", JWSAlgorithm.RS512),
+    ES256("ES256", AlgorithmFamily.EC, "SHA256WITHECDSA", ECEllipticCurve.P_256, JWSAlgorithm.ES256),
+    ES384("ES384", AlgorithmFamily.EC, "SHA384WITHECDSA", ECEllipticCurve.P_384, JWSAlgorithm.ES384),
+    ES512("ES512", AlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521, JWSAlgorithm.ES512),
+    PS256("PS256", AlgorithmFamily.RSA, "SHA256withRSAandMGF1", JWSAlgorithm.PS256),
+    PS384("PS384", AlgorithmFamily.RSA, "SHA384withRSAandMGF1", JWSAlgorithm.PS384),
+    PS512("PS512", AlgorithmFamily.RSA, "SHA512withRSAandMGF1", JWSAlgorithm.PS512);
 
     private final String name;
     private final AlgorithmFamily family;
     private final String algorithm;
     private final ECEllipticCurve curve;
     private final JwtType jwtType;
+    private final JWSAlgorithm jwsAlgorithm;
+    private final Algorithm alg;
 
-    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, ECEllipticCurve curve) {
+    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, ECEllipticCurve curve, JWSAlgorithm jwsAlgorithm) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
         this.curve = curve;
         this.jwtType = JwtType.JWT;
+        this.jwsAlgorithm = jwsAlgorithm;
+        this.alg = Algorithm.fromString(name);
     }
 
-    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm) {
-        this(name, family, algorithm, null);
+    SignatureAlgorithm(String name, AlgorithmFamily family, String algorithm, JWSAlgorithm jwsAlgorithm) {
+        this(name, family, algorithm, null, jwsAlgorithm);
     }
 
     SignatureAlgorithm(String name) {
-        this(name, null, null, null);
+        this(name, null, null, null, null);
+    }
+
+    public Algorithm getAlg() {
+        return alg;
     }
 
     public String getName() {
@@ -115,5 +125,9 @@ public enum SignatureAlgorithm {
     @JsonValue
     public String toString() {
         return name;
+    }
+
+    public JWSAlgorithm getJwsAlgorithm() {
+        return jwsAlgorithm;
     }
 }

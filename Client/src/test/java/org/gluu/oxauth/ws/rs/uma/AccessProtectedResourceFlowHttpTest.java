@@ -6,6 +6,15 @@
 
 package org.gluu.oxauth.ws.rs.uma;
 
+import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.BaseTest;
@@ -24,13 +33,6 @@ import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-
-import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-
-import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -56,7 +58,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
+        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
         assert_(this.metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
@@ -68,8 +70,8 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         this.permissionFlowTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
         this.permissionFlowTest.registerResourceTest = this.registerResourceTest;
 
-        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientExecutor(true));
-        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientExecutor(true));
+        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientEngine(true));
+        this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientEngine(true));
     }
 
     /**
@@ -105,9 +107,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
         } catch (ClientResponseFailure ex) {
+        } catch (ClientErrorException ex) {
             // expected need_info error :
             // sample:  {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}
-            String entity = (String) ex.getResponse().getEntity(String.class);
+            String entity = (String) ex.getResponse().readEntity(String.class);
             System.out.println(entity);
 
             assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");

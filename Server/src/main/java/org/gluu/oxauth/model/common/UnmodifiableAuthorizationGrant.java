@@ -22,7 +22,7 @@ import java.util.Set;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 14, 2019
+ * @version September 4, 2019
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
@@ -74,8 +74,9 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
-    public IdToken createIdToken(String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, String state,
-                                 AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
+    public IdToken createIdToken(
+            String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
+            String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 

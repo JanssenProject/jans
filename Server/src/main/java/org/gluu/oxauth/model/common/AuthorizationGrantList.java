@@ -34,7 +34,7 @@ import java.util.List;
  * Component to hold in memory authorization grant objects.
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version February 25, 2020
  */
 @Dependent
 public class AuthorizationGrantList implements IAuthorizationGrantList {
@@ -116,12 +116,34 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        Object cachedGrant = cacheService.get(CacheGrant.cacheKey(clientId, authorizationCode, null));
+    public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
+        CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
+        grant.init(user, client, expiresIn);
+
+        CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
+        cacheService.put(Integer.toString(grant.getCIBAAuthenticationRequestId().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+        log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
+        return grant;
+    }
+
+    @Override
+    public CIBAGrant getCIBAGrant(String authenticationRequestId) {
+        Object cachedGrant = cacheService.get(null, CIBACacheGrant.cacheKey(authenticationRequestId, null));
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(CacheGrant.cacheKey(clientId, authorizationCode, null));
-            log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
+            cachedGrant = cacheService.get(null, CIBACacheGrant.cacheKey(authenticationRequestId, null));
+            log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
+        }
+        return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
+    }
+
+    @Override
+    public AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode) {
+        Object cachedGrant = cacheService.get(CacheGrant.cacheKey(authorizationCode, null));
+        if (cachedGrant == null) {
+            // retry one time : sometimes during high load cache client may be not fast enough
+            cachedGrant = cacheService.get(CacheGrant.cacheKey(authorizationCode, null));
+            log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
@@ -129,16 +151,21 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
-            return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), TokenType.REFRESH_TOKEN);
+            return assertTokenType((TokenLdap) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), TokenType.REFRESH_TOKEN, clientId);
         }
-        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), TokenType.REFRESH_TOKEN);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), TokenType.REFRESH_TOKEN, clientId);
     }
 
-    public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType) {
-        if (tokenLdap != null && tokenLdap.getTokenTypeEnum() == tokenType) {
-            return asGrant(tokenLdap);
+    public AuthorizationGrant assertTokenType(TokenLdap tokenLdap, TokenType tokenType, String clientId) {
+        if (tokenLdap == null || tokenLdap.getTokenTypeEnum() != tokenType) {
+            return null;
         }
-        return null;
+
+        final AuthorizationGrant grant = asGrant(tokenLdap);
+        if (grant == null || !grant.getClientId().equals(clientId)) {
+            return null;
+        }
+        return grant;
     }
 
     @Override
@@ -168,7 +195,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken, boolean onlyFromCache) {
         final TokenLdap tokenLdap = grantService.getGrantByCode(accessToken, onlyFromCache);
-        if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        if (tokenLdap != null    && (tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.gluu.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
         return null;
@@ -220,6 +247,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         resourceOwnerPasswordCredentialsGrant.init(user, client);
 
                         result = resourceOwnerPasswordCredentialsGrant;
+                        break;
+                    case CIBA:
+                        CIBAGrant cibaGrant = grantInstance.select(CIBAGrant.class).get();
+                        cibaGrant.init(user, AuthorizationGrantType.CIBA, client, tokenLdap.getCreationDate());
+
+                        result = cibaGrant;
                         break;
                     default:
                         return null;
