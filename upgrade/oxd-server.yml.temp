@@ -23,6 +23,10 @@ enable_tracing: false
 tracer: {{tracer}}
 tracer_host: {{tracer_host}}
 tracer_port: {{tracer_port}}
+proxy_configuration:
+  host: {{proxy_configuration:host}}
+  port: {{proxy_configuration:port}}
+  protocol: {{proxy_configuration:protocol}}
 storage_configuration:
   dbFileLocation: {{storage_configuration:dbFileLocation}}
 
