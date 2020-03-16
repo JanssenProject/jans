@@ -30,6 +30,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
         try {
             JDBCConfiguration jdbcConfiguration = asJDBCConfiguration(configurationService.getConfiguration());
             validate(jdbcConfiguration);
+
             dataSource = new BasicDataSource();
             dataSource.setDriverClassName(jdbcConfiguration.getDriver());
             dataSource.setUrl(jdbcConfiguration.getJdbcUrl());
