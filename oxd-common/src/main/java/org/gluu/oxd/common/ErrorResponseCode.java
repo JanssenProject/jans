@@ -91,7 +91,9 @@ public enum ErrorResponseCode {
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
     NO_JDBC_CONNECTION_DRIVER(500, "invalid_jdbc_connection_driver", "JDBC connection driver not provided."),
     NO_JDBC_CONNECTION_URL(500, "invalid_jdbc_connection_url", "JDBC connection url not provided."),
-    NO_JDBC_CONNECTION_USERNAME(500, "invalid_jdbc_connection_username", "JDBC connection username not provided.");
+    NO_JDBC_CONNECTION_USERNAME(500, "invalid_jdbc_connection_username", "JDBC connection username not provided."),
+    NO_JDBC_CONFIGURATION(500, "invalid_jdbc_configuration", "JDBC configuration not provided in `oxd-server.yml`."),
+    FAILED_TO_CREATE_JDBC_CONNECTION(500, "failed_to_create_jdbc_connection", "Error in creating jdbc connection. Please check if correct storage_configuration is provided in `oxd-server.yml`"),;
 
     private final int httpStatus;
     private final String code;
