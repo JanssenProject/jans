@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <project
+ 	xmlns="http://maven.apache.org/POM/4.0.0"
+ 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>scim-rest</artifactId>
+	<name>SCIM API REST service</name>
+	<packaging>jar</packaging>
+	<url>http://www.gluu.org</url>
+
+	<parent>
+		<groupId>org.gluu</groupId>
+		<artifactId>scim</artifactId>
+		<version>4.2.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+        <!-- Gluu -->
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>scim-model</artifactId>
+            <version>${gluu.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxtrust-service</artifactId>
+            <version>${gluu.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-util</artifactId>
+        </dependency>
+
+        <!-- Weld -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-shaded</artifactId>
+            <version>${weld.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+            <version>1.0.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.3-M1</version>
+        </dependency>
+	</dependencies>
+	
+</project>
