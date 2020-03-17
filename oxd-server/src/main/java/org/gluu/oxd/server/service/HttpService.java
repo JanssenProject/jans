@@ -4,6 +4,7 @@
 package org.gluu.oxd.server.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Optional;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,8 +38,9 @@ public class HttpService {
     }
 
     public HttpClient getHttpClient() {
-        final ProxyConfiguration proxyConfig = asProxyConfiguration(configuration);
+        final Optional<ProxyConfiguration> proxyConfig = asProxyConfiguration(configuration);
         try {
+            validate(proxyConfig);
             final Boolean trustAllCerts = configuration.getTrustAllCerts();
             if (trustAllCerts != null && trustAllCerts) {
                 LOG.trace("Created TRUST_ALL client.");
@@ -59,16 +62,27 @@ public class HttpService {
         return CoreUtils.createClient(null, proxyConfig);
     }
 
-    private static ProxyConfiguration asProxyConfiguration(OxdServerConfiguration configuration) {
+    private static Optional<ProxyConfiguration> asProxyConfiguration(OxdServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getProxyConfiguration();
             if (node != null) {
-                return Jackson2.createJsonMapper().treeToValue(node, ProxyConfiguration.class);
+                return Optional.ofNullable(Jackson2.createJsonMapper().treeToValue(node, ProxyConfiguration.class));
             }
         } catch (Exception e) {
             LOG.error("Failed to parse ProxyConfiguration.", e);
         }
-        return new ProxyConfiguration();
+        return Optional.empty();
+    }
+
+    private void validate(Optional<ProxyConfiguration> proxyConfiguration) {
+
+        if (!proxyConfiguration.isPresent()) {
+            return;
+        }
+
+        if (Strings.isNullOrEmpty(proxyConfiguration.get().getHost())) {
+            throw new RuntimeException("Invalid proxy server `hostname` provided (empty or null). oxd will connect to OP_HOST without proxy configuration.");
+        }
     }
 
     public ClientExecutor getClientExecutor() {
