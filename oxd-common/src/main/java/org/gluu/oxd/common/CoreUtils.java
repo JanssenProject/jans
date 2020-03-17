@@ -38,6 +38,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -187,7 +188,7 @@ public class CoreUtils {
      */
 
 
-    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, ProxyConfiguration proxyConfiguration) throws Exception {
+    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
 
         SSLContext sslcontext = SSLContexts.custom()
                 .loadTrustMaterial(pathToKeyStore, password.toCharArray())
@@ -196,16 +197,10 @@ public class CoreUtils {
         SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(
                 sslcontext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-        /*Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("https", sslConSocFactory)
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .build();
-        HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);*/
-
         return createClient(sslConSocFactory, proxyConfiguration);
     }
 
-    public static HttpClient createHttpClientTrustAll(ProxyConfiguration proxyConfiguration) throws NoSuchAlgorithmException, KeyManagementException,
+    public static HttpClient createHttpClientTrustAll(Optional<ProxyConfiguration> proxyConfiguration) throws NoSuchAlgorithmException, KeyManagementException,
             KeyStoreException {
 
         SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
@@ -219,7 +214,7 @@ public class CoreUtils {
         return createClient(sslContextFactory, proxyConfiguration);
     }
 
-    public static HttpClient createClient(SSLConnectionSocketFactory connectionFactory, ProxyConfiguration proxyConfiguration) {
+    public static HttpClient createClient(SSLConnectionSocketFactory connectionFactory, Optional<ProxyConfiguration> proxyConfiguration) {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         HttpClientBuilder httClientBuilder = HttpClients.custom();
 
@@ -227,17 +222,18 @@ public class CoreUtils {
             httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
         }
 
-        if (proxyConfiguration != null && !Strings.isNullOrEmpty(proxyConfiguration.getHost())) {
+        if (proxyConfiguration.isPresent() && !Strings.isNullOrEmpty(proxyConfiguration.get().getHost())) {
             HttpHost proxyhost = null;
-            if (isSafePort(proxyConfiguration.getPort()) && !Strings.isNullOrEmpty(proxyConfiguration.getProtocol())) {
-                proxyhost = new HttpHost(proxyConfiguration.getHost(), proxyConfiguration.getPort(), proxyConfiguration.getProtocol());
-            } else if (isSafePort(proxyConfiguration.getPort())) {
-                proxyhost = new HttpHost(proxyConfiguration.getHost(), proxyConfiguration.getPort());
+            ProxyConfiguration proxyConfigObj = proxyConfiguration.get();
+
+            if (isSafePort(proxyConfigObj.getPort()) && !Strings.isNullOrEmpty(proxyConfigObj.getProtocol())) {
+                proxyhost = new HttpHost(proxyConfigObj.getHost(), proxyConfigObj.getPort(), proxyConfigObj.getProtocol());
+            } else if (isSafePort(proxyConfigObj.getPort())) {
+                proxyhost = new HttpHost(proxyConfigObj.getHost(), proxyConfigObj.getPort());
             } else {
-                proxyhost = new HttpHost(proxyConfiguration.getHost());
+                proxyhost = new HttpHost(proxyConfigObj.getHost());
             }
-            //HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyhost);
-            //httClientBuilder = httClientBuilder.setRoutePlanner(routePlanner);
+
             httClientBuilder = httClientBuilder.setProxy(proxyhost);
         }
 

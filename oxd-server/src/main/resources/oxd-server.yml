@@ -24,10 +24,6 @@ enable_tracing: false
 tracer: 'jaeger'
 tracer_host: 'localhost'
 tracer_port: 5775
-proxy_configuration:
-  host: ''
-  port:
-  protocol: ''
 storage_configuration:
   dbFileLocation: /opt/oxd-server/data/oxd_db
 
