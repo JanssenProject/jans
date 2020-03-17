@@ -42,7 +42,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
             dataSource.setMaxOpenPreparedStatements(100);
         } catch (Exception e) {
             LOG.error("Error in creating jdbc connection.", e);
-            throw new RuntimeException("Error in creating jdbc connection. Please check if correct storage_configuration is provided in `oxd-server.yml`");
+            throw new RuntimeException(e);
         }
     }
 
