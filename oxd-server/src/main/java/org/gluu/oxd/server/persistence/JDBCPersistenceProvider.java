@@ -42,7 +42,7 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
             dataSource.setMaxOpenPreparedStatements(100);
         } catch (Exception e) {
             LOG.error("Error in creating jdbc connection.", e);
-            throw new HttpException(ErrorResponseCode.FAILED_TO_CREATE_JDBC_CONNECTION);
+            throw new RuntimeException("Error in creating jdbc connection. Please check if correct storage_configuration is provided in `oxd-server.yml`");
         }
     }
 
@@ -69,22 +69,22 @@ public class JDBCPersistenceProvider implements SqlPersistenceProvider {
                 return Jackson2.createJsonMapper().treeToValue(node, JDBCConfiguration.class);
             }
             LOG.error("JDBC Configuration not provided.");
-            throw new HttpException(ErrorResponseCode.NO_JDBC_CONFIGURATION);
+            throw new Exception("JDBC configuration not provided in `oxd-server.yml`.");
         } catch (Exception e) {
             LOG.error("Failed to parse JDBCConfiguration.", e);
             throw e;
         }
     }
 
-    private void validate(JDBCConfiguration jdbcConfiguration) {
+    private void validate(JDBCConfiguration jdbcConfiguration) throws Exception {
         if (Strings.isNullOrEmpty(jdbcConfiguration.getDriver())) {
-            throw new HttpException(ErrorResponseCode.NO_JDBC_CONNECTION_DRIVER);
+            throw new Exception("JDBC connection driver not provided.");
         }
         if (Strings.isNullOrEmpty(jdbcConfiguration.getJdbcUrl())) {
-            throw new HttpException(ErrorResponseCode.NO_JDBC_CONNECTION_URL);
+            throw new Exception("JDBC connection url not provided.");
         }
         if (Strings.isNullOrEmpty(jdbcConfiguration.getUsername())) {
-            throw new HttpException(ErrorResponseCode.NO_JDBC_CONNECTION_USERNAME);
+            throw new Exception("JDBC connection username not provided.");
         }
     }
 }
