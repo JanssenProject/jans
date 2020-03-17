@@ -30,7 +30,6 @@ public class GuiceModule extends AbstractModule {
         bind(RpService.class).in(Singleton.class);
         bind(HttpService.class).in(Singleton.class);
         bind(IntrospectionService.class).in(Singleton.class);
-        bind(SqlPersistenceProvider.class).to(H2PersistenceProvider.class).in(Singleton.class);
         bind(PersistenceService.class).to(PersistenceServiceImpl.class).in(Singleton.class);
         bind(MigrationService.class).in(Singleton.class);
         bind(DiscoveryService.class).in(Singleton.class);
