@@ -1,0 +1,10 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User",
+    "urn:ietf:params:scim:schemas:extension:gluu:2.0:User"
+  ],
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+    "scimCustomThird": "3000"
+  },
+  "userName": "scim_test_bjensen_1"
+}

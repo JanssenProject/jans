@@ -1,0 +1,80 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+  ],
+  "Operations": [
+    {
+      "op": "replace",
+      "value": {
+        "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+          "scimCustomSecond": [
+            "2010-02-23T15:35:22Z"
+          ]
+        }
+      }
+    },
+    {
+      "op": "add",
+      "value": {
+        "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+          "scimCustomSecond": [
+            "2011-02-23T15:35:22Z"
+          ]
+        }
+      }
+    },
+    {
+      "op": "add",
+      "path": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+      "value": {
+        "scimCustomSecond": [
+          "2012-02-23T15:35:22Z"
+        ]
+      }
+    },
+    {
+      "op": "add",
+      "path": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User:scimCustomSecond",
+      "value": [
+        "2013-02-23T15:35:22Z"
+      ]
+    },
+    {
+      "op": "add",
+      "path": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User:scimCustomSecond",
+      "value": [
+        "2014-02-23T15:35:22Z",
+        "2015-02-23T15:35:22Z"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User:scimCustomThird",
+      "value": 1
+    },
+    {
+      "op": "remove",
+      "path": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User:scimCustomFirst"
+    },
+    {
+      "op": "add",
+      "path" : "urn:ietf:params:scim:schemas:core:2.0:User:phoneNumbers",
+      "value" : {
+        "value" : "666 123 4567",
+        "type" : "work"
+      }
+    },
+    {
+      "op": "remove",
+      "path": "name.givenName"
+    },
+    {
+      "op": "remove",
+      "path": "addresses.type"
+    },
+    {
+      "op": "remove",
+      "path": "urn:ietf:params:scim:schemas:core:2.0:User:phoneNumbers.type"
+    }
+  ]
+}
