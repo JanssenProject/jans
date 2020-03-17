@@ -1,0 +1,5 @@
+{
+  "schemas": [ "urn:ietf:params:scim:schemas:core:2.0:Group" ],
+  "externalId": "old_world_owners",
+  "displayName": "scim_test_worldmanagers"
+}

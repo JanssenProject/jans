@@ -1,0 +1,75 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User",
+    "urn:ietf:params:scim:schemas:extension:gluu:2.0:User"
+  ],
+  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {
+    "scimCustomFirst": "String single-valued",
+    "scimCustomSecond": [
+      "2016-02-23T15:35:22Z"
+    ],
+    "scimCustomThird": 3000
+  },
+  "externalId": "scim_test_bjensen_1-external",
+  "userName": "scim_test_bjensen_1",
+  "name": {
+    "honorificPrefix": "prefix",
+    "honorificSuffix": "suffix",
+    "formatted":"Ms. Barbara J Jensen III",
+    "familyName":"Jensen",
+    "givenName":"Barbara",
+    "middleName":"Jane"
+  },
+  "displayName": "Brava",
+  "nickName": "Babas",
+  "profileUrl": "http://www.gluu.org/",
+  "emails": [
+    {
+      "value": "bjane@gluu.org",
+      "type": "work",
+      "primary": true
+    }
+  ],
+  "addresses": [
+    {
+      "type": "other",
+      "streetAddress": "123 Evergreen skid row",
+      "locality": "Cartucho",
+      "region": "BO",
+      "postalCode": "54321",
+      "country": "CO",
+      "primary": true
+    }
+  ],
+  "phoneNumbers": [
+    {
+      "value": "555 123 4567",
+      "type": "home"
+    }
+  ],
+  "ims": [
+    {
+      "value": "nynytest_user",
+      "type": "Skype"
+    }
+  ],
+  "userType": "CEO",
+  "title": "CEO",
+  "active": true,
+  "password": "secret",
+  "roles": [
+    {
+      "value": "Owner"
+    }
+  ],
+  "entitlements": [
+    {
+      "value": "full access"
+    }
+  ],
+  "x509Certificates": [
+    {
+      "value": "MIIDQzCCAqygAwIBAgICEAAwDQYJKoZIhvcNAQEFBQAwTjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFDASBgNVBAoMC2V4YW1wbGUuY29tMRQwEgYDVQQDDAtleGFtcGxlLmNvbTAeFw0xMTEwMjIwNjI0MzFaFw0xMjEwMDQwNjI0MzFa MH8xCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRQwEgYDVQQKDAtleGFtcGxlLmNvbTEhMB8GA1UEAwwYTXMuIEJhcmJhcmEgSiBKZW5zZW4gSUlJMSIwIAYJKoZIhvcNAQkBFhNiamVuc2VuQGV4YW1wbGUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Kr+Dcds/JQ5GwejJFcBIP682X3xpjis56AK02bc1FLgzdLI8auoR+cC9/Vrh5t66HkQIOdA4unHh0AaZ4xL5PhVbXIPMB5vAPKpzz5iPSi8xO8SL7I7SDhcBVJhqVqr3HgllEG6UClDdHO7nkLuwXq8HcISKkbT5WFTVfFZzidPl8HZ7DhXkZIRtJwBweq4bvm3hM1Os7UQH05ZS6cVDgweKNwdLLrT51ikSQG3DYrl+ft781UQRIqxgwqCfXEuDiinPh0kkvIi5jivVu1Z9QiwlYEdRbLJ4zJQBmDrSGTMYn4lRc2HgHO4DqB/bnMVorHB0CC6AV1QoFK4GPe1LwIDAQABo3sweTAJBgNVHRMEAjAAMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBDZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQU8pD0U0vsZIsaA16lL8En8bx0F/gwHwYDVR0jBBgwFoAUdGeKitcaF7gnzsNwDx708kqaVt0wDQYJKoZIhvcNAQEFBQADgYEAA81SsFnOdYJtNg5Tcq+/ByEDrBgnusx0jloUhByPMEVkoMZ3J7j1ZgI8rAbOkNngX8+pKfTiDz1RC4+dx8oU6Za+4NJXUjlL5CvV6BEYb1+QAEJwitTVvxB/A67g42/vzgAtoRUeDov1+GFiBZ+GNF/cAYKcMtGcrs2i97ZkJMo="
+    }
+  ]
+}

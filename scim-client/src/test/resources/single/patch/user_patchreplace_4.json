@@ -1,0 +1,53 @@
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+  ],
+  "Operations": [
+    {
+      "op": "replace",
+      "path": "name",
+      "value": {
+        "honorificPrefix": "re-patched prefix",
+        "honorificSuffix": "re-patched suffix"
+      }
+    },
+    {
+      "op": "replace",
+      "path": "name.formatted",
+      "value": "re-patched Ms. Barbara J Jensen III"
+    },
+    {
+      "op": "replace",
+      "path": "addresses",
+      "value": [
+        {
+          "streetAddress": "re-patched 123 Evergreen skid row",
+          "postalCode": "90210"
+        }
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "phoneNumbers",
+      "value": [
+        {
+          "value": "re-patch 555 123 4567",
+          "type": "other"
+        },
+        {
+          "value": "re-patch 666 000 1234",
+          "type": "work"
+        }
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "x509Certificates",
+      "value": [
+        {
+          "value": "dummy"
+        }
+      ]
+    }
+  ]
+}
