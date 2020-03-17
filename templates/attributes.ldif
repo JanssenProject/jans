@@ -1286,6 +1286,7 @@ gluuAttributeViewType: admin
 gluuSAML1URI: urn:mace:dir:attribute-def:role
 gluuSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
 gluuStatus: active
+oxAuthClaimName: user_permission
 inum: 6049
 objectClass: gluuAttribute
 objectClass: top
