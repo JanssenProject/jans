@@ -10,6 +10,7 @@
     <url>http://ox.gluu.org</url>
 
     <properties>
+        <dbcp.version>1.4</dbcp.version>
         <h2.version>1.4.194</h2.version>
         <jedis.version>2.9.0</jedis.version>
         <dropwizard.version>2.0.0</dropwizard.version>
@@ -294,6 +295,12 @@
             <artifactId>jedis</artifactId>
             <version>${jedis.version}</version>
         </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${dbcp.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>uma-rs-resteasy</artifactId>
