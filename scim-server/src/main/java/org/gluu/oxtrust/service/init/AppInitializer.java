@@ -6,11 +6,13 @@ import org.gluu.oxtrust.service.logger.LoggerService;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.slf4j.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
-public class ContextListener implements ServletContextListener {
+@ApplicationScoped
+public class AppInitializer {
 
     @Inject
     private Logger log;
@@ -24,7 +26,7 @@ public class ContextListener implements ServletContextListener {
     @Inject
     private LoggerService loggerService;
 
-    public void contextInitialized(ServletContextEvent sce) {
+    public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
         log.info("SCIM service initializing");
         SecurityProviderUtility.installBCProvider();
@@ -36,9 +38,6 @@ public class ContextListener implements ServletContextListener {
         loggerService.initTimer();
         log.info("Initialized!");
 
-    }
-
-    public void contextDestroyed(ServletContextEvent sce) {
     }
 
 }
