@@ -65,6 +65,8 @@ public class OxdServerConfiguration extends Configuration {
     private int tracerPort = 5775;
     @JsonProperty(value = "enable_tracing")
     private Boolean enableTracing = false;
+    @JsonProperty(value = "proxy_configuration")
+    private JsonNode proxyConfiguration;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -282,6 +284,14 @@ public class OxdServerConfiguration extends Configuration {
         this.dbCleanupIntervalInHours = dbCleanupIntervalInHours;
     }
 
+    public JsonNode getProxyConfiguration() {
+        return proxyConfiguration;
+    }
+
+    public void setProxyConfiguration(JsonNode proxyConfiguration) {
+        this.proxyConfiguration = proxyConfiguration;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -308,6 +318,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", defaultSiteConfig=" + defaultSiteConfig + '\'' +
                 ", allowedOpHosts=" + allowedOpHosts + '\'' +
                 ", addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration=" + addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration +
+                ", proxyConfiguration=" + proxyConfiguration + '\'' +
                 '}';
     }
 }
