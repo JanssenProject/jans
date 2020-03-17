@@ -2,7 +2,6 @@ package org.gluu.oxd.server.persistence;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.ConfigurationService;
@@ -25,7 +24,6 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
     private ConfigurationService configurationService;
     private JdbcConnectionPool pool = null;
 
-    @Inject
     public H2PersistenceProvider(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
