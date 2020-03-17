@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+        </Console>
+        <RollingFile name="LOG_FILE" fileName="${sys:log.base}/logs/scim.log" filePattern="${sys:log.base}/logs/scim-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="2 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="10" />
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.gluu.oxtrust" level="INFO">
+            <AppenderRef ref="LOG_FILE" />
+        </Logger>
+        <Root level="ERROR">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+
+</Configuration>
