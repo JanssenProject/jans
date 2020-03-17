@@ -517,6 +517,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
+                    } else if (ldapName.equals("updatedAt")) {
+                        attribute = user.getUpdatedAt();
                     } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         final Object value = user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute());
                         if (value instanceof String) {
