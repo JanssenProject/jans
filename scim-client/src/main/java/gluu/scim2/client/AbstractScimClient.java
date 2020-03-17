@@ -4,6 +4,9 @@ import gluu.scim2.client.rest.FreelyAccessible;
 import gluu.scim2.client.rest.provider.AuthorizationInjectionFilter;
 import gluu.scim2.client.rest.provider.ListResponseProvider;
 import gluu.scim2.client.rest.provider.ScimResourceProvider;
+
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -68,7 +71,9 @@ public abstract class AbstractScimClient<T> implements InvocationHandler, Serial
             logger.debug("Using multithreaded support with maxTotalConnections={} and maxPerRoutConnections={}", cm.getMaxTotal(), cm.getDefaultMaxPerRoute());
             logger.warn("Ensure your oxTrust 'rptConnectionPoolUseConnectionPooling' property is set to true");
 
-            CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+            CloseableHttpClient httpClient = HttpClients.custom()
+					.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+            		.setConnectionManager(cm).build();
             ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
 
             client = new ResteasyClientBuilder().httpEngine(engine).build();
