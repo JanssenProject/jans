@@ -974,7 +974,19 @@ public abstract class BaseTest {
             client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
+            throw new AssertionError("Failed to create userinfo client");
+        }
+    }
+
+    protected UserInfoResponse requestUserInfo(String accessToken) {
+        try {
+            final UserInfoClient client = new UserInfoClient(userInfoEndpoint);
+            client.setExecutor(getClientExecutor());
+            final UserInfoResponse userInfoResponse = client.execUserInfo(accessToken);
+            showClient(client);
+            return userInfoResponse;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to request userinfo");
         }
     }
 
@@ -985,7 +997,7 @@ public abstract class BaseTest {
             client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
+            throw new AssertionError("Failed to create authorize client");
         }
     }
 
@@ -996,7 +1008,7 @@ public abstract class BaseTest {
             client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
+            throw new AssertionError("Failed to create token client");
         }
     }
 }
