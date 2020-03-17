@@ -88,12 +88,7 @@ public enum ErrorResponseCode {
     FAILED_TO_GET_DISCOVERY(500, "failed_to_get_discovery", "Failed to get OP discovery configuration."),
     SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
-    ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
-    NO_JDBC_CONNECTION_DRIVER(500, "invalid_jdbc_connection_driver", "JDBC connection driver not provided."),
-    NO_JDBC_CONNECTION_URL(500, "invalid_jdbc_connection_url", "JDBC connection url not provided."),
-    NO_JDBC_CONNECTION_USERNAME(500, "invalid_jdbc_connection_username", "JDBC connection username not provided."),
-    NO_JDBC_CONFIGURATION(500, "invalid_jdbc_configuration", "JDBC configuration not provided in `oxd-server.yml`."),
-    FAILED_TO_CREATE_JDBC_CONNECTION(500, "failed_to_create_jdbc_connection", "Error in creating jdbc connection. Please check if correct storage_configuration is provided in `oxd-server.yml`"),;
+    ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported.");
 
     private final int httpStatus;
     private final String code;
