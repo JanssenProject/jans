@@ -72,7 +72,7 @@ public class UmaScimClient<T> extends AbstractScimClient<T> {
      */
     @Override
     String getAuthenticationHeader() {
-        return StringHelper.isEmpty(rpt) ?  null : "Bearer " + rpt;
+    	return StringHelper.isEmpty(rpt) ?  null : "Bearer " + rpt;
     }
 
     /**
@@ -125,13 +125,13 @@ public class UmaScimClient<T> extends AbstractScimClient<T> {
     private String getAuthorizedRpt(String asUri, String ticket) {
 
         try {
-            // Get metadata configuration
-            UmaMetadata umaMetadata = UmaClientFactory.instance().createMetadataService(asUri).getMetadata();
+        	// Get metadata configuration
+        	UmaMetadata umaMetadata = UmaClientFactory.instance().createMetadataService(asUri).getMetadata();
             if (umaMetadata == null) {
                 throw new ScimInitializationException(String.format("Failed to load valid UMA metadata configuration from: %s", asUri));
             }
 
-            TokenRequest tokenRequest = getAuthorizationTokenRequest(umaMetadata);
+        	TokenRequest tokenRequest = getAuthorizationTokenRequest(umaMetadata);
             //No need for claims token. See comments on issue https://github.com/GluuFederation/SCIM-Client/issues/22
 
             UmaTokenService tokenService = UmaClientFactory.instance().createTokenService(umaMetadata);
