@@ -1,17 +1,16 @@
 package org.gluu.service.cache;
 
-import java.io.Serializable;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
-
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.Protocol;
+
+import java.io.Serializable;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -32,22 +31,17 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
         try {
             LOG.debug("Starting RedisSentinelProvider ... configuration:" + getRedisConfiguration());
 
-            JedisPoolConfig poolConfig = new JedisPoolConfig();
-            poolConfig.setMaxTotal(1000);
-            poolConfig.setMinIdle(2);
+            JedisPoolConfig poolConfig = createPoolConfig();
+            String password = StringUtils.isBlank(redisConfiguration.getDecryptedPassword()) ? null : redisConfiguration.getDecryptedPassword();
 
-            if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
-                pool = new JedisSentinelPool(
-                        getRedisConfiguration().getSentinelMasterGroupName(),
-                        Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
-                        poolConfig);
-            } else {
-                pool = new JedisSentinelPool(
-                        getRedisConfiguration().getSentinelMasterGroupName(),
-                        Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
-                        poolConfig,
-                        redisConfiguration.getDecryptedPassword());
-            }
+            pool = new JedisSentinelPool(
+                    getRedisConfiguration().getSentinelMasterGroupName(),
+                    Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
+                    poolConfig,
+                    redisConfiguration.getConnectionTimeout(),
+                    redisConfiguration.getSoTimeout(),
+                    password,
+                    Protocol.DEFAULT_DATABASE);
 
             testConnection();
             LOG.debug("RedisSentinelProvider started.");
