@@ -1,5 +1,6 @@
 package org.gluu.oxd.server.persistence;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.gluu.oxd.common.ExpiredObject;
@@ -25,11 +26,13 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
     private SqlPersistenceProvider provider;
     private ConfigurationService configurationService;
+    private String expiredObjectColumnName;
 
     @Inject
     public SqlPersistenceServiceImpl(SqlPersistenceProvider provider, ConfigurationService configurationService) {
         this.provider = provider;
         this.configurationService = configurationService;
+        this.expiredObjectColumnName = getKeyColumnName(configurationService);
     }
 
     public void create() {
@@ -47,7 +50,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             Statement stmt = conn.createStatement();
 
             stmt.addBatch("create table if not exists rp(id varchar(36) primary key, data varchar(50000))");
-            stmt.addBatch("create table if not exists expired_objects( " + getKeyColumnName(configurationService) + " varchar(50), value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
+            stmt.addBatch("create table if not exists expired_objects( " + this.expiredObjectColumnName + " varchar(50), value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
 
             stmt.executeBatch();
 
@@ -69,7 +72,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("insert into expired_objects(" + getKeyColumnName(configurationService) + ", value, type, iat, exp) values(?, ?, ?, ?, ?)");
+            PreparedStatement query = conn.prepareStatement("insert into expired_objects(" + this.expiredObjectColumnName + ", value, type, iat, exp) values(?, ?, ?, ?, ?)");
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
@@ -175,7 +178,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("select " + getKeyColumnName(configurationService) + ", value, type, iat, exp from expired_objects where " + getKeyColumnName(configurationService) + " = ?");
+            PreparedStatement query = conn.prepareStatement("select " + this.expiredObjectColumnName + ", value, type, iat, exp from expired_objects where " + this.expiredObjectColumnName + " = ?");
             query.setString(1, key.trim());
             ResultSet rs = query.executeQuery();
             ExpiredObject expiredObject = null;
@@ -306,7 +309,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
 
-            PreparedStatement query = conn.prepareStatement("delete from expired_objects where " + getKeyColumnName(configurationService) + " = ?");
+            PreparedStatement query = conn.prepareStatement("delete from expired_objects where " + this.expiredObjectColumnName + " = ?");
             query.setString(1, key);
             query.executeUpdate();
             query.close();
@@ -346,8 +349,9 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
     }
 
     private static String getKeyColumnName(ConfigurationService configurationService) {
-        String driverClass = configurationService.getConfiguration().getStorageConfiguration().get("driver") != null ?
-                configurationService.getConfiguration().getStorageConfiguration().get("driver").asText() : null;
+
+        JsonNode driverNode = configurationService.getConfiguration().getStorageConfiguration().get("driver");
+        String driverClass = driverNode != null ? driverNode.asText() : null;
 
         if (!Strings.isNullOrEmpty(driverClass) && driverClass.contains("mysql")) {
             return "`key`";
