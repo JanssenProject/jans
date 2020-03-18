@@ -353,8 +353,6 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         if (!Strings.isNullOrEmpty(driverClass) && driverClass.contains("mysql")) {
             return "`key`";
         }
-
         return "key";
-
     }
 }
