@@ -1,6 +1,5 @@
 package org.gluu.oxd.server.persistence;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.gluu.oxd.common.ExpiredObject;
@@ -347,7 +346,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
     }
 
     private static String getKeyColumnName(ConfigurationService configurationService) {
-        String driverClass = configurationService.getConfiguration().getStorageConfiguration().get("driver")!= null ?
+        String driverClass = configurationService.getConfiguration().getStorageConfiguration().get("driver") != null ?
                 configurationService.getConfiguration().getStorageConfiguration().get("driver").asText() : null;
 
         if (!Strings.isNullOrEmpty(driverClass) && driverClass.contains("mysql")) {
