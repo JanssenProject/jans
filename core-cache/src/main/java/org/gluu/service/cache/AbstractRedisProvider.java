@@ -1,6 +1,7 @@
 package org.gluu.service.cache;
 
 import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author yuriyz
@@ -13,6 +14,14 @@ public abstract class AbstractRedisProvider {
 		this.redisConfiguration = redisConfiguration;
         HostAndPort.setLocalhost("127.0.0.1");
 	}
+
+	public JedisPoolConfig createPoolConfig() {
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(redisConfiguration.getMaxTotalConnections());
+        poolConfig.setMaxIdle(redisConfiguration.getMaxIdleConnections());
+        poolConfig.setMinIdle(2);
+        return poolConfig;
+    }
 
 	public RedisConfiguration getRedisConfiguration() {
 		return redisConfiguration;
