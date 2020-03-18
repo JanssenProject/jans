@@ -1,18 +1,17 @@
 package org.gluu.service.cache;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Important : keep it weld free. It's reused by oxd !
@@ -33,16 +32,9 @@ public class RedisClusterProvider extends AbstractRedisProvider {
         try {
             LOG.debug("Starting RedisClusterProvider ... configuration:" + getRedisConfiguration());
 
-            JedisPoolConfig poolConfig = new JedisPoolConfig();
-            poolConfig.setMaxTotal(1000);
-            poolConfig.setMinIdle(2);
-
-            if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
-                pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), poolConfig);
-            } else {
-                // default maxAttempts and timeouts are taken from jedis constants
-                pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), 2000, 2000, 5, redisConfiguration.getDecryptedPassword(), poolConfig);
-            }
+            JedisPoolConfig poolConfig = createPoolConfig();
+            String password = StringUtils.isBlank(redisConfiguration.getDecryptedPassword()) ? null : redisConfiguration.getDecryptedPassword();
+            pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), redisConfiguration.getConnectionTimeout(), redisConfiguration.getSoTimeout(), redisConfiguration.getMaxRetryAttempts(), password, poolConfig);
 
             testConnection();
             LOG.debug("RedisClusterProvider started.");
