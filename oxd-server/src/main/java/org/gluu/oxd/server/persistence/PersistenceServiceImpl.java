@@ -39,13 +39,13 @@ public class PersistenceServiceImpl implements PersistenceService {
         if ("h2".equalsIgnoreCase(storage)) {
             sqlProvider = new H2PersistenceProvider(configurationService);
             setTimerForDBCleanUpTask();
-            return new SqlPersistenceServiceImpl(sqlProvider);
+            return new SqlPersistenceServiceImpl(sqlProvider, configurationService);
         } else if ("redis".equalsIgnoreCase(storage)) {
             return new RedisPersistenceService(configurationService.getConfiguration());
         } else if ("jdbc".equalsIgnoreCase(storage)) {
             sqlProvider = new JDBCPersistenceProvider(configurationService);
             setTimerForDBCleanUpTask();
-            return new SqlPersistenceServiceImpl(sqlProvider);
+            return new SqlPersistenceServiceImpl(sqlProvider, configurationService);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + configurationService.get());
     }
