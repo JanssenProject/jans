@@ -81,6 +81,7 @@ public class AppConfiguration implements Configuration {
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
+    private List<String> jwksAlgorithmsSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
     private List<String> idTokenTokenBindingCnfValuesSupported;
@@ -722,6 +723,14 @@ public class AppConfiguration implements Configuration {
 
     public void setClaimTypesSupported(List<String> claimTypesSupported) {
         this.claimTypesSupported = claimTypesSupported;
+    }
+
+    public List<String> getJwksAlgorithmsSupported() {
+        return jwksAlgorithmsSupported;
+    }
+
+    public void setJwksAlgorithmsSupported(List<String> jwksAlgorithmsSupported) {
+        this.jwksAlgorithmsSupported = jwksAlgorithmsSupported;
     }
 
     public String getServiceDocumentation() {
