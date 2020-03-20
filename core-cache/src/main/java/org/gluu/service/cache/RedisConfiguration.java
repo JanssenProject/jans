@@ -40,7 +40,7 @@ public class RedisConfiguration implements Serializable {
      */
     private int maxIdleConnections = 10;
 
-    private int maxTotalConnections = 10000;
+    private int maxTotalConnections = 500;
 
     private int connectionTimeout = 3000;
 
