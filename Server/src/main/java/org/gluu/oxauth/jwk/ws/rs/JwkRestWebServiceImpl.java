@@ -11,7 +11,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import jnr.ffi.annotations.In;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 
 /**
@@ -27,6 +29,9 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
     private Logger log;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
     @Override
@@ -35,6 +40,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
+            webKeysConfiguration.setAppConfiguration(appConfiguration);
             builder.entity(webKeysConfiguration.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -43,4 +49,5 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
 
         return builder.build();
     }
+
 }
