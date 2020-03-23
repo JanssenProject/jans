@@ -14,8 +14,6 @@
 package org.gluu.oxauth.fido2.ws.rs.service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,6 +99,7 @@ public class AssertionService {
         String keyId = commonVerifiers.verifyThatString(params, "id");
         commonVerifiers.verifyAssertionType(params.get("type"));
         commonVerifiers.verifyThatString(params, "rawId");
+
         if (params.get("response").hasNonNull("userHandle")) {
             // This can be null for U2F authenticators
             commonVerifiers.verifyThatString(params.get("response"), "userHandle");
@@ -204,11 +203,9 @@ public class AssertionService {
 
         assertionOptionsResponseNode.put("userVerification", userVerification.name());
 
-//        if (params.hasNonNull("extensions")) {
-//            assertionOptionsResponseNode.set("extensions", params.get("extensions"));
-//        } else {
-//            assertionOptionsResponseNode.putObject("extensions");
-//        }
+        if (params.hasNonNull("extensions")) {
+            assertionOptionsResponseNode.set("extensions", params.get("extensions"));
+        }
 
         Fido2AuthenticationData authenticationData = new Fido2AuthenticationData();
         authenticationData.setUsername(username);
