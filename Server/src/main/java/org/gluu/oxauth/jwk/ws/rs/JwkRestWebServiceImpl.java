@@ -6,14 +6,17 @@
 
 package org.gluu.oxauth.jwk.ws.rs;
 
+import org.gluu.oxauth.model.config.WebKeysConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.slf4j.Logger;
+
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.slf4j.Logger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides interface for JWK REST web services
@@ -39,7 +42,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            webKeysConfiguration.setAppConfiguration(appConfiguration);
+            webKeysConfiguration.setKeys(this.filterKeys(webKeysConfiguration.getKeys()));
             builder.entity(webKeysConfiguration.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -47,6 +50,23 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Method responsible to filter keys and return a new list of keys with all
+     * algorithms that it is inside Json config attribute called "jwksAlgorithmsSupported"
+     * @param allKeys All keys that should be filtered
+     * @return Filtered list
+     */
+    private List<JSONWebKey> filterKeys(List<JSONWebKey> allKeys) {
+        List<String> jwksAlgorithmsSupported = appConfiguration.getJwksAlgorithmsSupported();
+        if (allKeys == null || allKeys.size() == 0
+                || jwksAlgorithmsSupported == null || jwksAlgorithmsSupported.size() == 0) {
+            return allKeys;
+        }
+        return allKeys.stream().filter(
+                (key) -> jwksAlgorithmsSupported.contains(key.getAlg().getParamName())
+        ).collect(Collectors.toList());
     }
 
 }
