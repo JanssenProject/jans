@@ -42,7 +42,8 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            webKeysConfiguration.setKeys(this.filterKeys(webKeysConfiguration.getKeys()));
+            WebKeysConfiguration webKeysConfiguration = new WebKeysConfiguration();
+            webKeysConfiguration.setKeys(this.filterKeys(this.webKeysConfiguration.getKeys()));
             builder.entity(webKeysConfiguration.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
