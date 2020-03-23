@@ -11,7 +11,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import jnr.ffi.annotations.In;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
