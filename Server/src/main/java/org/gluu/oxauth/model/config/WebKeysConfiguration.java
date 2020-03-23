@@ -13,8 +13,8 @@ import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 
 import javax.enterprise.inject.Vetoed;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Yuriy Movchan
@@ -41,19 +41,14 @@ public class WebKeysConfiguration extends JSONWebKeySet implements Configuration
      * @return Filtered list
      */
     private List<JSONWebKey> filterKeys(List<JSONWebKey> allKeys) {
-        if (allKeys != null && allKeys.size() > 0) {
-            List<JSONWebKey> filteredKeys = new ArrayList<>();
-            List<String> jwksAlgorithmsSupported = appConfiguration.getJwksAlgorithmsSupported();
-            if (jwksAlgorithmsSupported != null && jwksAlgorithmsSupported.size() > 0) {
-                for (JSONWebKey key : allKeys) {
-                    if (jwksAlgorithmsSupported.contains(key.getAlg().getParamName()))
-                        filteredKeys.add(key);
-                }
-                return filteredKeys;
-            } else
-                return allKeys;
-        } else
+        List<String> jwksAlgorithmsSupported = appConfiguration.getJwksAlgorithmsSupported();
+        if (allKeys == null || allKeys.size() == 0
+                || jwksAlgorithmsSupported == null || jwksAlgorithmsSupported.size() == 0) {
             return allKeys;
+        }
+        return allKeys.stream().filter(
+                (key) -> jwksAlgorithmsSupported.contains(key.getAlg().getParamName())
+        ).collect(Collectors.toList());
     }
 
     public void setAppConfiguration(AppConfiguration appConfiguration) {
