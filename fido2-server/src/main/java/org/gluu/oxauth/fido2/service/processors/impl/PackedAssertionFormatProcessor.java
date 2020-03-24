@@ -68,13 +68,13 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
         log.info("User verification option {}", authenticationEntity.getUserVerificationOption());
-        if (UserVerification.valueOf(authenticationEntity.getUserVerificationOption()) == UserVerification.required) {
+        if (authenticationEntity.getUserVerificationOption() == UserVerification.required) {
             commonVerifiers.verifyRequiredUserPresent(authData);
         }
-        if (UserVerification.valueOf(authenticationEntity.getUserVerificationOption()) == UserVerification.preferred) {
+        if (authenticationEntity.getUserVerificationOption() == UserVerification.preferred) {
             commonVerifiers.verifyPreferredUserPresent(authData);
         }
-        if (UserVerification.valueOf(authenticationEntity.getUserVerificationOption()) == UserVerification.discouraged) {
+        if (authenticationEntity.getUserVerificationOption() == UserVerification.discouraged) {
             commonVerifiers.verifyDiscouragedUserPresent(authData);
         }
 

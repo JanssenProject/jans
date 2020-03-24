@@ -6,11 +6,48 @@
 
 package org.gluu.oxauth;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
+import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.dev.HostnameVerifierType;
+import org.gluu.oxauth.model.common.Holder;
+import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.error.IErrorType;
+import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.util.StringHelper;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
+import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.openqa.selenium.*;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.ITestContext;
+import org.testng.Reporter;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,66 +66,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Function;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.SSLContexts;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.client.AuthorizeClient;
-import org.gluu.oxauth.client.BaseClient;
-import org.gluu.oxauth.client.BaseResponseWithErrors;
-import org.gluu.oxauth.client.ClientUtils;
-import org.gluu.oxauth.client.OpenIdConfigurationClient;
-import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
-import org.gluu.oxauth.client.RegisterClient;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.UserInfoClient;
-import org.gluu.oxauth.client.UserInfoRequest;
-import org.gluu.oxauth.dev.HostnameVerifierType;
-import org.gluu.oxauth.model.common.Holder;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.error.IErrorType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxauth.model.util.Util;
-import org.gluu.util.StringHelper;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.ITestContext;
-import org.testng.Reporter;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -996,7 +974,19 @@ public abstract class BaseTest {
             client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
+            throw new AssertionError("Failed to create userinfo client");
+        }
+    }
+
+    protected UserInfoResponse requestUserInfo(String accessToken) {
+        try {
+            final UserInfoClient client = new UserInfoClient(userInfoEndpoint);
+            client.setExecutor(getClientExecutor());
+            final UserInfoResponse userInfoResponse = client.execUserInfo(accessToken);
+            showClient(client);
+            return userInfoResponse;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to request userinfo");
         }
     }
 
@@ -1007,10 +997,18 @@ public abstract class BaseTest {
             client.setExecutor(getClientExecutor());
             return client;
         } catch (Exception e) {
-            throw new AssertionError("Failed to create register client");
+            throw new AssertionError("Failed to create authorize client");
         }
     }
 
-
-
+    protected TokenClient newTokenClient(TokenRequest request) {
+        try {
+            final TokenClient client = new TokenClient(tokenEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create token client");
+        }
+    }
 }

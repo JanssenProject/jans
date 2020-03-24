@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.model.config;
 
-import javax.enterprise.inject.Vetoed;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+
+import javax.enterprise.inject.Vetoed;
 
 /**
  * @author Yuriy Movchan
@@ -19,4 +19,6 @@ import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Vetoed
 public class WebKeysConfiguration extends JSONWebKeySet implements Configuration {
+
+
 }

@@ -151,12 +151,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getId());
 
-            if (frontchannelUris.isEmpty()) { // no front-channel
+            if (frontchannelUris.isEmpty() && StringUtils.isNotBlank(postLogoutRedirectUri)) { // no front-channel
                 log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
-                if (StringUtils.isBlank(postLogoutRedirectUri)) {
-                    log.trace("postlogout_redirect_uri is missed");
-                    return Response.ok().build();
-                }
+
                 try {
                     log.trace("Redirect to postlogout_redirect_uri: " + postLogoutRedirectUri);
                     return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
@@ -287,12 +284,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
+            if (StringUtils.isBlank(postLogoutRedirectUri)) {
+                return "";
+            }
             if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
                 log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true)");
                 return postLogoutRedirectUri;
             }
-
-            boolean isNotBlank = StringUtils.isNotBlank(postLogoutRedirectUri);
 
             final String result;
             if (pair.getSecond() == null) {
@@ -301,8 +299,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 result = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
             }
 
-            if (isNotBlank && StringUtils.isBlank(result)) {
-                log.trace("Failed to valistdate post_logout_redirect_uri.");
+            if (StringUtils.isBlank(result)) {
+                log.trace("Failed to validate post_logout_redirect_uri.");
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
             }
 
@@ -312,10 +310,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             log.trace("Unable to validate post_logout_redirect_uri.");
             throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
         } catch (WebApplicationException e) {
-            if (pair.getFirst() != null) { // session_id was found and removed
-                String reason = "Session was removed successfully but post_logout_redirect_uri validation fails since AS failed to validate it against clients associated with session (which was just removed).";
-                log.error(reason, e);
-                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, reason));
+            if (pair.getFirst() != null) {
+                log.error(e.getMessage(), e);
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
             } else {
                 throw e;
             }
