@@ -74,7 +74,8 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
         commonVerifiers.verifyAAGUIDZeroed(authData);
-        commonVerifiers.verifyFlags(authData, null);
+
+        commonVerifiers.verifyUserPresent(authData);
         commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
         if (attStmt.hasNonNull("x5c")) {
