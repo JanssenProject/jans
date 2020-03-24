@@ -25,6 +25,7 @@ import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
+import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
@@ -78,6 +79,9 @@ public class IdTokenFactory {
     @Inject
     private JwrService jwrService;
 
+    @Inject
+    private SessionIdService sessionIdService;
+
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
 
@@ -120,6 +124,10 @@ public class IdTokenFactory {
 
         if (preProcessing != null) {
             preProcessing.apply(jwr);
+        }
+        final SessionId session = sessionIdService.getSessionByDn(authorizationGrant.getSessionDn());
+        if (session != null) {
+            jwr.setClaim("sid", session.getId());
         }
 
         if (authorizationGrant.getAcrValues() != null) {
