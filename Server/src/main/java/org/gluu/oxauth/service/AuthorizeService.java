@@ -58,7 +58,7 @@ public class AuthorizeService {
     private SessionIdService sessionIdService;
 
     @Inject
-    private UserService userService;
+    private CookieService cookieService;
 
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
@@ -93,7 +93,7 @@ public class AuthorizeService {
 
     public SessionId getSession(String sessionId) {
         if (StringUtils.isBlank(sessionId)) {
-            sessionId = sessionIdService.getSessionIdFromCookie();
+            sessionId = cookieService.getSessionIdFromCookie();
             if (StringUtils.isBlank(sessionId)) {
                 return null;
             }
@@ -137,7 +137,7 @@ public class AuthorizeService {
 
             // OXAUTH-297 - set session_id cookie
             if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
-                sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), false);
+                cookieService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), false);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
@@ -223,11 +223,11 @@ public class AuthorizeService {
             if (externalContext.getResponse() instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
 
-                log.trace("Invalidated {} cookie.", SessionIdService.SESSION_ID_COOKIE_NAME);
-                httpResponse.addHeader("Set-Cookie", SessionIdService.SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
+                log.trace("Invalidated {} cookie.", CookieService.SESSION_ID_COOKIE_NAME);
+                httpResponse.addHeader("Set-Cookie", CookieService.SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
 
-                log.trace("Invalidated {} cookie.", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
-                httpResponse.addHeader("Set-Cookie", SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
+                log.trace("Invalidated {} cookie.", CookieService.CONSENT_SESSION_ID_COOKIE_NAME);
+                httpResponse.addHeader("Set-Cookie", CookieService.CONSENT_SESSION_ID_COOKIE_NAME + "=deleted; Path=/; Secure; HttpOnly; Expires=Thu, 01 Jan 1970 00:00:01 GMT;");
                 return true;
             }
         } catch (Exception e) {
