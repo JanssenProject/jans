@@ -8,13 +8,13 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -37,13 +37,13 @@ public class ConsentGatheringSessionService {
     private SessionIdService sessionIdService;
 
     @Inject
-    private UserService userService;
+    private CookieService cookieService;
 
     @Inject
     private ClientService clientService;
 
     public SessionId getConnectSession(HttpServletRequest httpRequest) {
-        String cookieId = sessionIdService.getSessionIdFromCookie(httpRequest);
+        String cookieId = cookieService.getSessionIdFromCookie(httpRequest);
         log.trace("Cookie - session_id: ", cookieId);
         if (StringUtils.isNotBlank(cookieId)) {
             return sessionIdService.getSessionId(cookieId);
@@ -52,13 +52,13 @@ public class ConsentGatheringSessionService {
         return null;
     }
     public boolean hasSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+        String cookieId = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
         return StringUtils.isNotBlank(cookieId);
     }
 
     public SessionId getConsentSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String userDn, boolean create) {
-        String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+        String cookieId = cookieService.getConsentSessionIdFromCookie(httpRequest);
         log.trace("Cookie - consent_session_id: ", cookieId);
 
         if (StringUtils.isNotBlank(cookieId)) {
@@ -82,7 +82,7 @@ public class ConsentGatheringSessionService {
         log.trace("Generating new consent_session_id ...");
         SessionId session = sessionIdService.generateUnauthenticatedSessionId(userDn);
 
-        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
+        cookieService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, CookieService.CONSENT_SESSION_ID_COOKIE_NAME);
         log.trace("consent_session_id cookie created.");
 
         return session;
