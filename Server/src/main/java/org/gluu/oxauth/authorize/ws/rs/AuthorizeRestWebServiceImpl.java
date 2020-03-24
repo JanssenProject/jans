@@ -103,6 +103,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private SessionIdService sessionIdService;
 
+    @Inject CookieService cookieService;
+
     @Inject
     private ScopeChecker scopeChecker;
 
@@ -348,7 +350,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, userDn, prompt);
                             sessionUser.setSessionAttributes(requestParameterMap);
 
-                            sessionIdService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), sessionUser.getOPBrowserState(), httpResponse, false);
+                            cookieService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), sessionUser.getOPBrowserState(), httpResponse, false);
                             sessionIdService.updateSessionId(sessionUser);
                             user = userService.getUserByDn(sessionUser.getUserDn());
                         } else {
@@ -380,11 +382,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 endSession(sessionId, httpRequest, httpResponse);
                 sessionId = null;
 
-                redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
-                throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
             }
 
             oAuth2AuditLog.setUsername(user.getUserId());
@@ -431,6 +432,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 prompts.remove(Prompt.CONSENT);
 
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+            }
+
+            if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
                 return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
@@ -847,7 +855,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         String id = sessionId;
         if (StringHelper.isEmpty(id)) {
-            id = sessionIdService.getSessionIdFromCookie(httpRequest);
+            id = cookieService.getSessionIdFromCookie(httpRequest);
         }
 
         if (StringHelper.isNotEmpty(id)) {
@@ -862,6 +870,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
         }
 
-        sessionIdService.removeSessionIdCookie(httpResponse);
+        cookieService.removeSessionIdCookie(httpResponse);
     }
 }
