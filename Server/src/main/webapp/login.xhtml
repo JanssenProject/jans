@@ -26,7 +26,7 @@
 							infoClass="text-center" errorClass="text-center" />
 					</div>
 					<h:form  id="loginForm" style="padding:30px;">
-						<h:inputText placeholder="#{msgs['login.username']}" id="loginForm:username" name="loginForm:username"
+						<h:inputText placeholder="#{msgs['login.username']}" id="loginForm_username" name="loginForm_username"
 							required="true" colMd="10" labelColMd="2" autocomplete="off"
 							value="#{credentials.username}" styleClass="form-control"
 							style="width:100%">
@@ -34,7 +34,7 @@
 						<div class="form-group row">
 						</div>
 						<h:inputSecret placeholder="#{msgs['login.password']}" colMd="10"
-							id="loginForm:password" name="loginForm:password" labelColMd="2" value="#{credentials.password}"
+							id="loginForm_password" name="loginForm_password" labelColMd="2" value="#{credentials.password}"
 							autocomplete="off" styleClass="form-control" tyle="width:100%">
 						</h:inputSecret>
 						<div class="form-group row">
@@ -97,8 +97,8 @@
 		<script type="text/javascript">
 
             window.onload = function () {
-                var userNameField = document.getElementById("loginForm:username");
-                var passwordField = document.getElementById("loginForm:password");
+                var userNameField = document.getElementById("loginForm_username");
+                var passwordField = document.getElementById("loginForm_password");
 
                 passwordField.value = "";
                 var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
@@ -124,10 +124,10 @@
     			});
                 if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
                     $('#rememberme').attr('checked', 'checked')
-                    document.getElementById("loginForm:username").value = localStorage.usrname;
+                    document.getElementById("loginForm_username").value = localStorage.usrname;
                 } else {
                     $('#rememberme').removeAttr('checked');
-                    document.getElementById("loginForm:username").value = "";
+                    document.getElementById("loginForm_username").value = "";
                 }
 
                 $('#rememberme').click(function() {
@@ -139,7 +139,7 @@
 
     		function checkRemembeMe() {
                 if ($('#rememberme').is(':checked')) {
-                    localStorage.usrname = document.getElementById("loginForm:username").value;
+                    localStorage.usrname = document.getElementById("loginForm_username").value;
                     localStorage.chkbx = $('#rememberme').val();
                 } else {
                     localStorage.usrname = '';
