@@ -64,7 +64,8 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
     public void process(String base64AuthenticatorData, String signature, String clientDataJson, Fido2RegistrationData registration,
             Fido2AuthenticationData authenticationEntity) {
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
-        commonVerifiers.verifyFlags(authData, authenticationEntity.getUserVerificationOption());
+
+        commonVerifiers.verifyUserPresent(authData);
 
         byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
 
