@@ -290,7 +290,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 String userId = user.getUserId();
 
                                 if (!userId.equalsIgnoreCase(userIdClaimValue)) {
-                                    builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.USER_MISMATCHED);;
+                                    builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.USER_MISMATCHED);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 }
@@ -352,12 +352,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             sessionIdService.updateSessionId(sessionUser);
                             user = userService.getUserByDn(sessionUser.getUserDn());
                         } else {
-                            builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);;
+                            builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return builder.build();
                         }
                     } else {
-                        builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);;
+                        builder = redirectUriResponse.createErrorBuilder(AuthorizeErrorResponseType.LOGIN_REQUIRED);
                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
                         return builder.build();
                     }
@@ -368,13 +368,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         prompts.remove(Prompt.LOGIN);
                     }
 
-                    redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                    return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
-                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                    return builder.build();
+                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
                 }
             }
 
@@ -386,7 +383,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
                 throw new WebApplicationException(RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
             }
 
@@ -402,13 +399,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         sessionUser.addPermission(clientId, true);
                         sessionIdService.updateSessionId(sessionUser);
                     } else {
-                        redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                        return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                                 redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                 idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
-                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                        return builder.build();
+                                codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
                     }
                 } else if (client.getTrustedClient()) {
                     sessionUser.addPermission(clientId, true);
@@ -425,13 +419,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionId = null;
                 prompts.remove(Prompt.LOGIN);
 
-                redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
-                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                return builder.build();
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
             if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
@@ -440,13 +431,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 prompts.remove(Prompt.CONSENT);
 
-                redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
                         redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                         idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters);
-                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
-                applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                return builder.build();
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
             AuthorizationCode authorizationCode = null;
@@ -550,49 +538,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
-                CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
-
-                if (cibaGrant != null) {
-                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-                        RefreshToken refreshToken = cibaGrant.createRefreshToken();
-                        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
-                        AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-                        log.debug("Issuing access token: {}", accessToken.getCode());
-
-                        IdToken idToken = cibaGrant.createIdToken(
-                                null, null, accessToken, refreshToken,
-                                null, cibaGrant, false, null);
-
-                        cibaGrant.setUserAuthorization(true);
-                        cibaGrant.setTokensDelivered(true);
-                        cibaGrant.save();
-
-                        cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                cibaGrant.getClientNotificationToken(),
-                                accessToken.getCode(),
-                                refreshToken.getCode(),
-                                idToken.getCode(),
-                                accessToken.getExpiresIn()
-                        );
-                    } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-                        cibaGrant.setUserAuthorization(true);
-                        cibaGrant.setTokensDelivered(false);
-                        cibaGrant.save();
-
-                        cibaPingCallbackProxy.pingCallback(
-                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                cibaGrant.getClientNotificationToken()
-                        );
-                    } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                        cibaGrant.setUserAuthorization(true);
-                        cibaGrant.setTokensDelivered(false);
-                        cibaGrant.save();
-                    }
-                }
+                runCiba(authReqId, httpRequest, httpResponse);
             }
 
         } catch (WebApplicationException e) {
@@ -623,6 +569,55 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+        if (cibaGrant == null) {
+            return;
+        }
+
+
+        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+            RefreshToken refreshToken = cibaGrant.createRefreshToken();
+            log.debug("Issuing refresh token: {}", refreshToken.getCode());
+
+            AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+            log.debug("Issuing access token: {}", accessToken.getCode());
+
+            IdToken idToken = cibaGrant.createIdToken(
+                    null, null, accessToken, refreshToken,
+                    null, cibaGrant, false, null);
+
+            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setTokensDelivered(true);
+            cibaGrant.save();
+
+            cibaPushTokenDeliveryProxy.pushTokenDelivery(
+                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                    cibaGrant.getClientNotificationToken(),
+                    accessToken.getCode(),
+                    refreshToken.getCode(),
+                    idToken.getCode(),
+                    accessToken.getExpiresIn()
+            );
+        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
+            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setTokensDelivered(false);
+            cibaGrant.save();
+
+            cibaPingCallbackProxy.pingCallback(
+                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                    cibaGrant.getClientNotificationToken()
+            );
+        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setTokensDelivered(false);
+            cibaGrant.save();
+        }
     }
 
     private WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
@@ -723,37 +718,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    /**
-     * 1) https://ce-dev.gluu.org/oxauth/authorize -> session created with parameter list 1
-     * 2) https://ce-dev.gluu.org/oxauth/restv1/authorize -> with parameter list 2
-     * <p/>
-     * Second call will try to reuse session data from call 1 (parameter list1). Here we overriding them.
-     *
-     * @param httpRequest http request
-     * @param prompts     prompts
-     */
-    private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
-        SessionId sessionUser = identity.getSessionId();
-        if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
-            Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
-
-            Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
-            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
-
-            sessionUser.setUserDn(null);
-            sessionUser.setUser(null);
-            sessionUser.setSessionAttributes(requestParameterMap);
-            boolean persisted = sessionIdService.persistSessionId(sessionUser, !prompts.contains(Prompt.NONE));
-            if (persisted) {
-                if (log.isTraceEnabled()) {
-                    log.trace("Session '{}' persisted to LDAP", sessionUser.getId());
-                }
-            } else {
-                log.error("Failed to persisted session: {}", sessionUser.getId());
-            }
-        }
-    }
-
     private Map<String, String> getGenericRequestMap(HttpServletRequest httpRequest) {
         Map<String, String> result = new HashMap<>();
         for (Entry<String, String[]> entry : httpRequest.getParameterMap().entrySet()) {
@@ -763,13 +727,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return result;
     }
 
-    private void redirectToAuthorizationPage(
+    private Response redirectToAuthorizationPage(
             RedirectUri redirectUriResponse, List<ResponseType> responseTypes, String scope, String clientId,
             String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
             List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
             List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String sessionId, String claims, String authReqId,
-            Map<String, String> customParameters) {
+            Map<String, String> customParameters, OAuth2AuditLog oAuth2AuditLog, HttpServletRequest httpRequest) {
 
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + "/authorize" + сonfigurationFactory.getFacesMapping());
 
@@ -863,6 +827,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 redirectUriResponse.addResponseParameter(entry.getKey(), entry.getValue());
             }
         }
+
+        ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+        return builder.build();
     }
 
     private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
