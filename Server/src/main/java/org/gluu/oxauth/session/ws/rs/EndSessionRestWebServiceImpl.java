@@ -26,10 +26,7 @@ import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.URLPatternList;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.RedirectionUriService;
-import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalEndSessionService;
 import org.gluu.oxauth.service.external.context.EndSessionContext;
@@ -82,6 +79,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     @Inject
     private ClientService clientService;
@@ -359,7 +359,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         try {
             String id = sessionId;
             if (StringHelper.isEmpty(id)) {
-                id = sessionIdService.getSessionIdFromCookie(httpRequest);
+                id = cookieService.getSessionIdFromCookie(httpRequest);
             }
             if (StringHelper.isNotEmpty(id)) {
                 ldapSessionId = sessionIdService.getSessionId(id);
@@ -424,14 +424,14 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionIdService.removeSessionIdCookie(httpResponse);
-            sessionIdService.removeOPBrowserStateCookie(httpResponse);
+            cookieService.removeSessionIdCookie(httpResponse);
+            cookieService.removeOPBrowserStateCookie(httpResponse);
         }
     }
 
     private void removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            String id = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+            String id = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
             if (StringHelper.isNotEmpty(id)) {
                 SessionId ldapSessionId = sessionIdService.getSessionId(id);
@@ -447,7 +447,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionIdService.removeConsentSessionIdCookie(httpResponse);
+            cookieService.removeConsentSessionIdCookie(httpResponse);
         }
     }
 

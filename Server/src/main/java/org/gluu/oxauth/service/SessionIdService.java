@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
@@ -18,7 +19,6 @@ import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
@@ -47,16 +47,12 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -71,12 +67,7 @@ import java.util.concurrent.TimeUnit;
 @Named
 public class SessionIdService {
 
-    private static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String OP_BROWSER_STATE = "opbs";
-    public static final String SESSION_ID_COOKIE_NAME = "session_id";
-    private static final String RP_ORIGIN_ID_COOKIE_NAME = "rp_origin_id";
-    private static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
-    public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
 
@@ -99,9 +90,6 @@ public class SessionIdService {
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
-    private ConfigurationFactory configurationFactory;
-
-    @Inject
     private FacesContext facesContext;
 
     @Inject
@@ -119,8 +107,35 @@ public class SessionIdService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private CookieService cookieService;
+
     private String buildDn(String sessionId) {
         return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
+    }
+
+    public Set<SessionId> getCurrentSessions() {
+        final Set<String> ids = cookieService.getCurrentSessions();
+        final Set<SessionId> sessions = Sets.newHashSet();
+        for (String sessionId : ids) {
+            if (StringUtils.isBlank(sessionId)) {
+                log.error("Invalid sessionId in current_sessions: " + sessionId);
+                continue;
+            }
+
+            final SessionId sessionIdObj = getSessionId(sessionId);
+            if (sessionIdObj == null) {
+                log.trace("Unable to find session object by id: " + sessionId + " {expired?}");
+                continue;
+            }
+
+            if (sessionIdObj.getState() != SessionIdState.AUTHENTICATED) {
+                log.error("Session is not authenticated, id: " + sessionId);
+                continue;
+            }
+            sessions.add(sessionIdObj);
+        }
+        return sessions;
     }
 
     public String getAcr(SessionId session) {
@@ -267,203 +282,10 @@ public class SessionIdService {
         return currentSessionAttributes;
     }
 
-    public String getSessionIdFromCookie(HttpServletRequest request) {
-        return getValueFromCookie(request, SESSION_ID_COOKIE_NAME);
-    }
 
-    public String getUmaSessionIdFromCookie(HttpServletRequest request) {
-        return getValueFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
-    }
-
-    public String getConsentSessionIdFromCookie(HttpServletRequest request) {
-        return getValueFromCookie(request, CONSENT_SESSION_ID_COOKIE_NAME);
-    }
-
-    public String getSessionStateFromCookie(HttpServletRequest request) {
-        return getValueFromCookie(request, SESSION_STATE_COOKIE_NAME);
-    }
-
-    public String getRpOriginIdCookie() {
-        return getValueFromCookie(RP_ORIGIN_ID_COOKIE_NAME);
-    }
-
-    public String getValueFromCookie(String cookieName) {
-        try {
-            if (facesContext == null) {
-                return null;
-            }
-            final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
-            if (request != null) {
-                return getValueFromCookie(request, cookieName);
-            } else {
-                log.trace("Faces context returns null for http request object.");
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    public String getValueFromCookie(HttpServletRequest request, String cookieName) {
-        try {
-            final Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(cookieName) /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_id cookie: '{}'", cookie.getValue());
-                        return cookie.getValue();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return "";
-    }
-
-    public String getSessionIdFromCookie() {
-        try {
-            if (facesContext == null) {
-                return null;
-            }
-            final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
-            if (request != null) {
-                return getSessionIdFromCookie(request);
-            } else {
-                log.trace("Faces context returns null for http request object.");
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    public void creatRpOriginIdCookie(String rpOriginId) {
-        try {
-            final Object response = externalContext.getResponse();
-            if (response instanceof HttpServletResponse) {
-                final HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-                creatRpOriginIdCookie(rpOriginId, httpResponse);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public void creatRpOriginIdCookie(String rpOriginId, HttpServletResponse httpResponse) {
-        String header = RP_ORIGIN_ID_COOKIE_NAME + "=" + rpOriginId;
-        header += "; Path=" + configurationFactory.getContextPath();
-        header += "; Secure";
-        header += "; HttpOnly";
-
-        createCookie(header, httpResponse);
-    }
-
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, String cookieName) {
-        String header = cookieName + "=" + sessionId;
-        header += "; Path=/";
-        header += "; Secure";
-        header += "; HttpOnly";
-
-        createCookie(header, httpResponse);
-
-        createSessionStateCookie(sessionState, httpResponse);
-        createOPBrowserStateCookie(opbs, httpResponse);
-    }
-
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, boolean isUma) {
-        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
-        createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, cookieName);
-    }
-
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, boolean isUma) {
-        try {
-            final Object response = externalContext.getResponse();
-            if (response instanceof HttpServletResponse) {
-                final HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-                createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, isUma);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse) {
-        // Create the special cookie header with secure flag but not HttpOnly because the session_state
-        // needs to be read from the OP iframe using JavaScript
-        String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
-        header += "; Path=/";
-        header += "; Secure";
-
-        createCookie(header, httpResponse);
-    }
-
-    public void createOPBrowserStateCookie(String opbs, HttpServletResponse httpResponse) {
-        // Create the special cookie header with secure flag but not HttpOnly because the opbs
-        // needs to be read from the OP iframe using JavaScript
-        String header = OP_BROWSER_STATE + "=" + opbs;
-        header += "; Path=/";
-        header += "; Secure";
-        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
-        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
-            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
-            Calendar expirationDate = Calendar.getInstance();
-            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
-            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
-            if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
-                header += "Domain=" + appConfiguration.getCookieDomain() + ";";
-            }
-        }
-        httpResponse.addHeader("Set-Cookie", header);
-    }
-
-    protected void createCookie(String header, HttpServletResponse httpResponse) {
-        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
-        if (sessionStateLifetime != null && sessionStateLifetime > 0) {
-            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
-            Calendar expirationDate = Calendar.getInstance();
-            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
-            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
-            if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
-                header += "Domain=" + appConfiguration.getCookieDomain() + ";";
-            }
-        }
-
-        httpResponse.addHeader("Set-Cookie", header);
-    }
-
-    public void removeSessionIdCookie(HttpServletResponse httpResponse) {
-        removeCookie(SESSION_ID_COOKIE_NAME, httpResponse);
-    }
-
-    public void removeOPBrowserStateCookie(HttpServletResponse httpResponse) {
-        removeCookie(OP_BROWSER_STATE, httpResponse);
-    }
-
-    public void removeUmaSessionIdCookie(HttpServletResponse httpResponse) {
-        removeCookie(UMA_SESSION_ID_COOKIE_NAME, httpResponse);
-    }
-
-    public void removeConsentSessionIdCookie(HttpServletResponse httpResponse) {
-        removeCookie(CONSENT_SESSION_ID_COOKIE_NAME, httpResponse);
-    }
-
-    public void removeCookie(String cookieName, HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(cookieName, null); // Not necessary, but saves bandwidth.
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
-        if (StringUtils.isNotBlank(appConfiguration.getCookieDomain())) {
-            cookie.setDomain(appConfiguration.getCookieDomain());
-        }
-        httpResponse.addCookie(cookie);
-    }
 
     public SessionId getSessionId() {
-        String sessionId = getSessionIdFromCookie();
+        String sessionId = cookieService.getSessionIdFromCookie();
 
         if (StringHelper.isNotEmpty(sessionId)) {
             return getSessionId(sessionId);
@@ -483,14 +305,14 @@ public class SessionIdService {
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn) throws InvalidSessionStateException {
-        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        Map<String, String> sessionIdAttributes = new HashMap<>();
         sessionIdAttributes.put("prompt", "");
 
         return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
     }
 
     public SessionId generateAuthenticatedSessionId(HttpServletRequest httpRequest, String userDn, String prompt) throws InvalidSessionStateException {
-        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        Map<String, String> sessionIdAttributes = new HashMap<>();
         sessionIdAttributes.put("prompt", prompt);
 
         return generateAuthenticatedSessionId(httpRequest, userDn, sessionIdAttributes);
@@ -514,7 +336,7 @@ public class SessionIdService {
     }
 
     public SessionId generateUnauthenticatedSessionId(String userDn) {
-        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        Map<String, String> sessionIdAttributes = new HashMap<>();
         return generateSessionId(userDn, new Date(), SessionIdState.UNAUTHENTICATED, sessionIdAttributes, true);
     }
 
@@ -848,7 +670,7 @@ public class SessionIdService {
 
 
     public SessionId getSessionId(HttpServletRequest request) {
-        return getSessionId(getSessionIdFromCookie(request));
+        return getSessionId(cookieService.getSessionIdFromCookie(request));
     }
 
     public SessionId getSessionId(String sessionId) {
@@ -929,14 +751,7 @@ public class SessionIdService {
         if (sessionId == null) {
             return false;
         }
-
-        SessionIdState sessionIdState = sessionId.getState();
-
-        if (SessionIdState.AUTHENTICATED.equals(sessionIdState)) {
-            return true;
-        }
-
-        return false;
+        return SessionIdState.AUTHENTICATED.equals(sessionId.getState());
     }
 
     public boolean isNotSessionIdAuthenticated() {

@@ -6,15 +6,8 @@
 
 package org.gluu.oxauth.service;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -23,6 +16,12 @@ import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.util.StringHelper;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Helper service to generate either error response or local error based on application settings
@@ -38,6 +37,9 @@ public class ErrorHandlerService {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -71,7 +73,7 @@ public class ErrorHandlerService {
     }
     
     private void handleRemoteError(String facesMessageId, IErrorType errorType, String hint) {
-        String redirectUri = sessionIdService.getRpOriginIdCookie();
+        String redirectUri = cookieService.getRpOriginIdCookie();
         
         if (StringHelper.isEmpty(redirectUri)) {
             Log.error("Failed to get redirect_uri from cookie");
