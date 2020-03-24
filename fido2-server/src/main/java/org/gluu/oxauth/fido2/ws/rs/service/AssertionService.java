@@ -148,7 +148,7 @@ public class AssertionService {
     private JsonNode assertionOptions(JsonNode params) {
         log.info("assertionOptions {}", params);
         String username = params.get("username").asText();
-        UserVerification userVerification = UserVerification.required;
+        UserVerification userVerification = UserVerification.preferred;
 
         if (params.hasNonNull("userVerification")) {
             userVerification = commonVerifiers.verifyUserVerification(params.get("userVerification"));
