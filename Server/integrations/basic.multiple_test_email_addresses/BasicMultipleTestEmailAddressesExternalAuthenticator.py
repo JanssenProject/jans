@@ -1,8 +1,4 @@
-# oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
-# Copyright (c) 2016, Gluu
-#
-# Author: Yuriy Movchan
-#
+
 
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
@@ -16,7 +12,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self,   configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Basic. Initialization"
         print "Basic. Initialized successfully"
         return True   
@@ -46,7 +42,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             user_name_array = StringHelper.split(credentials.getUsername(),"+")
             
-            user_name = ''
+            user_name = None
             
             if len(user_name_array) == 2:
                 
