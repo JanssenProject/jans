@@ -74,7 +74,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
         commonVerifiers.verifyAAGUIDZeroed(authData);
-        commonVerifiers.verifyUserPresent(authData);
+        commonVerifiers.verifyFlags(authData, null);
         commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
         if (attStmt.hasNonNull("x5c")) {
@@ -96,11 +96,11 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
             throw new UnsupportedOperationException("TODO");
         } else {
-            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCOSEPublicKey());
+            PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
             commonVerifiers.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
         }
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
-        credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCOSEPublicKey()));
+        credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
     }
 }

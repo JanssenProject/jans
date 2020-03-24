@@ -89,7 +89,7 @@ public class AuthenticatorAttestationVerifier {
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
             return credIdAndCounters;
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Problem with processing authenticator data");
+            throw new Fido2RPRuntimeException("Problem with processing authenticator data", e);
         }
     }
 }

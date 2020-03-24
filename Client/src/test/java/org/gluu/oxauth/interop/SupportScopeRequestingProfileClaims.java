@@ -47,8 +47,7 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
@@ -87,8 +86,7 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
+        TokenClient tokenClient = newTokenClient(tokenRequest);
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
@@ -102,10 +100,8 @@ public class SupportScopeRequestingProfileClaims extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // 4. Request user info
-        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+        UserInfoResponse userInfoResponse = requestUserInfo(accessToken);
 
-        showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
