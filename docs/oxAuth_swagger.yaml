@@ -456,6 +456,11 @@ paths:
       summary: To get Claims details about the registered client.
       description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
       operationId: post_clientinfo
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type : string     
       requestBody:
         required: true
         content:
@@ -467,12 +472,7 @@ paths:
               properties:
                 access_token:
                   type : string
-                  description: Client-specific access token.
-      parameters:
-      - name: Authorization
-        in: header
-        schema:
-          type : string          
+                  description: Client-specific access token.           
       responses:
         200:
           description: OK
@@ -575,7 +575,7 @@ paths:
           in: query
           description: OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
           schema:
-            type : string 
+            type : boolean 
           example: response_as_jwt=false  
       responses:
         200:
@@ -587,29 +587,12 @@ paths:
                 description: meta-information about token
                 required:
                 - active
-                - exp
-                - iat
-                - acr_values
-                - scope      
-                - client_id
-                - sub      
-                - username
-                - iss
-                - aud
-                - token_type
                 type: object
                 properties:
                  active:
                    type: boolean
+                   description: Boolean indicator of whether or not the presented token is currently active. 
                    example: true
-                 exp:
-                   type: integer
-                   description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
-                 iat:
-                   type: integer
-                   example: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission was originally issued. 
-                 acr_values:
-                   type: string
                  scope:
                    type: array
                    description: Provide list of scopes to which access was granted for this resource.
@@ -619,26 +602,37 @@ paths:
                      type: string         
                  client_id:
                    type: string
+                   description:  Client identifier for the OAuth 2.0 client that requested this token.
                    example: 1238j323ds-23ij4
-                 sub:
-                   type: string
-                   example: Z5O3upPC88QrAjx00dis
-                   description: Subject of the token, as defined in JWT [RFC7519].           
                  username:
                    type: string
+                   description: Human-readable identifier for the resource owner who authorized this token.
                    example: jdoe
-                 iss:
-                   type: string
-                   example: https://server.example.com/
-                   description: String representing the issuer of this token, as defined in JWT [RFC7519].           
-                 aud:
-                   type: string
-                   example: https://protected.example.net/resource
-                   description: Service-specific string identifier or list of string identifiers representing the intended audience for this token, as defined in JWT [RFC7519]. 
                  token_type:
                    type: string
+                   description: Type of the token as defined in Section 5.1 of OAuth 2.0 [RFC6749].        
                    example: bearer, mac
-                   description: Type of the token as defined in Section 5.1 of OAuth 2.0 [RFC6749].               
+                 exp:
+                   type: integer
+                   description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+                 iat:
+                   type: integer
+                   example: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission was originally issued. 
+                 sub:
+                   type: string
+                   description: Subject of the token, as defined in JWT [RFC7519].   
+                   example: Z5O3upPC88QrAjx00dis  
+                 aud:
+                   type: string
+                   description: Service-specific string identifier or list of string identifiers representing the intended audience for this token, as defined in JWT [RFC7519]. 
+                   example: https://protected.example.net/resource
+                 iss:
+                   type: string
+                   description: String representing the issuer of this token, as defined in JWT [RFC7519].  
+                   example: https://server.example.com/   
+                 acr_values:
+                   type: string
+                   description: Authentication Context Class Reference values.
         400:
          $ref: '#/components/responses/InvalidRequest'   
         401:
@@ -650,7 +644,15 @@ paths:
       - Token
       summary: The Introspection OAuth 2 Endpoint.
       description: The Introspection OAuth 2 Endpoint.
-      operationId: post-introspection      
+      operationId: post-introspection 
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: Client Authorization details that contains the access token along with other details.  
+          schema:
+            type : string 
+          example: Bearer 23410913-abewfq.123483             
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -663,14 +665,6 @@ paths:
                   type : string
                   description: Client access token.
                   example: token=2YotnFZFEjr1zCsicMWpAA
-      parameters:
-        - name: Authorization
-          in: header
-          required: true
-          description: Client Authorization details that contains the access token along with other details.  
-          schema:
-            type : string 
-          example: Bearer 23410913-abewfq.123483            
       responses:
         200:
           description: OK
@@ -681,29 +675,12 @@ paths:
                 description: meta-information about token
                 required:
                 - active
-                - exp
-                - iat
-                - acr_values
-                - scope      
-                - client_id
-                - sub      
-                - username
-                - iss
-                - aud
-                - token_type
                 type: object
                 properties:
                  active:
                    type: boolean
+                   description: Boolean indicator of whether or not the presented token is currently active. 
                    example: true
-                 exp:
-                   type: integer
-                   description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
-                 iat:
-                   type: integer
-                   example: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission was originally issued. 
-                 acr_values:
-                   type: string
                  scope:
                    type: array
                    description: Provide list of scopes to which access was granted for this resource.
@@ -713,26 +690,37 @@ paths:
                      type: string         
                  client_id:
                    type: string
+                   description:  Client identifier for the OAuth 2.0 client that requested this token.
                    example: 1238j323ds-23ij4
-                 sub:
-                   type: string
-                   example: Z5O3upPC88QrAjx00dis
-                   description: Subject of the token, as defined in JWT [RFC7519].           
                  username:
                    type: string
+                   description: Human-readable identifier for the resource owner who authorized this token.
                    example: jdoe
-                 iss:
-                   type: string
-                   example: https://server.example.com/
-                   description: String representing the issuer of this token, as defined in JWT [RFC7519].           
-                 aud:
-                   type: string
-                   example: https://protected.example.net/resource
-                   description: Service-specific string identifier or list of string identifiers representing the intended audience for this token, as defined in JWT [RFC7519]. 
                  token_type:
                    type: string
+                   description: Type of the token as defined in Section 5.1 of OAuth 2.0 [RFC6749].        
                    example: bearer, mac
-                   description: Type of the token as defined in Section 5.1 of OAuth 2.0 [RFC6749].               
+                 exp:
+                   type: integer
+                   description: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+                 iat:
+                   type: integer
+                   example: Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission was originally issued. 
+                 sub:
+                   type: string
+                   description: Subject of the token, as defined in JWT [RFC7519].   
+                   example: Z5O3upPC88QrAjx00dis  
+                 aud:
+                   type: string
+                   description: Service-specific string identifier or list of string identifiers representing the intended audience for this token, as defined in JWT [RFC7519]. 
+                   example: https://protected.example.net/resource
+                 iss:
+                   type: string
+                   description: String representing the issuer of this token, as defined in JWT [RFC7519].  
+                   example: https://server.example.com/   
+                 acr_values:
+                   type: string
+                   description: Authentication Context Class Reference values.       
         400:
          $ref: '#/components/responses/InvalidRequest'   
         401:
@@ -756,13 +744,13 @@ paths:
                 required:
                 - keys
                 type: object
+                description: JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.
                 properties:
                   keys:
                     type: array
+                    description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
                     items:
-                      type: string
-                    description: Each property in the key is defined by the JWK specification RFC 7517 Section 4 or, for algorithm-specific properties, in RFC 7518]
-                    example: '{"keys": [{"key1": "value1", "key2": "value2"}] }'                   
+                      $ref: '#/components/schemas/JsonWebKey'                    
         500:
           $ref: '#/components/responses/InternalServerError'
   /register: 
@@ -835,18 +823,11 @@ paths:
                     a use (Key Use) parameter value is required for all keys in the
                     document to indicate each key's intended usage .
                 jwks:
-                  type: string
-                  description: Client's JSON Web Key Set (JWK) document, passed by
-                    value. The semantics of the jwks parameter are the same as the
-                    jwks_uri parameter, other than that the JWK Set is passed by value,
-                    rather than by reference. This parameter is intended only to be
-                    used by Clients that, for some reason, are unable to use the jwks_uri
-                    parameter, for instance, by native applications that might not
-                    have a location to host the contents of the JWK Set. If a Client
-                    can use jwks_uri, it must not use jwks. One significant downside
-                    of jwks is that it does not enable key rotation. The jwks_uri
-                    and jwks parameters must not be used together.
-                  example: '{"key1": "value1", "key2": "value2"}'
+                  type: array
+                  description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey' 
+                  example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
                 sector_identifier_uri:
                   type: string
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP. 
@@ -1063,6 +1044,19 @@ paths:
       summary: Updates Client Metadata for a registered client.
       description: Updates Client Metadata for a registered client.
       operationId: put-register
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          description: Client ID that identifies client that must be updated by this request.   
+          schema:
+            type : string  
+        - name: Authorization
+          in: header
+          required: true
+          description: Authorization header carrying \"registration_access_token\" issued before as a Bearer token  
+          schema:
+            type : string      
       requestBody:
         content:
           application/json:
@@ -1126,18 +1120,11 @@ paths:
                     a use (Key Use) parameter value is required for all keys in the
                     document to indicate each key's intended usage .
                 jwks:
-                  type: string
-                  description: Client's JSON Web Key Set (JWK) document, passed by
-                    value. The semantics of the jwks parameter are the same as the
-                    jwks_uri parameter, other than that the JWK Set is passed by value,
-                    rather than by reference. This parameter is intended only to be
-                    used by Clients that, for some reason, are unable to use the jwks_uri
-                    parameter, for instance, by native applications that might not
-                    have a location to host the contents of the JWK Set. If a Client
-                    can use jwks_uri, it must not use jwks. One significant downside
-                    of jwks is that it does not enable key rotation. The jwks_uri
-                    and jwks parameters must not be used together.
-                  example: '{"key1": "value1", "key2": "value2"}'
+                  type: array
+                  description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey' 	                
+                    example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
                 sector_identifier_uri:
                   type: string
                   description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP. 
@@ -1314,19 +1301,6 @@ paths:
                 backchannel_user_code_parameter:
                   type: boolean 
                   description: Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
-      parameters:
-        - name: client_id
-          in: query
-          required: true
-          description: Client ID that identifies client that must be updated by this request.   
-          schema:
-            type : string  
-        - name: Authorization
-          in: header
-          required: true
-          description: Authorization header carrying \"registration_access_token\" issued before as a Bearer token  
-          schema:
-            type : string      
       responses:
         200:
           description: OK
@@ -1729,7 +1703,6 @@ paths:
       parameters:
         - name: id_token_hint
           in: query
-          required: true
           description: Previously issued ID Token (id_token) passed to the logout endpoint as a hint about the End-User's current authenticated session with the Client. This is used as an indication of the identity of the End-User that the RP is requesting be logged out by the OP. The OP need not be listed as an audience of the ID Token when it is used as an id_token_hint value.
           schema:
             type : string
@@ -2150,32 +2123,29 @@ paths:
               description: Resource description
               type: object
               required:
-              - iat
-              - exp
+              - resource_scopes
               properties:
                 name:
                   type: string
                   description: A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner.
-                uri:
-                  type: string
-                  description: A human-readable string describing the resource
-                _type:
-                  type: string
-                  description: A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim.
-                scopes:
-                  type: array
-                  items:
-                    type: string
-                  description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
-                scopeExpression:
-                  type: string
-                _description:
-                  type: string
-                  description: A human-readable string describing the resource
                 icon_uri:
                   type: string
                   description: A URI for a graphic icon representing the resource set. The referenced icon MAY be used by the authorization server in its resource owner user interface for the resource owner.
                   example: http://www.example.com/icons/sharesocial.png
+                type:
+                  type: string
+                  description: A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim.
+                resource_scopes:
+                  type: array
+                  items:
+                    type: string
+                  description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
+                  example: \"read-public\", \"post-updates"\,\"read-private"\
+                scope_expression:
+                  type: string
+                description:
+                  type: string
+                  description: A human-readable string describing the resource
                 iat:
                   type: integer
                   description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
@@ -2233,32 +2203,29 @@ paths:
               description: Resource description
               type: object
               required:
-              - iat
-              - exp
+              - resource_scopes
               properties:
                 name:
                   type: string
                   description: A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner.
-                uri:
-                  type: string
-                  description: A human-readable string describing the resource
-                _type:
-                  type: string
-                  description: A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim.
-                scopes:
-                  type: array
-                  items:
-                    type: string
-                  description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
-                scopeExpression:
-                  type: string
-                _description:
-                  type: string
-                  description: A human-readable string describing the resource
                 icon_uri:
                   type: string
                   description: A URI for a graphic icon representing the resource set. The referenced icon MAY be used by the authorization server in its resource owner user interface for the resource owner.
                   example: http://www.example.com/icons/sharesocial.png
+                type:
+                  type: string
+                  description: A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim.
+                resource_scopes:
+                  type: array
+                  items:
+                    type: string
+                  description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
+                  example: \"read-public\", \"post-updates"\,\"read-private"\
+                scope_expression:
+                  type: string
+                description:
+                  type: string
+                  description: A human-readable string describing the resource
                 iat:
                   type: integer
                   description: number of seconds since January 1 1970 UTC, indicating when the token was issued at
@@ -2391,7 +2358,7 @@ paths:
                   uri:
                     type: string
                     description: A human-readable string describing the resource
-                  _type:
+                  type:
                     type: string
                     description: A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim.
                   scopes:
@@ -2401,7 +2368,7 @@ paths:
                     description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
                   scopeExpression:
                     type: string
-                  _description:
+                  description:
                     type: string
                     description: A human-readable string describing the resource
                   icon_uri:
@@ -2547,7 +2514,14 @@ paths:
       - Token Introspection 
       summary: The Introspection OAuth 2 Endpoint for RPT.
       description: The Introspection OAuth 2 Endpoint for RPT.
-      operationId: post-rpt-status      
+      operationId: post-rpt-status 
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: Client Authorization details that contains the access token along with other details.  
+          schema:
+            type : string         
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2562,13 +2536,6 @@ paths:
                 token_type_hint:
                   type : string  
                   description: ID Token previously issued by the Authorization Server being passed as a hint about the End-User.
-      parameters:
-        - name: Authorization
-          in: header
-          required: true
-          description: Client Authorization details that contains the access token along with other details.  
-          schema:
-            type : string             
       responses:
         200:
           description: OK
@@ -2767,6 +2734,12 @@ paths:
       summary: Returns Claims about the authenticated End-User.
       description: Returns Claims about the authenticated End-User.
       operationId: post-userinfo
+      parameters:      
+        - name: Authorization
+          in: header
+          description: Client Authorization details that contains the access token along with other details.
+          schema:
+            type : string   
       requestBody:
         required: true
         content:
@@ -2779,12 +2752,6 @@ paths:
                 access_token:
                   type : string
                   description: OAuth 2.0 Access Token. 
-      parameters:      
-        - name: Authorization
-          in: header
-          description: Client Authorization details that contains the access token along with other details.
-          schema:
-            type : string       
       responses:
         200:
           description: OK
@@ -3199,7 +3166,7 @@ paths:
                 id:
                   type: string
                   description: The base64url encoded id returned by the client
-                _type:
+                type:
                   type: array
                   items:
                     type: string
@@ -3345,7 +3312,7 @@ paths:
               - _type
               - clientDataJSON
               properties:
-                _type:
+                type:
                   type: string
                 clientDataJSON:
                   type: array
@@ -3420,4 +3387,40 @@ components:
         error_description:
           type: string
         details:
+          type: string
+    JsonWebKey:
+      required:
+      - alg
+      - exp
+      - key_ops
+      - kid
+      - kty
+      - use
+      - x5c
+      type: object
+      properties:
+        kid:
+          type: string
+        kty:
+          type: string
+        use:
+          type: string
+        alg:
+          type: string
+        crv:
+          type: string
+        exp:
+          type: integer
+          format: int64
+        x5c:
+          type: array
+          items:
+            type: string
+        n:
+          type: string
+        e:
+          type: string
+        x:
+          type: string
+        y:
           type: string
