@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.jsf2.message.FacesMessages;
@@ -41,8 +42,6 @@ import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -57,10 +56,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.*;
 
 /**
@@ -83,9 +79,6 @@ public class AuthorizeAction {
 
     @Inject
     private SessionIdService sessionIdService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private RedirectionUriService redirectionUriService;
@@ -143,6 +136,9 @@ public class AuthorizeAction {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private CookieService cookieService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -299,8 +295,8 @@ public class AuthorizeAction {
             }
 
             this.sessionId = unauthenticatedSession.getId();
-            sessionIdService.createSessionIdCookie(this.sessionId, unauthenticatedSession.getSessionState(), unauthenticatedSession.getOPBrowserState(), false);
-            sessionIdService.creatRpOriginIdCookie(redirectUri);
+            cookieService.createSessionIdCookie(this.sessionId, unauthenticatedSession.getSessionState(), unauthenticatedSession.getOPBrowserState(), false);
+            cookieService.creatRpOriginIdCookie(redirectUri);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
             if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
@@ -323,6 +319,11 @@ public class AuthorizeAction {
 
         final User user = sessionIdService.getUser(session);
         log.trace("checkPermissionGranted, user = " + user);
+
+        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+            facesService.redirectWithExternal("/selectAccount.xhtml", Maps.newHashMap());
+            return;
+        }
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
             if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
@@ -367,8 +368,6 @@ public class AuthorizeAction {
                 return;
             }
         }
-
-        return;
     }
 
     private SessionId handleAcrChange(SessionId session, List<Prompt> prompts) {
@@ -428,14 +427,6 @@ public class AuthorizeAction {
                         }
                     }
                 }
-            } catch (NoSuchAlgorithmException e) {
-                log.error(e.getMessage(), e);
-            } catch (URISyntaxException e) {
-                log.error(e.getMessage(), e);
-            } catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
-            } catch (NoSuchProviderException e) {
-                log.error(e.getMessage(), e);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -460,11 +451,7 @@ public class AuthorizeAction {
                         }
                     }
                 }
-            } catch (EntryPersistenceException e) {
-                log.error(e.getMessage(), e);
-            } catch (InvalidJwtException e) {
-                log.error(e.getMessage(), e);
-            } catch (InvalidJweException e) {
+            } catch (EntryPersistenceException | InvalidJwtException | InvalidJweException e) {
                 log.error(e.getMessage(), e);
             }
         }
