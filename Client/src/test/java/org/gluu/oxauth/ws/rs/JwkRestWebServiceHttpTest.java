@@ -41,7 +41,9 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
             assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
+            assertNotNull(JSONWebKey.getAlg(), "Unexpected result: alg is null");
         }
+        assertEquals(response.getJwks().getKeys().size(), 11, "The list of keys are not all that could be supported.");
     }
 
     @Parameters({"clientJwksUri"})
@@ -62,6 +64,8 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
             assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
+            assertNotNull(JSONWebKey.getAlg(), "Unexpected result: alg is null");
         }
+        assertEquals(response.getJwks().getKeys().size(), 11, "The list of keys are not all that could be supported.");
     }
 }

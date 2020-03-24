@@ -33,9 +33,6 @@ public class AuthenticatorAssertionVerifier {
     private Logger log;
 
     @Inject
-    private Base64Service base64Service;
-
-    @Inject
     private AssertionProcessorFactory assertionProcessorFactory;
 
     public void verifyAuthenticatorAssertionResponse(JsonNode response, Fido2RegistrationData registration,
