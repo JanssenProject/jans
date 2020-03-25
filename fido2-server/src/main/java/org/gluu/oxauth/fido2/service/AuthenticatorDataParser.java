@@ -51,23 +51,19 @@ public class AuthenticatorDataParser {
     private CommonVerifiers commonVerifiers;
 
     public AuthData parseAttestationData(String incomingAuthData) {
-        return parseAuthData(incomingAuthData, true);
+    	byte[] incomingAuthDataBuffer = base64Service.decode(incomingAuthData.getBytes());
+        return parseAuthData(incomingAuthDataBuffer);
     }
 
     public AuthData parseAssertionData(String incomingAuthData) {
-        return parseAuthData(incomingAuthData, false);
+    	byte[] incomingAuthDataBuffer = base64Service.urlDecode(incomingAuthData.getBytes());
+        return parseAuthData(incomingAuthDataBuffer);
     }
 
-    private AuthData parseAuthData(String incomingAuthData, boolean isAttestation) {
+    private AuthData parseAuthData(byte[] incomingAuthDataBuffer) {
         AuthData authData = new AuthData();
-        byte[] buffer;
 
-        // TODO: Fido2. Why there is difference there???
-        if (isAttestation)
-            buffer = base64Service.decode(incomingAuthData.getBytes());
-        else {
-            buffer = base64Service.urlDecode(incomingAuthData.getBytes());
-        }
+        byte[] buffer = incomingAuthDataBuffer;
         authData.setAuthDataDecoded(buffer);
 
         int offset = 0;
@@ -75,17 +71,20 @@ public class AuthenticatorDataParser {
         log.debug("RPIDHASH hex {}", Hex.encodeHexString(rpIdHashBuffer));
 
         byte[] flagsBuffer = Arrays.copyOfRange(buffer, offset, offset += 1);
+
         boolean hasAtFlag = commonVerifiers.verifyAtFlag(flagsBuffer);
+        boolean hasEdFlag = commonVerifiers.verifyEdFlag(flagsBuffer);
         log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
         log.debug("COUNTERS hex {}", Hex.encodeHexString(counterBuffer));
         authData.setRpIdHash(rpIdHashBuffer).setFlags(flagsBuffer).setCounters(counterBuffer);
 
-        byte[] attestationBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
-        commonVerifiers.verifyAttestationBuffer(hasAtFlag, attestationBuffer);
-
         if (hasAtFlag) {
+            byte[] attestationBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
+
+            commonVerifiers.verifyAttestationBuffer(attestationBuffer);
+
             byte[] aaguidBuffer = Arrays.copyOfRange(buffer, offset, offset += 16);
             log.debug("AAGUID hex {}", Hex.encodeHexString(aaguidBuffer));
 
@@ -111,20 +110,25 @@ public class AuthenticatorDataParser {
                 throw new Fido2RPRuntimeException("Unable to parse public key CBOR", e);
             }
             authData.setAaguid(aaguidBuffer).setCredId(credIDBuffer).setCosePublicKey(cosePublicKeyBuffer).setKeyType(keyType);
-            
-            // Process extensions
-            boolean hasEdFlag = commonVerifiers.verifyEdFlag(flagsBuffer);
-            if (hasEdFlag) {
-                byte[] extensionKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
-                log.debug("ExtensionKeyBuffer hex {}", Hex.encodeHexString(extensionKeyBuffer));
-                long extSize = getCborDataSize(extensionKeyBuffer);
-	            offset += extSize;
-            }
-
-            byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
-        	commonVerifiers.verifyNoLeftovers(leftovers);
         }
-        authData.setAttestationBuffer(buffer);
+
+        // Process extensions
+        if (hasEdFlag) {
+            byte[] extensionKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
+
+            commonVerifiers.verifyExtensionBuffer(extensionKeyBuffer);
+            
+            log.debug("ExtensionKeyBuffer hex {}", Hex.encodeHexString(extensionKeyBuffer));
+            authData.setExtensions(extensionKeyBuffer);
+
+            long extSize = getCborDataSize(extensionKeyBuffer);
+            offset += extSize;
+        }
+
+        byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
+    	commonVerifiers.verifyNoLeftovers(leftovers);
+
+    	authData.setAttestationBuffer(buffer);
 
         return authData;
     }

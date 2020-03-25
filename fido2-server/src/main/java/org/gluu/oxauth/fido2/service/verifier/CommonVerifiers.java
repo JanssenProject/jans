@@ -40,6 +40,7 @@ import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
@@ -132,31 +133,29 @@ public class CommonVerifiers {
         int bufferSize = 0;
         byte[] rpIdHash = authData.getRpIdHash();
         bufferSize += rpIdHash.length;
+
         byte[] flags = authData.getFlags();
         bufferSize += flags.length;
+
         byte[] counters = authData.getCounters();
         bufferSize += counters.length;
+
+        byte[] extensionsBuffer = authData.getExtensions();
+        if (extensionsBuffer == null) {
+        	extensionsBuffer = new byte[0];
+        }
+        bufferSize += extensionsBuffer.length;
+
         bufferSize += clientDataHash.length;
         log.info("Client data hash HEX {}", Hex.encodeHexString(clientDataHash));
-        byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHash).put(flags).put(counters).put(clientDataHash).array();
+
+        byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHash).put(flags).put(counters).put(extensionsBuffer).put(clientDataHash).array();
         byte[] signatureBytes = base64Service.urlDecode(signature.getBytes());
         log.info("Signature {}", Hex.encodeHexString(signatureBytes));
         log.info("Signature Base {}", Hex.encodeHexString(signatureBase));
+        log.info("Signature BaseLen {}", signatureBase.length);
+
         verifySignature(signatureBytes, signatureBase, publicKey, signatureAlgorithm);
-    }
-
-    public boolean verifyFlags(AuthData authData, UserVerification userVerification) {
-    	boolean userPresent = verifyUserPresent(authData);
-    	boolean userVerified = verifyUserVerified(authData);
-    	
-    	if (UserVerification.required == userVerification) {
-    		if (!(userPresent || userVerified)) {
-                throw new Fido2RPRuntimeException("User verification is required");
-    		}
-    	}
-
-    	
-    	return true;
     }
 
     public boolean verifyUserPresent(AuthData authData) {
@@ -171,7 +170,7 @@ public class CommonVerifiers {
         if ((authData.getFlags()[0] & FLAG_USER_VERIFIED) == 1) {
             return true;
         } else {
-            throw new Fido2RPRuntimeException("User not verified");
+            return false;
         }
     }
 
@@ -417,12 +416,15 @@ public class CommonVerifiers {
         return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
     }
 
-    public void verifyAttestationBuffer(boolean hasAtFlag, byte[] attestationBuffer) {
-        if (!hasAtFlag && attestationBuffer.length > 0) {
+    public void verifyAttestationBuffer(byte[] attestationBuffer) {
+        if (attestationBuffer.length == 0) {
             throw new Fido2RPRuntimeException("Invalid attestation data buffer");
         }
-        if (hasAtFlag && attestationBuffer.length == 0) {
-            throw new Fido2RPRuntimeException("Invalid attestation data buffer");
+    }
+
+    public void verifyExtensionBuffer(byte[] extensionBuffer) {
+        if (extensionBuffer.length == 0) {
+            throw new Fido2RPRuntimeException("Invalid extension data buffer");
         }
     }
 
@@ -578,33 +580,44 @@ public class CommonVerifiers {
         return type;
     }
 
+	public void verifyUserVerificationOption(UserVerification userVerification, AuthData authData) {
+		if (userVerification == UserVerification.required) {
+            verifyRequiredUserPresent(authData);
+        }
+        if (userVerification == UserVerification.preferred) {
+            verifyPreferredUserPresent(authData);
+        }
+        if (userVerification == UserVerification.discouraged) {
+            verifyDiscouragedUserPresent(authData);
+        }
+	}
+
     public void verifyRequiredUserPresent(AuthData authData) {
-        log.info("required user present {}", Hex.encodeHexString(authData.getFlags()));
+        log.info("Required user present {}", Hex.encodeHexString(authData.getFlags()));
         byte flags = authData.getFlags()[0];
 
-        if (!isUserPresent(flags) && !hasUserVerified(flags)) {
-            throw new Fido2RPRuntimeException("User required not present");
+        if (!isUserVerified(flags)) {
+            throw new Fido2RPRuntimeException("User required is not present");
         }
     }
 
     public void verifyPreferredUserPresent(AuthData authData) {
-
-        log.info("preferred user present {}", Hex.encodeHexString(authData.getFlags()));
-        byte flags = authData.getFlags()[0];
-        if (isUserPresent(flags) && hasUserVerified(flags)) {
-            throw new Fido2RPRuntimeException("User required not present");
-        }
+        log.info("Preferred user present {}", Hex.encodeHexString(authData.getFlags()));
+//        byte flags = authData.getFlags()[0];
+//        if (!(isUserVerified(flags) || isUserPresent(flags) || true)) {
+//            throw new Fido2RPRuntimeException("User preferred is not present");
+//        }
     }
 
     public void verifyDiscouragedUserPresent(AuthData authData) {
-        log.info("discouraged user present {}", Hex.encodeHexString(authData.getFlags()));
-        byte flags = authData.getFlags()[0];
-        if (hasUserVerified(flags) && isUserPresent(flags)) {
-            throw new Fido2RPRuntimeException("User discouraged is present present");
-        }
+        log.info("Discouraged user present {}", Hex.encodeHexString(authData.getFlags()));
+//        byte flags = authData.getFlags()[0];
+//        if (isUserPresent(flags) && isUserVerified(flags)) {
+//            throw new Fido2RPRuntimeException("User discouraged is not present");
+//        }
     }
 
-    private boolean hasUserVerified(byte flags) {
+    private boolean isUserVerified(byte flags) {
         boolean uv = (flags & FLAG_USER_VERIFIED) != 0;
         log.info("UV = {}", uv);
         return uv;

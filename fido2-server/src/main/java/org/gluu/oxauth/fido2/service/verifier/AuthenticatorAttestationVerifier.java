@@ -74,9 +74,11 @@ public class AuthenticatorAttestationVerifier {
             }
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode, "fmt");
             log.info("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
+            
             credential.setAttestationType(fmt);
             JsonNode authDataNode = authenticatorDataNode.get("authData");
             String authDataText = commonVerifiers.verifyAuthData(authDataNode);
+            
             JsonNode attStmt = authenticatorDataNode.get("attStmt");
             commonVerifiers.verifyAuthStatement(attStmt);
 
