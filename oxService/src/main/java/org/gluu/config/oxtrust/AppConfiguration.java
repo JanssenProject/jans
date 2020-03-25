@@ -52,9 +52,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private boolean updateStatus;
 
-    private String svnConfigurationStoreRoot;
-    private String svnConfigurationStorePassword;
-
     private String keystorePath;
     private String keystorePassword;
 
@@ -90,8 +87,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String certDir;
 
     private String servicesRestartTrigger;
-
-    private boolean persistSVN;
 
     private String oxAuthSectorIdentifierUrl;
 
@@ -320,21 +315,6 @@ public class AppConfiguration implements Configuration, Serializable {
         this.updateStatus = updateStatus;
     }
 
-    public String getSvnConfigurationStoreRoot() {
-        return svnConfigurationStoreRoot;
-    }
-
-    public void setSvnConfigurationStoreRoot(String svnConfigurationStoreRoot) {
-        this.svnConfigurationStoreRoot = svnConfigurationStoreRoot;
-    }
-
-    public String getSvnConfigurationStorePassword() {
-        return svnConfigurationStorePassword;
-    }
-
-    public void setSvnConfigurationStorePassword(String svnConfigurationStorePassword) {
-        this.svnConfigurationStorePassword = svnConfigurationStorePassword;
-    }
 
     public String getKeystorePath() {
         return keystorePath;
@@ -519,15 +499,7 @@ public class AppConfiguration implements Configuration, Serializable {
     public void setServicesRestartTrigger(String servicesRestartTrigger) {
         this.servicesRestartTrigger = servicesRestartTrigger;
     }
-
-    public boolean isPersistSVN() {
-        return persistSVN;
-    }
-
-    public void setPersistSVN(boolean persistSVN) {
-        this.persistSVN = persistSVN;
-    }
-
+    
     public String getOxAuthSectorIdentifierUrl() {
         return oxAuthSectorIdentifierUrl;
     }
