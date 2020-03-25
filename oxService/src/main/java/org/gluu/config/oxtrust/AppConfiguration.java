@@ -42,12 +42,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String[] contactObjectClassTypes;
     private String[] contactObjectClassDisplayNames;
 
-    private String photoRepositoryRootDir;
-    private int photoRepositoryThumbWidth;
-    private int photoRepositoryThumbHeight;
-    private int photoRepositoryCountLeveles;
-    private int photoRepositoryCountFoldersPerLevel;
-
     private String ldifStore;
 
     private boolean updateStatus;
@@ -60,8 +54,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String idpUrl;
 
     private String spMetadataPath;
-
-    private String logoLocation;
 
     private String idpSecurityKey;
     private String idpSecurityKeyPassword;
@@ -259,45 +251,7 @@ public class AppConfiguration implements Configuration, Serializable {
         this.contactObjectClassDisplayNames = contactObjectClassDisplayNames;
     }
 
-    public String getPhotoRepositoryRootDir() {
-        return photoRepositoryRootDir;
-    }
 
-    public void setPhotoRepositoryRootDir(String photoRepositoryRootDir) {
-        this.photoRepositoryRootDir = photoRepositoryRootDir;
-    }
-
-    public int getPhotoRepositoryThumbWidth() {
-        return photoRepositoryThumbWidth;
-    }
-
-    public void setPhotoRepositoryThumbWidth(int photoRepositoryThumbWidth) {
-        this.photoRepositoryThumbWidth = photoRepositoryThumbWidth;
-    }
-
-    public int getPhotoRepositoryThumbHeight() {
-        return photoRepositoryThumbHeight;
-    }
-
-    public void setPhotoRepositoryThumbHeight(int photoRepositoryThumbHeight) {
-        this.photoRepositoryThumbHeight = photoRepositoryThumbHeight;
-    }
-
-    public int getPhotoRepositoryCountLeveles() {
-        return photoRepositoryCountLeveles;
-    }
-
-    public void setPhotoRepositoryCountLeveles(int photoRepositoryCountLeveles) {
-        this.photoRepositoryCountLeveles = photoRepositoryCountLeveles;
-    }
-
-    public int getPhotoRepositoryCountFoldersPerLevel() {
-        return photoRepositoryCountFoldersPerLevel;
-    }
-
-    public void setPhotoRepositoryCountFoldersPerLevel(int photoRepositoryCountFoldersPerLevel) {
-        this.photoRepositoryCountFoldersPerLevel = photoRepositoryCountFoldersPerLevel;
-    }
 
     public String getLdifStore() {
         return ldifStore;
@@ -355,15 +309,6 @@ public class AppConfiguration implements Configuration, Serializable {
     public void setSpMetadataPath(String spMetadataPath) {
         this.spMetadataPath = spMetadataPath;
     }
-
-    public String getLogoLocation() {
-        return logoLocation;
-    }
-
-    public void setLogoLocation(String logoLocation) {
-        this.logoLocation = logoLocation;
-    }
-
     public String getIdpSecurityKey() {
         return idpSecurityKey;
     }
@@ -499,7 +444,7 @@ public class AppConfiguration implements Configuration, Serializable {
     public void setServicesRestartTrigger(String servicesRestartTrigger) {
         this.servicesRestartTrigger = servicesRestartTrigger;
     }
-    
+
     public String getOxAuthSectorIdentifierUrl() {
         return oxAuthSectorIdentifierUrl;
     }
