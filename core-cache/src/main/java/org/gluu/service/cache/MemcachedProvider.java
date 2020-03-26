@@ -1,20 +1,15 @@
 package org.gluu.service.cache;
 
+import net.spy.memcached.*;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.spy.memcached.AddrUtil;
-import net.spy.memcached.BinaryConnectionFactory;
-import net.spy.memcached.ConnectionFactory;
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.
@@ -122,17 +117,6 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
             return null;
         }
     }
-
-	@Override
-	public void put(String key, Object object) {
-        try {
-            OperationFuture<Boolean> set = client.set(key, 0, object);
-            OperationStatus status = set.getStatus(); // block
-            log.trace("set - key:" + key + ", expiration: " + 0 + ", status:" + status + ", get:" + get(key));
-        } catch (Exception e) {
-            log.error("Failed to put object in cache, key: " + key, e);
-        }
-	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
