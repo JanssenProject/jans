@@ -68,7 +68,7 @@ public class TokenLdap implements Serializable {
     @AttributeName(name = "ssnId", consistency = true)
     private String sessionDn;
     @Expiration
-    private int ttl;
+    private Integer ttl;
 
     @AttributeName(name = "attr")
     @JsonObject
@@ -86,11 +86,11 @@ public class TokenLdap implements Serializable {
         return attributes;
     }
 
-    public int getTtl() {
+    public Integer getTtl() {
         return ttl;
     }
 
-    public void setTtl(int ttl) {
+    public void setTtl(Integer ttl) {
         this.ttl = ttl;
     }
 
