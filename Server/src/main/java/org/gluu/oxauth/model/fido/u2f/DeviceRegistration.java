@@ -6,15 +6,11 @@
 package org.gluu.oxauth.model.fido.u2f;
 
 import org.gluu.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
 import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.BaseEntry;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
@@ -85,6 +81,9 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
     @AttributeName(name = "del")
     private boolean deletable = true;
+
+    @Expiration
+    private int ttl;
 	
 	public DeviceRegistration() {}
 
@@ -212,17 +211,28 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
     private void updateExpirationDate() {
         if (creationDate != null) {
+            final int expiration = 90;
             Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             calendar.setTime(creationDate);
-            calendar.add(Calendar.SECOND, 90);
+            calendar.add(Calendar.SECOND, expiration);
             this.expirationDate = calendar.getTime();
+            this.ttl = expiration;
         }
     }
 
 	public void clearExpiration() {
         this.expirationDate = null;
         this.deletable = false;
+        this.ttl = 0;
 	}
+
+    public int getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(int ttl) {
+        this.ttl = ttl;
+    }
 
     public DeviceData getDeviceData() {
 		return deviceData;
