@@ -228,6 +228,9 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "oxAuthBackchannelUserCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
+    @Expiration
+    private int ttl;
+
     public ClientAttributes getAttributes() {
         if (attributes == null) {
             attributes = new ClientAttributes();
@@ -237,6 +240,14 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setAttributes(ClientAttributes attributes) {
         this.attributes = attributes;
+    }
+
+    public int getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(int ttl) {
+        this.ttl = ttl;
     }
 
     public boolean isRptAsJwt() {
