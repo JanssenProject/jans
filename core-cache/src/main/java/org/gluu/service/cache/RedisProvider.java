@@ -1,14 +1,14 @@
 package org.gluu.service.cache;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 /**
  * @author yuriyz on 02/23/2017.
@@ -110,11 +110,6 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         }
         return redisProvider.get(key);
     }
-
-	@Override
-	public void put(String key, Object object) {
-        redisProvider.put(key, object);
-	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
