@@ -31,6 +31,7 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.util.JwtUtil;
+import org.gluu.oxauth.model.util.Pair;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -400,7 +401,10 @@ public class SessionIdService {
         sessionId.setDn(dn);
         sessionId.setUserDn(userDn);
         sessionId.setSessionState(sessionState);
-        sessionId.setExpirationDate(expirationDate(sessionId.getCreationDate(), state));
+
+        final Pair<Date, Integer> expiration = expirationDate(sessionId.getCreationDate(), state);
+        sessionId.setExpirationDate(expiration.getFirst());
+        sessionId.setTtl(expiration.getSecond());
 
         Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
         sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
@@ -493,8 +497,10 @@ public class SessionIdService {
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
                 sessionId.setLastUsedAt(new Date());
 
+                final Pair<Date, Integer> expiration = expirationDate(sessionId.getCreationDate(), sessionId.getState());
                 sessionId.setPersisted(true);
-                sessionId.setExpirationDate(expirationDate(sessionId.getCreationDate(), sessionId.getState()));
+                sessionId.setExpirationDate(expiration.getFirst());
+                sessionId.setTtl(expiration.getSecond());
                 log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
                 persistenceEntryManager.persist(sessionId);
                 return true;
@@ -592,18 +598,20 @@ public class SessionIdService {
         return AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
     }
 
-    private Date expirationDate(Date creationDate, SessionIdState state) {
+    private Pair<Date, Integer> expirationDate(Date creationDate, SessionIdState state) {
         int expirationInSeconds = state == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
                 getServerSessionIdLifetimeInSeconds();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(creationDate);
         calendar.add(Calendar.SECOND, expirationInSeconds);
-        return calendar.getTime();
+        return new Pair<>(calendar.getTime(), expirationInSeconds);
     }
 
     private void mergeWithRetry(final SessionId sessionId) {
-        sessionId.setExpirationDate(expirationDate(sessionId.getCreationDate(), sessionId.getState()));
+        final Pair<Date, Integer> expiration = expirationDate(sessionId.getCreationDate(), sessionId.getState());
+        sessionId.setExpirationDate(expiration.getFirst());
+        sessionId.setTtl(expiration.getSecond());
 
         EntryPersistenceException lastException = null;
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
