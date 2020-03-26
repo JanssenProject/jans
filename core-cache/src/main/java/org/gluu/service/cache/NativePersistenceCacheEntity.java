@@ -1,15 +1,11 @@
 package org.gluu.service.cache;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.Expiration;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.Deletable;
 import org.gluu.persist.model.base.DeletableEntity;
+
+import java.io.Serializable;
+import java.util.Date;
 
 @DataEntry
 @ObjectClass(value = "cache")
@@ -18,7 +14,7 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
     @DN
     private String dn;
     @Expiration
-    private int ttl;
+    private Integer ttl;
     @AttributeName(name = "uuid")
     private String id;
     @AttributeName(name = "iat")
@@ -34,11 +30,11 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
         this.dn = dn;
     }
 
-	public int getTtl() {
+	public Integer getTtl() {
 		return ttl;
 	}
 
-	public void setTtl(int ttl) {
+	public void setTtl(Integer ttl) {
 		this.ttl = ttl;
 	}
 
