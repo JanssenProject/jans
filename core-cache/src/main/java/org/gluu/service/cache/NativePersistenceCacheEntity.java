@@ -6,6 +6,7 @@ import java.util.Date;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.Expiration;
 import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.persist.model.base.Deletable;
 import org.gluu.persist.model.base.DeletableEntity;
@@ -16,6 +17,8 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
 
     @DN
     private String dn;
+    @Expiration
+    private int ttl;
     @AttributeName(name = "uuid")
     private String id;
     @AttributeName(name = "iat")
@@ -31,7 +34,15 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
         this.dn = dn;
     }
 
-    public String getId() {
+	public int getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(int ttl) {
+		this.ttl = ttl;
+	}
+
+	public String getId() {
         return id;
     }
 
@@ -57,7 +68,7 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
 
     @Override
 	public String toString() {
-		return "NativePersistenceCacheEntity [dn=" + dn + ", id=" + id + ", creationDate=" + creationDate + ", data=" + data
-				+ ", toString()=" + super.toString() + "]";
+		return "NativePersistenceCacheEntity [dn=" + dn + ", ttl=" + ttl + ", id=" + id + ", creationDate=" + creationDate + ", data="
+				+ data + "]";
 	}
 }
