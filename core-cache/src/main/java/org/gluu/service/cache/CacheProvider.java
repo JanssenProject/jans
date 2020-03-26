@@ -26,6 +26,7 @@ public abstract class CacheProvider<T> implements CacheInterface {
     /*
      * Put value with specified key without expiration 
      */
+    @Deprecated
     public abstract void put(String key, Object object);
 
     public abstract void put(int expirationInSeconds, String key, Object object);
