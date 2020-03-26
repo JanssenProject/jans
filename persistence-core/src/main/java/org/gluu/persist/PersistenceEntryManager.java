@@ -82,6 +82,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String primaryKey);
 
     boolean hasBranchesSupport(String primaryKey);
+    boolean hasExpirationSupport(String primaryKey);
 	String getPersistenceType();
     String getPersistenceType(String primaryKey);
 
