@@ -1,16 +1,5 @@
 package org.gluu.service.cache;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Calendar;
-import java.util.Date;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -20,6 +9,16 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Calendar;
+import java.util.Date;
 
 @ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
@@ -135,13 +134,6 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     public static String hashKey(String key) {
         return DigestUtils.sha256Hex(key);
     }
-
-	@Override
-	public void put(String key, Object object) {
-        Date creationDate = new Date();
-
-        putImpl(key, object, creationDate, Integer.MAX_VALUE);
-	}
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
