@@ -113,6 +113,7 @@ public class GrantService {
                     expiration = appConfiguration.getRefreshTokenLifetime();
                     break;
                 case ACCESS_TOKEN:
+                case LONG_LIVED_ACCESS_TOKEN:
                     int lifetime = appConfiguration.getAccessTokenLifetime();
                     Client client = clientService.getClient(token.getClientId());
                     // oxAuth #830 Client-specific access token expiration
@@ -120,6 +121,9 @@ public class GrantService {
                         lifetime = client.getAccessTokenLifetime();
                     }
                     expiration = lifetime;
+                    break;
+                case AUTHORIZATION_CODE:
+                    expiration = appConfiguration.getAuthorizationCodeLifetime();
                     break;
             }
 
