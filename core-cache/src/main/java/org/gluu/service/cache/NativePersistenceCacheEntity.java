@@ -18,7 +18,7 @@ public class NativePersistenceCacheEntity extends DeletableEntity implements Ser
     @DN
     private String dn;
     @Expiration
-    private int ttl;
+    private Integer ttl;
     @AttributeName(name = "uuid")
     private String id;
     @AttributeName(name = "iat")
