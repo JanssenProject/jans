@@ -1,5 +1,16 @@
 package org.gluu.service.cache;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -9,16 +20,6 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Calendar;
-import java.util.Date;
 
 @ApplicationScoped
 public class NativePersistenceCacheProvider extends AbstractCacheProvider<PersistenceEntryManager> {
@@ -35,6 +36,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     private String baseDn;
 
 	private boolean deleteExpiredOnGetRequest;
+
+	private boolean skipRemoveBeforePut;
 
     @PostConstruct
     public void init() {
@@ -64,6 +67,10 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
             baseDn = branchDn;
             cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(baseDn);
+
+            String persistenceType = entryManager.getPersistenceType(baseDn);
+            // CouchbaseEntryManagerFactory.PERSISTENCE_TYPE
+            skipRemoveBeforePut = "couchbase".equals(persistenceType);
 
             log.info("Created NATIVE_PERSISTENCE cache provider. `baseDn`: " + baseDn);
         } catch (Exception e) {
@@ -111,7 +118,7 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
             if (entity != null && entity.getData() != null) {
                 if (isExpired(entity.getNewExpirationDate()) && entity.isDeletable()) {
                     log.trace("Cache entity exists but expired, return null, expirationDate:" + entity.getExpirationDate() + ", key: " + key);
-                    if (deleteExpiredOnGetRequest) {
+                    if (deleteExpiredOnGetRequest && !skipRemoveBeforePut) {
                     	remove(key);
                     }
                     return null;
@@ -141,7 +148,6 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
         expirationInSeconds = expirationInSeconds > 0 ? expirationInSeconds : cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
 
-
         putImpl(key, object, creationDate, expirationInSeconds);
     }
 
@@ -165,7 +171,9 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 			entity.setNewExpirationDate(expirationDate.getTime());
 			entity.setDeletable(true);
 	
-			silentlyRemoveEntityIfExists(entity.getDn());
+			if (!skipRemoveBeforePut) {
+				silentlyRemoveEntityIfExists(entity.getDn());
+			}
 			entryManager.persist(entity);
         } catch (Exception e) {
         	log.error("Failed to put entry, key: " + originalKey + ", hashedKey: " + key + ", message: " + e.getMessage(), e); // log as trace since it is perfectly valid that entry is removed by timer for example
