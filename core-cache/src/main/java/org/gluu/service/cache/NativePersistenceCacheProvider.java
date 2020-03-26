@@ -243,7 +243,10 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
     @Override
     public void cleanup(final Date now) {
-        cleanup(now, cacheConfiguration.getNativePersistenceConfiguration().getDefaultCleanupBatchSize());
+    	NativePersistenceConfiguration nativePersistenceConfiguration = cacheConfiguration.getNativePersistenceConfiguration();
+		if (!entryManager.hasExpirationSupport(nativePersistenceConfiguration.getBaseDn())) {
+			cleanup(now, cacheConfiguration.getNativePersistenceConfiguration().getDefaultCleanupBatchSize());
+		}
     }
 
     public void cleanup(final Date now, int batchSize) {
