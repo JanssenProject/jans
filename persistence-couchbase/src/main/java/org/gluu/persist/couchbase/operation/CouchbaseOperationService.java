@@ -47,6 +47,7 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     boolean authenticate(String key, String password) throws SearchException, AuthenticationException;
 
     boolean addEntry(String key, JsonObject atts) throws DuplicateEntryException, PersistenceException;
+	boolean addEntry(String key, JsonObject jsonObject, int expirity) throws DuplicateEntryException, PersistenceException;
 
     boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, PersistenceException;
 

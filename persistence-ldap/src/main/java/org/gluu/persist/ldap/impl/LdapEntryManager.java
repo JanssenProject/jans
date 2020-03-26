@@ -158,8 +158,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         remove(dnValue.toString());
     }
 
-    @Override
     protected void persist(String dn, List<AttributeData> attributes) {
+    	persist(dn, attributes);
+    }
+
+    @Override
+    protected void persist(String dn, List<AttributeData> attributes, int expiration) {
         List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -907,6 +911,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 	@Override
 	public boolean hasBranchesSupport(String dn) {
 		return true;
+	}
+
+	@Override
+	public boolean hasExpirationSupport(String primaryKey) {
+		return false;
 	}
 
 	@Override

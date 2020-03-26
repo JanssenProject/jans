@@ -30,6 +30,7 @@ import org.gluu.persist.annotation.AttributesList;
 import org.gluu.persist.annotation.CustomObjectClass;
 import org.gluu.persist.annotation.DN;
 import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.Expiration;
 import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.persist.annotation.SchemaEntry;
@@ -67,6 +68,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			JsonObject.class };
 	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { CustomObjectClass.class };
 	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { DN.class };
+	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
 
 	public static final String OBJECT_CLASS = "objectClass";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -106,6 +108,8 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Object dnValue = getDNValue(entry, entryClass);
 
+		int expirationValue = getExpirationValue(entry, entryClass);
+
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
 		// Add object classes
@@ -114,10 +118,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		LOG.debug(String.format("LDAP attributes for persist: %s", attributes));
 
-		persist(dnValue.toString(), attributes);
+		persist(dnValue.toString(), attributes, expirationValue);
 	}
 
-	protected abstract void persist(String dn, List<AttributeData> attributes);
+	protected abstract void persist(String dn, List<AttributeData> attributes, int expiration);
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -767,11 +771,24 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	protected String getDNPropertyName(Class<?> entryClass) {
 		List<PropertyAnnotation> propertiesAnnotations = getEntryDnAnnotations(entryClass);
 		if (propertiesAnnotations.size() == 0) {
-			throw new MappingException("Entry should has property with annotation LdapDN");
+			throw new MappingException("Entry should has property with annotation DN");
 		}
 
 		if (propertiesAnnotations.size() > 1) {
-			throw new MappingException("Entry should has only one property with annotation LdapDN");
+			throw new MappingException("Entry should has only one property with annotation DN");
+		}
+
+		return propertiesAnnotations.get(0).getPropertyName();
+	}
+
+	protected String getExpirationPropertyName(Class<?> entryClass) {
+		List<PropertyAnnotation> propertiesAnnotations = getEntryExpirationAnnotations(entryClass);
+		if (propertiesAnnotations.size() == 0) {
+			return null;
+		}
+
+		if (propertiesAnnotations.size() > 1) {
+			throw new MappingException("Entry should has only one property with annotation Expiration");
 		}
 
 		return propertiesAnnotations.get(0).getPropertyName();
@@ -1444,6 +1461,10 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return getEntryClassAnnotations(entryClass, "dn_", LDAP_DN_PROPERTY_ANNOTATION);
 	}
 
+	protected <T> List<PropertyAnnotation> getEntryExpirationAnnotations(Class<T> entryClass) {
+		return getEntryClassAnnotations(entryClass, "exp_", LDAP_EXPIRATION_PROPERTY_ANNOTATION);
+	}
+
 	protected <T> List<PropertyAnnotation> getEntryCustomObjectClassAnnotations(Class<T> entryClass) {
 		return getEntryClassAnnotations(entryClass, "custom_", LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION);
 	}
@@ -1717,6 +1738,36 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		}
 
 		return dnValue;
+	}
+
+	protected <T> int getExpirationValue(Object entry, Class<T> entryClass) {
+		// Check if entry has Expiration property
+		String expirationProperty = getExpirationPropertyName(entryClass);
+		
+		if (expirationProperty == null) {
+			// No entry expiration property
+			return 0;
+		}
+
+		// Get Expiration value
+		Getter expirationGetter = getGetter(entryClass, expirationProperty);
+		if (expirationGetter == null) {
+			throw new MappingException("Entry should has getter for property " + expirationGetter);
+		}
+
+		Class<?> propertyType = expirationGetter.getReturnType();
+		if (!((propertyType == Integer.class) || (propertyType == Integer.TYPE))) {
+			throw new MappingException("Entry expiration property should has Integer type. Property: '"
+					+ expirationGetter + "'");
+		}
+
+		Object expirationValue = expirationGetter.get(entry);
+		if (expirationValue == null) {
+			// No entry expiration or null
+			return 0;
+		}
+
+		return (int) expirationValue;
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
