@@ -48,7 +48,7 @@ public class UmaPermission implements Serializable {
     private Map<String, String> attributes;
 
     @Expiration
-    private int ttl;
+    private Integer ttl;
 
     private boolean expired;
 
@@ -67,11 +67,11 @@ public class UmaPermission implements Serializable {
         checkExpired();
     }
 
-    public int getTtl() {
+    public Integer getTtl() {
         return ttl;
     }
 
-    public void setTtl(int ttl) {
+    public void setTtl(Integer ttl) {
         this.ttl = ttl;
     }
 
