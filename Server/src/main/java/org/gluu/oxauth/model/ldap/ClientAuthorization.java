@@ -35,13 +35,13 @@ public class ClientAuthorization implements Serializable {
     private boolean deletable = true;
 
     @Expiration
-    private int ttl;
+    private Integer ttl;
 
-    public int getTtl() {
+    public Integer getTtl() {
         return ttl;
     }
 
-    public void setTtl(int ttl) {
+    public void setTtl(Integer ttl) {
         this.ttl = ttl;
     }
 
