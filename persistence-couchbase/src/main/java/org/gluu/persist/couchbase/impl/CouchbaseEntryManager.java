@@ -166,7 +166,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected void persist(String dn, List<AttributeData> attributes, int expiration) {
+    protected void persist(String dn, List<AttributeData> attributes, Integer expiration) {
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -213,7 +213,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
+    public void merge(String dn, List<AttributeDataModification> attributeDataModifications, Integer expirationValue) {
         // Update entry
         try {
             List<MutationSpec> modifications = new ArrayList<MutationSpec>(attributeDataModifications.size());
@@ -254,7 +254,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
 
             if (modifications.size() > 0) {
-                boolean result = operationService.updateEntry(toCouchbaseKey(dn).getKey(), modifications);
+                boolean result = operationService.updateEntry(toCouchbaseKey(dn).getKey(), modifications, expirationValue);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
                 }

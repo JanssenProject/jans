@@ -163,11 +163,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
     }
 
     @Override
-    public boolean addEntry(String key, JsonObject jsonObject, int expirity) throws DuplicateEntryException, PersistenceException {
+    public boolean addEntry(String key, JsonObject jsonObject, Integer expiration) throws DuplicateEntryException, PersistenceException {
         Instant startTime = OperationDurationUtil.instance().now();
 
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        boolean result = addEntryImpl(bucketMapping, key, jsonObject, expirity);
+        boolean result = addEntryImpl(bucketMapping, key, jsonObject, expiration);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, json: {}", duration, bucketMapping.getBucketName(), key, jsonObject);
@@ -175,10 +175,16 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return result;
     }
 
-	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject, int expirity) throws PersistenceException {
+	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject, Integer expiration) throws PersistenceException {
 		try {
-            JsonDocument jsonDocument = JsonDocument.create(key, expirity, jsonObject);
-            JsonDocument result = bucketMapping.getBucket().upsert(jsonDocument);
+			JsonDocument jsonDocument; 
+			if (expiration == null) {
+	            jsonDocument = JsonDocument.create(key, jsonObject);
+			} else {
+	            jsonDocument = JsonDocument.create(key, expiration, jsonObject);
+			}
+
+			JsonDocument result = bucketMapping.getBucket().upsert(jsonDocument);
             if (result != null) {
                 return true;
             }
@@ -207,15 +213,15 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
             }
         }
 
-        return updateEntry(key, mods);
+        return updateEntry(key, mods, null);
     }
 
     @Override
-    public boolean updateEntry(String key, List<MutationSpec> mods) throws UnsupportedOperationException, SearchException {
+    public boolean updateEntry(String key, List<MutationSpec> mods, Integer expiration) throws UnsupportedOperationException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        boolean result = updateEntryImpl(bucketMapping, key, mods);
+        boolean result = updateEntryImpl(bucketMapping, key, mods, expiration);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, bucket: {}, key: {}, mods: {}", duration, bucketMapping.getBucketName(), key, mods);
@@ -223,9 +229,12 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return result;
     }
 
-	private boolean updateEntryImpl(BucketMapping bucketMapping, String key, List<MutationSpec> mods) throws SearchException {
+	private boolean updateEntryImpl(BucketMapping bucketMapping, String key, List<MutationSpec> mods, Integer expiration) throws SearchException {
 		try {
             MutateInBuilder builder = bucketMapping.getBucket().mutateIn(key);
+            if (expiration != null) {
+            	bucketMapping.getBucket().touch(key, expiration);
+            }
 
             return modifyEntry(builder, mods);
         } catch (final CouchbaseException ex) {

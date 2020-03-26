@@ -403,12 +403,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     //*************************************************************************
 
 	@Override
-	protected void persist(String dn, List<AttributeData> attributes, int expiration) {
+	protected void persist(String dn, List<AttributeData> attributes, Integer expiration) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 
     @Override
-	protected void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
+	protected void merge(String dn, List<AttributeDataModification> attributeDataModifications, Integer expiration) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 

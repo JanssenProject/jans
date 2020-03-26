@@ -108,7 +108,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Object dnValue = getDNValue(entry, entryClass);
 
-		int expirationValue = getExpirationValue(entry, entryClass);
+		Integer expirationValue = getExpirationValue(entry, entryClass);
 
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 
@@ -121,7 +121,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		persist(dnValue.toString(), attributes, expirationValue);
 	}
 
-	protected abstract void persist(String dn, List<AttributeData> attributes, int expiration);
+	protected abstract void persist(String dn, List<AttributeData> attributes, Integer expiration);
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -208,6 +208,8 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		Object dnValue = getDNValue(entry, entryClass);
 
+		Integer expirationValue = getExpirationValue(entry, entryClass);
+
 		List<AttributeData> attributesToPersist = getAttributesListForPersist(entry, propertiesAnnotations);
 		Map<String, AttributeData> attributesToPersistMap = getAttributesMap(attributesToPersist);
 
@@ -238,7 +240,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		LOG.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
 
-		merge(dnValue.toString(), attributeDataModifications);
+		merge(dnValue.toString(), attributeDataModifications, expirationValue);
 
 		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations, propertiesAnnotationsMap);
 	}
@@ -407,7 +409,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 				|| ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(String.valueOf(attributeToPersistValues[0])));
 	}
 
-	protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications);
+	protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications, Integer expiration);
 
 	public abstract void remove(String dn);
 
@@ -1740,13 +1742,13 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return dnValue;
 	}
 
-	protected <T> int getExpirationValue(Object entry, Class<T> entryClass) {
+	protected <T> Integer getExpirationValue(Object entry, Class<T> entryClass) {
 		// Check if entry has Expiration property
 		String expirationProperty = getExpirationPropertyName(entryClass);
 		
 		if (expirationProperty == null) {
 			// No entry expiration property
-			return 0;
+			return null;
 		}
 
 		// Get Expiration value
@@ -1764,10 +1766,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Object expirationValue = expirationGetter.get(entry);
 		if (expirationValue == null) {
 			// No entry expiration or null
-			return 0;
+			return null;
+		}
+		
+		if (expirationValue instanceof Integer) {
+			return (Integer) expirationValue;
 		}
 
-		return (int) expirationValue;
+		return Integer.valueOf((int) expirationValue);
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
