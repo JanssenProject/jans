@@ -139,9 +139,8 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 	@Override
 	public void put(String key, Object object) {
         Date creationDate = new Date();
-        Date expirationDate = new Date(Long.MAX_VALUE);
 
-        putImpl(key, object, creationDate, expirationDate);
+        putImpl(key, object, creationDate, Integer.MAX_VALUE);
 	}
 
     @Override
@@ -150,25 +149,28 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 
         expirationInSeconds = expirationInSeconds > 0 ? expirationInSeconds : cacheConfiguration.getNativePersistenceConfiguration().getDefaultPutExpiration();
 
+
+        putImpl(key, object, creationDate, expirationInSeconds);
+    }
+
+	private void putImpl(String key, Object object, Date creationDate, int expirationInSeconds) {
         Calendar expirationDate = Calendar.getInstance();
 		expirationDate.setTime(creationDate);
 		expirationDate.add(Calendar.SECOND, expirationInSeconds);
 
-        putImpl(key, object, creationDate, expirationDate.getTime());
-    }
-
-	private void putImpl(String key, Object object, Date creationDate, Date expirationDate) {
-        String originalKey = key;
+		
+		String originalKey = key;
 
         try {
             key = hashKey(key);
 	
 			NativePersistenceCacheEntity entity = new NativePersistenceCacheEntity();
+			entity.setTtl(expirationInSeconds);
 			entity.setData(asString(object));
 			entity.setId(key);
 			entity.setDn(createDn(key));
 			entity.setCreationDate(creationDate);
-			entity.setNewExpirationDate(expirationDate);
+			entity.setNewExpirationDate(expirationDate.getTime());
 			entity.setDeletable(true);
 	
 			silentlyRemoveEntityIfExists(entity.getDn());
