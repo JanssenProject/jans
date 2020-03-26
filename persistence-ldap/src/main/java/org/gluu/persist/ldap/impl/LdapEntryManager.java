@@ -163,7 +163,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    protected void persist(String dn, List<AttributeData> attributes, int expiration) {
+    protected void persist(String dn, List<AttributeData> attributes, Integer expiration) {
         List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -194,7 +194,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    public void merge(String dn, List<AttributeDataModification> attributeDataModifications) {
+    public void merge(String dn, List<AttributeDataModification> attributeDataModifications, Integer expiration) {
         // Update entry
         try {
             List<Modification> modifications = new ArrayList<Modification>(attributeDataModifications.size());

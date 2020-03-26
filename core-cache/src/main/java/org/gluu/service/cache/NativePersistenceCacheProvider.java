@@ -283,5 +283,11 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
     public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
         this.cacheConfiguration = cacheConfiguration;
     }
-
+    
+    public static void main(String[] args) {
+		NativePersistenceCacheProvider cp = new NativePersistenceCacheProvider();
+		Object obj = cp.fromString("rO0ABXNyAClvcmcuZ2x1dS5veGF1dGgubW9kZWwuY29tbW9uLkNsaWVudFRva2Vuc/Aib54fThHVAgACTAAIY2xpZW50SWR0ABJMamF2YS9sYW5nL1N0cmluZztMAAt0b2tlbkhhc2hlc3QAD0xqYXZhL3V0aWwvU2V0O3hwdAApMTAwMS45MGQ0MGI2OS02ZDFmLTQxMmYtOTg5ZS00MThmN2E2Y2M1MTNzcgARamF2YS51dGlsLkhhc2hTZXS6RIWVlri3NAMAAHhwdwwAAAAQP0AAAAAAAAF0AEA3M2M1NDBhYjRlNzU2ZTk2ZjQ2NzU2ODZjNzU0ZDg1ZjZiOWExYmI0ZjI1ZWY5NTZjYmRkZTQ0NjlmZTA2OGVjeA==");
+		
+		System.out.println(obj);
+	}
 }
