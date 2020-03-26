@@ -88,7 +88,18 @@ public class SessionId implements Deletable, Serializable {
     @Transient
     private User user;
 
+    @Expiration
+    private int ttl;
+
     public SessionId() {
+    }
+
+    public int getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(int ttl) {
+        this.ttl = ttl;
     }
 
     public String getDn() {
