@@ -43,7 +43,7 @@ public class RequestMessageLdap extends BaseEntry {
     private boolean deletable = true;
 
     @Expiration
-    private int ttl;
+    private Integer ttl;
 
     public RequestMessageLdap() {
     }
@@ -68,11 +68,11 @@ public class RequestMessageLdap extends BaseEntry {
         this.ttl = expiration;
     }
 
-    public int getTtl() {
+    public Integer getTtl() {
         return ttl;
     }
 
-    public void setTtl(int ttl) {
+    public void setTtl(Integer ttl) {
         this.ttl = ttl;
     }
 
