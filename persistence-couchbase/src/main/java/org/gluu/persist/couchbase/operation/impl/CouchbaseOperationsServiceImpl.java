@@ -159,10 +159,15 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
     @Override
     public boolean addEntry(String key, JsonObject jsonObject) throws DuplicateEntryException, PersistenceException {
+    	return addEntry(key, jsonObject, 0);
+    }
+
+    @Override
+    public boolean addEntry(String key, JsonObject jsonObject, int expirity) throws DuplicateEntryException, PersistenceException {
         Instant startTime = OperationDurationUtil.instance().now();
 
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        boolean result = addEntryImpl(bucketMapping, key, jsonObject);
+        boolean result = addEntryImpl(bucketMapping, key, jsonObject, expirity);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, json: {}", duration, bucketMapping.getBucketName(), key, jsonObject);
@@ -170,9 +175,9 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         return result;
     }
 
-	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject) throws PersistenceException {
+	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject, int expirity) throws PersistenceException {
 		try {
-            JsonDocument jsonDocument = JsonDocument.create(key, jsonObject);
+            JsonDocument jsonDocument = JsonDocument.create(key, expirity, jsonObject);
             JsonDocument result = bucketMapping.getBucket().upsert(jsonDocument);
             if (result != null) {
                 return true;

@@ -273,6 +273,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	}
 
 	@Override
+	public boolean hasExpirationSupport(String dn) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
+    	return persistenceEntryManager.hasExpirationSupport(dn);
+	}
+
+	@Override
 	public String getPersistenceType() {
 		return HybridEntryManagerFactory.PERSISTENCE_TYPE;
 	}
@@ -397,7 +403,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     //*************************************************************************
 
 	@Override
-	protected void persist(String dn, List<AttributeData> attributes) {
+	protected void persist(String dn, List<AttributeData> attributes, int expiration) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
 

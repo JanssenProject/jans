@@ -166,7 +166,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected void persist(String dn, List<AttributeData> attributes) {
+    protected void persist(String dn, List<AttributeData> attributes, int expiration) {
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -203,7 +203,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         // Persist entry
         try {
-            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject);
+            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject, expiration);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
             }
@@ -779,7 +779,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
     @Override
     public void importEntry(String dn, List<AttributeData> attributes) {
-    	persist(dn, attributes);
+    	persist(dn, attributes, 0);
     }
 
     private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
@@ -870,6 +870,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	@Override
 	public boolean hasBranchesSupport(String dn) {
 		return false;
+	}
+
+	@Override
+	public boolean hasExpirationSupport(String primaryKey) {
+		return true;
 	}
 
 	@Override
