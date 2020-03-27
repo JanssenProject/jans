@@ -80,17 +80,14 @@
     "attributes":[
     ],
     "static" : [
-      [["exp"], "objectClass = \"cache\" and del=true"]
     ]
   },
 
   "!bucket_prefix!_token": {
     "attributes": [
-      ["del","exp"],
       ["authzCode"]
     ],
     "static" : [
-      [["exp", "oxAuthExpiration"], "del=true"],
       [["grtId"], "objectClass = \"token\""],
       [["ssnId"], "objectClass = \"token\""]
     ]
