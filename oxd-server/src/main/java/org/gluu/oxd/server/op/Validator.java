@@ -183,6 +183,7 @@ public class Validator {
     public void validateIdToken(String nonce) {
         try {
             final String issuer = idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            final String sub = idToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
             final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
             final String clientId = rp.getClientId();
 
@@ -192,6 +193,12 @@ public class Validator {
             }
             //validate audience
             validateAudience(idToken, clientId);
+
+            //validate subject identifier
+            if (Strings.isNullOrEmpty(sub)) {
+               LOG.error("ID Token is missing `sub` value.");
+                throw new HttpException(ErrorResponseCode.NO_SUBJECT_IDENTIFIER);
+            }
 
             //validate id_token expire date
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
