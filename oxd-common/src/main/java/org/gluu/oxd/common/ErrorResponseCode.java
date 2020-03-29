@@ -88,7 +88,8 @@ public enum ErrorResponseCode {
     FAILED_TO_GET_DISCOVERY(500, "failed_to_get_discovery", "Failed to get OP discovery configuration."),
     SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
-    ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported.");
+    ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
+    NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value."),;
 
     private final int httpStatus;
     private final String code;
