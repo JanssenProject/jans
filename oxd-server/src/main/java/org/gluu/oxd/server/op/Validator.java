@@ -9,6 +9,7 @@ import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jws.AbstractJwsSigner;
 import org.gluu.oxauth.model.jws.ECDSASigner;
 import org.gluu.oxauth.model.jws.HMACSigner;
@@ -142,14 +143,22 @@ public class Validator {
     public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp) {
         final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
-        final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
         final String jwkUrl = discoveryResponse.getJwksUri();
+        String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
 
         if (signatureAlgorithm == null)
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
+        if (Strings.isNullOrEmpty(kid) && (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA || signatureAlgorithm.getFamily() == AlgorithmFamily.EC)) {
+            LOG.warn("`kid` is missing in id_token. Checking keystore for `kid`");
+            kid = keyService.getKeyId(idToken, jwkUrl, signatureAlgorithm, Use.SIGNATURE);
+            if (Strings.isNullOrEmpty(kid)) {
+                throw new HttpException(ErrorResponseCode.KEY_ID_NOT_FOUND);
+            }
+        }
+
         if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
-            final RSAPublicKey publicKey = keyService.getRSAPublicKey(jwkUrl, kid);
+            final RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwkUrl, kid);
             return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
             return new HMACSigner(signatureAlgorithm, rp.getClientSecret());
