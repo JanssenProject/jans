@@ -118,8 +118,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 response_check = self.validateInweboToken(self.api_uri, self.service_id, user_name, password, step)
             elif (step == 2):
                 print "elif (step == 2):"
-                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-                response_check = self.checkStatus(self.api_uri, self.service_id, user_name,  session_id, self.push_withoutpin)
+                session = CdiUtil.bean(SessionIdService).getSessionId()
+                if session == None:
+                    print "InWebo. Authenticate for step 2. session_id is not exists"
+                    return False
+
+                response_check = self.checkStatus(self.api_uri, self.service_id, user_name, session.getId(), self.push_withoutpin)
                 
                 if self.push_fail is not None:
                     self.setErrorMessage(self.push_fail)
