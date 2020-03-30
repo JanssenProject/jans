@@ -55,10 +55,7 @@ public class PublicOpKeyService {
             PublicKey cachedKey = cache.getIfPresent(mapKey);
             if (cachedKey != null) {
                 LOG.debug("Taken public key from cache, mapKey: " + mapKey);
-                if (cachedKey instanceof RSAPublicKey)
-                    return (RSAPublicKey) cachedKey;
-                else if (cachedKey instanceof ECDSAPublicKey)
-                    return (ECDSAPublicKey) cachedKey;
+                return cachedKey;
             }
 
             JwkClient jwkClient = new JwkClient(jwkSetUrl);
@@ -66,14 +63,7 @@ public class PublicOpKeyService {
 
             JwkResponse jwkResponse = jwkClient.exec();
             if (jwkResponse != null && jwkResponse.getStatus() == 200) {
-                PublicKey pk = jwkResponse.getPublicKey(keyId);
-                if (pk instanceof ECDSAPublicKey) {
-                    publicKey = (ECDSAPublicKey) pk;
-                    cache.put(mapKey, publicKey);
-                } else if (pk instanceof RSAPublicKey) {
-                    publicKey = (RSAPublicKey) pk;
-                    cache.put(mapKey, publicKey);
-                }
+                publicKey = jwkResponse.getPublicKey(keyId);
             }
 
             return publicKey;
