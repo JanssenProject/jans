@@ -120,8 +120,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Authenticate for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -231,8 +231,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
