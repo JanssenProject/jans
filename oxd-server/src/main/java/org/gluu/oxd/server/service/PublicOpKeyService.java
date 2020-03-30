@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.server.op.OpClientFactory;
 import org.gluu.util.Pair;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,25 +46,31 @@ public class PublicOpKeyService {
         this.opClientFactory = opClientFactory;
     }
 
-
-    public RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId) {
+    public PublicKey getPublicKey(String jwkSetUrl, String keyId) {
         try {
-            final Pair<String, String> mapKey = new Pair<>(jwkSetUri, keyId);
+            PublicKey publicKey = null;
 
-            RSAPublicKey cachedKey = (RSAPublicKey) cache.getIfPresent(mapKey);
+            final Pair<String, String> mapKey = new Pair<>(jwkSetUrl, keyId);
+
+            PublicKey cachedKey = cache.getIfPresent(mapKey);
             if (cachedKey != null) {
                 LOG.debug("Taken public key from cache, mapKey: " + mapKey);
-                return cachedKey;
+                if (cachedKey instanceof RSAPublicKey)
+                    return (RSAPublicKey) cachedKey;
+                else if (cachedKey instanceof ECDSAPublicKey)
+                    return (ECDSAPublicKey) cachedKey;
             }
 
-            RSAPublicKey publicKey = null;
-
-            JwkClient jwkClient = opClientFactory.createJwkClient(jwkSetUri);
+            JwkClient jwkClient = new JwkClient(jwkSetUrl);
             jwkClient.setExecutor(new ApacheHttpClient4Executor(httpService.getHttpClient()));
+
             JwkResponse jwkResponse = jwkClient.exec();
             if (jwkResponse != null && jwkResponse.getStatus() == 200) {
                 PublicKey pk = jwkResponse.getPublicKey(keyId);
-                if (pk instanceof RSAPublicKey) {
+                if (pk instanceof ECDSAPublicKey) {
+                    publicKey = (ECDSAPublicKey) pk;
+                    cache.put(mapKey, publicKey);
+                } else if (pk instanceof RSAPublicKey) {
                     publicKey = (RSAPublicKey) pk;
                     cache.put(mapKey, publicKey);
                 }
@@ -125,8 +132,8 @@ public class PublicOpKeyService {
         return null;
     }
 
-    public RSAPublicKey refetchKey(String jwkUrl, String kid) {
+    public PublicKey refetchKey(String jwkUrl, String kid) {
         cache.invalidate(new Pair<>(jwkUrl, kid));
-        return getRSAPublicKey(jwkUrl, kid);
+        return getPublicKey(jwkUrl, kid);
     }
 }
