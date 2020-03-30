@@ -89,6 +89,7 @@ public enum ErrorResponseCode {
     SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
+    KEY_ID_NOT_FOUND(500, "key_id_not_found", "`kid` is missing in `ID_TOKEN`. Unable to find matching key out of the Issuer's published set."),
     NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value.");
 
     private final int httpStatus;
