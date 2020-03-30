@@ -68,15 +68,7 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
         log.info("User verification option {}", authenticationEntity.getUserVerificationOption());
-        if (authenticationEntity.getUserVerificationOption() == UserVerification.required) {
-            commonVerifiers.verifyRequiredUserPresent(authData);
-        }
-        if (authenticationEntity.getUserVerificationOption() == UserVerification.preferred) {
-            commonVerifiers.verifyPreferredUserPresent(authData);
-        }
-        if (authenticationEntity.getUserVerificationOption() == UserVerification.discouraged) {
-            commonVerifiers.verifyDiscouragedUserPresent(authData);
-        }
+        commonVerifiers.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
         byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
 
@@ -96,4 +88,5 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
             throw new Fido2RPRuntimeException("General server error " + e.getMessage());
         }
     }
+
 }
