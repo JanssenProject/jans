@@ -26,6 +26,7 @@ import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
@@ -71,6 +72,9 @@ public class AuthenticationFilter implements Filter {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     @Inject
     private ClientService clientService;
@@ -177,7 +181,7 @@ public class AuthenticationFilter implements Filter {
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else {
-                String sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
+                String sessionId = cookieService.getSessionIdFromCookie(httpRequest);
                 List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
                 if (StringUtils.isBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {

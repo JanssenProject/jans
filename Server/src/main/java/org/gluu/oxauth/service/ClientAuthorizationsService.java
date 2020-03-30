@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
@@ -16,7 +17,6 @@ import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.*;
@@ -42,6 +42,9 @@ public class ClientAuthorizationsService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -132,6 +135,7 @@ public class ClientAuthorizationsService {
                 clientAuthorization.setDn(createDn(clientAuthorization.getId()));
                 clientAuthorization.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
                 clientAuthorization.setExpirationDate(client.getExpirationDate());
+                clientAuthorization.setTtl(appConfiguration.getDynamicRegistrationExpirationTime());
 
                 ldapEntryManager.persist(clientAuthorization);
             } else if (clientAuthorization.getScopes() != null) {

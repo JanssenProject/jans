@@ -1,9 +1,6 @@
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -36,6 +33,17 @@ public class ClientAuthorization implements Serializable {
 
     @AttributeName(name = "del")
     private boolean deletable = true;
+
+    @Expiration
+    private Integer ttl;
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
+    }
 
     public String getDn() {
         return dn;
