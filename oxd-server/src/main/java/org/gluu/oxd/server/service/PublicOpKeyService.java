@@ -58,7 +58,7 @@ public class PublicOpKeyService {
                 return cachedKey;
             }
 
-            JwkClient jwkClient = new JwkClient(jwkSetUrl);
+            JwkClient jwkClient = opClientFactory.createJwkClient(jwkSetUrl);
             jwkClient.setExecutor(new ApacheHttpClient4Executor(httpService.getHttpClient()));
 
             JwkResponse jwkResponse = jwkClient.exec();
