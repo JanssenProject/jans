@@ -3,7 +3,6 @@ package org.gluu.oxd.server.op;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
@@ -158,12 +157,12 @@ public class Validator {
         }
 
         if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
-            final RSAPublicKey publicKey = JwkClient.getRSAPublicKey(jwkUrl, kid);
+            final RSAPublicKey publicKey = (RSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
             return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
             return new HMACSigner(signatureAlgorithm, rp.getClientSecret());
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.EC) {
-            ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(jwkUrl, kid);
+            final ECDSAPublicKey publicKey = (ECDSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
             return new ECDSASigner(signatureAlgorithm, publicKey);
         }
         throw new HttpException(ErrorResponseCode.ALGORITHM_NOT_SUPPORTED);
