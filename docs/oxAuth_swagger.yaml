@@ -1,10 +1,10 @@
 # raw swagger spec link:
 # https://raw.githubusercontent.com/GluuFederation/oxAuth/master/docs/oxAuth_swagger.yaml
-# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxAuth-server/version_4.0/oxAuth/master/docs/oxAuth_swagger.yaml#/developers/setup-client
+# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxAuth/master/docs/oxAuth_swagger.yaml
 openapi: 3.0.1
 info:
   title: oxAuth
-  description: oxAuth - Authorization services
+  description: oxAuth - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
   contact:
     email: yuriyz@gluu.org
   license:
@@ -183,7 +183,42 @@ paths:
           description: OK
           content: {}
         302:
-          $ref: '#/components/responses/Found'   
+          description: Error codes for authorization endpoint.
+          content:
+            application/json:
+              schema:
+                title: AuthorizeError
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - unauthorized_client
+                    - disabled_client
+                    - access_denied
+                    - retry
+                    - unsupported_response_type
+                    - invalid_scope
+                    - server_error
+                    - temporarily_unavailable
+                    - invalid_request_redirect_uri
+                    - login_required
+                    - session_selection_required
+                    - consent_required
+                    - user_mismatched
+                    - invalid_request_uri
+                    - invalid_request_object
+                    - authentication_session_invalid
+                    - invalid_authentication_method
+                  error_description:
+                    type: string
+                  details:
+                    type: string    
         400:
           $ref: '#/components/responses/InvalidRequest'        
         401:
@@ -286,7 +321,42 @@ paths:
           description: OK
           content: {}
         302:
-          $ref: '#/components/responses/Found'   
+          description: Error codes for authorization endpoint.
+          content:
+            application/json:
+              schema:
+                title: AuthorizeError
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - unauthorized_client
+                    - disabled_client
+                    - access_denied
+                    - retry
+                    - unsupported_response_type
+                    - invalid_scope
+                    - server_error
+                    - temporarily_unavailable
+                    - invalid_request_redirect_uri
+                    - login_required
+                    - session_selection_required
+                    - consent_required
+                    - user_mismatched
+                    - invalid_request_uri
+                    - invalid_request_object
+                    - authentication_session_invalid
+                    - invalid_authentication_method
+                  error_description:
+                    type: string
+                  details:
+                    type: string     
         400:
           $ref: '#/components/responses/InvalidRequest'        
         401:
@@ -363,7 +433,35 @@ paths:
         400:
           $ref: '#/components/responses/InvalidRequest'     
         401:
-          $ref: '#/components/responses/Unauthorized'
+          #$ref: '#/components/responses/Unauthorized'
+          description: Unauthorized CIBA (Client Initiated Backchannel Authentication) access. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - invalid_scope
+                    - expired_login_hint_token
+                    - unknown_user_id
+                    - unauthorized_client
+                    - missing_user_code
+                    - invalid_user_code
+                    - invalid_binding_message
+                    - invalid_client
+                    - unauthorized_end_user_device
+                    - access_denied
+                  error_description:
+                    type: string
+                  details:
+                     type: string  
         403:
           $ref: '#/components/responses/AccessDenied'
   /bc-deviceRegistration:
@@ -394,7 +492,34 @@ paths:
           description: OK
           content: {}         
         400:
-          $ref: '#/components/responses/InvalidRequest'         
+          description: Invalid parameters are provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - invalid_scope
+                    - expired_login_hint_token
+                    - unknown_user_id
+                    - unauthorized_client
+                    - missing_user_code
+                    - invalid_user_code
+                    - invalid_binding_message
+                    - invalid_client
+                    - unauthorized_end_user_device
+                    - access_denied
+                  error_description:
+                    type: string
+                  details:
+                    type: string  
         403:
           $ref: '#/components/responses/AccessDenied'          
   /clientinfo:
@@ -449,7 +574,26 @@ paths:
                     items:
                       type: string                           
         400:
-          $ref: '#/components/responses/InvalidRequest'       
+          #$ref: '#/components/responses/InvalidRequest'       
+          description: Invalid Request are provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string  
     post:
       tags:
       - Client Info
@@ -508,7 +652,26 @@ paths:
                     items:
                       type: string                      
         400:
-          $ref: '#/components/responses/InvalidRequest'            
+          #$ref: '#/components/responses/InvalidRequest'            
+          description: Invalid Request are provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
   /.well-known/gluu-configuration:
     post:
       tags:
@@ -633,6 +796,10 @@ paths:
                  acr_values:
                    type: string
                    description: Authentication Context Class Reference values.
+                 jti:
+                  type: string
+                  description: String identifier for the token, as defined in JWT.
+                
         400:
          $ref: '#/components/responses/InvalidRequest'   
         401:
@@ -720,7 +887,10 @@ paths:
                    example: https://server.example.com/   
                  acr_values:
                    type: string
-                   description: Authentication Context Class Reference values.       
+                   description: Authentication Context Class Reference values.   
+                 jti:
+                  type: string
+                  description: String identifier for the token, as defined in JWT.                   
         400:
          $ref: '#/components/responses/InvalidRequest'   
         401:
@@ -1035,7 +1205,31 @@ paths:
                     type: integer
                     description: Time at which the client_secret will expire or 0 if it will not expire.                
         400:
-          $ref: '#/components/responses/InvalidRequest'                       
+          #$ref: '#/components/responses/InvalidRequest'                       
+           description: Invalid parameters are provided to endpoint. 
+           content:
+             application/json:
+               schema:
+                 type: object
+                 required:
+                 - error
+                 - error_description
+                 properties:
+                   error:
+                     type: string
+                     format: enum
+                     example:
+                     - invalid_redirect_uri
+                     - invalid_claims_redirect_uri
+                     - invalid_client_metadata
+                     - invalid_token
+                     - invalid_logout_uri
+                     - invalid_software_statement
+                     - access_denied
+                   error_description:
+                     type: string
+                   details:
+                     type: string  
         500:
           $ref: '#/components/responses/InternalServerError'  
     put:
@@ -1927,42 +2121,64 @@ paths:
                 type: object
                 description: UmaMetadata
                 required:
-                - permission_endpoint
-                - resource_registration_endpoint
-                - scope_endpoint
+                - issuer
+                - authorization_endpoint
+                - token_endpoint
+                - response_types_supported
                 properties:
                   issuer:
                     type: string
+                    description: The authorization server's issuer identifier, which is\n a URL that uses the \"https\" scheme and has no query or fragment\n components.  This is the location where \".well-known\" RFC 5785\n [RFC5785] resources containing information about the authorization\n server are published.  Using these well-known resources is\n described in Section 3.  The issuer identifier is used to prevent\n authorization server mix-up attacks, as described in \"OAuth 2.0 Mix-Up Mitigation\"
                     example: https://sample.com
-                  grant_types_supported:
-                    type: array
-                    items:
-                      type: string
-                    example:
-                    - authorization_code
-                    - implicit
-                    - client_credentials
+                  authorization_endpoint:
+                    type: string
+                    description: "URL of the authorization server's authorization endpoint.
+                    example: https://sample.com/oxauth/restv1/authorize
+                  token_endpoint:
+                    type: string
+                    description: URL of the authorization server's token endpoint [RFC6749].  This is REQUIRED unless only the implicit grant type is used.
+                    example: https://sample.com/oxauth/restv1/token                  
+                  jwks_uri:
+                    type: string
+                    description: URL of the authorization server's JWK Set [JWK] document.  The referenced document contains the signing key(s) the client uses to validate signatures from the authorization server. This URL MUST use the \"https\" scheme.  The JWK Set MAY also contain the server's encryption key(s), which are used by clients to encrypt requests to the server.  When both signing and encryption keys are made available, a \"use\" (public key use) parameter value is REQUIRED for all keys in the referenced JWK Set to indicate each key's intended usage.
+                    example: https://sample.com/oxauth/restv1/jwks
+                  registration_endpoint:
+                    type: string
+                    description: URL of the authorization server's OAuth 2.0 Dynamic Client Registration endpoint [RFC7591]
+                    example: https://sample.com/oxauth/restv1/register
                   response_types_supported:
                     type: array
                     items:
                       type: string
+                    description: JSON array containing a list of the OAuth 2.0 \"response_type\" values that this authorization server supports. The array values used are the same as those used with the \"response_types\" parameter defined by \"OAuth 2.0 Dynamic Client Registration Protocol\" [RFC7591].
                     example:
                     - code
                     - id_token
                     - token
+                  grant_types_supported:
+                    type: array
+                    items:
+                      type: string
+                    description: JSON array containing a list of the OAuth 2.0 grant type values that this authorization server supports.  The array values used are the same as those used with the \"grant_types\" parameter defined by \"OAuth 2.0 Dynamic Client Registration Protocol\" [RFC7591].  If omitted, the default value is \"[\"authorization_code\", \"implicit\"]\".
+                    example:
+                    - authorization_code
+                    - implicit
+                    - client_credentials  
                   token_endpoint_auth_methods_supported:
                     type: array
                     items:
                       type: string
+                    description: JSON array containing a list of client authentication methods supported by this token endpoint.  Client authentication method values are used in the \"token_endpoint_auth_method\" parameter defined in Section 2 of [RFC7591].  If omitted, the default is \"client_secret_basic\" -- the HTTP Basic Authentication Scheme specified in Section 2.3.1 of OAuth 2.0 [RFC6749].
                     example: 
                     - client_secret_basic
                     - client_secret_post
                     - client_secret_jwt
-                    - private_key_jwt
+                    - private_key_jwt  
                   token_endpoint_auth_signing_alg_values_supported:
                     type: array
                     items:
                       type: string
+                    description: JSON array containing a list of the JWS signing algorithms (\"alg\" values) supported by the token endpoint for the signature on the JWT [JWT] used to authenticate the client at the token endpoint for the \"private_key_jwt\" and \"client_secret_jwt\" authentication methods.  Servers SHOULD support \"RS256\".  The value \"none\" MUST NOT be used.
                     example: 
                     - HS256
                     - HS384
@@ -1973,56 +2189,56 @@ paths:
                     - ES256
                     - ES384
                     - ES512
+                  service_documentation:
+                    type: string
+                    description: URL of a page containing human-readable information that developers might want or need to know when using the authorization server.  In particular, if the authorization server does not support Dynamic Client Registration, then information on how to register clients needs to be provided in this documentation.
+                    example: http://<op_docs> 
                   ui_locales_supported:
                     type: array
                     items:
                       type: string
+                    description: Languages and scripts supported for the user interface, represented as a JSON array of BCP47 [RFC5646] language tag values.
                     example:
                     - en
                     - es
-                  op_tos_uri:
-                    type: string
-                    example: http://ox.sample.com/doku.php?id=oxauth:tos
                   op_policy_uri:
                     type: string
-                    example: http://ox.sample.com/doku.php?id=oxauth:policy
-                  jwks_uri:
+                    description: URL that the authorization server provides to the person registering the client to read about the authorization server's requirements on how the client can use the data provided by the authorization server.  The registration process SHOULD display this URL to the person registering the client if it is given.  As described in Section 5, despite the identifier \"op_policy_uri\", appearing to be OpenID-specific, its usage in this specification is actually referring to a general OAuth 2.0 feature that is not specific to OpenID Connect.
+                    example: http://ox.sample.com/doku.php?id=oxauth:policy  
+                  op_tos_uri:
                     type: string
-                    example: https://sample.com/oxauth/restv1/jwks
-                  service_documentation:
+                    description: URL that the authorization server provides to the person registering the client to read about the authorization server's terms of service.  The registration process SHOULD display this URL to the person registering the client if it is given.  As described in Section 5, despite the identifier \"op_tos_uri\", appearing to be OpenID-specific, its usage in this specification is actually referring to a general OAuth 2.0 feature that is not specific to OpenID Connect.
+                    example: http://ox.sample.com/doku.php?id=oxauth:tos
+                  introspection_endpoint:
+                    type: string 
+                    description: URL of the authorization server's OAuth 2.0 introspection endpoint [RFC7662].
+                    example: https://sample.com/oxauth/restv1/rpt/status
+                  code_challenge_methods_supported:
+                    type: array
+                    items:
+                      type: string
+                    description: JSON array containing a list of PKCE [RFC7636] code challenge methods supported by this authorization server.  Code challenge method values are used in the \"code_challenge_method\" parameter defined in Section 4.3 of [RFC7636].  The valid code challenge method values are those registered in the IANA \"PKCE Code Challenge Methods\" registry [IANA.OAuth.Parameters]                      
+                  claims_interaction_endpoint:
                     type: string
-                    example: http://<op_docs>
+                    description: Static endpoint URI at which the authorization server declares that it interacts with end-user requesting parties to gather claims. If the authorization server also provides a claims interaction endpoint URI as part of its redirect_user hint in a need_info response to a client on authorization failure (see Section 3.3.6), that value overrides this metadata value. Providing the static endpoint URI is useful for enabling interactive claims gathering prior to any pushed-claims flows taking place, so that, for example, it is possible to gather requesting party authorization interactively for collecting all other claims in a \"silent\" fashion."
+                    example: https://sample.com/oxauth/restv1/uma/gather_claims
                   uma_profiles_supported:
                     type: array
                     items: 
                       type: string
-                  registration_endpoint:
-                    type: string
-                    example: https://sample.com/oxauth/restv1/register
-                  token_endpoint:
-                    type: string
-                    example: https://sample.com/oxauth/restv1/token
-                  authorization_endpoint:
-                    type: string
-                    example: https://sample.com/oxauth/restv1/authorize
-                  introspection_endpoint:
-                    type: string 
-                    example: https://sample.com/oxauth/restv1/rpt/status
-                    description: If the authorization server supports token introspection as defined in this specification, it MUST supply this metadata value.
-                  resource_registration_endpoint:
-                    type: string
-                    example: https://sample.com/oxauth/restv1/host/rsrc/resource_set
-                    description: The endpoint URI at which the resource server registers resources to put them under authorization manager protection.
+                    description: UMA profiles supported by this authorization server. The value is an array of string values, where each string value is a URI identifying an UMA profile
                   permission_endpoint:
                     type: string
-                    example: https://sample.com/oxauth/restv1/host/rsrc_pr
                     description: The endpoint URI at which the resource server requests permissions on the client's behalf.
+                    example: https://sample.com/oxauth/restv1/host/rsrc_pr                    
+                  resource_registration_endpoint:
+                    type: string
+                    description: The endpoint URI at which the resource server registers resources to put them under authorization manager protection.
+                    example: https://sample.com/oxauth/restv1/host/rsrc/resource_set
                   scope_endpoint:
                     type: string
-                    example: https://sample.com/oxauth/restv1/uma/scopes
-                  claims_interaction_endpoint:
-                    type: string
-                    example: https://sample.com/oxauth/restv1/uma/gather_claims
+                    description: The Scope endpoint URI.
+                    example: https://sample.com/oxauth/restv1/uma/scopes                     
         500:
           $ref: '#/components/responses/InternalServerError' 
   /host/rsrc_pr:
@@ -2093,12 +2309,20 @@ paths:
                       description: An array referencing zero or more strings representing scopes to which access was granted for this resource.
                                    Each string MUST correspond to a scope that was registered by this resource server for the referenced resource.
                       items:
-                        type: string                      
+                        type: string  
+                      example:
+                      - http://photoz.example.com/dev/actions/add
+                      - http://photoz.example.com/dev/actions/internalClient                      
                     params:
                       type: object
                       description: A key/value map that can contain custom parameters.
                       additionalProperties:
-                        type: string                                       
+                        type: string
+                    exp:
+                      type: integer
+                      description: Number of seconds since January 1 1970 UTC, indicating when this token will expire.
+                      format: int64
+                      example: 1256953732                    
         500:
           $ref: '#/components/responses/InternalServerError'  
   /host/rsrc/resource_set:
@@ -2269,10 +2493,9 @@ paths:
           required: true
           schema:
             type : string
-        - name: rsid
-          in: path
-          required: true
-          description: Resource ID.
+        - name: scope
+          in: query
+          description: Scope uri.
           schema:
             type : string     
       responses:
@@ -2366,7 +2589,7 @@ paths:
                     items:
                       type: string
                     description: An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions.
-                  scopeExpression:
+                  scope_expression:
                     type: string
                   description:
                     type: string
@@ -3423,4 +3646,4 @@ components:
         x:
           type: string
         y:
-          type: string
+          type: string    
