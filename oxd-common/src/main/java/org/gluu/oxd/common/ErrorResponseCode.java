@@ -90,7 +90,8 @@ public enum ErrorResponseCode {
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
     KEY_ID_NOT_FOUND(500, "key_id_not_found", "`kid` is missing in `ID_TOKEN`. Unable to find matching key out of the Issuer's published set."),
-    NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value.");
+    NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value."),
+    ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED(400, "id_token_without_signature_not_allowed", "`ID_TOKEN` without signature is not allowed. To allow ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in oxd-server.yml.");
 
     private final int httpStatus;
     private final String code;
