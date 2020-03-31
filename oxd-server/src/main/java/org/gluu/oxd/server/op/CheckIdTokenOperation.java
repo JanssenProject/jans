@@ -43,6 +43,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .idToken(jwt)
                     .keyService(getKeyService())
                     .opClientFactory(getOpClientFactory())
+                    .oxdServerConfiguration(getConfigurationService().getConfiguration())
                     .rp(rp)
                     .build();
 
