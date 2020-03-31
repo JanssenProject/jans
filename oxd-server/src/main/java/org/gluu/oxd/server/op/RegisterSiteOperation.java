@@ -601,6 +601,12 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 LOG.error("Received invalid algorithm in `id_token_signed_response_alg` property. Value: " + params.getIdTokenSignedResponseAlg());
                 throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
             }
+
+            if (signatureAlgorithms == SignatureAlgorithm.NONE && !getConfigurationService().getConfiguration().getAcceptIdTokenWithoutSignature()) {
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in oxd-server.yml.");
+                throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
+            }
+
             request.setIdTokenSignedResponseAlg(signatureAlgorithms);
         }
 
