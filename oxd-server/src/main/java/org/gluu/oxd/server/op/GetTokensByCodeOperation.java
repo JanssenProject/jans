@@ -2,10 +2,12 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
-import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.client.TokenClient;
+import org.gluu.oxauth.client.TokenRequest;
+import org.gluu.oxauth.client.TokenResponse;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.jws.AbstractJwsSigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -14,7 +16,6 @@ import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
-import org.gluu.oxd.server.service.PublicOpKeyService;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     .idToken(idToken)
                     .keyService(getKeyService())
                     .opClientFactory(getOpClientFactory())
+                    .oxdServerConfiguration(getConfigurationService().getConfiguration())
                     .rp(rp)
                     .build();
 
