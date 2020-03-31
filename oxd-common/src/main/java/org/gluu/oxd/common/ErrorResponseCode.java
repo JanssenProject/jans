@@ -90,7 +90,8 @@ public enum ErrorResponseCode {
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
     KEY_ID_NOT_FOUND(500, "key_id_not_found", "`kid` is missing in `ID_TOKEN`. Unable to find matching key out of the Issuer's published set."),
-    NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value.");
+    NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value."),
+    INVALID_ID_TOKEN_ISSUED_AT(500, "invalid_id_token_issued_at", "`ISSUED_AT` date is either invalid or missing from `ID_TOKEN`.");
 
     private final int httpStatus;
     private final String code;
