@@ -17,12 +17,14 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.PublicOpKeyService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +38,7 @@ public class Validator {
     private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     private final OpenIdConfigurationResponse discoveryResponse;
+    private OxdServerConfiguration configuration;
     private AbstractJwsSigner jwsSigner;
     private final Jwt idToken;
     private OpClientFactory opClientFactory;
@@ -44,6 +47,10 @@ public class Validator {
 
     public OpenIdConfigurationResponse getDiscoveryResponse() {
         return discoveryResponse;
+    }
+
+    public OxdServerConfiguration getOxdServerConfiguration() {
+        return configuration;
     }
 
     public AbstractJwsSigner getJwsSigner() {
@@ -64,11 +71,12 @@ public class Validator {
 
     private Validator(Builder builder) {
         this.discoveryResponse = builder.discoveryResponse;
+        this.configuration = builder.configuration;
         this.idToken = builder.idToken;
         this.opClientFactory = builder.opClientFactory;
         this.keyService = builder.keyService;
         this.rp = builder.rp;
-        this.jwsSigner = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+        this.jwsSigner = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
     }
 
     //Builder Class
@@ -76,6 +84,7 @@ public class Validator {
 
         // required parameters
         private OpenIdConfigurationResponse discoveryResponse;
+        private OxdServerConfiguration configuration;
         private Jwt idToken;
         private OpClientFactory opClientFactory;
         private PublicOpKeyService keyService;
@@ -86,6 +95,11 @@ public class Validator {
 
         public Builder discoveryResponse(OpenIdConfigurationResponse discoveryResponse) {
             this.discoveryResponse = discoveryResponse;
+            return this;
+        }
+
+        public Builder oxdServerConfiguration(OxdServerConfiguration configuration) {
+            this.configuration = configuration;
             return this;
         }
 
@@ -139,7 +153,7 @@ public class Validator {
         }
     }
 
-    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp) {
+    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, OxdServerConfiguration configuration) {
         final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
         final String jwkUrl = discoveryResponse.getJwksUri();
@@ -155,8 +169,25 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.KEY_ID_NOT_FOUND);
             }
         }
+        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
-        if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
+            if (!configuration.getAcceptIdTokenWithoutSignature()) {
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in oxd-server.yml.");
+                throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
+            }
+
+            return new AbstractJwsSigner(signatureAlgorithm) {
+                @Override
+                public String generateSignature(String signingInput) throws SignatureException {
+                    return null;
+                }
+
+                @Override
+                public boolean validateSignature(String signingInput, String signature) throws SignatureException {
+                    return true;
+                }
+            };
+        } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
             final RSAPublicKey publicKey = (RSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
             return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
@@ -230,21 +261,26 @@ public class Validator {
             }
 
             // 2. validate signature
-            boolean signature = jwsSigner.validate(idToken);
-            if (!signature) {
-                final String jwkUrl = discoveryResponse.getJwksUri();
-                final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+            final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
+            final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
 
-                keyService.refetchKey(jwkUrl, kid);
-
-                AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
-                signature = signerWithRefreshedKey.validate(idToken);
-
+            if (signatureAlgorithm != SignatureAlgorithm.NONE) {
+                boolean signature = jwsSigner.validate(idToken);
                 if (!signature) {
-                    LOG.error("ID Token signature is invalid.");
-                    throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
-                } else {
-                    this.jwsSigner = signerWithRefreshedKey;
+                    final String jwkUrl = discoveryResponse.getJwksUri();
+                    final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+
+                    keyService.refetchKey(jwkUrl, kid);
+
+                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
+                    signature = signerWithRefreshedKey.validate(idToken);
+
+                    if (!signature) {
+                        LOG.error("ID Token signature is invalid.");
+                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
+                    } else {
+                        this.jwsSigner = signerWithRefreshedKey;
+                    }
                 }
             }
         } catch (HttpException e) {
