@@ -23,6 +23,7 @@ import org.gluu.oxd.server.service.StateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
 
@@ -155,8 +156,19 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.KEY_ID_NOT_FOUND);
             }
         }
+        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+            return new AbstractJwsSigner(signatureAlgorithm) {
+                @Override
+                public String generateSignature(String signingInput) throws SignatureException {
+                    return null;
+                }
 
-        if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
+                @Override
+                public boolean validateSignature(String signingInput, String signature) throws SignatureException {
+                    return true;
+                }
+            };
+        } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
             final RSAPublicKey publicKey = (RSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
             return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
@@ -204,7 +216,7 @@ public class Validator {
 
             //validate subject identifier
             if (Strings.isNullOrEmpty(sub)) {
-               LOG.error("ID Token is missing `sub` value.");
+                LOG.error("ID Token is missing `sub` value.");
                 throw new HttpException(ErrorResponseCode.NO_SUBJECT_IDENTIFIER);
             }
 
@@ -223,21 +235,26 @@ public class Validator {
             }
 
             // 2. validate signature
-            boolean signature = jwsSigner.validate(idToken);
-            if (!signature) {
-                final String jwkUrl = discoveryResponse.getJwksUri();
-                final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+            final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
+            final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
 
-                keyService.refetchKey(jwkUrl, kid);
-
-                AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
-                signature = signerWithRefreshedKey.validate(idToken);
-
+            if (signatureAlgorithm != SignatureAlgorithm.NONE) {
+                boolean signature = jwsSigner.validate(idToken);
                 if (!signature) {
-                    LOG.error("ID Token signature is invalid.");
-                    throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
-                } else {
-                    this.jwsSigner = signerWithRefreshedKey;
+                    final String jwkUrl = discoveryResponse.getJwksUri();
+                    final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+
+                    keyService.refetchKey(jwkUrl, kid);
+
+                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+                    signature = signerWithRefreshedKey.validate(idToken);
+
+                    if (!signature) {
+                        LOG.error("ID Token signature is invalid.");
+                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
+                    } else {
+                        this.jwsSigner = signerWithRefreshedKey;
+                    }
                 }
             }
         } catch (HttpException e) {

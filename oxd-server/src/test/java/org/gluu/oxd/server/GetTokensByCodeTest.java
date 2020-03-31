@@ -133,6 +133,14 @@ public class GetTokensByCodeTest {
 
     @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
     @Test
+    public void getToken_withNoneAlgo(String host, String opHost, String redirectUrls, String userId, String userSecret) {
+        ClientInterface client = Tester.newClient(host);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, "none");
+        GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString());
+    }
+
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
+    @Test
     public void whenInvalidCodeIsUsed_shouldGet400BadRequest(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
