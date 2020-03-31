@@ -43,6 +43,8 @@ public class OxdServerConfiguration extends Configuration {
     private int publicOpKeyCacheExpirationInMinutes = 60;
     @JsonProperty(value = "protect_commands_with_access_token")
     private Boolean protectCommandsWithAccessToken;
+    @JsonProperty(value = "accept_id_token_without_signature")
+    private Boolean acceptIdTokenWithoutSignature = false;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
     @JsonProperty(value = "add_client_credentials_grant_type_automatically_during_client_registration")
@@ -292,6 +294,14 @@ public class OxdServerConfiguration extends Configuration {
         this.proxyConfiguration = proxyConfiguration;
     }
 
+    public Boolean getAcceptIdTokenWithoutSignature() {
+        return acceptIdTokenWithoutSignature;
+    }
+
+    public void setAcceptIdTokenWithoutSignature(Boolean acceptIdTokenWithoutSignature) {
+        this.acceptIdTokenWithoutSignature = acceptIdTokenWithoutSignature;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -311,6 +321,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", rpCacheExpirationInMinutes=" + rpCacheExpirationInMinutes +
                 ", publicOpKeyCacheExpirationInMinutes=" + publicOpKeyCacheExpirationInMinutes +
                 ", protectCommandsWithAccessToken=" + protectCommandsWithAccessToken +
+                ", acceptIdTokenWithoutSignature=" + acceptIdTokenWithoutSignature +
                 ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
                 ", storage='" + storage + '\'' +
