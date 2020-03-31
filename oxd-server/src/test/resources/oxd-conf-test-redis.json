@@ -14,6 +14,7 @@
   "rp_cache_expiration_in_minutes": 60,
   "public_op_key_cache_expiration_in_minutes":60,
   "protect_commands_with_access_token": false,
+  "accept_id_token_without_signature": false,
   "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client":true,
   "migration_source_folder_path":"",
   "allowed_op_hosts": [],
