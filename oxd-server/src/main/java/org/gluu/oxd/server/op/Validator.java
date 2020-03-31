@@ -17,6 +17,7 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.PublicOpKeyService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.StateService;
@@ -37,6 +38,7 @@ public class Validator {
     private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     private final OpenIdConfigurationResponse discoveryResponse;
+    private OxdServerConfiguration configuration;
     private AbstractJwsSigner jwsSigner;
     private final Jwt idToken;
     private OpClientFactory opClientFactory;
@@ -45,6 +47,10 @@ public class Validator {
 
     public OpenIdConfigurationResponse getDiscoveryResponse() {
         return discoveryResponse;
+    }
+
+    public OxdServerConfiguration getOxdServerConfiguration() {
+        return configuration;
     }
 
     public AbstractJwsSigner getJwsSigner() {
@@ -65,11 +71,12 @@ public class Validator {
 
     private Validator(Builder builder) {
         this.discoveryResponse = builder.discoveryResponse;
+        this.configuration = builder.configuration;
         this.idToken = builder.idToken;
         this.opClientFactory = builder.opClientFactory;
         this.keyService = builder.keyService;
         this.rp = builder.rp;
-        this.jwsSigner = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+        this.jwsSigner = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
     }
 
     //Builder Class
@@ -77,6 +84,7 @@ public class Validator {
 
         // required parameters
         private OpenIdConfigurationResponse discoveryResponse;
+        private OxdServerConfiguration configuration;
         private Jwt idToken;
         private OpClientFactory opClientFactory;
         private PublicOpKeyService keyService;
@@ -87,6 +95,11 @@ public class Validator {
 
         public Builder discoveryResponse(OpenIdConfigurationResponse discoveryResponse) {
             this.discoveryResponse = discoveryResponse;
+            return this;
+        }
+
+        public Builder oxdServerConfiguration(OxdServerConfiguration configuration) {
+            this.configuration = configuration;
             return this;
         }
 
@@ -140,7 +153,7 @@ public class Validator {
         }
     }
 
-    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp) {
+    public static AbstractJwsSigner createJwsSigner(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService, OpClientFactory opClientFactory, Rp rp, OxdServerConfiguration configuration) {
         final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
         final String jwkUrl = discoveryResponse.getJwksUri();
@@ -157,6 +170,12 @@ public class Validator {
             }
         }
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+
+            if (!configuration.getAcceptIdTokenWithoutSignature()) {
+                LOG.error("`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in oxd-server.yml.");
+                throw new HttpException(ErrorResponseCode.ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED);
+            }
+
             return new AbstractJwsSigner(signatureAlgorithm) {
                 @Override
                 public String generateSignature(String signingInput) throws SignatureException {
@@ -253,7 +272,7 @@ public class Validator {
 
                     keyService.refetchKey(jwkUrl, kid);
 
-                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp);
+                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
                     signature = signerWithRefreshedKey.validate(idToken);
 
                     if (!signature) {

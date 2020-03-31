@@ -42,6 +42,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
                 .idToken(idToken)
                 .keyService(getKeyService())
                 .opClientFactory(getOpClientFactory())
+                .oxdServerConfiguration(getConfigurationService().getConfiguration())
                 .rp(rp)
                 .build();
         validator.validateNonce(getStateService());
