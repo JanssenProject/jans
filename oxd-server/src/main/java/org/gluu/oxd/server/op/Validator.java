@@ -220,6 +220,13 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.NO_SUBJECT_IDENTIFIER);
             }
 
+            //validate id_token issued at date
+            final Date issuedAt = idToken.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
+            if (issuedAt == null) {
+                LOG.error("`ISSUED_AT` date is either invalid or missing from `ID_TOKEN`.");
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_ISSUED_AT);
+            }
+
             //validate id_token expire date
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
