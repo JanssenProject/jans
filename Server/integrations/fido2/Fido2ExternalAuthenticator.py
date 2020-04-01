@@ -134,8 +134,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Fido2. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -194,6 +194,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
