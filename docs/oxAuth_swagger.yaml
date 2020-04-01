@@ -433,7 +433,6 @@ paths:
         400:
           $ref: '#/components/responses/InvalidRequest'     
         401:
-          #$ref: '#/components/responses/Unauthorized'
           description: Unauthorized CIBA (Client Initiated Backchannel Authentication) access. 
           content:
             application/json:
@@ -574,7 +573,6 @@ paths:
                     items:
                       type: string                           
         400:
-          #$ref: '#/components/responses/InvalidRequest'       
           description: Invalid Request are provided to endpoint. 
           content:
             application/json:
@@ -652,7 +650,6 @@ paths:
                     items:
                       type: string                      
         400:
-          #$ref: '#/components/responses/InvalidRequest'            
           description: Invalid Request are provided to endpoint. 
           content:
             application/json:
@@ -801,7 +798,42 @@ paths:
                   description: String identifier for the token, as defined in JWT.
                 
         400:
-         $ref: '#/components/responses/InvalidRequest'   
+          description: Error codes for introspection endpoint.
+          content:
+            application/json:
+              schema:
+                title: AuthorizeError
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - unauthorized_client
+                    - disabled_client
+                    - access_denied
+                    - retry
+                    - unsupported_response_type
+                    - invalid_scope
+                    - server_error
+                    - temporarily_unavailable
+                    - invalid_request_redirect_uri
+                    - login_required
+                    - session_selection_required
+                    - consent_required
+                    - user_mismatched
+                    - invalid_request_uri
+                    - invalid_request_object
+                    - authentication_session_invalid
+                    - invalid_authentication_method
+                  error_description:
+                    type: string
+                  details:
+                    type: string    
         401:
           $ref: '#/components/responses/Unauthorized'
         500:
@@ -892,7 +924,42 @@ paths:
                   type: string
                   description: String identifier for the token, as defined in JWT.                   
         400:
-         $ref: '#/components/responses/InvalidRequest'   
+         description: Error codes for introspection endpoint.
+         content:
+            application/json:
+              schema:
+                title: AuthorizeError
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                    - unauthorized_client
+                    - disabled_client
+                    - access_denied
+                    - retry
+                    - unsupported_response_type
+                    - invalid_scope
+                    - server_error
+                    - temporarily_unavailable
+                    - invalid_request_redirect_uri
+                    - login_required
+                    - session_selection_required
+                    - consent_required
+                    - user_mismatched
+                    - invalid_request_uri
+                    - invalid_request_object
+                    - authentication_session_invalid
+                    - invalid_authentication_method
+                  error_description:
+                    type: string
+                  details:
+                    type: string     
         401:
           $ref: '#/components/responses/Unauthorized'
         500:
@@ -1205,8 +1272,7 @@ paths:
                     type: integer
                     description: Time at which the client_secret will expire or 0 if it will not expire.                
         400:
-          #$ref: '#/components/responses/InvalidRequest'                       
-           description: Invalid parameters are provided to endpoint. 
+           description: Invalid parameters provided to endpoint. 
            content:
              application/json:
                schema:
@@ -1526,7 +1592,25 @@ paths:
                     type: integer
                     description: Time at which the client_secret will expire or 0 if it will not expire.                
         400:
-          $ref: '#/components/responses/InvalidRequest'                       
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_client_metadata
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         500:
           $ref: '#/components/responses/InternalServerError'    
     get:
@@ -1799,6 +1883,27 @@ paths:
                   backchannel_user_code_parameter:
                     type: boolean 
                     description: Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.                                      
+        400:
+           description: Invalid parameters provided to endpoint. 
+           content:
+             application/json:
+               schema:
+                 type: object
+                 required:
+                 - error
+                 - error_description
+                 properties:
+                   error:
+                     type: string
+                     format: enum
+                     example:
+                     - invalid_token
+                     - invalid_client_metadata
+                     - access_denied                     
+                   error_description:
+                     type: string
+                   details:
+                     type: string  
         401:      
           $ref: '#/components/responses/InvalidRequest'
         500:
@@ -1827,9 +1932,47 @@ paths:
           description: OK
           content: {}                                      
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_token
+                    - invalid_client_metadata
+                    - access_denied                     
+                  error_description:
+                    type: string
+                  details:
+                    type: string  
         401:
-          $ref: '#/components/responses/Unauthorized'          
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_token
+                    - invalid_client_metadata
+                    - access_denied                     
+                  error_description:
+                    type: string
+                  details:
+                    type: string            
         500:
           $ref: '#/components/responses/InternalServerError' 
   /revoke:
@@ -1860,7 +2003,26 @@ paths:
           content:
             content: {}                      
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - unsupported_token_type
+                    - invalid_client
+                    - invalid_request                     
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /session_status:
     get:
       tags:
@@ -1922,7 +2084,30 @@ paths:
         302:
           $ref: '#/components/responses/Found'        
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Error codes for end session endpoint.
+          content:
+            application/json:
+              schema:
+                title: EndSessionError
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_grant
+                    - invalid_request
+                    - invalid_grant_and_session
+                    - session_not_passed
+                    - post_logout_uri_not_passed
+                    - post_logout_uri_not_associated_with_client
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         500:
          $ref: '#/components/responses/InternalServerError'           
   /token:
@@ -2026,7 +2211,25 @@ paths:
                   id_token:
                     type: string
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_client_metadata
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         401:
           $ref: '#/components/responses/Unauthorized'          
         403:
@@ -2070,9 +2273,44 @@ paths:
         302:
           $ref: '#/components/responses/Found'  
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_session
+                    - invalid_claims_gathering_script_name
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         500:
-          $ref: '#/components/responses/InternalServerError' 
+         description: Invalid parameters provided to endpoint. 
+         content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
     post:
       tags:
       - UMA (User Managed Access)
@@ -2102,9 +2340,44 @@ paths:
         302:
           $ref: '#/components/responses/Found'  
         400:
-          $ref: '#/components/responses/InvalidRequest'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_session
+                    - invalid_claims_gathering_script_name
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         500:
-          $ref: '#/components/responses/InternalServerError' 
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
   /uma2-configuration:
     get:
       tags:
@@ -2240,7 +2513,24 @@ paths:
                     description: The Scope endpoint URI.
                     example: https://sample.com/oxauth/restv1/uma/scopes                     
         500:
-          $ref: '#/components/responses/InternalServerError' 
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
   /host/rsrc_pr:
     post:
       tags:
@@ -2324,7 +2614,24 @@ paths:
                       format: int64
                       example: 1256953732                    
         500:
-          $ref: '#/components/responses/InternalServerError'  
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
   /host/rsrc/resource_set:
     post:
       tags:
@@ -2400,7 +2707,24 @@ paths:
                     type: string
                     example: http://as.example.com/rs/222/resource/22/policy                  
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
     put:
       tags:
       - UMA 2 Resource 
@@ -2478,9 +2802,45 @@ paths:
                     example: KX3A-39WE 
                   user_access_policy_uri:
                     type: string
-                    example: http://as.example.com/rs/222/resource/22/policy                               
+                    example: http://as.example.com/rs/222/resource/22/policy   
+        404:
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - not_found
+                  error_description:
+                    type: string
+                  details:
+                    type: string                  
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
     get:
       tags:
       - UMA 2 Resource 
@@ -2512,7 +2872,24 @@ paths:
                   description: List of resource identifers
                   example: [ '11','22']
         500:
-         $ref: '#/components/responses/InternalServerError' 
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
     delete:
       tags:
       - UMA 2 Resource 
@@ -2536,7 +2913,24 @@ paths:
           description: OK
           content: {}                           
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /host/rsrc/resource_set/{rsid}:
     get:
       tags:
@@ -2609,7 +3003,24 @@ paths:
                     format: int64
                     example: 1419356238                       
         500:
-          $ref: '#/components/responses/InternalServerError'     
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string    
   /rpt/status:
     get:
       tags:
@@ -2731,7 +3142,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse' 
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string   
     post:
       tags:
       - Token Introspection 
@@ -2858,7 +3286,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse' 
         500:
-          $ref: '#/components/responses/InternalServerError' 
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string   
   /uma/scopes:
     get:
       tags:
@@ -2893,9 +3338,43 @@ paths:
                     type: string
                     description: A human-readable string describing some scope (extent) of access. This name MAY be used by the authorization server in any user interface it presents to the resource owner.                                      
         404:
-          $ref: '#/components/responses/NotFound'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - not_found
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         500:
-          $ref: '#/components/responses/InternalServerError'    
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string    
   /userinfo:
     get:
       tags:
@@ -2944,11 +3423,62 @@ paths:
                     type: string
                     example: http://example.com/janedoe/me.jpg
         400:
-          $ref: '#/components/responses/InvalidRequest'          
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string           
         401:
-          $ref: '#/components/responses/Unauthorized'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
         403:
-          $ref: '#/components/responses/AccessDenied'        
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - insufficient_scope
+                  error_description:
+                    type: string
+                  details:
+                    type: string        
         500:
           $ref: '#/components/responses/InternalServerError'  
     post:
@@ -3005,11 +3535,62 @@ paths:
                     type: string
                     example: http://example.com/janedoe/me.jpg
         400:
-          $ref: '#/components/responses/InvalidRequest'          
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string           
         401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/AccessDenied'        
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - invalid_token
+                  error_description:
+                    type: string
+                  details:
+                    type: string 
+        403:      
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - insufficient_scope
+                  error_description:
+                    type: string
+                  details:
+                    type: string            
         500:
           $ref: '#/components/responses/InternalServerError'
   /fido/u2f/authentication:
@@ -3070,9 +3651,43 @@ paths:
         403:
           $ref: '#/components/responses/AccessDenied'
         404:
-          $ref: '#/components/responses/NotFound'        
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - no_eligable_devices
+                  error_description:
+                    type: string
+                  details:
+                    type: string        
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
     post:
       tags:
       - FIDO U2F
@@ -3124,9 +3739,45 @@ paths:
                     type: string
                     description: The websafe-base64-encoded challenge.     
         403:
-          $ref: '#/components/responses/AccessDenied'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - session_expired
+                    - invalid_request
+                    - device_compromised
+                  error_description:
+                    type: string
+                  details:
+                    type: string
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
           
   /fido-configuration:
     get:
@@ -3160,14 +3811,31 @@ paths:
         403:
           $ref: '#/components/responses/AccessDenied'   
         500:
-          $ref: '#/components/responses/InternalServerError'
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
   /fido/u2f/registration:
     get:
       tags:
       - FIDO U2F
       summary: U2F device registration.
       description: U2F device registration.
-      operationId: fido-u2f-registration
+      operationId: get-fido-u2f-registration
       parameters:
       - name: username
         in: query
@@ -3238,10 +3906,142 @@ paths:
         403:          
           $ref: '#/components/responses/AccessDenied' 
         406:
-          $ref: '#/components/responses/NotAcceptable'        
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - registration_not_allowed
+                  error_description:
+                    type: string
+                  details:
+                    type: string     
         500:
-          $ref: '#/components/responses/InternalServerError'  
- 
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string
+    post:
+      tags:
+      - FIDO U2F
+      summary: U2F device registration.
+      description: U2F device registration.
+      operationId: post-fido-u2f-registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: RegisterSiteParams
+              required:
+              - username
+              type: object
+              properties:
+                username:
+                  type: string
+                tokenResponse:
+                  type: object
+                  description: FIDO U2F device registration details
+                  properties:
+                    registrationData:
+                      type: string
+                    clientData:
+                      type: string
+                    deviceData:
+                      type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: RegisterStatus
+                description: RegisterRequestMessage
+                type: object
+                properties:
+                  status:
+                    type: string
+                  challenge:
+                    type: string
+        403:          
+           description: Invalid parameters provided to endpoint. 
+           content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - session_expired
+                    - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string  
+        406:
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - registration_not_allowed
+                  error_description:
+                    type: string
+                  details:
+                    type: string     
+        500:
+          description: Invalid parameters provided to endpoint. 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - error
+                - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                    - server_error
+                  error_description:
+                    type: string
+                  details:
+                    type: string   
   /fido2/configuration:
     get:
       tags:
