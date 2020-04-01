@@ -676,6 +676,10 @@ public class SessionIdService {
         return null;
     }
 
+    @Deprecated
+    public String getSessionIdFromCookie() {
+        return cookieService.getSessionIdFromCookie();
+    }
 
     public SessionId getSessionId(HttpServletRequest request) {
         return getSessionId(cookieService.getSessionIdFromCookie(request));
