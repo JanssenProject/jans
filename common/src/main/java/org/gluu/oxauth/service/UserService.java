@@ -233,6 +233,36 @@ public class UserService {
 		return user;
 	}
 
+	public User getUserByAttributes(String attributeValue, String[] attributeNames, String... returnAttributes) {
+		if (ArrayHelper.isEmpty(attributeNames)) {
+			return null;
+		}
+
+		log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
+
+		List<Filter> filters = new ArrayList<Filter>(); 
+		for (String attributeName : attributeNames) {
+			Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attributeName), StringHelper.toLowerCase(attributeValue));
+			filters.add(filter);
+		}
+
+		Filter searchFiler;
+		if (filters.size() == 1) {
+			searchFiler = filters.get(0);
+		} else {
+			searchFiler = Filter.createORFilter(filters);
+		}
+
+		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, searchFiler, returnAttributes);
+		log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+
+		if (entries.size() > 0) {
+			return entries.get(0);
+		} else {
+			return null;
+		}
+	}
+
     public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");
 
