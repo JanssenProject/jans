@@ -48,14 +48,15 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
         final UserInfoResponse response = client.exec();
 
         final Rp rp = getRp();
-        validateSubjectIdentifier(rp.getIdToken(), response.getClaims().get("sub").get(0));
+        validateSubjectIdentifier(rp.getIdToken(), response);
 
 
         return new POJOResponse(Jackson2.createJsonMapper().readTree(response.getEntity()));
     }
 
-    public void validateSubjectIdentifier(String idToken, String subjectIdentifier) {
+    public void validateSubjectIdentifier(String idToken, UserInfoResponse response) {
         try {
+            String subjectIdentifier = response.getClaims().get("sub").get(0);
             final Jwt jwtIdToken = Jwt.parse(idToken);
             if (!jwtIdToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER).equals(subjectIdentifier)) {
                 LOG.error("UserInfo `sub` value does not matches with `sub` value of ID_TOKEN.");
