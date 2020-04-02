@@ -812,7 +812,6 @@ class Setup(object):
             if os.path.basename(f) == 'KeyGenerator.class':
                 p, e = os.path.splitext(f)
                 self.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
-                print(p)
             elif os.path.basename(f) == 'KeyExporter.class':
                 p, e = os.path.splitext(f)
                 self.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
