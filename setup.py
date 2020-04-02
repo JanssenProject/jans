@@ -807,17 +807,18 @@ class Setup(object):
 
         self.logIt("Determining key generator path")
         oxauth_client_jar_zf = zipfile.ZipFile(self.non_setup_properties['oxauth_client_jar_fn'])
-        menifest = oxauth_client_jar_zf.read('META-INF/MANIFEST.MF')
 
-        for l in menifest.splitlines():
-            ls = l.strip().decode('utf-8')
-            if ls.startswith('Main-Class'):
-                n = ls.find(':')
-                self.non_setup_properties['key_gen_path'] = ls[n+1:].strip()
-                self.logIt("Key generator path is determined as {}".format(self.non_setup_properties['key_gen_path']))
-                break
-        else:
-            self.logIt("Can't determine key generator path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
+        for f in oxauth_client_jar_zf.namelist():
+            if os.path.basename(f) == 'KeyGenerator.class':
+                p, e = os.path.splitext(f)
+                self.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
+                print(p)
+            elif os.path.basename(f) == 'KeyExporter.class':
+                p, e = os.path.splitext(f)
+                self.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
+
+        if (not 'key_gen_path' in self.non_setup_properties) or (not 'key_export_path' in self.non_setup_properties):
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
 
         self.logIt("Determining oxd server package")
         oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
@@ -2101,7 +2102,7 @@ class Setup(object):
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
                         self.non_setup_properties['oxauth_client_jar_fn'], 
-                        self.non_setup_properties['key_gen_path'],
+                        self.non_setup_properties['key_export_path'],
                         "-keystore",
                         jks_path,
                         "-keypasswd",
