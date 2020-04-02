@@ -6,16 +6,17 @@
 
 package org.gluu.oxauth.model.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.collect.Lists;
+import org.gluu.persist.annotation.AttributeEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.gluu.persist.annotation.AttributeEnum;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -138,6 +139,13 @@ public enum ResponseType implements HasParamName, AttributeEnum {
 
     public static boolean isImplicitFlow(String responseTypes) {
         return !responseTypes.contains("code") && (responseTypes.contains("id_token") || responseTypes.contains("token"));
+    }
+
+    public static List<String> toStringList(List<ResponseType> responseTypes) {
+        if (responseTypes == null) {
+            return Lists.newArrayList();
+        }
+        return responseTypes.stream().map(ResponseType::getValue).collect(Collectors.toList());
     }
 
     public static String[] toStringArray(ResponseType[] responseTypes) {
