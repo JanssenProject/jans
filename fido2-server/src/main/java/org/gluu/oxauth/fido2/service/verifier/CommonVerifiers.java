@@ -316,14 +316,13 @@ public class CommonVerifiers {
     }
 
     public void verifyOptions(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("username")
-        // params.hasNonNull("displayName")
-        // params.hasNonNull("attestation")
-        // params.hasNonNull("documentDomain")
-        ).parallelStream().filter(f -> f == false).count();
-        if (count != 0) {
-            throw new Fido2RPRuntimeException("Invalid parameters");
-        }
+		long count = Arrays.asList(params.hasNonNull("username"),
+				params.hasNonNull("displayName"),
+				params.hasNonNull("attestation"))
+				.parallelStream().filter(f -> f == false).count();
+		if (count != 0) {
+			throw new Fido2RPRuntimeException("Invalid parameters");
+		}
     }
 
     public void verifyBasicPayload(JsonNode params) {

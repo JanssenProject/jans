@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.ws.rs.service.AttestationService;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -48,12 +49,18 @@ public class AttestationController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public Response register(String content) throws IOException {
+    public Response register(String content) {
         if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
-        JsonNode params = dataMapperService.readTree(content);
+        JsonNode params;
+        try {
+        	params = dataMapperService.readTree(content);
+        } catch (IOException ex) {
+            throw new Fido2RPRuntimeException("Failed to parse start attestation request", ex);
+        }
+
         JsonNode result = attestationService.options(params);
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
@@ -64,12 +71,18 @@ public class AttestationController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/result")
-    public Response verify(String content) throws IOException {
+    public Response verify(String content) {
         if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
-        JsonNode params = dataMapperService.readTree(content);
+        JsonNode params;
+        try {
+        	params = dataMapperService.readTree(content);
+        } catch (IOException ex) {
+            throw new Fido2RPRuntimeException("Failed to parse finish attestation request", ex) ;
+        }
+
         JsonNode result = attestationService.verify(params);
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
