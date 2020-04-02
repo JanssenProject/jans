@@ -21,8 +21,10 @@ from java.util.concurrent.locks import ReentrantLock
 
 import java
 import sys
-import json
-
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
