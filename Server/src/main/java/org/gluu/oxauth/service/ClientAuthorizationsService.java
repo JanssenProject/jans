@@ -93,7 +93,7 @@ public class ClientAuthorizationsService {
         } else {
             String key = getCacheKey(userInum, clientId);
             Object cacheOjb = cacheService.get(key);
-            if (cacheOjb != null && cacheOjb instanceof ClientAuthorization) {
+            if (cacheOjb instanceof ClientAuthorization) {
                 return (ClientAuthorization) cacheOjb;
             }
         }
@@ -114,17 +114,18 @@ public class ClientAuthorizationsService {
         }
     }
 
-    public void add(String userInum, String clientId, Set<String> scopes, boolean persistInLdap) {
+    public void add(String userInum, String clientId, Set<String> scopes, boolean persist) {
+        log.trace("Attempting to add client authorization, scopes:" + scopes + ", clientId: " + clientId + ", userInum: " + userInum + ", persist: " + persist);
         Client client = clientService.getClient(clientId);
 
-        if (persistInLdap) {
+        if (persist) {
             // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
             // If a client has pre-authorization=true, there is no point to create the entry under
             // ou=clientAuthorizations it will negatively impact performance, grow the size of the
             // ldap database, and serve no purpose.
             prepareBranch();
 
-            ClientAuthorization clientAuthorization = find(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorization = find(userInum, clientId, persist);
 
             if (clientAuthorization == null) {
                 clientAuthorization = new ClientAuthorization();
@@ -147,7 +148,7 @@ public class ClientAuthorizationsService {
             }
         } else {
             // Put client authorization in cache. oxAuth #662.
-            ClientAuthorization clientAuthorizations = find(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorizations = find(userInum, clientId, persist);
             String key = getCacheKey(userInum, clientId);
 
             if (clientAuthorizations == null) {
