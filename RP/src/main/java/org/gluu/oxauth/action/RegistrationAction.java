@@ -105,7 +105,7 @@ public class RegistrationAction implements Serializable {
         try {
             RegisterRequest request = new RegisterRequest(applicationType, clientName, StringUtils.spaceSeparatedToList(redirectUris));
             request.setClaimsRedirectUris(StringUtils.spaceSeparatedToList(claimsRedirectUris));
-            request.setResponseTypes(ResponseType.toStringList(responseTypes));
+            request.setResponseTypes(responseTypes);
             request.setGrantTypes(grantTypes);
             request.setContacts(StringUtils.spaceSeparatedToList(contacts));
             request.setLogoUri(logoUri);
