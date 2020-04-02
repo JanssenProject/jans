@@ -238,7 +238,7 @@ public class AuthenticationService {
 	}
 
 	private Pair<Boolean, User> localAuthenticate(String nameValue, String password, String ... nameAttributes) {
-		User user = userService.getUserByAttributes(nameValue, nameAttributes, "uid");
+		User user = userService.getUserByAttributes(nameValue, nameAttributes, new String[] {"uid", "gluuStatus"});
 		if (user != null) {
 			if (!checkUserStatus(user)) {
 				return new Pair<Boolean, User>(false, user);
