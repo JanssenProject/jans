@@ -7,6 +7,8 @@
 package org.gluu.oxauth.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.*;
@@ -326,8 +328,10 @@ public class RegisterRequest extends BaseRequest {
      *
      * @return A list of response types.
      */
-    public List<String> getResponseTypes() {
-        return responseTypes;
+    public List<ResponseType> getResponseTypes() {
+        Set<ResponseType> types = Sets.newHashSet();
+        responseTypes.forEach(s -> types.addAll(ResponseType.fromString(s, " ")));
+        return Lists.newArrayList(types);
     }
 
     /**
@@ -336,9 +340,18 @@ public class RegisterRequest extends BaseRequest {
      *
      * @param responseTypes A list of response types.
      */
-    public void setResponseTypes(List<String> responseTypes) {
+    public void setResponseTypes(List<ResponseType> responseTypes) {
+        this.responseTypes = ResponseType.toStringList(responseTypes);
+    }
+
+    public List<String> getResponseTypes_() {
+        return responseTypes;
+    }
+
+    public void setResponseTypes_(List<String> responseTypes) {
         this.responseTypes = responseTypes;
     }
+
 
     /**
      * Returns a list of the OAuth 2.0 grant types that the Client is declaring that it will restrict itself to using.
@@ -1469,7 +1482,7 @@ public class RegisterRequest extends BaseRequest {
         result.setScopes(scope);
         result.setScope(scope);
         result.setClaims(claims);
-        result.setResponseTypes(new ArrayList<String>(responseTypes));
+        result.setResponseTypes_(new ArrayList<String>(responseTypes));
         result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
