@@ -46,10 +46,11 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
         client.setRequest(new UserInfoRequest(params.getAccessToken()));
 
         final UserInfoResponse response = client.exec();
-
-        final Rp rp = getRp();
-        validateSubjectIdentifier(rp.getIdToken(), response);
-
+        //validate subject identifier of successful response
+        if (response.getStatus() == 200) {
+            final Rp rp = getRp();
+            validateSubjectIdentifier(rp.getIdToken(), response);
+        }
 
         return new POJOResponse(Jackson2.createJsonMapper().readTree(response.getEntity()));
     }
