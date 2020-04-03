@@ -489,18 +489,13 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterRequest createRegisterClientRequest(RegisterSiteParams params, String oxdId) {
-        List<ResponseType> responseTypes = Lists.newArrayList();
-        for (String type : params.getResponseTypes()) {
-            responseTypes.add(ResponseType.fromString(type));
-        }
-
         String clientName = "oxd client for rp: " + oxdId;
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
         }
 
         final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, params.getRedirectUris());
-        request.setResponseTypes(responseTypes);
+        request.setResponseTypes_(params.getResponseTypes());
         request.setJwksUri(params.getClientJwksUri());
         request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUris() != null ? params.getPostLogoutRedirectUris() : Lists.newArrayList());
