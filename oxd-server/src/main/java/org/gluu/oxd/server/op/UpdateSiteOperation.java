@@ -112,7 +112,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         request.setHttpMethod(HttpMethod.PUT); // force update
 
         if (params.getResponseTypes() != null && !params.getResponseTypes().isEmpty()) {
-            request.setResponseTypes(params.getResponseTypes().stream().map(item -> ResponseType.fromString(item)).collect(Collectors.toList()));
+            request.setResponseTypes_(params.getResponseTypes());
         }
 
         if (params.getRptAsJwt() != null) {
