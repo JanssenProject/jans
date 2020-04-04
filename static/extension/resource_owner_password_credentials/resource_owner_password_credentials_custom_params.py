@@ -20,7 +20,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "ROPC script. Initializing ..."
         print "ROPC script. Initialized successfully"
         return True
@@ -31,7 +31,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Returns True and set user into context when user authenticated succesfully
     # Returns False when user not authenticated or it's needed to cancel notmal flow

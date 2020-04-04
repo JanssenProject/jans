@@ -10,7 +10,7 @@ class EndSession(EndSessionType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "EndSession script. Initializing ..."
         print "EndSession script. Initialized successfully"
 
@@ -22,7 +22,7 @@ class EndSession(EndSessionType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Returns string, it must be valid HTML (with iframes according to spec http://openid.net/specs/openid-connect-frontchannel-1_0.html)
     # This method is called on `/end_session` after actual session is killed and oxauth construct HTML to return to RP.
