@@ -15,7 +15,7 @@ class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Casa client registration. Initialization"
         self.clientRedirectUrisSet = self.prepareClientRedirectUris(configurationAttributes)
         print "Casa client registration. Initialized successfully"
@@ -63,7 +63,7 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     def setClientScopes(self, client, requiredScopes):
         

@@ -12,7 +12,7 @@ class SpontaneousScope(SpontaneousScopeType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Spontaneous scope script. Initializing ..."
         print "Spontaneous scope script. Initialized successfully"
 
@@ -24,7 +24,7 @@ class SpontaneousScope(SpontaneousScopeType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # This method is called before spontaneous scope is persisted. It's possible to disable persistence via context.setAllowSpontaneousScopePersistence(false)
     # Also it's possible to manipulated already granted scopes, e.g. context.getGrantedScopes().remove("transaction:456")

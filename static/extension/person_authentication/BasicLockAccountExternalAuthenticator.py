@@ -25,7 +25,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Basic (lock account). Initialization"
 
         self.invalidLoginCountAttribute = "oxCountInvalidLogin"
@@ -163,7 +163,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        return 1
+        return 11
 
     def getPageForStep(self, configurationAttributes, step):
         return ""
