@@ -21,7 +21,7 @@ class ApplicationSession(ApplicationSessionType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Application session. Initialization"
 
         self.entryManager = CdiUtil.bean(PersistenceEntryManager)
@@ -37,7 +37,7 @@ class ApplicationSession(ApplicationSessionType):
         return True   
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     # Application calls it at start session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest

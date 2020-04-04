@@ -11,7 +11,7 @@ class DynamicScope(DynamicScopeType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self,configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Super-Gluu-DynScope init"
         self.sessionIdClaimName = "__session_id"
         if configurationAttributes.containsKey("session_id_claim_name"):
@@ -42,4 +42,4 @@ class DynamicScope(DynamicScopeType):
         return updated
     
     def getApiVersion(self):
-        return 1
+        return 11
