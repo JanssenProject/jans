@@ -38,7 +38,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         self.oneStepAuthScheme = "onestep"
         self.twoStepAuthScheme = "twostep"
     
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
 
         print "Super-Gluu-RO Init"
         if not configurationAttributes.containsKey("application_id"):
@@ -90,7 +90,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         return True
     
     def getApiVersion(self):
-        return 1
+        return 11
     
     def authenticate(self, context): 
         if self.perform_preliminary_user_authentication(context) == False:

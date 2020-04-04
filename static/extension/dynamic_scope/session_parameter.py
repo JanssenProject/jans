@@ -16,7 +16,7 @@ class DynamicScope(DynamicScopeType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Session dynamic scope. Initialization"
 
         print "Session dynamic scope. Initialized successfully"
@@ -71,4 +71,4 @@ class DynamicScope(DynamicScopeType):
         return Arrays.asList("external_session_id")
 
     def getApiVersion(self):
-        return 2
+        return 11
