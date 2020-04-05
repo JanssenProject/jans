@@ -147,7 +147,12 @@ public class Validator {
 
     public void validateAuthorizationCode(String code) {
         if (!Strings.isNullOrEmpty(code)) {
+            if(Strings.isNullOrEmpty(idToken.getClaims().getClaimAsString("c_hash"))) {
+                LOG.error("`c_hash` is missing in `ID_TOKEN`.");
+                throw new HttpException(ErrorResponseCode.C_HASH_NOT_FOUND);
+            }
             if (!jwsSigner.validateAuthorizationCode(code, idToken)) {
+                LOG.error("`Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash).");
                 throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
             }
         }
