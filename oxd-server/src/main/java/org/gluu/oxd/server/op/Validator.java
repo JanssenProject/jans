@@ -132,14 +132,24 @@ public class Validator {
     }
 
     public void validateAccessToken(String accessToken) {
+        validateAccessToken(accessToken, false);
+    }
+
+    // `at_hash` in ID_TOKEN is mandatory for response_type='id_token token' for Implicit Flow or response_type='code id_token token' for Hybrid Flow.
+    public void validateAccessToken(String accessToken, boolean atHashRequired) {
         if (!Strings.isNullOrEmpty(accessToken)) {
             String atHash = idToken.getClaims().getClaimAsString("at_hash");
             if (Strings.isNullOrEmpty(atHash)) {
-                LOG.warn("Skip access_token validation because corresponding id_token does not have at_hash claim. access_token: " + accessToken + ", id_token: " + idToken);
-                return;
+                if(atHashRequired) {
+                    LOG.error("`at_hash` is missing in `ID_TOKEN`.");
+                    throw new HttpException(ErrorResponseCode.AT_HASH_NOT_FOUND);
+                } else {
+                    LOG.warn("Skip access_token validation because corresponding id_token does not have at_hash claim. access_token: " + accessToken + ", id_token: " + idToken);
+                    return;
+                }
             }
             if (!jwsSigner.validateAccessToken(accessToken, idToken)) {
-                LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
+                LOG.error("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
                 throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
             }
         }
