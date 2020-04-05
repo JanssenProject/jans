@@ -3,6 +3,8 @@
  */
 package org.gluu.oxd.server.op;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.jwt.Jwt;
@@ -16,6 +18,9 @@ import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -47,6 +52,9 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .rp(rp)
                     .build();
 
+            //validate at_hash in id_token
+            validator.validateAccessToken(params.getToken(), atHashCheckRequired(rp.getResponseTypes()));
+
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid());
             opResponse.setIssuedAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT)));
@@ -61,4 +69,15 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         throw HttpException.internalError();
     }
 
+    public static boolean atHashCheckRequired(List<String> responseTypes) {
+        Set<String> types = Sets.newHashSet();
+        responseTypes.forEach((s) -> {
+            if (s != null && !s.isEmpty()) {
+                types.addAll(Lists.newArrayList(s.split(" ")));
+            }
+        });
+        if (types.contains("token") && types.contains("id_token"))
+            return true;
+        return false;
+    }
 }
