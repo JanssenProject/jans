@@ -47,6 +47,9 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .rp(rp)
                     .build();
 
+            //validate c_hash in id_token
+            validator.validateAuthorizationCode(params.getCode());
+
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid());
             opResponse.setIssuedAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT)));
