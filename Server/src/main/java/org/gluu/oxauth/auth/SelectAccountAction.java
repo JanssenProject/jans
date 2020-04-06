@@ -1,6 +1,6 @@
 package org.gluu.oxauth.auth;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -53,21 +53,23 @@ public class SelectAccountAction {
     private String sessionId;
     private String allowedScope;
 
-    private Set<SessionId> currentSessions = Sets.newHashSet();
+    private List<SessionId> currentSessions = Lists.newArrayList();
 
     public void prepare() {
-        currentSessions = Sets.newHashSet();
+        currentSessions = Lists.newArrayList();
         for (SessionId sessionId : sessionIdService.getCurrentSessions()) {
             final User user = sessionIdService.getUser(sessionId);
             if (user == null) {
                 log.error("Failed to get user for session. Skipping it from current_sessions, id: " + sessionId.getId());
                 continue;
             }
-            currentSessions.add(sessionId);
+            if (!currentSessions.contains(sessionId)) {
+                currentSessions.add(sessionId);
+            }
         }
     }
 
-    public Set<SessionId> getCurrentSessions() {
+    public List<SessionId> getCurrentSessions() {
         return currentSessions;
     }
 
@@ -75,8 +77,8 @@ public class SelectAccountAction {
         log.debug("Selected account: " + selectedSession.getId());
     }
 
-    public String getName(Object sessionId) {
-        final User user = ((SessionId) sessionId).getUser();
+    public String getName(SessionId sessionId) {
+        final User user = sessionId.getUser();
         final String displayName = user.getAttribute("displayName");
         if (StringUtils.isNotBlank(displayName)) {
             return displayName;
