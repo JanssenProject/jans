@@ -43,31 +43,33 @@
             <h:panelGroup rendered="true">
                 <div class="login_bx_1"
                      style="border-radius: 10px; margin-top: 0; background: white; border: 1px solid #008b8b;">
-                    <div class="row">
-                        <div align="center" class="col-sm-12" style="margin-bottom: 20px;">
-                            <h:outputLabel value="#{msgs['login.selectAccount']}"/>
+                    <h:form id="selectForm">
+                        <div class="row">
+                            <div align="center" class="col-sm-12" style="margin-bottom: 20px;">
+                                <h:outputLabel value="#{msgs['login.selectAccount']}"/>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div align="center" class="col-sm-12">
-                            <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
-                                <h:commandLink style="background-color: #00BE79; color:white;"
-                                               styleClass="btn col-sm-12"
-                                               value="#{selectAccountAction.getName(_entry)}"
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
+                                    <h:commandLink style="background-color: #00BE79; color:white;"
+                                                   styleClass="btn col-sm-12"
+                                                   value="#{selectAccountAction.getName(_entry)}"
+                                                   iconAwesome="fa-sign-in"
+                                                   action="#{selectAccountAction.select(_entry)}"/>&nbsp;
+                                </ui:repeat>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <h:commandLink id="loginButton"
+                                               style="background-color:lightgray; color:black;"
+                                               styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
                                                iconAwesome="fa-sign-in"
-                                               action="#{selectAccountAction.select(_entry)}"/>&nbsp;
-                            </ui:repeat>
+                                               action="#{selectAccountAction.login()}"/>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div align="center" class="col-sm-12">
-                            <h:commandLink id="loginButton"
-                                           style="background-color:lightgray; color:black;"
-                                           styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
-                                           iconAwesome="fa-sign-in"
-                                           action="#{selectAccountAction.login()}"/>
-                        </div>
-                    </div>
+                    </h:form>
                 </div>
             </h:panelGroup>
         </div>
