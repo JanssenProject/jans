@@ -82,7 +82,7 @@ public class ConsentGatheringSessionService {
         log.trace("Generating new consent_session_id ...");
         SessionId session = sessionIdService.generateUnauthenticatedSessionId(userDn);
 
-        cookieService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, CookieService.CONSENT_SESSION_ID_COOKIE_NAME);
+        cookieService.createCookieWithState(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpRequest, httpResponse, CookieService.CONSENT_SESSION_ID_COOKIE_NAME);
         log.trace("consent_session_id cookie created.");
 
         return session;

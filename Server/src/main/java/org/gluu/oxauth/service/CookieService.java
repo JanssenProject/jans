@@ -2,8 +2,10 @@ package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.service.cdi.util.CdiUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -101,6 +103,35 @@ public class CookieService {
         }
     }
 
+    public void addCurrentSessionCookie(SessionId sessionId, HttpServletRequest request, HttpServletResponse httpResponse) {
+        final Set<String> currentSessions = getCurrentSessions(request);
+        removeOutdatedCurrentSessions(currentSessions);
+        currentSessions.add(sessionId.getId());
+
+        String header = CURRENT_SESSIONS_COOKIE_NAME + "=" + new JSONArray(currentSessions).toString();
+        header += "; Path=/";
+        header += "; Secure";
+        header += "; HttpOnly";
+
+        createCookie(header, httpResponse);
+    }
+
+    private void removeOutdatedCurrentSessions(Set<String> currentSessions) {
+        if (currentSessions.isEmpty()) {
+            return;
+        }
+
+        SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class); // avoid cycle dependency
+        Set<String> toRemove = Sets.newHashSet();
+        for (String sessionId : currentSessions) {
+            final SessionId sessionIdObject = sessionIdService.getSessionId(sessionId);
+            if (sessionIdObject == null) {
+                toRemove.add(sessionId);
+            }
+        }
+        currentSessions.removeAll(toRemove);
+    }
+
     public String getValueFromCookie(HttpServletRequest request, String cookieName) {
         try {
             final Cookie[] cookies = request.getCookies();
@@ -181,7 +212,7 @@ public class CookieService {
         createCookie(header, httpResponse);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, String cookieName) {
+    public void createCookieWithState(String sessionId, String sessionState, String opbs, HttpServletRequest request, HttpServletResponse httpResponse, String cookieName) {
         String header = cookieName + "=" + sessionId;
         header += "; Path=/";
         header += "; Secure";
@@ -193,18 +224,23 @@ public class CookieService {
         createOPBrowserStateCookie(opbs, httpResponse);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, HttpServletResponse httpResponse, boolean isUma) {
+    public void createSessionIdCookie(SessionId sessionId, HttpServletRequest request, HttpServletResponse httpResponse, boolean isUma) {
         String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
-        createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, cookieName);
+        if (!isUma) {
+            addCurrentSessionCookie(sessionId, request, httpResponse);
+        }
+        createCookieWithState(sessionId.getId(), sessionId.getSessionState(), sessionId.getOPBrowserState(), request, httpResponse, cookieName);
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, String opbs, boolean isUma) {
+    public void createSessionIdCookie(SessionId sessionId, boolean isUma) {
         try {
             final Object response = externalContext.getResponse();
-            if (response instanceof HttpServletResponse) {
+            final Object request = externalContext.getRequest();
+            if (response instanceof HttpServletResponse && request instanceof HttpServletRequest) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
+                final HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-                createSessionIdCookie(sessionId, sessionState, opbs, httpResponse, isUma);
+                createSessionIdCookie(sessionId, httpRequest, httpResponse, isUma);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

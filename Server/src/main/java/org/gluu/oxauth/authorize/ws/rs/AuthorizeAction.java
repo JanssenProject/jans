@@ -295,13 +295,12 @@ public class AuthorizeAction {
             }
 
             this.sessionId = unauthenticatedSession.getId();
-            cookieService.createSessionIdCookie(this.sessionId, unauthenticatedSession.getSessionState(), unauthenticatedSession.getOPBrowserState(), false);
+            cookieService.createSessionIdCookie(unauthenticatedSession, false);
             cookieService.creatRpOriginIdCookie(redirectUri);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
             if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
-                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT,
-                        requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
+                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
             }
 
             facesService.redirectWithExternal(redirectTo, loginParameters);

@@ -72,7 +72,7 @@ public class UmaSessionService {
             put("uma", "true");
         }});
 
-        cookieService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, true);
+        cookieService.createSessionIdCookie(session, httpRequest, httpResponse, true);
         log.trace("uma_session_id cookie created.");
         return session;
     }
