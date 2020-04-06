@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
-import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.jsf2.message.FacesMessages;
@@ -320,7 +319,8 @@ public class AuthorizeAction {
         log.trace("checkPermissionGranted, user = " + user);
 
         if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
-            facesService.redirectWithExternal("/selectAccount.xhtml", Maps.newHashMap());
+            Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
+            facesService.redirect("/selectAccount.xhtml", requestParameterMap);
             return;
         }
 
