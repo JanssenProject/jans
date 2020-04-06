@@ -45,17 +45,19 @@
                     <div class="row">
                         <div align="center" class="col-sm-offset-4 col-sm-9">
                             <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
-                                <h:commandLink class="button button-default"
-                                               value="#{selectAccountAction.getName(_entry)}"
-                                               action="#{selectAccountAction.select(_entry)}" />&nbsp;
+                                <h:commandButton id="loginButton"
+                                                 style="background-color: #00BE79; color:white;"
+                                                 styleClass="btn col-sm-12" value="#{selectAccountAction.getName(_entry)}"
+                                                 iconAwesome="fa-sign-in"
+                                                 action="#{selectAccountAction.select(_entry)}"/>&nbsp;
                             </ui:repeat>
                         </div>
                     </div>
                     <div class="row">
                         <div align="center" class="col-sm-offset-4 col-sm-9">
                             <h:commandButton id="loginButton"
-                                             style="background-color: #00BE79; color:white;"
-                                             styleClass="btn col-sm-12" value="    #{msgs['login.login']}"
+                                             style="background-color:white; color:black;"
+                                             styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
                                              iconAwesome="fa-sign-in"
                                              action="#{selectAccountAction.login()}"/>
                         </div>
