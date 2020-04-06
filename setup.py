@@ -5113,7 +5113,7 @@ class Setup(object):
             extraClasspath_list.append('./custom/libs/jsmpp-{}.jar'.format(self.jsmmp_version))
             element.text = ','.join(extraClasspath_list)
 
-            self.writeFile(oxauth_xml_fn, xml_headers+ElementTree.tostring(root))
+            self.writeFile(oxauth_xml_fn, xml_headers+ElementTree.tostring(root).decode('utf-8'))
 
         pylib_folder = os.path.join(self.gluuOptPythonFolder, 'libs')
         for script_fn in glob.glob(os.path.join(self.staticFolder, 'casa/scripts/*.*')):
