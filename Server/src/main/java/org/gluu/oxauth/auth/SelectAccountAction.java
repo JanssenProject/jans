@@ -162,7 +162,7 @@ public class SelectAccountAction {
 
         for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
             final String key = entry.getKey();
-            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF)) {
+            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF) || key.equals("prompt")) {
                 continue;
             }
             if (key.startsWith(formIdWithColon)) {
