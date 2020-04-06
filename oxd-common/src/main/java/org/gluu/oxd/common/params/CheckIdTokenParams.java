@@ -22,6 +22,8 @@ public class CheckIdTokenParams implements HasAccessTokenParams {
     private String nonce;
     @JsonProperty(value = "token")
     private String token;
+    @JsonProperty(value = "code")
+    private String code;
 
     public CheckIdTokenParams() {
     }
@@ -58,6 +60,13 @@ public class CheckIdTokenParams implements HasAccessTokenParams {
         id_token = p_idToken;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
     /**
      * Returns string representation of object
      *
@@ -71,6 +80,7 @@ public class CheckIdTokenParams implements HasAccessTokenParams {
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", token='").append(token).append('\'');
+        sb.append(", code='").append(code).append('\'');
         sb.append('}');
         return sb.toString();
     }
