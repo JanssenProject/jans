@@ -760,10 +760,8 @@ public class Authenticator {
         }
         String p_sessionId = sessionId.getId();
 
-        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId,
-                sessionId.getState());
-        // IMPORTANT : authenticate by session id only if state of session is
-        // authenticated!
+        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId, sessionId.getState());
+        // IMPORTANT : authenticate by session id only if state of session is authenticated!
         if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
             final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {

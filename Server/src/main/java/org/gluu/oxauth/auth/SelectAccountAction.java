@@ -2,14 +2,22 @@ package org.gluu.oxauth.auth;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.service.CookieService;
+import org.gluu.oxauth.service.RequestParameterService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -23,7 +31,26 @@ public class SelectAccountAction {
     private Logger log;
 
     @Inject
+    private Identity identity;
+
+    @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private FacesService facesService;
+
+    @Inject
+    private CookieService cookieService;
+
+    @Inject
+    private ExternalContext externalContext;
+
+    @Inject
+    private RequestParameterService requestParameterService;
+
+    @Inject
+    private Authenticator authenticator;
+
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -75,6 +102,9 @@ public class SelectAccountAction {
 
     public void select(SessionId selectedSession) {
         log.debug("Selected account: " + selectedSession.getId());
+        clearSessionIdCookie();
+        cookieService.createSessionIdCookie(selectedSession, false);
+        authenticator.authenticateBySessionId(selectedSession);
     }
 
     public String getName(SessionId sessionId) {
@@ -87,7 +117,36 @@ public class SelectAccountAction {
     }
 
     public void login() {
-        // todo
+        try {
+            clearSessionIdCookie();
+            String uri = buildAuthorizationUrl();
+            log.trace("RedirectTo: {}", uri);
+            facesService.redirectToExternalURL(uri);
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void clearSessionIdCookie() {
+        final Object response = externalContext.getResponse();
+        if (!(response instanceof HttpServletResponse)) {
+            log.error("Unknown http response.");
+            return;
+        }
+
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        cookieService.removeSessionIdCookie(httpResponse);
+        cookieService.removeOPBrowserStateCookie(httpResponse);
+
+        if (identity != null) {
+            identity.logout();
+        }
+        log.trace("Removed session_id and opbs cookies.");
+    }
+
+    private String buildAuthorizationUrl() throws UnsupportedEncodingException {
+        final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(externalContext.getRequestParameterMap());
     }
 
     public String getScope() {
