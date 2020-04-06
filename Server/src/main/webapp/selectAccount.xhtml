@@ -6,66 +6,70 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/login-template.xhtml">
     <f:metadata>
-        <f:viewAction action="#{selectAccountAction.prepare}" />
+        <f:viewAction action="#{selectAccountAction.prepare}"/>
 
-        <f:viewParam name="scope" value="#{selectAccountAction.scope}" />
-        <f:viewParam name="response_type" value="#{selectAccountAction.responseType}" />
-        <f:viewParam name="client_id" value="#{selectAccountAction.clientId}" />
-        <f:viewParam name="redirect_uri" value="#{selectAccountAction.redirectUri}" />
-        <f:viewParam name="state" value="#{selectAccountAction.state}" />
-        <f:viewParam name="response_mode" value="#{selectAccountAction.responseMode}" />
-        <f:viewParam name="nonce" value="#{selectAccountAction.nonce}" />
-        <f:viewParam name="display" value="#{selectAccountAction.display}" />
-        <f:viewParam name="prompt" value="#{selectAccountAction.prompt}" />
-        <f:viewParam name="max_age" value="#{selectAccountAction.maxAge}" />
-        <f:viewParam name="ui_locales" value="#{selectAccountAction.uiLocales}" />
-        <f:viewParam name="id_token_hint" value="#{selectAccountAction.idTokenHint}" />
-        <f:viewParam name="login_hint" value="#{selectAccountAction.loginHint}" />
-        <f:viewParam name="acr_values" value="#{selectAccountAction.acrValues}" />
-        <f:viewParam name="amr_values" value="#{selectAccountAction.amrValues}" />
-        <f:viewParam name="request" value="#{selectAccountAction.request}" />
-        <f:viewParam name="request_uri" value="#{selectAccountAction.requestUri}" />
-        <f:viewParam name="code_challenge" value="#{selectAccountAction.codeChallenge}" />
-        <f:viewParam name="code_challenge_method" value="#{selectAccountAction.codeChallengeMethod}" />
-        <f:viewParam name="claims" value="#{selectAccountAction.claims}" />
-        <f:viewParam name="auth_req_id" value="#{selectAccountAction.authReqId}" />
-        <f:viewParam name="binding_message" value="#{selectAccountAction.bindingMessage}" />
-        <f:viewParam name="session_id" value="#{selectAccountAction.sessionId}" />
+        <f:viewParam name="scope" value="#{selectAccountAction.scope}"/>
+        <f:viewParam name="response_type" value="#{selectAccountAction.responseType}"/>
+        <f:viewParam name="client_id" value="#{selectAccountAction.clientId}"/>
+        <f:viewParam name="redirect_uri" value="#{selectAccountAction.redirectUri}"/>
+        <f:viewParam name="state" value="#{selectAccountAction.state}"/>
+        <f:viewParam name="response_mode" value="#{selectAccountAction.responseMode}"/>
+        <f:viewParam name="nonce" value="#{selectAccountAction.nonce}"/>
+        <f:viewParam name="display" value="#{selectAccountAction.display}"/>
+        <f:viewParam name="prompt" value="#{selectAccountAction.prompt}"/>
+        <f:viewParam name="max_age" value="#{selectAccountAction.maxAge}"/>
+        <f:viewParam name="ui_locales" value="#{selectAccountAction.uiLocales}"/>
+        <f:viewParam name="id_token_hint" value="#{selectAccountAction.idTokenHint}"/>
+        <f:viewParam name="login_hint" value="#{selectAccountAction.loginHint}"/>
+        <f:viewParam name="acr_values" value="#{selectAccountAction.acrValues}"/>
+        <f:viewParam name="amr_values" value="#{selectAccountAction.amrValues}"/>
+        <f:viewParam name="request" value="#{selectAccountAction.request}"/>
+        <f:viewParam name="request_uri" value="#{selectAccountAction.requestUri}"/>
+        <f:viewParam name="code_challenge" value="#{selectAccountAction.codeChallenge}"/>
+        <f:viewParam name="code_challenge_method" value="#{selectAccountAction.codeChallengeMethod}"/>
+        <f:viewParam name="claims" value="#{selectAccountAction.claims}"/>
+        <f:viewParam name="auth_req_id" value="#{selectAccountAction.authReqId}"/>
+        <f:viewParam name="binding_message" value="#{selectAccountAction.bindingMessage}"/>
+        <f:viewParam name="session_id" value="#{selectAccountAction.sessionId}"/>
     </f:metadata>
     <ui:define name="head">
-        <meta name="description" content="Gluu, Inc." />
+        <meta name="description" content="Gluu, Inc."/>
     </ui:define>
     <ui:define name="pageTitle">
-        <h:outputText value="#{msgs['selectAccount.pageTitle']}" />
+        <h:outputText value="#{msgs['selectAccount.pageTitle']}"/>
     </ui:define>
     <ui:define name="body">
         <div class="container">
             <h:panelGroup rendered="true">
-                <div class="login_bx_1" style="border-radius: 10px; margin-top: 0; background: white; border: 1px solid #008b8b;">
-                    <div class="row">
-                        <div align="center" class="col-sm-12" style="margin-bottom: 20px;">
-                            <h:outputLabel value="#{msgs['login.selectAccount']}" />
+                <div class="login_bx_1"
+                     style="border-radius: 10px; margin-top: 0; background: white; border: 1px solid #008b8b;">
+                    <h:form id="form">
+                        <div class="row">
+                            <div align="center" class="col-sm-12" style="margin-bottom: 20px;">
+                                <h:outputLabel value="#{msgs['login.selectAccount']}"/>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div align="center" class="col-sm-12">
-                            <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
-                                <h:commandButton style="background-color: #00BE79; color:white;"
-                                                 styleClass="btn col-sm-12" value="#{selectAccountAction.getName(_entry)}"
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
+                                    <h:commandButton style="background-color: #00BE79; color:white;"
+                                                     styleClass="btn col-sm-12"
+                                                     value="#{selectAccountAction.getName(_entry)}"
+                                                     iconAwesome="fa-sign-in"
+                                                     action="#{selectAccountAction.select(_entry)}"/>&nbsp;
+                                </ui:repeat>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div align="center" class="col-sm-12">
+                                <h:commandButton id="loginButton"
+                                                 style="background-color:lightgray; color:black;"
+                                                 styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
                                                  iconAwesome="fa-sign-in"
-                                                 action="#{selectAccountAction.select(_entry)}"/>&nbsp;
-                            </ui:repeat>
+                                                 action="#{selectAccountAction.login()}"/>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div align="center" class="col-sm-12">
-                            <h:commandButton id="loginButton"
-                                             style="background-color:lightgray; color:black;"
-                                             styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
-                                             iconAwesome="fa-sign-in"
-                                             action="#{selectAccountAction.login()}"/>
-                        </div>
-                    </div>
+                    </h:form>
                 </div>
             </h:panelGroup>
         </div>
