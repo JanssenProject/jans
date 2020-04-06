@@ -43,7 +43,12 @@
             <h:panelGroup rendered="true">
                 <div class="login_bx_1" style="border-radius: 10px; margin-top: 0; background: white; border: 1px solid #008b8b;">
                     <div class="row">
-                        <div align="center" class="col-sm-offset-4 col-sm-9">
+                        <div align="center" class="col-sm-12" style="margin-bottom: 20px;>
+                            <h:outputLabel value="#{msgs['login.selectAccount']}" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div align="center" class="col-sm-12">
                             <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
                                 <h:commandButton id="loginButton"
                                                  style="background-color: #00BE79; color:white;"
@@ -54,9 +59,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div align="center" class="col-sm-offset-4 col-sm-9">
+                        <div align="center" class="col-sm-12">
                             <h:commandButton id="loginButton"
-                                             style="background-color:white; color:black;"
+                                             style="background-color:lightgray; color:black;"
                                              styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
                                              iconAwesome="fa-sign-in"
                                              action="#{selectAccountAction.login()}"/>
