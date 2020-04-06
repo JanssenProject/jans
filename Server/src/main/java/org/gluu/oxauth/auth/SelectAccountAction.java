@@ -1,6 +1,7 @@
 package org.gluu.oxauth.auth;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -28,6 +30,9 @@ import java.util.Set;
 @RequestScoped
 @Named
 public class SelectAccountAction {
+
+    private static final String FORM_ID = "selectForm";
+    private static final String LOGIN_BUTTON_REF = FORM_ID + ":loginButton";
 
     @Inject
     private Logger log;
@@ -151,7 +156,23 @@ public class SelectAccountAction {
 
     private String buildAuthorizationUrl() throws UnsupportedEncodingException {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(externalContext.getRequestParameterMap());
+        final Map<String, String> parameterMap = externalContext.getRequestParameterMap();
+        final Map<String, String> filtered = Maps.newHashMap();
+        final String formIdWithColon = FORM_ID + ":";
+
+        for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
+            final String key = entry.getKey();
+            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF)) {
+                continue;
+            }
+            if (key.startsWith(formIdWithColon)) {
+                filtered.put(StringUtils.removeStart(key, formIdWithColon), entry.getValue());
+                continue;
+            }
+            filtered.put(StringUtils.removeStart(key, formIdWithColon), entry.getValue());
+        }
+
+        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(filtered);
     }
 
     public String getScope() {
