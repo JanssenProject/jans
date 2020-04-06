@@ -52,21 +52,21 @@
                         <div class="row">
                             <div align="center" class="col-sm-12">
                                 <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
-                                    <h:commandButton style="background-color: #00BE79; color:white;"
-                                                     styleClass="btn col-sm-12"
-                                                     value="#{selectAccountAction.getName(_entry)}"
-                                                     iconAwesome="fa-sign-in"
-                                                     action="#{selectAccountAction.select(_entry)}"/>&nbsp;
+                                    <h:commandLink style="background-color: #00BE79; color:white;"
+                                                   styleClass="btn col-sm-12"
+                                                   value="#{selectAccountAction.getName(_entry)}"
+                                                   iconAwesome="fa-sign-in"
+                                                   action="#{selectAccountAction.select(_entry)}"/>&nbsp;
                                 </ui:repeat>
                             </div>
                         </div>
                         <div class="row">
                             <div align="center" class="col-sm-12">
-                                <h:commandButton id="loginButton"
-                                                 style="background-color:lightgray; color:black;"
-                                                 styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
-                                                 iconAwesome="fa-sign-in"
-                                                 action="#{selectAccountAction.login()}"/>
+                                <h:commandLink id="loginButton"
+                                               style="background-color:lightgray; color:black;"
+                                               styleClass="btn col-sm-12" value="#{msgs['login.loginAsAnother']}"
+                                               iconAwesome="fa-sign-in"
+                                               action="#{selectAccountAction.login()}"/>
                             </div>
                         </div>
                     </h:form>
