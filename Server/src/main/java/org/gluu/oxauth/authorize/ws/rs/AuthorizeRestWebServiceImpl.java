@@ -350,7 +350,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             sessionUser = sessionIdService.generateAuthenticatedSessionId(httpRequest, userDn, prompt);
                             sessionUser.setSessionAttributes(requestParameterMap);
 
-                            cookieService.createSessionIdCookie(sessionUser.getId(), sessionUser.getSessionState(), sessionUser.getOPBrowserState(), httpResponse, false);
+                            cookieService.createSessionIdCookie(sessionUser, httpRequest, httpResponse, false);
                             sessionIdService.updateSessionId(sessionUser);
                             user = userService.getUserByDn(sessionUser.getUserDn());
                         } else {
