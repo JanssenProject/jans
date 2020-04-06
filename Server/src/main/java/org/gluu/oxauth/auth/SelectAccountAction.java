@@ -75,8 +75,8 @@ public class SelectAccountAction {
         log.debug("Selected account: " + selectedSession.getId());
     }
 
-    public String getName(SessionId sessionId) {
-        final User user = sessionId.getUser();
+    public String getName(Object sessionId) {
+        final User user = ((SessionId) sessionId).getUser();
         final String displayName = user.getAttribute("displayName");
         if (StringUtils.isNotBlank(displayName)) {
             return displayName;
