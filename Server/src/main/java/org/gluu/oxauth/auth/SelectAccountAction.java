@@ -1,6 +1,7 @@
 package org.gluu.oxauth.auth;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.security.Identity;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -84,14 +86,17 @@ public class SelectAccountAction {
 
     public void prepare() {
         currentSessions = Lists.newArrayList();
+        Set<String> uids = Sets.newHashSet();
         for (SessionId sessionId : sessionIdService.getCurrentSessions()) {
             final User user = sessionIdService.getUser(sessionId);
             if (user == null) {
                 log.error("Failed to get user for session. Skipping it from current_sessions, id: " + sessionId.getId());
                 continue;
             }
-            if (!currentSessions.contains(sessionId)) {
+            final String uid = user.getUserId();
+            if (!currentSessions.contains(sessionId) && !uids.contains(uid)) {
                 currentSessions.add(sessionId);
+                uids.add(uid);
             }
         }
     }
