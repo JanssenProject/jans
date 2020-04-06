@@ -50,7 +50,7 @@
                     <div class="row">
                         <div align="center" class="col-sm-12">
                             <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
-                                <h:commandButton id="loginButton"
+                                <h:commandButton id="#{_entry.id}"
                                                  style="background-color: #00BE79; color:white;"
                                                  styleClass="btn col-sm-12" value="#{selectAccountAction.getName(_entry)}"
                                                  iconAwesome="fa-sign-in"
