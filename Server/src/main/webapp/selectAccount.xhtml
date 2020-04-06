@@ -7,6 +7,30 @@
                 template="/WEB-INF/incl/layout/login-template.xhtml">
     <f:metadata>
         <f:viewAction action="#{selectAccountAction.prepare}" />
+
+        <f:viewParam name="scope" value="#{selectAccountAction.scope}" />
+        <f:viewParam name="response_type" value="#{selectAccountAction.responseType}" />
+        <f:viewParam name="client_id" value="#{selectAccountAction.clientId}" />
+        <f:viewParam name="redirect_uri" value="#{selectAccountAction.redirectUri}" />
+        <f:viewParam name="state" value="#{selectAccountAction.state}" />
+        <f:viewParam name="response_mode" value="#{selectAccountAction.responseMode}" />
+        <f:viewParam name="nonce" value="#{selectAccountAction.nonce}" />
+        <f:viewParam name="display" value="#{selectAccountAction.display}" />
+        <f:viewParam name="prompt" value="#{selectAccountAction.prompt}" />
+        <f:viewParam name="max_age" value="#{selectAccountAction.maxAge}" />
+        <f:viewParam name="ui_locales" value="#{selectAccountAction.uiLocales}" />
+        <f:viewParam name="id_token_hint" value="#{selectAccountAction.idTokenHint}" />
+        <f:viewParam name="login_hint" value="#{selectAccountAction.loginHint}" />
+        <f:viewParam name="acr_values" value="#{selectAccountAction.acrValues}" />
+        <f:viewParam name="amr_values" value="#{selectAccountAction.amrValues}" />
+        <f:viewParam name="request" value="#{selectAccountAction.request}" />
+        <f:viewParam name="request_uri" value="#{selectAccountAction.requestUri}" />
+        <f:viewParam name="code_challenge" value="#{selectAccountAction.codeChallenge}" />
+        <f:viewParam name="code_challenge_method" value="#{selectAccountAction.codeChallengeMethod}" />
+        <f:viewParam name="claims" value="#{selectAccountAction.claims}" />
+        <f:viewParam name="auth_req_id" value="#{selectAccountAction.authReqId}" />
+        <f:viewParam name="binding_message" value="#{selectAccountAction.bindingMessage}" />
+        <f:viewParam name="session_id" value="#{selectAccountAction.sessionId}" />
     </f:metadata>
     <ui:define name="head">
         <meta name="description" content="Gluu, Inc." />
@@ -22,9 +46,18 @@
                         <div align="center" class="col-sm-offset-4 col-sm-9">
                             <ui:repeat value="#{selectAccountAction.currentSessions}" var="_entry">
                                 <h:commandLink class="button button-default"
-                                               value="#{_entry.user.getAttribute('displayName')}"
+                                               value="#{selectAccountAction.getName(_entry)}"
                                                action="#{selectAccountAction.select(_entry)}" />&nbsp;
                             </ui:repeat>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div align="center" class="col-sm-offset-4 col-sm-9">
+                            <h:commandButton id="loginButton"
+                                             style="background-color: #00BE79; color:white;"
+                                             styleClass="btn col-sm-12" value="    #{msgs['login.login']}"
+                                             iconAwesome="fa-sign-in"
+                                             action="#{selectAccountAction.login()}"/>
                         </div>
                     </div>
                 </div>
