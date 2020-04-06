@@ -137,7 +137,7 @@ public class AuthorizeService {
 
             // OXAUTH-297 - set session_id cookie
             if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
-                cookieService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), false);
+                cookieService.createSessionIdCookie(session, false);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
