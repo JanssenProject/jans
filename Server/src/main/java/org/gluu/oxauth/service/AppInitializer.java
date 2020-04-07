@@ -508,6 +508,9 @@ public class AppInitializer {
 			}
 			properties.setProperty(prefix + "useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
 			properties.setProperty(prefix + "maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
+			
+			// Remove internal DB trustStoreFile property
+			properties.remove(prefix + "trustStoreFile");			
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();
