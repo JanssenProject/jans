@@ -100,7 +100,7 @@ public class SelectAccountAction {
             }
             final String uid = StringUtils.isNotBlank(user.getUserId()) ? user.getUserId() : user.getDn();
             if (!currentSessions.contains(sessionId) && !uids.contains(uid)) {
-                log.trace("User: {}, sessionId: {}", uid, sessionId);
+                log.trace("User: {}, sessionId: {}", uid, sessionId.getId());
                 currentSessions.add(sessionId);
                 uids.add(uid);
             }
@@ -112,12 +112,12 @@ public class SelectAccountAction {
         return currentSessions;
     }
 
-    public void select(SessionId selectedSession) {
+    public void select(String selectedSessionId) {
         try {
-            log.debug("Selected account: " + selectedSession.getId());
+            log.debug("Selected account: " + selectedSessionId);
             clearSessionIdCookie();
-            cookieService.createSessionIdCookie(selectedSession, false);
-            authenticator.authenticateBySessionId(selectedSession);
+            cookieService.createSessionIdCookie(currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny().get(), false);
+            authenticator.authenticateBySessionId(selectedSessionId);
             String uri = buildAuthorizationUrl();
             log.trace("RedirectTo: {}", uri);
             facesService.redirectToExternalURL(uri);
