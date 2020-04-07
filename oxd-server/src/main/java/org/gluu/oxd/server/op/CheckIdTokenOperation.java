@@ -3,8 +3,6 @@
  */
 package org.gluu.oxd.server.op;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -21,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -54,7 +51,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .build();
 
             //validate at_hash in id_token
-            validator.validateAccessToken(params.getToken(), atHashCheckRequired(rp.getResponseTypes()));
+            validator.validateAccessToken(params.getAccessToken(), atHashCheckRequired(rp.getResponseTypes()));
             //validate c_hash in id_token
             validator.validateAuthorizationCode(params.getCode());
 
