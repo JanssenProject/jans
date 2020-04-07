@@ -820,7 +820,7 @@ public class SessionIdService {
             return null;
         }
 
-        final User user = userService.getUserByDn(sessionId.getUserDn(), "displayName", "uid");
+        final User user = userService.getUserByDn(sessionId.getUserDn());
         if (user != null) {
             sessionId.setUser(user);
             return user;
