@@ -98,7 +98,7 @@ public class SelectAccountAction {
                 log.error("Failed to get user for session. Skipping it from current_sessions, id: " + sessionId.getId());
                 continue;
             }
-            final String uid = user.getUserId();
+            final String uid = StringUtils.isNotBlank(user.getUserId()) ? user.getUserId() : user.getDn();
             if (!currentSessions.contains(sessionId) && !uids.contains(uid)) {
                 currentSessions.add(sessionId);
                 uids.add(uid);
