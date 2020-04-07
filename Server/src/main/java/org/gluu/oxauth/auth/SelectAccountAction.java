@@ -156,13 +156,17 @@ public class SelectAccountAction {
 
     private String buildAuthorizationUrl() throws UnsupportedEncodingException {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(getFilteredParameters());
+    }
+
+    private Map<String, String> getFilteredParameters() {
         final Map<String, String> parameterMap = externalContext.getRequestParameterMap();
         final Map<String, String> filtered = Maps.newHashMap();
         final String formIdWithColon = FORM_ID + ":";
 
         for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
             final String key = entry.getKey();
-            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF) || key.equals("prompt")) {
+            if (key.equals("javax.faces.ViewState") || key.equals(FORM_ID) || key.contains(LOGIN_BUTTON_REF)) {
                 continue;
             }
             if (key.startsWith(formIdWithColon)) {
@@ -171,8 +175,7 @@ public class SelectAccountAction {
             }
             filtered.put(StringUtils.removeStart(key, formIdWithColon), entry.getValue());
         }
-
-        return httpRequest.getContextPath() + "/restv1/authorize?" + requestParameterService.parametersAsString(filtered);
+        return filtered;
     }
 
     public String getScope() {
