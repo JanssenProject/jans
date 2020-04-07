@@ -510,9 +510,9 @@ public class AppInitializer {
 			properties.setProperty(prefix + "maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
 			
 			// Remove internal DB trustStoreFile property
-			properties.remove(prefix + "trustStoreFile");			
-			properties.remove(prefix + "trustStorePin");			
-			properties.remove(prefix + "trustStoreFormat");			
+			properties.remove(prefix + "ssl.trustStoreFile");			
+			properties.remove(prefix + "ssl.trustStorePin");			
+			properties.remove(prefix + "ssl.trustStoreFormat");			
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();
