@@ -88,6 +88,7 @@ public class SelectAccountAction {
     private String allowedScope;
 
     private List<SessionId> currentSessions = Lists.newArrayList();
+    private String selectedSessionId;
 
     public void prepare() {
         currentSessions = Lists.newArrayList();
@@ -112,7 +113,7 @@ public class SelectAccountAction {
         return currentSessions;
     }
 
-    public void select(String selectedSessionId) {
+    public void select() {
         try {
             log.debug("Selected account: " + selectedSessionId);
             clearSessionIdCookie();
@@ -380,5 +381,13 @@ public class SelectAccountAction {
 
     public void setBindingMessage(String bindingMessage) {
         this.bindingMessage = bindingMessage;
+    }
+
+    public String getSelectedSessionId() {
+        return selectedSessionId;
+    }
+
+    public void setSelectedSessionId(String selectedSessionId) {
+        this.selectedSessionId = selectedSessionId;
     }
 }
