@@ -13,6 +13,7 @@ import org.gluu.oxauth.service.RequestParameterService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
@@ -90,6 +91,7 @@ public class SelectAccountAction {
     private List<SessionId> currentSessions = Lists.newArrayList();
     private String selectedSessionId;
 
+    @PostConstruct
     public void prepare() {
         currentSessions = Lists.newArrayList();
         Set<String> uids = Sets.newHashSet();
