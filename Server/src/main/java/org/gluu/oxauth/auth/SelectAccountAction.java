@@ -100,10 +100,12 @@ public class SelectAccountAction {
             }
             final String uid = StringUtils.isNotBlank(user.getUserId()) ? user.getUserId() : user.getDn();
             if (!currentSessions.contains(sessionId) && !uids.contains(uid)) {
+                log.trace("User: {}, sessionId: {}", uid, sessionId);
                 currentSessions.add(sessionId);
                 uids.add(uid);
             }
         }
+        log.trace("Found {} sessions", currentSessions.size());
     }
 
     public List<SessionId> getCurrentSessions() {
@@ -111,10 +113,17 @@ public class SelectAccountAction {
     }
 
     public void select(SessionId selectedSession) {
-        log.debug("Selected account: " + selectedSession.getId());
-        clearSessionIdCookie();
-        cookieService.createSessionIdCookie(selectedSession, false);
-        authenticator.authenticateBySessionId(selectedSession);
+        try {
+            log.debug("Selected account: " + selectedSession.getId());
+            clearSessionIdCookie();
+            cookieService.createSessionIdCookie(selectedSession, false);
+            authenticator.authenticateBySessionId(selectedSession);
+            String uri = buildAuthorizationUrl();
+            log.trace("RedirectTo: {}", uri);
+            facesService.redirectToExternalURL(uri);
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+        }
     }
 
     public String getName(SessionId sessionId) {
@@ -123,7 +132,10 @@ public class SelectAccountAction {
         if (StringUtils.isNotBlank(displayName)) {
             return displayName;
         }
-        return user.getUserId();
+        if (StringUtils.isNotBlank(displayName)) {
+            return user.getUserId();
+        }
+        return user.getDn();
     }
 
     public void login() {
