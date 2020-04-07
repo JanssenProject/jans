@@ -45,6 +45,10 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean protectCommandsWithAccessToken;
     @JsonProperty(value = "accept_id_token_without_signature")
     private Boolean acceptIdTokenWithoutSignature = false;
+    @JsonProperty(value = "id_token_validation_c_hash_required")
+    private Boolean idTokenValidationCHashRequired = true;
+    @JsonProperty(value = "id_token_validation_at_hash_required")
+    private Boolean idTokenValidationAtHashRequired = true;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
     @JsonProperty(value = "add_client_credentials_grant_type_automatically_during_client_registration")
@@ -302,6 +306,22 @@ public class OxdServerConfiguration extends Configuration {
         this.acceptIdTokenWithoutSignature = acceptIdTokenWithoutSignature;
     }
 
+    public Boolean getIdTokenValidationCHashRequired() {
+        return idTokenValidationCHashRequired;
+    }
+
+    public void setIdTokenValidationCHashRequired(Boolean idTokenValidationCHashRequired) {
+        this.idTokenValidationCHashRequired = idTokenValidationCHashRequired;
+    }
+
+    public Boolean getIdTokenValidationAtHashRequired() {
+        return idTokenValidationAtHashRequired;
+    }
+
+    public void setIdTokenValidationAtHashRequired(Boolean idTokenValidationAtHashRequired) {
+        this.idTokenValidationAtHashRequired = idTokenValidationAtHashRequired;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -330,6 +350,8 @@ public class OxdServerConfiguration extends Configuration {
                 ", allowedOpHosts=" + allowedOpHosts + '\'' +
                 ", addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration=" + addClientCredentialsGrantTypeAutomaticallyDuringClientRegistration +
                 ", proxyConfiguration=" + proxyConfiguration + '\'' +
+                ", idTokenValidationCHashRequired=" + idTokenValidationCHashRequired + '\'' +
+                ", idTokenValidationAtHashRequired=" + idTokenValidationAtHashRequired + '\'' +
                 '}';
     }
 }
