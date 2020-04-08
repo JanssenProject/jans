@@ -44,7 +44,7 @@ public class LdapConnectionProvider {
     private static final String[] SSL_PROTOCOLS = {"TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3"};
 
     private LDAPConnectionPool connectionPool;
-    private int creationResultCode;
+    private ResultCode creationResultCode;
 
     private int supportedLDAPVersion = DEFAULT_SUPPORTED_LDAP_VERSION;
     private String subschemaSubentry = DEFAULT_SUBSCHEMA_SUBENTRY;
@@ -74,7 +74,7 @@ public class LdapConnectionProvider {
         try {
             init(props);
         } catch (LDAPException ex) {
-            creationResultCode = ex.getResultCode().intValue();
+            creationResultCode = ex.getResultCode();
 
             Properties clonedProperties = (Properties) props.clone();
             if (clonedProperties.getProperty("bindPassword") != null) {
@@ -214,7 +214,7 @@ public class LdapConnectionProvider {
         this.supportedLDAPVersion = determineSupportedLdapVersion();
         this.subschemaSubentry = determineSubschemaSubentry();
         this.supportsSubtreeDeleteRequestControl = supportsSubtreeDeleteRequestControl();
-        this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
+        this.creationResultCode = ResultCode.SUCCESS;
     }
 
     private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest,
@@ -474,16 +474,16 @@ public class LdapConnectionProvider {
         return isConnected;
     }
 
-    public int getCreationResultCode() {
+    public ResultCode getCreationResultCode() {
         return creationResultCode;
     }
 
-    public void setCreationResultCode(int creationResultCode) {
+    public void setCreationResultCode(ResultCode creationResultCode) {
         this.creationResultCode = creationResultCode;
     }
 
     public boolean isCreated() {
-        return ResultCode.SUCCESS_INT_VALUE == this.creationResultCode;
+        return ResultCode.SUCCESS == this.creationResultCode;
     }
 
     public String[] getServers() {
