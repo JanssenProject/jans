@@ -165,7 +165,7 @@ public class CouchbaseFilterConverter {
             	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
             } else if (hasSubFilters && (isMultiValuedDetected == null)) {
         		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
-            	return ConvertedExpression.build(nameConvertedExpression.expression().eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            	return ConvertedExpression.build(nameConvertedExpression.expression().eq(buildTypedExpression(currentGenericFilter)), nameConvertedExpression.consistency() || requiredConsistency);
             } else {
             	Expression nameExpression;
             	if (hasSubFilters) {

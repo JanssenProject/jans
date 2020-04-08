@@ -1769,11 +1769,19 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 			return null;
 		}
 		
+		Integer resultExpirationValue;
 		if (expirationValue instanceof Integer) {
-			return (Integer) expirationValue;
+			resultExpirationValue = (Integer) expirationValue;
+		} else {
+			resultExpirationValue = Integer.valueOf((int) expirationValue);
+		}
+		
+		// TTL can't be negative
+		if (resultExpirationValue < 0) {
+			resultExpirationValue = 0;
 		}
 
-		return Integer.valueOf((int) expirationValue);
+		return resultExpirationValue;
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
