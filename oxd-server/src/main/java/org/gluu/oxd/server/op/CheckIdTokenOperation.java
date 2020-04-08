@@ -5,6 +5,7 @@ package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxd.common.Command;
@@ -16,6 +17,8 @@ import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -47,6 +50,8 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
                     .rp(rp)
                     .build();
 
+            //validate at_hash in id_token
+            validator.validateAccessToken(params.getAccessToken(), atHashCheckRequired(rp.getResponseTypes()));
             //validate c_hash in id_token
             validator.validateAuthorizationCode(params.getCode());
 
@@ -64,4 +69,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         throw HttpException.internalError();
     }
 
+    public static boolean atHashCheckRequired(List<String> responseTypes) {
+        return responseTypes.stream().anyMatch(s -> ResponseType.fromString(s, " ").contains(ResponseType.TOKEN));
+    }
 }
