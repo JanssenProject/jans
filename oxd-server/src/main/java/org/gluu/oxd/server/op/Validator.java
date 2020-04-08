@@ -132,29 +132,52 @@ public class Validator {
     }
 
     public void validateAccessToken(String accessToken) {
-        if (!Strings.isNullOrEmpty(accessToken)) {
-            String atHash = idToken.getClaims().getClaimAsString("at_hash");
-            if (Strings.isNullOrEmpty(atHash)) {
+        validateAccessToken(accessToken, false);
+    }
+
+    // `at_hash` in ID_TOKEN is mandatory for response_type='id_token token' for Implicit Flow or response_type='code id_token token' for Hybrid Flow.
+    public void validateAccessToken(String accessToken, boolean atHashRequired) {
+
+        if (!configuration.getIdTokenValidationAtHashRequired()) {
+            return;
+        }
+
+        if (Strings.isNullOrEmpty(accessToken)) {
+            return;
+        }
+
+        String atHash = idToken.getClaims().getClaimAsString("at_hash");
+        if (Strings.isNullOrEmpty(atHash)) {
+            if (atHashRequired) {
+                LOG.error("`at_hash` is missing in `ID_TOKEN`.");
+                throw new HttpException(ErrorResponseCode.AT_HASH_NOT_FOUND);
+            } else {
                 LOG.warn("Skip access_token validation because corresponding id_token does not have at_hash claim. access_token: " + accessToken + ", id_token: " + idToken);
                 return;
             }
-            if (!jwsSigner.validateAccessToken(accessToken, idToken)) {
-                LOG.trace("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
-                throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
-            }
+        }
+        if (!jwsSigner.validateAccessToken(accessToken, idToken)) {
+            LOG.error("Hash from id_token does not match hash of the access_token (at_hash). access_token:" + accessToken + ", idToken: " + idToken + ", at_hash:" + atHash);
+            throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
         }
     }
 
     public void validateAuthorizationCode(String code) {
-        if (!Strings.isNullOrEmpty(code)) {
-            if(Strings.isNullOrEmpty(idToken.getClaims().getClaimAsString("c_hash"))) {
-                LOG.error("`c_hash` is missing in `ID_TOKEN`.");
-                throw new HttpException(ErrorResponseCode.C_HASH_NOT_FOUND);
-            }
-            if (!jwsSigner.validateAuthorizationCode(code, idToken)) {
-                LOG.error("`Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash).");
-                throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
-            }
+        if (!configuration.getIdTokenValidationCHashRequired()) {
+            return;
+        }
+
+        if (Strings.isNullOrEmpty(code)) {
+            return;
+        }
+
+        if (Strings.isNullOrEmpty(idToken.getClaims().getClaimAsString("c_hash"))) {
+            LOG.error("`c_hash` is missing in `ID_TOKEN`.");
+            throw new HttpException(ErrorResponseCode.C_HASH_NOT_FOUND);
+        }
+        if (!jwsSigner.validateAuthorizationCode(code, idToken)) {
+            LOG.error("`Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash).");
+            throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
         }
     }
 
