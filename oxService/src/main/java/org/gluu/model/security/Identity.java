@@ -6,6 +6,7 @@ import java.security.acl.Group;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Priority;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Alternative;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
+import javax.interceptor.Interceptor;
 
 import org.gluu.model.security.event.Authenticated;
 import org.gluu.service.security.Secure;
@@ -21,6 +23,7 @@ import org.slf4j.Logger;
 @RequestScoped
 @Named
 @Alternative
+@Priority(Interceptor.Priority.APPLICATION + 10)
 public class Identity implements Serializable {
 
     private static final long serialVersionUID = 3751659008033189259L;
