@@ -390,8 +390,10 @@ public class Authenticator {
 
                 String redirectTo = externalAuthenticationService
                         .executeExternalGetPageForStep(customScriptConfiguration, nextStep);
-                if (StringHelper.isEmpty(redirectTo) || redirectTo == null) {
+                if (redirectTo == null) {
                     return Constants.RESULT_FAILURE;
+                } else if (StringHelper.isEmpty(redirectTo)) {
+                    redirectTo = "/login.xhtml";
                 }
 
                 // Store/Update extra parameters in session attributes map

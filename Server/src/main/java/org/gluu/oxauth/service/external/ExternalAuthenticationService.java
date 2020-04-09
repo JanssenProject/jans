@@ -295,9 +295,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
-		}
 
-		return null;
+    		return null;
+		}
 	}
 
 	public int executeExternalGetApiVersion(CustomScriptConfiguration customScriptConfiguration) {
