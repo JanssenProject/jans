@@ -5435,7 +5435,6 @@ if __name__ == '__main__':
     '''
 
     parser = argparse.ArgumentParser(description=parser_description)
-    parser = argparse.ArgumentParser(description=parser_description)
     parser.add_argument('-c', help="Use command line instead of tui", action='store_true')
     parser.add_argument('-d', help="Installation directory")
     parser.add_argument('-r', '--install-oxauth-rp', help="Install oxAuth RP", action='store_true')
