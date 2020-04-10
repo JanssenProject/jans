@@ -1580,18 +1580,7 @@
             "oid": "oxAttribute", 
             "syntax": "1.3.6.1.4.1.1466.115.121.1.27", 
             "x_origin": "Gluu created attribute"
-        }, 
-        {
-            "desc": "oxAuth Expiration", 
-            "equality": "generalizedTimeMatch", 
-            "names": [
-                "oxAuthExpiration"
-            ], 
-            "oid": "oxAttribute", 
-            "ordering": "generalizedTimeOrderingMatch", 
-            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
-            "x_origin": "Gluu created attribute"
-        }, 
+        },  
         {
             "desc": "oxAuth Expiration", 
             "equality": "generalizedTimeMatch", 
@@ -5220,7 +5209,7 @@
                 "oxAuthClientIdIssuedAt", 
                 "oxAuthClientSecret", 
                 "oxAuthClientSecretExpiresAt", 
-                "oxAuthExpiration", 
+                "exp", 
                 "del", 
                 "oxAuthClientURI", 
                 "oxAuthContact", 
@@ -5434,7 +5423,7 @@
                 "oxType", 
                 "oxScopeExpression", 
                 "iat", 
-                "oxAuthExpiration", 
+                "exp", 
                 "del", 
                 "description"
             ], 
@@ -5453,7 +5442,7 @@
         {
             "kind": "STRUCTURAL", 
             "may": [
-                "oxAuthExpiration", 
+                "exp", 
                 "del", 
                 "oxAuthUmaScope", 
                 "oxConfigurationCode", 
@@ -5647,7 +5636,7 @@
             "kind": "STRUCTURAL", 
             "may": [
                 "iat", 
-                "oxAuthExpiration", 
+                "exp", 
                 "del", 
                 "oxProxyAccessToken", 
                 "oxProxyClientId"
@@ -5769,7 +5758,7 @@
                 "oxCounter", 
                 "oxStatus", 
                 "del", 
-                "oxAuthExpiration", 
+                "exp", 
                 "personInum",
                 "creationDate", 
                 "oxLastAccessTime", 
@@ -5797,7 +5786,7 @@
                 "oxRequest", 
                 "oxSessionStateId", 
                 "del", 
-                "oxAuthExpiration", 
+                "exp", 
                 "personInum", 
                 "creationDate"
             ], 
@@ -5823,7 +5812,7 @@
                 "oxMetricType", 
                 "creationDate", 
                 "del", 
-                "oxAuthExpiration", 
+                "exp", 
                 "oxData"
             ], 
             "must": [
@@ -5844,7 +5833,7 @@
                 "oxId", 
                 "oxAuthClientId", 
                 "oxAuthUserId", 
-                "oxAuthExpiration", 
+                "exp", 
                 "del", 
                 "oxAuthScope"
             ], 
