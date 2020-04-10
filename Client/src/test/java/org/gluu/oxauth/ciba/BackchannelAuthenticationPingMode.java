@@ -43,7 +43,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 4, 2020
+ * @version April 10, 2020
  */
 public class BackchannelAuthenticationPingMode extends BaseTest {
 
@@ -154,6 +154,11 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
             showClient(tokenClient);
             pollCount++;
         } while (tokenResponse.getStatus() == 400 && pollCount < 5);
+
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -301,6 +306,166 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
         assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
         assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+    }
+
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "userInum"})
+    @Test
+    public void backchannelTokenDeliveryModePingLoginHint4(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String userInum) throws Exception {
+        showTitle("backchannelTokenDeliveryModePingLoginHint4");
+
+        RegisterResponse registerResponse1 = requestClientRegistration(clientJwksUri, backchannelClientNotificationEndpoint);
+        RegisterResponse registerResponse2 = requestClientRegistration(clientJwksUri, backchannelClientNotificationEndpoint);
+
+        String sub1 = requestBackchannelAuthentication(userInum, registerResponse1.getClientId(), registerResponse1.getClientSecret());
+        String sub2 = requestBackchannelAuthentication(userInum, registerResponse2.getClientId(), registerResponse2.getClientSecret());
+
+        assertEquals(sub1, sub2, "Each client must share the same sub value");
+
+        String sub3 = requestBackchannelAuthentication(userInum, registerResponse1.getClientId(), registerResponse1.getClientSecret());
+        String sub4 = requestBackchannelAuthentication(userInum, registerResponse2.getClientId(), registerResponse2.getClientSecret());
+
+        assertEquals(sub1, sub3, "Same client must receive the same sub value");
+        assertEquals(sub2, sub4, "Same client must receive the same sub value");
+    }
+
+    public RegisterResponse requestClientRegistration(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint) {
+        // Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+
+        registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PING);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+        registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
+        registerRequest.setBackchannelUserCodeParameter(true);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PING.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), new Boolean(true).toString());
+
+        return registerResponse;
+    }
+
+    public String requestBackchannelAuthentication(
+            final String userInum, final String clientId, final String clientSecret) throws Exception {
+        // Authentication Request
+        String bindingMessage = RandomStringUtils.randomAlphanumeric(6);
+
+        BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "email", "address", "phone"));
+        backchannelAuthenticationRequest.setLoginHint(userInum);
+        backchannelAuthenticationRequest.setClientNotificationToken("123");
+        backchannelAuthenticationRequest.setUserCode("qwerty");
+        backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
+        backchannelAuthenticationRequest.setBindingMessage(bindingMessage);
+        backchannelAuthenticationRequest.setAuthUsername(clientId);
+        backchannelAuthenticationRequest.setAuthPassword(clientSecret);
+
+        BackchannelAuthenticationClient backchannelAuthenticationClient = new BackchannelAuthenticationClient(backchannelAuthenticationEndpoint);
+        backchannelAuthenticationClient.setRequest(backchannelAuthenticationRequest);
+        BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
+
+        showClient(backchannelAuthenticationClient);
+        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
+        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
+        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
+        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+
+        String authReqId = backchannelAuthenticationResponse.getAuthReqId();
+
+        // 3. Token Request Using CIBA Grant Type
+        TokenResponse tokenResponse = null;
+        int pollCount = 0;
+        do {
+            Thread.sleep(5000);
+
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CIBA);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setAuthReqId(authReqId);
+
+            TokenClient tokenClient = new TokenClient(tokenEndpoint);
+            tokenClient.setRequest(tokenRequest);
+            tokenResponse = tokenClient.exec();
+
+            showClient(tokenClient);
+            pollCount++;
+        } while (tokenResponse.getStatus() == 400 && pollCount < 5);
+
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+
+        String accessToken = tokenResponse.getAccessToken();
+        String idToken = tokenResponse.getIdToken();
+
+        // 4. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+
+        // Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
+                jwksUri,
+                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
+        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
+
+        assertTrue(rsaSigner.validate(jwt));
+
+        String sub = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
+
+        return sub;
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
