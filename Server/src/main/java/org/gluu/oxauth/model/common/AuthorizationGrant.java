@@ -40,7 +40,7 @@ import java.util.Set;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 4, 2019
+ * @version April 10, 2020
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -360,7 +360,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        return sectorIdentifierService.getSub(getClient(), getUser());
+        return sectorIdentifierService.getSub(getClient(), getUser(), this instanceof CIBAGrant);
     }
 
     public boolean isCachedWithNoPersistence() {
