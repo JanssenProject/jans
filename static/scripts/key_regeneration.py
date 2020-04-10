@@ -7,7 +7,16 @@ import json
 import subprocess
 import sys
 import zipfile
+import argparse
+
 import xml.etree.ElementTree as ET
+
+parser = argparse.ArgumentParser('This script removes current key and creates new key for oxauth.')
+ldap_group = parser.add_mutually_exclusive_group()
+ldap_group.add_argument('-expiration_hours', help="Keys expire in hours", type=int)
+ldap_group.add_argument('-expiration', help="Keys expire in days", default=365, type=int)
+
+argsp = parser.parse_args()
 
 defaul_storage = 'ldap'
 
@@ -251,8 +260,14 @@ if gluu_ver_real < '3.1.2':
 else:
     args += ['-sig_keys', ' '.join(key_algs), '-enc_keys', ' '.join(key_algs)]
     
-args += ['-dnname', "'CN=oxAuth CA Certificates'",
-    '-expiration', '365','>', oxauth_keys_json_fn]
+args += ['-dnname', "'CN=oxAuth CA Certificates'"]
+
+if argsp.expiration_hours:
+    args += ['-expiration_hours', str(argsp.expiration_hours)]
+else:
+    args += ['-expiration', str(argsp.expiration)]
+    
+args += ['>', oxauth_keys_json_fn]
 
 output = run_command(args)
 
