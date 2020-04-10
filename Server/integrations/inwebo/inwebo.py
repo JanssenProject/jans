@@ -27,7 +27,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.otp = "false"
         self.client = None
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
        
         print "inWebo. Initialization"
         iw_cert_store_type = configurationAttributes.get("iw_cert_store_type").getValue2()
@@ -75,7 +75,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

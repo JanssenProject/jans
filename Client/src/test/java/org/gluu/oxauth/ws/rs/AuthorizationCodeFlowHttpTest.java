@@ -75,7 +75,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-        TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
+        TokenClient tokenClient1 = newTokenClient(tokenRequest);
         tokenClient1.setRequest(tokenRequest);
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
@@ -104,13 +104,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
+                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID), clientExecutor(true));
         RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
 
         assertTrue(rsaSigner.validate(jwt));
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
+        tokenClient2.setExecutor(clientExecutor(true));
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
@@ -125,6 +126,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 6. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        userInfoClient.setExecutor(clientExecutor(true));
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
@@ -810,8 +812,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);

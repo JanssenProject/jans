@@ -67,7 +67,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return value
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print("SMPP Initialization")
 
         self.TIME_FORMATTER = AbsoluteTimeFormatter()
@@ -221,7 +221,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
