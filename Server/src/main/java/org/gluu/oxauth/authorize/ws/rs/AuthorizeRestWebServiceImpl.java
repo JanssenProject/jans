@@ -70,7 +70,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 5, 2020
+ * @version April 10, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -432,9 +432,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest);
                 applicationAuditLogger.sendMessage(oAuth2AuditLog);
                 return builder.build();
-            }
-
-            if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
+            } else if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
                 clientAuthorizationsService.clearAuthorizations(clientAuthorization,
                         client.getPersistClientAuthorizations());
 
