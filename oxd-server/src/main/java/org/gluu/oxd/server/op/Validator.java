@@ -234,9 +234,9 @@ public class Validator {
         }
     }
 
-    public boolean isIdTokenValid() {
+    public boolean isIdTokenValid(String nonce) {
         try {
-            validateIdToken();
+            validateIdToken(nonce);
             return true;
         } catch (Exception e) {
             return false;
