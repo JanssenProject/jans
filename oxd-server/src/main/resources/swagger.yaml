@@ -1094,6 +1094,8 @@ paths:
                   type: string
                 state:
                   type: string
+                nonce:
+                  type: string
                 redirect_uri:
                   type: string
                   example: https://client.example.org/cb
