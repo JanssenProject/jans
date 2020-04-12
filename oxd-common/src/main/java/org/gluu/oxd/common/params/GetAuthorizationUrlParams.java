@@ -28,6 +28,8 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private String token;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "nonce")
+    private String nonce;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
     @JsonProperty(value = "params")
@@ -128,6 +130,14 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
         this.response_types = responseTypes;
     }
 
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -159,6 +169,7 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", custom_parameters=" + custom_parameters +
                 ", redirect_uri='" + redirect_uri + '\'' +
                 ", state='" + state + '\'' +
+                ", nonce='" + nonce + '\'' +
                 ", response_types=" + response_types + '\'' +
                 '}';
     }
