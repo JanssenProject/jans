@@ -51,6 +51,25 @@ public class GetAuthorizationUrlTest {
 
     @Parameters({"redirectUrls", "opHost"})
     @Test
+    public void testWithNonceParameter(String redirectUrls, String opHost) throws Exception {
+        DevelopersApi api = Tester.api();
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(api, opHost, redirectUrls);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setNonce("dummy_nonce");
+
+        final GetAuthorizationUrlResponse resp = api.getAuthorizationUrl(commandParams, Tester.getAuthorization(site));
+        assertNotNull(resp);
+        Tester.notEmpty(resp.getAuthorizationUrl());
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(StringUtils.isNotBlank(parameters.get("nonce")));
+        assertEquals(parameters.get("nonce"), "dummy_nonce");
+    }
+
+    @Parameters({"redirectUrls", "opHost"})
+    @Test
     public void testWithResposeType(String redirectUrls, String opHost) throws Exception {
         DevelopersApi api = Tester.api();
 
