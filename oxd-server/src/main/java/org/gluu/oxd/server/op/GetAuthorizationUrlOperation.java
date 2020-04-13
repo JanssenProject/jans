@@ -68,6 +68,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         }
 
         String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
+        String nonce = StringUtils.isNotBlank(params.getNonce()) ? getStateService().putNonce(Utils.encode(params.getNonce())) : getStateService().generateNonce();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
@@ -75,7 +76,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + state;
-        authorizationEndpoint += "&nonce=" + getStateService().generateNonce();
+        authorizationEndpoint += "&nonce=" + nonce;
 
         String acrValues = Utils.joinAndUrlEncode(acrValues(rp, params)).trim();
         if (!Strings.isNullOrEmpty(acrValues)) {

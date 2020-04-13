@@ -56,7 +56,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             validator.validateAuthorizationCode(params.getCode());
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-            opResponse.setActive(validator.isIdTokenValid());
+            opResponse.setActive(validator.isIdTokenValid(params.getNonce()));
             opResponse.setIssuedAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT)));
             opResponse.setExpiresAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME)));
             opResponse.setClaims(jwt.getClaims().toMap());
