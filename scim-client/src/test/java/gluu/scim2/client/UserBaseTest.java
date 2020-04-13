@@ -1,7 +1,6 @@
 package gluu.scim2.client;
 
 import org.gluu.oxtrust.model.scim2.user.UserResource;
-import org.testng.Assert;
 
 import javax.ws.rs.core.Response;
 
