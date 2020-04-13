@@ -60,7 +60,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
             String subjectIdentifier = response.getClaims().get("sub").get(0);
             final Jwt jwtIdToken = Jwt.parse(idToken);
             if (!jwtIdToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER).equals(subjectIdentifier)) {
-                LOG.error("UserInfo `sub` value does not matches with `sub` value of ID_TOKEN.");
+                LOG.error("UserInfo `sub` value does not matches with `sub` value of ID_TOKEN. ID_TOKEN `sub`: "+jwtIdToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER)+" UserInfo `sub`: "+subjectIdentifier);
                 throw new HttpException(ErrorResponseCode.INVALID_SUBJECT_IDENTIFIER);
             }
         } catch (HttpException e) {
