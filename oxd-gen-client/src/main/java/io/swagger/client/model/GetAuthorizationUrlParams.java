@@ -46,6 +46,9 @@ public class GetAuthorizationUrlParams {
   @SerializedName("state")
   private String state = null;
 
+  @SerializedName("nonce")
+  private String nonce = null;
+
   @SerializedName("redirect_uri")
   private String redirectUri = null;
 
@@ -164,6 +167,24 @@ public class GetAuthorizationUrlParams {
     this.state = state;
   }
 
+  public GetAuthorizationUrlParams nonce(String nonce) {
+    this.nonce = nonce;
+    return this;
+  }
+
+   /**
+   * Get nonce
+   * @return nonce
+  **/
+  @Schema(description = "")
+  public String getNonce() {
+    return nonce;
+  }
+
+  public void setNonce(String nonce) {
+    this.nonce = nonce;
+  }
+
   public GetAuthorizationUrlParams redirectUri(String redirectUri) {
     this.redirectUri = redirectUri;
     return this;
@@ -275,6 +296,7 @@ public class GetAuthorizationUrlParams {
         Objects.equals(this.acrValues, getAuthorizationUrlParams.acrValues) &&
         Objects.equals(this.prompt, getAuthorizationUrlParams.prompt) &&
         Objects.equals(this.state, getAuthorizationUrlParams.state) &&
+        Objects.equals(this.nonce, getAuthorizationUrlParams.nonce) &&
         Objects.equals(this.redirectUri, getAuthorizationUrlParams.redirectUri) &&
         Objects.equals(this.responseTypes, getAuthorizationUrlParams.responseTypes) &&
         Objects.equals(this.customParameters, getAuthorizationUrlParams.customParameters) &&
@@ -283,7 +305,7 @@ public class GetAuthorizationUrlParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, scope, acrValues, prompt, state, redirectUri, responseTypes, customParameters, params);
+    return Objects.hash(oxdId, scope, acrValues, prompt, state, nonce, redirectUri, responseTypes, customParameters, params);
   }
 
 
@@ -297,6 +319,7 @@ public class GetAuthorizationUrlParams {
     sb.append("    acrValues: ").append(toIndentedString(acrValues)).append("\n");
     sb.append("    prompt: ").append(toIndentedString(prompt)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    nonce: ").append(toIndentedString(nonce)).append("\n");
     sb.append("    redirectUri: ").append(toIndentedString(redirectUri)).append("\n");
     sb.append("    responseTypes: ").append(toIndentedString(responseTypes)).append("\n");
     sb.append("    customParameters: ").append(toIndentedString(customParameters)).append("\n");

@@ -122,4 +122,25 @@ public class GetAuthorizationUrlTest {
         assertTrue(StringUtils.isNotBlank(parameters.get("state")));
         assertEquals(parameters.get("state"), state);
     }
+
+    @Parameters({"host", "opHost", "redirectUrls", "postLogoutRedirectUrl", "logoutUrl", "paramRedirectUrl"})
+    @Test
+    public void testWithNonceParameter(String host, String opHost, String redirectUrls, String postLogoutRedirectUrl, String logoutUrl, String paramRedirectUrl) throws IOException {
+        ClientInterface client = Tester.newClient(host);
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, logoutUrl, false);
+        final GetAuthorizationUrlParams commandParams = new GetAuthorizationUrlParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setRedirectUri(paramRedirectUrl);
+        commandParams.setNonce("dummy_nonce");
+
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), commandParams);
+        assertNotNull(resp);
+        notEmpty(resp.getAuthorizationUrl());
+        assertTrue(resp.getAuthorizationUrl().contains(paramRedirectUrl));
+
+        Map<String, String> parameters = CoreUtils.splitQuery(resp.getAuthorizationUrl());
+        assertTrue(StringUtils.isNotBlank(parameters.get("nonce")));
+        assertEquals(parameters.get("nonce"), "dummy_nonce");
+    }
 }
