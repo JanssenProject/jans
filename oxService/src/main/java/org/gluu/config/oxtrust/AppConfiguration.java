@@ -85,9 +85,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String oxAuthClientId;
     private String oxAuthClientPassword;
     private String oxAuthClientScope;
-    private String oxAuthFapiClientKeystoreType;
-    private String oxAuthFapiClientKeystorePath;
-    private String oxAuthFapiClientKeystorePassword;
 
     private String loginRedirectUrl;
     private String logoutRedirectUrl;
@@ -945,30 +942,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setEnableUpdateNotification(boolean enableUpdateNotification) {
         this.enableUpdateNotification = enableUpdateNotification;
-    }
-
-    public String getOxAuthFapiClientKeystoreType() {
-        return oxAuthFapiClientKeystoreType;
-    }
-
-    public void setOxAuthFapiClientKeystoreType(String oxAuthFapiClientKeystoreType) {
-        this.oxAuthFapiClientKeystoreType = oxAuthFapiClientKeystoreType;
-    }
-
-    public String getOxAuthFapiClientKeystorePath() {
-        return oxAuthFapiClientKeystorePath;
-    }
-
-    public void setOxAuthFapiClientKeystorePath(String oxAuthFapiClientKeystorePath) {
-        this.oxAuthFapiClientKeystorePath = oxAuthFapiClientKeystorePath;
-    }
-
-    public String getOxAuthFapiClientKeystorePassword() {
-        return oxAuthFapiClientKeystorePassword;
-    }
-
-    public void setOxAuthFapiClientKeystorePassword(String oxAuthFapiClientKeystorePassword) {
-        this.oxAuthFapiClientKeystorePassword = oxAuthFapiClientKeystorePassword;
     }
 
 }
