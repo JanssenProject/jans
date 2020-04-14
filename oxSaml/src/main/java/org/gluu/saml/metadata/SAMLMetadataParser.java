@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
  */
 
 @ApplicationScoped
-public final class SAMLMetadataParser {
+public class SAMLMetadataParser {
 
 	@Inject
 	private Logger log;
