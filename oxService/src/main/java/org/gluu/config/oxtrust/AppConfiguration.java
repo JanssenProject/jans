@@ -85,8 +85,6 @@ public class AppConfiguration implements Configuration, Serializable {
     private String oxAuthClientId;
     private String oxAuthClientPassword;
     private String oxAuthClientScope;
-    private String oxAuthClientFapiJWKPrivateKeyModulus;
-    private String oxAuthClientFapiJWKPrivateKeyPrivateExponent;
     private String oxAuthFapiClientKeystoreType;
     private String oxAuthFapiClientKeystorePath;
     private String oxAuthFapiClientKeystorePassword;
@@ -947,22 +945,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setEnableUpdateNotification(boolean enableUpdateNotification) {
         this.enableUpdateNotification = enableUpdateNotification;
-    }
-
-    public String getOxAuthClientFapiJWKPrivateKeyModulus() {
-        return oxAuthClientFapiJWKPrivateKeyModulus;
-    }
-
-    public void setOxAuthClientFapiJWKPrivateKeyModulus(String oxAuthClientFapiJWKPrivateKeyModulus) {
-        this.oxAuthClientFapiJWKPrivateKeyModulus = oxAuthClientFapiJWKPrivateKeyModulus;
-    }
-
-    public String getOxAuthClientFapiJWKPrivateKeyPrivateExponent() {
-        return oxAuthClientFapiJWKPrivateKeyPrivateExponent;
-    }
-
-    public void setOxAuthClientFapiJWKPrivateKeyPrivateExponent(String oxAuthClientFapiJWKPrivateKeyPrivateExponent) {
-        this.oxAuthClientFapiJWKPrivateKeyPrivateExponent = oxAuthClientFapiJWKPrivateKeyPrivateExponent;
     }
 
     public String getOxAuthFapiClientKeystoreType() {
