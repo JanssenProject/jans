@@ -5,7 +5,6 @@
  */
 package org.gluu.saml.metadata;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,15 +12,16 @@ import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.gluu.service.document.store.service.DocumentStoreService;
 import org.gluu.util.io.HTTPFileDownloader;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
 /**
@@ -29,20 +29,26 @@ import org.xml.sax.SAXException;
  *
  * @author Dmitry Ognyannikov
  */
+
+@ApplicationScoped
 public final class SAMLMetadataParser {
-    private static final Log LOG = LogFactory.getLog(SAMLMetadataParser.class);
 
-    private SAMLMetadataParser() { }
+	@Inject
+	private Logger log;
 
-    public static List<String> getEntityIdFromMetadataFile(File metadataFile) {
-        if (!metadataFile.isFile()) {
+	@Inject
+	private DocumentStoreService documentStoreService;
+
+    public List<String> getEntityIdFromMetadataFile(String metadataFile) {
+        if (!documentStoreService.hasDocument(metadataFile)) {
             return null;
         }
+
         EntityIDHandler handler = parseMetadata(metadataFile);
         if(handler!=null){
             List<String> entityIds = handler.getEntityIDs();
             if (entityIds == null || entityIds.isEmpty()) {
-                LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+                log.error("Failed to find entityId in metadata file: " + metadataFile);
             }
             return entityIds;
         }else{
@@ -50,13 +56,13 @@ public final class SAMLMetadataParser {
         }
     }
 
-    public static List<String> getSpEntityIdFromMetadataFile(File metadataFile) {
+    public List<String> getSpEntityIdFromMetadataFile(String metadataFile) {
         EntityIDHandler handler = parseMetadata(metadataFile);
         if(handler!=null){
             List<String> entityIds = handler.getSpEntityIDs();
 
             if (entityIds == null || entityIds.isEmpty()) {
-                LOG.error("Failed to find entityId in metadata file: " + metadataFile.getAbsolutePath());
+            	log.error("Failed to find entityId in metadata file: " + metadataFile);
             }
 
             return entityIds;
@@ -66,25 +72,26 @@ public final class SAMLMetadataParser {
 
     }
 
-    public static EntityIDHandler parseMetadata(File metadataFile) {
-        if (!metadataFile.exists()) {
-            LOG.error("Failed to get entityId from metadata file: " + metadataFile.getAbsolutePath());
+    public EntityIDHandler parseMetadata(String metadataFile) {
+        if (!documentStoreService.hasDocument(metadataFile)) {
+            log.error("Failed to get entityId from metadata file: " + metadataFile);
             return null;
         }
+
         InputStream is = null;
         try {
-            is = FileUtils.openInputStream(metadataFile);
+            is = documentStoreService.readDocumentAsStream(metadataFile);
 
             return parseMetadata(is);
         } catch (IOException ex) {
-            LOG.error("Failed to read SAML metadata file: " + metadataFile.getAbsolutePath(), ex);
+            log.error("Failed to read SAML metadata file: " + metadataFile, ex);
             return null;
         } finally {
             IOUtils.closeQuietly(is);
         }
     }
 
-    public static EntityIDHandler parseMetadata(InputStream is) {
+    public EntityIDHandler parseMetadata(InputStream is) {
         InputStreamReader isr = null;
         EntityIDHandler handler = null;
         try {
@@ -93,11 +100,11 @@ public final class SAMLMetadataParser {
             handler = new EntityIDHandler();
             saxParser.parse(is, handler);
         } catch (IOException ex) {
-            LOG.error("Failed to read SAML metadata", ex);
+            log.error("Failed to read SAML metadata", ex);
         } catch (ParserConfigurationException e) {
-            LOG.error("Failed to confugure SAX parser", e);
+            log.error("Failed to confugure SAX parser", e);
         } catch (SAXException e) {
-            LOG.error("Failed to parse SAML metadata", e);
+            log.error("Failed to parse SAML metadata", e);
         } finally {
             IOUtils.closeQuietly(isr);
             IOUtils.closeQuietly(is);
@@ -107,16 +114,17 @@ public final class SAMLMetadataParser {
         return handler;
     }
 
-    public static EntityIDHandler parseMetadata(URL metadataURL) {
+    public EntityIDHandler parseMetadata(URL metadataURL) {
         String metadataFileContent = HTTPFileDownloader.getResource(metadataURL.toExternalForm(), "application/xml, text/xml", null, null);
-        return parseMetadata(metadataFileContent);
-    }
 
-    public static EntityIDHandler parseMetadata(String metadata) {
-        if (metadata == null) {
+        if (metadataFileContent == null) {
             return null;
         }
-        InputStream is = new StringBufferInputStream(metadata);
+
+        InputStream is = new StringBufferInputStream(metadataFileContent);
+
         return parseMetadata(is);
     }
+
 }
+
