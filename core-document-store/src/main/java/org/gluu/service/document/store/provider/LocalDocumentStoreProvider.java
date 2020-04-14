@@ -76,6 +76,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public boolean hasDocument(String path) {
+		log.debug("Has document: '{}'", path);
+
 		if (StringHelper.isEmpty(path)) {
 			throw new IllegalArgumentException("Specified path should not be empty!");
 		}
@@ -87,6 +89,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public boolean saveDocument(String path, String documentContent, Charset charset) throws IOException {
+		log.debug("Save document: '{}'", path);
+
 		File file = buildFilePath(path);
 		createParentPath(file);
 
@@ -104,6 +108,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public boolean saveDocumentStream(String path, InputStream documentStream) throws IOException {
+		log.debug("Save document from stream: '{}'", path);
+
 		File file = buildFilePath(path);
 		createParentPath(file);
 
@@ -121,6 +127,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public String readDocument(String path, Charset charset) throws IOException {
+		log.debug("Read document: '{}'", path);
+
 		File file = buildFilePath(path);
 		createParentPath(file);
 
@@ -129,6 +137,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public InputStream readDocumentAsStream(String path)  throws IOException {
+		log.debug("Read document as stream: '{}'", path);
+
 		File file = buildFilePath(path);
 
 		return new BufferedInputStream(FileUtils.openInputStream(file));
@@ -136,6 +146,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public boolean renameDocument(String currentPath, String destinationPath) throws IOException {
+		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
+
 		File currentFile = buildFilePath(currentPath);
 		File destinationFile = buildFilePath(destinationPath);
 		
@@ -157,6 +169,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public boolean removeDocument(String path) throws IOException {
+		log.debug("Remove document: '{}'", path);
+
 		if (!hasDocument(path)) {
 			return true;
 		}
