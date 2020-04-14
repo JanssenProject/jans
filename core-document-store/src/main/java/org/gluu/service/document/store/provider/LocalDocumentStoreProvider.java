@@ -177,7 +177,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	private File buildFilePath(String path) {
-		String filePath = baseLocation + File.pathSeparator + path;
+		String filePath = baseLocation + File.separator + path;
 		return new File(filePath);
 	}
 
