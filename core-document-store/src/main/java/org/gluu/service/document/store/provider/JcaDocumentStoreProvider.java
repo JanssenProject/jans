@@ -54,7 +54,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
     }
 
     public DocumentStoreType getProviderType() {
-        return DocumentStoreType.LOCAL;
+        return DocumentStoreType.JCA;
     }
 
 	public boolean hasDocument(String path) {
