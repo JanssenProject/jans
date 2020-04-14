@@ -41,6 +41,7 @@
 		<module>oxModel</module>
 		<module>oxSaml</module>
 		<module>core-cache</module>
+		<module>core-document-store</module>
 		<module>core-standalone</module>
 		<module>core-java-ext</module>
 		<module>core-cdi</module>
