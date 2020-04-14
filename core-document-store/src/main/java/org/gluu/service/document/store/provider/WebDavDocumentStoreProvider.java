@@ -55,7 +55,7 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 
     @Override
     public DocumentStoreType getProviderType() {
-        return DocumentStoreType.LOCAL;
+        return DocumentStoreType.WEB_DAV;
     }
 
 	@Override
