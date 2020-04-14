@@ -19,6 +19,7 @@ import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.gluu.GluuErrorResponseType;
 import org.gluu.oxauth.model.registration.Client;
@@ -205,9 +206,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug(reason);
         try {
             if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
-                // Commented out to avoid sending an error:                
-                // String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
-                // postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                if (ErrorHandlingMethod.REMOTE == appConfiguration.getErrorHandlingMethod()) {
+                    String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
+                    postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                }
                 return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
             }
         } catch (URISyntaxException e) {
