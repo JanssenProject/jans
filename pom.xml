@@ -107,6 +107,21 @@
             </dependency>
             <dependency>
                 <groupId>org.gluu</groupId>
+                <artifactId>oxcore-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-timer-weld</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxcore-persistence-annotation</artifactId>
                 <version>${project.version}</version>
             </dependency>
