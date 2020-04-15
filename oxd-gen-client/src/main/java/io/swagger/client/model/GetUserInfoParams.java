@@ -33,6 +33,9 @@ public class GetUserInfoParams {
   @SerializedName("access_token")
   private String accessToken = null;
 
+  @SerializedName("id_token")
+  private String idToken = null;
+
   public GetUserInfoParams oxdId(String oxdId) {
     this.oxdId = oxdId;
     return this;
@@ -69,6 +72,24 @@ public class GetUserInfoParams {
     this.accessToken = accessToken;
   }
 
+  public GetUserInfoParams idToken(String idToken) {
+    this.idToken = idToken;
+    return this;
+  }
+
+   /**
+   * Get idToken
+   * @return idToken
+  **/
+  @Schema(description = "")
+  public String getIdToken() {
+    return idToken;
+  }
+
+  public void setIdToken(String idToken) {
+    this.idToken = idToken;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -80,12 +101,13 @@ public class GetUserInfoParams {
     }
     GetUserInfoParams getUserInfoParams = (GetUserInfoParams) o;
     return Objects.equals(this.oxdId, getUserInfoParams.oxdId) &&
-        Objects.equals(this.accessToken, getUserInfoParams.accessToken);
+        Objects.equals(this.accessToken, getUserInfoParams.accessToken) &&
+        Objects.equals(this.idToken, getUserInfoParams.idToken);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, accessToken);
+    return Objects.hash(oxdId, accessToken, idToken);
   }
 
 
@@ -96,6 +118,7 @@ public class GetUserInfoParams {
     
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    accessToken: ").append(toIndentedString(accessToken)).append("\n");
+    sb.append("    idToken: ").append(toIndentedString(idToken)).append("\n");
     sb.append("}");
     return sb.toString();
   }
