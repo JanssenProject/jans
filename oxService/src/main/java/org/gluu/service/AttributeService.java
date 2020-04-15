@@ -34,7 +34,7 @@ public abstract class AttributeService implements Serializable {
     protected Logger log;
 
     @Inject
-    protected PersistenceEntryManager ldapEntryManager;
+    protected PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     protected SchemaService schemaService;
@@ -48,7 +48,7 @@ public abstract class AttributeService implements Serializable {
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
         String[] targetArray = new String[] { attributeValue };
         Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
-        List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
+        List<GluuAttribute> result = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
 
         return result;
     }
@@ -111,7 +111,7 @@ public abstract class AttributeService implements Serializable {
     }
 
     protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
-        List<GluuAttribute> attributeList = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, null);
+        List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, null);
 
         return attributeList;
     }

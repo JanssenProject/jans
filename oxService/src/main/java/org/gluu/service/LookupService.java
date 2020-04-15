@@ -37,7 +37,7 @@ public class LookupService implements Serializable {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     private CacheService cacheService;
@@ -53,7 +53,7 @@ public class LookupService implements Serializable {
         String key = "l_" + dn;
         DisplayNameEntry entry = (DisplayNameEntry) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entry == null) {
-            entry = ldapEntryManager.find(dn, DisplayNameEntry.class, null);
+            entry = persistenceEntryManager.find(dn, DisplayNameEntry.class, null);
 
             cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entry);
         }
@@ -81,7 +81,7 @@ public class LookupService implements Serializable {
         List<DisplayNameEntry> entries = (List<DisplayNameEntry>) cacheService.get(OxConstants.CACHE_LOOKUP_NAME, key);
         if (entries == null) {
             Filter searchFilter = buildInumFilter(inums);
-            entries = ldapEntryManager.findEntries(baseDn, DisplayNameEntry.class, searchFilter);
+            entries = persistenceEntryManager.findEntries(baseDn, DisplayNameEntry.class, searchFilter);
             cacheService.put(OxConstants.CACHE_LOOKUP_NAME, key, entries);
         }
         return entries;
