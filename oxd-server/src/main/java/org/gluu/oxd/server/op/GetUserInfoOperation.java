@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.op;
 
 import com.google.inject.Injector;
+import io.dropwizard.util.Strings;
 import org.gluu.oxauth.client.UserInfoClient;
 import org.gluu.oxauth.client.UserInfoRequest;
 import org.gluu.oxauth.client.UserInfoResponse;
@@ -48,8 +49,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
         final UserInfoResponse response = client.exec();
         //validate subject identifier of successful response
         if (response.getStatus() == 200) {
-            final Rp rp = getRp();
-            validateSubjectIdentifier(rp.getIdToken(), response);
+            validateSubjectIdentifier(params.getIdToken(), response);
         }
 
         return new POJOResponse(Jackson2.createJsonMapper().readTree(response.getEntity()));
@@ -57,6 +57,15 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
 
     public void validateSubjectIdentifier(String idToken, UserInfoResponse response) {
         try {
+            boolean validateUserInfoWithIdToken = getConfigurationService().getConfiguration().getValidateUserInfoWithIdToken();
+            if (!validateUserInfoWithIdToken) {
+                return;
+            }
+
+            if (Strings.isNullOrEmpty(idToken)) {
+                return;
+            }
+
             String subjectIdentifier = response.getClaims().get("sub").get(0);
             final Jwt jwtIdToken = Jwt.parse(idToken);
             if (!jwtIdToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER).equals(subjectIdentifier)) {
