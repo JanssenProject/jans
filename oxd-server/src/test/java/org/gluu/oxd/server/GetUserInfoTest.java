@@ -31,6 +31,7 @@ public class GetUserInfoTest {
         GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
+        params.setIdToken(tokens.getIdToken());
 
         final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), params);
         assertNotNull(resp);

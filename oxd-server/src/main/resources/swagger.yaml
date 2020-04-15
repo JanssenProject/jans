@@ -1263,6 +1263,8 @@ paths:
                 access_token:
                   type: string
                   example: 88bba7f5-961c-4b71-8053-9ab35f1ad395
+                id_token:
+                  type: string
         required: false
       responses:
         200:
