@@ -49,6 +49,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean idTokenValidationCHashRequired = true;
     @JsonProperty(value = "id_token_validation_at_hash_required")
     private Boolean idTokenValidationAtHashRequired = true;
+    @JsonProperty(value = "validate_user_info_with_id_token")
+    private Boolean validateUserInfoWithIdToken = false;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
     @JsonProperty(value = "add_client_credentials_grant_type_automatically_during_client_registration")
@@ -322,6 +324,14 @@ public class OxdServerConfiguration extends Configuration {
         this.idTokenValidationAtHashRequired = idTokenValidationAtHashRequired;
     }
 
+    public Boolean getValidateUserInfoWithIdToken() {
+        return validateUserInfoWithIdToken;
+    }
+
+    public void setValidateUserInfoWithIdToken(Boolean validateUserInfoWithIdToken) {
+        this.validateUserInfoWithIdToken = validateUserInfoWithIdToken;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -352,6 +362,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", proxyConfiguration=" + proxyConfiguration + '\'' +
                 ", idTokenValidationCHashRequired=" + idTokenValidationCHashRequired + '\'' +
                 ", idTokenValidationAtHashRequired=" + idTokenValidationAtHashRequired + '\'' +
+                ", validateUserInfoWithIdToken=" + validateUserInfoWithIdToken + '\'' +
                 '}';
     }
 }
