@@ -77,7 +77,7 @@ class Token:
 
         #generate token
         token = ''.join(random.choice(letters) for i in range(lenght))
-        print "Forgot Password - Generating token %s" % token
+        print "Forgot Password - Generating token"
 
         return token
 
@@ -221,26 +221,33 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     print "Forgot Password -Email format valid"
  
-                    print "Forgot Password - User email is %s" % email
+                    print "Forgot Password - Entered email is %s" % email
                     identity.setWorkingParameter("useremail",email)
                     
-                    #send email
-                    new_token = Token()
-                    token = new_token.generateToken()                
-                    sender = EmailSender()
-                    sender.sendEmail(email,token)
-
-                    
-                    identity.setWorkingParameter("token", token)
-                    print identity.getWorkingParameter("token")
-                    
-
                     # Just trying to get the user by the email
                     user_service = CdiUtil.bean(UserService)
                     user2 = user_service.getUserByAttribute("mail", email)
-                    print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
+
+                    if user2 is not None:
                     
-                   
+                        print user2
+                        print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
+                    
+                        # send email
+                        new_token = Token()
+                        token = new_token.generateToken()                
+                        sender = EmailSender()
+                        sender.sendEmail(email,token)
+
+                    
+                        identity.setWorkingParameter("token", token)
+                        print identity.getWorkingParameter("token")
+                    
+ 
+                        
+                    else:
+                        print "Forgot Password - User with e-mail %s not found" % email
+
                     return True
 
 
@@ -343,7 +350,7 @@ class PersonAuthentication(PersonAuthenticationType):
     # The xhtml page to render upon each step of the flow
     # returns a string relative to oxAuth webapp root
     def getPageForStep(self, configurationAttributes, step):
-        print "Forgot Password - Entered getPageForStep()"
+        
         if step == 1:
             return "/auth/forgot_password/forgot.xhtml"
             
