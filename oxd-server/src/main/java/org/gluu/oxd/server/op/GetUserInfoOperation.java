@@ -65,7 +65,7 @@ public class GetUserInfoOperation extends BaseOperation<GetUserInfoParams> {
             if (Strings.isNullOrEmpty(idToken)) {
                 return;
             }
-
+            LOG.trace("Validating subject Identifier (`sub`) of userInfo response.");
             String subjectIdentifier = response.getClaims().get("sub").get(0);
             final Jwt jwtIdToken = Jwt.parse(idToken);
             if (!jwtIdToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER).equals(subjectIdentifier)) {
