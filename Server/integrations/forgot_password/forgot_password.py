@@ -184,9 +184,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        '''
-        Retorna True se a autenticação foi bem sucedida no passo atual
-        '''
+     
                     
         print "Forgot Password - Authenticate for step %s" % step
 
@@ -277,9 +275,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Forgot Password - Token inputed by user is %s" % input_token
 
             token = identity.getWorkingParameter("token")
-            print "Forgot Password - Retrieved token %s" % token
+            print "Forgot Password - Retrieved token"
             email = identity.getWorkingParameter("useremail")
-            print "Forgot Password - Retrieved email %s" % email
+            print "Forgot Password - Retrieved email" 
 
             if input_token == token:
                 print "Forgot Password - token entered correctly"
@@ -304,18 +302,17 @@ class PersonAuthentication(PersonAuthenticationType):
             new_password = ServerUtil.getFirstValue(requestParameters, "UpdatePasswordForm:newPassword")
             
             print "Forgot Password - New password submited"
-            #print "Forgot Password - New password: %s" % new_password
         
 
 
-            #update user info with new password
+            # update user info with new password
             user2.setAttribute("userPassword",new_password)
 
             user_service.updateUser(user2)
 
             authenticationService2 = CdiUtil.bean(AuthenticationService)
             
-            #authenticates and login user
+            # authenticates and login user
             login = authenticationService2.authenticate(user_name, new_password)
             
             return True
@@ -350,7 +347,7 @@ class PersonAuthentication(PersonAuthenticationType):
     # The xhtml page to render upon each step of the flow
     # returns a string relative to oxAuth webapp root
     def getPageForStep(self, configurationAttributes, step):
-        
+
         if step == 1:
             return "/auth/forgot_password/forgot.xhtml"
             
