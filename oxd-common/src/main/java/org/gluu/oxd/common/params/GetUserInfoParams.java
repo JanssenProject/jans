@@ -15,6 +15,8 @@ public class GetUserInfoParams implements HasAccessTokenParams {
     private String oxd_id;
     @JsonProperty(value = "access_token")
     private String access_token;
+    @JsonProperty(value = "id_token")
+    private String id_token;
     @JsonProperty(value = "token")
     private String token;
 
@@ -45,6 +47,14 @@ public class GetUserInfoParams implements HasAccessTokenParams {
         this.token = token;
     }
 
+    public String getIdToken() {
+        return id_token;
+    }
+
+    public void setIdToken(String idToken) {
+        this.id_token = idToken;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -71,6 +81,7 @@ public class GetUserInfoParams implements HasAccessTokenParams {
         sb.append("{access_token='").append(access_token).append('\'');
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", token='").append(token).append('\'');
+        sb.append(", id_token='").append(id_token).append('\'');
         sb.append('}');
         return sb.toString();
     }
