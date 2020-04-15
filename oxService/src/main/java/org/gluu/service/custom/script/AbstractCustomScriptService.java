@@ -30,26 +30,26 @@ public abstract class AbstractCustomScriptService implements Serializable {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     public void add(CustomScript customScript) {
-        ldapEntryManager.persist(customScript);
+        persistenceEntryManager.persist(customScript);
     }
 
     public void update(CustomScript customScript) {
-        ldapEntryManager.merge(customScript);
+        persistenceEntryManager.merge(customScript);
     }
 
     public void remove(CustomScript customScript) {
-        ldapEntryManager.remove(customScript);
+        persistenceEntryManager.remove(customScript);
     }
 
     public CustomScript getCustomScriptByDn(String customScriptDn, String... returnAttributes) {
-        return ldapEntryManager.find(customScriptDn, CustomScript.class, returnAttributes);
+        return persistenceEntryManager.find(customScriptDn, CustomScript.class, returnAttributes);
     }
 
     public CustomScript getCustomScriptByDn(Class<?> customScriptType, String customScriptDn) {
-        return (CustomScript) ldapEntryManager.find(customScriptType, customScriptDn);
+        return (CustomScript) persistenceEntryManager.find(customScriptType, customScriptDn);
     }
 
     public Optional<CustomScript> getCustomScriptByINum(String baseDn, String inum, String... returnAttributes) {
@@ -61,7 +61,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
         final Filter filter = Filter.createORFilter(customScriptTypeFilters);
 
-        final List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
+        final List<CustomScript> result = persistenceEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
 
         if (result.isEmpty()) {
 
@@ -75,7 +75,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
     public List<CustomScript> findAllCustomScripts(String[] returnAttributes) {
         String baseDn = baseDn();
 
-        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, null, returnAttributes);
+        List<CustomScript> result = persistenceEntryManager.findEntries(baseDn, CustomScript.class, null, returnAttributes);
 
         return result;
     }
@@ -95,7 +95,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
         Filter filter = Filter.createORFilter(customScriptTypeFilters);
 
-        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
+        List<CustomScript> result = persistenceEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
 
         return result;
     }
