@@ -180,6 +180,7 @@ public class AppConfiguration implements Configuration {
     private Boolean customHeadersWithAuthorizationResponse;
     private Boolean frontChannelLogoutSessionSupported;
     private String loggingLevel;
+    private String loggingLayout;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
     private Boolean logClientIdOnClientAuthentication;
@@ -1432,6 +1433,14 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
+
     public Boolean getEnableClientGrantTypeUpdate() {
         return enableClientGrantTypeUpdate;
     }
@@ -1667,4 +1676,5 @@ public class AppConfiguration implements Configuration {
     public void setCibaEndUserNotificationConfig(CIBAEndUserNotificationConfig cibaEndUserNotificationConfig) {
         this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
     }
+
 }
