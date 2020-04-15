@@ -35,6 +35,7 @@ public class GetUserInfoTest {
         final GetUserInfoParams params = new GetUserInfoParams();
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
+        params.setIdToken(tokens.getIdToken());
 
         final Map<String, Object> resp = client.getUserInfo(params, getAuthorization(site));
         assertNotNull(resp);
