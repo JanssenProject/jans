@@ -37,6 +37,8 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.jetbrains.annotations.Nullable;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
@@ -61,11 +63,8 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.function.Function;
 
 import static org.testng.Assert.*;
@@ -438,7 +437,13 @@ public abstract class BaseTest {
     }
 
     protected AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
-                                                             WebDriver currentDriver, AuthorizeClient authorizeClient,
+                                                               WebDriver currentDriver,
+                                                               String authorizationResponseStr) {
+        return buildAuthorizationResponse(authorizationRequest, currentDriver, null, authorizationResponseStr);
+    }
+
+    protected AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
+                                                             WebDriver currentDriver, @Nullable AuthorizeClient authorizeClient,
                                                              String authorizationResponseStr) {
         final WebDriver.Options options = currentDriver.manage();
         Cookie sessionStateCookie = options.getCookieNamed("session_state");
@@ -455,8 +460,10 @@ public abstract class BaseTest {
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
             authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
         }
-        authorizeClient.setResponse(authorizationResponse);
-        showClientUserAgent(authorizeClient);
+        if (authorizeClient != null) {
+            authorizeClient.setResponse(authorizationResponse);
+            showClientUserAgent(authorizeClient);
+        }
 
         return authorizationResponse;
     }
@@ -1015,5 +1022,13 @@ public abstract class BaseTest {
         PageConfig config = new PageConfig(driver);
         config.getTestKeys().putAll(allTestKeys);
         return config;
+    }
+
+    public static String randomUUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static void output(String str) {
+        System.out.println(str); // switch to logger?
     }
 }
