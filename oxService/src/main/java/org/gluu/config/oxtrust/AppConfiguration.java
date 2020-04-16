@@ -141,6 +141,7 @@ public class AppConfiguration implements Configuration, Serializable {
     private List<String> clientBlackList;
 
     private String loggingLevel;
+    private String loggingLayout;
 
     private String shibbolethVersion;
     private String shibboleth3IdpRootDir;
@@ -779,6 +780,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setLoggingLevel(String loggingLevel) {
         this.loggingLevel = loggingLevel;
+    }
+
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
     }
 
     public int getMetricReporterInterval() {
