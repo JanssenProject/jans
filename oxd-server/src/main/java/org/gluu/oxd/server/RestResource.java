@@ -262,7 +262,7 @@ public class RestResource {
 
     private static String validateAccessToken(String authorization) {
         final String prefix = "Bearer ";
-        if (StringUtils.isNotEmpty(authorization) && authorization.startsWith(prefix)) {
+        if (StringUtils.isNotEmpty(authorization) && authorization.toLowerCase().startsWith(prefix.toLowerCase())) {
             String accessToken = authorization.substring(prefix.length());
             if (StringUtils.isNotBlank(accessToken)) {
                 return accessToken;
