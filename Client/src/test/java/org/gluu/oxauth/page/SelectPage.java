@@ -28,6 +28,10 @@ public class SelectPage extends AbstractPage {
         }).collect(Collectors.toList());
     }
 
+    public WebElement getAccountButton(String name) {
+        return getAccountButtons().stream().filter(webElement -> webElement.getText().equals(name)).findFirst().get();
+    }
+
     public LoginPage clickOnLoginAsAnotherUser() {
         final WebDriver driver = driver();
 
