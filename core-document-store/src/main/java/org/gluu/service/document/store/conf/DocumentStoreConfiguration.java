@@ -15,9 +15,9 @@ public class DocumentStoreConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 2519892725606554887L;
 
-	private DocumentStoreType documentStoreType = DocumentStoreType.LOCAL;
+	private DocumentStoreType documentStoreType;
 
-    private LocalDocumentStoreConfiguration localConfiguration = new LocalDocumentStoreConfiguration();
+    private LocalDocumentStoreConfiguration localConfiguration;
 
     private JcaDocumentStoreConfiguration jcaConfiguration;
 
