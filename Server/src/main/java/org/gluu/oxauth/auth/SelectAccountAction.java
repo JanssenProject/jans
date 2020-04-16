@@ -143,7 +143,7 @@ public class SelectAccountAction {
     }
 
     public String getId(SessionId sessionId) {
-        if (StringUtils.isNotBlank(sessionId.getId())) {
+        if (sessionId != null && StringUtils.isNotBlank(sessionId.getId())) {
             return sessionId.getId();
         }
         log.error("Session id is not set.");
