@@ -332,6 +332,7 @@
         "disableFido2":true
     },
     "loggingLevel": "INFO",
+    "loggingLayout": "text",
     "errorHandlingMethod":"internal",
     "useLocalCache":true,
     "backchannelTokenDeliveryModesSupported": ["poll", "ping", "push"],
