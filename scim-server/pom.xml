@@ -59,22 +59,29 @@
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxcore-service</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.python</groupId>
-                    <artifactId>jython-standalone</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxtrust-service</artifactId>
             <version>${gluu.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>scim-rest</artifactId>
+            <version>${gluu.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-cdi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld</groupId>
+            <artifactId>weld-core-impl</artifactId>
         </dependency>
 
         <!-- Security -->
