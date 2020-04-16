@@ -83,7 +83,7 @@ public class SAMLMetadataParser {
             is = documentStoreService.readDocumentAsStream(metadataFile);
 
             return parseMetadata(is);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error("Failed to read SAML metadata file: " + metadataFile, ex);
             return null;
         } finally {
