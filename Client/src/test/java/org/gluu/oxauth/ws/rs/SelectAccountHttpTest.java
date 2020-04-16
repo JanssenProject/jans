@@ -17,7 +17,6 @@ import org.gluu.oxauth.page.LoginPage;
 import org.gluu.oxauth.page.PageConfig;
 import org.gluu.oxauth.page.SelectPage;
 import org.json.JSONArray;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -92,12 +91,11 @@ public class SelectAccountHttpTest extends BaseTest {
 
         output("5. Check that we have 2 buttons for Account 1 and Account 2");
         final SelectPage selectPage = SelectPage.navigate(pageConfig, authorizationEndpoint + "?" + authorizationRequest.getQueryString());
-        final List<WebElement> accountButtons = selectPage.getAccountButtons();
-        assertEquals("oxAuth Test User", accountButtons.get(0).getText());
-        assertEquals("oxAuth Test User2", accountButtons.get(1).getText());
+        assertNotNull(selectPage.getAccountButton("oxAuth Test User"));
+        assertNotNull(selectPage.getAccountButton("oxAuth Test User2"));
 
         output("6. Switch back to Account 1");
-        selectPage.switchAccount(accountButtons.get(0));
+        selectPage.switchAccount(selectPage.getAccountButton("oxAuth Test User"));
         assertEquals(account1SessionId, assertSessionIdCookie()); // check session_id really corresponds to Account 1
     }
 
