@@ -15,6 +15,7 @@ gluuPassportEnabled: %(gluuPassportEnabled)s
 gluuRadiusEnabled: %(gluuRadiusEnabled)s
 gluuSamlEnabled: %(gluuSamlEnabled)s
 oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
+oxDocumentStoreConfiguration: {"dataStoreType":"LOCAL","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
 oxIDPAuthentication: {"type": "auth",
