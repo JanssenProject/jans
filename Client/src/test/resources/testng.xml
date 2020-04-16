@@ -43,7 +43,7 @@
         </classes>
     </test>
 
-    <test name="Select Account test (HTTP)" enabled="true">
+    <test name="Select Account test (HTTP)" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ws.rs.SelectAccountHttpTest"/>
         </classes>
