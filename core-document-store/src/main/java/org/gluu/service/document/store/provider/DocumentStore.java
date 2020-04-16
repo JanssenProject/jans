@@ -18,35 +18,33 @@ public interface DocumentStore<T> {
 
 	/**
 	 * Save document into store
-	 * @throws IOException 
 	 */
-	boolean saveDocument(String path, String documentContent, Charset charset) throws IOException;
+	boolean saveDocument(String path, String documentContent, Charset charset);
 
 	/**
 	 * Save document stream into store
-	 * @throws IOException 
 	 */
-	boolean saveDocumentStream(String path, InputStream documentStream) throws IOException;
+	boolean saveDocumentStream(String path, InputStream documentStream);
 
 	/**
 	 * Load document from store
 	 */
-	String readDocument(String path, Charset charset) throws IOException;
+	String readDocument(String path, Charset charset);
 
 	/**
 	 * Load document from store as stream
 	 */
-	public InputStream readDocumentAsStream(String path)  throws IOException;
+	public InputStream readDocumentAsStream(String path) ;
 
 	/**
 	 * Removes an object document from store
 	 */
-	boolean removeDocument(String path) throws IOException;
+	boolean removeDocument(String path);
 
 	/**
 	 * Rename an object in document store
 	 */
-	boolean renameDocument(String currentPath, String destinationPath) throws IOException;
+	boolean renameDocument(String currentPath, String destinationPath);
 
 	public abstract DocumentStoreType getProviderType();
 
