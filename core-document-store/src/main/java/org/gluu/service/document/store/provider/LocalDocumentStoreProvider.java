@@ -88,11 +88,13 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) throws IOException {
+	public boolean saveDocument(String path, String documentContent, Charset charset) {
 		log.debug("Save document: '{}'", path);
 
 		File file = buildFilePath(path);
-		createParentPath(file);
+		if (!createParentPath(file)) {
+			return false;
+		}
 
 		try (FileOutputStream os = FileUtils.openOutputStream(file)) {
 			IOUtils.write(documentContent, os, charset);
@@ -107,11 +109,13 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) throws IOException {
+	public boolean saveDocumentStream(String path, InputStream documentStream) {
 		log.debug("Save document from stream: '{}'", path);
 
 		File file = buildFilePath(path);
-		createParentPath(file);
+		if (!createParentPath(file)) {
+			return false;
+		}
 
 		try (FileOutputStream os = FileUtils.openOutputStream(file)) {
 			IOUtils.copy(documentStream, os);
@@ -119,33 +123,47 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 			
 			return true;
 		} catch (IOException ex) {
-			log.error("Failed to write document stream to file '{}'", file.getAbsolutePath(), ex);
+			log.error("Failed to write document from stream to file '{}'", file.getAbsolutePath(), ex);
 		}
 
 		return false;
 	}
 
 	@Override
-	public String readDocument(String path, Charset charset) throws IOException {
+	public String readDocument(String path, Charset charset) {
 		log.debug("Read document: '{}'", path);
 
 		File file = buildFilePath(path);
-		createParentPath(file);
+		if (!createParentPath(file)) {
+			return null;
+		}
 
-		return FileUtils.readFileToString(file, charset);
+		try {
+			return FileUtils.readFileToString(file, charset);
+		} catch (IOException ex) {
+			log.error("Failed to read document from file '{}'", file.getAbsolutePath(), ex);
+		}
+		
+		return null;
 	}
 
 	@Override
-	public InputStream readDocumentAsStream(String path)  throws IOException {
+	public InputStream readDocumentAsStream(String path) {
 		log.debug("Read document as stream: '{}'", path);
 
 		File file = buildFilePath(path);
 
-		return new BufferedInputStream(FileUtils.openInputStream(file));
+		try {
+			return new BufferedInputStream(FileUtils.openInputStream(file));
+		} catch (IOException ex) {
+			log.error("Failed to read document as stream from file '{}'", file.getAbsolutePath(), ex);
+		}
+		
+		return null;
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) throws IOException {
+	public boolean renameDocument(String currentPath, String destinationPath) {
 		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
 
 		File currentFile = buildFilePath(currentPath);
@@ -155,20 +173,18 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 			log.error("Failed to remove destination file '{}'", destinationFile.getAbsolutePath());
 		}
 
-		createParentPath(destinationFile);
-
 		try {
 			currentFile.renameTo(destinationFile);
+			return true;
 		} catch (Exception ex) {
 			log.error("Failed to rename to destination file '{}'", destinationFile.getAbsolutePath(), ex);
-			throw new IOException("Failed to rename to destination file " + destinationFile.getAbsolutePath(), ex);
 		}
-
-		return true;
+		
+		return false;
 	}
 
 	@Override
-	public boolean removeDocument(String path) throws IOException {
+	public boolean removeDocument(String path) {
 		log.debug("Remove document: '{}'", path);
 
 		if (!hasDocument(path)) {
@@ -176,18 +192,22 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		}
 
 		File file = buildFilePath(path);
-		createParentPath(file);
+		if (!createParentPath(file)) {
+			return false;
+		}
 
 		return FileUtils.deleteQuietly(file);
 	}
 
-	private void createParentPath(File file) throws IOException {
+	private boolean createParentPath(File file) {
 		try {
 			FileUtils.forceMkdirParent(file);
+			return true;
 		} catch (IOException ex) {
 			log.error("Failed to create path to file '{}'", file.getAbsolutePath(), ex);
-			throw ex;
 		}
+
+		return false;
 	}
 
 	private File buildFilePath(String path) {

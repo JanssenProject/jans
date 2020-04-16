@@ -32,42 +32,42 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) throws IOException {
+	public boolean saveDocument(String path, String documentContent, Charset charset) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.saveDocument(path, documentContent, charset);
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) throws IOException {
+	public boolean saveDocumentStream(String path, InputStream documentStream) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.saveDocumentStream(path, documentStream);
 	}
 
 	@Override
-	public String readDocument(String path, Charset charset)  throws IOException {
+	public String readDocument(String path, Charset charset)  {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.readDocument(path, charset);
 	}
 
 	@Override
-	public InputStream readDocumentAsStream(String path)  throws IOException {
+	public InputStream readDocumentAsStream(String path)  {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.readDocumentAsStream(path);
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) throws IOException {
+	public boolean renameDocument(String currentPath, String destinationPath) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.renameDocument(currentPath, destinationPath);
 	}
 
 	@Override
-	public boolean removeDocument(String path) throws IOException {
+	public boolean removeDocument(String path) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.removeDocument(path);

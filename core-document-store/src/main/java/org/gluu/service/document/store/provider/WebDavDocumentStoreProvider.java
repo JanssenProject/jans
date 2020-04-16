@@ -71,25 +71,25 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) throws IOException {
+	public boolean saveDocumentStream(String path, InputStream documentStream) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public String readDocument(String path, Charset charset) throws IOException {
+	public String readDocument(String path, Charset charset) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public InputStream readDocumentAsStream(String path) throws IOException {
+	public InputStream readDocumentAsStream(String path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) throws IOException {
+	public boolean renameDocument(String currentPath, String destinationPath) {
 		// TODO Auto-generated method stub
 		return false;
 	}
