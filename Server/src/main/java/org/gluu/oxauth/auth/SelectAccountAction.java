@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -140,14 +139,6 @@ public class SelectAccountAction {
             return user.getUserId();
         }
         return user.getDn();
-    }
-
-    public String getId(SessionId sessionId) {
-        if (sessionId != null && StringUtils.isNotBlank(sessionId.getId())) {
-            return sessionId.getId();
-        }
-        log.error("Session id is not set.");
-        return UUID.randomUUID().toString();
     }
 
     public void login() {
