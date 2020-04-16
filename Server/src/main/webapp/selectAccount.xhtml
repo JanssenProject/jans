@@ -54,7 +54,7 @@
                                                    value="#{selectAccountAction.getName(_entry)}"
                                                    iconAwesome="fa-sign-in"
                                                    action="#{selectAccountAction.select()}"
-                                                   id="#{_entry.id}">
+                                                   id="#{selectAccountAction.getId(_entry)}">
                                         <f:setPropertyActionListener target="#{selectAccountAction.selectedSessionId}" value="#{_entry.id}" />
                                     </h:commandLink>&nbsp;
                                 </ui:repeat>
