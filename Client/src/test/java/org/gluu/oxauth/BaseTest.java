@@ -644,6 +644,10 @@ public abstract class BaseTest {
             WebElement loginButton = driver.findElement(By.id(loginFormLoginButton));
 
             loginButton.click();
+
+            navigateToAuhorizationUrl(driver, driver.getCurrentUrl());
+
+            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT).until(d -> !d.getCurrentUrl().contains("/authorize"));
         }
 
         String authorizationResponseStr = driver.getCurrentUrl();
@@ -653,7 +657,7 @@ public abstract class BaseTest {
         if (sessionStateCookie != null) {
             sessionState = sessionStateCookie.getValue();
         }
-        System.out.println("authenticateResourceOwner: sessionState:" + sessionState);
+        System.out.println("authenticateResourceOwner: sessionState:" + sessionState + ", url:" + authorizationResponseStr);
 
         stopSelenium();
 
@@ -922,7 +926,7 @@ public abstract class BaseTest {
 		// Use the TrustSelfSignedStrategy to allow Self Signed Certificates
         SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
 
-        // We can optionally disable hostname verification. 
+        // We can optionally disable hostname verification.
         // If you don't want to further weaken the security, you don't have to include this.
         HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
 
