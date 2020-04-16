@@ -47,7 +47,7 @@ public class StandaloneDocumentStoreProviderFactory {
 			}
 
 			JcaDocumentStoreProvider jcaDocumentStoreProvider = new JcaDocumentStoreProvider();
-			jcaDocumentStoreProvider.configure(documentStoreConfiguration);
+			jcaDocumentStoreProvider.configure(documentStoreConfiguration, stringEncrypter);
 			jcaDocumentStoreProvider.init();
 
 			documentStoreProvider = jcaDocumentStoreProvider;
