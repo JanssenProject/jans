@@ -122,6 +122,11 @@
             </dependency>
             <dependency>
                 <groupId>org.gluu</groupId>
+                <artifactId>oxcore-document-store</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxcore-persistence-annotation</artifactId>
                 <version>${project.version}</version>
             </dependency>
