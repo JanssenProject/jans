@@ -39,10 +39,10 @@
 		<module>persistence-ldap-sample</module>
 		<module>persistence-couchbase-sample</module>
 		<module>oxModel</module>
-		<module>oxSaml</module>
 		<module>core-cache</module>
 		<module>core-document-store</module>
 		<module>core-standalone</module>
+		<module>oxSaml</module>
 		<module>core-java-ext</module>
 		<module>core-cdi</module>
 		<module>core-timer-weld</module>
