@@ -8,6 +8,7 @@ package org.gluu.oxtrust.service.antlr.scimFilter;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
  * @author Val Pecaoco
  * Re-engineered by jgomer on 2017-12-09.
  */
-@Named
+@ApplicationScoped
 public class ScimFilterParserService {
 
     @Inject

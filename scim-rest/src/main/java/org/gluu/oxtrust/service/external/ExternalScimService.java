@@ -23,7 +23,6 @@ import org.gluu.service.custom.script.ExternalScriptService;
  * @author jgomer
  */
 @ApplicationScoped
-@Named
 public class ExternalScimService extends ExternalScriptService {
 
     public ExternalScimService() {

@@ -14,14 +14,14 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Stateless
-@Named
+@ApplicationScoped
 public class UserPersistenceHelper {
 
     @Inject

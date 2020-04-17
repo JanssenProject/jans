@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -35,8 +36,7 @@ import org.slf4j.Logger;
 /**
  * Created by jgomer on 2017-09-29.
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class ExtensionService {
 
     @Inject

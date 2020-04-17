@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -34,8 +35,7 @@ import org.slf4j.Logger;
 /**
  * Created by jgomer on 2017-10-01.
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class ScimResourceSerializer {
 
     @Inject

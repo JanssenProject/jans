@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
@@ -40,7 +41,7 @@ import org.slf4j.Logger;
 /**
  * @author Val Pecaoco Re-engineered by jgomer on 2017-10-18.
  */
-@Named
+@ApplicationScoped
 public class Scim2GroupService implements Serializable {
 
 	/**
