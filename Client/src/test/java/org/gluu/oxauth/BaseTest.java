@@ -765,7 +765,7 @@ public abstract class BaseTest {
             assertNotNull(response.getIssuer(), "The issuer is null");
             assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
             assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
-            assertNotNull(response.getTokenRevocationEndpoint(), "The tokenRevocationEndpoint is null");
+            assertNotNull(response.getRevocationEndpoint(), "The revocationEndpoint is null");
             assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");
             assertNotNull(response.getJwksUri(), "The jwksUri is null");
             assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
@@ -783,7 +783,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
-            tokenRevocationEndpoint = response.getTokenRevocationEndpoint();
+            tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
             clientInfoEndpoint = response.getClientInfoEndpoint();
             checkSessionIFrame = response.getCheckSessionIFrame();

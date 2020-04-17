@@ -28,7 +28,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String tokenEndpoint;
-    private String tokenRevocationEndpoint;
+    private String revocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -221,17 +221,17 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      *
      * @return The URL of the Token Revocation endpoint.
      */
-    public String getTokenRevocationEndpoint() {
-        return tokenRevocationEndpoint;
+    public String getRevocationEndpoint() {
+        return revocationEndpoint;
     }
 
     /**
      * Sets the URL of the Token Revocation endpoint.
      *
-     * @param tokenRevocationEndpoint The URL of the Token Revocation endpoint.
+     * @param revocationEndpoint The URL of the Token Revocation endpoint.
      */
-    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
-        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
+    public void setRevocationEndpoint(String revocationEndpoint) {
+        this.revocationEndpoint = revocationEndpoint;
     }
 
     /**
@@ -1076,7 +1076,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
-                ", tokenRevocationEndpoint='" + tokenRevocationEndpoint + '\'' +
+                ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
                 ", clientInfoEndpoint='" + clientInfoEndpoint + '\'' +
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +
