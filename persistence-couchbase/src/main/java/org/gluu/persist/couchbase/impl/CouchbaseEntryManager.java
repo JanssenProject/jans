@@ -84,7 +84,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     protected CouchbaseEntryManager(CouchbaseOperationsServiceImpl operationService) {
         this.operationService = operationService;
-        this.FILTER_CONVERTER = new CouchbaseFilterConverter(this);
+        this.FILTER_CONVERTER = new CouchbaseFilterConverter();
         subscribers = new LinkedList<DeleteNotifier>();
     }
 
