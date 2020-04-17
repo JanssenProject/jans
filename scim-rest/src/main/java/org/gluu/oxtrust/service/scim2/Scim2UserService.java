@@ -16,13 +16,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.decorator.Delegate;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Any;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.management.InvalidAttributeValueException;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.config.oxtrust.AppConfiguration;
 import org.gluu.model.GluuStatus;
 import org.gluu.oxtrust.model.GluuGroup;
 import org.gluu.oxtrust.model.scim.ScimCustomPerson;
@@ -68,7 +73,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author jgomer
  */
-@Named
+@ApplicationScoped
 public class Scim2UserService implements Serializable {
 
 	/**
@@ -89,9 +94,6 @@ public class Scim2UserService implements Serializable {
 	private IGroupService groupService;
 
 	@Inject
-	private GroupWebService groupWS;
-
-	@Inject
 	private ExternalScimService externalScimService;
 
 	@Inject
@@ -106,7 +108,12 @@ public class Scim2UserService implements Serializable {
 	@Inject
 	private PersistenceEntryManager ldapEntryManager;
 
+	@Inject
+    AppConfiguration appConfiguration;
+
 	private boolean ldapBackend;
+
+	private String groupEndpointUrl;
 
 	private String[] getComplexMultivaluedAsArray(List items) {
 
@@ -355,7 +362,7 @@ public class Scim2UserService implements Serializable {
 
 					Group group = new Group();
 					group.setValue(gluuGroup.getInum());
-					String reference = groupWS.getEndpointUrl() + "/" + gluuGroup.getInum();
+					String reference = groupEndpointUrl + "/" + gluuGroup.getInum();
 					group.setRef(reference);
 					group.setDisplay(gluuGroup.getDisplayName());
 					group.setType(Group.Type.DIRECT); // Only support direct membership: see section 4.1.2 of RFC 7644
@@ -598,6 +605,7 @@ public class Scim2UserService implements Serializable {
 	@PostConstruct
     private void init() {
         ldapBackend = scimFilterParserService.isLdapBackend();
+		groupEndpointUrl = appConfiguration.getBaseEndpoint() + GroupWebService.class.getAnnotation(Path.class).value();
     }
 
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.lang.model.type.NullType;
@@ -42,8 +43,7 @@ import org.slf4j.Logger;
 /**
  * Created by jgomer on 2017-12-17.
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class Scim2PatchService {
 
     @Inject
