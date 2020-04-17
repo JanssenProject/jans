@@ -21,6 +21,8 @@ import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.cache.InMemoryConfiguration;
+import org.gluu.service.document.store.conf.DocumentStoreConfiguration;
+import org.gluu.service.document.store.conf.LocalDocumentStoreConfiguration;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -82,6 +84,24 @@ public class ApplicationFactory {
 		log.info("Cache configuration: " + cacheConfiguration);
 		return cacheConfiguration;
 	}
+
+    @Produces @ApplicationScoped
+   	public DocumentStoreConfiguration getDocumentStoreConfiguration() {
+    	DocumentStoreConfiguration documentStoreConfiguration = configurationService.getConfiguration().getDocumentStoreConfiguration();
+   		if ((documentStoreConfiguration == null) || (documentStoreConfiguration.getDocumentStoreType() == null)) {
+   			log.error("Failed to read document store configuration from DB. Please check configuration oxDocumentStoreConfiguration attribute " +
+   					"that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
+   			log.info("Creating fallback LOCAL document store configuration ... ");
+
+   			documentStoreConfiguration = new DocumentStoreConfiguration();
+   			documentStoreConfiguration.setLocalConfiguration(new LocalDocumentStoreConfiguration());
+
+   			log.info("LOCAL document store configuration is created.");
+		}
+
+   		log.info("Document store configuration: " + documentStoreConfiguration);
+   		return documentStoreConfiguration;
+   	}
 
 	@Produces @RequestScoped
 	public SmtpConfiguration getSmtpConfiguration() {
