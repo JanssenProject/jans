@@ -77,7 +77,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		try {
 			log.debug("Starting JcaDocumentStoreProvider ...");
 			decryptPassword(jcaDocumentStoreConfiguration);
-			this.repository = new URLRemoteRepository("http://localhost:8080/rmi");
+			this.repository = new URLRemoteRepository(jcaDocumentStoreConfiguration.getServerUrl());
 			
 			String password = StringUtils.isBlank(jcaDocumentStoreConfiguration.getDecryptedPassword()) ? "" : jcaDocumentStoreConfiguration.getDecryptedPassword();
 			
