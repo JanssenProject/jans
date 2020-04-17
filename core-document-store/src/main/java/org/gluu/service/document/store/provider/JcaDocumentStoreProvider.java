@@ -101,7 +101,13 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	public void destroy() {
 		log.debug("Destroying JcaDocumentStoreProvider");
 
+		this.repository = null;
+
 		log.debug("Destroyed JcaDocumentStoreProvider");
+	}
+
+	public void setJcaDocumentStoreConfiguration(JcaDocumentStoreConfiguration jcaDocumentStoreConfiguration) {
+		this.jcaDocumentStoreConfiguration = jcaDocumentStoreConfiguration;
 	}
 
 	public DocumentStoreType getProviderType() {
@@ -376,6 +382,25 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		public Session call() throws Exception {
 			return repository.login(credentials, workspaceName);
 		}
+	}
+
+	public boolean isConnected() {
+		log.debug("Check if server available");
+
+		Node fileNode = null;
+		Session session;
+		try {
+			session = getSessionWithTimeout();
+			try {
+				fileNode = JcrUtils.getNodeIfExists(getNormalizedPath("/"), session);
+			} finally {
+				closeSession(session);
+			}
+		} catch (RepositoryException ex) {
+			log.error("Failed to check if server available", ex);
+		}
+
+		return fileNode != null;
 	}
 
 }
