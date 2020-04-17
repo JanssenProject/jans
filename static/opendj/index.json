@@ -131,6 +131,13 @@
 	},
 
 	{
+		"attribute": "exp",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
 		"attribute": "oxLastAccessTime",
 		"type": "date",
 		"index": ["ordering"],
