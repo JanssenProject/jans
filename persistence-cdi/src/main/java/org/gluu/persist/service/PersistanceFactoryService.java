@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -229,5 +230,4 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		return this.log;
 		
 	}
-
 }
