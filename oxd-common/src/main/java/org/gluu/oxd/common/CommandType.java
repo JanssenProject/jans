@@ -4,6 +4,7 @@
 package org.gluu.oxd.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.apache.commons.lang.StringUtils;
 
@@ -14,43 +15,50 @@ import org.apache.commons.lang.StringUtils;
 public enum CommandType {
 
     // Register
-    REGISTER_SITE("register_site"),
-    UPDATE_SITE("update_site"),
-    REMOVE_SITE("remove_site"),
+    REGISTER_SITE("register_site", false),
+    UPDATE_SITE("update_site", false),
+    REMOVE_SITE("remove_site", false),
 
     // Connect (stateful)
-    GET_AUTHORIZATION_URL("get_authorization_url"),
-    GET_AUTHORIZATION_CODE("get_authorization_code"),
-    GET_TOKENS_BY_CODE("get_tokens_by_code"),
-    GET_USER_INFO("get_user_info"),
-    GET_LOGOUT_URI("get_logout_uri"),
-    GET_ACCESS_TOKEN_BY_REFRESH_TOKEN("get_access_token_by_refresh_token"),
-    INTROSPECT_ACCESS_TOKEN("introspect_access_token"),
+    GET_AUTHORIZATION_URL("get_authorization_url", true),
+    GET_AUTHORIZATION_CODE("get_authorization_code", true),
+    GET_TOKENS_BY_CODE("get_tokens_by_code", true),
+    GET_USER_INFO("get_user_info", true),
+    GET_LOGOUT_URI("get_logout_uri", true),
+    GET_ACCESS_TOKEN_BY_REFRESH_TOKEN("get_access_token_by_refresh_token", true),
+    INTROSPECT_ACCESS_TOKEN("introspect_access_token", true),
 
-    VALIDATE("validate"),
-    CHECK_ID_TOKEN("id_token_status"),
-    CHECK_ACCESS_TOKEN("access_token_status"),
+    VALIDATE("validate", true),
+    CHECK_ID_TOKEN("id_token_status", true),
+    CHECK_ACCESS_TOKEN("access_token_status", true),
 
     // UMA
-    RS_PROTECT("uma_rs_protect"),
-    RS_MODIFY("uma_rs_modify"),
-    RS_CHECK_ACCESS("uma_rs_check_access"),
-    INTROSPECT_RPT("introspect_rpt"),
-    RP_GET_RPT("uma_rp_get_rpt"),
-    RP_GET_CLAIMS_GATHERING_URL("uma_rp_get_claims_gathering_url"),
+    RS_PROTECT("uma_rs_protect", true),
+    RS_MODIFY("uma_rs_modify", true),
+    RS_CHECK_ACCESS("uma_rs_check_access", true),
+    INTROSPECT_RPT("introspect_rpt", true),
+    RP_GET_RPT("uma_rp_get_rpt", true),
+    RP_GET_CLAIMS_GATHERING_URL("uma_rp_get_claims_gathering_url", true),
 
     // stateless
-    AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
-    IMPLICIT_FLOW("implicit_flow"),
-    GET_CLIENT_TOKEN("get_client_token"),
-    GET_RP("get_rp"),
-    GET_JWKS("get_jwks"),
-    GET_DISCOVERY("get_discovery");
+    AUTHORIZATION_CODE_FLOW("authorization_code_flow", true),
+    IMPLICIT_FLOW("implicit_flow", true),
+    GET_CLIENT_TOKEN("get_client_token", false),
+    GET_RP("get_rp", false),
+    GET_JWKS("get_jwks", false),
+    GET_DISCOVERY("get_discovery", false);
 
     private final String value;
+    private final boolean authorizationRequired;
 
-    CommandType(String p_value) {
-        value = p_value;
+    CommandType(String value, boolean authorizationRequired) {
+        this.value = value;
+        this.authorizationRequired = authorizationRequired;
+    }
+
+    @JsonIgnore
+    public boolean isAuthorizationRequired() {
+        return authorizationRequired;
     }
 
     @JsonValue
