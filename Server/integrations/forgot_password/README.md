@@ -14,5 +14,3 @@ This script enables user to reset its password:
 * Enable the custom script. 
 
 Please notice the xhtml files for this script are currently located at `oxAuth/Server/src/main/webapp/auth/forgot_password/`
-
-
