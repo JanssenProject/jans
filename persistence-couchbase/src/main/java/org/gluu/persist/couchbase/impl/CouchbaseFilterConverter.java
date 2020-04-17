@@ -50,6 +50,9 @@ public class CouchbaseFilterConverter {
     	this.couchbaseEntryManager = couchbaseEntryManager;
 	}
 
+	public CouchbaseFilterConverter() {
+	}
+
 	public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	return convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap, null);
     }
