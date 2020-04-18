@@ -77,10 +77,15 @@ from ces_current.pylib.generate_properties import generate_properties
 from ces_current.pylib.jproperties import Properties as JProperties
 from ces_current.pylib.gluu_utils import read_properties_file
 
+class ProgressBar:
+    def progress(self, ptype, msg, incr=True):
+        print(msg)
+
 setup_porperties = generate_properties(True)
 
 setupObj = Setup(ces_dir)
 setupObj.initialize()
+setupObj.pbar = ProgressBar()
 
 setupObj.setup = setupObj
 
@@ -131,6 +136,18 @@ else:
     ldap_conn = ldap.initialize('ldaps://'+ldap_host_port)
     ldap_conn.simple_bind_s(bindDN, bindPassword)
 
+
+def get_oxTrustConfiguration_ldap():
+    result = ldap_conn.search_s(
+                        'o=gluu',
+                        ldap.SCOPE_SUBTREE,
+                        '(objectClass=oxTrustConfiguration)',
+                        ['oxTrustConfApplication']
+                        )
+    dn = result[0][0]
+    oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0])
+
+    return dn, oxTrustConfApplication
 
 def get_oxTrustConfiguration_ldap():
     result = ldap_conn.search_s(
@@ -443,7 +460,32 @@ def installCasa():
 
 
 def installRadius():
+    outputFolder = setupObj.outputFolder
+    setupObj.outputFolder = os.path.join(cur_dir, 'output')
     setupObj.install_gluu_radius()
+    setupObj.outputFolder = outputFolder
+
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
+    dn, oxAuthConfiguration = get_oxAuthConfiguration_ldap()
+
+    oxAuthConfiguration['openidScopeBackwardCompatibility'] = True
+    oxAuthConfiguration['legacyIdTokenClaims'] = True
+    oxAuthConfiguration_js = json.dumps(oxAuthConfiguration, indent=2)
+
+    ldap_conn.modify_s(
+                        dn,
+                        [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfiguration_js)]
+                    )
+
+    ldap_conn.modify_s('ou=configuration,o=gluu',
+                    [( ldap.MOD_REPLACE, 'gluuRadiusEnabled',  'true')]
+                    )
+
+    ldap_conn.modify_s('inum=B8FD-4C11,ou=scripts,o=gluu',
+                    [( ldap.MOD_REPLACE, 'oxEnabled',  'true')]
+                    )
 
 if args.addshib:
     installSaml()
