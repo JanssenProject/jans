@@ -79,7 +79,7 @@ def read_properties_file(fn):
     if os.path.exists(fn):
         with open(fn, 'rb') as f:
             p.load(f, 'utf-8')
-      
+
         for k in p.keys():
             retDict[str(k)] = str(p[k].data)
             
