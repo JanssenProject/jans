@@ -15,6 +15,8 @@ parser.add_argument("-addshib", help="Install Shibboleth SAML IDP", action="stor
 parser.add_argument("-addpassport", help="Install Passport", action="store_true")
 parser.add_argument("-addoxd", help="Install Oxd Server", action="store_true")
 parser.add_argument("-addcasa", help="Install Gluu Casa", action="store_true")
+parser.add_argument("-addradius", help="Install Gluu Radius Server", action="store_true")
+
 
 args = parser.parse_args()
 
@@ -49,7 +51,7 @@ for l in menifest.splitlines():
 
 print("Current Gluu Version", gluu_version)
 
-"""
+
 if os.path.exists(ces_dir + '.back'):
     os.system('rm -r -f ' + ces_dir + '.back')
 
@@ -64,7 +66,7 @@ print("Extracting package")
 os.system('unzip -o -qq {}/version_{}.zip'.format(cur_dir, gluu_version))
 os.system('mv {}/community-edition-setup-version_{} {}/ces_current'.format(cur_dir, gluu_version, cur_dir))
 os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/generate_properties.py -O {}'.format(os.path.join(ces_dir, 'pylib', 'generate_properties.py')))
-"""
+
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
 
 sys.path.append(ces_dir)
@@ -439,6 +441,10 @@ def installCasa():
     setupObj.calculate_selected_aplications_memory()
     setupObj.install_casa()
 
+
+def installRadius():
+    setupObj.install_gluu_radius()
+
 if args.addshib:
     installSaml()
 
@@ -450,6 +456,9 @@ if args.addoxd:
 
 if args.addcasa:
     installCasa()
+
+if args.addradius:
+    installRadius()
 
 if persistence_type == 'ldap':
     setupObj.deleteLdapPw()
