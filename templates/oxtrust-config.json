@@ -137,6 +137,7 @@
     },
     "cleanServiceInterval":300,
     "loggingLevel": "INFO",
+    "loggingLayout": "text",
     "passwordResetRequestExpirationTime":600,
     "useLocalCache":true
 }
