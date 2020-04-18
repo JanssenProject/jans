@@ -4615,6 +4615,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxDocumentStoreConfiguration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxDocumentStoreConfiguration"
+            ], 
+            "oid": "oxAttribute", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
         }
     ], 
     "objectClasses": [
@@ -4905,8 +4916,9 @@
                 "oxLogViewerConfig", 
                 "oxLogConfigLocation", 
                 "oxSmtpConfiguration", 
-                "oxCacheConfiguration", 
-                "oxTrustStoreCert", 
+                "oxCacheConfiguration",
+                "oxDocumentStoreConfiguration",
+                "oxTrustStoreCert",
                 "oxTrustStoreConf", 
                 "passwordResetAllowed", 
                 "softwareVersion", 
