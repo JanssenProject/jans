@@ -300,7 +300,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getSettings(self):
-        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        entryManager = CdiUtil.bean(PersistenceEntryManager)
         config = ApplicationConfiguration()
         config = entryManager.find(config.getClass(), "ou=casa,ou=configuration,o=gluu")
         settings = None
