@@ -1016,6 +1016,10 @@ class Setup(object):
         if not self.application_max_ram:
             self.application_max_ram = 3072
 
+        if not self.couchbaseShibUserPassword:
+            self.couchbaseShibUserPassword = self.getPW()
+
+
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'red']:
