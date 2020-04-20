@@ -6,15 +6,14 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
-
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.client.JwkResponse;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for JWK Web Services (HTTP)
@@ -41,7 +40,9 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
             assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
+            assertNotNull(JSONWebKey.getAlg(), "Unexpected result: alg is null");
         }
+        //assertEquals(response.getJwks().getKeys().size(), 11, "The list of keys are not all that could be supported.");
     }
 
     @Parameters({"clientJwksUri"})
@@ -62,6 +63,8 @@ public class JwkRestWebServiceHttpTest extends BaseTest {
         for (JSONWebKey JSONWebKey : response.getJwks().getKeys()) {
             assertNotNull(JSONWebKey.getKid(), "Unexpected result: kid is null");
             assertNotNull(JSONWebKey.getUse(), "Unexpected result: use is null");
+            assertNotNull(JSONWebKey.getAlg(), "Unexpected result: alg is null");
         }
+        //assertEquals(response.getJwks().getKeys().size(), 11, "The list of keys are not all that could be supported.");
     }
 }

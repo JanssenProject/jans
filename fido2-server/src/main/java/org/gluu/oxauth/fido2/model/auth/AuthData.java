@@ -13,16 +13,23 @@
 
 package org.gluu.oxauth.fido2.model.auth;
 
+/**
+ * @author Yuriy Movchan
+ * @version March 9, 2020
+ */
 public class AuthData {
     private byte[] rpIdHash;
     private byte[] flags;
     private byte[] counters;
     private byte[] aaguid;
     private byte[] credId;
-    private byte[] signatureBaseFields;
     private byte[] attestationBuffer;
     private int keyType;
+    private byte[] cosePublicKey;
+    private byte[] extensions;
+
     private byte[] authDataDecoded;
+
 
     public byte[] getRpIdHash() {
         return rpIdHash;
@@ -69,16 +76,14 @@ public class AuthData {
         return this;
     }
 
-    public byte[] getCOSEPublicKey() {
-        return COSEPublicKey;
+    public byte[] getCosePublicKey() {
+        return cosePublicKey;
     }
 
-    public AuthData setCOSEPublicKey(byte[] COSEPublicKey) {
-        this.COSEPublicKey = COSEPublicKey;
+    public AuthData setCosePublicKey(byte[] cosePublicKey) {
+        this.cosePublicKey = cosePublicKey;
         return this;
     }
-
-    private byte[] COSEPublicKey;
 
     public byte[] getAttestationBuffer() {
         return attestationBuffer;
@@ -103,4 +108,14 @@ public class AuthData {
     public void setAuthDataDecoded(byte[] authDataDecoded) {
         this.authDataDecoded = authDataDecoded;
     }
+
+	public byte[] getExtensions() {
+		return extensions;
+	}
+
+	public AuthData setExtensions(byte[] extensions) {
+		this.extensions = extensions;
+        return this;
+	}
+
 }

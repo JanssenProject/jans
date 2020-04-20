@@ -3,10 +3,7 @@ package org.gluu.oxauth.dev.manual;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.client.UserInfoClient;
-import org.gluu.oxauth.client.UserInfoResponse;
 import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -43,15 +40,6 @@ public class AccessTokenManualTest extends BaseTest {
 
             System.out.println("Obtained user info successfully, seconds: " + ((i + 1) * 10));
         }
-    }
-
-    private UserInfoResponse requestUserInfo(String accessToken) throws Exception {
-        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        userInfoClient.setExecutor(clientExecutor(true));
-        UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
-
-        assertNotNull(response2.getClaim(JwtClaimName.EMAIL));
-        return response2;
     }
 
     private static void sleepSeconds(int i) throws InterruptedException {
