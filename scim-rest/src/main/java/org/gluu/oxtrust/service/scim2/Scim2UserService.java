@@ -16,11 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.decorator.Delegate;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.management.InvalidAttributeValueException;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
