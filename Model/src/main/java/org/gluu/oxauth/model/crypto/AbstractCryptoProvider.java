@@ -21,17 +21,13 @@ import org.gluu.oxeleven.model.KeyRequestParam;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
+import java.security.spec.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -206,9 +202,11 @@ public abstract class AbstractCryptoProvider {
                 }
 
                 if (AlgorithmFamily.RSA.equals(family)) {
-                    publicKey = new RSAPublicKeyImpl(
+                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                    RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
+                    publicKey = keyFactory.generatePublic(pubKeySpec);
                 } else if (AlgorithmFamily.EC.equals(family)) {
                     ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
                     AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
