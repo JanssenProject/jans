@@ -44,18 +44,18 @@
 			for (let i=0; i &lt; numbs.length; i++) {
 				let checked = (i == 0) ? " checked" : ""
 				//very ugly... yes
-				var line = '&lt;li class="list-group-item hover-bg-light-gray gray hover-dark-gray pv1"&gt; '
-				line = line + '&lt;label&gt; '
-				line = line + '&lt;input type="radio" id="optionPhone" class="mr1" onchange="changeOption(' + i + ')"' + checked + '/&gt; ' 
-				line = line + '&lt;span class="mb1">'+ ast + numbs[i] + '&lt;/span&gt; '
-				line = line + '&lt;/label&gt; '
-				line = line + '&lt;/li&gt; '
-			
+				var line = '&lt;li class="list-group-item hover-bg-light-gray gray hover-dark-gray pv1"> '
+				line = line + '&lt;label> '
+				line = line + '&lt;input type="radio" id="optionPhone" name="optionPhone" class="mr1" onchange="changeOption(' + i + ')"' + checked + '/> '
+				line = line + '&lt;span class="mb1">'+ ast + numbs[i] + '&lt;/span> '
+				line = line + '&lt;/label> '
+				line = line + '&lt;/li> '
+				
 				var option = $(line)
 				$('#phones').append(option)
 			}
 		
-			function changeOption(index) {        
+			function changeOption(index) {
 				document.getElementById("OtpSmsloginForm:indexOfNumber").value = index;
 			}
 		</script>

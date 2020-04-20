@@ -14,8 +14,6 @@
 package org.gluu.oxauth.fido2.ws.rs.service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +22,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
@@ -87,76 +86,13 @@ public class AssertionService {
     private AppConfiguration appConfiguration;
 
     public JsonNode options(JsonNode params) {
-        log.info("options {}", params);
-        return assertionOptions(params);
-    }
+        log.debug("assertionOptions {}", params);
 
-    public JsonNode verify(JsonNode params) {
-        log.info("authenticateResponse {}", params);
-        ObjectNode authenticateResponseNode = dataMapperService.createObjectNode();
-        JsonNode response = params.get("response");
-
-        commonVerifiers.verifyBasicPayload(params);
-        String keyId = commonVerifiers.verifyThatString(params, "id");
-        commonVerifiers.verifyAssertionType(params.get("type"));
-        commonVerifiers.verifyThatString(params, "rawId");
-        JsonNode userHandle = params.get("response").get("userHandle");
-        if (userHandle != null && params.get("response").hasNonNull("userHandle")) {
-            // This can be null for U2F authenticators
-            commonVerifiers.verifyThatString(userHandle, "userHandle");
-        }
-
-        JsonNode clientDataJSONNode;
-        try {
-            clientDataJSONNode = dataMapperService
-                    .readTree(new String(base64Service.urlDecode(params.get("response").get("clientDataJSON").asText()), Charset.forName("UTF-8")));
-        } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Can't parse message");
-        } catch (Exception e) {
-            throw new Fido2RPRuntimeException("Invalid assertion data");
-        }
-
-        commonVerifiers.verifyClientJSON(clientDataJSONNode);
-        commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
-
-        String clientDataChallenge = clientDataJSONNode.get("challenge").asText();
-        String clientDataOrigin = clientDataJSONNode.get("origin").asText();
-
-        Fido2AuthenticationEntry authenticationEntity = authenticationsRepository.findByChallenge(clientDataChallenge).parallelStream().findFirst()
-                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find matching request by challenge '%s'", clientDataChallenge)));
-        
-        Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
-
-        // challengeVerifier.verifyChallenge(authenticationEntity.getChallenge(),
-        // challenge, clientDataChallenge);
-        domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataOrigin);
-
-        Fido2RegistrationEntry registrationEntry = registrationsRepository.findByPublicKeyId(keyId)
-                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
-        Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-
-        authenticatorAuthorizationVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
-
-        authenticationData.setW3cAuthenticatorAssertionResponse(response.toString());
-        authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
-
-        authenticationsRepository.update(authenticationEntity);
-
-        authenticateResponseNode.put("status", "ok");
-        authenticateResponseNode.put("errorMessage", "");
-        return authenticateResponseNode;
-    }
-
-    private JsonNode assertionOptions(JsonNode params) {
-        log.info("assertionOptions {}", params);
         String username = params.get("username").asText();
-        String userVerification = "required";
+        UserVerification userVerification = UserVerification.preferred;
 
-        if (params.hasNonNull("authenticatorSelection")) {
-            JsonNode authenticatorSelector = params.get("authenticatorSelection");
-            if (authenticatorSelector.hasNonNull("userVerification")) {
-                userVerification = commonVerifiers.verifyUserVerification(authenticatorSelector.get("userVerification"));
-            }
+        if (params.hasNonNull("userVerification")) {
+            userVerification = commonVerifiers.verifyUserVerification(params.get("userVerification"));
         }
 
         String documentDomain;
@@ -168,7 +104,7 @@ public class AssertionService {
         
         documentDomain = networkService.getHost(documentDomain);
 
-        log.info("Options {} ", username);
+        log.debug("Options {} ", username);
 
         ObjectNode assertionOptionsResponseNode = dataMapperService.createObjectNode();
 
@@ -185,9 +121,6 @@ public class AssertionService {
 
         String challenge = challengeGenerator.getChallenge();
         assertionOptionsResponseNode.put("challenge", challenge);
-
-        ObjectNode credentialUserEntityNode = assertionOptionsResponseNode.putObject("user");
-        credentialUserEntityNode.put("name", username);
 
         ArrayNode publicKeyCredentialDescriptors = assertionOptionsResponseNode.putArray("allowCredentials");
 
@@ -209,12 +142,10 @@ public class AssertionService {
             throw new Fido2RPRuntimeException("Can't find associated key. Have you registered");
         }
 
-        assertionOptionsResponseNode.put("userVerification", userVerification);
+        assertionOptionsResponseNode.put("userVerification", userVerification.name());
 
         if (params.hasNonNull("extensions")) {
             assertionOptionsResponseNode.set("extensions", params.get("extensions"));
-        } else {
-//            assertionOptionsResponseNode.putObject("extensions");
         }
 
         Fido2AuthenticationData authenticationData = new Fido2AuthenticationData();
@@ -231,5 +162,63 @@ public class AssertionService {
         assertionOptionsResponseNode.put("errorMessage", "");
 
         return assertionOptionsResponseNode;
+
     }
+
+    public JsonNode verify(JsonNode params) {
+        log.debug("authenticateResponse {}", params);
+
+        ObjectNode authenticateResponseNode = dataMapperService.createObjectNode();
+        JsonNode response = params.get("response");
+
+        commonVerifiers.verifyBasicPayload(params);
+        String keyId = commonVerifiers.verifyThatString(params, "id");
+        commonVerifiers.verifyAssertionType(params.get("type"));
+        commonVerifiers.verifyThatString(params, "rawId");
+
+        if (params.get("response").hasNonNull("userHandle")) {
+            // This can be null for U2F authenticators
+            commonVerifiers.verifyThatString(params.get("response"), "userHandle");
+        }
+
+        JsonNode clientDataJSONNode;
+        try {
+            clientDataJSONNode = dataMapperService
+                    .readTree(new String(base64Service.urlDecode(params.get("response").get("clientDataJSON").asText()), Charset.forName("UTF-8")));
+        } catch (IOException e) {
+            throw new Fido2RPRuntimeException("Can't parse message", e);
+        } catch (Exception e) {
+            throw new Fido2RPRuntimeException("Invalid assertion data", e);
+        }
+
+        commonVerifiers.verifyClientJSON(clientDataJSONNode);
+        commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
+
+        String clientDataChallenge = clientDataJSONNode.get("challenge").asText();
+        String clientDataOrigin = clientDataJSONNode.get("origin").asText();
+
+        Fido2AuthenticationEntry authenticationEntity = authenticationsRepository.findByChallenge(clientDataChallenge).parallelStream().findFirst()
+                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find matching request by challenge '%s'", clientDataChallenge)));
+        
+        Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
+
+        challengeVerifier.verifyChallenge(authenticationEntity.getChallange(), clientDataChallenge, clientDataChallenge);
+        domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataOrigin);
+
+        Fido2RegistrationEntry registrationEntry = registrationsRepository.findByPublicKeyId(keyId)
+                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
+        Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
+
+        authenticatorAuthorizationVerifier.verifyAuthenticatorAssertionResponse(response, registrationData, authenticationData);
+
+        authenticationData.setW3cAuthenticatorAssertionResponse(response.toString());
+        authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+
+        authenticationsRepository.update(authenticationEntity);
+
+        authenticateResponseNode.put("status", "ok");
+        authenticateResponseNode.put("errorMessage", "");
+        return authenticateResponseNode;
+    }
+
 }

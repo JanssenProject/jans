@@ -19,6 +19,7 @@ import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.gluu.GluuErrorResponseType;
 import org.gluu.oxauth.model.registration.Client;
@@ -26,10 +27,7 @@ import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.URLPatternList;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.RedirectionUriService;
-import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalEndSessionService;
 import org.gluu.oxauth.service.external.context.EndSessionContext;
@@ -82,6 +80,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     @Inject
     private ClientService clientService;
@@ -151,12 +152,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
             backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getId());
 
-            if (frontchannelUris.isEmpty()) { // no front-channel
+            if (frontchannelUris.isEmpty() && StringUtils.isNotBlank(postLogoutRedirectUri)) { // no front-channel
                 log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
-                if (StringUtils.isBlank(postLogoutRedirectUri)) {
-                    log.trace("postlogout_redirect_uri is missed");
-                    return Response.ok().build();
-                }
+
                 try {
                     log.trace("Redirect to postlogout_redirect_uri: " + postLogoutRedirectUri);
                     return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
@@ -208,9 +206,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         log.debug(reason);
         try {
             if (allowPostLogoutRedirect(postLogoutRedirectUri)) {
-                // Commented out to avoid sending an error:                
-                // String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
-                // postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                if (ErrorHandlingMethod.REMOTE == appConfiguration.getErrorHandlingMethod()) {
+                    String separator = postLogoutRedirectUri.contains("?") ? "&" : "?";
+                    postLogoutRedirectUri = postLogoutRedirectUri + separator + errorResponseFactory.getErrorAsQueryString(error, "", reason);
+                }
                 return Response.status(Response.Status.FOUND).location(new URI(postLogoutRedirectUri)).build();
             }
         } catch (URISyntaxException e) {
@@ -287,12 +286,13 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     private String validatePostLogoutRedirectUri(String postLogoutRedirectUri, Pair<SessionId, AuthorizationGrant> pair) {
         try {
+            if (StringUtils.isBlank(postLogoutRedirectUri)) {
+                return "";
+            }
             if (appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) {
                 log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true)");
                 return postLogoutRedirectUri;
             }
-
-            boolean isNotBlank = StringUtils.isNotBlank(postLogoutRedirectUri);
 
             final String result;
             if (pair.getSecond() == null) {
@@ -301,8 +301,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 result = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
             }
 
-            if (isNotBlank && StringUtils.isBlank(result)) {
-                log.trace("Failed to valistdate post_logout_redirect_uri.");
+            if (StringUtils.isBlank(result)) {
+                log.trace("Failed to validate post_logout_redirect_uri.");
                 throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
             }
 
@@ -312,10 +312,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             log.trace("Unable to validate post_logout_redirect_uri.");
             throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
         } catch (WebApplicationException e) {
-            if (pair.getFirst() != null) { // session_id was found and removed
-                String reason = "Session was removed successfully but post_logout_redirect_uri validation fails since AS failed to validate it against clients associated with session (which was just removed).";
-                log.error(reason, e);
-                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, reason));
+            if (pair.getFirst() != null) {
+                log.error(e.getMessage(), e);
+                throw new WebApplicationException(createErrorResponse(postLogoutRedirectUri, EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT, ""));
             } else {
                 throw e;
             }
@@ -362,7 +361,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         try {
             String id = sessionId;
             if (StringHelper.isEmpty(id)) {
-                id = sessionIdService.getSessionIdFromCookie(httpRequest);
+                id = cookieService.getSessionIdFromCookie(httpRequest);
             }
             if (StringHelper.isNotEmpty(id)) {
                 ldapSessionId = sessionIdService.getSessionId(id);
@@ -427,14 +426,14 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionIdService.removeSessionIdCookie(httpResponse);
-            sessionIdService.removeOPBrowserStateCookie(httpResponse);
+            cookieService.removeSessionIdCookie(httpResponse);
+            cookieService.removeOPBrowserStateCookie(httpResponse);
         }
     }
 
     private void removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            String id = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+            String id = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
             if (StringHelper.isNotEmpty(id)) {
                 SessionId ldapSessionId = sessionIdService.getSessionId(id);
@@ -450,7 +449,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionIdService.removeConsentSessionIdCookie(httpResponse);
+            cookieService.removeConsentSessionIdCookie(httpResponse);
         }
     }
 
