@@ -58,6 +58,13 @@ public class ServerUtil {
         return new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     }
 
+    public static int calculateTtl(Date creationDate, Date expirationDate) {
+        if (creationDate != null && expirationDate != null) {
+            return (int) ((expirationDate.getTime() - creationDate.getTime()) / 1000L);
+        }
+        return 0;
+    }
+
     public static String asJsonSilently(Object p_object) {
         try {
             return asJson(p_object);

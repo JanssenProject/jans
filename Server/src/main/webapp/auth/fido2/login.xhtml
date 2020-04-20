@@ -57,8 +57,8 @@
 						addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
 					} else if (err.name === 'AbortError') {
 						addMessage('This operation is canceled by user.');
-					} else if (err.message) {
-						addMessage(`${err.name}: ${err.message}`);
+				    } else if (err.message) {
+						addMessage(err.name + ' : ' + err.message);
 					} else if (err.messages) {
 						addMessages(err.messages);
 					}
@@ -86,7 +86,7 @@
 					} else if (err.name === 'AbortError') {
 						addMessage('This operation is canceled by user.');
 				    } else if (err.message) {
-						addMessage(`${err.name}: ${err.message}`);
+						addMessage(err.name + ' : ' + err.message);
 				    } else if (err.messages) {
 						addMessages(err.messages);
 				    }
@@ -94,12 +94,13 @@
 					return false;
 				});
 			}
-
-			if (assertion_request != null) {
-				setTimeout(startAssertion(), 1000);
-			} else {
-				setTimeout(startAttestation(), 1000);
-			}
+            window.onload = function() {
+    			if (assertion_request != null) {
+    				setTimeout(startAssertion(), 1000);
+    			} else {
+    				setTimeout(startAttestation(), 1000);
+    			}
+            };
 		</script>
 
 		<style type="text/css">
