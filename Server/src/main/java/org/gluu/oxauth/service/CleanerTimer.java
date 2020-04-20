@@ -146,7 +146,11 @@ public class CleanerTimer {
 
 			for (String baseDn : createCleanServiceBaseDns()) {
 				try {
-					log.debug("Start clean up for baseDn: " + baseDn);
+                    if (entryManager.hasExpirationSupport(baseDn)) {
+                        continue;
+                    }
+
+                    log.debug("Start clean up for baseDn: " + baseDn);
 					final Stopwatch started = Stopwatch.createStarted();
 
 					int removed = cleanup(baseDn, now, chunkSize);

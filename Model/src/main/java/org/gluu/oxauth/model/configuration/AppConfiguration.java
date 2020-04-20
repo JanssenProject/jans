@@ -81,6 +81,7 @@ public class AppConfiguration implements Configuration {
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
+    private List<String> jwksAlgorithmsSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
     private List<String> idTokenTokenBindingCnfValuesSupported;
@@ -179,6 +180,7 @@ public class AppConfiguration implements Configuration {
     private Boolean customHeadersWithAuthorizationResponse;
     private Boolean frontChannelLogoutSessionSupported;
     private String loggingLevel;
+    private String loggingLayout;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
     private Boolean logClientIdOnClientAuthentication;
@@ -722,6 +724,14 @@ public class AppConfiguration implements Configuration {
 
     public void setClaimTypesSupported(List<String> claimTypesSupported) {
         this.claimTypesSupported = claimTypesSupported;
+    }
+
+    public List<String> getJwksAlgorithmsSupported() {
+        return jwksAlgorithmsSupported;
+    }
+
+    public void setJwksAlgorithmsSupported(List<String> jwksAlgorithmsSupported) {
+        this.jwksAlgorithmsSupported = jwksAlgorithmsSupported;
     }
 
     public String getServiceDocumentation() {
@@ -1423,6 +1433,14 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
+
     public Boolean getEnableClientGrantTypeUpdate() {
         return enableClientGrantTypeUpdate;
     }
@@ -1658,4 +1676,5 @@ public class AppConfiguration implements Configuration {
     public void setCibaEndUserNotificationConfig(CIBAEndUserNotificationConfig cibaEndUserNotificationConfig) {
         this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
     }
+
 }

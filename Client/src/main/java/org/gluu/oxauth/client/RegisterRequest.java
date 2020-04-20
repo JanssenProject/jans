@@ -7,6 +7,8 @@
 package org.gluu.oxauth.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.*;
@@ -42,7 +44,18 @@ public class RegisterRequest extends BaseRequest {
     private String registrationAccessToken;
     private List<String> redirectUris;
     private List<String> claimsRedirectUris;
-    private List<ResponseType> responseTypes;
+
+    /**
+     * code: authorization_code
+     * id_token: implicit
+     * token id_token: implicit
+     * code id_token: authorization_code, implicit
+     * code token: authorization_code, implicit
+     * code token id_token: authorization_code, implicit
+     *
+     * https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
+     */
+    private List<String> responseTypes;
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
@@ -125,7 +138,7 @@ public class RegisterRequest extends BaseRequest {
 
         this.redirectUris = new ArrayList<String>();
         this.claimsRedirectUris = new ArrayList<String>();
-        this.responseTypes = new ArrayList<ResponseType>();
+        this.responseTypes = new ArrayList<String>();
         this.grantTypes = new ArrayList<GrantType>();
         this.contacts = new ArrayList<String>();
         this.defaultAcrValues = new ArrayList<String>();
@@ -316,7 +329,9 @@ public class RegisterRequest extends BaseRequest {
      * @return A list of response types.
      */
     public List<ResponseType> getResponseTypes() {
-        return responseTypes;
+        Set<ResponseType> types = Sets.newHashSet();
+        responseTypes.forEach(s -> types.addAll(ResponseType.fromString(s, " ")));
+        return Lists.newArrayList(types);
     }
 
     /**
@@ -326,8 +341,17 @@ public class RegisterRequest extends BaseRequest {
      * @param responseTypes A list of response types.
      */
     public void setResponseTypes(List<ResponseType> responseTypes) {
+        this.responseTypes = ResponseType.toStringList(responseTypes);
+    }
+
+    public List<String> getResponseTypes_() {
+        return responseTypes;
+    }
+
+    public void setResponseTypes_(List<String> responseTypes) {
         this.responseTypes = responseTypes;
     }
+
 
     /**
      * Returns a list of the OAuth 2.0 grant types that the Client is declaring that it will restrict itself to using.
@@ -1320,17 +1344,11 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        final Set<ResponseType> responseTypes = new HashSet<ResponseType>();
+        final Set<String> responseTypes = new HashSet<String>();
         if (requestObject.has(RESPONSE_TYPES.toString())) {
             JSONArray responseTypesJsonArray = requestObject.getJSONArray(RESPONSE_TYPES.toString());
             for (int i = 0; i < responseTypesJsonArray.length(); i++) {
-                String[] rts = responseTypesJsonArray.getString(i).split(" ");
-                for (int j = 0; j < rts.length; j++) {
-                    ResponseType rt = ResponseType.fromString(rts[j]);
-                    if (rt != null) {
-                        responseTypes.add(rt);
-                    }
-                }
+                responseTypes.add(responseTypesJsonArray.getString(i));
             }
         }
 
@@ -1464,7 +1482,7 @@ public class RegisterRequest extends BaseRequest {
         result.setScopes(scope);
         result.setScope(scope);
         result.setClaims(claims);
-        result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
+        result.setResponseTypes_(new ArrayList<String>(responseTypes));
         result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
                 ApplicationType.fromString(requestObject.getString(APPLICATION_TYPE.toString())) : ApplicationType.WEB);
