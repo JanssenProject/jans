@@ -240,6 +240,7 @@ class Setup(object):
         self.installOxAuthRP = False
         self.installPassport = False
         self.installGluuRadius = False
+        self.installScimServer = False
 
         self.gluuPassportEnabled = 'false'
         self.gluuRadiusEnabled = 'false'
@@ -302,33 +303,38 @@ class Setup(object):
         self.jetty_app_configuration = OrderedDict((
                 ('oxauth', {'name' : 'oxauth',
                             'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                            'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                            'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                             'installed' : False
                             }),
                 ('identity', {'name' : 'identity',
                               'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                              'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                              'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                               'installed' : False
                               }),
                 ('idp', {'name' : 'idp',
                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
-                         'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                         'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                          'installed' : False
                          }),
 
                 ('oxauth-rp', {'name' : 'oxauth-rp',
                                'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                               'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
+                               'memory' : {'ratio' : 0.10, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
                                'installed' : False
                                }),
                 ('passport', {'name' : 'passport',
                               'node' : {},
-                              'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                              'memory' : {'ratio' : 0.10, "max_allowed_mb" : 1024},
                               'installed' : False
                                }),
                 ('casa', {'name': 'casa',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.1, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'installed': False
+                         }),
+                ('scim', {'name': 'scim',
+                         'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
+                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
                          'installed': False
                          }),
             ))
@@ -681,6 +687,7 @@ class Setup(object):
                         'opendj': ['', 70],
                         'oxauth': ['opendj', 72],
                         'identity': ['opendj oxauth', 74],
+                        'scim': ['opendj oxauth', 75],
                         'idp': ['opendj oxauth', 76],
                         'casa': ['opendj oxauth', 78],
                         'oxd-server': ['opendj oxauth', 80],
@@ -758,7 +765,7 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + str(self.application_max_ram).rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            
+
             bc = []
             if self.wrends_install:
                 t_ = 'wrends'
@@ -777,6 +784,7 @@ class Setup(object):
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
+            txt += 'Install Scim Server'.ljust(30) + repr(self.installScimServer).rjust(35) + "\n"
             txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
             txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
@@ -2296,6 +2304,19 @@ class Setup(object):
         # don't send header to server
         self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
+    def install_scim_server(self):
+        self.logIt("Copying scim.war into jetty webapps folder...")
+
+        jettyServiceName = 'scim'
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/scim.war' % self.distGluuFolder, jettyServiceWebapps)
+
+        # don't send header to server
+        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
+
     def install_saml(self):
         if self.installSaml:
             self.logIt("Install SAML Shibboleth IDP v3...")
@@ -2546,9 +2567,13 @@ class Setup(object):
             self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
+        if self.installScimServer:
+            self.pbar.progress("oxtrust", "Installing Gluu components: Scim Server", False)
+            self.install_scim_server()
+
         if self.installSaml:
             self.pbar.progress("saml", "Installing Gluu components: saml", False)
-            self.install_saml()
+            self.install_scim_server()
 
         if self.installOxAuthRP:
             self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
@@ -3218,6 +3243,12 @@ class Setup(object):
             self.installHttpd = True
         else:
             self.installHttpd = False
+
+        promptForScimServer = self.getPrompt("Install Scim Server?",
+                                            self.getDefaultOption(self.installScimServer)
+                                            )[0].lower()
+        if promptForScimServer == 'y':
+            self.installScimServer = True
 
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
