@@ -120,7 +120,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
-        credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCOSEPublicKey()));
+        credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
 
     }
 }

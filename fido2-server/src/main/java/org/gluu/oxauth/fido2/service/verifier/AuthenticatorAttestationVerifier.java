@@ -74,9 +74,11 @@ public class AuthenticatorAttestationVerifier {
             }
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode, "fmt");
             log.info("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
+            
             credential.setAttestationType(fmt);
             JsonNode authDataNode = authenticatorDataNode.get("authData");
             String authDataText = commonVerifiers.verifyAuthData(authDataNode);
+            
             JsonNode attStmt = authenticatorDataNode.get("attStmt");
             commonVerifiers.verifyAuthStatement(attStmt);
 
@@ -89,7 +91,7 @@ public class AuthenticatorAttestationVerifier {
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
             return credIdAndCounters;
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Problem with processing authenticator data");
+            throw new Fido2RPRuntimeException("Problem with processing authenticator data", e);
         }
     }
 }

@@ -324,6 +324,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setGrantId(getGrantId());
         result.setCreationDate(p_token.getCreationDate());
         result.setExpirationDate(p_token.getExpirationDate());
+        result.setTtl(p_token.getTtl());
         result.setTokenCode(hashedCode);
         result.setUserId(getUserId());
         result.setClientId(getClientId());

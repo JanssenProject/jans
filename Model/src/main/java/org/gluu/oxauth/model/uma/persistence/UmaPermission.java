@@ -7,6 +7,7 @@
 package org.gluu.oxauth.model.uma.persistence;
 
 import com.google.common.collect.Maps;
+import org.gluu.oxauth.model.util.Pair;
 import org.gluu.persist.annotation.*;
 
 import java.io.Serializable;
@@ -46,20 +47,32 @@ public class UmaPermission implements Serializable {
     @AttributeName(name = "oxAttributes")
     private Map<String, String> attributes;
 
+    @Expiration
+    private Integer ttl;
+
     private boolean expired;
 
     public UmaPermission() {
     }
 
     public UmaPermission(String resourceId, List<String> scopes, String ticket,
-                         String configurationCode, Date expirationDate) {
+                         String configurationCode, Pair<Date, Integer> expirationDate) {
         this.resourceId = resourceId;
         this.scopeDns = scopes;
         this.ticket = ticket;
         this.configurationCode = configurationCode;
-        this.expirationDate = expirationDate;
+        this.expirationDate = expirationDate.getFirst();
+        this.ttl = expirationDate.getSecond();
 
         checkExpired();
+    }
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
     }
 
     public String getDn() {
