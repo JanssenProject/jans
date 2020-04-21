@@ -6,8 +6,17 @@
 
 package org.gluu.oxauth.session.ws.rs;
 
-import java.io.IOException;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.service.CookieService;
+import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -19,18 +28,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * @author Yuriy Movchan
@@ -45,6 +44,9 @@ public class CheckSessionStatusRestWebServiceImpl {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     @GET
     @Path("/session_status")
@@ -61,8 +63,8 @@ public class CheckSessionStatusRestWebServiceImpl {
     })
     public Response requestCheckSessionStatus(@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse,
                                               @Context SecurityContext securityContext) throws IOException {
-        String sessionIdCookie = sessionIdService.getSessionIdFromCookie(httpRequest);
-        log.debug("Found session '{}' cookie: '{}'", SessionIdService.SESSION_ID_COOKIE_NAME, sessionIdCookie);
+        String sessionIdCookie = cookieService.getSessionIdFromCookie(httpRequest);
+        log.debug("Found session '{}' cookie: '{}'", CookieService.SESSION_ID_COOKIE_NAME, sessionIdCookie);
 
         CheckSessionResponse response = new CheckSessionResponse("unknown", "");
 

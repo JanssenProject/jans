@@ -51,7 +51,7 @@ public class AttributeService extends org.gluu.service.AttributeService {
     public GluuAttribute getAttributeByDn(String dn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	return usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(GluuAttribute.class, dn), 60);
+    	return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(GluuAttribute.class, dn), 60);
     }
 
     public GluuAttribute getByLdapName(String name) {
