@@ -390,8 +390,10 @@ public class Authenticator {
 
                 String redirectTo = externalAuthenticationService
                         .executeExternalGetPageForStep(customScriptConfiguration, nextStep);
-                if (StringHelper.isEmpty(redirectTo) || redirectTo == null) {
+                if (redirectTo == null) {
                     return Constants.RESULT_FAILURE;
+                } else if (StringHelper.isEmpty(redirectTo)) {
+                    redirectTo = "/login.xhtml";
                 }
 
                 // Store/Update extra parameters in session attributes map
@@ -760,10 +762,8 @@ public class Authenticator {
         }
         String p_sessionId = sessionId.getId();
 
-        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId,
-                sessionId.getState());
-        // IMPORTANT : authenticate by session id only if state of session is
-        // authenticated!
+        logger.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId, sessionId, sessionId.getState());
+        // IMPORTANT : authenticate by session id only if state of session is authenticated!
         if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
             final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {

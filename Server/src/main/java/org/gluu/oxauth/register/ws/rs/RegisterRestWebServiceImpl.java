@@ -277,6 +277,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
                 client.setClientSecretExpiresAt(calendar.getTime());
                 client.setExpirationDate(calendar.getTime());
+                client.setTtl(appConfiguration.getDynamicRegistrationExpirationTime());
             }
             client.setDeletable(client.getClientSecretExpiresAt() != null);
 

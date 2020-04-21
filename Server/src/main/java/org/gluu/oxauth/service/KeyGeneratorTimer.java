@@ -20,7 +20,6 @@ import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -38,13 +37,11 @@ import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 1, 2019
+ * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
 @Named
 public class KeyGeneratorTimer {
-
-    private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
 
 	private static final int DEFAULT_INTERVAL = 60;
 
@@ -73,9 +70,7 @@ public class KeyGeneratorTimer {
         log.debug("Initializing Key Generator Timer");
         this.isActive = new AtomicBoolean(false);
 
-        // Schedule to start every 1 minute
-		final int delay = 1 * 60;
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new KeyGenerationEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new KeyGenerationEvent(),
 				Scheduled.Literal.INSTANCE));
 
 		this.lastFinishedTime = System.currentTimeMillis();
@@ -104,7 +99,7 @@ public class KeyGeneratorTimer {
         }
     }
 
-	private void updateKeys() throws JSONException, Exception {
+	private void updateKeys() throws Exception {
 		if (!isStartUpdateKeys()) {
 			return;
 		}
@@ -114,19 +109,19 @@ public class KeyGeneratorTimer {
 	}
 
 	private boolean isStartUpdateKeys() {
-		int poolingInterval = appConfiguration.getKeyRegenerationInterval();
+		long poolingInterval = appConfiguration.getKeyRegenerationInterval();
         if (poolingInterval <= 0) {
         	poolingInterval = DEFAULT_INTERVAL;
         }
 
-        poolingInterval = poolingInterval * 3600 * 1000;
+        poolingInterval = poolingInterval * 3600 * 1000L;
 
-		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+		long timeDifference = System.currentTimeMillis() - this.lastFinishedTime;
 
-		return timeDiffrence >= poolingInterval;
+		return timeDifference >= poolingInterval;
 	}
 
-    private void updateKeysImpl() throws JSONException, Exception {
+    private void updateKeysImpl() throws Exception {
         log.info("Updating JWKS keys ...");
         String dn = configurationFactory.getBaseConfiguration().getString("oxauth_ConfigurationEntryDN");
         Conf conf = ldapEntryManager.find(Conf.class, dn);

@@ -1,5 +1,6 @@
 package org.gluu.oxauth.model.fido.u2f;
 
+import org.gluu.persist.annotation.Expiration;
 import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
@@ -41,6 +42,9 @@ public class RequestMessageLdap extends BaseEntry {
     @AttributeName(name = "del")
     private boolean deletable = true;
 
+    @Expiration
+    private Integer ttl;
+
     public RequestMessageLdap() {
     }
 
@@ -56,10 +60,20 @@ public class RequestMessageLdap extends BaseEntry {
         this.sessionId = sessionId;
         this.userInum = userInum;
 
+        final int expiration = 90;
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.setTime(creationDate);
-        calendar.add(Calendar.SECOND, 90);
+        calendar.add(Calendar.SECOND, expiration);
         this.expirationDate = calendar.getTime();
+        this.ttl = expiration;
+    }
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
     }
 
     public String getId() {
