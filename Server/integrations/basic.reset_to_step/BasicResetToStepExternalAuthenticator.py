@@ -64,13 +64,12 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Basic (demo reset step). Get next step for step '%s'" % step
         identity = CdiUtil.bean(Identity)
 
-        # If user not pass current step authenticaton change step to previous
+        # If user not pass current step authenticaton redirect to current step
         pass_authentication = identity.getWorkingParameter("pass_authentication")
         if not pass_authentication:
-            if step > 1:
-                resultStep = step - 1
-                print "Basic (demo reset step). Get next step. Changing step to '%s'" % resultStep
-                return resultStep
+            resultStep = step
+            print "Basic (demo reset step). Get next step. Changing step to '%s'" % resultStep
+            return resultStep
 
         return -1
 

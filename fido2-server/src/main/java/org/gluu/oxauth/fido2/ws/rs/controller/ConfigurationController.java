@@ -55,7 +55,7 @@ public class ConfigurationController {
 	    final String baseEndpointUri = appConfiguration.getBaseEndpoint();
 	    ObjectNode response = dataMapperService.createObjectNode();
         
-        response.put("version", "1.0");
+        response.put("version", "1.1");
         response.put("issuer", appConfiguration.getIssuer());
 
         ObjectNode attestation = dataMapperService.createObjectNode();

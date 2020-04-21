@@ -13,6 +13,8 @@
 
 package org.gluu.oxauth.fido2.model.entry;
 
+import org.gluu.oxauth.fido2.ctap.UserVerification;
+
 public class Fido2AuthenticationData extends Fido2Data {
 
     private static final long serialVersionUID = 1382804326976802044L;
@@ -27,7 +29,7 @@ public class Fido2AuthenticationData extends Fido2Data {
     private String w3cCredentialRequestOptions;
     private String w3cAuthenticatorAssertionResponse;
 
-    private String userVerificationOption;
+    private UserVerification userVerificationOption;
 
     private Fido2AuthenticationStatus status;
 
@@ -95,11 +97,11 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.w3cAuthenticatorAssertionResponse = w3cAuthenticatorAssertionResponse;
     }
 
-    public String getUserVerificationOption() {
+    public UserVerification getUserVerificationOption() {
         return userVerificationOption;
     }
 
-    public void setUserVerificationOption(String userVerificationOption) {
+    public void setUserVerificationOption(UserVerification userVerificationOption) {
         this.userVerificationOption = userVerificationOption;
     }
 
