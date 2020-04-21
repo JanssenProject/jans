@@ -43,7 +43,6 @@ import base64
 import copy
 import random
 import ssl
-import ldap
 import uuid
 import multiprocessing
 import io
@@ -56,10 +55,10 @@ from xml.etree import ElementTree
 from urllib.parse import urlparse
 
 from pylib import gluu_utils
-from pylib.ldif import LDIFWriter
 from pylib.jproperties import Properties
-from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
+from pylib.ldif3.ldif3 import LDIFWriter
+from pylib.schema import ObjectClass
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -88,8 +87,6 @@ suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
 
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
-
 re_split_host = re.compile(r'[^,\s,;]+')
 
 istty = False
@@ -116,12 +113,6 @@ try:
     from pylib.cbm import CBM
 except:
     pass
-
-try:
-    from ldap.dn import str2dn
-except:
-    pass
-
 
 
 class ProgressBar:
@@ -2942,9 +2933,16 @@ class Setup(object):
     def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
         
         result = {'result': True, 'reason': ''}
-        conn = ldap.initialize('ldaps://{}:{}'.format(ldap_host, self.ldaps_port))
+        
+        ldap_server = Server(ldap_host, port=int(self.ldaps_port), use_ssl=True)
+        conn = Connection(
+            ldap_server,
+            user=ldap_binddn,
+            password=ldap_password,
+            )
+
         try:
-            conn.simple_bind_s(ldap_binddn, ldap_password)
+            conn.bind()
         except Exception as e:
             result['result'] = False
             result['reason'] = str(e)
@@ -4268,7 +4266,7 @@ class Setup(object):
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap net-tools python3-requests bzip2', 'optional': 'memcached'},
-                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog bzip2', 'optional': 'memcached'},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 }
@@ -4776,10 +4774,16 @@ class Setup(object):
         self.couchbaseProperties()
 
     def getLdapConnection(self):
-            ldap_conn = ldap.initialize('ldaps://{0}:{1}'.format(self.ldap_hostname, self.ldaps_port))
-            ldap_conn.simple_bind_s(self.ldap_binddn, self.ldapPass)
-            
-            return ldap_conn
+
+        ldap_server = Server(self.ldap_hostname, port=int(self.ldaps_port), use_ssl=True)
+        ldap_conn = Connection(
+                    ldap_server,
+                    user=self.ldap_binddn,
+                    password=self.ldapPass,
+                    )
+        ldap_conn.bind()
+
+        return ldap_conn
 
 
     def create_test_client_keystore(self):
@@ -4878,19 +4882,26 @@ class Setup(object):
             ldap_conn = self.getLdapConnection()
 
             dn = 'ou=oxauth,ou=configuration,o=gluu'
-            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxAuthConfDynamic'])
-            oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
+            ldap_conn.search(
+                            search_base=dn,
+                            search_scope=BASE,
+                            search_filter='(objectclass=*)',
+                            attributes=['oxAuthConfDynamic']
+                        )
+
+            oxAuthConfDynamic = json.loads(ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
 
             for k, v in oxAuthConfDynamic_changes:
                 oxAuthConfDynamic[k] = v
 
             oxAuthConfDynamic_js = json.dumps(oxAuthConfDynamic, indent=2)
-            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfDynamic_js)])
+            ldap_conn.modify(dn, {'oxAuthConfDynamic': [MODIFY_REPLACE, oxAuthConfDynamic_js]})
 
             # Enable custom scripts
             for inum in custom_scripts:
                 dn = 'inum={0},ou=scripts,o=gluu'.format(inum)
-                ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxEnabled',  'true')])
+                ldap_conn.modify(dn, {'oxEnabled': [MODIFY_REPLACE, 'true']})
+
 
 
             # Update LDAP schema
@@ -4904,26 +4915,19 @@ class Setup(object):
 
             for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
                 objcl = ObjectClass(o)
-                if 'gluuCustomPerson' in objcl.names:
-                    may_list = list(objcl.may)
+                if 'gluuCustomPerson' in objcl.tokens['NAME']:
+                    may_list = list(objcl.tokens['NAME'])
                     for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
                         if not a in may_list:
                             may_list.append(a)
                     
-                    objcl.may = tuple(may_list)
-                    obcl_parser.entries[0][1]['objectClasses'][i] = str(objcl)
+                    objcl.tokens['MAY'] = tuple(may_list)
+                    obcl_parser.entries[0][1]['objectClasses'][i] = objcl.getstr()
 
             tmp_fn = '/tmp/77-customAttributes.ldif'
-
-            with open(tmp_fn, 'w') as w:
+            with open(tmp_fn, 'wb') as w:
                 ldif_writer = LDIFWriter(w)
-                for dn, entry in obcl_parser.entries:
-
-                    for e in entry:
-                        for i, v in enumerate(entry[e][:]):
-                            if isinstance(v, str):
-                                entry[e][i] = v.encode('utf-8')
-                
+                for dn, entry in obcl_parser.entries:                
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, self.openDjSchemaFolder)
@@ -4967,11 +4971,19 @@ class Setup(object):
             
             dn = 'ou=configuration,o=gluu'
 
-            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxIDPAuthentication'])
-            oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
+            ldap_conn.search(
+                search_base=dn,
+                search_scope=BASE,
+                search_filter='(objectclass=*)',
+                attributes=['oxIDPAuthentication']
+            )
+            
+            
+            oxIDPAuthentication = json.loads(ldap_conn.response[0]['attributes']['oxIDPAuthentication'][0])
             oxIDPAuthentication['config']['servers'] = config_servers
             oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication_js)])
+            ldap_conn.modify(dn, {'oxIDPAuthentication': [MODIFY_REPLACE, oxIDPAuthentication_js]})
+
             ldap_conn.unbind()
             
         else:
@@ -5657,14 +5669,6 @@ if __name__ == '__main__':
 
     installObject.properties_password = argsp.properties_password
 
-    if setupOptions['loadTestDataExit']:
-        installObject.initialize()
-        installObject.load_test_data_exit()
-
-    if installObject.check_installed():
-        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
-        sys.exit(2)
-
     installObject.downloadWars = setupOptions['downloadWars']
 
     for option in setupOptions:
@@ -5679,7 +5683,16 @@ if __name__ == '__main__':
     #it is time to import pyDes library
     from pyDes import *
     from pylib.cbm import CBM
-    from ldap.dn import str2dn
+    from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
+
+    if setupOptions['loadTestDataExit']:
+        installObject.initialize()
+        installObject.load_test_data_exit()
+
+    if installObject.check_installed():
+        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
+        sys.exit(2)
+
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()

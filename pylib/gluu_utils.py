@@ -7,9 +7,10 @@ import json
 import datetime
 import copy
 
+from ldap3.utils import dn as dnutils
+
 from .jproperties import Properties
-from .ldif import LDIFParser
-from ldap.dn import str2dn
+from .ldif3.ldif3 import LDIFParser
 from .attribute_data_types import ATTRUBUTEDATATYPES
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -40,15 +41,18 @@ class colors:
 
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
-        LDIFParser.__init__(self, open(ldif_file,'rb'))
+        self.ldif_file = ldif_file
         self.entries = []
 
-    def handle(self, dn, entry):
-        for e in entry:
-            for i, v in enumerate(entry[e][:]):
-                if isinstance(v, bytes):
-                    entry[e][i] = v.decode('utf-8')
-        self.entries.append((dn, entry))
+    def parse(self):
+        with open(self.ldif_file, 'rb') as f:
+            parser = LDIFParser(f)
+            for dn, entry in parser.parse():
+                for e in entry:
+                    for i, v in enumerate(entry[e][:]):
+                        if isinstance(v, bytes):
+                            entry[e][i] = v.decode('utf-8')
+                self.entries.append((dn, entry))
 
 
 def prepare_multivalued_list():
@@ -168,11 +172,11 @@ def getTypedValue(dtype, val):
 
 def get_key_from(dn):
     dns = []
-    for d in str2dn(dn):
-        for rd in d:
-            if rd[0] == 'o' and rd[1] == 'gluu':
-                continue
-            dns.append(rd[1])
+    for rd in dnutils.parse_dn(dn):
+
+        if rd[0] == 'o' and rd[1] == 'gluu':
+            continue
+        dns.append(rd[1])
 
     dns.reverse()
     key = '_'.join(dns)
