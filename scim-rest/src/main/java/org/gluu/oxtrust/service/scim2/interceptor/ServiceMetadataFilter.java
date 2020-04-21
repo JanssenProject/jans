@@ -9,6 +9,7 @@ import static org.gluu.oxtrust.model.scim2.Constants.QUERY_PARAM_FILTER;
 
 import java.io.IOException;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -24,6 +25,7 @@ import org.slf4j.Logger;
  * to the caller
  * Created by jgomer on 2017-11-27.
  */
+@ApplicationScoped
 @Provider
 @RejectFilterParam
 public class ServiceMetadataFilter implements ContainerRequestFilter {

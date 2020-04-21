@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -54,6 +55,7 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 08/23/2013
  * Re-engineered by jgomer on 2017-09-14.
  */
+@Dependent
 public class BaseScimWebService {
 
     @Inject
