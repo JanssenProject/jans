@@ -367,8 +367,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return result
 
     def validateSessionId(self, identity):
-        session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-        if StringHelper.isEmpty(session_id):
+        session = CdiUtil.bean(SessionIdService).getSessionId()
+        if session == None:
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 

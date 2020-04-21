@@ -16,9 +16,9 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import javax.annotation.Nullable;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -114,6 +114,7 @@ public class UserService {
 	}
 
     public User updateUser(User user) {
+        user.setUpdatedAt(new Date());
 		return ldapEntryManager.merge(user);
 	}
 
@@ -134,7 +135,8 @@ public class UserService {
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
     		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
     	}
-    	
+
+    	user.setCreatedAt(new Date());
 		ldapEntryManager.persist(user);
 		
 		return getUser(uid);
@@ -153,7 +155,7 @@ public class UserService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		Set<String> allObjectClasses = new HashSet<String>();
+    		Set<String> allObjectClasses = new HashSet<>();
     		allObjectClasses.addAll(personCustomObjectClassList);
 
     		String currentObjectClasses[] = user.getCustomObjectClasses();
@@ -164,6 +166,7 @@ public class UserService {
     		user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
     	}
 
+    	user.setCreatedAt(new Date());
     	ldapEntryManager.persist(user);
 
 		return getUserByDn(user.getDn());
@@ -228,6 +231,36 @@ public class UserService {
 		}
 
 		return user;
+	}
+
+	public User getUserByAttributes(String attributeValue, String[] attributeNames, String... returnAttributes) {
+		if (ArrayHelper.isEmpty(attributeNames)) {
+			return null;
+		}
+
+		log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
+
+		List<Filter> filters = new ArrayList<Filter>(); 
+		for (String attributeName : attributeNames) {
+			Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attributeName), StringHelper.toLowerCase(attributeValue));
+			filters.add(filter);
+		}
+
+		Filter searchFiler;
+		if (filters.size() == 1) {
+			searchFiler = filters.get(0);
+		} else {
+			searchFiler = Filter.createORFilter(filters);
+		}
+
+		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, searchFiler, returnAttributes);
+		log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+
+		if (entries.size() > 0) {
+			return entries.get(0);
+		} else {
+			return null;
+		}
 	}
 
     public List<User> getUsersBySample(User user, int limit) {

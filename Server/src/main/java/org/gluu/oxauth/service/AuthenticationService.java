@@ -26,6 +26,8 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
+import org.gluu.util.ArrayHelper;
+import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -149,6 +151,58 @@ public class AuthenticationService {
 		return authenticated;
 	}
 
+	/**
+	 * Authenticate user.
+	 *
+	 * @param nameValue
+	 *            The name value to find user
+	 * @param password
+	 *            The user's password.
+	 * @param nameAttributes
+	 *            List of attribute to search.
+	 * @return <code>true</code> if success, otherwise <code>false</code>.
+	 */
+	public boolean authenticate(String nameValue, String password, String ... nameAttributes) {
+		log.debug("Authenticating user with LDAP: nameValue: '{}', nameAttributes: '{}', credentials: '{}'", nameValue,
+				ArrayHelper.toString(nameAttributes),
+				System.identityHashCode(credentials));
+
+		Pair<Boolean, User> authenticatedPair = null;
+		boolean authenticated = false;
+		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
+
+		com.codahale.metrics.Timer.Context timerContext = metricService
+				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+		try {
+			authenticatedPair = localAuthenticate(nameValue, password, nameAttributes);
+		} finally {
+			timerContext.stop();
+		}
+
+		String userId = null;
+		if ((authenticatedPair != null) && (authenticatedPair.getSecond() != null)) {
+			authenticated = authenticatedPair.getFirst();
+			userId = authenticatedPair.getSecond().getUserId();
+		}
+		setAuthenticatedUserSessionAttribute(userId, authenticated);
+
+		MetricType metricType;
+		if (authenticated) {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+		} else {
+			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		}
+
+		metricService.incCounter(metricType);
+
+		if (protectionServiceEnabled) {
+			authenticationProtectionService.storeAttempt(userId, authenticated);
+			authenticationProtectionService.doDelayIfNeeded(userId);
+		}
+
+		return authenticated;
+	}
+
 	private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
 		SessionId sessionId = sessionIdService.getSessionId();
 		if (sessionId != null) {
@@ -181,6 +235,29 @@ public class AuthenticationService {
 		}
 
 		return false;
+	}
+
+	private Pair<Boolean, User> localAuthenticate(String nameValue, String password, String ... nameAttributes) {
+		User user = userService.getUserByAttributes(nameValue, nameAttributes, new String[] {"uid", "gluuStatus"});
+		if (user != null) {
+			if (!checkUserStatus(user)) {
+				return new Pair<Boolean, User>(false, user);
+			}
+
+			// Use local LDAP server for user authentication
+			boolean authenticated = ldapEntryManager.authenticate(user.getDn(), password);
+			if (authenticated) {
+				configureAuthenticatedUser(user);
+				updateLastLogonUserTime(user);
+
+				log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
+						System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+			}
+
+			return new Pair<Boolean, User>(authenticated, user);
+		}
+
+		return new Pair<Boolean, User>(false, null);
 	}
 
 	private boolean externalAuthenticate(String keyValue, String password) {

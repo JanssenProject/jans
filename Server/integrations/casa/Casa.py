@@ -2,7 +2,6 @@
 
 from java.util import Collections, HashMap, HashSet, ArrayList, Arrays, Date
 from java.nio.charset import Charset
-from javax.faces.context import FacesContext
 
 from org.apache.http.params import CoreConnectionPNames
 

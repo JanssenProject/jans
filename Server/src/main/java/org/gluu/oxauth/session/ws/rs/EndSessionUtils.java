@@ -81,10 +81,10 @@ public class EndSessionUtils {
                     "</script>";
         }
 
-        html += "<title>Gluu Generated logout page</title>" +
+        html += "<title>Your logout was successful</title>" +
                 "</head>" +
                 "<body>" +
-                "Logout requests sent.<br/>" +
+                "Your logout was successful.<br/>" +
                 iframes +
                 "</body>" +
                 "</html>";
