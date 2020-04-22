@@ -547,23 +547,14 @@ def generate_properties(as_dict=False):
             if m:
                 setup_prop['asimbaJksPass'] = m.groups()[0]
 
-    if as_dict:
-        return setup_prop
+    if not 'inumOrg' in setup_prop:
+        setup_prop['inumOrg'] = setup_prop['admin_inum'].split('!0000!')[0]
 
-    setup_propp = Properties()
+    if not 'githubBranchName' in setup_prop:
+        setup_prop['githubBranchName'] = 'version_'+gluu_version
 
-    for p_key in setup_prop:
-        p_val = setup_prop[p_key]
-        if p_key == 'mappingLocations':
-            p_val = json.dumps(p_val)
-        elif isinstance(p_val, bool):
-            p_val = str(p_val).lower()
-        elif not isinstance(p_val, str):
-            p_val = str(p_val)
 
-        setup_propp[p_key] = p_val
-
-    return setup_propp
+    return setup_prop
 
 if __name__ == '__main__':
 
@@ -575,8 +566,16 @@ if __name__ == '__main__':
         n = len(flist) + 1
         os.rename(setup_prop_fn, setup_prop_fn+'.'+str(n))
 
-    with open(setup_prop_fn, 'wb') as w:
-        setup_prop.store(w)
+    with open(setup_prop_fn, 'w') as w:
+        for p_key in setup_prop:
+            p_val = setup_prop[p_key]
+            if p_key == 'mappingLocations':
+                p_val = json.dumps(p_val)
+            elif isinstance(p_val, bool):
+                p_val = str(p_val).lower()
+            elif not isinstance(p_val, str):
+                p_val = str(p_val)
+            w.write('{}={}\n'.format(p_key, p_val))
 
     print("{} is written successfully".format(setup_prop_fn))
 
