@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetLogoutUrlParams implements HasAccessTokenParams {
+public class GetLogoutUrlParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -22,18 +22,8 @@ public class GetLogoutUrlParams implements HasAccessTokenParams {
     private String state;
     @JsonProperty(value = "session_state")
     private String session_state;
-    @JsonProperty(value = "token")
-    private String token;
 
     public GetLogoutUrlParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getPostLogoutRedirectUri() {
@@ -85,7 +75,6 @@ public class GetLogoutUrlParams implements HasAccessTokenParams {
         sb.append(", post_logout_redirect_uri=").append(post_logout_redirect_uri);
         sb.append(", state=").append(state);
         sb.append(", session_state=").append(session_state);
-        sb.append(", token=").append(token);
         sb.append('}');
         return sb.toString();
     }

@@ -49,7 +49,7 @@ public class RsModifyTest {
         params2.setPath(resources.get(0).getPath());
         params2.setScopes(Lists.newArrayList("http://photoz.example.com/dev/actions/see"));
 
-        RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(), params2);
+        RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(site), null, params2);
         assertNotNull(response.getOxdId());
         return response;
     }
@@ -62,7 +62,7 @@ public class RsModifyTest {
         params2.setPath(resources.get(0).getPath());
         params2.setScopeExpression(correctScopeExpression.replaceAll("'", "\""));
 
-        RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(), params2);
+        RsModifyResponse response = client.umaRsModify(Tester.getAuthorization(site), null, params2);
         assertNotNull(response.getOxdId());
         return response;
     }

@@ -3,13 +3,13 @@ package org.gluu.oxd.client;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.gluu.oxd.common.params.HasAccessTokenParams;
+import org.gluu.oxd.common.params.HasOxdIdParams;
 
 /**
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsProtectParams2 implements HasAccessTokenParams {
+public class RsProtectParams2 implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;

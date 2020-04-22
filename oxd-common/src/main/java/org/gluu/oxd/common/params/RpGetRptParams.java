@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Yuriy Zabrovarnyy
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetRptParams implements HasAccessTokenParams {
+public class RpGetRptParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -31,8 +31,6 @@ public class RpGetRptParams implements HasAccessTokenParams {
     private List<String> scope;
     @JsonProperty(value = "state")
     private String state;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "params")
     private Map<String, String> params;
 
@@ -45,14 +43,6 @@ public class RpGetRptParams implements HasAccessTokenParams {
 
     public void setParams(Map<String, String> params) {
         this.params = params;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getOxdId() {
@@ -131,7 +121,6 @@ public class RpGetRptParams implements HasAccessTokenParams {
                 ", rpt='" + rpt + '\'' +
                 ", scope=" + scope +
                 ", state='" + state + '\'' +
-                ", token='" + token + '\'' +
                 ", params='" + params + '\'' +
                 '}';
     }

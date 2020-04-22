@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImplicitFlowParams implements HasAccessTokenParams {
+public class ImplicitFlowParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -30,18 +30,8 @@ public class ImplicitFlowParams implements HasAccessTokenParams {
     private String scope;
     @JsonProperty(value = "nonce")
     private String nonce;
-    @JsonProperty(value = "token")
-    private String token;
 
     public ImplicitFlowParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getClientSecret() {
@@ -124,7 +114,6 @@ public class ImplicitFlowParams implements HasAccessTokenParams {
         sb.append(", user_secret='").append(user_secret).append('\'');
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }
