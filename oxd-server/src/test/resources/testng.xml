@@ -4,6 +4,7 @@
 
     <parameter name="host" value="http://localhost"/>
     <parameter name="opHost" value="https://${test.server.name}"/>
+    <parameter name="authServer" value="https://ce-dev6.gluu.org"/>
     <parameter name="opDiscoveryPath" value=""/>
     <parameter name="opConfigurationEndpoint" value="https://${test.server.name}/.well-known/openid-configuration"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
@@ -172,6 +173,11 @@
             <class name="org.gluu.oxd.server.IntrospectRptTest"/>
         </classes>
     </test>
+    <test name="Different Authorization Server Test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.DifferentAuthServerTest"/>
+        </classes>
+    </test>
 
     <!-- Custom -->
     <test name="Setup client" enabled="true">
@@ -297,6 +303,12 @@
     <test name="RP - Get Claims-Gathering Url Swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
+
+    <test name="Different Authorization Server Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.DifferentAuthServerTest"/>
         </classes>
     </test>
 </suite>

@@ -96,7 +96,9 @@ public enum ErrorResponseCode {
     INVALID_SUBJECT_IDENTIFIER(500, "invalid_subject_identifier", "UserInfo `sub` value does not matches with `sub` value of ID_TOKEN."),
     FAILED_TO_VERIFY_SUBJECT_IDENTIFIER(500, "failed_to_verify_subject_identifier", "Failed to verify subject identifier (`sub`) of UserInfo response. See oxd-server logs for details."),
     AT_HASH_NOT_FOUND(500, "at_hash_not_found", "`at_hash` is missing in `ID_TOKEN`."),
-    C_HASH_NOT_FOUND(500, "c_hash_not_found", "`c_hash` is missing in `ID_TOKEN`.");
+    C_HASH_NOT_FOUND(500, "c_hash_not_found", "`c_hash` is missing in `ID_TOKEN`."),
+    INVALID_AUTHORIZATION_OXD_ID(400, "invalid_authorization_oxd_id", "`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should contain `oxd_id` from `protect_commands_with_oxd_id` field in oxd-server.yml."),
+    AUTHORIZATION_OXD_ID_NOT_FOUND(400, "authorization_oxd_id_not_found", "`oxd_id` in `AuthorizationOxdId` header is not registered in oxd.");
 
     private final int httpStatus;
     private final String code;

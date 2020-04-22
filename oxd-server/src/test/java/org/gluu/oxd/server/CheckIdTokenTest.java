@@ -37,7 +37,7 @@ public class CheckIdTokenTest {
         params.setIdToken(response.getIdToken());
         params.setNonce(nonce);
 
-        final CheckIdTokenResponse checkR = client.checkIdToken(Tester.getAuthorization(), params);
+        final CheckIdTokenResponse checkR = client.checkIdToken(Tester.getAuthorization(site), null, params);
         assertNotNull(checkR);
         assertTrue(checkR.isActive());
         assertNotNull(checkR.getExpiresAt());

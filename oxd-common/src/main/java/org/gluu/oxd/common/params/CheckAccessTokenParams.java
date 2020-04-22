@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CheckAccessTokenParams implements HasAccessTokenParams {
+public class CheckAccessTokenParams implements HasOxdIdParams {
 
     /**
      * oxd ID
@@ -33,8 +33,6 @@ public class CheckAccessTokenParams implements HasAccessTokenParams {
      */
     @JsonProperty(value = "access_token")
     private String access_token;
-    @JsonProperty(value = "token")
-    private String token;
 
     /**
      * Constructor
@@ -86,14 +84,6 @@ public class CheckAccessTokenParams implements HasAccessTokenParams {
         access_token = p_accessToken;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     /**
      * Returns string representation of object
      *
@@ -106,7 +96,6 @@ public class CheckAccessTokenParams implements HasAccessTokenParams {
         sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", id_token='").append(id_token).append('\'');
         sb.append(", access_token='").append(access_token).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

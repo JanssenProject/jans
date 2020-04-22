@@ -20,7 +20,7 @@ public class UmaSpontaneousScopeTest {
     @Parameters({"host", "opHost", "paramRedirectUrl", "userId", "userSecret", "rsProtectWithSpontaneousScope"})
     @Test
     public void init(String host, String opHost, String paramRedirectUrl, String userId, String userSecret, String rsProtectWithSpontaneousScope) throws Exception {
-        List<String> scopes = Lists.newArrayList("openid", "uma_protection", "profile", "address", "email", "phone", "user_name");
+        List<String> scopes = Lists.newArrayList("openid", "uma_protection", "profile", "address", "email", "phone", "user_name", "oxd");
         List<String> responseTypes = Lists.newArrayList("code", "id_token", "token");
         //register client
         ClientInterface client = Tester.newClient(host);
@@ -34,7 +34,7 @@ public class UmaSpontaneousScopeTest {
         params.setOxdId(registerResponse.getOxdId());
         params.setRpt(response.getRpt());
 
-        final CorrectRptIntrospectionResponse rptIntrospectionResponse = client.introspectRpt(Tester.getAuthorization(), params);
+        final CorrectRptIntrospectionResponse rptIntrospectionResponse = client.introspectRpt(Tester.getAuthorization(registerResponse), null, params);
 
         rptIntrospectionResponse.getPermissions().forEach( permission -> {
             assertTrue(permission.getScopes().contains(USER_2_SCOPE));
