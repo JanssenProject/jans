@@ -12,7 +12,7 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UpdateSiteParams implements HasAccessTokenParams {
+public class UpdateSiteParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -51,8 +51,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
     private List<String> grant_types;
     @JsonProperty(value = "contacts")
     private List<String> contacts;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "access_token_as_jwt")
     private Boolean access_token_as_jwt;
     @JsonProperty(value = "access_token_signing_alg")
@@ -152,14 +150,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
 
     public void setRptAsJwt(Boolean rpt_as_jwt) {
         this.rpt_as_jwt = rpt_as_jwt;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -895,7 +885,6 @@ public class UpdateSiteParams implements HasAccessTokenParams {
         sb.append(", claims_locales=").append(claims_locales);
         sb.append(", grant_types=").append(grant_types);
         sb.append(", contacts=").append(contacts);
-        sb.append(", token=").append(token);
         sb.append(", access_token_as_jwt=").append(access_token_as_jwt);
         sb.append(", access_token_signing_alg=").append(access_token_signing_alg);
         sb.append(", rpt_as_jwt=").append(rpt_as_jwt);

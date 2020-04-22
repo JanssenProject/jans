@@ -38,7 +38,7 @@ public class AuthorizationCodeFlowTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken(tokens.getAccessToken());
 
-        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), params);
+        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), null, params);
         assertNotNull(resp);
         assertNotNull(resp.get("sub"));
 
@@ -79,7 +79,7 @@ public class AuthorizationCodeFlowTest {
         params.setCode(codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
         params.setState(state);
 
-        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), null, params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -94,7 +94,7 @@ public class AuthorizationCodeFlowTest {
         params.setState(state);
         params.setNonce(nonce);
 
-        return client.getAuthorizationCode(Tester.getAuthorization(), params).getCode();
+        return client.getAuthorizationCode(Tester.getAuthorization(), null, params).getCode();
     }
 
     public static void getLogoutUrl(ClientInterface client, RegisterSiteResponse site, String postLogoutRedirectUrl) {
@@ -105,7 +105,7 @@ public class AuthorizationCodeFlowTest {
         logoutParams.setState(UUID.randomUUID().toString());
         logoutParams.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-        final GetLogoutUriResponse resp = client.getLogoutUri(Tester.getAuthorization(), logoutParams);
+        final GetLogoutUriResponse resp = client.getLogoutUri(Tester.getAuthorization(), null, logoutParams);
         assertNotNull(resp);
     }
 }

@@ -28,7 +28,6 @@ public class ParamsSecurityTest {
             GetJwksParams.class,
             EmptyParams.class,
             HasOxdIdParams.class,
-            HasAccessTokenParams.class,
             GetDiscoveryParams.class,
             IParams.class
     );
@@ -39,8 +38,8 @@ public class ParamsSecurityTest {
             if (EXCLUSING_LIST.contains(clazz)) {
                 continue;
             }
-            if (!HasAccessTokenParams.class.isAssignableFrom(clazz)) {
-                throw new AssertionError("Params class does not implement HasProtectionAccessTokenParams interface, class: " + clazz);
+            if (!HasOxdIdParams.class.isAssignableFrom(clazz)) {
+                throw new AssertionError("Params class does not implement HasOxdIdParams interface, class: " + clazz);
             }
         }
     }

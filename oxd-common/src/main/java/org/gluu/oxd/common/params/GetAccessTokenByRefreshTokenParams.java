@@ -9,7 +9,7 @@ import java.util.List;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAccessTokenByRefreshTokenParams implements HasAccessTokenParams {
+public class GetAccessTokenByRefreshTokenParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -17,17 +17,6 @@ public class GetAccessTokenByRefreshTokenParams implements HasAccessTokenParams 
     private String refresh_token;
     @JsonProperty(value = "scope")
     private List<String> scope;
-    @JsonProperty(value = "token")
-    private String token;
-
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     public String getOxdId() {
         return oxd_id;

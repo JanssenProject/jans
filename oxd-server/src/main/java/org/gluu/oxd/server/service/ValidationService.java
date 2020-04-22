@@ -74,9 +74,6 @@ public class ValidationService {
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
         }
-        if (params instanceof HasAccessTokenParams) {
-            validate((HasAccessTokenParams) params);
-        }
 
         if (!(params instanceof RegisterSiteParams) && params instanceof HasOxdIdParams) {
             try {
@@ -120,45 +117,41 @@ public class ValidationService {
     /**
      * Returns whether has valid token
      *
-     * @param params params
-     * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
+     * @param accessToken
+     * @param oxdId
      */
-    private boolean validate(HasAccessTokenParams params) {
-        if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
-            return false; // skip validation since protectCommandsWithAccessToken=false
-        }
-
-        final String accessToken = params.getToken();
+    public void validateAccessToken(String accessToken, String oxdId) {
 
         if (StringUtils.isBlank(accessToken)) {
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
-        if (params instanceof RegisterSiteParams) {
-            return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
-        }
 
         final RpSyncService rpSyncService = ServerLauncher.getInjector().getInstance(RpSyncService.class);
 
-        final Rp rp = rpSyncService.getRp(params.getOxdId());
+        final Rp rp = rpSyncService.getRp(oxdId);
 
-        final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
+        final IntrospectionResponse introspectionResponse = introspect(accessToken, oxdId);
 
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", clientId: " + rp.getClientId());
         if (StringUtils.isBlank(introspectionResponse.getClientId())) {
+            LOG.error("AS returned introspection response with empty/blank client_id which is required by oxd. Please check your AS installation and make sure AS return client_id for introspection call (CE 3.1.0 or later).");
             throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
         }
         if (!introspectionResponse.getScope().contains("oxd")) {
+            LOG.error("access_token does not have `oxd` scope. Make sure a) scope exists on AS b) register_site is registered with 'oxd' scope c) get_client_token has 'oxd' scope in request");
             throw new HttpException(ErrorResponseCode.ACCESS_TOKEN_INSUFFICIENT_SCOPE);
         }
 
         if (introspectionResponse.getClientId().equals(rp.getClientId())) {
-            return true;
+            return;
         }
+        LOG.error("No access token provided in Authorization header. Forbidden.");
         throw new HttpException(ErrorResponseCode.INVALID_ACCESS_TOKEN);
     }
 
     public IntrospectionResponse introspect(String accessToken, String oxdId) {
         if (StringUtils.isBlank(accessToken)) {
+            LOG.debug("access_token is blank. Command is protected by access_token, please provide valid token or otherwise switch off protection in configuration with protect_commands_with_access_token=false");
             throw new HttpException(ErrorResponseCode.BLANK_ACCESS_TOKEN);
         }
 
@@ -171,7 +164,7 @@ public class ValidationService {
         final IntrospectionResponse response = introspectionService.introspectToken(oxdId, accessToken);
 
         if (!response.isActive()) {
-            LOG.debug("access_token is not active.");
+            LOG.error("access_token is not active.");
             throw new HttpException(ErrorResponseCode.INACTIVE_ACCESS_TOKEN);
         }
         return response;

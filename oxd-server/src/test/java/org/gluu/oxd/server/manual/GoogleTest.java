@@ -48,11 +48,11 @@ public class GoogleTest {
 //        System.out.println(resp);
     }
 
-    private static String getAuthorizationUrl(ClientInterface client, String oxdId) {
+    private static String getAuthorizationUrl(ClientInterface client, RegisterSiteResponse site) {
         final GetAuthorizationUrlParams params = new GetAuthorizationUrlParams();
-        params.setOxdId(oxdId);
+        params.setOxdId(site.getOxdId());
 
-        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(), params);
+        final GetAuthorizationUrlResponse resp = client.getAuthorizationUrl(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
         notEmpty(resp.getAuthorizationUrl());
         System.out.println("Authorization url: " + resp.getAuthorizationUrl());

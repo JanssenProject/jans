@@ -49,7 +49,7 @@ public class RpGetRptTest {
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setRptAsJwt(true);
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
@@ -78,7 +78,7 @@ public class RpGetRptTest {
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
 
-        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(), params);
+        final RpGetRptResponse response = client.umaRpGetRpt(Tester.getAuthorization(site), null, params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getRpt()));
