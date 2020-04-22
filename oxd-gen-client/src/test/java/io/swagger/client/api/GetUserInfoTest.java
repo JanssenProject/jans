@@ -37,7 +37,7 @@ public class GetUserInfoTest {
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
-        final Map<String, Object> resp = client.getUserInfo(params, getAuthorization(site));
+        final Map<String, Object> resp = client.getUserInfo(params, getAuthorization(site), null);
         assertNotNull(resp);
         assertFalse(resp.isEmpty());
         assertNotNull(resp.get("sub"));
@@ -54,7 +54,7 @@ public class GetUserInfoTest {
         params.setOxdId(site.getOxdId());
         params.setAccessToken("blahBlah"); // invalid token
 
-        final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(params, getAuthorization(site));
+        final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(params, getAuthorization(site), null);
         assertEquals(apiResponse.getStatusCode() , 200); // fixme should be 401
 
         assertNotNull(apiResponse.getData());
@@ -71,7 +71,7 @@ public class GetUserInfoTest {
         params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce, getAuthorization(site)));
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokensByCode(params, getAuthorization(site));
+        final GetTokensByCodeResponse resp = client.getTokensByCode(params, getAuthorization(site), null);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());

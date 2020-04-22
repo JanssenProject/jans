@@ -12,26 +12,16 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsProtectParams implements HasAccessTokenParams {
+public class RsProtectParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "resources")
     private List<RsResource> resources;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "overwrite")
     private Boolean overwrite = false;
 
     public RsProtectParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getOxdId() {
@@ -64,7 +54,6 @@ public class RsProtectParams implements HasAccessTokenParams {
         sb.append("RsProtectParams");
         sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", resources=").append(resources);
-        sb.append(", token=").append(token);
         sb.append(", overwrite=").append(overwrite);
         sb.append('}');
         return sb.toString();

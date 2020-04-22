@@ -58,7 +58,7 @@ public class UpdateSiteTest {
         assertNotNull(registerResponse.getOxdId());
         String oxdId = registerResponse.getOxdId();
 
-        Rp fetchedRp = fetchRp(host, oxdId);
+        Rp fetchedRp = fetchRp(host, registerResponse);
 
         assertEquals(authorizationRedirectUri, fetchedRp.getRedirectUri());
         assertEquals(Lists.newArrayList("acrBefore"), fetchedRp.getAcrValues());
@@ -69,17 +69,17 @@ public class UpdateSiteTest {
         updateParams.setScope(Lists.newArrayList("profile"));
         updateParams.setAcrValues(Lists.newArrayList("acrAfter"));
 
-        UpdateSiteResponse updateResponse = Tester.newClient(host).updateSite(Tester.getAuthorization(), updateParams);
+        UpdateSiteResponse updateResponse = Tester.newClient(host).updateSite(Tester.getAuthorization(registerResponse), null, updateParams);
         assertNotNull(updateResponse);
 
-        fetchedRp = fetchRp(host, oxdId);
+        fetchedRp = fetchRp(host, registerResponse);
 
         assertEquals(anotherRedirectUri, fetchedRp.getRedirectUri());
         assertEquals(Lists.newArrayList("acrAfter"), fetchedRp.getAcrValues());
     }
 
-    private static Rp fetchRp(String host, String oxdId) throws IOException {
-        final String rpAsJson = Tester.newClient(host).getRp(Tester.getAuthorization(), new GetRpParams(oxdId));
+    private static Rp fetchRp(String host, RegisterSiteResponse site) throws IOException {
+        final String rpAsJson = Tester.newClient(host).getRp(Tester.getAuthorization(site), null, new GetRpParams(site.getOxdId()));
         GetRpResponse resp = Jackson2.createJsonMapper().readValue(rpAsJson, GetRpResponse.class);
         return Jackson2.createJsonMapper().readValue(resp.getNode().toString(), Rp.class);
     }

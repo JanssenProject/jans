@@ -210,7 +210,7 @@ public class Cli {
                 GetRpParams params = new GetRpParams();
                 params.setList(true);
 
-                String respString = client.getRp(authorization, params);
+                String respString = client.getRp(authorization, null, params);
                 GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp == null) {
                     System.out.println("Failed to fetch entries from database. Please check oxd-server.log file for details.");
@@ -240,7 +240,7 @@ public class Cli {
             if (cmd.hasOption("oxd_id")) {
                 final String oxdId = cmd.getOptionValue("oxd_id");
 
-                String respString = client.getRp(authorization, new GetRpParams(oxdId));
+                String respString = client.getRp(authorization, null, new GetRpParams(oxdId));
                 GetRpResponse resp = Jackson2.createJsonMapper().readValue(respString, GetRpResponse.class);
                 if (resp != null) {
                     print(oxdId, resp.getNode());
@@ -251,7 +251,7 @@ public class Cli {
             }
 
             if (cmd.hasOption("d")) {
-                RemoveSiteResponse resp = client.removeSite(authorization, new RemoveSiteParams(cmd.getOptionValue("d")));
+                RemoveSiteResponse resp = client.removeSite(authorization, null, new RemoveSiteParams(cmd.getOptionValue("d")));
                 if (resp != null && StringUtils.isNotBlank(resp.getOxdId())) {
                     System.out.println("Entry removed successfully.");
                 } else {

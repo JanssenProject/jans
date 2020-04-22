@@ -24,7 +24,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(response.getOxdId());
 
-        RemoveSiteResponse removeResponse = api.removeSite(params, Tester.getAuthorization(response));
+        RemoveSiteResponse removeResponse = api.removeSite(params, Tester.getAuthorization(response), null);
         assertNotNull(removeResponse);
         assertTrue(StringUtils.isNotEmpty(removeResponse.getOxdId()));
     }
@@ -37,7 +37,7 @@ public class RemoveSiteTest {
         RemoveSiteParams params = new RemoveSiteParams();
         params.setOxdId(someRandomId);
         try {
-            api.removeSite(params, Tester.getAuthorization());
+            api.removeSite(params, Tester.getAuthorization(), null);
         } catch (ApiException e) {
             assertEquals(e.getCode(), 400);
             assertEquals(Tester.asError(e).getError(), ErrorResponseCode.INVALID_OXD_ID.getCode());

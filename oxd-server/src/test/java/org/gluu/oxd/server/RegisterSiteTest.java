@@ -24,7 +24,7 @@ import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 public class RegisterSiteTest {
 
-    private String oxdId = null;
+    private RegisterSiteResponse site = null;
 
     @Parameters({"host", "opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
@@ -33,7 +33,7 @@ public class RegisterSiteTest {
         assertNotNull(resp);
 
         notEmpty(resp.getOxdId());
-        oxdId = resp.getOxdId();
+        site = resp;
     }
     @Parameters({"host", "opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
@@ -105,14 +105,14 @@ public class RegisterSiteTest {
     @Parameters({"host"})
     @Test(dependsOnMethods = {"register"})
     public void update(String host) {
-        notEmpty(oxdId);
+        notEmpty(site.getOxdId());
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
 
         // more specific site registration
         final UpdateSiteParams params = new UpdateSiteParams();
-        params.setOxdId(oxdId);
+        params.setOxdId(site.getOxdId());
         params.setScope(Lists.newArrayList("profile"));
 
         params.setClientName("oxd-client-updated-test");
@@ -159,7 +159,7 @@ public class RegisterSiteTest {
         customAttributes.put("key2", "v2");
         params.setCustomAttributes(customAttributes);
 
-        UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(), params);
+        UpdateSiteResponse resp = Tester.newClient(host).updateSite(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
     }
 
@@ -174,7 +174,7 @@ public class RegisterSiteTest {
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
         params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
