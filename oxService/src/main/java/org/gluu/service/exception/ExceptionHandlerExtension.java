@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Yuriy Movchan Date: 05/22/2017
  */
-@ApplicationScoped
 public class ExceptionHandlerExtension implements Extension {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerExtension.class.getName());
