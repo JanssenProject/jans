@@ -292,7 +292,7 @@ public class RestResource {
         }
 
         if (!conf.getProtectCommandsWithOxdId().contains(authorizationOxdId)) {
-            LOG.debug("`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should cointain`oxd_id` from `protect_commands_with_oxd_id` field in oxd-server.yml.");
+            LOG.debug("`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should contain `oxd_id` from `protect_commands_with_oxd_id` field in oxd-server.yml.");
             throw new HttpException(ErrorResponseCode.INVALID_AUTHORIZATION_OXD_ID);
         }
     }
