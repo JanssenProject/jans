@@ -12,12 +12,13 @@ import javax.inject.Named;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 
 /**
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version December 21, 2019
  */
 public class EnumValuesFactory {
 
@@ -36,7 +37,8 @@ public class EnumValuesFactory {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
                 GrantType.CLIENT_CREDENTIALS,
                 GrantType.REFRESH_TOKEN,
-                GrantType.OXAUTH_UMA_TICKET
+                GrantType.OXAUTH_UMA_TICKET,
+                GrantType.CIBA
         };
     }
 
@@ -86,5 +88,18 @@ public class EnumValuesFactory {
     @Named
     public BlockEncryptionAlgorithm[] getBlockEncryptionAlgorithms() {
         return BlockEncryptionAlgorithm.values();
+    }
+
+    // CIBA
+    @Produces
+    @Named
+    public BackchannelTokenDeliveryMode[] getBachBackchannelTokenDeliveryModes() {
+        return BackchannelTokenDeliveryMode.values();
+    }
+
+    @Produces
+    @Named
+    public AsymmetricSignatureAlgorithm[] getAsymmetricSignatureAlgorithms() {
+        return AsymmetricSignatureAlgorithm.values();
     }
 }

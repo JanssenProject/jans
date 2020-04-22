@@ -146,7 +146,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
             TokenResponse tokenResponse = tokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+            assertEquals(tokenResponse.getStatus(), 400, "Unexpected response code: " + tokenResponse.getStatus());
             assertNotNull(tokenResponse.getEntity(), "The entity is null");
             assertNotNull(tokenResponse.getErrorType(), "The error type is null");
             assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");

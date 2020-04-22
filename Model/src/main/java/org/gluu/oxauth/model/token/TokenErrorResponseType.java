@@ -56,7 +56,29 @@ public enum TokenErrorResponseType implements IErrorType {
      * The requested scope is invalid, unknown, malformed, or exceeds the scope
      * granted by the resource owner.
      */
-    INVALID_SCOPE("invalid_scope");
+    INVALID_SCOPE("invalid_scope"),
+
+    /**
+     * CIBA. The authorization request is still pending as the end-user hasn't yet been authenticated.
+     */
+    AUTHORIZATION_PENDING("authorization_pending"),
+
+    /**
+     * CIBA. A variant of "authorization_pending", the authorization request is still pending and
+     * polling should continue, but the interval MUST be increased by at least 5 seconds
+     * for this and all subsequent requests.
+     */
+    SLOW_DOWN("slow_down"),
+
+    /**
+     * CIBA. The auth_req_id has expired. The Client will need to make a new Authentication Request.
+     */
+    EXPIRED_TOKEN("expired_token"),
+
+    /**
+     * CIBA. The end-user denied the authorization request.
+     */
+    ACCESS_DENIED("access_denied");
 
     private final String paramName;
 

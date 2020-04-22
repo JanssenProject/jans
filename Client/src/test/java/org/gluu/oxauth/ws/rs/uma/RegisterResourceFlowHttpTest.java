@@ -6,6 +6,17 @@
 
 package org.gluu.oxauth.ws.rs.uma;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaResourceService;
@@ -14,18 +25,12 @@ import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxauth.model.uma.UmaResource;
 import org.gluu.oxauth.model.uma.UmaResourceResponse;
 import org.gluu.oxauth.model.uma.UmaResourceWithId;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
-
-import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
 
 /**
  * Test cases for the registering UMA resources
@@ -58,7 +63,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
-            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
+            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
             UmaTestUtil.assert_(this.metadata);
         }
 
@@ -68,7 +73,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
     public UmaResourceService getResourceService() throws Exception {
         if (resourceService == null) {
-            resourceService = UmaClientFactory.instance().createResourceService(this.metadata, clientExecutor(true));
+            resourceService = UmaClientFactory.instance().createResourceService(this.metadata, clientEngine(true));
         }
         return resourceService;
     }
@@ -175,7 +180,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             getResourceService().updateResource("Bearer " + pat.getAccessToken(), "fake_resource_id", resource);
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             int status = ex.getResponse().getStatus();
             assertTrue(status != Response.Status.OK.getStatusCode(), "Unexpected response status");
         }
@@ -197,7 +203,8 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
         }
 

@@ -11,12 +11,10 @@ import com.google.common.collect.Lists;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
+import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
@@ -30,7 +28,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version December 21, 2019
  */
 @Named
 @SessionScoped
@@ -43,6 +41,9 @@ public class RegistrationAction implements Serializable {
 
     @Inject
     private AuthorizationAction authorizationAction;
+
+    @Inject
+    private  BackchannelAuthenticationAction backchannelAuthenticationAction;
 
     @Inject
     private TokenAction tokenAction;
@@ -94,6 +95,12 @@ public class RegistrationAction implements Serializable {
     private String clientReadRequestString;
     private String clientReadResponseString;
 
+    // CIBA
+    private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
+    private String backchannelClientNotificationEndpoint;
+    private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
+    private Boolean backchannelUserCodeParameter;
+
     public void exec() {
         try {
             RegisterRequest request = new RegisterRequest(applicationType, clientName, StringUtils.spaceSeparatedToList(redirectUris));
@@ -128,11 +135,17 @@ public class RegistrationAction implements Serializable {
             request.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
             request.setFrontChannelLogoutSessionRequired(logoutSessionRequired);
 
+            // CIBA
+            request.setBackchannelTokenDeliveryMode(backchannelTokenDeliveryMode);
+            request.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+            request.setBackchannelAuthenticationRequestSigningAlg(backchannelAuthenticationRequestSigningAlg);
+            request.setBackchannelUserCodeParameter(backchannelUserCodeParameter);
+
             RegisterClient client = new RegisterClient(registrationEndpoint);
             client.setRequest(request);
             RegisterResponse response = client.exec();
 
-            if (response.getStatus() == 200) {
+            if (response.getStatus() >= 200 && response.getStatus() <= 299) {
                 registrationClientUri = response.getRegistrationClientUri();
                 registrationAccessToken = response.getRegistrationAccessToken();
                 authorizationAction.setClientId(response.getClientId());
@@ -142,6 +155,9 @@ public class RegistrationAction implements Serializable {
                 }
                 tokenAction.setClientId(response.getClientId());
                 tokenAction.setClientSecret(response.getClientSecret());
+
+                backchannelAuthenticationAction.setClientId(response.getClientId());
+                backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
             }
 
             showResults = true;
@@ -502,5 +518,37 @@ public class RegistrationAction implements Serializable {
 
     public void setClientReadResponseString(String clientReadResponseString) {
         this.clientReadResponseString = clientReadResponseString;
+    }
+
+    public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
+        return backchannelTokenDeliveryMode;
+    }
+
+    public void setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
+        this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
+    }
+
+    public String getBackchannelClientNotificationEndpoint() {
+        return backchannelClientNotificationEndpoint;
+    }
+
+    public void setBackchannelClientNotificationEndpoint(String backchannelClientNotificationEndpoint) {
+        this.backchannelClientNotificationEndpoint = backchannelClientNotificationEndpoint;
+    }
+
+    public AsymmetricSignatureAlgorithm getBackchannelAuthenticationRequestSigningAlg() {
+        return backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public void setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg) {
+        this.backchannelAuthenticationRequestSigningAlg = backchannelAuthenticationRequestSigningAlg;
+    }
+
+    public Boolean getBackchannelUserCodeParameter() {
+        return backchannelUserCodeParameter;
+    }
+
+    public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
+        this.backchannelUserCodeParameter = backchannelUserCodeParameter;
     }
 }

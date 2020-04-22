@@ -18,6 +18,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.config.oxtrust import LdapOxPassportConfiguration
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.persist import PersistenceEntryManager
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
 from java.util import ArrayList, Arrays, Collections
@@ -33,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Passport. init called"
 
         self.extensionModule = self.loadExternalModule(configurationAttributes.get("extension_module"))
@@ -60,7 +61,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getApiVersion(self):
-        return 2
+        return 11
 
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
@@ -136,7 +137,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif jsonp != None:
                 # Completion of profile takes place
                 user_profile = json.loads(jsonp)
-                user_profile["mail"] = mail
+                user_profile["mail"] = [ mail ]
 
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
@@ -334,7 +335,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
-        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        entryManager = CdiUtil.bean(PersistenceEntryManager)
 
         config = LdapOxPassportConfiguration()
         config = entryManager.find(config.getClass(), self.passportDN).getPassportConfiguration()
@@ -430,10 +431,11 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
             appConfiguration.setKeyStoreSecret(self.keyStorePassword)
+            appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getAlgorithm())
+                                                        None, None, jwt.getHeader().getSignatureAlgorithm())
         except:
             print "Exception: ", sys.exc_info()[1]
 
@@ -564,7 +566,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return logged_in
 
 
-    def setMessageError(self, msg, severity):
+    def setMessageError(self, severity, msg):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
         facesMessages.clear()

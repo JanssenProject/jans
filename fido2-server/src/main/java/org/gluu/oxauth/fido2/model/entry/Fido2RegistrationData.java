@@ -24,8 +24,8 @@ public class Fido2RegistrationData extends Fido2Data {
     private String userId;
     private String challenge;
 
-    private String w3cCredentialCreationOptions;
-    private String w3cAuthenticatorAttenstationResponse;
+    private String credentialCreationOptions;
+    private String authenticatorAttenstationResponse;
 
     private String uncompressedECPoint;
     private String publicKeyId;
@@ -39,8 +39,6 @@ public class Fido2RegistrationData extends Fido2Data {
     private String attestationType;
 
     private int signatureAlgorithm;
-
-    private AttestationConveyancePreference attestationConveyancePreferenceType;
 
     public String getUsername() {
         return username;
@@ -74,20 +72,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getW3cCredentialCreationOptions() {
-        return w3cCredentialCreationOptions;
+    public String getCredentialCreationOptions() {
+        return credentialCreationOptions;
     }
 
-    public void setW3cCredentialCreationOptions(String w3cCredentialCreationOptions) {
-        this.w3cCredentialCreationOptions = w3cCredentialCreationOptions;
+    public void setCredentialCreationOptions(String credentialCreationOptions) {
+        this.credentialCreationOptions = credentialCreationOptions;
     }
 
-    public String getW3cAuthenticatorAttenstationResponse() {
-        return w3cAuthenticatorAttenstationResponse;
+    public String getAuthenticatorAttenstationResponse() {
+        return authenticatorAttenstationResponse;
     }
 
-    public void setW3cAuthenticatorAttenstationResponse(String w3cAuthenticatorAttenstationResponse) {
-        this.w3cAuthenticatorAttenstationResponse = w3cAuthenticatorAttenstationResponse;
+    public void setAuthenticatorAttenstationResponse(String authenticatorAttenstationResponse) {
+        this.authenticatorAttenstationResponse = authenticatorAttenstationResponse;
     }
 
     public String getUncompressedECPoint() {
@@ -146,24 +144,12 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public AttestationConveyancePreference getAttestationConveyancePreferenceType() {
-        return attestationConveyancePreferenceType;
-    }
-
-    public void setAttestationConveyancePreferenceType(AttestationConveyancePreference attestationConveyancePreferenceType) {
-        this.attestationConveyancePreferenceType = attestationConveyancePreferenceType;
-    }
-
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("FidoRegistrationEntity [username=").append(username).append(", domain=").append(domain).append(", userId=").append(userId)
-                .append(", challenge=").append(challenge).append(", w3cCredentialCreationOptions=").append(w3cCredentialCreationOptions)
-                .append(", w3cAuthenticatorAttenstationResponse=").append(w3cAuthenticatorAttenstationResponse).append(", uncompressedECPoint=")
-                .append(uncompressedECPoint).append(", publicKeyId=").append(publicKeyId).append(", type=").append(type).append(", status=")
-                .append(status).append(", counter=").append(counter).append(", attestationType=").append(attestationType)
-                .append(", signatureAlgorithm=").append(signatureAlgorithm).append(", attestationConveyancePreferenceType=")
-                .append(attestationConveyancePreferenceType).append("]");
-        return builder.toString();
-    }
+	public String toString() {
+		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
+				+ ", credentialCreationOptions=" + credentialCreationOptions + ", authenticatorAttenstationResponse="
+				+ authenticatorAttenstationResponse + ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId
+				+ ", type=" + type + ", status=" + status + ", counter=" + counter + ", attestationType=" + attestationType
+				+ ", signatureAlgorithm=" + signatureAlgorithm + "]";
+	}
 }

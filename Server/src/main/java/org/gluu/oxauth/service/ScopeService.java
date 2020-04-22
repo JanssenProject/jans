@@ -145,19 +145,17 @@ public class ScopeService {
         if (cached != null)
             return (Scope) cached;
 
-
-        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-
-        org.oxauth.persistence.model.Scope scopeExample = new org.oxauth.persistence.model.Scope();
-        scopeExample.setDn(scopesBaseDN);
-        scopeExample.setId(id);
-
-        List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
-        if ((scopes != null) && (scopes.size() > 0)) {
-            final Scope scope = scopes.get(0);
-            usedCacheService.put(id, scope);
-            usedCacheService.put(scope.getDn(), scope);
-            return scope;
+        try {
+            List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(
+                    staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("oxId", id));
+            if ((scopes != null) && (scopes.size() > 0)) {
+                final Scope scope = scopes.get(0);
+                usedCacheService.put(id, scope);
+                usedCacheService.put(scope.getDn(), scope);
+                return scope;
+            }
+        } catch (Exception e) {
+            log.error("Failed to find scope with id: " + id, e);
         }
         return null;
     }

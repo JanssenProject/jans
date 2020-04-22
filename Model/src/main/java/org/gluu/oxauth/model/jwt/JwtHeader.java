@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.model.jwt;
 
-import static org.gluu.oxauth.model.jwt.JwtHeaderName.*;
-
-import org.json.JSONObject;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.json.JSONObject;
+
+import static org.gluu.oxauth.model.jwt.JwtHeaderName.*;
 
 /**
  * @author Javier Rojas Blum
@@ -50,7 +50,7 @@ public class JwtHeader extends JwtClaimSet {
         return this;
     }
 
-    public SignatureAlgorithm getAlgorithm() {
+    public SignatureAlgorithm getSignatureAlgorithm() {
         String alg = getClaimAsString(ALGORITHM);
         return SignatureAlgorithm.fromString(alg);
     }
@@ -127,6 +127,10 @@ public class JwtHeader extends JwtClaimSet {
         } else {
             setClaim(ENCRYPTION_METHOD, encryptionMethod.toString());
         }
+    }
+
+    public BlockEncryptionAlgorithm getEncryptionMethod() {
+        return BlockEncryptionAlgorithm.fromName(getClaimAsString(ENCRYPTION_METHOD));
     }
 
     /**

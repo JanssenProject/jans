@@ -106,7 +106,7 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(CLAIMS_REDIRECT_URIS.toString(), new JSONArray(getRequest().getClaimsRedirectUris()));
                 }
                 if (getRequest().getResponseTypes() != null && !getRequest().getResponseTypes().isEmpty()) {
-                    requestBody.put(RESPONSE_TYPES.toString(), new JSONArray(getRequest().getResponseTypes()));
+                    requestBody.put(RESPONSE_TYPES.toString(), new JSONArray(getRequest().getResponseTypes_()));
                 }
                 if (getRequest().getGrantTypes() != null && !getRequest().getGrantTypes().isEmpty()) {
                     requestBody.put(GRANT_TYPES.toString(), new JSONArray(getRequest().getGrantTypes()));
@@ -225,6 +225,12 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
                     requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
                 }
+                if (getRequest().getBackchannelLogoutUris() != null && !getRequest().getBackchannelLogoutUris().isEmpty()) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_URI.getName(), getRequest().getBackchannelLogoutUris());
+                }
+                if (getRequest().getBackchannelLogoutSessionRequired() != null) {
+                    requestBody.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getBackchannelLogoutSessionRequired());
+                }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
                 }
@@ -296,6 +302,8 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 clientResponse = clientRequest.post(String.class);
             } else if (getHttpMethod().equals(HttpMethod.PUT)) {
                 clientResponse = clientRequest.put(String.class);
+            } else if (getHttpMethod().equals(HttpMethod.DELETE)) {
+                clientResponse = clientRequest.delete(String.class);
             } else { // GET
                 clientResponse = clientRequest.get(String.class);
             }
