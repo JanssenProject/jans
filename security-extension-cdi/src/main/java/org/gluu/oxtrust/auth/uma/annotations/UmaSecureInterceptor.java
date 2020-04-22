@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 @Interceptor
 @UmaSecure
 @Priority(Interceptor.Priority.PLATFORM_AFTER)
+@Deprecated
 public class UmaSecureInterceptor {
 
     @Inject
