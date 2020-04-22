@@ -43,12 +43,14 @@
 		<module>core-document-store</module>
 		<module>core-standalone</module>
 		<module>oxSaml</module>
+		<module>oxJsfUtil</module>
 		<module>core-java-ext</module>
 		<module>core-cdi</module>
 		<module>core-timer-weld</module>
+		<module>security-extension-cdi</module>
+		<module>exception-extension-cdi</module>
 		<module>oxService</module>
 		<module>server</module>
-		<module>oxJsfUtil</module>
 		<module>oxRadius</module>
 		<module>demo-cdi</module>
 	</modules>

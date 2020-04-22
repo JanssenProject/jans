@@ -12,12 +12,11 @@ import javax.enterprise.event.Event;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.interceptor.Interceptor;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
-import javax.interceptor.Interceptor;
 
 import org.gluu.model.security.event.Authenticated;
-import org.gluu.service.security.Secure;
 import org.slf4j.Logger;
 
 @RequestScoped
@@ -227,11 +226,6 @@ public class Identity implements Serializable {
             }
         }
         return false;
-    }
-
-    @Secure("#{identity.loggedIn}")
-    public boolean checkLoggedIn() {
-        return isLoggedIn();
     }
 
 }
