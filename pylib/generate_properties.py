@@ -476,11 +476,13 @@ def generate_properties(as_dict=False):
     if oxAuthConfDynamic:
         o_issuer = urlparse(oxAuthConfDynamic['issuer'])
         setup_prop['hostname'] = str(o_issuer.netloc)
-        setup_prop['pairwiseCalculationSalt'] =  str(oxAuthConfDynamic['pairwiseCalculationSalt'])
         setup_prop['oxauth_openidScopeBackwardCompatibility'] =  oxAuthConfDynamic.get('openidScopeBackwardCompatibility', False)
+        if 'pairwiseCalculationSalt' in oxAuthConfDynamic:
+            setup_prop['pairwiseCalculationSalt'] =  str(oxAuthConfDynamic['pairwiseCalculationSalt'])
         if 'legacyIdTokenClaims' in oxAuthConfDynamic:
             setup_prop['oxauth_legacyIdTokenClaims'] = oxAuthConfDynamic['legacyIdTokenClaims']
-        setup_prop['pairwiseCalculationKey'] = str(oxAuthConfDynamic['pairwiseCalculationKey'])
+        if 'pairwiseCalculationKey' in oxAuthConfDynamic:
+            setup_prop['pairwiseCalculationKey'] = str(oxAuthConfDynamic['pairwiseCalculationKey'])
         if 'keyStoreFile' in oxAuthConfDynamic:
             setup_prop['oxauth_openid_jks_fn'] = str(oxAuthConfDynamic['keyStoreFile'])
         if 'keyStoreSecret' in oxAuthConfDynamic:
