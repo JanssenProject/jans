@@ -216,8 +216,9 @@ public class CustomScriptManager implements Serializable {
 
 			CustomScriptConfiguration prevCustomScriptConfiguration = newCustomScriptConfigurations
 					.get(newSupportedCustomScriptInum);
-			if ((prevCustomScriptConfiguration == null) || (prevCustomScriptConfiguration.getCustomScript()
-					.getRevision() != newCustomScript.getRevision())) {
+			boolean hasChanged = (prevCustomScriptConfiguration == null) || (prevCustomScriptConfiguration.getCustomScript()
+					.getRevision() != newCustomScript.getRevision());
+			if (hasChanged || ScriptLocationType.FILE == newCustomScript.getLocationType()) {
 				// Destroy old version properly before creating new one
 				if (prevCustomScriptConfiguration != null) {
 					destroyCustomScript(prevCustomScriptConfiguration);
