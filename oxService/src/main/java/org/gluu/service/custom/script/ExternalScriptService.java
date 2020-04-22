@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
  *
  * @author Yuriy Movchan Date: 01/08/2015
  */
+@ApplicationScoped
 public class ExternalScriptService implements Serializable {
 
     private static final long serialVersionUID = -1070021905117441202L;
