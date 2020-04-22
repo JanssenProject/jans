@@ -77,6 +77,16 @@
             </dependency>
             <dependency>
                 <groupId>org.gluu</groupId>
+                <artifactId>security-extension-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>exception-extension-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
                 <artifactId>oxcore-radius</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -218,6 +228,12 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.faces</artifactId>
 				<version>${jsf-impl.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.jboss.spec.javax.annotation</groupId>
+			    <artifactId>jboss-annotations-api_1.2_spec</artifactId>
+			    <version>1.0.2.Final</version>
+				<scope>provided</scope>
 			</dependency>
 
 			<dependency>
