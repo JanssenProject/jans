@@ -287,7 +287,7 @@ args = ['/opt/jre/bin/java', '-Dlog4j.defaultInitOverride=true',
 
 
 if gluu_ver_real < '3.1.2':
-    args += ['-algorithms', ' '.join(key_algs)]
+    args += ['-algorithms', key_algs]
 else:
     args += ['-sig_keys', key_algs, '-enc_keys', enc_keys]
     
