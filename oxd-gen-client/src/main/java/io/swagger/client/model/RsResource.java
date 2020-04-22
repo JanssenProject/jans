@@ -89,10 +89,10 @@ public class RsResource {
   }
 
    /**
-   * number of seconds since January 1 1970 UTC, indicating when this token will expire
+   * Resource expiration date in terms of number of seconds since January 1 1970 UTC
    * @return exp
   **/
-  @Schema(example = "1535709072", description = "number of seconds since January 1 1970 UTC, indicating when this token will expire")
+  @Schema(example = "1545709072", description = "Resource expiration date in terms of number of seconds since January 1 1970 UTC")
   public Long getExp() {
     return exp;
   }
@@ -107,10 +107,10 @@ public class RsResource {
   }
 
    /**
-   * number of seconds since January 1 1970 UTC, indicating when the token was issued at
+   * Resource creation date in terms of number of seconds since January 1 1970 UTC
    * @return iat
   **/
-  @Schema(example = "1535709072", description = "number of seconds since January 1 1970 UTC, indicating when the token was issued at")
+  @Schema(example = "1535709072", description = "Resource creation date in terms of number of seconds since January 1 1970 UTC")
   public Long getIat() {
     return iat;
   }

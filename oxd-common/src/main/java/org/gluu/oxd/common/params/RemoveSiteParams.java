@@ -7,12 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RemoveSiteParams implements HasAccessTokenParams {
+public class RemoveSiteParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
-    @JsonProperty(value = "token")
-    private String token;
 
     public RemoveSiteParams() {
     }
@@ -23,7 +21,6 @@ public class RemoveSiteParams implements HasAccessTokenParams {
 
     public RemoveSiteParams(String oxdId, String token) {
         this.oxd_id = oxdId;
-        this.token = token;
     }
 
     @Override
@@ -36,19 +33,9 @@ public class RemoveSiteParams implements HasAccessTokenParams {
     }
 
     @Override
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    @Override
     public String toString() {
         return "RemoveSiteParams{" +
                 "oxd_id='" + oxd_id + '\'' +
-                ", token='" + token + '\'' +
                 '}';
     }
 }

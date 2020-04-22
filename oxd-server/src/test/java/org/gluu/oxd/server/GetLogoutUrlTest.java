@@ -37,7 +37,7 @@ public class GetLogoutUrlTest {
         params.setState(UUID.randomUUID().toString());
         params.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-        final GetLogoutUriResponse resp = client.getLogoutUri(Tester.getAuthorization(), params);
+        final GetLogoutUriResponse resp = client.getLogoutUri(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
         assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
     }

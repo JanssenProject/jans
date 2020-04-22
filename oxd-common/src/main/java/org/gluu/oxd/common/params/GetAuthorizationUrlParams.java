@@ -12,7 +12,7 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationUrlParams implements HasAccessTokenParams {
+public class GetAuthorizationUrlParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -24,8 +24,6 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
     private List<String> scope;
     @JsonProperty(value = "hd")
     private String hd; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "nonce")
@@ -48,14 +46,6 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
 
     public void setCustomParameters(Map<String, String> customParameters) {
         this.custom_parameters = customParameters;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getHostedDomain() {
@@ -164,7 +154,6 @@ public class GetAuthorizationUrlParams implements HasAccessTokenParams {
                 ", prompt='" + prompt + '\'' +
                 ", scope=" + scope +
                 ", hd='" + hd + '\'' +
-                ", token='" + token + '\'' +
                 ", params=" + params +
                 ", custom_parameters=" + custom_parameters +
                 ", redirect_uri='" + redirect_uri + '\'' +
