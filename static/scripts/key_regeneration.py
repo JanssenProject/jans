@@ -29,6 +29,40 @@ ox_ldap_roperties_fn = os.path.join(conf_dir, 'ox-ldap.properties')
 keystore_fn = 'oxauth-keys.jks'
 oxauth_keys_json_fn = 'oxauth-keys.json'
 
+alg_keys = {
+    '3.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.0.2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.0.3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.2.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.3.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.3.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.4.sp3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.5.sp4': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.5.sp3': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.5.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.5': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.6.sp2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.6.sp1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.6': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.7': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '3.1.8': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
+    '4.0':   {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+    '4.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+    '4.1.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+    '4.1.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+}
+
+sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+enc_keys = 'RSA1_5 RSA-OAEP'
+
+
 if os.path.exists('/etc/yum.repos.d/'):
     package_type = 'rpm'
 elif os.path.exists('/etc/apt/sources.list'):
