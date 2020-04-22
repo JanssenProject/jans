@@ -80,10 +80,10 @@ public class GetClientTokenParams {
   }
 
    /**
-   * Provide the URL of OpenID Provider (OP). If missing, then &#x60;op_configuration_endpoint&#x60; must be defined.
+   * Deprecated in favor of &#x60;op_configuration_endpoint&#x60;. It will be removed in future version(s). Provide the URL of OpenID Provider (OP) in this field. If missing, then &#x60;op_configuration_endpoint&#x60; must be defined.
    * @return opHost
   **/
-  @Schema(example = "https://<ophostname>", description = "Provide the URL of OpenID Provider (OP). If missing, then `op_configuration_endpoint` must be defined.")
+  @Schema(example = "https://<ophostname>", description = "Deprecated in favor of `op_configuration_endpoint`. It will be removed in future version(s). Provide the URL of OpenID Provider (OP) in this field. If missing, then `op_configuration_endpoint` must be defined.")
   public String getOpHost() {
     return opHost;
   }
@@ -98,10 +98,10 @@ public class GetClientTokenParams {
   }
 
    /**
-   * Path to the OpenID Connect Provider&#x27;s discovery document. For example, if it is &#x27;https://example.com/.well-known/openid-configuration&#x27; then the path is blank . But if it is &#x27;https://example.com/oxauth/.well-known/openid-configuration&#x27; then the path is &#x27;/oxauth&#x27;
+   * Deprecated in favor of &#x60;op_configuration_endpoint&#x60;. It will be removed in future version(s). Provide path to the OpenID Connect Provider&#x27;s discovery document in this field. For example, if it is &#x27;https://example.com/.well-known/openid-configuration&#x27; then the path is blank. But if it is &#x27;https://example.com/oxauth/.well-known/openid-configuration&#x27; then the path is &#x27;/oxauth&#x27;
    * @return opDiscoveryPath
   **/
-  @Schema(example = "/oxauth", description = "Path to the OpenID Connect Provider's discovery document. For example, if it is 'https://example.com/.well-known/openid-configuration' then the path is blank . But if it is 'https://example.com/oxauth/.well-known/openid-configuration' then the path is '/oxauth'")
+  @Schema(example = "/oxauth", description = "Deprecated in favor of `op_configuration_endpoint`. It will be removed in future version(s). Provide path to the OpenID Connect Provider's discovery document in this field. For example, if it is 'https://example.com/.well-known/openid-configuration' then the path is blank. But if it is 'https://example.com/oxauth/.well-known/openid-configuration' then the path is '/oxauth'")
   public String getOpDiscoveryPath() {
     return opDiscoveryPath;
   }

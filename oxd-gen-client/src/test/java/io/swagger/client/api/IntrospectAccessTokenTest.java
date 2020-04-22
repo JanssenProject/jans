@@ -29,7 +29,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         introspectParams.setAccessToken(accessToken);
         //
         final String authorization = "Bearer " + accessToken;
-        final IntrospectAccessTokenResponse iaTokenResponse = client.introspectAccessToken(introspectParams, authorization);
+        final IntrospectAccessTokenResponse iaTokenResponse = client.introspectAccessToken(introspectParams, authorization, null);
         assertNotNull(iaTokenResponse);
         assertTrue(iaTokenResponse.isActive());
         assertNotNull(iaTokenResponse.getIat());
@@ -64,7 +64,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         iatParams.setOxdId(setupData.getOxdId());
 
         try {
-            client.introspectAccessToken(iatParams, validHeader);
+            client.introspectAccessToken(iatParams, validHeader, null);
         } catch (ApiException e) {
             assertEquals(400, e.getCode());
             return;
@@ -93,7 +93,7 @@ public class IntrospectAccessTokenTest extends BaseTestCase {
         introspectParams.setAccessToken(tokenResponseData.getAccessToken());
 
         final String invalidAuthString = "Bearer NotAuthorized";
-        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse = client.introspectAccessTokenWithHttpInfo(introspectParams, invalidAuthString);
+        final ApiResponse<IntrospectAccessTokenResponse> introApiResponse = client.introspectAccessTokenWithHttpInfo(introspectParams, invalidAuthString, null);
 
         assertEquals(403, introApiResponse.getStatusCode());
         assertNotNull(introApiResponse.getData());

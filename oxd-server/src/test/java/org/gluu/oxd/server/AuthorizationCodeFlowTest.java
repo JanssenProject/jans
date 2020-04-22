@@ -36,7 +36,7 @@ public class AuthorizationCodeFlowTest {
         params.setUserId(userId);
         params.setUserSecret(userSecret);
 
-        final AuthorizationCodeFlowResponse resp = client.authorizationCodeFlow(Tester.getAuthorization(), params);
+        final AuthorizationCodeFlowResponse resp = client.authorizationCodeFlow(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
 
         notEmpty(resp.getAccessToken());

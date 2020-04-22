@@ -25,7 +25,7 @@ public class RemoveSiteTest {
 
         notEmpty(resp.getOxdId());
 
-        RemoveSiteResponse removeResponse = client.removeSite(Tester.getAuthorization(), new RemoveSiteParams(resp.getOxdId()));
+        RemoveSiteResponse removeResponse = client.removeSite(Tester.getAuthorization(resp), null, new RemoveSiteParams(resp.getOxdId()));
         assertNotNull(removeResponse);
         assertNotNull(removeResponse.getOxdId());
     }
