@@ -13,8 +13,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<resteasy.version>3.9.3.Final</resteasy.version>
-		<resteasy.jaxrs.version>3.9.3.Final</resteasy.jaxrs.version>
+		<resteasy.version>3.11.2.Final</resteasy.version>
+		<resteasy.jaxrs.version>3.11.2.Final</resteasy.jaxrs.version>
 
 		<httpcore.version>4.4.13</httpcore.version>
 		<httpclient.version>4.5.11</httpclient.version>
@@ -54,11 +54,6 @@
 			<id>gluu</id>
 			<name>Gluu repository</name>
 			<url>http://ox.gluu.org/maven</url>
-		</repository>
-		<repository>
-			<id>bouncycastle</id>
-			<name>Bouncy Castle</name>
-			<url>http://repo2.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 
