@@ -9,12 +9,14 @@ package org.gluu.oxauth.model.common;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
 import org.gluu.oxauth.model.util.HashUtil;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.model.base.Deletable;
 
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -50,6 +52,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
     @AttributeName(name = "ssnId")
     private String sessionDn;
     private String x5ts256;
+    private int ttl;
 
     /**
      * Creates and initializes the values of an abstract token.
@@ -60,6 +63,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
         if (lifeTime <= 0) {
             throw new IllegalArgumentException("Lifetime of the token is less or equal to zero.");
         }
+        ttl = lifeTime;
         Calendar calendar = Calendar.getInstance();
         creationDate = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -77,6 +81,23 @@ public abstract class AbstractToken implements Serializable, Deletable {
         this.expirationDate = expirationDate;
 
         checkExpired();
+    }
+
+    public int getTtl() {
+        initTtl();
+        return ttl;
+    }
+
+    private void initTtl() {
+        if (ttl > 0) {
+            return;
+        }
+        ttl = ServerUtil.calculateTtl(creationDate, expirationDate);
+        if (ttl > 0) {
+            return;
+        }
+        // unable to calculate ttl (expiration or creation date is not set), thus defaults it to 1 day
+        ttl = (int) TimeUnit.DAYS.toSeconds(1);
     }
 
     /**
@@ -232,7 +253,7 @@ public abstract class AbstractToken implements Serializable, Deletable {
     }
 
     @Override
-    public boolean isDeletable() {
+    public Boolean isDeletable() {
         return deletable;
     }
 

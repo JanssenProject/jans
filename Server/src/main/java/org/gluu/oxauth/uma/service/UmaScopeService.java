@@ -11,8 +11,10 @@ import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.service.InumService;
+import org.gluu.oxauth.service.SpontaneousScopeService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.oxauth.persistence.model.Scope;
@@ -25,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,6 +55,26 @@ public class UmaScopeService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private SpontaneousScopeService spontaneousScopeService;
+
+    public Scope getOrCreate(Client client, String scopeId, Set<String> regExps) {
+        Scope fromLdap = getScope(scopeId);
+        if (fromLdap != null) { // already exists
+            return fromLdap;
+        }
+
+        if (!client.getAttributes().getAllowSpontaneousScopes()) {
+            return null;
+        }
+
+        if (!spontaneousScopeService.isAllowedBySpontaneousScopes_(regExps, scopeId)) {
+            return null;
+        }
+
+        return spontaneousScopeService.createSpontaneousScopeIfNeeded(regExps, scopeId, client.getClientId());
+    }
 
     public Scope getScope(String scopeId) {
         try {
@@ -159,6 +182,7 @@ public class UmaScopeService {
             newScope.setInum(inum);
             newScope.setDisplayName(scopeId);
             newScope.setId(scopeId);
+            newScope.setDeletable(false);
 
             final boolean persisted = persist(newScope);
             if (persisted) {
@@ -168,7 +192,7 @@ public class UmaScopeService {
             }
         }
 
-        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_RESOURCE_SCOPE, "Failed to persist scope.");
+        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Failed to persist scope.");
     }
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {

@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
@@ -16,14 +17,13 @@ import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 17, 2018
+ * @version March 4, 2020
  */
 @Named
 public class ClientAuthorizationsService {
@@ -43,6 +43,9 @@ public class ClientAuthorizationsService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
         branch.setOrganizationalUnitName("authorizations");
@@ -56,6 +59,11 @@ public class ClientAuthorizationsService {
     }
 
     public void prepareBranch() {
+        String baseDn = createDn(null);
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
         // Create client authorizations branch if needed
         if (!containsBranch()) {
             addBranch();
@@ -85,7 +93,7 @@ public class ClientAuthorizationsService {
         } else {
             String key = getCacheKey(userInum, clientId);
             Object cacheOjb = cacheService.get(key);
-            if (cacheOjb != null && cacheOjb instanceof ClientAuthorization) {
+            if (cacheOjb instanceof ClientAuthorization) {
                 return (ClientAuthorization) cacheOjb;
             }
         }
@@ -93,17 +101,31 @@ public class ClientAuthorizationsService {
         return null;
     }
 
-    public void add(String userInum, String clientId, Set<String> scopes, boolean persistInLdap) {
-        Client client = clientService.getClient(clientId);
+    public void clearAuthorizations(ClientAuthorization clientAuthorization, boolean persistInLdap) {
+        if (clientAuthorization == null) {
+            return;
+        }
 
         if (persistInLdap) {
+            ldapEntryManager.remove(clientAuthorization);
+        } else {
+            String key = getCacheKey(clientAuthorization.getUserId(), clientAuthorization.getClientId());
+            cacheService.remove(key);
+        }
+    }
+
+    public void add(String userInum, String clientId, Set<String> scopes, boolean persist) {
+        log.trace("Attempting to add client authorization, scopes:" + scopes + ", clientId: " + clientId + ", userInum: " + userInum + ", persist: " + persist);
+        Client client = clientService.getClient(clientId);
+
+        if (persist) {
             // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
             // If a client has pre-authorization=true, there is no point to create the entry under
             // ou=clientAuthorizations it will negatively impact performance, grow the size of the
             // ldap database, and serve no purpose.
             prepareBranch();
 
-            ClientAuthorization clientAuthorization = find(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorization = find(userInum, clientId, persist);
 
             if (clientAuthorization == null) {
                 clientAuthorization = new ClientAuthorization();
@@ -114,6 +136,7 @@ public class ClientAuthorizationsService {
                 clientAuthorization.setDn(createDn(clientAuthorization.getId()));
                 clientAuthorization.setDeletable(!client.getAttributes().getKeepClientAuthorizationAfterExpiration());
                 clientAuthorization.setExpirationDate(client.getExpirationDate());
+                clientAuthorization.setTtl(appConfiguration.getDynamicRegistrationExpirationTime());
 
                 ldapEntryManager.persist(clientAuthorization);
             } else if (clientAuthorization.getScopes() != null) {
@@ -125,7 +148,7 @@ public class ClientAuthorizationsService {
             }
         } else {
             // Put client authorization in cache. oxAuth #662.
-            ClientAuthorization clientAuthorizations = find(userInum, clientId, persistInLdap);
+            ClientAuthorization clientAuthorizations = find(userInum, clientId, persist);
             String key = getCacheKey(userInum, clientId);
 
             if (clientAuthorizations == null) {

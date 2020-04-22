@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
@@ -21,7 +20,6 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.service.cdi.util.CdiUtil;
@@ -93,7 +91,7 @@ public class ClientAssertion {
                             if (client != null) {
                                 JwtType jwtType = JwtType.fromString(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
                                 AuthenticationMethod authenticationMethod = client.getAuthenticationMethod();
-                                SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getAlgorithm();
+                                SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
 
                                 if (jwtType == null && signatureAlgorithm != null) {
                                     jwtType = signatureAlgorithm.getJwtType();

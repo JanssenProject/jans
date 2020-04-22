@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.authorize;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ScopeService;
@@ -47,14 +48,20 @@ public class ScopeChecker {
     private ExternalSpontaneousScopeService externalSpontaneousScopeService;
 
     public Set<String> checkScopesPolicy(Client client, String scope) {
-        log.debug("Checking scopes policy for: " + scope);
+        if (StringUtils.isBlank(scope)) {
+            return Sets.newHashSet();
+        }
+        return checkScopesPolicy(client, Arrays.asList(scope.split(" ")));
+    }
+
+    public Set<String> checkScopesPolicy(Client client, List<String> scopesRequested) {
+        log.debug("Checking scopes policy for: " + scopesRequested);
         Set<String> grantedScopes = new HashSet<>();
 
-        if (scope == null || client == null) {
+        if (scopesRequested == null || scopesRequested.isEmpty() || client == null) {
             return grantedScopes;
         }
 
-        final String[] scopesRequested = scope.split(" ");
         String[] scopesAllowed = client.getScopes() != null ? client.getScopes() : new String[0];
 
         for (String scopeRequested : scopesRequested) {
@@ -75,7 +82,7 @@ public class ScopeChecker {
                 externalSpontaneousScopeService.executeExternalManipulateScope(context);
 
                 if (context.isAllowSpontaneousScopePersistence()) {
-                    spontaneousScopeService.createSpontaneousScopeIfNeeded(client, scopeRequested);
+                    spontaneousScopeService.createSpontaneousScopeIfNeeded(Sets.newHashSet(client.getAttributes().getSpontaneousScopes()), scopeRequested, client.getClientId());
                 }
             }
         }

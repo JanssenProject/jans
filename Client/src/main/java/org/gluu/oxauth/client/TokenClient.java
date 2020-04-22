@@ -19,7 +19,7 @@ import javax.ws.rs.HttpMethod;
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version February 25, 2020
  */
 public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
 
@@ -271,6 +271,9 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         }
         for (String key : getRequest().getCustomParameters().keySet()) {
             clientRequest.formParameter(key, getRequest().getCustomParameters().get(key));
+        }
+        if (StringUtils.isNotBlank(getRequest().getAuthReqId())) {
+            clientRequest.formParameter("auth_req_id", getRequest().getAuthReqId());
         }
 
         // Call REST Service and handle response

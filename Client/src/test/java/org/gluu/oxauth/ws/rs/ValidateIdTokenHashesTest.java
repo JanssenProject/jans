@@ -167,7 +167,6 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
         assertTrue(rsaSigner2.validateAccessToken(accessToken2, jwt2));
 
-        assertNull(jwt2.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNull(jwt2.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
 
         // 6. Request new access token using the refresh token.

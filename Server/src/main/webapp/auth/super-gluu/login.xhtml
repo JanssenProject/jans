@@ -235,54 +235,39 @@ body {
 				</div>
 			</div>
 		</h:panelGroup>
-		<h:panelGroup id="subsequent">
-			<header class="bs-docs-nav navbar navbar-static-top" id="top">
-			<div class="container">
-				<div class="navbar-header">
-					<a target="_blank" class="navbar-brand"><img
-						src="#{oxAuthConfigurationService.getImgLocation()}/logo.png"
-						alt="logo" /></a>
-				</div>
-			</div>
-			</header>
 
-			<div class="bs-docs-section">
-				<div class="container">
-					<div class="row">
-						<div class="col-md-12">
-							<div class="mid-wrapper">
-								<span class="icon_01"> <img
-									src="#{oxAuthConfigurationService.getImgLocation()}/tube_1.jpg"
-									alt="" />
-								</span>
-								<p style="line-height: 30px;">
-									A Super Gluu push notification has been sent to your <br />
-									registered device. Approve the push to login.
-								</p>
-							</div>
-
-							<div class="button-wrap1">
-								<p>Didn't receive the push notification?</p>
-								<a onclick="showQrDialog();" style="cursor: pointer;"
-									target="_blank" class="sigin-a">Scan QR code instead</a> <span
-									class="contactadmin"> If you no longer control the
-									device you registered,<br /> <a href="#">contact your Gluu
-										server admin</a> to enroll a new device
-								</span>
-							</div>
-
-						</div>
-
+		<h:panelGroup id="subsequent" style="margin:10px; padding:10px;">
+			<div class="row" style="margin: 10px; padding: 10px;">
+				<div class="col-md-6 col-sm-5">
+					<div>
+						<span class="icon_01"> <img
+							src="#{oxAuthConfigurationService.getImgLocation()}/tube_1.jpg"
+							alt="" />
+						</span>
+						<p style="line-height: 30px;">
+							A Super Gluu push notification has been sent to your <br />
+							registered device. Approve the push to login.
+						</p>
 					</div>
-
+					<div>
+						<p>Didn't receive the push notification?</p>
+						<a onclick="showQrDialog();" style="cursor: pointer;"
+							target="_blank" class="sigin-a"><span style="color: blue">Scan
+								QR code instead</span></a> <span class="contactadmin"> If you no
+							longer control the device you registered,<br /> <a href="#">contact
+								your Gluu server admin</a> to enroll a new device
+						</span>
+					</div>
+				</div>
+				<div class="col-md-6 col-sm-5" style="margin-left: 50%;">
+					<div id="dialog" style="display: none; margin-left: 50%;"
+						title="Super Gluu QR Code">
+						<div id="susequentcontainer"></div>
+						<br></br>
+						<div id="susequentprogressbar"></div>
+					</div>
 				</div>
 			</div>
 		</h:panelGroup>
-
-		<div id="dialog" style="display: none;" title="QR Code">
-			<div id="susequentcontainer"></div>
-			<div id="susequentprogressbar"></div>
-
-		</div>
 	</ui:define>
 </ui:composition>

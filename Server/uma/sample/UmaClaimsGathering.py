@@ -11,7 +11,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Claims-Gathering. Initializing ..."
         print "Claims-Gathering. Initialized successfully"
 
@@ -23,7 +23,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
 
     # Main gather method. Must return True (if gathering performed successfully) or False (if fail).

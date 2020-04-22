@@ -228,6 +228,9 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "oxAuthBackchannelUserCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
+    @Expiration
+    private Integer ttl;
+
     public ClientAttributes getAttributes() {
         if (attributes == null) {
             attributes = new ClientAttributes();
@@ -237,6 +240,14 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setAttributes(ClientAttributes attributes) {
         this.attributes = attributes;
+    }
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
     }
 
     public boolean isRptAsJwt() {
@@ -281,6 +292,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @return logout session required
      */
     public Boolean getFrontChannelLogoutSessionRequired() {
+        if (frontChannelLogoutSessionRequired == null) frontChannelLogoutSessionRequired = false;
         return frontChannelLogoutSessionRequired;
     }
 
@@ -299,6 +311,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @return logout uri
      */
     public String[] getFrontChannelLogoutUri() {
+        if (frontChannelLogoutUri == null) frontChannelLogoutUri = new String[0];
         return frontChannelLogoutUri;
     }
 
@@ -1183,10 +1196,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setSoftwareStatement(String softwareStatement) {
         this.softwareStatement = softwareStatement;
-    }
-
-    public static Client instance() {
-        return new Client();
     }
 
     public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {

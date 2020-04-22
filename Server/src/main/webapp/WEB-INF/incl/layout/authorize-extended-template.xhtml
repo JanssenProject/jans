@@ -91,6 +91,15 @@
 						</ui:fragment>
 					</ul>
 					<h:panelGroup layout="block"
+								  rendered="#{!empty authorizeAction.bindingMessage}">
+						<p>
+							#{msgs['ciba.bindingMessage']}
+							<strong>
+								#{authorizeAction.bindingMessage}
+							</strong>
+						</p>
+					</h:panelGroup>
+					<h:panelGroup layout="block"
 						rendered='#{!empty client.getPolicyUri()}'>
 						<p>
 							<h:outputText value="#{msgs['common.agreePolicy']}" />

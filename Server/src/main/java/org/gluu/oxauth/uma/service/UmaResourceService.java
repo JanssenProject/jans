@@ -7,6 +7,7 @@
 package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -172,7 +173,19 @@ public class UmaResourceService {
         throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND, "Failed to find resource set with id: " + id);
     }
 
+    public Set<String> getResourceScopes(Set<String> resourceIds) {
+        Set<String> result = Sets.newHashSet();
+        for (String resourceId : resourceIds) {
+            result.addAll(getResourceById(resourceId).getScopes());
+        }
+        return result;
+    }
+
     private void prepareBranch() {
+        if (!ldapEntryManager.hasBranchesSupport(getDnForResource(null))) {
+            return;
+        }
+
         // Create resource description branch if needed
         if (!ldapEntryManager.contains(getDnForResource(null), SimpleBranch.class)) {
             addBranch();
