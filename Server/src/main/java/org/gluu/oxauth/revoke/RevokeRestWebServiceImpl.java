@@ -73,8 +73,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
             client = sessionClient.getClient();
             oAuth2AuditLog.setClientId(client.getClientId());
 
-            boolean validToken = validateToken(token);
-            if (validToken) {
+            if (validateToken(token)) {
                 TokenTypeHint tth = TokenTypeHint.getByValue(tokenTypeHint);
                 AuthorizationGrant authorizationGrant = null;
 
@@ -91,14 +90,10 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
                     }
                 }
 
-                if (authorizationGrant == null) {
-                	validToken = false;
-                } else {
+                if (authorizationGrant != null) {
                     grantService.removeAllByGrantId(authorizationGrant.getGrantId());
                 }
-            }
-
-            if (!validToken) {
+            } else {
                 builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 400
                 builder.entity(errorResponseFactory.errorAsJson(
                         TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."));
