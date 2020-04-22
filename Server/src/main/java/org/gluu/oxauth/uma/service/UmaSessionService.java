@@ -8,20 +8,21 @@ package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -37,12 +38,12 @@ public class UmaSessionService {
     @Inject
     private SessionIdService sessionIdService;
     @Inject
-    private UserService userService;
-    @Inject
     private ClientService clientService;
+    @Inject
+    private CookieService cookieService;
 
     public SessionId getConnectSession(HttpServletRequest httpRequest) {
-        String cookieId = sessionIdService.getSessionIdFromCookie(httpRequest);
+        String cookieId = cookieService.getSessionIdFromCookie(httpRequest);
         log.trace("Cookie - session_id: " + cookieId);
         if (StringUtils.isNotBlank(cookieId)) {
             return sessionIdService.getSessionId(cookieId);
@@ -51,7 +52,7 @@ public class UmaSessionService {
     }
 
     public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieId = sessionIdService.getUmaSessionIdFromCookie(httpRequest);
+        String cookieId = cookieService.getUmaSessionIdFromCookie(httpRequest);
         log.trace("Cookie - uma_session_id: " + cookieId);
 
         if (StringUtils.isNotBlank(cookieId)) {
@@ -67,16 +68,19 @@ public class UmaSessionService {
         }
 
         log.trace("Generating new uma_session_id ...");
-        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "no");
+        SessionId session = sessionIdService.generateAuthenticatedSessionId(httpRequest, "", new HashMap<String, String>() {{
+            put("uma", "true");
+        }});
 
-        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), session.getOPBrowserState(), httpResponse, true);
+        cookieService.createSessionIdCookie(session, httpRequest, httpResponse, true);
         log.trace("uma_session_id cookie created.");
         return session;
     }
 
     public boolean persist(SessionId session) {
         try {
-            if (sessionIdService.persistSessionId(session, true)) {
+
+            if (sessionIdService.updateSessionId(session, true, true, true)) {
                 log.trace("Session persisted successfully. Session: " + session);
                 return true;
             }
@@ -102,18 +106,12 @@ public class UmaSessionService {
 
     public void configure(SessionId session, String scriptName, Boolean reset, List<UmaPermission> permissions,
                           String clientId, String claimRedirectUri, String state) {
-//        if (reset != null && reset) {
         setStep(1, session);
-//        }
         setState(session, state);
         setClaimsRedirectUri(session, claimRedirectUri);
         setTicket(session, permissions.get(0).getTicket());
-
-//        if (StringUtils.isBlank(getScriptName(session))) {
         setScriptName(session, scriptName);
-//        }
 
-//        if (StringUtils.isBlank(getPct(session))) {
         String pct = permissions.get(0).getAttributes().get("pct");
 
         if (StringUtils.isBlank(pct)) {
@@ -122,13 +120,7 @@ public class UmaSessionService {
         }
 
         setPct(session, pct);
-//        }
-
-//        if (StringUtils.isBlank(getClientId(session))) {
         setClientId(session, clientId);
-//        }
-
-//        getStep(session); // init step
         persist(session);
     }
 

@@ -18,44 +18,40 @@ public class ClientUtils {
     private ClientUtils() {
     }
 
-    public static void showClient(BaseClient client) {
+    public static void showHeader(String header) {
         System.out.println("-------------------------------------------------------");
-        System.out.println("REQUEST:");
+        System.out.println(header);
         System.out.println("-------------------------------------------------------");
-        System.out.println(client.getRequestAsString());
-        System.out.println("");
+    }
 
-        System.out.println("-------------------------------------------------------");
-        System.out.println("RESPONSE:");
-        System.out.println("-------------------------------------------------------");
+    public static void showClient(BaseClient client) {
+        showHeader("REQUEST:");
+        System.out.println(client.getRequestAsString());
+        System.out.println();
+
+        showHeader("RESPONSE:");
         System.out.println(client.getResponseAsString());
-        System.out.println("");
+        System.out.println();
     }
 
     public static void showClientUserAgent(BaseClient client) {
-        System.out.println("-------------------------------------------------------");
-        System.out.println("REQUEST:");
-        System.out.println("-------------------------------------------------------");
+        showHeader("REQUEST:");
         System.out.println(client.getUrl() + "?" + client.getRequest().getQueryString());
-        System.out.println("");
+        System.out.println();
 
         if (client.getResponse() != null) {
-            System.out.println("-------------------------------------------------------");
-            System.out.println("RESPONSE:");
-            System.out.println("-------------------------------------------------------");
+            showHeader("RESPONSE:");
             System.out.println("HTTP/1.1 302 Found");
             System.out.println("Location: " + client.getResponse().getLocation());
-            System.out.println("");
+            System.out.println();
         }
     }
 
     public static void showClient(BaseClient client, CookieStore cookieStore) {
         showClient(client);
 
-        System.out.println("-------------------------------------------------------");
-        System.out.println("COOKIES:");
-        System.out.println("-------------------------------------------------------");
+        showHeader("COOKIES:");
         System.out.println(cookieStore.getCookies());
-        System.out.println("");
+        System.out.println();
     }
 }

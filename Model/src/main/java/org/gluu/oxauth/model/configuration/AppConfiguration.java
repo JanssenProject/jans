@@ -81,6 +81,7 @@ public class AppConfiguration implements Configuration {
     private List<String> dynamicRegistrationCustomAttributes;
     private List<String> displayValuesSupported;
     private List<String> claimTypesSupported;
+    private List<String> jwksAlgorithmsSupported;
     private String serviceDocumentation;
     private List<String> claimsLocalesSupported;
     private List<String> idTokenTokenBindingCnfValuesSupported;
@@ -132,6 +133,7 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
+    private Boolean sessionIdRequestParameterEnabled = false; // #1195
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
@@ -179,6 +181,7 @@ public class AppConfiguration implements Configuration {
     private Boolean customHeadersWithAuthorizationResponse;
     private Boolean frontChannelLogoutSessionSupported;
     private String loggingLevel;
+    private String loggingLayout;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
     private Boolean logClientIdOnClientAuthentication;
@@ -190,6 +193,8 @@ public class AppConfiguration implements Configuration {
     private Boolean disableU2fEndpoint = false;
 
     private Boolean useLocalCache = false;
+    private Boolean fapiCompatibility = false;
+    private Boolean forceIdTokenHintPrecense = false;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -209,6 +214,24 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getFapiCompatibility() {
+        if (fapiCompatibility == null) fapiCompatibility = false;
+        return fapiCompatibility;
+    }
+
+    public void setFapiCompatibility(Boolean fapiCompatibility) {
+        this.fapiCompatibility = fapiCompatibility;
+    }
+
+    public Boolean getForceIdTokenHintPrecense() {
+        if (forceIdTokenHintPrecense == null) forceIdTokenHintPrecense = false;
+        return forceIdTokenHintPrecense;
+    }
+
+    public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
+        this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    }
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -704,6 +727,14 @@ public class AppConfiguration implements Configuration {
         this.claimTypesSupported = claimTypesSupported;
     }
 
+    public List<String> getJwksAlgorithmsSupported() {
+        return jwksAlgorithmsSupported;
+    }
+
+    public void setJwksAlgorithmsSupported(List<String> jwksAlgorithmsSupported) {
+        this.jwksAlgorithmsSupported = jwksAlgorithmsSupported;
+    }
+
     public String getServiceDocumentation() {
         return serviceDocumentation;
     }
@@ -927,6 +958,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getDynamicRegistrationEnabled() {
+        if (dynamicRegistrationEnabled == null) dynamicRegistrationEnabled = false;
         return dynamicRegistrationEnabled;
     }
 
@@ -991,6 +1023,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {
+        if (allowPostLogoutRedirectWithoutValidation == null) allowPostLogoutRedirectWithoutValidation = false;
         return allowPostLogoutRedirectWithoutValidation;
     }
 
@@ -1096,6 +1129,17 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistOnPromptNone(Boolean sessionIdPersistOnPromptNone) {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
+    }
+
+    public Boolean getSessionIdRequestParameterEnabled() {
+        if (sessionIdRequestParameterEnabled == null) {
+            sessionIdRequestParameterEnabled = false;
+        }
+        return sessionIdRequestParameterEnabled;
+    }
+
+    public void setSessionIdRequestParameterEnabled(Boolean sessionIdRequestParameterEnabled) {
+        this.sessionIdRequestParameterEnabled = sessionIdRequestParameterEnabled;
     }
 
     public Boolean getSessionIdEnabled() {
@@ -1390,6 +1434,14 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
+
     public Boolean getEnableClientGrantTypeUpdate() {
         return enableClientGrantTypeUpdate;
     }
@@ -1546,6 +1598,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelTokenDeliveryModesSupported() {
+        if (backchannelTokenDeliveryModesSupported == null) backchannelTokenDeliveryModesSupported = Lists.newArrayList();
         return backchannelTokenDeliveryModesSupported;
     }
 
@@ -1554,6 +1607,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public List<String> getBackchannelAuthenticationRequestSigningAlgValuesSupported() {
+        if (backchannelAuthenticationRequestSigningAlgValuesSupported == null) backchannelAuthenticationRequestSigningAlgValuesSupported = Lists.newArrayList();
         return backchannelAuthenticationRequestSigningAlgValuesSupported;
     }
 

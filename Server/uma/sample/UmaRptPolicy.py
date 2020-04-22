@@ -22,7 +22,7 @@ class UmaRptPolicy(UmaRptPolicyType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "RPT Policy. Initializing ..."
         print "RPT Policy. Initialized successfully"
 
@@ -34,7 +34,7 @@ class UmaRptPolicy(UmaRptPolicyType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Returns required claims definitions.
     # This method must provide definition of all claims that is used in 'authorize' method.

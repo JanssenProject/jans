@@ -25,7 +25,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript,  configurationAttributes):
         print "Basic (lock account). Initialization"
 
         self.invalidLoginCountAttribute = "oxCountInvalidLogin"
@@ -57,7 +57,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

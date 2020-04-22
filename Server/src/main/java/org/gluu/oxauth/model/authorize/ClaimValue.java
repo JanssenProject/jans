@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012
@@ -21,6 +21,7 @@ public class ClaimValue {
     private ClaimValueType claimValueType;
     private List<String> values;
     private String value;
+    private Boolean essential;
 
     private ClaimValue() {
     }
@@ -34,6 +35,9 @@ public class ClaimValue {
 
     public static ClaimValue createEssential(boolean essentialValue) {
         ClaimValue claimValue = new ClaimValue();
+        claimValue.setEssential(essentialValue);
+
+        // todo do we need code below ?
         if (essentialValue) {
             claimValue.claimValueType = ClaimValueType.ESSENTIAL_TRUE;
         } else {
@@ -60,6 +64,14 @@ public class ClaimValue {
         return claimValue;
     }
 
+    public Boolean getEssential() {
+        return essential;
+    }
+
+    public void setEssential(Boolean essential) {
+        this.essential = essential;
+    }
+
     public ClaimValueType getClaimValueType() {
         return claimValueType;
     }
@@ -69,6 +81,13 @@ public class ClaimValue {
     }
 
     public String getValue() {
+        return value;
+    }
+
+    public String getValueAsString() {
+        if (values != null && !values.isEmpty()) {
+            return String.join(" ", values);
+        }
         return value;
     }
 

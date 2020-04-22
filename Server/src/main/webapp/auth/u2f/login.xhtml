@@ -17,44 +17,31 @@
 			var register_request = ${identity.getWorkingParameter('fido_u2f_registration_request')};
 
 			function startRegistration() {
-				u2f
-						.register(
-								register_request.registerRequests,
-								register_request.authenticateRequests,
-								function(data) {
-									if (data.errorCode) {
-										alert("U2F failed with error: "
-												+ data.errorCode);
-										return;
-									}
+				u2fApi.register(register_request.registerRequests)
+					.then( function(data) {
+						document.getElementById('tokenResponse').value = JSON.stringify(data);
+						document.getElementById('authMethod').value = 'enroll';
 
-									document.getElementById('tokenResponse').value = JSON
-											.stringify(data);
-									document.getElementById('authMethod').value = 'enroll';
-
-									document.getElementById('u2f_form')
-											.submit();
-								});
+						document.getElementById('u2f_form').submit();
+					})
+					.catch( function(msg) {
+						alert("U2F failed. " + msg);
+						return;
+					});
 			}
 
 			function startAuthentication() {
-				u2f
-						.sign(
-								auth_request.authenticateRequests,
-								function(data) {
-									if (data.errorCode) {
-										alert("U2F failed with error code: "
-												+ data.errorCode);
-										return;
-									}
+				u2fApi.sign(auth_request.authenticateRequests)
+					.then( function( data ) {
+						document.getElementById('tokenResponse').value = JSON.stringify(data);
+						document.getElementById('authMethod').value = 'authenticate';
 
-									document.getElementById('tokenResponse').value = JSON
-											.stringify(data);
-									document.getElementById('authMethod').value = 'authenticate';
-
-									document.getElementById('u2f_form')
-											.submit();
-								});
+						document.getElementById('u2f_form').submit();
+					})
+					.catch( function(msg) {
+						alert("U2F failed. " + msg);
+						return;
+					});
 			}
 
 			if (auth_request != null) {

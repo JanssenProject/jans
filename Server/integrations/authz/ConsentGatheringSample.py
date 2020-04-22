@@ -17,7 +17,7 @@ class ConsentGathering(ConsentGatheringType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Consent-Gathering. Initializing ..."
         print "Consent-Gathering. Initialized successfully"
 
@@ -30,7 +30,7 @@ class ConsentGathering(ConsentGatheringType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()

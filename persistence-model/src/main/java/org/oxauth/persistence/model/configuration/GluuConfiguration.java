@@ -9,14 +9,14 @@ package org.oxauth.persistence.model.configuration;
 import java.io.Serializable;
 import java.util.List;
 
-import org.gluu.persist.model.base.GluuBoolean;
-import org.gluu.persist.model.base.InumEntry;
+import org.gluu.model.SmtpConfiguration;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.JsonObject;
 import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.model.SmtpConfiguration;
+import org.gluu.persist.model.base.InumEntry;
 import org.gluu.service.cache.CacheConfiguration;
+import org.gluu.service.document.store.conf.DocumentStoreConfiguration;
 
 /**
  * Gluu Configuration
@@ -39,7 +39,11 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "oxCacheConfiguration")
 	@JsonObject
 	private CacheConfiguration cacheConfiguration;
-	
+
+	@AttributeName(name = "oxDocumentStoreConfiguration")
+	@JsonObject
+	private DocumentStoreConfiguration documentStoreConfiguration;
+
 	@AttributeName(name = "oxIDPAuthentication")
 	@JsonObject
 	private List<oxIDPAuthConf> oxIDPAuthentication;
@@ -76,6 +80,14 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
 		this.cacheConfiguration = cacheConfiguration;
+	}
+
+	public DocumentStoreConfiguration getDocumentStoreConfiguration() {
+		return documentStoreConfiguration;
+	}
+
+	public void setDocumentStoreConfiguration(DocumentStoreConfiguration documentStoreConfiguration) {
+		this.documentStoreConfiguration = documentStoreConfiguration;
 	}
 
 	public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {

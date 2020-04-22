@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.model.authorize;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.util.Util;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012
@@ -37,16 +37,22 @@ public class IdTokenMember {
                 claimValue = ClaimValue.createNull();
             } else {
                 JSONObject claimValueJsonObject = jsonObject.getJSONObject(claimName);
-                if (claimValueJsonObject.has("essential")) {
-                    boolean essential = claimValueJsonObject.getBoolean("essential");
-                    claimValue = ClaimValue.createEssential(essential);
-                } else if (claimValueJsonObject.has("values")) {
+
+                if (claimValueJsonObject.has("values")) {
                     JSONArray claimValueJsonArray = claimValueJsonObject.getJSONArray("values");
                     List<String> claimValueArr = Util.asList(claimValueJsonArray);
                     claimValue = ClaimValue.createValueList(claimValueArr);
                 } else if (claimValueJsonObject.has("value")) {
                     String value = claimValueJsonObject.getString("value");
                     claimValue = ClaimValue.createSingleValue(value);
+                }
+                if (claimValueJsonObject.has("essential")) {
+                    final boolean essential = claimValueJsonObject.getBoolean("essential");
+                    if (claimValue != null) {
+                        claimValue.setEssential(essential);
+                    } else {
+                        claimValue = ClaimValue.createEssential(essential);
+                    }
                 }
             }
 

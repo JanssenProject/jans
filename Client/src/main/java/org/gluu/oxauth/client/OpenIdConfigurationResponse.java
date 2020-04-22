@@ -28,7 +28,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String tokenEndpoint;
-    private String tokenRevocationEndpoint;
+    private String revocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -68,6 +68,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private Boolean tlsClientCertificateBoundAccessTokens;
     private Boolean frontChannelLogoutSupported;
     private Boolean frontChannelLogoutSessionSupported;
+    private Boolean backchannelLogoutSupported;
+    private Boolean backchannelLogoutSessionSupported;
     private String opPolicyUri;
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
@@ -219,17 +221,17 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      *
      * @return The URL of the Token Revocation endpoint.
      */
-    public String getTokenRevocationEndpoint() {
-        return tokenRevocationEndpoint;
+    public String getRevocationEndpoint() {
+        return revocationEndpoint;
     }
 
     /**
      * Sets the URL of the Token Revocation endpoint.
      *
-     * @param tokenRevocationEndpoint The URL of the Token Revocation endpoint.
+     * @param revocationEndpoint The URL of the Token Revocation endpoint.
      */
-    public void setTokenRevocationEndpoint(String tokenRevocationEndpoint) {
-        this.tokenRevocationEndpoint = tokenRevocationEndpoint;
+    public void setRevocationEndpoint(String revocationEndpoint) {
+        this.revocationEndpoint = revocationEndpoint;
     }
 
     /**
@@ -1004,6 +1006,22 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.frontChannelLogoutSupported = frontChannelLogoutSupported;
     }
 
+    public Boolean getBackchannelLogoutSupported() {
+        return backchannelLogoutSupported;
+    }
+
+    public void setBackchannelLogoutSupported(Boolean backchannelLogoutSupported) {
+        this.backchannelLogoutSupported = backchannelLogoutSupported;
+    }
+
+    public Boolean getBackchannelLogoutSessionSupported() {
+        return backchannelLogoutSessionSupported;
+    }
+
+    public void setBackchannelLogoutSessionSupported(Boolean backchannelLogoutSessionSupported) {
+        this.backchannelLogoutSessionSupported = backchannelLogoutSessionSupported;
+    }
+
     public Boolean getTlsClientCertificateBoundAccessTokens() {
         return tlsClientCertificateBoundAccessTokens;
     }
@@ -1058,7 +1076,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
-                ", tokenRevocationEndpoint='" + tokenRevocationEndpoint + '\'' +
+                ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
                 ", clientInfoEndpoint='" + clientInfoEndpoint + '\'' +
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +
@@ -1097,6 +1115,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", tlsClientCertificateBoundAccessTokens=" + tlsClientCertificateBoundAccessTokens +
                 ", frontChannelLogoutSupported=" + frontChannelLogoutSupported +
                 ", frontChannelLogoutSessionSupported=" + frontChannelLogoutSessionSupported +
+                ", backchannelLogoutSupported=" + backchannelLogoutSupported +
+                ", backchannelLogoutSessionSupported=" + backchannelLogoutSessionSupported +
                 ", requireRequestUriRegistration=" + requireRequestUriRegistration +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
