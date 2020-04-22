@@ -7,7 +7,7 @@ import com.google.common.base.Strings;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsModifyParams implements HasAccessTokenParams {
+public class RsModifyParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -19,16 +19,6 @@ public class RsModifyParams implements HasAccessTokenParams {
     List<String> scopes;
     @JsonProperty("scope_expression")
     String scopeExpression;
-    @JsonProperty(value = "token")
-    private String token;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     public String getOxdId() {
         return oxd_id;

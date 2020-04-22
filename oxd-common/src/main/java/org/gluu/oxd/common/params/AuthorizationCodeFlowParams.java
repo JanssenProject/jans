@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthorizationCodeFlowParams implements HasAccessTokenParams {
+public class AuthorizationCodeFlowParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -34,8 +34,6 @@ public class AuthorizationCodeFlowParams implements HasAccessTokenParams {
     private String nonce;
     @JsonProperty(value = "acr")
     private String acr;
-    @JsonProperty(value = "token")
-    private String token;
 
     public AuthorizationCodeFlowParams() {
     }
@@ -46,14 +44,6 @@ public class AuthorizationCodeFlowParams implements HasAccessTokenParams {
 
     public void setOxdId(String oxdId) {
         this.oxd_id = oxdId;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getAcr() {
@@ -137,7 +127,6 @@ public class AuthorizationCodeFlowParams implements HasAccessTokenParams {
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", acr='").append(acr).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -75,6 +75,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean enableTracing = false;
     @JsonProperty(value = "proxy_configuration")
     private JsonNode proxyConfiguration;
+    @JsonProperty(value = "protect_commands_with_oxd_id")
+    private List<String> protectCommandsWithOxdId;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -332,6 +334,14 @@ public class OxdServerConfiguration extends Configuration {
         this.validateUserInfoWithIdToken = validateUserInfoWithIdToken;
     }
 
+    public List<String> getProtectCommandsWithOxdId() {
+        return protectCommandsWithOxdId;
+    }
+
+    public void setProtectCommandsWithOxdId(List<String> protectCommandsWithOxdId) {
+        this.protectCommandsWithOxdId = protectCommandsWithOxdId;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -363,6 +373,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", idTokenValidationCHashRequired=" + idTokenValidationCHashRequired + '\'' +
                 ", idTokenValidationAtHashRequired=" + idTokenValidationAtHashRequired + '\'' +
                 ", validateUserInfoWithIdToken=" + validateUserInfoWithIdToken + '\'' +
+                ", protectCommandsWithOxdId=" + protectCommandsWithOxdId + '\'' +
                 '}';
     }
 }
