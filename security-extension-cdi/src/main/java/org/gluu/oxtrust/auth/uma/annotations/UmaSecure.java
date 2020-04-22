@@ -24,6 +24,7 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding
 @Target(value = {ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface UmaSecure {
     /**
      * UMA scopes as single string
