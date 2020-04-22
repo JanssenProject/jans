@@ -133,7 +133,12 @@ def read_properties_file(fn):
             
     return retDict
 
-salt_prop = read_properties_file('/etc/gluu/conf/salt')
+
+salt_file = '/opt/tomcat/conf/salt'
+if not os.path.exists(salt_file):
+    salt_file = '/opt/tomcat/conf/salt'
+
+salt_prop = read_properties_file(salt_file)
 salt = salt_prop['encodeSalt']
 
 def unobscure(s=""):
@@ -186,9 +191,12 @@ def generate_properties(as_dict=False):
     setup_prop['encode_salt'] = salt
     mappingLocations = {'default': 'ldap', 'token': 'ldap', 'cache': 'ldap', 'user': 'ldap', 'site': 'ldap'}
 
+    oxauth_file = '/opt/tomcat/webapps/oxauth.war'
+    if not os.path.exists(oxauth_file):
+        oxauth_file = '/opt/gluu/jetty/oxauth/webapps/oxauth.war'
 
     #Determine gluu version
-    war_zip = zipfile.ZipFile('/opt/gluu/jetty/oxauth/webapps/oxauth.war', 'r')
+    war_zip = zipfile.ZipFile(oxauth_file, 'r')
     menifest = war_zip.read('META-INF/MANIFEST.MF')
 
     for l in menifest.splitlines():
@@ -212,7 +220,10 @@ def generate_properties(as_dict=False):
     gluu_3x = '.'.join(gluu_version.split('.')[:2]) < '4.0'
 
     if gluu_3x:
-        gluu_ldap_prop = read_properties_file('/etc/gluu/conf/ox-ldap.properties')
+        ox_ldap_prop_file = '/opt/tomcat/conf/ox-ldap.properties'
+        if not os.path.exists(ox_ldap_prop_file):
+            ox_ldap_prop_file = '/etc/gluu/conf/ox-ldap.properties'
+        gluu_ldap_prop = read_properties_file(ox_ldap_prop_file)
         oxauth_ConfigurationEntryDN = gluu_ldap_prop['oxauth_ConfigurationEntryDN']
         oxtrust_ConfigurationEntryDN = gluu_ldap_prop['oxtrust_ConfigurationEntryDN']
         oxidp_ConfigurationEntryDN = gluu_ldap_prop['oxidp_ConfigurationEntryDN']
@@ -287,7 +298,10 @@ def generate_properties(as_dict=False):
     if setup_prop['persistence_type'] != 'couchbase':
         setup_prop['ldap_binddn'] = gluu_ldap_prop['bindDN']
         setup_prop['ldapPass'] = unobscure(gluu_ldap_prop['bindPassword'])
-        setup_prop['opendj_p12_pass'] = unobscure(gluu_ldap_prop['ssl.trustStorePin'])
+        try:
+            setup_prop['opendj_p12_pass'] = unobscure(gluu_ldap_prop['ssl.trustStorePin'])
+        except:
+            pass
         setup_prop['ldap_hostname'], setup_prop['ldaps_port']  = gluu_ldap_prop['servers'].split(',')[0].split(':')
 
         ldap_conn = ldap.initialize('ldaps://{0}:1636'.format(setup_prop['ldap_hostname']))
@@ -374,9 +388,12 @@ def generate_properties(as_dict=False):
         if 'gluuIpAddress' in result[0][1]:
             setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
 
-        oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0].decode('utf-8'))
 
-        setup_prop['cache_provider_type'] = str(oxCacheConfiguration['cacheProviderType'])
+        try:
+            oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0].decode('utf-8'))
+            setup_prop['cache_provider_type'] = str(oxCacheConfiguration['cacheProviderType'])
+        except:
+            pass
 
         result = ldap_conn.search_s(oxidp_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxApplicationConfiguration)', ['oxConfApplication'])
         oxConfApplication = json.loads(result[0][1]['oxConfApplication'][0].decode('utf-8'))
@@ -431,12 +448,16 @@ def generate_properties(as_dict=False):
 
         setup_prop['shibJksPass'] =  str(unobscure(oxTrustConfApplication['idpSecurityKeyPassword']))
         setup_prop['admin_email'] =  str(oxTrustConfApplication['orgSupportEmail'])
-        setup_prop['orgName'] =  str(oxTrustConfApplication['organizationName'])
+        if 'organizationName' in oxTrustConfApplication:
+            setup_prop['orgName'] =  str(oxTrustConfApplication['organizationName'])
         setup_prop['oxauth_client_id'] =  str(oxTrustConfApplication['oxAuthClientId'])
         setup_prop['oxauthClient_pw'] = str(unobscure(oxTrustConfApplication['oxAuthClientPassword']))
-        setup_prop['scim_rs_client_id'] =  str(oxTrustConfApplication['scimUmaClientId'])
-        setup_prop['scim_resource_oxid'] =  str(oxTrustConfApplication['scimUmaResourceId'])
-        setup_prop['scimTestMode'] =  oxTrustConfApplication['scimTestMode']
+        if 'scimUmaClientId' in oxTrustConfApplication:
+            setup_prop['scim_rs_client_id'] =  str(oxTrustConfApplication['scimUmaClientId'])
+        if 'scimUmaClientId' in oxTrustConfApplication:
+            setup_prop['scim_resource_oxid'] =  str(oxTrustConfApplication['scimUmaResourceId'])
+        if 'scimTestMode' in oxTrustConfApplication:
+            setup_prop['scimTestMode'] =  oxTrustConfApplication['scimTestMode']
 
         if 'apiUmaClientKeyStorePassword' in oxTrustConfApplication:
             setup_prop['api_rp_client_jks_pass'] = unobscure(oxTrustConfApplication['apiUmaClientKeyStorePassword'])
@@ -457,16 +478,21 @@ def generate_properties(as_dict=False):
         setup_prop['hostname'] = str(o_issuer.netloc)
         setup_prop['pairwiseCalculationSalt'] =  str(oxAuthConfDynamic['pairwiseCalculationSalt'])
         setup_prop['oxauth_openidScopeBackwardCompatibility'] =  oxAuthConfDynamic.get('openidScopeBackwardCompatibility', False)
-        setup_prop['oxauth_legacyIdTokenClaims'] = oxAuthConfDynamic['legacyIdTokenClaims']
+        if 'legacyIdTokenClaims' in oxAuthConfDynamic:
+            setup_prop['oxauth_legacyIdTokenClaims'] = oxAuthConfDynamic['legacyIdTokenClaims']
         setup_prop['pairwiseCalculationKey'] = str(oxAuthConfDynamic['pairwiseCalculationKey'])
-        setup_prop['oxauth_openid_jks_fn'] = str(oxAuthConfDynamic['keyStoreFile'])
-        setup_prop['oxauth_openid_jks_pass'] = str(oxAuthConfDynamic['keyStoreSecret'])
+        if 'keyStoreFile' in oxAuthConfDynamic:
+            setup_prop['oxauth_openid_jks_fn'] = str(oxAuthConfDynamic['keyStoreFile'])
+        if 'keyStoreSecret' in oxAuthConfDynamic:
+            setup_prop['oxauth_openid_jks_pass'] = str(oxAuthConfDynamic['keyStoreSecret'])
 
 
     ssl_subj = get_ssl_subject('/etc/certs/httpd.crt')
     setup_prop['countryCode'] = ssl_subj['C']
     setup_prop['state'] = ssl_subj['ST']
     setup_prop['city'] = ssl_subj['L']
+    if not 'orgName' in setup_prop:
+        setup_prop['orgName'] = ssl_subj['O']
 
     for service in jetty_services:
         setup_prop[jetty_services[service][0]] = os.path.exists('/opt/gluu/jetty/{0}/webapps/{0}.war'.format(service))
@@ -511,7 +537,14 @@ def generate_properties(as_dict=False):
     setup_prop['installHTTPD'] = os.path.exists(https_gluu_fn)
 
     setup_prop['mappingLocations'] = mappingLocations
-    
+
+    asimba_xml = '/opt/tomcat/webapps/asimba/WEB-INF/conf/asimba.xml'
+    if os.path.exists(asimba_xml):
+        for l in open(asimba_xml):
+            m = re.search('<password>(.*)</password>', '<password>p49IXMHN06SL</password>')
+            if m:
+                setup_prop['asimbaJksPass'] = m.groups()[0]
+
     if as_dict:
         return setup_prop
 
