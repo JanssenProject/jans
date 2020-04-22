@@ -29,7 +29,7 @@ ox_ldap_roperties_fn = os.path.join(conf_dir, 'ox-ldap.properties')
 keystore_fn = 'oxauth-keys.jks'
 oxauth_keys_json_fn = 'oxauth-keys.json'
 
-alg_keys = {
+algs_for_versions = {
     '3.0.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
     '3.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
     '3.0.2': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512'},
@@ -133,7 +133,7 @@ if os.path.exists(gluu_hybrid_roperties_fn):
 elif os.path.exists(gluu_couchbase_roperties_fn):
     defaul_storage = 'couchbase'
 
-print "Obtaining keystore passwrod and determining algorithms"
+print "Obtaining keystore passwrod"
 
 if defaul_storage == 'ldap':
     prop_fn = gluu_ldap_roperties_fn if os.path.exists(gluu_ldap_roperties_fn) else ox_ldap_roperties_fn
@@ -195,13 +195,6 @@ else:
         oxRevision = configuration_oxauth['results'][0]['gluu']['oxRevision']
     else:
         print "Couchbase server responded unexpectedly", result.text
-
-if oxAuthConfWebKeys:
-    #Determine current algs
-    key_algs = [ wkey['alg'] for wkey in oxAuthConfWebKeys['keys'] ]
-else:
-    print "Keys does not exist on the server, using defaults"
-    key_algs = ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512', 'RSA1_5', 'RSA-OAEP']
 
 oxRevision = int(oxRevision) + 1
 
@@ -282,6 +275,10 @@ if not ver_tmp_list[-1].isdigit():
     ver_tmp_list.pop()
 gluu_ver_real = '.'.join(ver_tmp_list)
 
+if gluu_ver_real in algs_for_versions:
+    key_algs = algs_for_versions[gluu_ver]['sig_keys']
+    enc_keys = algs_for_versions[gluu_ver].get('enc_keys', key_algs)
+
 #Generete keys
 args = ['/opt/jre/bin/java', '-Dlog4j.defaultInitOverride=true',
     '-cp', oxauth_client_fn_path, key_gen_path,
@@ -292,7 +289,7 @@ args = ['/opt/jre/bin/java', '-Dlog4j.defaultInitOverride=true',
 if gluu_ver_real < '3.1.2':
     args += ['-algorithms', ' '.join(key_algs)]
 else:
-    args += ['-sig_keys', ' '.join(key_algs), '-enc_keys', ' '.join(key_algs)]
+    args += ['-sig_keys', key_algs, '-enc_keys', enc_keys]
     
 args += ['-dnname', "'CN=oxAuth CA Certificates'"]
 
@@ -369,4 +366,5 @@ if defaul_storage == 'ldap':
 else:
     result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
     result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxRevision={}".format(oxRevision))
+
 print "Please exit container and restart Gluu Server"
