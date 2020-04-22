@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/07/2017
@@ -44,7 +45,7 @@ public class RsCheckAccessTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-        checkAccess(client, site, org.testng.collections.Lists.newArrayList("http://photoz.example.com/dev/actions/all","http://photoz.example.com/dev/actions/view"));
+        checkAccess(client, site, org.testng.collections.Lists.newArrayList("http://photoz.example.com/dev/actions/all", "http://photoz.example.com/dev/actions/view"));
     }
 
     @Parameters({"host", "opHost", "redirectUrls", "rsProtect"})
@@ -56,7 +57,7 @@ public class RsCheckAccessTest {
 
         RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
 
-        checkAccessWithIncorrectScopes(client, site, org.testng.collections.Lists.newArrayList("/dev/actions/all","/dev/actions/view"));
+        checkAccessWithIncorrectScopes(client, site, org.testng.collections.Lists.newArrayList("/dev/actions/all", "/dev/actions/view"));
     }
 
     public static RsCheckAccessResponse checkAccess(ClientInterface client, RegisterSiteResponse site, List<String> scopeList) {
@@ -67,7 +68,7 @@ public class RsCheckAccessTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(site), null, params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -82,11 +83,11 @@ public class RsCheckAccessTest {
         params.setRpt("dummy");
         params.setScopes(scopeList);
         try {
-            client.umaRsCheckAccess(Tester.getAuthorization(), params);
+            client.umaRsCheckAccess(Tester.getAuthorization(site), null, params);
             assertTrue(false);
 
         } catch (Exception e) {
-          //test-case passed
+            //test-case passed
         }
     }
 }

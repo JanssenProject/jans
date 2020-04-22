@@ -33,7 +33,7 @@ public class GetUserInfoTest {
         params.setAccessToken(tokens.getAccessToken());
         params.setIdToken(tokens.getIdToken());
 
-        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(), params);
+        final JsonNode resp = client.getUserInfo(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
         assertNotNull(resp.get("sub"));
     }
@@ -44,10 +44,10 @@ public class GetUserInfoTest {
         final String nonce = CoreUtils.secureRandomString();
         final GetTokensByCodeParams params = new GetTokensByCodeParams();
         params.setOxdId(site.getOxdId());
-        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site.getOxdId(), userId, userSecret, clientId, redirectUrls, state, nonce));
+        params.setCode(GetTokensByCodeTest.codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce));
         params.setState(state);
 
-        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(), params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CheckIdTokenParams implements HasAccessTokenParams {
+public class CheckIdTokenParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -20,22 +20,12 @@ public class CheckIdTokenParams implements HasAccessTokenParams {
     private String id_token;
     @JsonProperty(value = "nonce")
     private String nonce;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "access_token")
     private String access_token;
 
     public CheckIdTokenParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getNonce() {
@@ -90,7 +80,6 @@ public class CheckIdTokenParams implements HasAccessTokenParams {
         sb.append("{id_token='").append(id_token).append('\'');
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append(", code='").append(code).append('\'');
         sb.append(", access_token='").append(access_token).append('\'');
         sb.append('}');
