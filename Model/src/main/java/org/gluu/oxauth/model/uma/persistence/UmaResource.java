@@ -7,10 +7,8 @@
 package org.gluu.oxauth.model.uma.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import com.google.common.collect.Lists;
+import org.gluu.persist.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -75,6 +73,17 @@ public class UmaResource implements Serializable {
 
     @AttributeName(name = "del")
     private boolean deletable = true;
+
+    @Expiration
+    private Integer ttl;
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
+    }
 
     public boolean isDeletable() {
         return deletable;
@@ -160,6 +169,7 @@ public class UmaResource implements Serializable {
     }
 
     public List<String> getScopes() {
+        if (scopes == null) scopes = Lists.newArrayList();
         return scopes;
     }
 

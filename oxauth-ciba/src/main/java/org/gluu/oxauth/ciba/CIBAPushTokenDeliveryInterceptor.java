@@ -9,12 +9,12 @@ package org.gluu.oxauth.ciba;
 import org.gluu.oxauth.client.push.PushTokenDeliveryClient;
 import org.gluu.oxauth.client.push.PushTokenDeliveryRequest;
 import org.gluu.oxauth.client.push.PushTokenDeliveryResponse;
-import org.gluu.oxauth.model.common.TokenType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.interception.CIBAPushTokenDeliveryInterception;
 import org.gluu.oxauth.interception.CIBAPushTokenDeliveryInterceptionInterface;
+import org.gluu.oxauth.model.common.TokenType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
@@ -25,7 +25,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version February 25, 2020
  */
 @Interceptor
 @CIBAPushTokenDeliveryInterception
@@ -43,7 +43,7 @@ public class CIBAPushTokenDeliveryInterceptor implements CIBAPushTokenDeliveryIn
 
     @AroundInvoke
     public Object pushTokenDelivery(InvocationContext ctx) {
-        log.debug("CIBA: notifying end-user...");
+        log.debug("CIBA: push token delivery...");
 
         try {
             String authReqId = (String) ctx.getParameters()[0];
@@ -78,5 +78,7 @@ public class CIBAPushTokenDeliveryInterceptor implements CIBAPushTokenDeliveryIn
         PushTokenDeliveryClient pushTokenDeliveryClient = new PushTokenDeliveryClient(clientNotificationEndpoint);
         pushTokenDeliveryClient.setRequest(pushTokenDeliveryRequest);
         PushTokenDeliveryResponse pushTokenDeliveryResponse = pushTokenDeliveryClient.exec();
+
+        log.debug("CIBA: push token delivery result status " + pushTokenDeliveryResponse.getStatus());
     }
 }

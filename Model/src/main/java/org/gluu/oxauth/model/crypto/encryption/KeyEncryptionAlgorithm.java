@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.crypto.encryption;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.gluu.oxauth.model.jwk.Algorithm;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012
@@ -26,17 +27,24 @@ public enum KeyEncryptionAlgorithm {
     private final String name;
     private final String family;
     private final String algorithm;
+    private final Algorithm alg;
 
     private KeyEncryptionAlgorithm(String name) {
         this.name = name;
         this.family = null;
         this.algorithm = null;
+        this.alg = Algorithm.fromString(name);
     }
 
     private KeyEncryptionAlgorithm(String name, String family, String algorithm) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
+        this.alg = Algorithm.fromString(name);
+    }
+
+    public Algorithm getAlg() {
+        return alg;
     }
 
     public String getName() {

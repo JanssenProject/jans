@@ -45,6 +45,7 @@ public class TokenAction implements Serializable {
     private String scope;
     private String assertion;
     private String refreshToken;
+    private String authReqId;
 
     private boolean showResults;
     private String requestString;
@@ -68,6 +69,7 @@ public class TokenAction implements Serializable {
             if (authenticationMethod.equals(AuthenticationMethod.CLIENT_SECRET_JWT)) {
                 request.setAudience(tokenEndpoint);
             }
+            request.setAuthReqId(authReqId);
 
             TokenClient client = new TokenClient(tokenEndpoint);
             client.setRequest(request);
@@ -171,6 +173,14 @@ public class TokenAction implements Serializable {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
     }
 
     public boolean isShowResults() {

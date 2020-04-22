@@ -182,9 +182,9 @@ public class Util {
 
     public static List<String> splittedStringAsList(String p_string, String p_delimiter) {
         final List<String> result = new ArrayList<String>();
-        if (org.apache.commons.lang.StringUtils.isNotBlank(p_string) && org.apache.commons.lang.StringUtils.isNotEmpty(p_delimiter)) {
+        if (StringUtils.isNotBlank(p_string)) {
             final String[] array = p_string.split(p_delimiter);
-            if (array != null && array.length > 0) {
+            if (array.length > 0) {
                 result.addAll(Arrays.asList(array));
             }
         }

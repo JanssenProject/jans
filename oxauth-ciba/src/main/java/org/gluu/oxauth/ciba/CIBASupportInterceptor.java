@@ -28,13 +28,9 @@ public class CIBASupportInterceptor implements CIBASupportInterceptionInterface,
 
     private final static Logger log = LoggerFactory.getLogger(CIBASupportInterceptor.class);
 
-    public CIBASupportInterceptor() {
-        log.info("CIBA Configuration Interceptor loaded.");
-    }
-
     @AroundInvoke
     public Object isCIBASupported(InvocationContext ctx) {
-        log.debug("CIBA: support...");
+        log.trace("CIBA: support...");
 
         boolean result = false;
         try {

@@ -202,7 +202,7 @@ public class UmaClient {
 			String tmpKeyId = keyId;
 	        if (StringHelper.isEmpty(tmpKeyId)) {
 	        	// Get first key
-	        	List<String> aliases = cryptoProvider.getKeyAliases();
+	        	List<String> aliases = cryptoProvider.getKeys();
 	        	if (aliases.size() > 0) {
 	        		tmpKeyId = aliases.get(0);
 	        	}

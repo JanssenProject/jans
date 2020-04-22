@@ -6,49 +6,38 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.SCOPE;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import com.google.common.collect.Lists;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.RegisterResponse;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterResponseParam;
+import org.gluu.oxauth.model.uma.TestUtil;
+import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.util.ServerUtil;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
-import org.gluu.oxauth.util.ServerUtil;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.TestUtil;
+import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for Client Registration Web Services (embedded)
@@ -247,12 +236,13 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
     @Parameters({"registerPath"})
     @Test
-    public void requestClientRegistrationFail1(final String registerPath) throws Exception {
+    public void failRegistration_whenRedirectUriIsNotSetForResponseTypeCode(final String registerPath) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
         String registerRequestContent = null;
         try {
             RegisterRequest registerRequest = new RegisterRequest(null, null, null);
+            registerRequest.setResponseTypes(Lists.newArrayList(ResponseType.CODE));
 
             registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
         } catch (JSONException e) {
@@ -264,32 +254,6 @@ public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
         String entity = response.readEntity(String.class);
 
         showResponse("requestClientRegistrationFail 1", response, entity);
-
-        assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
-        TestUtil.assertErrorResponse(entity);
-    }
-
-    @Parameters({"registerPath"})
-    @Test
-    public void requestClientRegistrationFail2(final String registerPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
-
-        String registerRequestContent = null;
-        try {
-            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null); // Missing
-            // redirect
-            // URIs
-
-            registerRequestContent = ServerUtil.toPrettyJson(registerRequest.getJSONParameters());
-        } catch (JSONException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-
-        Response response = request.post(Entity.json(registerRequestContent));
-        String entity = response.readEntity(String.class);
-
-        showResponse("requestClientRegistrationFail 2", response, entity);
 
         assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
         TestUtil.assertErrorResponse(entity);

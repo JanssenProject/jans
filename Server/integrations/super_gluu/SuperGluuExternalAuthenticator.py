@@ -43,7 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Super-Gluu. Initialization"
 
         if not configurationAttributes.containsKey("authentication_mode"):
@@ -154,7 +154,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -345,15 +345,15 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-                if StringHelper.isEmpty(session_id):
+                session = CdiUtil.bean(SessionIdService).getSessionId()
+                if session == None:
                     print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                     return False
-            
+
                 issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
-                                   'state': session_id,
+                                   'state': session.getId(),
                                    'licensed': self.valid_license,
                                    'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
@@ -384,8 +384,8 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
             
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -401,7 +401,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
-                               'state': session_id,
+                               'state': session.getId(),
                                'licensed': self.valid_license,
                                'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 

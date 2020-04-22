@@ -1,12 +1,5 @@
 package org.gluu.oxauth.service;
 
-import java.net.URI;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.oxauth.model.common.PairwiseIdType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.SubjectIdentifierGenerator;
@@ -16,7 +9,12 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.net.URI;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -51,6 +49,10 @@ public class PairwiseIdentifierService {
     }
 
     public void prepareBranch(final String userInum) {
+        if (!ldapEntryManager.hasBranchesSupport(userService.getDnForUser(userInum))) {
+            return;
+        }
+
         // Create pairwise identifier branch if needed
         if (!containsBranch(userInum)) {
             addBranch(userInum);

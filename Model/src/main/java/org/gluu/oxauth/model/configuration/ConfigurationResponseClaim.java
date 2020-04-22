@@ -15,7 +15,9 @@ public interface ConfigurationResponseClaim {
     String ISSUER = "issuer";
     String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
     String TOKEN_ENDPOINT = "token_endpoint";
+    @Deprecated // remove in 5.x version
     String TOKEN_REVOCATION_ENDPOINT = "token_revocation_endpoint";
+    String REVOCATION_ENDPOINT = "revocation_endpoint";
     String USER_INFO_ENDPOINT = "userinfo_endpoint";
     String CLIENT_INFO_ENDPOINT = "clientinfo_endpoint";
     String CHECK_SESSION_IFRAME = "check_session_iframe";
@@ -62,6 +64,8 @@ public interface ConfigurationResponseClaim {
     String FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     String AUTH_LEVEL_MAPPING = "auth_level_mapping";
     String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
+    String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
+    String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
 
     // CIBA
     String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";

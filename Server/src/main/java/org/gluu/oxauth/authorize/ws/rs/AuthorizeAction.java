@@ -7,6 +7,7 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.AuthenticationScriptUsageType;
@@ -28,7 +29,6 @@ import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.LocaleUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -37,11 +37,10 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
 import org.gluu.util.StringHelper;
+import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -56,16 +55,13 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.*;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 7, 2019
+ * @version March 4, 2020
  */
 @RequestScoped
 @Named
@@ -82,9 +78,6 @@ public class AuthorizeAction {
 
     @Inject
     private SessionIdService sessionIdService;
-
-    @Inject
-    private UserService userService;
 
     @Inject
     private RedirectionUriService redirectionUriService;
@@ -140,6 +133,12 @@ public class AuthorizeAction {
     @Inject
     private AbstractCryptoProvider cryptoProvider;
 
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private CookieService cookieService;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -177,18 +176,22 @@ public class AuthorizeAction {
         if (StringUtils.isNotBlank(uiLocales)) {
             uiLocalesList = Util.splittedStringAsList(uiLocales, " ");
 
-            List<Locale> supportedLocales = new ArrayList<Locale>();
-            for (Iterator<Locale> it = facesContext.getApplication().getSupportedLocales(); it.hasNext(); ) {
-                supportedLocales.add(it.next());
-            }
+            List<Locale> supportedLocales = languageBean.getSupportedLocales();
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
-            if (matchingLocale != null)
-                languageBean.setLocaleCode(matchingLocale.getLanguage());
+            if (matchingLocale != null) {
+                languageBean.setLocale(matchingLocale);
+            }
         } else {
+            Locale requestedLocale = facesContext.getExternalContext().getRequestLocale();
+            if (requestedLocale != null) {
+                languageBean.setLocale(requestedLocale);
+                return;
+            }
+            
             Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
             if (defaultLocale != null) {
-                languageBean.setLocaleCode(defaultLocale.getLanguage());
+                languageBean.setLocale(defaultLocale);
             }
         }
     }
@@ -291,13 +294,12 @@ public class AuthorizeAction {
             }
 
             this.sessionId = unauthenticatedSession.getId();
-            sessionIdService.createSessionIdCookie(this.sessionId, unauthenticatedSession.getSessionState(), unauthenticatedSession.getOPBrowserState(), false);
-            sessionIdService.creatRpOriginIdCookie(redirectUri);
+            cookieService.createSessionIdCookie(unauthenticatedSession, false);
+            cookieService.creatRpOriginIdCookie(redirectUri);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
             if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
-                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT,
-                        requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
+                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
             }
 
             facesService.redirectWithExternal(redirectTo, loginParameters);
@@ -315,6 +317,12 @@ public class AuthorizeAction {
 
         final User user = sessionIdService.getUser(session);
         log.trace("checkPermissionGranted, user = " + user);
+
+        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+            Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
+            facesService.redirect("/selectAccount.xhtml", requestParameterMap);
+            return;
+        }
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
             if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
@@ -359,8 +367,6 @@ public class AuthorizeAction {
                 return;
             }
         }
-
-        return;
     }
 
     private SessionId handleAcrChange(SessionId session, List<Prompt> prompts) {
@@ -420,14 +426,6 @@ public class AuthorizeAction {
                         }
                     }
                 }
-            } catch (NoSuchAlgorithmException e) {
-                log.error(e.getMessage(), e);
-            } catch (URISyntaxException e) {
-                log.error(e.getMessage(), e);
-            } catch (UnsupportedEncodingException e) {
-                log.error(e.getMessage(), e);
-            } catch (NoSuchProviderException e) {
-                log.error(e.getMessage(), e);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
@@ -452,11 +450,7 @@ public class AuthorizeAction {
                         }
                     }
                 }
-            } catch (EntryPersistenceException e) {
-                log.error(e.getMessage(), e);
-            } catch (InvalidJwtException e) {
-                log.error(e.getMessage(), e);
-            } catch (InvalidJweException e) {
+            } catch (EntryPersistenceException | InvalidJwtException | InvalidJweException e) {
                 log.error(e.getMessage(), e);
             }
         }
@@ -805,6 +799,20 @@ public class AuthorizeAction {
 
     public void setAuthReqId(String authReqId) {
         this.authReqId = authReqId;
+    }
+
+    public String getBindingMessage() {
+        String bindingMessage = null;
+
+        if (Strings.isNotBlank(getAuthReqId())) {
+            final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+
+            if (cibaGrant != null) {
+                bindingMessage = cibaGrant.getBindingMessage();
+            }
+        }
+
+        return bindingMessage;
     }
 
     public String encodeParameters(String url, Map<String, Object> parameters) {

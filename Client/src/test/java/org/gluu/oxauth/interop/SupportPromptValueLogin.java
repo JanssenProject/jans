@@ -47,8 +47,7 @@ public class SupportPromptValueLogin extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
@@ -91,8 +90,7 @@ public class SupportPromptValueLogin extends BaseTest {
             tokenRequest.setAuthPassword(clientSecret);
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-            TokenClient tokenClient = new TokenClient(tokenEndpoint);
-            tokenClient.setRequest(tokenRequest);
+            TokenClient tokenClient = newTokenClient(tokenRequest);
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
@@ -133,8 +131,7 @@ public class SupportPromptValueLogin extends BaseTest {
             tokenRequest.setAuthPassword(clientSecret);
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-            TokenClient tokenClient = new TokenClient(tokenEndpoint);
-            tokenClient.setRequest(tokenRequest);
+            TokenClient tokenClient = newTokenClient(tokenRequest);
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);

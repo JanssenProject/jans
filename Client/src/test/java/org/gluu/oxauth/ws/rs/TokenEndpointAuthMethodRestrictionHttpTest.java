@@ -9378,7 +9378,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "PS384_keyId", "dnName",
             "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgPS384(
@@ -9504,8 +9504,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
@@ -9525,6 +9524,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         RegisterClient readClient = new RegisterClient(registrationClientUri);
         readClient.setRequest(readClientRequest);
+        readClient.setExecutor(clientExecutor(true));
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
@@ -9583,8 +9583,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
+        TokenClient tokenClient = newTokenClient(tokenRequest);
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);

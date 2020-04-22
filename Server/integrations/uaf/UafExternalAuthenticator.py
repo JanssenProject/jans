@@ -33,7 +33,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "UAF. Initialization"
 
         if not configurationAttributes.containsKey("uaf_server_uri"):
@@ -75,7 +75,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -120,8 +120,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Authenticate for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -231,8 +231,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 

@@ -7,15 +7,16 @@
 package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.uma.UmaPermissionList;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.util.Pair;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -57,7 +58,7 @@ public class UmaPermissionService {
         return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_PERMISSION, clientDn);
     }
 
-    private List<UmaPermission> createPermissions(UmaPermissionList permissions, Date expirationDate) {
+    private List<UmaPermission> createPermissions(UmaPermissionList permissions, Pair<Date, Integer> expirationDate) {
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
 
         final String ticket = generateNewTicket();
@@ -77,7 +78,7 @@ public class UmaPermissionService {
        return UUID.randomUUID().toString();
     }
 
-    public String addPermission(UmaPermissionList permissionList, String clientDn) throws Exception {
+    public String addPermission(UmaPermissionList permissionList, String clientDn) {
         try {
             List<UmaPermission> created = createPermissions(permissionList, ticketExpirationDate());
             for (UmaPermission permission : created) {
@@ -90,7 +91,7 @@ public class UmaPermissionService {
         }
     }
 
-    public Date ticketExpirationDate() {
+    public Pair<Date, Integer> ticketExpirationDate() {
         int lifeTime = appConfiguration.getUmaTicketLifetime();
         if (lifeTime <= 0) {
             lifeTime = DEFAULT_TICKET_LIFETIME;
@@ -98,7 +99,7 @@ public class UmaPermissionService {
 
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, lifeTime);
-        return calendar.getTime();
+        return new Pair<>(calendar.getTime(), lifeTime);
     }
 
     public void addPermission(UmaPermission permission, String clientDn) {

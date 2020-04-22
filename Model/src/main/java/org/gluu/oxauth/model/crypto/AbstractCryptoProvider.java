@@ -5,6 +5,7 @@
  */
 package org.gluu.oxauth.model.crypto;
 
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
@@ -20,22 +21,15 @@ import org.gluu.oxeleven.model.KeyRequestParam;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import sun.security.rsa.RSAPublicKeyImpl;
 
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
+import java.security.spec.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.gluu.oxauth.model.jwk.JWKParameter.*;
 
@@ -63,9 +57,16 @@ public abstract class AbstractCryptoProvider {
 
     public abstract boolean containsKey(String keyId);
 
+    public List<String> getKeys() {
+        return Lists.newArrayList();
+    }
+
     public abstract PrivateKey getPrivateKey(String keyId) throws Exception;
 
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
+        if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+            return null;
+        }
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
             if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 return key.getKid();
@@ -97,10 +98,10 @@ public abstract class AbstractCryptoProvider {
         return jwks;
     }
 
-    public static JSONObject generateJwks(int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
+    public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration) throws Exception {
         JSONArray keys = new JSONArray();
-        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
-        generateJwks(keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.ENCRYPTION);
+        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.SIGNATURE);
+        generateJwks(cryptoProvider, keys, keyRegenerationInterval, idTokenLifeTime, configuration, Use.ENCRYPTION);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JSON_WEB_KEY_SET, keys);
@@ -108,12 +109,10 @@ public abstract class AbstractCryptoProvider {
         return jsonObject;
     }
 
-    public static void generateJwks(JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
+    public static void generateJwks(AbstractCryptoProvider cryptoProvider, JSONArray keys, int keyRegenerationInterval, int idTokenLifeTime, AppConfiguration configuration, Use use) throws Exception {
         GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         expirationTime.add(GregorianCalendar.HOUR, keyRegenerationInterval);
         expirationTime.add(GregorianCalendar.SECOND, idTokenLifeTime);
-
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         try {
             keys.put(cryptoProvider.generateKey(Algorithm.RS256, expirationTime.getTimeInMillis(), use));
@@ -182,7 +181,7 @@ public abstract class AbstractCryptoProvider {
         }
     }
 
-    public PublicKey getPublicKey(String alias, JSONObject jwks) throws Exception {
+    public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws Exception {
         java.security.PublicKey publicKey = null;
 
         JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
@@ -192,15 +191,22 @@ public abstract class AbstractCryptoProvider {
                 AlgorithmFamily family = null;
                 if (key.has(ALGORITHM)) {
                     Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
+
+                    if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
+                        LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                        continue;
+                    }
                     family = algorithm.getFamily();
                 } else if (key.has(KEY_TYPE)) {
                     family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
                 }
 
                 if (AlgorithmFamily.RSA.equals(family)) {
-                    publicKey = new RSAPublicKeyImpl(
+                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                    RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
                             new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
+                    publicKey = keyFactory.generatePublic(pubKeySpec);
                 } else if (AlgorithmFamily.EC.equals(family)) {
                     ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
                     AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());

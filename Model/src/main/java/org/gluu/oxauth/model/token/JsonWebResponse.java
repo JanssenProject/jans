@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.model.token;
 
-import java.io.Serializable;
-
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.jwt.JwtHeader;
+
+import java.io.Serializable;
 
 /**
  * JSON Web Token is a compact token format intended for space constrained
@@ -41,6 +41,13 @@ public class JsonWebResponse implements Serializable {
 	public JwtClaims getClaims() {
 		return claims;
 	}
+
+    public void setClaim(String key, String value) {
+	    if (claims == null) {
+	        return;
+        }
+	    claims.setClaim(key, value);
+    }
 
 	public void setClaims(JwtClaims claims) {
 		this.claims = claims;

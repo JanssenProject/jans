@@ -120,7 +120,7 @@ public enum AuthorizeErrorResponseType implements IErrorType {
     /**
      * The request parameter contains an invalid OpenID Request Object.
      */
-    INVALID_OPENID_REQUEST_OBJECT("invalid_openid_request_object"),
+    INVALID_REQUEST_OBJECT("invalid_request_object"),
 
     /**
      * The authorization server can't handle user authentication due to session expiration
