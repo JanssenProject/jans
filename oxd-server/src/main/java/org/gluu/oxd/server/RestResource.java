@@ -247,7 +247,6 @@ public class RestResource {
         }
     }
 
-
     private static <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String authorizationOxdId) {
         LOG.trace("Command: {}", paramsAsString);
         T params = read(paramsAsString, paramsClass);
@@ -267,11 +266,6 @@ public class RestResource {
         }
         return forJsonConversion;
     }
-
-    private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
-        return Strings.isNullOrEmpty(authorizationOxdId) ? params.getOxdId() : authorizationOxdId;
-    }
-
 
     private static void validateAuthorizationOxdId(OxdServerConfiguration conf, String authorizationOxdId) {
 
@@ -319,5 +313,9 @@ public class RestResource {
 
         final ValidationService validationService = ServerLauncher.getInjector().getInstance(ValidationService.class);
         validationService.validateAccessToken(accessToken, authorizationOxdId);
+    }
+
+    private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
+        return Strings.isNullOrEmpty(authorizationOxdId) ? params.getOxdId() : authorizationOxdId;
     }
 }
