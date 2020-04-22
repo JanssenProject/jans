@@ -2032,7 +2032,7 @@ class Setup(object):
         self.run([self.cmd_chown, '%s:%s' % (user, user), keystoreFN])
         self.run([self.cmd_chmod, '700', keystoreFN])
 
-    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, key_expiration = None, dn_name = None, key_algs = None):
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
 
         if dn_name == None:
@@ -2044,6 +2044,8 @@ class Setup(object):
         if key_expiration == None:
             key_expiration = self.default_key_expiration
 
+        if not enc_keys:
+            enc_keys = key_algs
 
         # We can remove this once KeyGenerator will do the same
         if jks_create == True:
@@ -2089,7 +2091,7 @@ class Setup(object):
                         "-sig_keys",
                         "%s" % key_algs,
                         "-enc_keys",
-                        "%s" % key_algs,
+                        "%s" % enc_keys,
                         "-dnname",
                         '"%s"' % dn_name,
                         "-expiration",
@@ -2142,8 +2144,9 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def generate_oxauth_openid_keys(self):
-        key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
-        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=key_algs)
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
