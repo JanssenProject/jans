@@ -38,7 +38,7 @@ public class GetLogoutUrlTest {
         params.setState(UUID.randomUUID().toString());
         params.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-        final GetLogoutUriResponse resp = client.getLogoutUri(params, Tester.getAuthorization());
+        final GetLogoutUriResponse resp = client.getLogoutUri(params, Tester.getAuthorization(), null);
         assertNotNull(resp);
         assertNotNull(resp.getUri());
         assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
@@ -53,7 +53,7 @@ public class GetLogoutUrlTest {
         params.setOxdId(UUID.randomUUID().toString());
 
         try {
-            client.getLogoutUri(params, Tester.getAuthorization());
+            client.getLogoutUri(params, Tester.getAuthorization(), null);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);  // fixme should be 404 (NOT_FOUND) instead of BAD_REQUEST,
         }
@@ -67,7 +67,7 @@ public class GetLogoutUrlTest {
         params.setOxdId(null);
 
         try {
-            client.getLogoutUri(params, Tester.getAuthorization());
+            client.getLogoutUri(params, Tester.getAuthorization(), null);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);  //BAD_REQUEST
         }

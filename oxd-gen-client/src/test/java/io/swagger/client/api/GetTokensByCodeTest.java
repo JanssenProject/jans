@@ -51,7 +51,7 @@ public class GetTokensByCodeTest {
         refreshParams.setScope(Lists.newArrayList("openid"));
         refreshParams.setRefreshToken(resp.getRefreshToken());
 
-        GetAccessTokenByRefreshTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(refreshParams, authorization);
+        GetAccessTokenByRefreshTokenResponse refreshResponse = client.getAccessTokenByRefreshToken(refreshParams, authorization, null);
 
         assertNotNull(refreshResponse);
         notEmpty(refreshResponse.getAccessToken());
@@ -73,7 +73,7 @@ public class GetTokensByCodeTest {
         params.setCode(code);
         params.setState(state);
 
-        final GetTokensByCodeResponse resp = client.getTokensByCode(params, authorizationStr);
+        final GetTokensByCodeResponse resp = client.getTokensByCode(params, authorizationStr, null);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());

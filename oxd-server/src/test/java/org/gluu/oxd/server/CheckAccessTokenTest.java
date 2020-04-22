@@ -32,7 +32,7 @@ public class CheckAccessTokenTest {
         params.setIdToken(response.getIdToken());
         params.setOxdId(site.getOxdId());
 
-        final CheckAccessTokenResponse checkR = client.checkAccessToken(Tester.getAuthorization(), params);
+        final CheckAccessTokenResponse checkR = client.checkAccessToken(Tester.getAuthorization(site), null, params);
         assertNotNull(checkR);
         assertTrue(checkR.isActive());
         assertNotNull(checkR.getExpiresAt());

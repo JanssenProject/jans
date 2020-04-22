@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsCheckAccessParams implements HasAccessTokenParams {
+public class RsCheckAccessParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -21,20 +21,10 @@ public class RsCheckAccessParams implements HasAccessTokenParams {
     private String path;
     @JsonProperty(value = "http_method")
     private String http_method;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "scopes")
     private List<String> scopes;
 
     public RsCheckAccessParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getOxdId() {
@@ -85,7 +75,6 @@ public class RsCheckAccessParams implements HasAccessTokenParams {
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", path='").append(path).append('\'');
         sb.append(", http_method='").append(http_method).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append(", scopes='").append(scopes).append('\'');
         sb.append('}');
         return sb.toString();

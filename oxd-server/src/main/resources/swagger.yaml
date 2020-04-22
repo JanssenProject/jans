@@ -563,6 +563,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -689,6 +693,10 @@ paths:
       operationId: update-site
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1008,6 +1016,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1063,6 +1075,10 @@ paths:
       operationId: get-authorization-url
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1164,6 +1180,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1247,6 +1267,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1306,6 +1330,10 @@ paths:
       operationId: get-logout-uri
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1379,6 +1407,10 @@ paths:
       operationId: get-access-token-by-refresh-token
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1472,6 +1504,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1537,6 +1573,10 @@ paths:
       operationId: uma-rs-modify
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1611,6 +1651,10 @@ paths:
       operationId: uma-rs-check-access
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1690,6 +1734,10 @@ paths:
       operationId: introspect-rpt
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string
@@ -1798,6 +1846,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1890,6 +1942,10 @@ paths:
         in: header
         schema:
           type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
       requestBody:
         content:
           application/json:
@@ -1964,6 +2020,10 @@ paths:
       operationId: get-json-web-key-set
       parameters:
       - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
         in: header
         schema:
           type: string

@@ -7,14 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetRpParams implements HasAccessTokenParams {
+public class GetRpParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "list")
     private Boolean list;
-    @JsonProperty(value = "token")
-    private String token;
 
     public GetRpParams() {
     }
@@ -37,14 +35,6 @@ public class GetRpParams implements HasAccessTokenParams {
 
     public void setList(Boolean list) {
         this.list = list;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     @Override
