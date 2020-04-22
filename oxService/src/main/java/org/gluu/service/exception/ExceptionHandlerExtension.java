@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Extension;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Yuriy Movchan Date: 05/22/2017
  */
+@ApplicationScoped
 public class ExceptionHandlerExtension implements Extension {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerExtension.class.getName());
