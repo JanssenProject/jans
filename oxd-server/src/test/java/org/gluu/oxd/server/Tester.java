@@ -60,6 +60,20 @@ public class Tester {
         return AUTHORIZATION;
     }
 
+    public static String getAuthorization(RegisterSiteResponse site) {
+        final GetClientTokenParams params = new GetClientTokenParams();
+        params.setScope(Lists.newArrayList("openid", "oxd"));
+        params.setOpHost(site.getOpHost());
+        params.setClientId(site.getClientId());
+        params.setClientSecret(site.getClientSecret());
+
+        GetClientTokenResponse resp = Tester.newClient(HOST).getClientToken(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getAccessToken()));
+
+        return "Bearer " + resp.getAccessToken();
+    }
+
     public static RegisterSiteResponse getSetupClient() {
         return SETUP_CLIENT;
     }

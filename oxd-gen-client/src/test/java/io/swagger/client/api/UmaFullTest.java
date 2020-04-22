@@ -47,7 +47,7 @@ public class UmaFullTest {
         params.setOxdId(site.getOxdId());
         params.setTicket(checkAccess.getTicket());
 
-        final UmaRpGetRptResponse response = client.umaRpGetRpt(params, Tester.getAuthorization());
+        final UmaRpGetRptResponse response = client.umaRpGetRpt(params, Tester.getAuthorization(), null);
 
         assertNotNull(response);
 
@@ -70,7 +70,7 @@ public class UmaFullTest {
         params.setTicket(UUID.randomUUID().toString());
 
         try {
-            client.umaRpGetRpt(params, Tester.getAuthorization());
+            client.umaRpGetRpt(params, Tester.getAuthorization(), null);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);  // BAD REQUEST
         }
@@ -96,7 +96,7 @@ public class UmaFullTest {
         params.setClaimToken(Tester.getAuthorization(site));
 
         try {
-            client.umaRpGetRpt(params, Tester.getAuthorization());
+            client.umaRpGetRpt(params, Tester.getAuthorization(), null);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);
         }

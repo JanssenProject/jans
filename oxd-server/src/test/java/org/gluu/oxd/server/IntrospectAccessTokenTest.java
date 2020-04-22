@@ -29,7 +29,7 @@ public class IntrospectAccessTokenTest {
 
         final GetClientTokenParams params = new GetClientTokenParams();
         params.setOpHost(opHost);
-        params.setScope(Lists.newArrayList("openid"));
+        params.setScope(Lists.newArrayList("openid", "oxd"));
         params.setClientId(setupResponse.getClientId());
         params.setClientSecret(setupResponse.getClientSecret());
 
@@ -42,7 +42,7 @@ public class IntrospectAccessTokenTest {
         introspectParams.setOxdId(setupResponse.getOxdId());
         introspectParams.setAccessToken(tokenResponse.getAccessToken());
 
-        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), introspectParams);
+        IntrospectAccessTokenResponse introspectionResponse = client.introspectAccessToken("Bearer " + tokenResponse.getAccessToken(), null, introspectParams);
 
         assertNotNull(introspectionResponse);
         assertTrue(introspectionResponse.isActive());

@@ -7,14 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author yuriyz
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IntrospectRptParams implements HasAccessTokenParams {
+public class IntrospectRptParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
     @JsonProperty(value = "rpt")
     private String rpt;
-    @JsonProperty(value = "token")
-    private String token;
 
     @Override
     public String getOxdId() {
@@ -33,12 +31,4 @@ public class IntrospectRptParams implements HasAccessTokenParams {
         this.rpt = rpt;
     }
 
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

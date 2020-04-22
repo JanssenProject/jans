@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationCodeParams implements HasAccessTokenParams {
+public class GetAuthorizationCodeParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -25,8 +25,6 @@ public class GetAuthorizationCodeParams implements HasAccessTokenParams {
     private String state;
     @JsonProperty(value = "nonce")
     private String nonce;
-    @JsonProperty(value = "token")
-    private String token;
 
     public GetAuthorizationCodeParams() {
     }
@@ -79,14 +77,6 @@ public class GetAuthorizationCodeParams implements HasAccessTokenParams {
         this.acr_values = acrValues;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -96,7 +86,6 @@ public class GetAuthorizationCodeParams implements HasAccessTokenParams {
         sb.append(", username='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", state='").append(state).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

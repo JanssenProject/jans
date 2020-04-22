@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetTokensByCodeParams implements HasAccessTokenParams {
+public class GetTokensByCodeParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -17,18 +17,8 @@ public class GetTokensByCodeParams implements HasAccessTokenParams {
     private String code;
     @JsonProperty(value = "state")
     private String state;
-    @JsonProperty(value = "token")
-    private String token;
 
     public GetTokensByCodeParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getCode() {
@@ -79,7 +69,6 @@ public class GetTokensByCodeParams implements HasAccessTokenParams {
         sb.append("{code='").append(code).append('\'');
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", state='").append(state).append('\'');
-        sb.append(", token='").append(token).append('\'');
         sb.append('}');
         return sb.toString();
     }

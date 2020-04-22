@@ -93,7 +93,7 @@ public class RsProtectTest {
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
 
         try {
-            client.umaRsProtect(Tester.getAuthorization(), params);
+            client.umaRsProtect(Tester.getAuthorization(site), null, params);
         } catch (BadRequestException e) {
             assertEquals("uma_protection_exists", TestUtils.asError(e).getError());
             return;
@@ -117,7 +117,7 @@ public class RsProtectTest {
         params.setResources(Jackson2.createJsonMapper().readTree(Jackson2.asJsonSilently(resources)));
         params.setOverwrite(true); // force overwrite
 
-        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(), params);
+        RsProtectResponse response = client.umaRsProtect(Tester.getAuthorization(site), null, params);
         assertNotNull(response);
     }
 
@@ -147,7 +147,7 @@ public class RsProtectTest {
         params.setPath("/GetAll");
         params.setRpt("");
 
-        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(), params);
+        final RsCheckAccessResponse response = client.umaRsCheckAccess(Tester.getAuthorization(site), null, params);
 
         assertNotNull(response);
         assertTrue(StringUtils.isNotBlank(response.getAccess()));
@@ -162,7 +162,7 @@ public class RsProtectTest {
             e.printStackTrace();
         }
 
-        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(), params);
+        final RsProtectResponse resp = client.umaRsProtect(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);
         return resp;
     }

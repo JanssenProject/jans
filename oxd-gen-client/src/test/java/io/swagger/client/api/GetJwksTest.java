@@ -31,7 +31,7 @@ public class GetJwksTest {
         params.setOpHost(opHost);
         params.setOpDiscoveryPath(opDiscoveryPath);
 
-        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization());
+        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization(), null);
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());
@@ -47,7 +47,7 @@ public class GetJwksTest {
         final GetJwksParams params = new GetJwksParams();
         params.setOpConfigurationEndpoint(opConfigurationEndpoint);
 
-        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization());
+        final GetJwksResponse response = client.getJsonWebKeySet(params, Tester.getAuthorization(), null);
         assertNotNull(response);
         assertNotNull(response.getKeys());
         assertFalse(response.getKeys().isEmpty());
@@ -64,7 +64,7 @@ public class GetJwksTest {
         params.setOpDiscoveryPath(opDiscoveryPath);
 
         try {
-            client.getJsonWebKeySetWithHttpInfo(params, Tester.getAuthorization());
+            client.getJsonWebKeySetWithHttpInfo(params, Tester.getAuthorization(), null);
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);
         }

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
+public class RpGetClaimsGatheringUrlParams implements HasOxdIdParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxd_id;
@@ -19,22 +19,12 @@ public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
     private String ticket;
     @JsonProperty(value = "claims_redirect_uri")
     private String claims_redirect_uri;
-    @JsonProperty(value = "token")
-    private String token;
     @JsonProperty(value = "state")
     private String state;
     @JsonProperty(value = "custom_parameters")
     private Map<String, String> custom_parameters;
 
     public RpGetClaimsGatheringUrlParams() {
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getOxdId() {
@@ -84,7 +74,6 @@ public class RpGetClaimsGatheringUrlParams implements HasAccessTokenParams {
         sb.append("{oxd_id='").append(oxd_id).append('\'');
         sb.append(", ticket=").append(ticket);
         sb.append(", claims_redirect_uri=").append(claims_redirect_uri);
-        sb.append(", token=").append(token);
         sb.append(", state=").append(state);
         sb.append(", custom_parameters=").append(custom_parameters);
         sb.append('}');
