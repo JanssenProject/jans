@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.couchbase.model.ConvertedExpression;
@@ -37,7 +35,6 @@ import com.couchbase.client.java.query.dsl.functions.StringFunctions;
  *
  * @author Yuriy Movchan Date: 05/15/2018
  */
-@ApplicationScoped
 public class CouchbaseFilterConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseFilterConverter.class);
@@ -48,9 +45,6 @@ public class CouchbaseFilterConverter {
 
     public CouchbaseFilterConverter(CouchbaseEntryManager couchbaseEntryManager) {
     	this.couchbaseEntryManager = couchbaseEntryManager;
-	}
-
-	public CouchbaseFilterConverter() {
 	}
 
 	public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
