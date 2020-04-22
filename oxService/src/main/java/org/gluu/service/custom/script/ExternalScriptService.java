@@ -28,8 +28,7 @@ import org.slf4j.Logger;
  *
  * @author Yuriy Movchan Date: 01/08/2015
  */
-@ApplicationScoped
-public class ExternalScriptService implements Serializable {
+public abstract class ExternalScriptService implements Serializable {
 
     private static final long serialVersionUID = -1070021905117441202L;
 
