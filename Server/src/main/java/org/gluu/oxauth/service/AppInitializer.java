@@ -387,6 +387,7 @@ public class AppInitializer {
 		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
 
 		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs, persistenceEntryManagerFactory.getPersistenceType());
+		log.trace("Attempting to create LDAP auth PersistenceEntryManager with properties: {}", persistenceAuthProperties);
 
 		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
 			PersistenceEntryManager persistenceAuthEntryManager = 
@@ -507,6 +508,11 @@ public class AppInitializer {
 			}
 			properties.setProperty(prefix + "useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
 			properties.setProperty(prefix + "maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
+			
+			// Remove internal DB trustStoreFile property
+			properties.remove(prefix + "ssl.trustStoreFile");			
+			properties.remove(prefix + "ssl.trustStorePin");			
+			properties.remove(prefix + "ssl.trustStoreFormat");			
 		}
 
 		EncryptionService securityService = encryptionServiceInstance.get();

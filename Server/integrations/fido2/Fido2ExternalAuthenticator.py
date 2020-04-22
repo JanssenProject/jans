@@ -21,14 +21,16 @@ from java.util.concurrent.locks import ReentrantLock
 
 import java
 import sys
-import json
-
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Fido2. Initialization"
 
         if not configurationAttributes.containsKey("fido2_server_uri"):
@@ -49,7 +51,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -134,8 +136,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Fido2. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -194,6 +196,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):

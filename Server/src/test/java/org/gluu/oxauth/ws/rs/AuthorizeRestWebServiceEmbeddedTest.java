@@ -377,7 +377,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         try {
             JSONObject jsonObj = new JSONObject(entity);
             assertTrue(jsonObj.has("error"), "The error type is null");
-            assertEquals(jsonObj.getString("error"), "invalid_request");
+            assertEquals(jsonObj.getString("error"), "unauthorized_client");
             assertTrue(jsonObj.has("error_description"), "The error description is null");
             assertEquals(jsonObj.get(AuthorizeResponseParam.STATE), state);
         } catch (JSONException e) {

@@ -8,13 +8,6 @@ package org.gluu.oxauth.client.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -28,12 +21,14 @@ import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.util.ClientUtil;
-
-import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.PublicKey;
+
+import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
 
 /**
  * @author Javier Rojas Blum
@@ -405,7 +400,7 @@ public class JwtState {
         if (keyEncryptionAlgorithm != null && blockEncryptionAlgorithm != null) {
             JweEncrypterImpl jweEncrypter;
             if (cryptoProvider != null && jwks != null) {
-                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks);
+                PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jwks, null);
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, publicKey);
             } else {
                 jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedKey.getBytes(Util.UTF8_STRING_ENCODING));

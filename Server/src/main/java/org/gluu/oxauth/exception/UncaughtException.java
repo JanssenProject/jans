@@ -1,17 +1,17 @@
 package org.gluu.oxauth.exception;
 
-import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.inject.Vetoed;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.net.URI;
 
 /**
  * Created by eugeniuparvan on 8/29/17.
@@ -39,6 +39,12 @@ public class UncaughtException extends Throwable implements ExceptionMapper<Thro
     @Override
     public Response toResponse(Throwable exception) {
         try {
+            if (exception instanceof WebApplicationException) {
+                final Response response = ((WebApplicationException) exception).getResponse();
+                if (response != null && response.getStatus() > 0) {
+                    return response;
+                }
+            }
             log.error("Jersey error.", exception);
             return Response.temporaryRedirect(new URI(getRedirectURI())).build();
         } catch (Exception e) {

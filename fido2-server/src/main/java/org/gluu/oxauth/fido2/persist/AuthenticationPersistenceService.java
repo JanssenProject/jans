@@ -117,11 +117,13 @@ public class AuthenticationPersistenceService {
 
     public void prepareBranch(final String userInum) {
         String baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
-        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
-	        // Create Fido2 base branch for authentication entries if needed
-	        if (!containsBranch(baseDn)) {
-	            addBranch(baseDn);
-	        }
+        if (!ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	return;
+        }
+
+        // Create Fido2 base branch for authentication entries if needed
+        if (!containsBranch(baseDn)) {
+            addBranch(baseDn);
         }
     }
 

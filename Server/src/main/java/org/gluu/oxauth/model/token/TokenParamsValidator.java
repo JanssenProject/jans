@@ -17,7 +17,7 @@ import org.gluu.oxauth.model.common.GrantType;
  * Validates the parameters received for the token web service.
  *
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version February 25, 2020
  */
 public class TokenParamsValidator {
 
@@ -59,6 +59,9 @@ public class TokenParamsValidator {
                 break;
             case REFRESH_TOKEN:
                 result = refreshToken != null && !refreshToken.isEmpty();
+                break;
+            case CIBA:
+                result = true;
                 break;
         }
 

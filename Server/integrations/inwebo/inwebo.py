@@ -27,7 +27,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.otp = "false"
         self.client = None
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
        
         print "inWebo. Initialization"
         iw_cert_store_type = configurationAttributes.get("iw_cert_store_type").getValue2()
@@ -75,7 +75,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -118,8 +118,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 response_check = self.validateInweboToken(self.api_uri, self.service_id, user_name, password, step)
             elif (step == 2):
                 print "elif (step == 2):"
-                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-                response_check = self.checkStatus(self.api_uri, self.service_id, user_name,  session_id, self.push_withoutpin)
+                session = CdiUtil.bean(SessionIdService).getSessionId()
+                if session == None:
+                    print "InWebo. Authenticate for step 2. session_id is not exists"
+                    return False
+
+                response_check = self.checkStatus(self.api_uri, self.service_id, user_name, session.getId(), self.push_withoutpin)
                 
                 if self.push_fail is not None:
                     self.setErrorMessage(self.push_fail)

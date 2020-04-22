@@ -31,6 +31,8 @@ public class BaseDnConfiguration {
     private String groups;
     @XmlElement(name = "clients")
     private String clients;
+    @XmlElement(name = "sessions")
+    private String sessions;
 	@XmlElement(name = "tokens")
 	private String tokens;
     @XmlElement(name = "authorizations")
@@ -106,6 +108,14 @@ public class BaseDnConfiguration {
 
     public void setClients(String p_clients) {
         clients = p_clients;
+    }
+
+    public String getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(String sessions) {
+        this.sessions = sessions;
     }
 
     public String getTokens() {

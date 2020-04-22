@@ -6,23 +6,28 @@
 
 package org.gluu.oxauth.ws.rs.uma;
 
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
+
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaPermissionService;
-import org.gluu.oxauth.model.uma.*;
+import org.gluu.oxauth.model.uma.PermissionTicket;
+import org.gluu.oxauth.model.uma.UmaMetadata;
+import org.gluu.oxauth.model.uma.UmaPermission;
+import org.gluu.oxauth.model.uma.UmaPermissionList;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
-
-import javax.ws.rs.core.Response;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNull;
 
 /**
  * Test cases for the registering UMA permissions flow (HTTP)
@@ -49,7 +54,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
-            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
+            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientEngine(true)).getMetadata();
             UmaTestUtil.assert_(this.metadata);
         }
 
@@ -68,7 +73,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
     public UmaPermissionService getPermissionService() throws Exception {
         if (permissionService == null) {
-            permissionService = UmaClientFactory.instance().createPermissionService(this.metadata, clientExecutor(true));
+            permissionService = UmaClientFactory.instance().createPermissionService(this.metadata, clientEngine(true));
         }
         return permissionService;
     }
@@ -80,6 +85,10 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public void testRegisterPermission() throws Exception {
         showTitle("testRegisterPermission");
         registerResourcePermission(this.registerResourceTest.resourceId, Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+    }
+
+    public String registerResourcePermission(List<String> scopes) throws Exception {
+        return registerResourcePermission(this.registerResourceTest.resourceId, scopes);
     }
 
     public String registerResourcePermission(String resourceId, List<String> scopes) throws Exception {
@@ -111,7 +120,8 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
             ticket = getPermissionService().registerPermission(
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
+        } catch (ClientErrorException ex) {
+            System.err.println(ex.getResponse().readEntity(String.class));
             assertTrue(ex.getResponse().getStatus() != Response.Status.CREATED.getStatusCode() &&
                     ex.getResponse().getStatus() != Response.Status.OK.getStatusCode()
                     , "Unexpected response status");

@@ -65,7 +65,7 @@ public class GrantService {
         return String.format("tknCde=%s,", p_hashedToken) + tokenBaseDn();
     }
 
-    public String tokenBaseDn() {
+    private String tokenBaseDn() {
         return staticConfiguration.getBaseDn().getTokens();  // ou=tokens,o=gluu
     }
 
@@ -104,22 +104,26 @@ public class GrantService {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(token.getTokenCode());
 
-            String expiration = null;
+            int expiration = appConfiguration.getDynamicRegistrationExpirationTime(); // fallback to client's lifetime
             switch (token.getTokenTypeEnum()) {
                 case ID_TOKEN:
-                    expiration = Integer.toString(appConfiguration.getIdTokenLifetime());
+                    expiration = appConfiguration.getIdTokenLifetime();
                     break;
                 case REFRESH_TOKEN:
-                    expiration = Integer.toString(appConfiguration.getRefreshTokenLifetime());
+                    expiration = appConfiguration.getRefreshTokenLifetime();
                     break;
                 case ACCESS_TOKEN:
+                case LONG_LIVED_ACCESS_TOKEN:
                     int lifetime = appConfiguration.getAccessTokenLifetime();
                     Client client = clientService.getClient(token.getClientId());
                     // oxAuth #830 Client-specific access token expiration
                     if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
                         lifetime = client.getAccessTokenLifetime();
                     }
-                    expiration = Integer.toString(lifetime);
+                    expiration = lifetime;
+                    break;
+                case AUTHORIZATION_CODE:
+                    expiration = appConfiguration.getAuthorizationCodeLifetime();
                     break;
             }
 
@@ -141,7 +145,7 @@ public class GrantService {
 
     public ClientTokens getCacheClientTokens(String clientId) {
         ClientTokens clientTokens = new ClientTokens(clientId);
-        Object o = cacheService.get(null, clientTokens.cacheKey());
+        Object o = cacheService.get(clientTokens.cacheKey());
         if (o instanceof ClientTokens) {
             return (ClientTokens) o;
         } else {
@@ -174,7 +178,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode(), token.getGrantId()));
+                cacheService.remove(null, CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -288,7 +292,7 @@ public class GrantService {
     }
 
     public List<TokenLdap> getCacheClientTokensEntries(String clientId) {
-        Object o = cacheService.get(null, new ClientTokens(clientId).cacheKey());
+        Object o = cacheService.get(new ClientTokens(clientId).cacheKey());
         if (o instanceof ClientTokens) {
             return getCacheTokensEntries(((ClientTokens) o).getTokenHashes());
         }
@@ -318,12 +322,12 @@ public class GrantService {
      *
      * @param p_code code
      */
-    public void removeByCode(String p_code, String p_clientId) {
+    public void removeByCode(String p_code) {
         final TokenLdap t = getGrantByCode(p_code, true);
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(CacheGrant.cacheKey(p_clientId, p_code, null));
+        cacheService.remove(CacheGrant.cacheKey(p_code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {

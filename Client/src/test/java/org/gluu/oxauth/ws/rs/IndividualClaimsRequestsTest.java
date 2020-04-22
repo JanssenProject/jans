@@ -48,6 +48,8 @@ import static org.testng.Assert.*;
  */
 public class IndividualClaimsRequestsTest extends BaseTest {
 
+    public static final String ACR_VALUE = "basic";
+
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestClaimsIndividuallyRequestObjectSigningAlgNoneUserInfoSignedResponseJson(
@@ -122,7 +124,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -263,7 +265,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -404,7 +406,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -546,7 +548,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -688,7 +690,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -833,7 +835,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -982,7 +984,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1131,7 +1133,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1280,7 +1282,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1429,7 +1431,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1578,7 +1580,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1728,7 +1730,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -1871,7 +1873,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -2024,7 +2026,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -2179,7 +2181,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));
@@ -2334,7 +2336,7 @@ public class IndividualClaimsRequestsTest extends BaseTest {
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_POSTAL_CODE, ClaimValue.createNull()));
         jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.ADDRESS_COUNTRY, ClaimValue.createNull()));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
+        jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{ACR_VALUE})));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NAME, ClaimValue.createEssential(true)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
         jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.GIVEN_NAME, ClaimValue.createEssential(false)));

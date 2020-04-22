@@ -7,24 +7,33 @@
 package org.gluu.oxauth.i18n;
 
 import java.io.Serializable;
-import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.service.cdi.event.ConfigurationUpdate;
+import org.gluu.util.StringHelper;
+import org.gluu.util.ilocale.LocaleUtil;
+import org.slf4j.Logger;
 
 /**
  * @version August 9, 2017
  */
 @Named("language")
-@RequestScoped
+@ApplicationScoped
 public class LanguageBean implements Serializable {
 
 	private static final long serialVersionUID = -6723715664277907737L;
@@ -33,30 +42,84 @@ public class LanguageBean implements Serializable {
 	private static final int DEFAULT_MAX_AGE = 31536000; // 1 year in seconds
 	private static final String COOKIE_PATH = "/";
 
-	private String localeCode = Locale.ENGLISH.getLanguage();
+	private static final Locale defaultLocale = Locale.ENGLISH;
 
+    @Inject
+    private Logger log;
+
+	private List<Locale> supportedLocales;
+
+    public void initSupportedLocales(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
+    	this.supportedLocales = buildSupportedLocales(appConfiguration);
+    }
+
+    @Deprecated
+    // We need to keep it till 5.0 for compatibility with old xhtml files
 	public String getLocaleCode() {
 		try {
-			String localeCode = getCookieValue();
-			if (localeCode != null)
-				setLocaleCode(localeCode);
-			return this.localeCode;
+			Locale locale = getCookieLocale();
+			if (locale != null) {
+				setLocale(locale);
+			}
+
+			return locale.toLanguageTag();
 		} catch (Exception e) {
-			return localeCode;
+			return defaultLocale.getLanguage();
 		}
 	}
 
-	public void setLocaleCode(String localeCode) {
-		Iterator<Locale> locales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
-		while (locales.hasNext()) {
-			Locale locale = locales.next();
-			if (!Strings.isEmpty(locale.getLanguage()) && locale.getLanguage().equals(localeCode)) {
-				this.localeCode = localeCode;
-				FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
-				setCookieValue(localeCode);
+	public Locale getLocale() {
+		try {
+			Locale locale = getCookieLocale();
+			if (locale != null) {
+				return locale;
+			}
+		} catch (Exception ex) {
+			log.trace("Failed to get locale from cookie", ex);
+		}
+
+		return defaultLocale;
+	}
+
+	public void setLocaleCode(String requestedLocaleCode) {
+		for (Locale supportedLocale : supportedLocales) {
+			if (!Strings.isEmpty(supportedLocale.getLanguage()) && supportedLocale.getLanguage().equals(requestedLocaleCode)) {
+				Locale locale = new Locale(requestedLocaleCode);
+				FacesContext.getCurrentInstance().getViewRoot().setLocale(locale);
+				setCookieValue(locale.toLanguageTag());
 				break;
 			}
 		}
+	}
+
+	public void setLocale(Locale requestedLocale) {
+		for (Locale supportedLocale : supportedLocales) {
+			if (supportedLocale.equals(requestedLocale)) {
+				FacesContext.getCurrentInstance().getViewRoot().setLocale(supportedLocale);
+				setCookieValue(supportedLocale.toLanguageTag());
+				break;
+			}
+		}
+		
+		// If there is no supported locale attempt to find it by language
+		setLocaleCode(requestedLocale.getLanguage());
+	}
+
+    public List<Locale> getSupportedLocales() {
+    	return supportedLocales;
+    }
+
+	private List<Locale> buildSupportedLocales(AppConfiguration appConfiguration) {
+		List<String> uiLocales = appConfiguration.getUiLocalesSupported();
+		
+		List<Locale> supportedLocales = new LinkedList<Locale>();
+		for (String uiLocale : uiLocales) {
+        	Pair<Locale, List<Locale>> locales = LocaleUtil.toLocaleList(uiLocale);
+        	
+        	supportedLocales.addAll(locales.getRight());
+		}
+		
+		return supportedLocales;
 	}
 
 	public String getMessage(String key) {
@@ -88,6 +151,17 @@ public class LanguageBean implements Serializable {
 	private String getCookieValue() {
 		Cookie cookie = getCookie();
 		return cookie == null ? null : cookie.getValue();
+	}
+
+	private Locale getCookieLocale() {
+		String cookieValue = getCookieValue();
+		if (StringHelper.isEmpty(cookieValue)) {
+			return null;
+		}
+		
+		Locale locale = Locale.forLanguageTag(cookieValue);
+
+		return locale;
 	}
 
 	private Cookie getCookie() {

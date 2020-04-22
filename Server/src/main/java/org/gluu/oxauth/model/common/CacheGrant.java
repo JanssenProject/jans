@@ -9,7 +9,6 @@ package org.gluu.oxauth.model.common;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.common.User;
 
 import javax.enterprise.inject.Instance;
 import java.io.Serializable;
@@ -200,14 +199,14 @@ public class CacheGrant implements Serializable {
     }
 
     public String cacheKey() {
-        return cacheKey(client.getClientId(), authorizationCodeString, grantId);
+        return cacheKey(authorizationCodeString, grantId);
     }
 
-    public static String cacheKey(String clientId, String code, String grantId) {
+    public static String cacheKey(String code, String grantId) {
         if (StringUtils.isBlank(code)) {
             return grantId;
         }
-        return clientId + "_" + code;
+        return code;
     }
 
     @Override
