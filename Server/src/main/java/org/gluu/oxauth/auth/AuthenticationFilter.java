@@ -150,7 +150,7 @@ public class AuthenticationFilter implements Filter {
                     processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
                 }
             } else if (tokenRevocationEndpoint) {
-                if (authorizationHeader.startsWith("Basic ")) {
+                if (StringHelper.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Basic ")) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");

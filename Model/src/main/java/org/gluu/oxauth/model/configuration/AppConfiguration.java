@@ -112,6 +112,7 @@ public class AppConfiguration implements Configuration {
     private Boolean trustedClientEnabled;
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
     private Boolean dynamicRegistrationScopesParamEnabled;
+    private Boolean dynamicRegistrationPasswordGrantTypeEnabled;
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
 
@@ -1677,4 +1678,22 @@ public class AppConfiguration implements Configuration {
         this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
     }
 
+    /**
+     * Returns a flag to determinate if oxAuth supports password grant type for
+     * dynamic client registration.
+     * @return Boolean, true if it supports, false if it doesn't support.
+     */
+    public Boolean getDynamicRegistrationPasswordGrantTypeEnabled() {
+        return dynamicRegistrationPasswordGrantTypeEnabled;
+    }
+
+    /**
+     * This method sets the flag that define if oxAuth supports or not password
+     * grant type for dynamic client registration.
+     * @param dynamicRegistrationPasswordGrantTypeEnabled Boolean value for
+     *                                                    the flag.
+     */
+    public void setDynamicRegistrationPasswordGrantTypeEnabled(Boolean dynamicRegistrationPasswordGrantTypeEnabled) {
+        this.dynamicRegistrationPasswordGrantTypeEnabled = dynamicRegistrationPasswordGrantTypeEnabled;
+    }
 }
