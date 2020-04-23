@@ -42,6 +42,17 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("backchannelLogoutSessionRequired")
     private Boolean backchannelLogoutSessionRequired;
 
+    @JsonProperty("additional_audience")
+    private List<String> additionalAudience;
+
+    public List<String> getAdditionalAudience() {
+        if (additionalAudience == null) additionalAudience = Lists.newArrayList();
+        return additionalAudience;
+    }
+
+    public void setAdditionalAudience(List<String> additionalAudience) {
+        this.additionalAudience = additionalAudience;
+    }
 
     public String getTlsClientAuthSubjectDn() {
         return tlsClientAuthSubjectDn;
@@ -129,6 +140,7 @@ public class ClientAttributes implements Serializable {
                 ", spontaneousScopeScriptDns=" + spontaneousScopeScriptDns +
                 ", backchannelLogoutUri=" + backchannelLogoutUri +
                 ", backchannelLogoutSessionRequired=" + backchannelLogoutSessionRequired +
+                ", additionalAudience=" + additionalAudience +
                 '}';
     }
 }
