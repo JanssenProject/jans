@@ -136,7 +136,7 @@ def read_properties_file(fn):
 
 salt_file = '/opt/tomcat/conf/salt'
 if not os.path.exists(salt_file):
-    salt_file = '/opt/tomcat/conf/salt'
+    salt_file = '/etc/gluu/conf/salt'
 
 salt_prop = read_properties_file(salt_file)
 salt = salt_prop['encodeSalt']
