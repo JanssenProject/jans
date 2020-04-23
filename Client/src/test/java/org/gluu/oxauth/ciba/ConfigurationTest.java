@@ -52,7 +52,7 @@ public class ConfigurationTest extends BaseTest {
         assertNotNull(response.getIssuer(), "The issuer is null");
         assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
         assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
-        assertNotNull(response.getTokenRevocationEndpoint(), "The tokenRevocationEndpoint is null");
+        assertNotNull(response.getRevocationEndpoint(), "The tokenRevocationEndpoint is null");
         assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");
         assertNotNull(response.getEndSessionEndpoint(), "The endSessionEndpoint is null");
         assertNotNull(response.getJwksUri(), "The jwksUri is null");
