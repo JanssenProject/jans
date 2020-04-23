@@ -17,13 +17,13 @@ class EndUserNotification(EndUserNotificationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self):
+    def init(self, configurationAttributes):
         print "Firebase EndUserNotification script. Initializing ..."
         print "Firebase EndUserNotification script. Initialized successfully"
 
         return True
 
-    def destroy(self):
+    def destroy(self, configurationAttributes):
         print "Firebase EndUserNotification script. Destroying ..."
         print "Firebase EndUserNotification script. Destroyed successfully"
         return True
