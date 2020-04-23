@@ -9,7 +9,6 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
-import org.gluu.service.el.ExtendedELContext;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
@@ -19,7 +18,6 @@ import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -122,13 +120,6 @@ public class AppInitializer {
         }
         return entryManager;
 
-    }
-
-    //TODO: added this producer, otherwise weld Unsatisfied dependencies arises
-    @Produces
-    @RequestScoped
-    public ExtendedELContext createELContext() {
-        return null;
     }
 
 }
