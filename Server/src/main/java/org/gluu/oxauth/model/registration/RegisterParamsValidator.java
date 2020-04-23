@@ -320,4 +320,16 @@ public class RegisterParamsValidator {
         }
         return hosts;
     }
+
+    /**
+     * Check if exists a Password Grant Type in the list of Grant Types.
+     * @param grantTypes List of Grant Types.
+     * @return True if Password Grant Type exists in the list, otherwise false
+     */
+    public boolean checkIfThereIsPasswordGrantType(List<GrantType> grantTypes) {
+        if (grantTypes != null)
+            return grantTypes.stream().anyMatch(grantType -> grantType == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        return false;
+    }
+
 }
