@@ -91,7 +91,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
                 }
 
                 if (authorizationGrant != null) {
-                    grantService.removeAllTokensBySession(authorizationGrant.getTokenLdap().getSessionDn());
+                    grantService.removeAllByGrantId(authorizationGrant.getGrantId());
                 }
             } else {
                 builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 400
