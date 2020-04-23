@@ -1,0 +1,62 @@
+package org.gluu.oxauth.servlet;
+
+import org.apache.commons.io.IOUtils;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.util.Util;
+import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+@WebServlet(urlPatterns = "/firebase-messaging-sw.js")
+public class BcFirebaseMessagingSwServlet extends HttpServlet {
+
+	private static final long serialVersionUID = 5445488800130871634L;
+
+	@Inject
+	private Logger log;
+
+	@Inject
+	private AppConfiguration appConfiguration;
+
+	@Override
+	protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse response)
+			throws ServletException, IOException {
+		response.setContentType("application/javascript");
+		loadFirebaseMessagingSwFile(response);
+	}
+
+	private void loadFirebaseMessagingSwFile(HttpServletResponse response) {
+		String baseJavascriptFileConfiguration = "/WEB-INF/firebase-messaging-sw.js";
+		try (InputStream in = getServletContext().getResourceAsStream(baseJavascriptFileConfiguration);
+				OutputStream out = response.getOutputStream()) {
+			String content = IOUtils.toString(in, StandardCharsets.UTF_8);
+
+			Map<String, String> publicConfiguration = new HashMap<>();
+			publicConfiguration.put("apiKey", appConfiguration.getCibaEndUserNotificationConfig().getApiKey());
+			publicConfiguration.put("authDomain", appConfiguration.getCibaEndUserNotificationConfig().getAuthDomain());
+			publicConfiguration.put("databaseURL", appConfiguration.getCibaEndUserNotificationConfig().getDatabaseURL());
+			publicConfiguration.put("projectId", appConfiguration.getCibaEndUserNotificationConfig().getProjectId());
+			publicConfiguration.put("storageBucket", appConfiguration.getCibaEndUserNotificationConfig().getStorageBucket());
+			publicConfiguration.put("messagingSenderId", appConfiguration.getCibaEndUserNotificationConfig().getMessagingSenderId());
+			publicConfiguration.put("appId", appConfiguration.getCibaEndUserNotificationConfig().getAppId());
+
+			content = content.replace("'${FIREBASE_CONFIG}'", Util.asJson(publicConfiguration));
+
+			IOUtils.write(content, out, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			log.debug("Error loading firebase-messaging-sw.js configuration file: " + e.getMessage());
+		}
+	}
+
+}
