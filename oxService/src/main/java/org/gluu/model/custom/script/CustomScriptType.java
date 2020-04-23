@@ -13,6 +13,8 @@ import org.gluu.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.model.custom.script.type.authz.ConsentGatheringType;
 import org.gluu.model.custom.script.type.authz.DummyConsentGatheringType;
+import org.gluu.model.custom.script.type.ciba.DummyEndUserNotificationType;
+import org.gluu.model.custom.script.type.ciba.EndUserNotificationType;
 import org.gluu.model.custom.script.type.client.ClientRegistrationType;
 import org.gluu.model.custom.script.type.client.DummyClientRegistrationType;
 import org.gluu.model.custom.script.type.id.DummyIdGeneratorType;
@@ -73,7 +75,9 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyDynamicScopeType()),
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
-    SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
+    SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
+    CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
+            CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType());
 
     private String value;
     private String displayName;
