@@ -85,6 +85,10 @@
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
+		    <groupId>org.gluu</groupId>
+		    <artifactId>exception-extension-cdi</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-model</artifactId>
 		</dependency>
