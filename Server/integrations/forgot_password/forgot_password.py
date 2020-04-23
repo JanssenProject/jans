@@ -349,6 +349,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
 
         if step == 1:
+            
             return "/auth/forgot_password/forgot.xhtml"
             
         if step == 2:
