@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ciba;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
 
 /**
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version April 22, 2020
  */
 @Interceptor
 @CIBAAuthorizeParamsValidatorInterception
@@ -60,11 +61,12 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
             String loginHint = (String) ctx.getParameters()[5];
             String bindingMessage = (String) ctx.getParameters()[6];
             Boolean backchannelUserCodeParameter = (Boolean) ctx.getParameters()[7];
-            String userCode = (String) ctx.getParameters()[8];
+            String userCodeParam = (String) ctx.getParameters()[8];
+            String userCode = (String) ctx.getParameters()[9];
             errorResponse = validateParams(
                     scopeList, clientNotificationToken, tokenDeliveryMode,
                     loginHintToken, idTokenHint, loginHint, bindingMessage,
-                    backchannelUserCodeParameter, userCode);
+                    backchannelUserCodeParameter, userCodeParam, userCode);
             ctx.proceed();
         } catch (Exception e) {
             log.error("Failed to validate authorize params.", e);
@@ -77,7 +79,7 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
     public DefaultErrorResponse validateParams(
             List<String> scopeList, String clientNotificationToken, BackchannelTokenDeliveryMode tokenDeliveryMode,
             String loginHintToken, String idTokenHint, String loginHint, String bindingMessage,
-            Boolean backchannelUserCodeParameter, String userCode) {
+            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode) {
 
         if (tokenDeliveryMode == null) {
             DefaultErrorResponse errorResponse = new DefaultErrorResponse();
@@ -134,12 +136,26 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
             }
         }
 
-        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
-            if (Strings.isBlank(userCode)) {
+        if (BooleanUtils.isTrue(backchannelUserCodeParameter)) {
+            if (Strings.isBlank(userCodeParam)) {
                 DefaultErrorResponse errorResponse = new DefaultErrorResponse();
                 errorResponse.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
                 errorResponse.setType(INVALID_USER_CODE);
                 errorResponse.setReason("The user code is required.");
+
+                return errorResponse;
+            } else if (Strings.isBlank(userCode)) {
+                DefaultErrorResponse errorResponse = new DefaultErrorResponse();
+                errorResponse.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+                errorResponse.setType(INVALID_USER_CODE);
+                errorResponse.setReason("The user code is not set.");
+
+                return errorResponse;
+            } else if (!userCode.equals(userCodeParam)) {
+                DefaultErrorResponse errorResponse = new DefaultErrorResponse();
+                errorResponse.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+                errorResponse.setType(INVALID_USER_CODE);
+                errorResponse.setReason("The user code is not valid.");
 
                 return errorResponse;
             }

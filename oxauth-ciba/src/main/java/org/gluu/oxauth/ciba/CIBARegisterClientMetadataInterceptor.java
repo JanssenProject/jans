@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ciba;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ import java.io.Serializable;
 
 /**
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version April 22, 2020
  */
 @Interceptor
 @CIBARegisterClientMetadataInterception
@@ -76,7 +77,8 @@ public class CIBARegisterClientMetadataInterceptor implements CIBARegisterClient
         if (backchannelAuthenticationRequestSigningAlg != null) {
             client.setBackchannelAuthenticationRequestSigningAlg(backchannelAuthenticationRequestSigningAlg);
         }
-        if (backchannelUserCodeParameter != null) {
+        if (BooleanUtils.isTrue(appConfiguration.getBackchannelUserCodeParameterSupported())
+                && backchannelUserCodeParameter != null) {
             client.setBackchannelUserCodeParameter(backchannelUserCodeParameter);
         }
     }
