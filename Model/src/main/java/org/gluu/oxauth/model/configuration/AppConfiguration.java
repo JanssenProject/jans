@@ -112,7 +112,7 @@ public class AppConfiguration implements Configuration {
     private Boolean trustedClientEnabled;
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
     private Boolean dynamicRegistrationScopesParamEnabled;
-    private Boolean dynamicRegistrationPasswordGrantTypeEnabled;
+    private Boolean dynamicRegistrationPasswordGrantTypeEnabled = false;
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
 
