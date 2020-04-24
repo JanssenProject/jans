@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 
 # The MIT License (MIT)
@@ -44,7 +43,6 @@ import base64
 import copy
 import random
 import ssl
-import ldap
 import uuid
 import multiprocessing
 import io
@@ -57,10 +55,10 @@ from xml.etree import ElementTree
 from urllib.parse import urlparse
 
 from pylib import gluu_utils
-from pylib.ldif import LDIFWriter
 from pylib.jproperties import Properties
-from ldap.schema import ObjectClass
 from pylib.printVersion import get_war_info
+from pylib.ldif3.ldif3 import LDIFWriter
+from pylib.schema import ObjectClass
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -89,8 +87,6 @@ suggested_mem_size = 3.7 # in GB
 suggested_number_of_cpu = 2
 suggested_free_disk_space = 40 #in GB
 
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
-
 re_split_host = re.compile(r'[^,\s,;]+')
 
 istty = False
@@ -117,12 +113,6 @@ try:
     from pylib.cbm import CBM
 except:
     pass
-
-try:
-    from ldap.dn import str2dn
-except:
-    pass
-
 
 
 class ProgressBar:
@@ -241,6 +231,7 @@ class Setup(object):
         self.installOxAuthRP = False
         self.installPassport = False
         self.installGluuRadius = False
+        self.installScimServer = False
 
         self.gluuPassportEnabled = 'false'
         self.gluuRadiusEnabled = 'false'
@@ -303,33 +294,38 @@ class Setup(object):
         self.jetty_app_configuration = OrderedDict((
                 ('oxauth', {'name' : 'oxauth',
                             'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                            'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                            'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                             'installed' : False
                             }),
                 ('identity', {'name' : 'identity',
                               'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                              'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                              'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                               'installed' : False
                               }),
                 ('idp', {'name' : 'idp',
                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
-                         'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                         'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                          'installed' : False
                          }),
 
                 ('oxauth-rp', {'name' : 'oxauth-rp',
                                'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                               'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
+                               'memory' : {'ratio' : 0.10, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
                                'installed' : False
                                }),
                 ('passport', {'name' : 'passport',
                               'node' : {},
-                              'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                              'memory' : {'ratio' : 0.10, "max_allowed_mb" : 1024},
                               'installed' : False
                                }),
                 ('casa', {'name': 'casa',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.1, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'installed': False
+                         }),
+                ('scim', {'name': 'scim',
+                         'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
+                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
                          'installed': False
                          }),
             ))
@@ -682,6 +678,7 @@ class Setup(object):
                         'opendj': ['', 70],
                         'oxauth': ['opendj', 72],
                         'identity': ['opendj oxauth', 74],
+                        'scim': ['opendj oxauth', 75],
                         'idp': ['opendj oxauth', 76],
                         'casa': ['opendj oxauth', 78],
                         'oxd-server': ['opendj oxauth', 80],
@@ -759,7 +756,7 @@ class Setup(object):
             txt += 'Applications max ram'.ljust(30) + str(self.application_max_ram).rjust(35) + "\n"
             txt += 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n"
             txt += 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n"
-            
+
             bc = []
             if self.wrends_install:
                 t_ = 'wrends'
@@ -778,6 +775,7 @@ class Setup(object):
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
+            txt += 'Install Scim Server'.ljust(30) + repr(self.installScimServer).rjust(35) + "\n"
             txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
             txt += 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
@@ -874,6 +872,10 @@ class Setup(object):
                 cmd = [self.cmd_chown, 'jetty:jetty', fn]
                 self.run(cmd)
 
+        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        if self.installGluuRadius:
+            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+
     def set_permissions(self):
         self.logIt("Changing permissions")
 
@@ -900,6 +902,9 @@ class Setup(object):
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
 
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        if self.installGluuRadius:
+            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
     def detect_ip(self):
         detectedIP = None
@@ -1001,6 +1006,10 @@ class Setup(object):
 
         if not self.application_max_ram:
             self.application_max_ram = 3072
+
+        if not self.couchbaseShibUserPassword:
+            self.couchbaseShibUserPassword = self.getPW()
+
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
@@ -2023,7 +2032,7 @@ class Setup(object):
         self.run([self.cmd_chown, '%s:%s' % (user, user), keystoreFN])
         self.run([self.cmd_chmod, '700', keystoreFN])
 
-    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, key_expiration = None, dn_name = None, key_algs = None):
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
 
         if dn_name == None:
@@ -2035,6 +2044,8 @@ class Setup(object):
         if key_expiration == None:
             key_expiration = self.default_key_expiration
 
+        if not enc_keys:
+            enc_keys = key_algs
 
         # We can remove this once KeyGenerator will do the same
         if jks_create == True:
@@ -2080,7 +2091,7 @@ class Setup(object):
                         "-sig_keys",
                         "%s" % key_algs,
                         "-enc_keys",
-                        "%s" % key_algs,
+                        "%s" % enc_keys,
                         "-dnname",
                         '"%s"' % dn_name,
                         "-expiration",
@@ -2133,8 +2144,9 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def generate_oxauth_openid_keys(self):
-        key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512 RSA1_5 RSA-OAEP'
-        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=key_algs)
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
     def generate_base64_string(self, lines, num_spaces):
@@ -2289,6 +2301,19 @@ class Setup(object):
 
         # don't send header to server
         self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
+    def install_scim_server(self):
+        self.logIt("Copying scim.war into jetty webapps folder...")
+
+        jettyServiceName = 'scim'
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/scim.war' % self.distGluuFolder, jettyServiceWebapps)
+
+        # don't send header to server
+        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
 
     def install_saml(self):
         if self.installSaml:
@@ -2540,9 +2565,13 @@ class Setup(object):
             self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
+        if self.installScimServer:
+            self.pbar.progress("oxtrust", "Installing Gluu components: Scim Server", False)
+            self.install_scim_server()
+
         if self.installSaml:
             self.pbar.progress("saml", "Installing Gluu components: saml", False)
-            self.install_saml()
+            self.install_scim_server()
 
         if self.installOxAuthRP:
             self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
@@ -2560,7 +2589,7 @@ class Setup(object):
             self.pbar.progress("casa", "Installing Gluu components: Casa", False)
             self.install_casa()
 
-        self.install_gluu_radius()
+        self.install_gluu_radius_base()
 
 
     def isIP(self, address):
@@ -2907,9 +2936,16 @@ class Setup(object):
     def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
         
         result = {'result': True, 'reason': ''}
-        conn = ldap.initialize('ldaps://{}:{}'.format(ldap_host, self.ldaps_port))
+        
+        ldap_server = Server(ldap_host, port=int(self.ldaps_port), use_ssl=True)
+        conn = Connection(
+            ldap_server,
+            user=ldap_binddn,
+            password=ldap_password,
+            )
+
         try:
-            conn.simple_bind_s(ldap_binddn, ldap_password)
+            conn.bind()
         except Exception as e:
             result['result'] = False
             result['reason'] = str(e)
@@ -3212,6 +3248,12 @@ class Setup(object):
             self.installHttpd = True
         else:
             self.installHttpd = False
+
+        promptForScimServer = self.getPrompt("Install Scim Server?",
+                                            self.getDefaultOption(self.installScimServer)
+                                            )[0].lower()
+        if promptForScimServer == 'y':
+            self.installScimServer = True
 
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
@@ -4227,7 +4269,7 @@ class Setup(object):
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap net-tools python3-requests bzip2', 'optional': 'memcached'},
-                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog bzip2', 'optional': 'memcached'},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap python3-requests bzip2', 'optional': 'memcached'},
                 }
@@ -4735,10 +4777,16 @@ class Setup(object):
         self.couchbaseProperties()
 
     def getLdapConnection(self):
-            ldap_conn = ldap.initialize('ldaps://{0}:{1}'.format(self.ldap_hostname, self.ldaps_port))
-            ldap_conn.simple_bind_s(self.ldap_binddn, self.ldapPass)
-            
-            return ldap_conn
+
+        ldap_server = Server(self.ldap_hostname, port=int(self.ldaps_port), use_ssl=True)
+        ldap_conn = Connection(
+                    ldap_server,
+                    user=self.ldap_binddn,
+                    password=self.ldapPass,
+                    )
+        ldap_conn.bind()
+
+        return ldap_conn
 
 
     def create_test_client_keystore(self):
@@ -4837,19 +4885,26 @@ class Setup(object):
             ldap_conn = self.getLdapConnection()
 
             dn = 'ou=oxauth,ou=configuration,o=gluu'
-            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxAuthConfDynamic'])
-            oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
+            ldap_conn.search(
+                            search_base=dn,
+                            search_scope=BASE,
+                            search_filter='(objectclass=*)',
+                            attributes=['oxAuthConfDynamic']
+                        )
+
+            oxAuthConfDynamic = json.loads(ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
 
             for k, v in oxAuthConfDynamic_changes:
                 oxAuthConfDynamic[k] = v
 
             oxAuthConfDynamic_js = json.dumps(oxAuthConfDynamic, indent=2)
-            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfDynamic_js)])
+            ldap_conn.modify(dn, {'oxAuthConfDynamic': [MODIFY_REPLACE, oxAuthConfDynamic_js]})
 
             # Enable custom scripts
             for inum in custom_scripts:
                 dn = 'inum={0},ou=scripts,o=gluu'.format(inum)
-                ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxEnabled',  'true')])
+                ldap_conn.modify(dn, {'oxEnabled': [MODIFY_REPLACE, 'true']})
+
 
 
             # Update LDAP schema
@@ -4863,26 +4918,19 @@ class Setup(object):
 
             for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
                 objcl = ObjectClass(o)
-                if 'gluuCustomPerson' in objcl.names:
-                    may_list = list(objcl.may)
+                if 'gluuCustomPerson' in objcl.tokens['NAME']:
+                    may_list = list(objcl.tokens['NAME'])
                     for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
                         if not a in may_list:
                             may_list.append(a)
                     
-                    objcl.may = tuple(may_list)
-                    obcl_parser.entries[0][1]['objectClasses'][i] = str(objcl)
+                    objcl.tokens['MAY'] = tuple(may_list)
+                    obcl_parser.entries[0][1]['objectClasses'][i] = objcl.getstr()
 
             tmp_fn = '/tmp/77-customAttributes.ldif'
-
-            with open(tmp_fn, 'w') as w:
+            with open(tmp_fn, 'wb') as w:
                 ldif_writer = LDIFWriter(w)
-                for dn, entry in obcl_parser.entries:
-
-                    for e in entry:
-                        for i, v in enumerate(entry[e][:]):
-                            if isinstance(v, str):
-                                entry[e][i] = v.encode('utf-8')
-                
+                for dn, entry in obcl_parser.entries:                
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, self.openDjSchemaFolder)
@@ -4926,11 +4974,19 @@ class Setup(object):
             
             dn = 'ou=configuration,o=gluu'
 
-            result = ldap_conn.search_s(dn,ldap.SCOPE_BASE,  attrlist=['oxIDPAuthentication'])
-            oxIDPAuthentication = json.loads(result[0][1]['oxIDPAuthentication'][0])
+            ldap_conn.search(
+                search_base=dn,
+                search_scope=BASE,
+                search_filter='(objectclass=*)',
+                attributes=['oxIDPAuthentication']
+            )
+            
+            
+            oxIDPAuthentication = json.loads(ldap_conn.response[0]['attributes']['oxIDPAuthentication'][0])
             oxIDPAuthentication['config']['servers'] = config_servers
             oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-            ldap_conn.modify_s(dn, [( ldap.MOD_REPLACE, 'oxIDPAuthentication',  oxIDPAuthentication_js)])
+            ldap_conn.modify(dn, {'oxIDPAuthentication': [MODIFY_REPLACE, oxIDPAuthentication_js]})
+
             ldap_conn.unbind()
             
         else:
@@ -5126,17 +5182,14 @@ class Setup(object):
         return o.hostname, o.port
 
 
-    def install_gluu_radius(self):
-        
+    def install_gluu_radius_base(self):
+
         if not self.gluu_radius_client_id:
             self.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
 
         source_dir = os.path.join(self.staticFolder, 'radius')
-        radius_libs = os.path.join(self.distGluuFolder, 'gluu-radius-libs.zip')
-        radius_jar = os.path.join(self.distGluuFolder, 'super-gluu-radius-server.jar')
         conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
         self.createDirs(conf_dir)
-        logs_dir = os.path.join(self.radius_dir,'logs')
 
         self.radius_jwt_pass = self.getPW()
         radius_jwt_pass = self.obscure(self.radius_jwt_pass)
@@ -5178,61 +5231,65 @@ class Setup(object):
         
         self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
 
-        ldif_file_base = os.path.join(self.outputFolder, 'gluu_radius_base.ldif')
-        ldif_file_server = os.path.join(self.outputFolder, 'gluu_radius_server.ldif')
+
         ldif_file_clients = os.path.join(self.outputFolder, 'gluu_radius_clients.ldif')
-        
+        ldif_file_base = os.path.join(self.outputFolder, 'gluu_radius_base.ldif')
+
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj([ldif_file_base, ldif_file_clients])
         else:
             self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
 
-
         if self.installGluuRadius:
-            self.pbar.progress("radius", "Installing Gluu components: Radius", False)
+            self.install_gluu_radius()
 
-            if not os.path.exists(logs_dir):
-                self.run([self.cmd_mkdir, '-p', logs_dir])
+    def install_gluu_radius(self):
 
-            self.run(['unzip', '-n', '-q', radius_libs, '-d', self.radius_dir ])
-            self.copyFile(radius_jar, self.radius_dir)
+        self.pbar.progress("radius", "Installing Gluu components: Radius", False)
+        
+        radius_libs = os.path.join(self.distGluuFolder, 'gluu-radius-libs.zip')
+        radius_jar = os.path.join(self.distGluuFolder, 'super-gluu-radius-server.jar')
+        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
+        ldif_file_server = os.path.join(self.outputFolder, 'gluu_radius_server.ldif')
+        source_dir = os.path.join(self.staticFolder, 'radius')
+        logs_dir = os.path.join(self.radius_dir,'logs')
 
-            if self.mappingLocations['default'] == 'ldap':
-                schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
-                self.import_ldif_opendj([schema_ldif])
-                self.import_ldif_opendj([ldif_file_server])
-            else:
-                self.import_ldif_couchebase([ldif_file_server])
-            
-            self.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), self.osDefault)
-            self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
-            self.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
+        if not os.path.exists(logs_dir):
+            self.run([self.cmd_mkdir, '-p', logs_dir])
 
-            
-            self.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
-            self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
-            
-            if self.os_type+self.os_version == 'ubuntu16':
-                self.run(['update-rc.d', 'gluu-radius', 'defaults'])
-            else:
-                self.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
-                self.run([self.systemctl, 'daemon-reload'])
-            
-            #create empty gluu-radius.private-key.pem
-            gluu_radius_private_key_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
-            self.writeFile(gluu_radius_private_key_fn, '')
-            
-            self.run([self.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
-            self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
-            self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
-            
-            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
-            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+        self.run(['unzip', '-n', '-q', radius_libs, '-d', self.radius_dir ])
+        self.copyFile(radius_jar, self.radius_dir)
 
-            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
-            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
-            
-            self.enable_service_at_start('gluu-radius')
+        if self.mappingLocations['default'] == 'ldap':
+            schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
+            self.import_ldif_opendj([schema_ldif])
+            self.import_ldif_opendj([ldif_file_server])
+        else:
+            self.import_ldif_couchebase([ldif_file_server])
+        
+        self.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), self.osDefault)
+        self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
+        self.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
+
+        
+        self.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+        self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+        
+        if self.os_type+self.os_version == 'ubuntu16':
+            self.run(['update-rc.d', 'gluu-radius', 'defaults'])
+        else:
+            self.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+            self.run([self.systemctl, 'daemon-reload'])
+        
+        #create empty gluu-radius.private-key.pem
+        gluu_radius_private_key_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
+        self.writeFile(gluu_radius_private_key_fn, '')
+        
+        self.run([self.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
+        self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
+        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+
+        self.enable_service_at_start('gluu-radius')
 
     def post_install_tasks(self):
         super_gluu_lisence_renewer_fn = os.path.join(self.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
@@ -5615,14 +5672,6 @@ if __name__ == '__main__':
 
     installObject.properties_password = argsp.properties_password
 
-    if setupOptions['loadTestDataExit']:
-        installObject.initialize()
-        installObject.load_test_data_exit()
-
-    if installObject.check_installed():
-        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
-        sys.exit(2)
-
     installObject.downloadWars = setupOptions['downloadWars']
 
     for option in setupOptions:
@@ -5637,7 +5686,16 @@ if __name__ == '__main__':
     #it is time to import pyDes library
     from pyDes import *
     from pylib.cbm import CBM
-    from ldap.dn import str2dn
+    from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
+
+    if setupOptions['loadTestDataExit']:
+        installObject.initialize()
+        installObject.load_test_data_exit()
+
+    if installObject.check_installed():
+        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
+        sys.exit(2)
+
 
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
