@@ -54,16 +54,7 @@
                                 <input name="email" type="email" id="email" pattern=".+@gmail.com" class="form-control" autocomplete="off" required="true" />
                             </div>
                         </div>
-                        <div class="row" id="cert" style="margin-top: 20px;">
-                            <div class="col-25" style="width: 25%;margin-top: 6px;">
-                                <label for="cert">Certificate (PEM)</label>
-                            </div>
-                            <input id="inputCertString" name="certString" type="text" class="form-control" autocomplete="off" style="display: none;" />
-                            <input id="inputCert" name="cert" type="text" class="form-control" autocomplete="off" style="display: none;" />
-                            <div class="col-75" style="width: 75%;margin-top: 6px;">
-                                <input id="fileInput" type="file" name="file" />
-                            </div>
-                        </div>
+                    
                         <div class="row" style="margin-top: 20px;">
                             <div class="col-25" style="width: 25%;margin-top: 6px;">
                                 <label for="forpassword">Password</label>
@@ -161,7 +152,7 @@
             function start() {
                 func1();
                 Captcha();
-                init();
+              
             }
             window.onload = start;
 
@@ -192,29 +183,7 @@
             }
 
 
-            function init() {
-                document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
-            }
-
-            function handleFileSelect(event) {
-                const reader = new FileReader()
-                reader.onload = handleFileLoad;
-                reader.readAsText(event.target.files[0])
-
-            }
-
-            function handleFileLoad(event) {
-
-                cert = event.target.result;
-                cn = cert.slice(cert.indexOf("subject=") + 9, cert.indexOf("issuer=") - 1);
-                cn = cn.replace('/', ',');
-                cert = cert.slice(cert.indexOf("-----BEGIN CERTIFICATE-----") + 27, cert.indexOf("-----END CERTIFICATE-----") - 1);
-                cert = cert.replace(" ", "");
-                certString = '{"value":"' + cert + '"' + ',"display"="' + cn + '","type":null,"primary":null}';
-                document.getElementById('inputCert').value = certString;
-                document.getElementById('inputCertString').value = cert;
-            }
-
+        
             document.getElementById("password").addEventListener("input", myFunction);
             var meter_value;
 
