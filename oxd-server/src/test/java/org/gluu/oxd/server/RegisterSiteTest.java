@@ -194,7 +194,7 @@ public class RegisterSiteTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setIdTokenSignedResponseAlg(idTokenSignedResponseAlg);
         params.setGrantTypes(Lists.newArrayList(
