@@ -90,19 +90,26 @@ class EmailSender():
         get SMTP config from Gluu Server
         return dict
         '''
-        print "Forgot Password - SMTP CONFIG:"
+       
         smtpconfig = CdiUtil.bean(ConfigurationService).getConfiguration().getSmtpConfiguration()
-        encryptionService = CdiUtil.bean(EncryptionService)
-        smtp_config = {
-            'host' : smtpconfig.getHost(),
-            'port' : smtpconfig.getPort(),
-            'user' : smtpconfig.getUserName(),
-            'from' : smtpconfig.getFromEmailAddress(),
-            'pwd_decrypted' : encryptionService.decrypt(smtpconfig.getPassword()),
-            'req_ssl' : smtpconfig.isRequiresSsl(),
-            'requires_authentication' : smtpconfig.isRequiresAuthentication(),
-            'server_trust' : smtpconfig.isServerTrust()
-        }
+        print smtpconfig
+        print "Forgot Password - SMTP CONFIG:"
+        if smtpconfig is None:
+            print "Forgot Password - SMTP CONFIG DOESN'T EXIST - Please configure"
+
+        else:
+            print "Forgot Password - SMTP CONFIG FOUND"
+            encryptionService = CdiUtil.bean(EncryptionService)
+            smtp_config = {
+                'host' : smtpconfig.getHost(),
+                'port' : smtpconfig.getPort(),
+                'user' : smtpconfig.getUserName(),
+                'from' : smtpconfig.getFromEmailAddress(),
+                'pwd_decrypted' : encryptionService.decrypt(smtpconfig.getPassword()),
+                'req_ssl' : smtpconfig.isRequiresSsl(),
+                'requires_authentication' : smtpconfig.isRequiresAuthentication(),
+                'server_trust' : smtpconfig.isServerTrust()
+            }
 
         return smtp_config
 
@@ -191,12 +198,52 @@ class PersonAuthentication(PersonAuthenticationType):
        
         identity = CdiUtil.bean(Identity)
         
-
         if step == 1:
+            #normal login
+            credentials = identity.getCredentials()
+            user_name = credentials.getUsername()
+            user_password = credentials.getPassword()
+            
+            # The following service bean allows us to authenticate the individual
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            
+            # See https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/Server/src/main/java/org/xdi/oxauth/service/AuthenticationService.java#L120
+            logged_in = authenticationService.authenticate(user_name, user_password)
+
+            if not logged_in:
+                print "Forgot Password - Username and password were invalid"
+            
+            '''
+            else:
+                # Here I'll check if logged user has some pet name stored in his entry, otherwise a variable will be set to 
+                # flag that the flow will ends earlier (no second factor)
+
+                # Obtain the subject, user is an instance of https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/common/src/main/java/org/xdi/oxauth/model/common/User.java
+                # which derives from https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/common/src/main/java/org/xdi/oxauth/model/common/SimpleUser.java
+                # and https://github.com/GluuFederation/oxCore/blob/version_3.1.4/oxLdapSample/src/main/java/org/gluu/ldap/SimpleUser.java
+
+                user = authenticationService.getAuthenticatedUser()
+                print "Pet. User %s is authenticated" % user.getUserId()
+
+                # I assume you are storing pet's name in secretAnswer attribute
+                pet = user.getAttribute("secretAnswer")
+                if pet == None:
+                    print "Pet. No pet for this user"
+                else:
+                    print "Pet. Flow will proceed with second factor challenge"
+                    # Store pet name for later use
+                    identity.setWorkingParameter("pet_name", pet)
+                    # I think one can only store strings, but it's not so terrible
+        
+            '''
+            return logged_in
+
+        if step == 2:
             
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
+
 
             print "Forgot Password - user_name = " + str(user_name)
 
@@ -259,7 +306,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return True
 
-        if step == 2:
+        if step == 3:
 
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
@@ -291,7 +338,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         
         # step 3 enters new password
-        if step == 3:
+        if step == 4:
             user_service = CdiUtil.bean(UserService)
 
             email = identity.getWorkingParameter("useremail")
@@ -336,26 +383,29 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if not identity.getWorkingParameter("token_valid"):
-            return 2
-
-        if identity.getWorkingParameter("token_valid"):
             return 3
 
+        if identity.getWorkingParameter("token_valid"):
+            return 4
+
         else:
-            return 1
+            return 2
 
     # The xhtml page to render upon each step of the flow
     # returns a string relative to oxAuth webapp root
     def getPageForStep(self, configurationAttributes, step):
 
         if step == 1:
-            
+            #return default login page
+            return ""
+
+        if step == 2:
             return "/auth/forgot_password/forgot.xhtml"
             
-        if step == 2:
+        if step == 3:
             return "/auth/forgot_password/resettoken.xhtml"
 
-        if step == 3:
+        if step == 4:
             return "/auth/forgot_password/newpassword.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):
