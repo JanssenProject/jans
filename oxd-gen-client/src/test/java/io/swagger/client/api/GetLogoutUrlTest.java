@@ -38,7 +38,7 @@ public class GetLogoutUrlTest {
         params.setState(UUID.randomUUID().toString());
         params.setSessionState(UUID.randomUUID().toString()); // here must be real session instead of dummy UUID
 
-        final GetLogoutUriResponse resp = client.getLogoutUri(params, Tester.getAuthorization(), null);
+        final GetLogoutUriResponse resp = client.getLogoutUri(params, Tester.getAuthorization(site), null);
         assertNotNull(resp);
         assertNotNull(resp.getUri());
         assertTrue(resp.getUri().contains(URLEncoder.encode(postLogoutRedirectUrl, "UTF-8")));
@@ -59,15 +59,15 @@ public class GetLogoutUrlTest {
         }
     }
 
+    @Parameters({"opHost", "redirectUrls", "postLogoutRedirectUrl"})
     @Test
-    public void testWithNullOxdId() throws Exception {
+    public void testWithNullOxdId(String opHost, String redirectUrls, String postLogoutRedirectUrl) throws Exception {
         final DevelopersApi client = api();
-
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, postLogoutRedirectUrl, "","","" );
         final GetLogoutUriParams params = new GetLogoutUriParams();
         params.setOxdId(null);
-
         try {
-            client.getLogoutUri(params, Tester.getAuthorization(), null);
+            client.getLogoutUri(params, Tester.getAuthorization(site), site.getOxdId());
         } catch (ApiException ex) {
             assertEquals(ex.getCode(), 400);  //BAD_REQUEST
         }
