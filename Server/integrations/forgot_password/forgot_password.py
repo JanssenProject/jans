@@ -400,7 +400,7 @@ class PersonAuthentication(PersonAuthenticationType):
     # The xhtml page to render upon each step of the flow
     # returns a string relative to oxAuth webapp root
     def getPageForStep(self, configurationAttributes, step):
-        print "Entered getPageForStep %s" % step
+        
         sf = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
 
         if step == 1:
