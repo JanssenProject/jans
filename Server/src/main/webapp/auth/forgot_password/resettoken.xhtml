@@ -41,13 +41,16 @@
 			<div class="bs-docs-section">
 				<div class="container">
 					<div class="step_bx">
-						<h2>Password Reset Token</h2>
-						<p>Enter the password received in your email:</p>
-						
+						<h2>Password Token</h2>
+						<p>Enter the token received in your email</p>	
+						<img
+							src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png"
+							alt="ver_code" />
 						<!-- This form field is referenced in authenticate method of script -->
 						<input class="form-control" id="ResetTokenForm:inputToken" name="ResetTokenForm:inputToken"
 							type="text" autocomplete="off" />
-							
+
+						
 						<!-- commandButton component makes the form to be submitted: it triggers this Java method to
 						   https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/Server/src/main/java/org/xdi/oxauth/auth/Authenticator.java#L117
 						   which in turn ends up calling the authenticate method in script.
