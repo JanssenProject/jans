@@ -400,7 +400,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if sf == "forgot_password":
                 return "/auth/forgot_password/forgot.xhtml"
 
-            if sf = 'email_2FA':
+            if sf == 'email_2FA':
                 return ""
 
         if step == 2:
