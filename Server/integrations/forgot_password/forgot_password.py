@@ -88,8 +88,6 @@ class EmailSender():
         '''
        
         smtpconfig = CdiUtil.bean(ConfigurationService).getConfiguration().getSmtpConfiguration()
-        print smtpconfig
-        print "Forgot Password - SMTP CONFIG:"
         
         if smtpconfig is None:
             print "Forgot Password - SMTP CONFIG DOESN'T EXIST - Please configure"
