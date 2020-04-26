@@ -376,8 +376,7 @@ class PersonAuthentication(PersonAuthenticationType):
     # This method determines how many steps the authentication flow may have
     # It doesn't have to be a constant value
     def getCountAuthenticationSteps(self, configurationAttributes):
-        print "Entered getCount...."
-    
+        
         sf = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
         
 
