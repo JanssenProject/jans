@@ -123,7 +123,9 @@ class EmailSender():
         smtpconfig = self.getSmtpConfig()
         
         try:
-            
+            print "SMTPFONCIG:"
+            print smtpconfig
+
             
             s = smtplib.SMTP(smtpconfig['host'], port=smtpconfig['port'])
             
@@ -181,7 +183,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        # I'm not sure why is 11 and not 2
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -191,123 +194,144 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-     
+
+        sf = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
+        print("SCRIPT_FUNCTION = " + sf)
                     
         print "Forgot Password - Authenticate for step %s" % step
 
-       
+
         identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+        user_name = credentials.getUsername()
+        user_password = credentials.getPassword()
+
+        if user_name:
+            print "entering authenticate user name for step " + str(step) + " + user_name: " + user_name
+            print "password : " + user_password
+        else:
+            "user_name null for step %s" % step
         
         if step == 1:
-            #normal login
-            credentials = identity.getCredentials()
-            user_name = credentials.getUsername()
-            user_password = credentials.getPassword()
-            
-            # The following service bean allows us to authenticate the individual
-            authenticationService = CdiUtil.bean(AuthenticationService)
-            
-            # See https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/Server/src/main/java/org/xdi/oxauth/service/AuthenticationService.java#L120
-            logged_in = authenticationService.authenticate(user_name, user_password)
 
-            if not logged_in:
-                print "Forgot Password - Username and password were invalid"
-            
-            '''
-            else:
-                # Here I'll check if logged user has some pet name stored in his entry, otherwise a variable will be set to 
-                # flag that the flow will ends earlier (no second factor)
+            if sf == "forgot_password":
+                '''
+                credentials = identity.getCredentials()
+                user_name = credentials.getUsername()
+                user_password = credentials.getPassword()
+                '''
 
-                # Obtain the subject, user is an instance of https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/common/src/main/java/org/xdi/oxauth/model/common/User.java
-                # which derives from https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/common/src/main/java/org/xdi/oxauth/model/common/SimpleUser.java
-                # and https://github.com/GluuFederation/oxCore/blob/version_3.1.4/oxLdapSample/src/main/java/org/gluu/ldap/SimpleUser.java
-
-                user = authenticationService.getAuthenticatedUser()
-                print "Pet. User %s is authenticated" % user.getUserId()
-
-                # I assume you are storing pet's name in secretAnswer attribute
-                pet = user.getAttribute("secretAnswer")
-                if pet == None:
-                    print "Pet. No pet for this user"
-                else:
-                    print "Pet. Flow will proceed with second factor challenge"
-                    # Store pet name for later use
-                    identity.setWorkingParameter("pet_name", pet)
-                    # I think one can only store strings, but it's not so terrible
-        
-            '''
-            return logged_in
-
-        if step == 2:
-            
-            credentials = identity.getCredentials()
-            user_name = credentials.getUsername()
-            user_password = credentials.getPassword()
+                print "Forgot Password - user_name = " + str(user_name)
 
 
-            print "Forgot Password - user_name = " + str(user_name)
+                authenticationService = CdiUtil.bean(AuthenticationService)
 
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
-            authenticationService = CdiUtil.bean(AuthenticationService)
-
-            logged_in = authenticationService.authenticate(user_name, user_password)
-            
-
-            
-            if not logged_in:
+                print ("logged_in :" + str(logged_in))
+                
 
                 
-                email = ServerUtil.getFirstValue(requestParameters, "ForgotPasswordForm:useremail")
-                validator = EmailValidator()
-                if not validator.check(email):
-                    print "Forgot Password - Email format invalid"
-                    return False
+                if not logged_in:
+
+                    
+                    email = ServerUtil.getFirstValue(requestParameters, "ForgotPasswordForm:useremail")
+                    validator = EmailValidator()
+                    if not validator.check(email):
+                        print "Forgot Password - Email format invalid"
+                        return False
+
+                    else:
+                        print "Forgot Password -Email format valid"
+     
+                        print "Forgot Password - Entered email is %s" % email
+                        identity.setWorkingParameter("useremail",email)
+                        
+                        # Just trying to get the user by the email
+                        user_service = CdiUtil.bean(UserService)
+                        user2 = user_service.getUserByAttribute("mail", email)
+
+                        if user2 is not None:
+                        
+                            print user2
+                            print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
+                        
+                            # send email
+                            new_token = Token()
+                            token = new_token.generateToken()                
+                            sender = EmailSender()
+                            print "Email: " + email
+                            print "Token: " + token
+                            sender.sendEmail(email,token)
+
+                        
+                            identity.setWorkingParameter("token", token)
+                            print identity.getWorkingParameter("token")
+                        
+     
+                            
+                        else:
+                            print "Forgot Password - User with e-mail %s not found" % email
+
+                        return True
+
 
                 else:
-                    print "Forgot Password -Email format valid"
- 
-                    print "Forgot Password - Entered email is %s" % email
-                    identity.setWorkingParameter("useremail",email)
-                    
-                    # Just trying to get the user by the email
-                    user_service = CdiUtil.bean(UserService)
-                    user2 = user_service.getUserByAttribute("mail", email)
+                    # if user is already authenticated, returns true.
 
-                    if user2 is not None:
-                    
-                        print user2
-                        print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
-                    
-                        # send email
-                        new_token = Token()
-                        token = new_token.generateToken()                
-                        sender = EmailSender()
-                        sender.sendEmail(email,token)
-
-                    
-                        identity.setWorkingParameter("token", token)
-                        print identity.getWorkingParameter("token")
-                    
- 
-                        
-                    else:
-                        print "Forgot Password - User with e-mail %s not found" % email
+                    user = authenticationService.getAuthenticatedUser()
+                    print "Forgot Password - User %s is authenticated" % user.getUserId()
 
                     return True
 
+            if sf == "email_2FA":
 
-            else:
+                # get user email
+
+                # Just trying to get the user by the email
+                authenticationService = CdiUtil.bean(AuthenticationService)
                 
 
-                user = authenticationService.getAuthenticatedUser()
-                print "Forgot Password - User %s is authenticated" % user.getUserId()
-
+                logged_in = authenticationService.authenticate(user_name, user_password)
+                print ("logged_in email_2FA step 1 :" + str(logged_in))
                 
+                print 'email_2FA user_name: ' + str(user_name)
+                print 'email_2FA user_password' + str(user_password)
 
-                return True
+                user_service = CdiUtil.bean(UserService)
+                user2 = user_service.getUserByAttribute("uid", user_name)
 
-        if step == 3:
 
+
+                if user2 is not None:
+                    print "user:"
+                    print user2
+                    print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
+                    email = user2.getAttribute("mail")
+                    uid = user2.getAttribute("uid")
+                    print email
+
+                    #get user_id and password
+
+
+                    # send token
+                    # send email
+                    new_token = Token()
+                    token = new_token.generateToken()                
+                    sender = EmailSender()
+                    print "Email: " + email
+                    print "Token: " + token
+                    sender.sendEmail(email,token)
+
+                        
+                    identity.setWorkingParameter("token", token)
+                    print identity.getWorkingParameter("token")
+
+                    return True
+   
+
+        if step == 2:
+            # step 2 user enters token
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
@@ -336,14 +360,17 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Forgot Password - wrong token"
                 return False
 
-        
+ 
         # step 3 enters new password
-        if step == 4:
+        if step == 3:
             user_service = CdiUtil.bean(UserService)
 
             email = identity.getWorkingParameter("useremail")
             user2 = user_service.getUserByAttribute("mail", email)
+
+
             user_name = user2.getUserId()
+            print "STEP 3 USER_NAME: " + user_name
             
             
             new_password = ServerUtil.getFirstValue(requestParameters, "UpdatePasswordForm:newPassword")
@@ -357,16 +384,26 @@ class PersonAuthentication(PersonAuthenticationType):
 
             user_service.updateUser(user2)
 
+            # authenticates and login user
             authenticationService2 = CdiUtil.bean(AuthenticationService)
             
-            # authenticates and login user
+            
             login = authenticationService2.authenticate(user_name, new_password)
             
             return True
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         
-        print "Forgot Password - Forgot. Prepare for Step %s" %step
+        print "Forgot Password - Preparing for step %s" % step
+        # Lets get the SCRIPT FUNCTION cystom attribute value
+        sf = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
+        
+
+        if sf == "forgot_password":
+            # skip to step 2
+            print "is testvalue"
+
+        
         
         return True
 
@@ -379,34 +416,109 @@ class PersonAuthentication(PersonAuthenticationType):
     # This method determines how many steps the authentication flow may have
     # It doesn't have to be a constant value
     def getCountAuthenticationSteps(self, configurationAttributes):
+        print "Entered getCount...."
     
         identity = CdiUtil.bean(Identity)
+        sf = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
+        print "SCRIPT FUNCTION == %s" % sf
 
-        if not identity.getWorkingParameter("token_valid"):
+        # if option is forgot_token
+        if sf == "forgot_password":
+            print "Entered sf == forgot_password"
             return 3
+            '''
+            # if user didn't entered a valid token yet
+            if not identity.getWorkingParameter("token_valid"):
+                print "if forgot_password and NOT token_valid"
 
+                print "getCount returns 4"
+                return 4
+
+
+            # If user entered token on forgot_token
+            if identity.getWorkingParameter("token_valid"):
+                print "return 4"
+                return 4
+
+            else:
+                print "return 2"
+                return 2
+            '''
+
+
+
+
+        if sf == "email_2FA":
+            print "Entered if sf=email_2FA"
+            return 2
+
+        else:
+            print "Forgot Password - Custom Script Custom Property Incorrect, please check"
+
+
+        '''
+        # If user has not entered a valid token yet        
+        if not identity.getWorkingParameter("token_valid"):
+
+            print "return 3"
+            ## CHANGE TO 3 LATER!!!
+            ## return 3
+            return 2
+
+
+        # If user entered token on forgot_token
         if identity.getWorkingParameter("token_valid"):
+            print "return 4"
             return 4
 
         else:
+            print "return 2"
             return 2
+        '''
 
     # The xhtml page to render upon each step of the flow
     # returns a string relative to oxAuth webapp root
     def getPageForStep(self, configurationAttributes, step):
-
+        print "Entered getPageForStep %s" % step
+        sc = configurationAttributes.get("SCRIPT_FUNCTION").getValue2()
         if step == 1:
+
             #return default login page
-            return ""
+
+            
+            if sc == "forgot_password":
+                return "/auth/forgot_password/forgot.xhtml"
+
+            else:
+
+                return ""
 
         if step == 2:
-            return "/auth/forgot_password/forgot.xhtml"
-            
-        if step == 3:
             return "/auth/forgot_password/resettoken.xhtml"
 
-        if step == 4:
-            return "/auth/forgot_password/newpassword.xhtml"
+        if step == 3:
+            # TEMPORARY REPEATING 4
+            if sc == "forgot_password":
+                return "/auth/forgot_password/newpassword.xhtml"
+
+
+        
+    
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        # Method used on version 2 (11?)
+        print "Entered getNextStep for step %s" % step
+        '''
+        if step == 2:
+            print "next step 4"
+            return 4
+        '''
+
+        #if step == 1:
+        
+        #    return 2
+        return -1
+    
 
     def logout(self, configurationAttributes, requestParameters):
         return True
