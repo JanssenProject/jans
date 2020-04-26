@@ -17,6 +17,7 @@ from org.gluu.oxauth.service import ConfigurationService
 from org.gluu.oxauth.service import EncryptionService
 from org.gluu.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
+from org.gluu.persist.exception import AuthenticationException
 
 #dealing with smtp server
 import smtplib
@@ -268,34 +269,41 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if sf == "email_2FA":
 
-                # Just trying to get the user by the uid
-                authenticationService = CdiUtil.bean(AuthenticationService)
-                logged_in = authenticationService.authenticate(user_name, user_password)
+                try:
+                    # Just trying to get the user by the uid
+                    authenticationService = CdiUtil.bean(AuthenticationService)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
+                    
+                    print 'email_2FA user_name: ' + str(user_name)
+                    
+                    user_service = CdiUtil.bean(UserService)
+                    user2 = user_service.getUserByAttribute("uid", user_name)
+
+                    if user2 is not None:
+                        print "user:"
+                        print user2
+                        print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
+                        email = user2.getAttribute("mail")
+                        uid = user2.getAttribute("uid")
+
+                        # send token
+                        # send email
+                        new_token = Token()
+                        token = new_token.generateToken()                
+                        sender = EmailSender()
+                        print "Email: " + email
+                        print "Token: " + token
+                        sender.sendEmail(email,token)
+
+                        identity.setWorkingParameter("token", token)
+
+                        return True
+
+                except AuthenticationException as err:
+                    print err
+                    return False
+
                 
-                print 'email_2FA user_name: ' + str(user_name)
-                
-                user_service = CdiUtil.bean(UserService)
-                user2 = user_service.getUserByAttribute("uid", user_name)
-
-                if user2 is not None:
-                    print "user:"
-                    print user2
-                    print "Forgot Password - User with e-mail %s found." % user2.getAttribute("mail")
-                    email = user2.getAttribute("mail")
-                    uid = user2.getAttribute("uid")
-
-                    # send token
-                    # send email
-                    new_token = Token()
-                    token = new_token.generateToken()                
-                    sender = EmailSender()
-                    print "Email: " + email
-                    print "Token: " + token
-                    sender.sendEmail(email,token)
-
-                    identity.setWorkingParameter("token", token)
-
-                    return True
    
 
         if step == 2:
