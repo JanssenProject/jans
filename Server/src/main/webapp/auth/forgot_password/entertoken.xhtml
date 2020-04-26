@@ -8,7 +8,6 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
-                
 	<!-- This makes a call to this method:
 	https://github.com/GluuFederation/oxAuth/blob/version_3.1.4/Server/src/main/java/org/xdi/oxauth/auth/Authenticator.java#L524-L524
 	-->
@@ -31,13 +30,15 @@
 			<div class="container">
 				<div class="navbar-header">
 					<a target="_blank" class="navbar-brand">
-					<img src="../img/logo.png" alt="logo" /></a>
+					<ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                        </h:panelGroup> </a>
 				</div>
 			</div>
 		</header>
 	
 		<h:form id="ResetTokenForm">
-			<!-- these divs were stolen from some other page... HTML+CSS  so annoying -->
 			<div class="bs-docs-section">
 				<div class="container">
 					<div class="step_bx">
