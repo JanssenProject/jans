@@ -404,7 +404,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return ""
 
         if step == 2:
-            return "/auth/forgot_password/resettoken.xhtml"
+            return "/auth/forgot_password/entertoken.xhtml"
 
         if step == 3:
             if sf == "forgot_password":
