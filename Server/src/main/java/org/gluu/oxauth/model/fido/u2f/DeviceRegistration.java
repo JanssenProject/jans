@@ -76,7 +76,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
     @AttributeName(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
 
     @AttributeName(name = "del")
