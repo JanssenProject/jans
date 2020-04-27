@@ -1,4 +1,4 @@
-package org.gluu.oxauth.ciba.service.external.context;
+package org.gluu.oxauth.service.external.context;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.CibaEncryptionService;
