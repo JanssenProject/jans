@@ -1,6 +1,7 @@
 package org.gluu.oxauth.ciba.service.external.context;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.CibaEncryptionService;
 
 /**
  * @author Milton BO
@@ -8,18 +9,21 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 public class ExternalCibaEndUserNotificationContext {
 
     private final AppConfiguration appConfiguration;
+    private final CibaEncryptionService encryptionService;
     private final String scope;
     private final String acrValues;
     private final String authReqId;
     private final String deviceRegistrationToken;
 
     public ExternalCibaEndUserNotificationContext(String scope, String acrValues, String authReqId,
-                                                  String deviceRegistrationToken, AppConfiguration appConfiguration) {
+                                                  String deviceRegistrationToken, AppConfiguration appConfiguration,
+                                                  CibaEncryptionService encryptionService) {
         this.appConfiguration = appConfiguration;
         this.scope = scope;
         this.acrValues = acrValues;
         this.authReqId = authReqId;
         this.deviceRegistrationToken = deviceRegistrationToken;
+        this.encryptionService = encryptionService;
     }
 
     public AppConfiguration getAppConfiguration() {
@@ -40,6 +44,10 @@ public class ExternalCibaEndUserNotificationContext {
 
     public String getDeviceRegistrationToken() {
         return deviceRegistrationToken;
+    }
+
+    public CibaEncryptionService getEncryptionService() {
+        return encryptionService;
     }
 
     @Override
