@@ -68,7 +68,7 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "iat")
     private Date creationDate;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
 
     @AttributeName(name = "del")
