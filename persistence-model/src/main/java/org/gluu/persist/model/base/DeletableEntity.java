@@ -11,10 +11,8 @@ import java.util.Date;
 @DataEntry
 public class DeletableEntity extends BaseEntry implements Deletable {
 
-    @AttributeName(name = "oxAuthExpiration")
-    private Date expirationDate;
     @AttributeName(name = "exp")
-    private Date newExpirationDate;
+    private Date expirationDate;
     @AttributeName(name = "del")
     private Boolean deletable;
 
@@ -35,26 +33,18 @@ public class DeletableEntity extends BaseEntry implements Deletable {
         this.expirationDate = expirationDate;
     }
 
-    public Date getNewExpirationDate() {
-		return newExpirationDate;
-	}
-
-	public void setNewExpirationDate(Date newExpirationDate) {
-		this.newExpirationDate = newExpirationDate;
-	}
-
 	public boolean canDelete() {
         return canDelete(new Date());
     }
 
     public boolean canDelete(Date now) {
-    	Date exp = expirationDate != null ? expirationDate :  newExpirationDate;
+    	Date exp = expirationDate != null ? expirationDate :  null;
         return deletable != null && deletable && (exp == null || exp.before(now));
     }
 
     @Override
     public String toString() {
-    	Date exp = expirationDate != null ? expirationDate :  newExpirationDate;
+    	Date exp = expirationDate != null ? expirationDate :  null;
         return "DeletableEntity{" +
                 "expirationDate=" + exp +
                 ", deletable=" + deletable +

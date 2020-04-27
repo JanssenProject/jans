@@ -1,11 +1,6 @@
 package org.gluu.ldap;
 
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
+import com.unboundid.util.StaticUtils;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
@@ -22,7 +17,11 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
 
-import com.unboundid.util.StaticUtils;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by eugeniuparvan on 1/12/17.
@@ -52,8 +51,8 @@ public final class LdapSampleBatchJob {
             public void performAction(List<SimpleTokenLdap> objects) {
                 for (SimpleTokenLdap simpleTokenLdap : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleTokenLdap.getDn(), "oxAuthExpiration",
-                                simpleTokenLdap.getAttribute("oxAuthExpiration"));
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleTokenLdap.getDn(), "exp",
+                                simpleTokenLdap.getAttribute("exp"));
                         simpleTokenLdap.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         ldapEntryManager.merge(simpleTokenLdap);
                         processedCount++;
@@ -66,8 +65,8 @@ public final class LdapSampleBatchJob {
             }
         };
 
-        final Filter filter1 = Filter.createPresenceFilter("oxAuthExpiration");
-        ldapEntryManager.findEntries("o=gluu", SimpleTokenLdap.class, filter1, SearchScope.SUB, new String[] {"oxAuthExpiration"},
+        final Filter filter1 = Filter.createPresenceFilter("exp");
+        ldapEntryManager.findEntries("o=gluu", SimpleTokenLdap.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenLdapBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -108,9 +107,9 @@ public final class LdapSampleBatchJob {
             }
         };
 
-        final Filter filter3 = Filter.createPresenceFilter("oxAuthExpiration");
+        final Filter filter3 = Filter.createPresenceFilter("exp");
         List<SimpleClient> result3 = ldapEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
-                new String[] {"oxAuthExpiration"}, clientBatchOperation, 0, 0, 1000);
+                new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
 
         LOG.info("Result count (without collecting results): " + result3.size());
 
@@ -127,9 +126,9 @@ public final class LdapSampleBatchJob {
             }
         };
 
-        final Filter filter4 = Filter.createPresenceFilter("oxAuthExpiration");
+        final Filter filter4 = Filter.createPresenceFilter("exp");
         List<SimpleClient> result4 = ldapEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
-                new String[] {"oxAuthExpiration"}, clientBatchOperation2, 0, 0, 1000);
+                new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
 
         LOG.info("Result count (with collecting results): " + result4.size());
     }

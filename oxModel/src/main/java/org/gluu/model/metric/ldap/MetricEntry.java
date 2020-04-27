@@ -44,7 +44,7 @@ public class MetricEntry {
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
     @AttributeName(name = "del")
     private boolean deletable = true;
