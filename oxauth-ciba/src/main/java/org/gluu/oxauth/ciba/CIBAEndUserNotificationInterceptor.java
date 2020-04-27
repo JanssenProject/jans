@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.ciba.service.external.ExternalCibaEndUserNotificationService;
-import org.gluu.oxauth.ciba.service.external.context.ExternalCibaEndUserNotificationContext;
+import org.gluu.oxauth.service.external.ExternalCibaEndUserNotificationService;
+import org.gluu.oxauth.service.external.context.ExternalCibaEndUserNotificationContext;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingClient;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingRequest;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingResponse;
