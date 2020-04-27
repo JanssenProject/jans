@@ -36,7 +36,7 @@ public class RequestMessageLdap extends BaseEntry {
     @AttributeName(name = "personInum")
     protected String userInum;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
 
     @AttributeName(name = "del")
