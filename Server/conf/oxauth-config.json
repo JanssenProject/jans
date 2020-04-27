@@ -209,6 +209,7 @@
     "oxOpenIdConnectVersion":"openidconnect-1.0",
     "oxId":"https://${server.name}/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
+    "dynamicRegistrationPasswordGrantTypeEnabled":true,
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
