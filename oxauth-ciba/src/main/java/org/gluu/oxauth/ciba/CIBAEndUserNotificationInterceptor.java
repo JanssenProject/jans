@@ -12,7 +12,9 @@ import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingResponse;
 import org.gluu.oxauth.interception.CIBAEndUserNotificationInterception;
 import org.gluu.oxauth.interception.CIBAEndUserNotificationInterceptionInterface;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.EncryptionService;
 import org.gluu.oxauth.util.RedirectUri;
+import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,10 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private EncryptionService encryptionService;
+
 
     public CIBAEndUserNotificationInterceptor() {
         log.info("CIBA End-User Notification Interceptor loaded.");
@@ -67,7 +73,8 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
         String clientId = appConfiguration.getBackchannelClientId();
         String redirectUri = appConfiguration.getBackchannelRedirectUri();
         String url = appConfiguration.getCibaEndUserNotificationConfig().getNotificationUrl();
-        String key = appConfiguration.getCibaEndUserNotificationConfig().getNotificationKey();
+        String key = encryptionService.decrypt(appConfiguration.getCibaEndUserNotificationConfig()
+                .getNotificationKey(), true);
         String to = deviceRegistrationToken;
         String title = "oxAuth Authentication Request";
         String body = "Client Initiated Backchannel Authentication (CIBA)";
