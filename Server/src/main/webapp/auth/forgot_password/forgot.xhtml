@@ -47,7 +47,10 @@
 			<div class="container">
 				<div class="navbar-header">
 					<a target="_blank" class="navbar-brand">
-					<img src="../img/logo.png" alt="logo" /></a>
+					<<ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                        </h:panelGroup> </a>
 				</div>
 			</div>
 		</header>
