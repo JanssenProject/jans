@@ -197,11 +197,7 @@ public class CleanerTimer {
         try {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("del", true),
-                    Filter.createORFilter(
-                            Filter.createLessOrEqualFilter("oxAuthExpiration", entryManager.encodeTime(baseDn, now)),
-                            Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now))
-
-                    ));
+                    Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, now)));
 
             int removedCount = entryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
             
