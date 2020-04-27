@@ -36,10 +36,11 @@ class EndUserNotification(EndUserNotificationType):
     def notifyEndUser(self, context):
         print 'Sending push notification using Firebase Cloud Messaging'
         appConfiguration = context.getAppConfiguration()
+        encryptionService = context.getEncryptionService()
         clientId = appConfiguration.getBackchannelClientId()
         redirectUri = appConfiguration.getBackchannelRedirectUri()
         url = appConfiguration.getCibaEndUserNotificationConfig().getNotificationUrl()
-        key = appConfiguration.getCibaEndUserNotificationConfig().getNotificationKey()
+        key = encryptionService.decrypt(appConfiguration.getCibaEndUserNotificationConfig().getNotificationKey(), True)
         to = context.getDeviceRegistrationToken()
         title = "oxAuth Authentication Request"
         body = "Client Initiated Backchannel Authentication (CIBA)"

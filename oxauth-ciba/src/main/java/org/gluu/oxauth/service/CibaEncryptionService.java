@@ -24,7 +24,7 @@ import java.util.Properties;
  */
 @ApplicationScoped
 @Named
-public class EncryptionService {
+public class CibaEncryptionService {
 
     @Inject
     private Logger log;
