@@ -124,13 +124,6 @@
 	},
 
 	{
-		"attribute": "oxAuthExpiration",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot"]
-	},
-
-	{
 		"attribute": "exp",
 		"type": "date",
 		"index": ["ordering"],
