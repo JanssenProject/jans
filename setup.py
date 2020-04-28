@@ -1365,6 +1365,10 @@ class Setup(object):
             if getattr(self, si):
                 setattr(self, se, 'true')
 
+        if not 'oxtrust_admin_password' in p:
+            p['oxtrust_admin_password'] = p['ldapPass']
+
+
         return p
 
     def obscure(self, data=""):
@@ -5314,8 +5318,6 @@ class Setup(object):
         try:
             self.thread_queue = queue
             self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
-            self.pbar.progress("gluu", "Initializing")
-            self.initialize()
             self.pbar.progress("gluu", "Configuring system")
             self.configureSystem()
             self.pbar.progress("download", "Downloading War files")
@@ -5719,6 +5721,7 @@ if __name__ == '__main__':
         pass
 
     installObject.logIt("Installing Gluu Server", True)
+    installObject.initialize()
 
     setup_loaded = None
 
