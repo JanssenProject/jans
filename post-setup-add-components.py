@@ -7,6 +7,8 @@ import subprocess
 import json
 import zipfile
 
+from ldap3 import Server, Connection, BASE, SUBTREE, MODIFY_REPLACE
+
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.join(cur_dir, 'ces_current')
 
@@ -51,7 +53,6 @@ for l in menifest.splitlines():
 
 print("Current Gluu Version", gluu_version)
 
-
 if os.path.exists(ces_dir + '.back'):
     os.system('rm -r -f ' + ces_dir + '.back')
 
@@ -59,12 +60,15 @@ if os.path.exists(ces_dir):
     os.system('mv {0} {0}.back'.format(ces_dir))
 
 ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/version_{}.zip'.format(gluu_version)
+
+
 print("Downloading Community Edition Setup {}".format(gluu_version))
 
 os.system('wget -nv {} -O {}/version_{}.zip'.format(ces_url, cur_dir, gluu_version))
 print("Extracting package")
 os.system('unzip -o -qq {}/version_{}.zip'.format(cur_dir, gluu_version))
 os.system('mv {}/community-edition-setup-version_{} {}/ces_current'.format(cur_dir, gluu_version, cur_dir))
+
 os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/generate_properties.py -O {}'.format(os.path.join(ces_dir, 'pylib', 'generate_properties.py')))
 
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
@@ -128,42 +132,46 @@ else:
 
     bindDN = ox_ldap_prop['bindDN']
     bindPassword_e = ox_ldap_prop['bindPassword']
+
     cmd = '/opt/gluu/bin/encode.py -D ' + bindPassword_e    
     bindPassword = os.popen(cmd).read().strip()
-    ldap_host_port = ox_ldap_prop['servers'].split(',')[0].strip()
+    ldap_host, ldap_port = ox_ldap_prop['servers'].split(',')[0].strip().split(':')
 
-    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
-    ldap_conn = ldap.initialize('ldaps://'+ldap_host_port)
-    ldap_conn.simple_bind_s(bindDN, bindPassword)
+    ldap_server = Server(ldap_host, port=int(ldap_port), use_ssl=True)
+    ldap_conn = Connection(ldap_server, user=bindDN, password=bindPassword)
+    ldap_conn.bind()
+
+
+def get_oxAuthConfiguration_ldap():
+
+    ldap_conn.search(
+                search_base='o=gluu', 
+                search_scope=SUBTREE,
+                search_filter='(objectClass=oxAuthConfiguration)',
+                attributes=["oxAuthConfDynamic"]
+                )
+
+    dn = ldap_conn.response[0]['dn']
+    oxAuthConfDynamic = json.loads(ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
+
+    return dn, oxAuthConfDynamic
 
 
 def get_oxTrustConfiguration_ldap():
-    result = ldap_conn.search_s(
-                        'o=gluu',
-                        ldap.SCOPE_SUBTREE,
-                        '(objectClass=oxTrustConfiguration)',
-                        ['oxTrustConfApplication']
-                        )
-    dn = result[0][0]
-    oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0])
-
-    return dn, oxTrustConfApplication
-
-def get_oxTrustConfiguration_ldap():
-    result = ldap_conn.search_s(
-                        'o=gluu',
-                        ldap.SCOPE_SUBTREE,
-                        '(objectClass=oxTrustConfiguration)',
-                        ['oxTrustConfApplication']
-                        )
-    dn = result[0][0]
-    oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0])
+    ldap_conn.search(
+                search_base='o=gluu',
+                search_scope=SUBTREE,
+                search_filter='(objectClass=oxTrustConfiguration)',
+                attributes=['oxTrustConfApplication']
+                )
+    dn = ldap_conn.response[0]['dn']
+    oxTrustConfApplication = json.loads(ldap_conn.response[0]['attributes']['oxTrustConfApplication'][0])
 
     return dn, oxTrustConfApplication
 
 def installSaml():
 
-    if os.path.exists('/opt//shibboleth-idp'):
+    if os.path.exists('/opt/shibboleth-idp'):
         print("SAML is already installed on this system")
         return
 
@@ -187,7 +195,6 @@ def installSaml():
 
     print("Installing Shibboleth ...")
     setupObj.oxTrustConfigGeneration = "true"
-
 
 
     if setupObj.persistence_type == 'couchbase':
@@ -258,11 +265,15 @@ def installSaml():
         oxTrustConfApplication['configGeneration'] = True
         oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
 
-        ldap_conn.modify_s(
+        ldap_conn.modify( 
                         dn,
-                        [( ldap.MOD_REPLACE, 'oxTrustConfApplication',  oxTrustConfApplication_js)]
-                    )
-        ldap_conn.modify_s('ou=configuration,o=gluu', [( ldap.MOD_REPLACE, 'gluuSamlEnabled',  'true')])
+                        {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                        )
+
+        ldap_conn.modify(
+                        'ou=configuration,o=gluu',
+                        {"gluuSamlEnabled": [MODIFY_REPLACE, 'true']}
+                        )
 
     else:
         bucket = gluu_cb_prop['bucket.default']
@@ -352,18 +363,24 @@ def installPassport():
             oxTrustConfApplication[k] = passport_oxtrust_config[k]
         
         oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
-        ldap_conn.modify_s(
-                        dn,
-                        [( ldap.MOD_REPLACE, 'oxTrustConfApplication',  oxTrustConfApplication_js)]
-                    )
-        ldap_conn.modify_s('ou=configuration,o=gluu', [( ldap.MOD_REPLACE, 'gluuPassportEnabled',  'true')])
+        
+        ldap_conn.modify(
+                dn,
+                {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                )
+
+        ldap_conn.modify(
+                'ou=configuration,o=gluu',
+                {"gluuPassportEnabled": [MODIFY_REPLACE, 'true']}
+                )
+
         
         for scr in scripts_enable:
-            ldap_conn.modify_s(
-                        'inum={},ou=scripts,o=gluu'.format(scr),
-                        [( ldap.MOD_REPLACE, 'oxEnabled',  'true')]
+            ldap_conn.modify(
+                    'inum={},ou=scripts,o=gluu'.format(scr),
+                    {"oxEnabled": [MODIFY_REPLACE, 'true']}
                     )
-        
+
     else:
         bucket = gluu_cb_prop['bucket.default']
 
@@ -379,6 +396,8 @@ def installPassport():
             setupObj.cbm.exec_query(n1ql)
     
     print("Passport installation done")
+
+
 
 def installOxd():
     
@@ -413,6 +432,8 @@ def installOxd():
 
     setupObj.oxd_package = os.path.join(setupObj.distGluuFolder, 'oxd-server.tgz')
     setupObj.install_oxd()
+
+
 
 def installCasa():
 
@@ -474,18 +495,21 @@ def installRadius():
     oxAuthConfiguration['legacyIdTokenClaims'] = True
     oxAuthConfiguration_js = json.dumps(oxAuthConfiguration, indent=2)
 
-    ldap_conn.modify_s(
-                        dn,
-                        [( ldap.MOD_REPLACE, 'oxAuthConfDynamic',  oxAuthConfiguration_js)]
-                    )
+    ldap_conn.modify(
+            dn,
+            {"oxAuthConfDynamic": [MODIFY_REPLACE, oxAuthConfiguration_js]}
+            )
 
-    ldap_conn.modify_s('ou=configuration,o=gluu',
-                    [( ldap.MOD_REPLACE, 'gluuRadiusEnabled',  'true')]
-                    )
+    ldap_conn.modify(
+            'ou=configuration,o=gluu',
+            {"gluuRadiusEnabled": [MODIFY_REPLACE, 'true']}
+            )
 
-    ldap_conn.modify_s('inum=B8FD-4C11,ou=scripts,o=gluu',
-                    [( ldap.MOD_REPLACE, 'oxEnabled',  'true')]
-                    )
+    ldap_conn.modify(
+            'inum=B8FD-4C11,ou=scripts,o=gluu',
+            {"oxEnabled": [MODIFY_REPLACE, 'true']}
+            )
+
 
 if args.addshib:
     installSaml()
