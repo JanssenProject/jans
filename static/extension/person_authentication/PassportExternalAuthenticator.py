@@ -18,6 +18,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.config.oxtrust import LdapOxPassportConfiguration
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from org.gluu.persist import PersistenceEntryManager
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
 from java.util import ArrayList, Arrays, Collections
@@ -334,7 +335,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         registeredProviders = {}
         print "Passport. parseAllProviders. Adding providers"
-        entryManager = CdiUtil.bean(AppInitializer).createPersistenceEntryManager()
+        entryManager = CdiUtil.bean(PersistenceEntryManager)
 
         config = LdapOxPassportConfiguration()
         config = entryManager.find(config.getClass(), self.passportDN).getPassportConfiguration()
