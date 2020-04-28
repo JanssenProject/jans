@@ -4272,7 +4272,7 @@ class Setup(object):
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests bzip2', 'optional': 'memcached'},
-                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 rsyslog bzip2', 'optional': 'memcached'},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
                 }
@@ -4281,7 +4281,11 @@ class Setup(object):
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
-                sout, serr = self.run(query_command.format(package), shell=True, get_stderr=True)
+                if os_type_version in ('centos 7', 'red 7') and package == 'python3-ldap3':
+                    package_query = 'python36-ldap3'
+                else:
+                    package_query = package
+                sout, serr = self.run(query_command.format(package_query), shell=True, get_stderr=True)
                 if check_text in sout+serr:
                     self.logIt('Package {0} was not installed'.format(package))
                     install_list[install_type].append(package)
