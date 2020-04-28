@@ -184,9 +184,9 @@ public class Rp implements Serializable {
     @JsonProperty(value = "last_synced")
     private Date lastSynced;
     @JsonProperty(value = "sync_client_from_op")
-    private Boolean syncClientFromOp;
+    private Boolean syncClientFromOp = false;
     @JsonProperty(value = "sync_client_period_in_seconds")
-    private Integer syncClientPeriodInSeconds;
+    private Integer syncClientPeriodInSeconds = 3600;
     @JsonProperty(value = "allow_spontaneous_scopes")
     private Boolean allowSpontaneousScopes = false;
     @JsonProperty(value = "spontaneous_scopes")
