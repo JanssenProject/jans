@@ -4264,7 +4264,6 @@ class Setup(object):
 
         install_command, update_command, query_command, check_text = self.get_install_commands()
 
-
         install_list = {'mondatory': [], 'optional': []}
 
         package_list = {
@@ -4317,7 +4316,7 @@ class Setup(object):
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
                     if not self.os_type == 'fedora':
-                        sout, serr = self.run(update_command, shell=True)
+                        sout, serr = self.run(update_command, shell=True, get_stderr=True)
                     self.run(install_command.format(packages), shell=True)
 
         if self.os_type in ('ubuntu', 'debian'):
@@ -5689,6 +5688,8 @@ if __name__ == '__main__':
     from pyDes import *
     from pylib.cbm import CBM
     from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
+    from ldap3.utils import dn as dnutils
+    gluu_utils.dnutils = dnutils
 
     if setupOptions['loadTestDataExit']:
         installObject.initialize()
