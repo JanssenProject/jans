@@ -877,7 +877,10 @@ class Setup(object):
                 cmd = [self.cmd_chown, 'jetty:jetty', fn]
                 self.run(cmd)
 
-        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        gluu_radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
+        if os.path.exists(gluu_radius_jks_fn):
+            self.run([self.cmd_chown, 'radius:gluu', gluu_radius_jks_fn])
+
         if self.installGluuRadius:
             self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
