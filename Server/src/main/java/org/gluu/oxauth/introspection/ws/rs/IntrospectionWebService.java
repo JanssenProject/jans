@@ -12,6 +12,7 @@ import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
@@ -186,6 +187,7 @@ public class IntrospectionWebService {
     private String createResponseAsJwt(JSONObject response, AuthorizationGrant grant) throws Exception {
         final JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
         final Jwt jwt = jwtSigner.newJwt();
+        Audience.setAudience(jwt.getClaims(), grant.getClient());
 
         Iterator<String> keysIter = response.keys();
         while (keysIter.hasNext()) {
