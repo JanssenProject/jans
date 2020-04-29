@@ -37,7 +37,7 @@
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/../license.md</source>
+            <source>${project.basedir}/../LICENSE</source>
             <outputDirectory>/license</outputDirectory>
             <destName>license.txt</destName>
         </file>
