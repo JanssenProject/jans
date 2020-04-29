@@ -1,9 +1,9 @@
-package org.gluu.oxauth.ciba.service.external;
+package org.gluu.oxauth.service.external;
 
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.ciba.EndUserNotificationType;
-import org.gluu.oxauth.ciba.service.external.context.ExternalCibaEndUserNotificationContext;
+import org.gluu.oxauth.service.external.context.ExternalCibaEndUserNotificationContext;
 import org.gluu.service.custom.script.ExternalScriptService;
 import org.slf4j.Logger;
 

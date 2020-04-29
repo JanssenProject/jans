@@ -6,14 +6,15 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.ciba.service.external.ExternalCibaEndUserNotificationService;
-import org.gluu.oxauth.ciba.service.external.context.ExternalCibaEndUserNotificationContext;
+import org.gluu.oxauth.service.external.ExternalCibaEndUserNotificationService;
+import org.gluu.oxauth.service.external.context.ExternalCibaEndUserNotificationContext;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingClient;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingRequest;
 import org.gluu.oxauth.client.fcm.FirebaseCloudMessagingResponse;
 import org.gluu.oxauth.interception.CIBAEndUserNotificationInterception;
 import org.gluu.oxauth.interception.CIBAEndUserNotificationInterceptionInterface;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.CibaEncryptionService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,9 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private CibaEncryptionService cibaEncryptionService;
 
     @Inject
     private ExternalCibaEndUserNotificationService externalCibaEndUserNotificationService;
@@ -72,7 +76,7 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
             if (externalCibaEndUserNotificationService.isEnabled()) {
                 log.debug("CIBA: Authorization request sending to the end user with custom interception scripts");
                 ExternalCibaEndUserNotificationContext context = new ExternalCibaEndUserNotificationContext(scope,
-                        acrValues, authReqId, deviceRegistrationToken, appConfiguration);
+                        acrValues, authReqId, deviceRegistrationToken, appConfiguration, cibaEncryptionService);
                 log.info("CIBA: Notification sent to the end user, result {}",
                         externalCibaEndUserNotificationService.executeExternalNotifyEndUser(context));
             } else {
@@ -94,7 +98,8 @@ public class CIBAEndUserNotificationInterceptor implements CIBAEndUserNotificati
         String clientId = appConfiguration.getBackchannelClientId();
         String redirectUri = appConfiguration.getBackchannelRedirectUri();
         String url = appConfiguration.getCibaEndUserNotificationConfig().getNotificationUrl();
-        String key = appConfiguration.getCibaEndUserNotificationConfig().getNotificationKey();
+        String key = cibaEncryptionService.decrypt(appConfiguration.getCibaEndUserNotificationConfig()
+                .getNotificationKey(), true);
         String to = deviceRegistrationToken;
         String title = "oxAuth Authentication Request";
         String body = "Client Initiated Backchannel Authentication (CIBA)";
