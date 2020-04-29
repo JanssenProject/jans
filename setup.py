@@ -1583,6 +1583,10 @@ class Setup(object):
         if self.java_type == 'jre':
             self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
 
+        if not os.path.exists('/opt/jre/jre'):
+            self.run([self.cmd_mkdir, '-p', '/opt/jre/jre'])
+            self.run([self.cmd_ln, '-s', '/opt/jre/lib', '/opt/jre/jre/lib'])
+
 
     def extractOpenDJ(self):        
 
@@ -2580,7 +2584,7 @@ class Setup(object):
 
         if self.installSaml:
             self.pbar.progress("saml", "Installing Gluu components: saml", False)
-            self.install_scim_server()
+            self.install_saml()
 
         if self.installOxAuthRP:
             self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
