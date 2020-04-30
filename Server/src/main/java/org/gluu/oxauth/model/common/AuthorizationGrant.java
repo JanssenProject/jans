@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -40,7 +41,7 @@ import java.util.Set;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 4, 2019
+ * @version April 10, 2020
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -209,9 +210,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
-        jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+        Audience.setAudience(jwt.getClaims(), getClient());
 
         if (client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims()) {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
@@ -361,7 +362,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        return sectorIdentifierService.getSub(getClient(), getUser());
+        return sectorIdentifierService.getSub(getClient(), getUser(), this instanceof CIBAGrant);
     }
 
     public boolean isCachedWithNoPersistence() {

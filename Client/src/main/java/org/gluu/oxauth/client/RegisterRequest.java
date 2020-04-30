@@ -16,6 +16,7 @@ import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.json.JsonApplier;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxauth.util.ClientUtil;
@@ -107,6 +108,7 @@ public class RegisterRequest extends BaseRequest {
     private String backchannelClientNotificationEndpoint;
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
     private Boolean backchannelUserCodeParameter;
+    private List<String> additionalAudience;
 
     /**
      * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
@@ -198,6 +200,14 @@ public class RegisterRequest extends BaseRequest {
 
     public void setSpontaneousScopes(List<String> spontaneousScopes) {
         this.spontaneousScopes = spontaneousScopes;
+    }
+
+    public List<String> getAdditionalAudience() {
+        return additionalAudience;
+    }
+
+    public void setAdditionalAudience(List<String> additionalAudience) {
+        this.additionalAudience = additionalAudience;
     }
 
     public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
@@ -1136,7 +1146,9 @@ public class RegisterRequest extends BaseRequest {
      */
     @Override
     public Map<String, String> getParameters() {
-        Map<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> parameters = new HashMap<>();
+
+        JsonApplier.getInstance().apply(this, parameters);
 
         if (redirectUris != null && !redirectUris.isEmpty()) {
             parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris).toString());
@@ -1306,7 +1318,7 @@ public class RegisterRequest extends BaseRequest {
         if (backchannelAuthenticationRequestSigningAlg != null) {
             parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
         }
-        if (backchannelUserCodeParameter) {
+        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
             parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
         }
 
@@ -1432,6 +1444,9 @@ public class RegisterRequest extends BaseRequest {
 
 
         final RegisterRequest result = new RegisterRequest();
+
+        JsonApplier.getInstance().apply(requestObject, result);
+
         result.setJsonObject(requestObject);
         result.setRequestUris(requestUris);
         result.setAuthorizedOrigins(authorizedOrigins);
@@ -1530,6 +1545,8 @@ public class RegisterRequest extends BaseRequest {
     @Override
     public JSONObject getJSONParameters() throws JSONException {
         JSONObject parameters = new JSONObject();
+
+        JsonApplier.getInstance().apply(this, parameters);
 
         if (redirectUris != null && !redirectUris.isEmpty()) {
             parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris));

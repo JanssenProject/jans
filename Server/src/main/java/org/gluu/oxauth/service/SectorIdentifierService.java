@@ -2,6 +2,8 @@ package org.gluu.oxauth.service;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.StaticConfiguration;
@@ -20,7 +22,7 @@ import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
- * @version January 15, 2016
+ * @version April 10, 2020
  */
 @Stateless
 @Named
@@ -40,7 +42,6 @@ public class SectorIdentifierService {
 
     @Inject
     protected AppConfiguration appConfiguration;
-
 
     /**
      * Get sector identifier by oxId
@@ -74,7 +75,7 @@ public class SectorIdentifierService {
         return String.format("oxId=%s,%s", oxId, sectorIdentifierDn);
     }
 
-    public String getSub(Client client, User user) {
+    public String getSub(Client client, User user, boolean isCibaGrant) {
         if (user == null) {
             log.trace("User is null, return blank sub");
             return "";
@@ -84,14 +85,22 @@ public class SectorIdentifierService {
             return "";
         }
 
-
         final boolean isClientPairwise = SubjectType.PAIRWISE.equals(SubjectType.fromString(client.getSubjectType()));
         if (isClientPairwise) {
             final String sectorIdentifierUri;
+
             if (StringUtils.isNotBlank(client.getSectorIdentifierUri())) {
                 sectorIdentifierUri = client.getSectorIdentifierUri();
             } else {
-                sectorIdentifierUri = !ArrayUtils.isEmpty(client.getRedirectUris()) ? client.getRedirectUris()[0] : null;
+                if (!isCibaGrant) {
+                    sectorIdentifierUri = !ArrayUtils.isEmpty(client.getRedirectUris()) ? client.getRedirectUris()[0] : null;
+                } else {
+                    if (client.getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+                        sectorIdentifierUri = client.getBackchannelClientNotificationEndpoint();
+                    } else {
+                        sectorIdentifierUri = client.getJwksUri();
+                    }
+                }
             }
 
             String userInum = user.getAttribute("inum");
