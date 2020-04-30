@@ -7,8 +7,6 @@ import json
 import datetime
 import copy
 
-from ldap3.utils import dn as dnutils
-
 from .jproperties import Properties
 from .ldif3.ldif3 import LDIFParser
 from .attribute_data_types import ATTRUBUTEDATATYPES
