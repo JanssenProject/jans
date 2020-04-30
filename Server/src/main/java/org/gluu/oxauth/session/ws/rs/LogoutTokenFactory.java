@@ -21,6 +21,7 @@ import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 10, 2020
  */
 @Stateless
 @Named
@@ -74,7 +75,7 @@ public class LogoutTokenFactory {
             jwr.getClaims().setClaim("sid", sessionId);
         }
 
-        final String sub = sectorIdentifierService.getSub(client, user);
+        final String sub = sectorIdentifierService.getSub(client, user, false);
         if (StringUtils.isNotBlank(sub)) {
             jwr.getClaims().setSubjectIdentifier(sub);
         }
