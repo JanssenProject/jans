@@ -616,7 +616,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         try {
             log.debug("Attempting to UPDATE client, client_id: {}, requestParams = {}, isSecure = {}",
                     clientId, requestParams, securityContext.isSecure());
-            final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+            final String accessToken = tokenService.getToken(authorization);
 
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
@@ -705,7 +705,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Override
     public Response requestClientRead(String clientId, String authorization, HttpServletRequest httpRequest,
                                       SecurityContext securityContext) {
-        String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+        String accessToken = tokenService.getToken(authorization);
         log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
@@ -932,7 +932,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Override
     public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
         try {
-            String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+            String accessToken = tokenService.getToken(authorization);
 
             log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
                     clientId, accessToken, securityContext.isSecure());

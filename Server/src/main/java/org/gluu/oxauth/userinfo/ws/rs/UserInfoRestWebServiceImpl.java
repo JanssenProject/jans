@@ -130,14 +130,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     public Response requestUserInfo(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
-        
-        if(authorization != null && !authorization.isEmpty() && tokenService.isBearerAuthToken(authorization)) {
+
+        if (tokenService.isBearerAuthToken(authorization)) {
             accessToken = tokenService.getBearerToken(authorization);
         }
 
-        if(authorization !=null )
-        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}",
-                accessToken, securityContext.isSecure());
+        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.USER_INFO);
