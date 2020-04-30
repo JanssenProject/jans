@@ -7,9 +7,6 @@
 package org.gluu.oxauth.introspection.ws.rs;
 
 import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.claims.Audience;
@@ -50,10 +47,6 @@ import java.util.Iterator;
  * @version June 30, 2018
  */
 @Path("/introspection")
-@Api(value = "/introspection", description = "The Introspection Endpoint is an OAuth 2 Endpoint that responds to " +
-        "   HTTP GET and HTTP POST requests from token holders.  The endpoint " +
-        "   takes a single parameter representing the token (and optionally " +
-        "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
     private static final Pair<AuthorizationGrant, Boolean> EMPTY = new Pair<>(null, false);
@@ -79,11 +72,6 @@ public class IntrospectionWebService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "invalid_request\n" +
-                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
-            @ApiResponse(code = 500, message = "Introspection Internal Server Failed.")
-    })
     public Response introspectGet(@HeaderParam("Authorization") String p_authorization,
                                   @QueryParam("token") String p_token,
                                   @QueryParam("token_type_hint") String tokenTypeHint,

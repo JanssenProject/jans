@@ -6,10 +6,6 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
@@ -32,7 +28,6 @@ import javax.ws.rs.core.Response.Status;
  * @author Yuriy Movchan Date: 05/13/2015
  */
 @Path("/fido-configuration")
-@Api(value = "/.well-known/fido-configuration", description = "The FIDO server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/fido-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the FIDO U2f server.")
 public class U2fConfigurationWS {
 
 	@Inject
@@ -46,8 +41,6 @@ public class U2fConfigurationWS {
 
 	@GET
 	@Produces({ "application/json" })
-	@ApiOperation(value = "Provides configuration data as json document. It contains options and endpoints supported by the FIDO U2F server.", response = U2fConfiguration.class)
-	@ApiResponses(value = { @ApiResponse(code = 500, message = "Failed to build FIDO U2F configuration json object.") })
 	public Response getConfiguration() {
 		try {
 		    if (appConfiguration.getDisableU2fEndpoint()) {
