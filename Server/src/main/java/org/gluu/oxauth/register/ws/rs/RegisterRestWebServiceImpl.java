@@ -28,6 +28,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.json.JsonApplier;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.register.RegisterErrorResponseType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
@@ -358,6 +359,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
     private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
+
+        JsonApplier.getInstance().transfer(requestObject, p_client);
+        JsonApplier.getInstance().transfer(requestObject, p_client.getAttributes());
+
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
@@ -751,6 +756,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     private JSONObject getJSONObject(Client client, boolean authorizationRequestCustomAllowedParameters) throws JSONException, StringEncrypter.EncryptionException {
         JSONObject responseJsonObject = new JSONObject();
+
+        JsonApplier.getInstance().apply(client, responseJsonObject);
+        JsonApplier.getInstance().apply(client.getAttributes(), responseJsonObject);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
