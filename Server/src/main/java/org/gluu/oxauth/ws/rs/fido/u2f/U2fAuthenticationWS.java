@@ -6,16 +6,6 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import javax.inject.Inject;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.gluu.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
@@ -31,6 +21,7 @@ import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
 import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.service.fido.u2f.AuthenticationService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.UserSessionIdService;
@@ -38,9 +29,7 @@ import org.gluu.oxauth.service.fido.u2f.ValidationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
 
-import com.wordnik.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -53,7 +42,6 @@ import javax.ws.rs.core.Response.Status;
  * @version August 9, 2017
  */
 @Path("/fido/u2f/authentication")
-@Api(value = "/fido/u2f/registration", description = "The endpoint at which the application U2F device start registration process.")
 public class U2fAuthenticationWS {
 
     @Inject
