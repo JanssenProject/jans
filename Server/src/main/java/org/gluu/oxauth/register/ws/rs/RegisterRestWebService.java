@@ -99,7 +99,7 @@ public interface RegisterRestWebService {
     @Path("/register")
     @Produces({MediaType.APPLICATION_JSON})
     Response delete(
-            @QueryParam("client_id")
+            @QueryParam("client_id") String clientId,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest httpRequest,
             @Context SecurityContext securityContext);
