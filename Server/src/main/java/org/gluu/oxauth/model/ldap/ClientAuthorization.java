@@ -28,7 +28,7 @@ public class ClientAuthorization implements Serializable {
     @AttributeName(name = "oxAuthScope")
     private String[] scopes;
 
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
 
     @AttributeName(name = "del")

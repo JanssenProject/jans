@@ -1,6 +1,7 @@
 package org.gluu.oxauth.session.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 10, 2020
  */
 @Stateless
 @Named
@@ -65,15 +67,15 @@ public class LogoutTokenFactory {
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwr.getClaims().setAudience(client.getClientId());
         jwr.getClaims().setJwtId(UUID.randomUUID());
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());
+        Audience.setAudience(jwr.getClaims(), client);
 
         if (StringUtils.isNotBlank(sessionId) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
             jwr.getClaims().setClaim("sid", sessionId);
         }
 
-        final String sub = sectorIdentifierService.getSub(client, user);
+        final String sub = sectorIdentifierService.getSub(client, user, false);
         if (StringUtils.isNotBlank(sub)) {
             jwr.getClaims().setSubjectIdentifier(sub);
         }
