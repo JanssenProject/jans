@@ -1,6 +1,5 @@
 package org.gluu.oxauth.model.uma;
 
-import com.wordnik.swagger.annotations.ApiModel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
@@ -15,7 +14,6 @@ import java.io.Serializable;
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @XmlRootElement
-@ApiModel(value = "UMA Token Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UmaTokenResponse implements Serializable {
 
