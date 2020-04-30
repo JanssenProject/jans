@@ -52,7 +52,7 @@ public class SpontaneousScopeService {
         scope.setInum(UUID.randomUUID().toString());
         scope.setScopeType(ScopeType.SPONTANEOUS);
         scope.setDeletable(true);
-        scope.setNewExpirationDate(new Date(getLifetime()));
+        scope.setExpirationDate(new Date(getLifetime()));
         scope.setDn("inum=" + scope.getInum() + "," + staticConfiguration.getBaseDn().getScopes());
         scope.getAttributes().setSpontaneousClientId(clientId);
         scope.getAttributes().setSpontaneousClientScopes(Lists.newArrayList(isAllowed.getSecond()));

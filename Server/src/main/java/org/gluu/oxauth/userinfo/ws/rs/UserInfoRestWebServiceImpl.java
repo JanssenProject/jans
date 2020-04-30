@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
@@ -257,7 +258,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().addAudience(authorizationGrant.getClientId());
+        Audience.setAudience(jwt.getClaims(), authorizationGrant.getClient());
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -288,7 +289,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwe.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwe.getClaims().addAudience(authorizationGrant.getClientId());
+        Audience.setAudience(jwe.getClaims(), authorizationGrant.getClient());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
