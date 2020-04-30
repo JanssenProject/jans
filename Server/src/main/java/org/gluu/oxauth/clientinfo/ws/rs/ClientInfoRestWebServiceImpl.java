@@ -72,7 +72,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
     public Response requestClientInfo(String accessToken, String authorization, SecurityContext securityContext) {
         if (authorization != null && !authorization.isEmpty() && tokenService.isBearerAuthToken(authorization)) {
-            accessToken = tokenService.getBearerTokenFromAuthorizationParameter(authorization);
+            accessToken = tokenService.getBearerToken(authorization);
         }
         log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}",
                 new Object[] { accessToken, securityContext.isSecure() });
