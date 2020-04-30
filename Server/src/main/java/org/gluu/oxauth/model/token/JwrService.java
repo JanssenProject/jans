@@ -2,6 +2,7 @@ package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Function;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.CIBAGrant;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -35,6 +36,7 @@ import static org.gluu.oxauth.model.jwt.JwtHeaderName.ALGORITHM;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @version April 10, 2020
  */
 @Stateless
 @Named
@@ -133,7 +135,7 @@ public class JwrService {
     }
 
     public void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) throws Exception {
-        jwr.getClaims().setSubjectIdentifier(sectorIdentifierService.getSub(authorizationGrant.getClient(), authorizationGrant.getUser()));
+        jwr.getClaims().setSubjectIdentifier(sectorIdentifierService.getSub(authorizationGrant.getClient(), authorizationGrant.getUser(), authorizationGrant instanceof CIBAGrant));
     }
 
     public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String sessionId) {
