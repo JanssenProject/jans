@@ -1241,6 +1241,11 @@ paths:
                 backchannel_user_code_parameter:
                   type: boolean 
                   description: Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
+                additional_audience:
+                  type: array
+                    description: Additional audiences.
+                    items:
+                      type: string
       responses:
         200:
           description: OK
@@ -1561,6 +1566,11 @@ paths:
                 backchannel_user_code_parameter:
                   type: boolean 
                   description: Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
+                additional_audience:
+                  type: array
+                    description: Additional audiences.
+                    items:
+                      type: string
       responses:
         200:
           description: OK
