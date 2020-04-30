@@ -8,7 +8,6 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -73,7 +72,6 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * @version April 10, 2020
  */
 @Path("/")
-@Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
