@@ -5,7 +5,7 @@
 
     <test name="JsonApplierServerTest" enabled="true">
         <classes>
-            <class name=" org.gluu.oxauth.json.JsonApplierServerTest" />
+            <class name="org.gluu.oxauth.json.JsonApplierServerTest" />
         </classes>
     </test>
 
