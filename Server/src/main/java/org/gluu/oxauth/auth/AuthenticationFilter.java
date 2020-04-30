@@ -287,9 +287,8 @@ public class AuthenticationFilter implements Filter {
 
         try {
             String header = servletRequest.getHeader("Authorization");
-            header.startsWith("Basic ");
             if (header != null && tokenService.isBasicAuthToken(header)) {
-                String base64Token = tokenService.getBasicTokenFromAuthorizationParameter(header);
+                String base64Token = tokenService.getBasicToken(header);
                 String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
 
                 String username = "";

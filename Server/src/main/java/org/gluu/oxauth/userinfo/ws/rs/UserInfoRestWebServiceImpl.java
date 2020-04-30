@@ -132,7 +132,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public Response requestUserInfo(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
         
         if(authorization != null && !authorization.isEmpty() && tokenService.isBearerAuthToken(authorization)) {
-            accessToken = tokenService.getBearerTokenFromAuthorizationParameter(authorization);
+            accessToken = tokenService.getBearerToken(authorization);
         }
 
         if(authorization !=null )
