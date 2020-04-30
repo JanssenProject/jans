@@ -1547,7 +1547,7 @@ class Setup(object):
 
     def installJRE(self):
 
-        jre_arch_list = glob.glob(os.path.join(self.distAppFolder, 'amazon-corretto-*-linux-x64.tar.gz'))
+        jre_arch_list = glob.glob(os.path.join(self.distAppFolder, 'amazon-corretto-*.tar.gz'))
 
         if not jre_arch_list:
             self.logIt("JRE packgage not found in {}. Will download jdk".format(self.distAppFolder))
