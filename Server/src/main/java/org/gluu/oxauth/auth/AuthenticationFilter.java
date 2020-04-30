@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
 import org.gluu.oxauth.model.token.ClientAssertionType;
+import org.gluu.oxauth.model.token.HttpAuthTokenType;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
@@ -132,7 +133,8 @@ public class AuthenticationFilter implements Filter {
                 log.debug("Starting token endpoint authentication");
 
                 // #686 : allow authenticated client via user access_token
-                final String accessToken = tokenService.getTokenAfterPrefix(authorizationHeader, "Bearer ", "AccessToken ");
+                final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorizationHeader,
+                    HttpAuthTokenType.Bearer,HttpAuthTokenType.AccessToken);
                 if (StringUtils.isNotBlank(accessToken)) {
                     processAuthByAccessToken(accessToken, httpRequest, httpResponse, filterChain);
                     return;
@@ -142,7 +144,7 @@ public class AuthenticationFilter implements Filter {
                         && httpRequest.getParameter("client_assertion_type") != null) {
                     log.debug("Starting JWT token endpoint authentication");
                     processJwtAuth(httpRequest, httpResponse, filterChain);
-                } else if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
+                } else if (authorizationHeader != null && tokenService.isBasicAuthToken(authorizationHeader)) {
                     log.debug("Starting Basic Auth token endpoint authentication");
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
@@ -150,7 +152,7 @@ public class AuthenticationFilter implements Filter {
                     processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
                 }
             } else if (tokenRevocationEndpoint) {
-                if (StringHelper.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Basic ")) {
+                if (StringHelper.isNotEmpty(authorizationHeader) && tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
@@ -158,7 +160,7 @@ public class AuthenticationFilter implements Filter {
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else if (backchannelAuthenticationEnpoint) {
-                if (Strings.isNotBlank(authorizationHeader) && authorizationHeader.startsWith("Basic ")) {
+                if (Strings.isNotBlank(authorizationHeader) && tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     String entity = errorResponseFactory.getErrorAsJson(INVALID_CLIENT);
@@ -171,13 +173,12 @@ public class AuthenticationFilter implements Filter {
                     out.flush();
                 }
             } else if (authorizationHeader != null) {
-                if (authorizationHeader.startsWith("Bearer ")) {
+                if (tokenService.isBearerAuthToken(authorizationHeader)) {
                     processBearerAuth(httpRequest, httpResponse, filterChain);
-                } else if (authorizationHeader.startsWith("Basic ")) {
+                } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
-
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else {
@@ -286,8 +287,9 @@ public class AuthenticationFilter implements Filter {
 
         try {
             String header = servletRequest.getHeader("Authorization");
-            if (header != null && header.startsWith("Basic ")) {
-                String base64Token = header.substring(6);
+            header.startsWith("Basic ");
+            if (header != null && tokenService.isBasicAuthToken(header)) {
+                String base64Token = tokenService.getBasicTokenFromAuthorizationParameter(header);
                 String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
 
                 String username = "";
@@ -344,7 +346,7 @@ public class AuthenticationFilter implements Filter {
                                    FilterChain filterChain) {
         try {
             String header = servletRequest.getHeader("Authorization");
-            if (header != null && header.startsWith("Bearer ")) {
+            if (header != null && tokenService.isBearerAuthToken(header)) {
                 // Immutable object
                 // servletRequest.getParameterMap().put("access_token", new
                 // String[]{accessToken});

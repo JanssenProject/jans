@@ -219,9 +219,9 @@ public class IntrospectionWebService {
      * @throws UnsupportedEncodingException when encoding is not supported
      */
     private Pair<AuthorizationGrant, Boolean> getAuthorizationGrant(String authorization, String accessToken) throws UnsupportedEncodingException {
-        AuthorizationGrant grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Bearer ");
+        AuthorizationGrant grant = tokenService.getBearerAuthorizationGrant(authorization);
         if (grant != null) {
-            final String authorizationAccessToken = authorization.substring("Bearer ".length());
+            final String authorizationAccessToken = tokenService.getBearerTokenFromAuthorizationParameter(authorization);
             final AbstractToken accessTokenObject = grant.getAccessToken(authorizationAccessToken);
             if (accessTokenObject != null && accessTokenObject.isValid()) {
                 return new Pair<>(grant, false);
@@ -231,13 +231,13 @@ public class IntrospectionWebService {
             }
         }
 
-        grant = tokenService.getAuthorizationGrantByPrefix(authorization, "Basic ");
+        grant = tokenService.getBasicAuthorizationGrant(authorization);
         if (grant != null) {
             return new Pair<>(grant, false);
         }
-        if (StringUtils.startsWithIgnoreCase(authorization, "Basic ")) {
-
-            String encodedCredentials = authorization.substring("Basic ".length());
+        if (tokenService.isBasicAuthToken(authorization)) {
+            
+            String encodedCredentials = tokenService.getBasicTokenFromAuthorizationParameter(authorization);
 
             String token = new String(Base64.decodeBase64(encodedCredentials), Util.UTF8_STRING_ENCODING);
 
