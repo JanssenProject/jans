@@ -6,13 +6,11 @@
 
 package org.gluu.oxauth.model.uma;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -31,36 +29,22 @@ import java.util.List;
 @JsonPropertyOrder({"name", "uri", "type", "scopes", "scopeExpression", "icon_uri"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
-@ApiModel(value = "The resource server defines a resource set that the authorization server needs to be aware of by registering a resource set description at the authorization server. This registration process results in a unique identifier for the resource set that the resource server can later use for managing its description.")
 public class UmaResource {
 
-    @ApiModelProperty(value = "An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions."
-            , required = false)
     private List<String> scopes;
 
-    @ApiModelProperty(value = "Scope expression.", required = false)
     private String scopeExpression;
 
-    @ApiModelProperty(value = "A human-readable string describing the resource at length. The authorization server MAY use this description in any user interface it presents to a resource owner, for example, for resource protection monitoring or policy setting."
-            , required = false)
     private String description;
 
-    @ApiModelProperty(value = "A URI for a graphic icon representing the resource set. The referenced icon MAY be used by the authorization server in its resource owner user interface for the resource owner."
-            , required = false)
     private String iconUri;
 
-    @ApiModelProperty(value = " A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner."
-              , required = false)
     private String name;
 
-    @ApiModelProperty(value = " A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim."
-                  , required = false)
     private String type;
 
-    @ApiModelProperty(value = "Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource was originally issued.", required = true)
     private Integer iat;
 
-    @ApiModelProperty(value = " Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this resource will expire. ", required = true)
     private Integer exp;
 
     @JsonProperty(value = "iat")

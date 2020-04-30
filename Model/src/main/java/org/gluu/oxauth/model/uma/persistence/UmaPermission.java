@@ -33,7 +33,7 @@ public class UmaPermission implements Serializable {
     private String ticket;
     @AttributeName(name = "oxConfigurationCode")
     private String configurationCode;
-    @AttributeName(name = "oxAuthExpiration")
+    @AttributeName(name = "exp")
     private Date expirationDate;
     @AttributeName(name = "del")
     private boolean deletable = true;

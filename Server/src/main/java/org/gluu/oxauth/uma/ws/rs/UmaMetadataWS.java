@@ -6,10 +6,6 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -30,7 +26,6 @@ import javax.ws.rs.core.Response;
  * The endpoint at which the requester can obtain UMA2 metadata.
  */
 @Path("/uma2-configuration")
-@Api(value = "/.well-known/uma2-configuration", description = "The authorization server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/uma2-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
 public class UmaMetadataWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
@@ -47,13 +42,6 @@ public class UmaMetadataWS {
 
     @GET
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    @ApiOperation(
-            value = "Provides configuration data as json document. It contains options and endpoints supported by the authorization server.",
-            response = UmaMetadata.class
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 500, message = "Failed to build Uma configuration json object.")
-    })
     public Response getConfiguration() {
         try {
             final String baseEndpointUri = appConfiguration.getBaseEndpoint();

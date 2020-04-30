@@ -13,12 +13,12 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version April 22, 2020
  */
 public interface CIBAAuthorizeParamsValidatorInterceptionInterface {
 
     DefaultErrorResponse validateParams(
             List<String> scopeList, String clientNotificationToken, BackchannelTokenDeliveryMode tokenDeliveryMode,
             String loginHintToken, String idTokenHint, String loginHint, String bindingMessage,
-            Boolean backchannelUserCodeParameter, String userCode);
+            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode);
 }

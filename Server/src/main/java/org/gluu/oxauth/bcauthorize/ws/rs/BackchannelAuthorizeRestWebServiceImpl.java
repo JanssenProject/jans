@@ -6,11 +6,7 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
 import org.apache.logging.log4j.util.Strings;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorProxy;
 import org.gluu.oxauth.ciba.CIBAEndUserNotificationProxy;
@@ -38,6 +34,9 @@ import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -59,10 +58,9 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * Implementation for request backchannel authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version March 4, 2020
+ * @version April 22, 2020
  */
 @Path("/")
-@Api(value = "/oxauth/bc-authorize", description = "Backchannel Authorization Endpoint")
 public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthorizeRestWebService {
 
     @Inject
@@ -101,7 +99,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     @Override
     public Response requestBackchannelAuthorizationPost(
             String clientId, String scope, String clientNotificationToken, String acrValues, String loginHintToken,
-            String idTokenHint, String loginHint, String bindingMessage, String userCode, Integer requestedExpiry,
+            String idTokenHint, String loginHint, String bindingMessage, String userCodeParam, Integer requestedExpiry,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded
 
@@ -113,9 +111,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request backchannel authorization: "
                         + "clientId = {}, scope = {}, clientNotificationToken = {}, acrValues = {}, loginHintToken = {}, "
-                        + "idTokenHint = {}, loginHint = {}, bindingMessage = {}, userCode = {}, requestedExpiry = {}",
+                        + "idTokenHint = {}, loginHint = {}, bindingMessage = {}, userCodeParam = {}, requestedExpiry = {}",
                 clientId, scope, clientNotificationToken, acrValues, loginHintToken,
-                idTokenHint, loginHint, bindingMessage, userCode, requestedExpiry);
+                idTokenHint, loginHint, bindingMessage, userCodeParam, requestedExpiry);
         log.debug("Attempting to request backchannel authorization: "
                 + "isSecure = {}", securityContext.isSecure());
 
@@ -211,18 +209,19 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             scopeList.addAll(grantedScopes);
         }
 
-        DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
-                scopeList, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
-                loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
-                userCode);
-        if (cibaAuthorizeParamsValidation != null) {
-            builder = Response.status(cibaAuthorizeParamsValidation.getStatus());
-            builder.entity(errorResponseFactory.errorAsJson(
-                    cibaAuthorizeParamsValidation.getType(), cibaAuthorizeParamsValidation.getReason()));
-            return builder.build();
-        }
-
         try {
+            String userCode = (String) user.getAttribute("oxAuthBackchannelUserCode", true, false);
+            DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
+                    scopeList, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
+                    loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
+                    userCodeParam, userCode);
+            if (cibaAuthorizeParamsValidation != null) {
+                builder = Response.status(cibaAuthorizeParamsValidation.getStatus());
+                builder.entity(errorResponseFactory.errorAsJson(
+                        cibaAuthorizeParamsValidation.getType(), cibaAuthorizeParamsValidation.getReason()));
+                return builder.build();
+            }
+
             String deviceRegistrationToken = (String) user.getAttribute("oxAuthBackchannelDeviceRegistrationToken", true, false);
             if (deviceRegistrationToken == null) {
                 builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode()); // 401
