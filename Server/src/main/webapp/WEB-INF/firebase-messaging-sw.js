@@ -1,19 +1,11 @@
 // Import and configure the Firebase SDK
 // These scripts are made available when the app is served or deployed on Firebase Hosting
 // If you do not serve/host your project using Firebase Hosting see https://firebase.google.com/docs/web/setup
-importScripts('https://www.gstatic.com/firebasejs/6.0.4/firebase-app.js');
-importScripts('https://www.gstatic.com/firebasejs/6.0.4/firebase-messaging.js');
+importScripts('https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/7.6.1/firebase-messaging.js');
 
 // Your web app's Firebase configuration
-var firebaseConfig = {
-    apiKey: "AIzaSyDwJtxZV-ApPlApt7HdXkleEZhseURgzHI",
-    authDomain: "api-project-561176510817.firebaseapp.com",
-    databaseURL: "https://api-project-561176510817.firebaseio.com",
-    projectId: "api-project-561176510817",
-    storageBucket: "api-project-561176510817.appspot.com",
-    messagingSenderId: "561176510817",
-    appId: "1:561176510817:web:8e327e72cd49e8d5"
-};
+var firebaseConfig = '${FIREBASE_CONFIG}';
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
