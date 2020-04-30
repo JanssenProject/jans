@@ -25,7 +25,7 @@ public interface UserInfoRestWebService {
     @Path("/userinfo")
     @Produces({MediaType.APPLICATION_JSON})
     Response requestUserInfoGet(
-            @QueryParam("access_token")
+            @QueryParam("access_token")String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
@@ -34,7 +34,7 @@ public interface UserInfoRestWebService {
     @Path("/userinfo")
     @Produces({MediaType.APPLICATION_JSON})
     Response requestUserInfoPost(
-            @FormParam("access_token")
+            @FormParam("access_token") String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
