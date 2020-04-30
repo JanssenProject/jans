@@ -17,6 +17,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ScopeService;
+import org.gluu.oxauth.service.token.TokenService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.oxauth.persistence.model.Scope;
@@ -54,7 +55,10 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 	private ClientService clientService;
 
 	@Inject
-	private AttributeService attributeService;
+    private AttributeService attributeService;
+    
+    @Inject
+    private TokenService tokenService;
 
     @Override
     public Response requestClientInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
@@ -67,8 +71,8 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
     }
 
     public Response requestClientInfo(String accessToken, String authorization, SecurityContext securityContext) {
-        if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
-            accessToken = authorization.substring(7);
+        if (authorization != null && !authorization.isEmpty() && tokenService.isBearerAuthToken(authorization)) {
+            accessToken = tokenService.getBearerTokenFromAuthorizationParameter(authorization);
         }
         log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}",
                 new Object[] { accessToken, securityContext.isSecure() });
