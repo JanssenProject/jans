@@ -112,7 +112,7 @@ public class UmaValidationService {
             throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT, "Authorization header is blank.");
         }
 
-        String token = tokenService.getTokenFromAuthorizationParameter(authorization);
+        String token = tokenService.getToken(authorization);
         if (StringHelper.isEmpty(token)) {
             log.debug("Token is invalid.");
             throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT, "Token is invalid.");
