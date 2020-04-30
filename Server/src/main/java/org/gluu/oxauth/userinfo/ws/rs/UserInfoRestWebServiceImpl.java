@@ -42,6 +42,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
+import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
@@ -114,6 +115,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @Inject
     private PersistenceEntryManager entryManager;
 
+    @Inject
+    private TokenService tokenService;
+
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
         return requestUserInfo(accessToken, authorization, request, securityContext);
@@ -125,9 +129,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     public Response requestUserInfo(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
-        if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
-            accessToken = authorization.substring(7);
+        
+        if(authorization != null && !authorization.isEmpty() && tokenService.isBearerAuthToken(authorization)) {
+            accessToken = tokenService.getBearerTokenFromAuthorizationParameter(authorization);
         }
+
+        if(authorization !=null )
         log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}",
                 accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
