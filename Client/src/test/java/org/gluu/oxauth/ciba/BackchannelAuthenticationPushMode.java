@@ -43,7 +43,7 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version March 4, 2020
+ * @version April 22, 2020
  */
 public class BackchannelAuthenticationPushMode extends BaseTest {
 
@@ -72,10 +72,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
     String loginHintTokenPS384;
     String loginHintTokenPS512;
 
-    @Parameters({"backchannelClientNotificationEndpoint", "userId"})
+    @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userId"})
     @Test
     public void backchannelTokenDeliveryModePushLoginHint1(
-            final String backchannelClientNotificationEndpoint, final String userId) {
+            final String backchannelClientNotificationEndpoint, final String backchannelUserCode, final String userId) {
         showTitle("backchannelTokenDeliveryModePushLoginHint1");
 
         // 1. Dynamic Client Registration
@@ -111,12 +111,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
 
         // 2. Authentication Request
         String bindingMessage = RandomStringUtils.randomAlphanumeric(6);
+        String clientNotificationToken = UUID.randomUUID().toString();
 
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid", "profile", "address", "phone", "email"));
         backchannelAuthenticationRequest.setLoginHint(userId);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
         backchannelAuthenticationRequest.setBindingMessage(bindingMessage);
@@ -134,10 +135,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint", "userEmail"})
+    @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userEmail"})
     @Test
     public void backchannelTokenDeliveryModePushLoginHint2(
-            final String backchannelClientNotificationEndpoint, final String userEmail) {
+            final String backchannelClientNotificationEndpoint, final String backchannelUserCode, final String userEmail) {
         showTitle("backchannelTokenDeliveryModePushLoginHint2");
 
         // 1. Dynamic Client Registration
@@ -172,11 +173,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userEmail);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -192,10 +195,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint", "userInum"})
+    @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userInum"})
     @Test
     public void backchannelTokenDeliveryModePushLoginHint3(
-            final String backchannelClientNotificationEndpoint, final String userInum) {
+            final String backchannelClientNotificationEndpoint, final String backchannelUserCode, final String userInum) {
         showTitle("backchannelTokenDeliveryModePushLoginHint3");
 
         // 1. Dynamic Client Registration
@@ -230,11 +233,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userInum);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -250,10 +255,125 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"backchannelClientNotificationEndpoint", "userInum"})
+    @Test
+    public void backchannelTokenDeliveryModePushLoginHint4(
+            final String backchannelClientNotificationEndpoint, final String userInum) {
+        showTitle("backchannelTokenDeliveryModePushLoginHint4");
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+
+        registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+        registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
+        registerRequest.setBackchannelUserCodeParameter(false);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PUSH.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), new Boolean(false).toString());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
+        BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userInum);
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAuthUsername(clientId);
+        backchannelAuthenticationRequest.setAuthPassword(clientSecret);
+
+        BackchannelAuthenticationClient backchannelAuthenticationClient = new BackchannelAuthenticationClient(backchannelAuthenticationEndpoint);
+        backchannelAuthenticationClient.setRequest(backchannelAuthenticationRequest);
+        BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
+
+        showClient(backchannelAuthenticationClient);
+        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
+        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
+        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
+        assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+    }
+
+    @Parameters({"backchannelClientNotificationEndpoint", "userInum"})
+    @Test
+    public void backchannelTokenDeliveryModePushLoginHint5(
+            final String backchannelClientNotificationEndpoint, final String userInum) {
+        showTitle("backchannelTokenDeliveryModePushLoginHint5");
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+
+        registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+        registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PUSH.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
+        BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setLoginHint(userInum);
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setRequestedExpiry(1200);
+        backchannelAuthenticationRequest.setAuthUsername(clientId);
+        backchannelAuthenticationRequest.setAuthPassword(clientSecret);
+
+        BackchannelAuthenticationClient backchannelAuthenticationClient = new BackchannelAuthenticationClient(backchannelAuthenticationEndpoint);
+        backchannelAuthenticationClient.setRequest(backchannelAuthenticationRequest);
+        BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
+
+        showClient(backchannelAuthenticationClient);
+        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
+        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
+        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
+        assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+    }
+
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintRS256")
-    public void backchannelTokenDeliveryModePushIdTokenHintRS256(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintRS256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS256");
 
         // 1. Dynamic Client Registration
@@ -289,11 +409,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -309,10 +431,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintRS384")
-    public void backchannelTokenDeliveryModePushIdTokenHintRS384(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintRS384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS384");
 
         // 1. Dynamic Client Registration
@@ -348,11 +470,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -368,10 +492,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintRS512")
-    public void backchannelTokenDeliveryModePushIdTokenHintRS512(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintRS512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintRS512");
 
         // 1. Dynamic Client Registration
@@ -407,11 +531,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintRS512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -427,10 +553,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintES256")
-    public void backchannelTokenDeliveryModePushIdTokenHintES256(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintES256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES256");
 
         // 1. Dynamic Client Registration
@@ -466,11 +592,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -486,10 +614,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintES384")
-    public void backchannelTokenDeliveryModePushIdTokenHintES384(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintES384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES384");
 
         // 1. Dynamic Client Registration
@@ -525,11 +653,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -545,10 +675,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintES512")
-    public void backchannelTokenDeliveryModePushIdTokenHintES512(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintES512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintES512");
 
         // 1. Dynamic Client Registration
@@ -584,11 +714,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintES512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -604,10 +736,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintPS256")
-    public void backchannelTokenDeliveryModePushIdTokenHintPS256(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintPS256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS256");
 
         // 1. Dynamic Client Registration
@@ -643,11 +775,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -663,10 +797,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintPS384")
-    public void backchannelTokenDeliveryModePushIdTokenHintPS384(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintPS384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS384");
 
         // 1. Dynamic Client Registration
@@ -702,11 +836,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -722,10 +858,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintPS512")
-    public void backchannelTokenDeliveryModePushIdTokenHintPS512(final String clientJwksUri,
-                                                                 final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintPS512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintPS512");
 
         // 1. Dynamic Client Registration
@@ -761,11 +897,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintPS512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -781,10 +919,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintAlgA128KWEncA128GCM")
-    public void backchannelTokenDeliveryModePushIdTokenHintAlgA128KWEncA128GCM(final String clientJwksUri,
-                                                                               final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintAlgA128KWEncA128GCM(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgA128KWEncA128GCM");
 
         // 1. Dynamic Client Registration
@@ -820,11 +958,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgA128KWEncA128GCM);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -840,10 +980,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintAlgA256KWEncA256GCM")
-    public void backchannelTokenDeliveryModePushIdTokenHintAlgA256KWEncA256GCM(final String clientJwksUri,
-                                                                               final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintAlgA256KWEncA256GCM(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgA256KWEncA256GCM");
 
         // 1. Dynamic Client Registration
@@ -879,11 +1019,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgA256KWEncA256GCM);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -899,10 +1041,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintAlgRSA15EncA128CBCPLUSHS256")
-    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA128CBCPLUSHS256(final String clientJwksUri,
-                                                                                       final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA128CBCPLUSHS256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA128CBCPLUSHS256");
 
         // 1. Dynamic Client Registration
@@ -938,11 +1080,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSA15EncA128CBCPLUSHS256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -958,10 +1102,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintAlgRSA15EncA256CBCPLUSHS512")
-    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA256CBCPLUSHS512(final String clientJwksUri,
-                                                                                       final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA256CBCPLUSHS512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSA15EncA256CBCPLUSHS512");
 
         // 1. Dynamic Client Registration
@@ -997,11 +1141,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSA15EncA256CBCPLUSHS512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1017,10 +1163,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "idTokenHintAlgRSAOAEPEncA256GCM")
-    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSAOAEPEncA256GCM(final String clientJwksUri,
-                                                                                final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushIdTokenHintAlgRSAOAEPEncA256GCM(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushIdTokenHintAlgRSAOAEPEncA256GCM");
 
         // 1. Dynamic Client Registration
@@ -1056,11 +1202,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setIdTokenHint(idTokenHintAlgRSAOAEPEncA256GCM);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1076,10 +1224,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS256")
-    public void backchannelTokenDeliveryModePushLoginHintTokenRS256(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenRS256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS256");
 
         // 1. Dynamic Client Registration
@@ -1115,11 +1263,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1135,10 +1285,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS384")
-    public void backchannelTokenDeliveryModePushLoginHintTokenRS384(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenRS384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS384");
 
         // 1. Dynamic Client Registration
@@ -1174,11 +1324,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1194,10 +1346,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenRS512")
-    public void backchannelTokenDeliveryModePushLoginHintTokenRS512(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenRS512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenRS512");
 
         // 1. Dynamic Client Registration
@@ -1233,11 +1385,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenRS512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1253,10 +1407,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES256")
-    public void backchannelTokenDeliveryModePushLoginHintTokenES256(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenES256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES256");
 
         // 1. Dynamic Client Registration
@@ -1292,11 +1446,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1312,10 +1468,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES384")
-    public void backchannelTokenDeliveryModePushLoginHintTokenES384(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenES384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES384");
 
         // 1. Dynamic Client Registration
@@ -1351,11 +1507,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1371,10 +1529,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenES512")
-    public void backchannelTokenDeliveryModePushLoginHintTokenES512(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenES512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenES512");
 
         // 1. Dynamic Client Registration
@@ -1410,11 +1568,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenES512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1430,10 +1590,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS256")
-    public void backchannelTokenDeliveryModePushLoginHintTokenPS256(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenPS256(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS256");
 
         // 1. Dynamic Client Registration
@@ -1469,11 +1629,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS256);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1489,10 +1651,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS384")
-    public void backchannelTokenDeliveryModePushLoginHintTokenPS384(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenPS384(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS384");
 
         // 1. Dynamic Client Registration
@@ -1528,11 +1690,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS384);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1548,10 +1712,10 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
     }
 
-    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
+    @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode"})
     @Test(dependsOnMethods = "loginHintTokenPS512")
-    public void backchannelTokenDeliveryModePushLoginHintTokenPS512(final String clientJwksUri,
-                                                                    final String backchannelClientNotificationEndpoint) {
+    public void backchannelTokenDeliveryModePushLoginHintTokenPS512(
+            final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode) {
         showTitle("backchannelTokenDeliveryModePushLoginHintTokenPS512");
 
         // 1. Dynamic Client Registration
@@ -1587,11 +1751,13 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHintToken(loginHintTokenPS512);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1911,10 +2077,12 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHint("admin");
-        backchannelAuthenticationRequest.setClientNotificationToken("1234567890");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
         backchannelAuthenticationRequest.setUserCode(null); // Invalid user code.
         backchannelAuthenticationRequest.setAuthUsername(clientId);
         backchannelAuthenticationRequest.setAuthPassword(clientSecret);
@@ -1931,10 +2099,9 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"backchannelClientNotificationEndpoint", "userId"})
+    @Parameters({"backchannelClientNotificationEndpoint"})
     @Test
-    public void backchannelTokenDeliveryModePushFail7(
-            final String backchannelClientNotificationEndpoint, final String userId) {
+    public void backchannelTokenDeliveryModePushFail7(final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePushFail7");
 
         // 1. Dynamic Client Registration
@@ -1969,11 +2136,73 @@ public class BackchannelAuthenticationPushMode extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
+        BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
+        backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
+        backchannelAuthenticationRequest.setLoginHint("admin");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode("INVALID_USER_CODE"); // Invalid user code.
+        backchannelAuthenticationRequest.setAuthUsername(clientId);
+        backchannelAuthenticationRequest.setAuthPassword(clientSecret);
+
+        BackchannelAuthenticationClient backchannelAuthenticationClient = new BackchannelAuthenticationClient(backchannelAuthenticationEndpoint);
+        backchannelAuthenticationClient.setRequest(backchannelAuthenticationRequest);
+        BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
+
+        showClient(backchannelAuthenticationClient);
+        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
+        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
+        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
+        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE, backchannelAuthenticationResponse.getErrorType());
+        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"backchannelClientNotificationEndpoint", "backchannelUserCode", "userId"})
+    @Test
+    public void backchannelTokenDeliveryModePushFail8(
+            final String backchannelClientNotificationEndpoint, final String backchannelUserCode, final String userId) {
+        showTitle("backchannelTokenDeliveryModePushFail8");
+
+        // 1. Dynamic Client Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.CIBA));
+
+        registerRequest.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.PUSH);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
+        registerRequest.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.RS256);
+        registerRequest.setBackchannelUserCodeParameter(true);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.PUSH.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
+        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), new Boolean(true).toString());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Authentication Request
+        String clientNotificationToken = UUID.randomUUID().toString();
+
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
         backchannelAuthenticationRequest.setScope(Arrays.asList("openid"));
         backchannelAuthenticationRequest.setLoginHint(userId);
-        backchannelAuthenticationRequest.setClientNotificationToken("123");
-        backchannelAuthenticationRequest.setUserCode("qwe");
+        backchannelAuthenticationRequest.setClientNotificationToken(clientNotificationToken);
+        backchannelAuthenticationRequest.setUserCode(backchannelUserCode);
         backchannelAuthenticationRequest.setRequestedExpiry(1200);
         backchannelAuthenticationRequest.setAcrValues(Arrays.asList("auth_ldap_server", "basic"));
         backchannelAuthenticationRequest.setBindingMessage("####"); // Invalid binding message
