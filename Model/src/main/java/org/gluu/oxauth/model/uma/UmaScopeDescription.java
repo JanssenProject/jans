@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth.model.uma;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -28,19 +26,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonPropertyOrder({ "name", "icon_uri" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement()
-@ApiModel(value = "A scope description is a JSON document")
 public class UmaScopeDescription {
 
-	@ApiModelProperty(value = "A human-readable string describing the resource at length. The authorization server MAY use this description in any user interface it presents to a resource owner, for example, for resource protection monitoring or policy setting."
-			, required = false)
 	private String description;
 
-	@ApiModelProperty(value = "A URI for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner."
-			, required = false)
 	private String iconUri;
 
-    @ApiModelProperty(value = "A human-readable string describing some scope (extent) of access. This name MAY be used by the authorization server in any user interface it presents to the resource owner."
-                 , required = true)
 	private String name;
 
 	@JsonProperty(value = "description")

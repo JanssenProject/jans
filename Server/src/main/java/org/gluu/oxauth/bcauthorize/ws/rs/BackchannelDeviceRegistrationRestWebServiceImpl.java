@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBADeviceRegistrationValidatorProxy;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
@@ -40,7 +39,6 @@ import static org.gluu.oxauth.model.ciba.BackchannelDeviceRegistrationErrorRespo
  * @version October 7, 2019
  */
 @Path("/")
-@Api(value = "/oxauth/bc-deviceRegistration", description = "Backchannel Device Registration Endpoint")
 public class BackchannelDeviceRegistrationRestWebServiceImpl implements BackchannelDeviceRegistrationRestWebService {
 
     @Inject
