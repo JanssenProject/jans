@@ -362,7 +362,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        return sectorIdentifierService.getSub(getClient(), getUser(), this instanceof CIBAGrant);
+        return sectorIdentifierService.getSub(this);
     }
 
     public boolean isCachedWithNoPersistence() {

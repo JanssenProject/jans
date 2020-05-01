@@ -47,10 +47,8 @@ import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.util.StringHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -369,9 +367,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
             }
-
-            if(authorizationGrant.getAuthorizationGrantType()!=AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
-                jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
         }
 
         if (authorizationGrant.getClaims() != null) {
@@ -441,45 +436,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getAuthorizationGrantType() != AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS && 
-            authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
-                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else if( authorizationGrant.getAuthorizationGrantType() != AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS){
-            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
-            }
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
-                subValue = authorizationGrant.getUser().getUserId();
-            }
-            jsonWebResponse.getClaims().setSubjectIdentifier(subValue);
-        }else {
-            String userid = authorizationGrant.getUser().getUserId();
-            jsonWebResponse.getClaims().setSubjectIdentifier(userid);
-        }
+        jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
