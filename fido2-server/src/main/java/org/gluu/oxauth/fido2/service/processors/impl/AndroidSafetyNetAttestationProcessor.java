@@ -24,7 +24,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
@@ -36,6 +35,7 @@ import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CertificateSelector;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
+import org.gluu.oxauth.fido2.service.mds.AuthCertService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -64,7 +64,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     private CoseService coseService;
 
     @Inject
-    private CertificationKeyStoreUtils utils;
+    private AuthCertService authCertService;
 
     @Inject
     private Base64Service base64Service;
@@ -83,7 +83,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         String aaguid = Hex.encodeHexString(authData.getAaguid());
         log.info("Android safetynet payload {} {}", aaguid, new String(base64Service.decode(response)));
 
-        X509TrustManager tm = utils.populateTrustManager(authData);
+        X509TrustManager tm = authCertService.populateTrustManager(authData);
         AttestationStatement stmt;
         try {
             stmt = OfflineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);

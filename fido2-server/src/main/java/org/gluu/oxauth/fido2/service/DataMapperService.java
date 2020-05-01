@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
@@ -53,6 +54,10 @@ public class DataMapperService {
 
     public ObjectNode createObjectNode() {
         return objectMapper.createObjectNode();
+    }
+
+    public ArrayNode createArrayNode() {
+        return objectMapper.createArrayNode();
     }
 
     public JsonNode cborReadTree(byte[] content) throws IOException {
