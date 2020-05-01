@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
 import org.gluu.oxauth.fido2.cryptoutils.AndroidKeyUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
@@ -35,6 +34,7 @@ import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
+import org.gluu.oxauth.fido2.service.mds.AuthCertService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -60,7 +60,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     private AndroidKeyUtils androidKeyUtils;
 
     @Inject
-    private CertificationKeyStoreUtils utils;
+    private AuthCertService authCertService;
 
     @Override
     public AttestationFormat getAttestationFormat() {
@@ -80,7 +80,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
             certificatePath.add(i.next().asText());
         }
         List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
-        List<X509Certificate> trustAnchorCertificates = utils.getCertificates(authData);
+        List<X509Certificate> trustAnchorCertificates = authCertService.getCertificates(authData);
         X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
         ECPublicKey pubKey = (ECPublicKey) verifiedCert.getPublicKey();
 
