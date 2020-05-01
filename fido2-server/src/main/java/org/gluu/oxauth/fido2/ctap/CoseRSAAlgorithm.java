@@ -49,7 +49,7 @@ public enum CoseRSAAlgorithm {
         return ALGORITHM_MAPPINGS.get(value);
     }
 
-    int getNumericValue() {
+    public int getNumericValue() {
         return numericValue;
     }
 }

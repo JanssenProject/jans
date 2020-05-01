@@ -32,7 +32,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
@@ -43,6 +42,8 @@ import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
+import org.gluu.oxauth.fido2.service.SignatureValidator;
+import org.gluu.oxauth.fido2.service.mds.AuthCertService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -67,7 +68,10 @@ public class TPMProcessor implements AttestationFormatProcessor {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private CertificationKeyStoreUtils utils;
+    private AuthCertService authCertService;
+    
+    @Inject
+    private SignatureValidator signatureValidator;
 
     @Inject
     private CertificateValidator certificateValidator;
@@ -115,7 +119,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
             List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
             List<X509Certificate> aikCertificates = cryptoUtils.getCertificates(aikCertificatePath);
-            List<X509Certificate> trustAnchorCertificates = utils.getCertificates(authData);
+            List<X509Certificate> trustAnchorCertificates = authCertService.getCertificates(authData);
             X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
             X509Certificate aikCertificate = aikCertificates.get(0);
 
@@ -187,7 +191,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
     }
 
     private byte[] getHashedBuffer(int digestAlgorith, byte[] authenticatorDataBuffer, byte[] clientDataHashBuffer) {
-        MessageDigest hashedBufferDigester = commonVerifiers.getDigest(digestAlgorith);
+        MessageDigest hashedBufferDigester = signatureValidator.getDigest(digestAlgorith);
         byte[] b1 = authenticatorDataBuffer;
         byte[] b2 = clientDataHashBuffer;
         byte[] buffer = ByteBuffer.allocate(b1.length + b2.length).put(b1).put(b2).array();
