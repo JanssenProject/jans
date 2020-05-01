@@ -90,7 +90,7 @@ public class CertificateValidator {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
-                log.warn("Empty list of trust managers");
+                log.error("Empty list of trust managers");
                 return certs.get(0);
             }
 
