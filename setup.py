@@ -1018,6 +1018,8 @@ class Setup(object):
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
 
+        if self.installCasa:
+            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
