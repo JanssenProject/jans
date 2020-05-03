@@ -120,6 +120,7 @@ public class AppConfiguration implements Configuration {
     private Boolean persistRefreshTokenInLdap = true;
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
+    private Boolean returnClientSecretOnRead = false;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -214,6 +215,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getReturnClientSecretOnRead() {
+        if (returnClientSecretOnRead == null) returnClientSecretOnRead = false;
+        return returnClientSecretOnRead;
+    }
+
+    public void setReturnClientSecretOnRead(Boolean returnClientSecretOnRead) {
+        this.returnClientSecretOnRead = returnClientSecretOnRead;
+    }
 
     public Boolean getFapiCompatibility() {
         if (fapiCompatibility == null) fapiCompatibility = false;
