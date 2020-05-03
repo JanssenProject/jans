@@ -320,7 +320,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             clientService.persist(client);
 
-            JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            JSONObject jsonObject = getJSONObject(client);
             builder.entity(jsonObject.toString(4).replace("\\/", "/"));
 
             log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
@@ -750,18 +750,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(p_client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+        final JSONObject jsonObject = getJSONObject(p_client);
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
-    private JSONObject getJSONObject(Client client, boolean authorizationRequestCustomAllowedParameters) throws JSONException, StringEncrypter.EncryptionException {
+    private JSONObject getJSONObject(Client client) throws JSONException, StringEncrypter.EncryptionException {
         JSONObject responseJsonObject = new JSONObject();
 
         JsonApplier.getInstance().apply(client, responseJsonObject);
         JsonApplier.getInstance().apply(client.getAttributes(), responseJsonObject);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
+        if (appConfiguration.getReturnClientSecretOnRead()) {
+            Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
+        }
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
                 appConfiguration.getRegistrationEndpoint() + "?" +
@@ -836,7 +838,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         }
 
-        if (authorizationRequestCustomAllowedParameters) {
+        if (appConfiguration.getLegacyDynamicRegistrationScopeParam()) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
         } else {
             Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
