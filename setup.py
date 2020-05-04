@@ -614,10 +614,11 @@ class Setup(object):
                             'query_manage_index']
         self.post_messages = []
         self.couchbase_bucket_prefix = 'gluu'
-        
+
         #oxd install options
         self.installOxd = False
         self.oxd_package = ''
+        self.oxd_use_gluu_storage = False
 
         #casa install options
         self.installCasa = False
@@ -3324,6 +3325,15 @@ class Setup(object):
                 self.installOxd = False
 
 
+        if self.installOxd:
+
+            promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
+                                                self.getDefaultOption(self.oxd_use_gluu_storage)
+                                                )[0].lower()
+            if promptForOxdGluuStorage == 'y':
+                self.oxd_use_gluu_storage = True
+
+
         promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
                                             self.getDefaultOption(self.installGluuRadius)
                                             )[0].lower()
@@ -4281,22 +4291,22 @@ class Setup(object):
         install_list = {'mondatory': [], 'optional': []}
 
         package_list = {
-                'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests bzip2', 'optional': 'memcached'},
-                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 rsyslog bzip2', 'optional': 'memcached'},
-                'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
+                'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2', 'optional': 'memcached'},
+                'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
+                'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
                 }
 
         os_type_version = self.os_type+' '+self.os_version
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
-                if os_type_version in ('centos 7', 'red 7') and package == 'python3-ldap3':
-                    package_query = 'python36-ldap3'
+                if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
+                    package_query = package_query.replace('python3-', 'python36-')
                 else:
                     package_query = package
                 sout, serr = self.run(query_command.format(package_query), shell=True, get_stderr=True)
@@ -5092,6 +5102,8 @@ class Setup(object):
     def install_oxd(self):
         self.logIt("Installing oxd server...")
         oxd_root = '/opt/oxd-server/'
+        oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
+        
         self.run(['tar', '-zxf', self.oxd_package, '-C', '/opt'])
         self.run(['chown', '-R', 'jetty:jetty', oxd_root])
         
@@ -5113,6 +5125,29 @@ class Setup(object):
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
 
+
+        if self.oxd_use_gluu_storage:
+            oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
+            yml_str = self.readFile(oxd_server_yml_fn)
+            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+            oxd_yaml['storage_configuration'].pop('dbFileLocation')
+
+            oxd_yaml['storage'] = 'gluu_server_configuration'
+
+            oxd_yaml['storage_configuration']['type'] = self.gluu_properties_fn
+
+            oxd_yaml['storage_configuration']['connection'] = self.ox_ldap_properties \
+                if self.mappingLocations['default'] == 'ldap' else self.gluuCouchebaseProperties
+
+            try:
+                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
+            except:
+                pass
+            
+            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+
+            self.writeFile(oxd_server_yml_fn, yml_str)
 
         self.enable_service_at_start('oxd-server')
 
@@ -5705,6 +5740,7 @@ if __name__ == '__main__':
     #it is time to import pyDes library
     from pyDes import *
     from pylib.cbm import CBM
+    import ruamel.yaml
     from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
     from ldap3.utils import dn as dnutils
     gluu_utils.dnutils = dnutils
