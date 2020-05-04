@@ -5585,6 +5585,7 @@ if __name__ == '__main__':
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--install-casa', help="Install Casa", action='store_true')
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
+    parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
 
     argsp = parser.parse_args()
@@ -5713,7 +5714,10 @@ if __name__ == '__main__':
     
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
- 
+
+    if argsp.oxd_use_gluu_storage:
+        setupOptions['oxd_use_gluu_storage'] = True
+
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
             setupOptions['importLDIFDir'] = argsp.import_ldif
