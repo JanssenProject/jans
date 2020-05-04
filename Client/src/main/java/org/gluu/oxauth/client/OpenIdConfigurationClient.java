@@ -85,120 +85,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
-            if (StringUtils.isNotBlank(entity)) {
-                JSONObject jsonObj = new JSONObject(entity);
-
-                if (jsonObj.has(ISSUER)) {
-                    getResponse().setIssuer(jsonObj.getString(ISSUER));
-                }
-                if (jsonObj.has(AUTHORIZATION_ENDPOINT)) {
-                    getResponse().setAuthorizationEndpoint(jsonObj.getString(AUTHORIZATION_ENDPOINT));
-                }
-                if (jsonObj.has(TOKEN_ENDPOINT)) {
-                    getResponse().setTokenEndpoint(jsonObj.getString(TOKEN_ENDPOINT));
-                }
-                if (jsonObj.has(TOKEN_REVOCATION_ENDPOINT)) {
-                    getResponse().setRevocationEndpoint(jsonObj.getString(TOKEN_REVOCATION_ENDPOINT));
-                }
-                if (jsonObj.has(REVOCATION_ENDPOINT)) {
-                    getResponse().setRevocationEndpoint(jsonObj.getString(REVOCATION_ENDPOINT));
-                }
-                if (jsonObj.has(USER_INFO_ENDPOINT)) {
-                    getResponse().setUserInfoEndpoint(jsonObj.getString(USER_INFO_ENDPOINT));
-                }
-                if (jsonObj.has(CLIENT_INFO_ENDPOINT)) {
-                    getResponse().setClientInfoEndpoint(jsonObj.getString(CLIENT_INFO_ENDPOINT));
-                }
-                if (jsonObj.has(CHECK_SESSION_IFRAME)) {
-                    getResponse().setCheckSessionIFrame(jsonObj.getString(CHECK_SESSION_IFRAME));
-                }
-                if (jsonObj.has(END_SESSION_ENDPOINT)) {
-                    getResponse().setEndSessionEndpoint(jsonObj.getString(END_SESSION_ENDPOINT));
-                }
-                if (jsonObj.has(JWKS_URI)) {
-                    getResponse().setJwksUri(jsonObj.getString(JWKS_URI));
-                }
-                if (jsonObj.has(REGISTRATION_ENDPOINT)) {
-                    getResponse().setRegistrationEndpoint(jsonObj.getString(REGISTRATION_ENDPOINT));
-                }
-                if (jsonObj.has(ID_GENERATION_ENDPOINT)) {
-                    getResponse().setIdGenerationEndpoint(jsonObj.getString(ID_GENERATION_ENDPOINT));
-                }
-                if (jsonObj.has(INTROSPECTION_ENDPOINT)) {
-                    getResponse().setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
-                }
-                if (jsonObj.has(SCOPE_TO_CLAIMS_MAPPING)) {
-                    getResponse().setScopeToClaimsMapping(OpenIdConfigurationResponse.parseScopeToClaimsMapping(jsonObj.getJSONArray(SCOPE_TO_CLAIMS_MAPPING)));
-                }
-                Util.addToListIfHas(getResponse().getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getGrantTypesSupported(), jsonObj, GRANT_TYPES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getAcrValuesSupported(), jsonObj, ACR_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getSubjectTypesSupported(), jsonObj, SUBJECT_TYPES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getUserInfoSigningAlgValuesSupported(), jsonObj, USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getUserInfoEncryptionAlgValuesSupported(), jsonObj, USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getUserInfoEncryptionEncValuesSupported(), jsonObj, USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getIdTokenSigningAlgValuesSupported(), jsonObj, ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getIdTokenEncryptionAlgValuesSupported(), jsonObj, ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getIdTokenEncryptionEncValuesSupported(), jsonObj, ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getRequestObjectSigningAlgValuesSupported(), jsonObj, REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getRequestObjectEncryptionAlgValuesSupported(), jsonObj, REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getRequestObjectEncryptionEncValuesSupported(), jsonObj, REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getTokenEndpointAuthMethodsSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED);
-                Util.addToListIfHas(getResponse().getTokenEndpointAuthSigningAlgValuesSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getDisplayValuesSupported(), jsonObj, DISPLAY_VALUES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getClaimTypesSupported(), jsonObj, CLAIM_TYPES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getClaimsSupported(), jsonObj, CLAIMS_SUPPORTED);
-                if (jsonObj.has(SERVICE_DOCUMENTATION)) {
-                    getResponse().setServiceDocumentation(jsonObj.getString(SERVICE_DOCUMENTATION));
-                }
-                Util.addToListIfHas(getResponse().getClaimsLocalesSupported(), jsonObj, CLAIMS_LOCALES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getUiLocalesSupported(), jsonObj, UI_LOCALES_SUPPORTED);
-                if (jsonObj.has(CLAIMS_PARAMETER_SUPPORTED)) {
-                    getResponse().setClaimsParameterSupported(jsonObj.getBoolean(CLAIMS_PARAMETER_SUPPORTED));
-                }
-                if (jsonObj.has(REQUEST_PARAMETER_SUPPORTED)) {
-                    getResponse().setRequestParameterSupported(jsonObj.getBoolean(REQUEST_PARAMETER_SUPPORTED));
-                }
-                if (jsonObj.has(REQUEST_URI_PARAMETER_SUPPORTED)) {
-                    getResponse().setRequestUriParameterSupported(jsonObj.getBoolean(REQUEST_URI_PARAMETER_SUPPORTED));
-                }
-                if (jsonObj.has(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS)) {
-                    getResponse().setTlsClientCertificateBoundAccessTokens(jsonObj.optBoolean(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS));
-                }
-                if (jsonObj.has(FRONTCHANNEL_LOGOUT_SUPPORTED)) {
-                    getResponse().setFrontChannelLogoutSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SUPPORTED));
-                }
-                if (jsonObj.has(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
-                    getResponse().setFrontChannelLogoutSessionSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED));
-                }
-                if (jsonObj.has(BACKCHANNEL_LOGOUT_SUPPORTED)) {
-                    getResponse().setBackchannelLogoutSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SUPPORTED));
-                }
-                if (jsonObj.has(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
-                    getResponse().setBackchannelLogoutSessionSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED));
-                }
-                if (jsonObj.has(REQUIRE_REQUEST_URI_REGISTRATION)) {
-                    getResponse().setRequireRequestUriRegistration(jsonObj.getBoolean(REQUIRE_REQUEST_URI_REGISTRATION));
-                }
-                if (jsonObj.has(OP_POLICY_URI)) {
-                    getResponse().setOpPolicyUri(jsonObj.getString(OP_POLICY_URI));
-                }
-                if (jsonObj.has(OP_TOS_URI)) {
-                    getResponse().setOpTosUri(jsonObj.getString(OP_TOS_URI));
-                }
-
-                // CIBA
-                if (jsonObj.has(BACKCHANNEL_AUTHENTICATION_ENDPOINT)) {
-                    getResponse().setBackchannelAuthenticationEndpoint(jsonObj.getString(BACKCHANNEL_AUTHENTICATION_ENDPOINT));
-                }
-                Util.addToListIfHas(getResponse().getBackchannelTokenDeliveryModesSupported(), jsonObj, BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED);
-                Util.addToListIfHas(getResponse().getBackchannelAuthenticationRequestSigningAlgValuesSupported(), jsonObj, BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED);
-                if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
-                    getResponse().setBackchannelUserCodeParameterSupported(jsonObj.getBoolean(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
-                }
-            }
+            parse(entity, getResponse());
         } catch (JSONException e) {
             LOG.error("There is an error in the JSON response. Check if there is a syntax error in the JSON response or there is a wrong key", e);
             if (entity != null) {
@@ -215,5 +102,130 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         }
 
         return getResponse();
+    }
+
+    public static void parse(String json, OpenIdConfigurationResponse response) {
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
+
+        JSONObject jsonObj = new JSONObject(json);
+
+        if (jsonObj.has(ISSUER)) {
+            response.setIssuer(jsonObj.getString(ISSUER));
+        }
+        if (jsonObj.has(AUTHORIZATION_ENDPOINT)) {
+            response.setAuthorizationEndpoint(jsonObj.getString(AUTHORIZATION_ENDPOINT));
+        }
+        if (jsonObj.has(TOKEN_ENDPOINT)) {
+            response.setTokenEndpoint(jsonObj.getString(TOKEN_ENDPOINT));
+        }
+        if (jsonObj.has(TOKEN_REVOCATION_ENDPOINT)) {
+            response.setRevocationEndpoint(jsonObj.getString(TOKEN_REVOCATION_ENDPOINT));
+        }
+        if (jsonObj.has(REVOCATION_ENDPOINT)) {
+            response.setRevocationEndpoint(jsonObj.getString(REVOCATION_ENDPOINT));
+        }
+        if (jsonObj.has(USER_INFO_ENDPOINT)) {
+            response.setUserInfoEndpoint(jsonObj.getString(USER_INFO_ENDPOINT));
+        }
+        if (jsonObj.has(CLIENT_INFO_ENDPOINT)) {
+            response.setClientInfoEndpoint(jsonObj.getString(CLIENT_INFO_ENDPOINT));
+        }
+        if (jsonObj.has(CHECK_SESSION_IFRAME)) {
+            response.setCheckSessionIFrame(jsonObj.getString(CHECK_SESSION_IFRAME));
+        }
+        if (jsonObj.has(END_SESSION_ENDPOINT)) {
+            response.setEndSessionEndpoint(jsonObj.getString(END_SESSION_ENDPOINT));
+        }
+        if (jsonObj.has(JWKS_URI)) {
+            response.setJwksUri(jsonObj.getString(JWKS_URI));
+        }
+        if (jsonObj.has(REGISTRATION_ENDPOINT)) {
+            response.setRegistrationEndpoint(jsonObj.getString(REGISTRATION_ENDPOINT));
+        }
+        if (jsonObj.has(ID_GENERATION_ENDPOINT)) {
+            response.setIdGenerationEndpoint(jsonObj.getString(ID_GENERATION_ENDPOINT));
+        }
+        if (jsonObj.has(INTROSPECTION_ENDPOINT)) {
+            response.setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
+        }
+        if (jsonObj.has(SCOPE_TO_CLAIMS_MAPPING)) {
+            response.setScopeToClaimsMapping(OpenIdConfigurationResponse.parseScopeToClaimsMapping(jsonObj.getJSONArray(SCOPE_TO_CLAIMS_MAPPING)));
+        }
+        Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
+        Util.addToListIfHas(response.getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
+        Util.addToListIfHas(response.getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);
+        Util.addToListIfHas(response.getGrantTypesSupported(), jsonObj, GRANT_TYPES_SUPPORTED);
+        Util.addToListIfHas(response.getAcrValuesSupported(), jsonObj, ACR_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getSubjectTypesSupported(), jsonObj, SUBJECT_TYPES_SUPPORTED);
+        Util.addToListIfHas(response.getUserInfoSigningAlgValuesSupported(), jsonObj, USER_INFO_SIGNING_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getUserInfoEncryptionAlgValuesSupported(), jsonObj, USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getUserInfoEncryptionEncValuesSupported(), jsonObj, USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getIdTokenSigningAlgValuesSupported(), jsonObj, ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getIdTokenEncryptionAlgValuesSupported(), jsonObj, ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getIdTokenEncryptionEncValuesSupported(), jsonObj, ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getRequestObjectSigningAlgValuesSupported(), jsonObj, REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getRequestObjectEncryptionAlgValuesSupported(), jsonObj, REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getRequestObjectEncryptionEncValuesSupported(), jsonObj, REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getTokenEndpointAuthMethodsSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED);
+        Util.addToListIfHas(response.getTokenEndpointAuthSigningAlgValuesSupported(), jsonObj, TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getDisplayValuesSupported(), jsonObj, DISPLAY_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getClaimTypesSupported(), jsonObj, CLAIM_TYPES_SUPPORTED);
+        Util.addToListIfHas(response.getClaimsSupported(), jsonObj, CLAIMS_SUPPORTED);
+        if (jsonObj.has(SERVICE_DOCUMENTATION)) {
+            response.setServiceDocumentation(jsonObj.getString(SERVICE_DOCUMENTATION));
+        }
+        Util.addToListIfHas(response.getClaimsLocalesSupported(), jsonObj, CLAIMS_LOCALES_SUPPORTED);
+        Util.addToListIfHas(response.getUiLocalesSupported(), jsonObj, UI_LOCALES_SUPPORTED);
+        if (jsonObj.has(CLAIMS_PARAMETER_SUPPORTED)) {
+            response.setClaimsParameterSupported(jsonObj.getBoolean(CLAIMS_PARAMETER_SUPPORTED));
+        }
+        if (jsonObj.has(REQUEST_PARAMETER_SUPPORTED)) {
+            response.setRequestParameterSupported(jsonObj.getBoolean(REQUEST_PARAMETER_SUPPORTED));
+        }
+        if (jsonObj.has(REQUEST_URI_PARAMETER_SUPPORTED)) {
+            response.setRequestUriParameterSupported(jsonObj.getBoolean(REQUEST_URI_PARAMETER_SUPPORTED));
+        }
+        if (jsonObj.has(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS)) {
+            response.setTlsClientCertificateBoundAccessTokens(jsonObj.optBoolean(TLS_CLIENT_CERTIFICATE_BOUND_ACCESS_TOKENS));
+        }
+        if (jsonObj.has(FRONTCHANNEL_LOGOUT_SUPPORTED)) {
+            response.setFrontChannelLogoutSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SUPPORTED));
+        }
+        if (jsonObj.has(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
+            response.setFrontChannelLogoutSessionSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED));
+        }
+        if (jsonObj.has(BACKCHANNEL_LOGOUT_SUPPORTED)) {
+            response.setBackchannelLogoutSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SUPPORTED));
+        }
+        if (jsonObj.has(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
+            response.setBackchannelLogoutSessionSupported(jsonObj.optBoolean(BACKCHANNEL_LOGOUT_SESSION_SUPPORTED));
+        }
+        if (jsonObj.has(REQUIRE_REQUEST_URI_REGISTRATION)) {
+            response.setRequireRequestUriRegistration(jsonObj.getBoolean(REQUIRE_REQUEST_URI_REGISTRATION));
+        }
+        if (jsonObj.has(OP_POLICY_URI)) {
+            response.setOpPolicyUri(jsonObj.getString(OP_POLICY_URI));
+        }
+        if (jsonObj.has(OP_TOS_URI)) {
+            response.setOpTosUri(jsonObj.getString(OP_TOS_URI));
+        }
+
+        // CIBA
+        if (jsonObj.has(BACKCHANNEL_AUTHENTICATION_ENDPOINT)) {
+            response.setBackchannelAuthenticationEndpoint(jsonObj.getString(BACKCHANNEL_AUTHENTICATION_ENDPOINT));
+        }
+        Util.addToListIfHas(response.getBackchannelTokenDeliveryModesSupported(), jsonObj, BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED);
+        Util.addToListIfHas(response.getBackchannelAuthenticationRequestSigningAlgValuesSupported(), jsonObj, BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED);
+        if (jsonObj.has(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED)) {
+            response.setBackchannelUserCodeParameterSupported(jsonObj.getBoolean(BACKCHANNEL_USER_CODE_PAREMETER_SUPPORTED));
+        }
+    }
+
+    public static OpenIdConfigurationResponse parse(String json) {
+        OpenIdConfigurationResponse response = new OpenIdConfigurationResponse();
+        parse(json, response);
+        return response;
     }
 }
