@@ -158,6 +158,7 @@ public class RegistrationAction implements Serializable {
 
                 backchannelAuthenticationAction.setClientId(response.getClientId());
                 backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
+                backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(request.getBackchannelTokenDeliveryMode());
             }
 
             showResults = true;
