@@ -9,7 +9,11 @@ package org.gluu.oxauth.action;
 import org.gluu.oxauth.client.BackchannelAuthenticationClient;
 import org.gluu.oxauth.client.BackchannelAuthenticationRequest;
 import org.gluu.oxauth.client.BackchannelAuthenticationResponse;
+import org.gluu.oxauth.model.ciba.CibaFlowState;
+import org.gluu.oxauth.model.ciba.CibaRequestSession;
+import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.service.CibaSessions;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;
@@ -34,6 +38,9 @@ public class BackchannelAuthenticationAction implements Serializable {
     @Inject
     private TokenAction tokenAction;
 
+    @Inject
+    private CibaSessions cibaSessions;
+
     private String backchannelAuthenticationEndpoint;
     private List<String> scope;
     private String clientNotificationToken;
@@ -46,6 +53,7 @@ public class BackchannelAuthenticationAction implements Serializable {
     private Integer requestedExpiry;
     private String clientId;
     private String clientSecret;
+    private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
 
     private boolean showResults;
     private String requestString;
@@ -76,6 +84,16 @@ public class BackchannelAuthenticationAction implements Serializable {
         tokenAction.setAuthReqId(backchannelAuthenticationResponse.getAuthReqId());
 
         showResults = true;
+
+        // Create session to process between endpoints and the frontend application.
+        CibaRequestSession session = new CibaRequestSession();
+        session.setState(CibaFlowState.REQUEST_SENT);
+        session.setRequest(backchannelAuthenticationRequest);
+        session.setResponse(backchannelAuthenticationResponse);
+        session.setTokenDeliveryMode(this.backchannelTokenDeliveryMode);
+        session.setClientId(clientId);
+        session.setClientSecret(clientSecret);
+        cibaSessions.getSessions().put(backchannelAuthenticationResponse.getAuthReqId(), session);
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -197,4 +215,13 @@ public class BackchannelAuthenticationAction implements Serializable {
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
     }
+
+    public BackchannelTokenDeliveryMode getBackchannelTokenDeliveryMode() {
+        return backchannelTokenDeliveryMode;
+    }
+
+    public void setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
+        this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
+    }
+
 }
