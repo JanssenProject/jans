@@ -6,26 +6,21 @@
 
 package org.gluu.oxauth.action;
 
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-
-import java.io.Serializable;
-import java.net.URISyntaxException;
+import org.apache.http.client.HttpClient;
+import org.gluu.net.SslDefaultHttpClient;
+import org.gluu.net.TrustAllTrustManager;
+import org.gluu.oxauth.client.*;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.Serializable;
+import java.net.URISyntaxException;
 
-import org.apache.http.client.HttpClient;
-import org.gluu.net.SslDefaultHttpClient;
-import org.gluu.net.TrustAllTrustManager;
-import org.gluu.oxauth.client.OpenIdConfigurationClient;
-import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryRequest;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
-import org.slf4j.Logger;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
 
 /**
  * @author Javier Rojas Blum
@@ -116,6 +111,7 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 				authorizationAction.setAuthorizationEndpoint(openIdConfigurationResponse.getAuthorizationEndpoint());
 				authorizationAction.setJwksUri(openIdConfigurationResponse.getJwksUri());
 				backchannelAuthenticationAction.setBackchannelAuthenticationEndpoint(openIdConfigurationResponse.getBackchannelAuthenticationEndpoint());
+				backchannelAuthenticationAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
 				tokenAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
 				userInfoAction.setUserInfoEndpoint(openIdConfigurationResponse.getUserInfoEndpoint());
 				checkSessionAction.setCheckSessionEndpoint(openIdConfigurationResponse.getCheckSessionIFrame());
