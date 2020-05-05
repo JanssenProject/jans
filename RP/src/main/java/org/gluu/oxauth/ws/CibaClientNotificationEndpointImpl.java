@@ -7,7 +7,6 @@
 package org.gluu.oxauth.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.gluu.oxauth.client.BaseRequest;
 import org.gluu.oxauth.model.ciba.CibaCallback;
 import org.gluu.oxauth.model.ciba.CibaRequestSession;
 import org.gluu.oxauth.model.ciba.PingCibaCallback;
@@ -48,24 +47,24 @@ public class CibaClientNotificationEndpointImpl implements CibaClientNotificatio
             CibaCallback callback = objectMapper.readValue(requestParams, CibaCallback.class);
             if (callback.getAuthReqId() == null || ! cibaSessions.getSessions().containsKey(callback.getAuthReqId())) {
                 log.error("Nothing to process, auth_req_id param is empty or doesn't exist. Value gotten: {}", callback.getAuthReqId());
-                return null;
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
             CibaRequestSession session = cibaSessions.getSessions().get(callback.getAuthReqId());
-            String validAuthorization = BaseRequest.getEncodedCredentials(session.getClientId(), session.getClientSecret());
-            if (validAuthorization == null || !validAuthorization.equals(authorization)) {
+            authorization = authorization != null ? authorization.replace("Bearer ", "") : "";
+            if (!session.getClientNotificationToken().equals(authorization)) {
                 log.warn("Authorization header not verified.");
-                return null;
+                return Response.status(Response.Status.UNAUTHORIZED).build();
             }
             if (session.getTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
                 PingCibaCallback pingCibaCallback = objectMapper.readValue(requestParams, PingCibaCallback.class);
-                cibaService.processPingCallback(pingCibaCallback, session);
+                cibaService.processPingCallback(callback.getAuthReqId(), pingCibaCallback, session);
             } else if (session.getTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
                 log.warn("Not implemented yet...");
             }
             return null;
         } catch (Exception e) {
             log.error("Problems processing ciba callback", e);
-            return null;
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
