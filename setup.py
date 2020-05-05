@@ -62,6 +62,19 @@ from pylib.schema import ObjectClass
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
+try:
+    from pyDes import *
+except:
+    site_libdir = site.getsitepackages()[0]
+    if not os.path.exists(site_libdir):
+        os.makedirs(site_libdir)
+
+    shutil.copy(
+            os.path.join(cur_dir, 'pylib/pyDes.py'),
+            site_libdir
+            )
+    from pyDes import *
+
 os_type, os_version = gluu_utils.get_os_type()
 
 if not os_version in gluu_utils.supportes_os_types.get(os_type, []):
@@ -99,17 +112,9 @@ except:
     tty_columns = 120
 
 
-try:
-    from pyDes import *
-except:
-    site_libdir = site.getsitepackages()[0]
-    shutil.copy(
-            os.path.join(cur_dir, 'pylib/pyDes.py'),
-            site_libdir
-            )
-    from pyDes import *
 
-try:    
+
+try:
     from pylib.cbm import CBM
 except:
     pass
@@ -609,10 +614,11 @@ class Setup(object):
                             'query_manage_index']
         self.post_messages = []
         self.couchbase_bucket_prefix = 'gluu'
-        
+
         #oxd install options
         self.installOxd = False
         self.oxd_package = ''
+        self.oxd_use_gluu_storage = False
 
         #casa install options
         self.installCasa = False
@@ -872,7 +878,10 @@ class Setup(object):
                 cmd = [self.cmd_chown, 'jetty:jetty', fn]
                 self.run(cmd)
 
-        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        gluu_radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
+        if os.path.exists(gluu_radius_jks_fn):
+            self.run([self.cmd_chown, 'radius:gluu', gluu_radius_jks_fn])
+
         if self.installGluuRadius:
             self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
@@ -1010,6 +1019,8 @@ class Setup(object):
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
 
+        if self.installCasa:
+            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
@@ -1365,6 +1376,10 @@ class Setup(object):
             if getattr(self, si):
                 setattr(self, se, 'true')
 
+        if not 'oxtrust_admin_password' in p:
+            p['oxtrust_admin_password'] = p['ldapPass']
+
+
         return p
 
     def obscure(self, data=""):
@@ -1535,7 +1550,7 @@ class Setup(object):
 
     def installJRE(self):
 
-        jre_arch_list = glob.glob(os.path.join(self.distAppFolder, 'amazon-corretto-*-linux-x64.tar.gz'))
+        jre_arch_list = glob.glob(os.path.join(self.distAppFolder, 'amazon-corretto-*.tar.gz'))
 
         if not jre_arch_list:
             self.logIt("JRE packgage not found in {}. Will download jdk".format(self.distAppFolder))
@@ -1573,6 +1588,10 @@ class Setup(object):
         
         if self.java_type == 'jre':
             self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
+
+        if not os.path.exists('/opt/jre/jre'):
+            self.run([self.cmd_mkdir, '-p', '/opt/jre/jre'])
+            self.run([self.cmd_ln, '-s', '/opt/jre/lib', '/opt/jre/jre/lib'])
 
 
     def extractOpenDJ(self):        
@@ -2571,7 +2590,7 @@ class Setup(object):
 
         if self.installSaml:
             self.pbar.progress("saml", "Installing Gluu components: saml", False)
-            self.install_scim_server()
+            self.install_saml()
 
         if self.installOxAuthRP:
             self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
@@ -3304,6 +3323,15 @@ class Setup(object):
                 self.installOxd = True
             else:
                 self.installOxd = False
+
+
+        if self.installOxd:
+
+            promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
+                                                self.getDefaultOption(self.oxd_use_gluu_storage)
+                                                )[0].lower()
+            if promptForOxdGluuStorage == 'y':
+                self.oxd_use_gluu_storage = True
 
 
         promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
@@ -4260,25 +4288,28 @@ class Setup(object):
 
         install_command, update_command, query_command, check_text = self.get_install_commands()
 
-
         install_list = {'mondatory': [], 'optional': []}
 
         package_list = {
-                'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests bzip2', 'optional': 'memcached'},
-                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog bzip2', 'optional': 'memcached'},
-                'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
-                'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests bzip2', 'optional': 'memcached'},
+                'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
+                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
+                'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2', 'optional': 'memcached'},
+                'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
+                'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
                 }
 
         os_type_version = self.os_type+' '+self.os_version
 
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
-                sout, serr = self.run(query_command.format(package), shell=True, get_stderr=True)
+                if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
+                    package_query = package_query.replace('python3-', 'python36-')
+                else:
+                    package_query = package
+                sout, serr = self.run(query_command.format(package_query), shell=True, get_stderr=True)
                 if check_text in sout+serr:
                     self.logIt('Package {0} was not installed'.format(package))
                     install_list[install_type].append(package)
@@ -4313,7 +4344,7 @@ class Setup(object):
                     self.logIt("Installing packages " + packages)
                     print("Installing packages", packages)
                     if not self.os_type == 'fedora':
-                        sout, serr = self.run(update_command, shell=True)
+                        sout, serr = self.run(update_command, shell=True, get_stderr=True)
                     self.run(install_command.format(packages), shell=True)
 
         if self.os_type in ('ubuntu', 'debian'):
@@ -5071,6 +5102,8 @@ class Setup(object):
     def install_oxd(self):
         self.logIt("Installing oxd server...")
         oxd_root = '/opt/oxd-server/'
+        oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
+        
         self.run(['tar', '-zxf', self.oxd_package, '-C', '/opt'])
         self.run(['chown', '-R', 'jetty:jetty', oxd_root])
         
@@ -5092,6 +5125,29 @@ class Setup(object):
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
 
+
+        if self.oxd_use_gluu_storage:
+            oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
+            yml_str = self.readFile(oxd_server_yml_fn)
+            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+            oxd_yaml['storage_configuration'].pop('dbFileLocation')
+
+            oxd_yaml['storage'] = 'gluu_server_configuration'
+
+            oxd_yaml['storage_configuration']['type'] = self.gluu_properties_fn
+
+            oxd_yaml['storage_configuration']['connection'] = self.ox_ldap_properties \
+                if self.mappingLocations['default'] == 'ldap' else self.gluuCouchebaseProperties
+
+            try:
+                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
+            except:
+                pass
+            
+            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+
+            self.writeFile(oxd_server_yml_fn, yml_str)
 
         self.enable_service_at_start('oxd-server')
 
@@ -5314,8 +5370,6 @@ class Setup(object):
         try:
             self.thread_queue = queue
             self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
-            self.pbar.progress("gluu", "Initializing")
-            self.initialize()
             self.pbar.progress("gluu", "Configuring system")
             self.configureSystem()
             self.pbar.progress("download", "Downloading War files")
@@ -5531,6 +5585,7 @@ if __name__ == '__main__':
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--install-casa', help="Install Casa", action='store_true')
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
+    parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
 
     argsp = parser.parse_args()
@@ -5659,7 +5714,10 @@ if __name__ == '__main__':
     
     if argsp.remote_ldap:
         setupOptions['listenAllInterfaces'] = True
- 
+
+    if argsp.oxd_use_gluu_storage:
+        setupOptions['oxd_use_gluu_storage'] = True
+
     if argsp.import_ldif:
         if os.path.isdir(argsp.import_ldif):
             setupOptions['importLDIFDir'] = argsp.import_ldif
@@ -5686,7 +5744,10 @@ if __name__ == '__main__':
     #it is time to import pyDes library
     from pyDes import *
     from pylib.cbm import CBM
+    import ruamel.yaml
     from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
+    from ldap3.utils import dn as dnutils
+    gluu_utils.dnutils = dnutils
 
     if setupOptions['loadTestDataExit']:
         installObject.initialize()
@@ -5719,6 +5780,7 @@ if __name__ == '__main__':
         pass
 
     installObject.logIt("Installing Gluu Server", True)
+    installObject.initialize()
 
     setup_loaded = None
 
