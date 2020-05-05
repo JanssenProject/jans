@@ -751,6 +751,15 @@ class Setup(object):
             'oxauth_client_jar_fn': os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
                 }
 
+        self.logIt("Determining oxd server package")
+        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
+
+        if oxd_package_list:
+            self.oxd_package = max(oxd_package_list)
+
+        self.logIt("oxd server package was determined as " + self.oxd_package)
+
+
     def __repr__(self):
         try:
             txt = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
@@ -822,14 +831,6 @@ class Setup(object):
 
         if (not 'key_gen_path' in self.non_setup_properties) or (not 'key_export_path' in self.non_setup_properties):
             self.logIt("Can't determine key generator and/or key exporter path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
-
-        self.logIt("Determining oxd server package")
-        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
-
-        if oxd_package_list:
-            self.oxd_package = max(oxd_package_list)
-
-        self.logIt("oxd server package was determined as " + self.oxd_package)
 
         if self.installCasa:
             self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
