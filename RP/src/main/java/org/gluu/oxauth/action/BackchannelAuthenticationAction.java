@@ -113,11 +113,16 @@ public class BackchannelAuthenticationAction implements Serializable {
                 case REQUEST_SENT: return "Waiting...";
                 case ACCEPTED: return "User granted the permission. Now you can call to the Token Endpoint.";
                 case REJECTED: return "User has denied the access.";
+                case RESPONSE_GOTTEN: return "Push Response : ";
                 default: return "Invalid state";
             }
         } else {
             return null;
         }
+    }
+
+    public String getResponsePushFlow() {
+        return cibaSessions.getSessions().get(this.authReqId).getCallbackJsonBody();
     }
 
     public String getBackchannelAuthenticationEndpoint() {

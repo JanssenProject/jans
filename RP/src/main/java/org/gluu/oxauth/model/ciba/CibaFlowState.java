@@ -4,7 +4,8 @@ public enum CibaFlowState {
 
     REQUEST_SENT,
     ACCEPTED,
-    REJECTED;
+    REJECTED,
+    RESPONSE_GOTTEN;
 
     CibaFlowState() {
     }
