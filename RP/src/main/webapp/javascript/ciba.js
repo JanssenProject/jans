@@ -19,9 +19,17 @@ function processCibaAuthorizationResponse() {
 }
 
 function initPingProcess() {
+    let initialDate = new Date().getTime();
     window.updaterInterval = setInterval( function() {
-        let updateButton = document.getElementById("mainForm:cibaPingStatusButton" );
-        updateButton.click();
+        if (new Date().getTime() - initialDate < 300000) {
+            let updateButton = document.getElementById("mainForm:cibaPingStatusButton");
+            updateButton.click();
+        } else {
+            console.log('Finishing the updaterInterval, because there was not any answer from the end user.');
+            if (window.updaterInterval) {
+                clearInterval(window.updaterInterval);
+            }
+        }
     }, 2000);
 }
 
