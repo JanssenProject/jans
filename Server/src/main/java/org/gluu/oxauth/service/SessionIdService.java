@@ -49,6 +49,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -461,12 +462,31 @@ public class SessionIdService {
         }
     }
 
-    public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, SessionId sessionId, String p_userDn) {
+    public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId sessionId, String p_userDn) {
         sessionId.setUserDn(p_userDn);
         sessionId.setAuthenticationTime(new Date());
         sessionId.setState(SessionIdState.AUTHENTICATED);
 
-        boolean persisted = updateSessionId(sessionId, true, true, true);
+        final boolean persisted;
+        if (appConfiguration.getChangeSessionIdOnAuthentication()) {
+            final String oldSesionId = sessionId.getId();
+            final String newSessionId = UUID.randomUUID().toString();
+
+            log.debug("Changing session id from {} to {} ...", oldSesionId, newSessionId);
+            remove(sessionId);
+
+            sessionId.setId(newSessionId);
+            sessionId.setDn(buildDn(newSessionId));
+            if (sessionId.getIsJwt()) {
+                sessionId.setJwt(generateJwt(sessionId, sessionId.getUserDn()).asString());
+            }
+
+            persisted = persistSessionId(sessionId, true);
+            cookieService.createSessionIdCookie(sessionId, httpRequest, httpResponse, false);
+            log.debug("Session identifier changed from {} to {} .", oldSesionId, newSessionId);
+        } else {
+            persisted = updateSessionId(sessionId, true, true, true);
+        }
 
         auditLogging(sessionId);
         log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), persisted);
