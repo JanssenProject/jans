@@ -2,6 +2,7 @@ package org.gluu.oxauth.model.ciba;
 
 import org.gluu.oxauth.client.BackchannelAuthenticationRequest;
 import org.gluu.oxauth.client.BackchannelAuthenticationResponse;
+import org.gluu.oxauth.client.TokenResponse;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 
 public class CibaRequestSession {
@@ -12,7 +13,9 @@ public class CibaRequestSession {
     private BackchannelTokenDeliveryMode tokenDeliveryMode;
     private String clientId;
     private String clientSecret;
-
+    private String tokenEndpoint;
+    private TokenResponse tokenResponse;
+    private String clientNotificationToken;
 
     public CibaRequestSession() {
 
@@ -71,6 +74,30 @@ public class CibaRequestSession {
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
+    }
+
+    public String getTokenEndpoint() {
+        return tokenEndpoint;
+    }
+
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
+    }
+
+    public TokenResponse getTokenResponse() {
+        return tokenResponse;
+    }
+
+    public void setTokenResponse(TokenResponse tokenResponse) {
+        this.tokenResponse = tokenResponse;
+    }
+
+    public String getClientNotificationToken() {
+        return clientNotificationToken;
+    }
+
+    public void setClientNotificationToken(String clientNotificationToken) {
+        this.clientNotificationToken = clientNotificationToken;
     }
 
     @Override
