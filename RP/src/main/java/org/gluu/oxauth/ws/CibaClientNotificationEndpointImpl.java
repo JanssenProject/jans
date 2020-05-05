@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ws;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gluu.oxauth.model.ciba.CibaCallback;
 import org.gluu.oxauth.model.ciba.CibaRequestSession;
@@ -43,7 +44,8 @@ public class CibaClientNotificationEndpointImpl implements CibaClientNotificatio
                                     HttpServletRequest request,
                                     SecurityContext securityContext) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectMapper objectMapper = new ObjectMapper()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             CibaCallback callback = objectMapper.readValue(requestParams, CibaCallback.class);
             if (callback.getAuthReqId() == null || ! cibaSessions.getSessions().containsKey(callback.getAuthReqId())) {
                 log.error("Nothing to process, auth_req_id param is empty or doesn't exist. Value gotten: {}", callback.getAuthReqId());
@@ -59,7 +61,7 @@ public class CibaClientNotificationEndpointImpl implements CibaClientNotificatio
                 PingCibaCallback pingCibaCallback = objectMapper.readValue(requestParams, PingCibaCallback.class);
                 cibaService.processPingCallback(callback.getAuthReqId(), pingCibaCallback, session);
             } else if (session.getTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-                log.warn("Not implemented yet...");
+                cibaService.processPushCallback(requestParams, session);
             }
             return null;
         } catch (Exception e) {

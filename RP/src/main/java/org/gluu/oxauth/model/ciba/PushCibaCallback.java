@@ -2,7 +2,7 @@ package org.gluu.oxauth.model.ciba;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class PushCallback extends CibaCallback {
+public class PushCibaCallback extends CibaCallback {
 
     @JsonProperty("access_token")
     private String accessToken;
@@ -19,7 +19,7 @@ public class PushCallback extends CibaCallback {
     @JsonProperty("id_token")
     private String idToken;
 
-    public PushCallback() {
+    public PushCibaCallback() {
 
     }
 
