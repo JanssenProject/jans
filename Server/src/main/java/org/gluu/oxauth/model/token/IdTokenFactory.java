@@ -94,7 +94,7 @@ public class IdTokenFactory {
             int apiVersion = externalAuthenticator.getApiVersion();
 
             if (apiVersion > 3) {
-                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims();
+                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims(script.getConfigurationAttributes());
                 if (authenticationMethodClaimsOrNull != null) {
                     for (String key : authenticationMethodClaimsOrNull.keySet()) {
                         amrList.add(key + ":" + authenticationMethodClaimsOrNull.get(key));
