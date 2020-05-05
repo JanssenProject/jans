@@ -56,18 +56,18 @@ public class ScopeService {
      *
      * @return list of scopes
      */
-    public List<org.oxauth.persistence.model.Scope> getAllScopesList() {
+    public List<Scope> getAllScopesList() {
         String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
         return ldapEntryManager.findEntries(scopesBaseDN,
-                org.oxauth.persistence.model.Scope.class,
+                Scope.class,
                 Filter.createPresenceFilter("inum"));
     }
 
     public List<String> getDefaultScopesDn() {
-        List<String> defaultScopes = new ArrayList<String>();
+        List<String> defaultScopes = new ArrayList<>();
 
-        for (org.oxauth.persistence.model.Scope scope : getAllScopesList()) {
+        for (Scope scope : getAllScopesList()) {
             if (Boolean.TRUE.equals(scope.isDefaultScope())) {
                 defaultScopes.add(scope.getDn());
             }
@@ -77,10 +77,10 @@ public class ScopeService {
     }
 
     public List<String> getScopesDn(List<String> scopeNames) {
-        List<String> scopes = new ArrayList<String>();
+        List<String> scopes = new ArrayList<>();
 
         for (String scopeName : scopeNames) {
-            org.oxauth.persistence.model.Scope scope = getScopeById(scopeName);
+            Scope scope = getScopeById(scopeName);
             if (scope != null) {
                 scopes.add(scope.getDn());
             }
@@ -109,7 +109,7 @@ public class ScopeService {
      *
      * @return Scope
      */
-    public org.oxauth.persistence.model.Scope getScopeByDn(String dn) {
+    public Scope getScopeByDn(String dn) {
     	BaseCacheService usedCacheService = getCacheService();
         final Scope scope = usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Scope.class, dn), 60);
         if (scope != null && StringUtils.isNotBlank(scope.getId())) {
@@ -123,7 +123,7 @@ public class ScopeService {
      *
      * @return Scope
      */
-    public org.oxauth.persistence.model.Scope getScopeByDnSilently(String dn) {
+    public Scope getScopeByDnSilently(String dn) {
         try {
             return getScopeByDn(dn);
         } catch (Exception e) {
@@ -146,7 +146,7 @@ public class ScopeService {
             return (Scope) cached;
 
         try {
-            List<org.oxauth.persistence.model.Scope> scopes = ldapEntryManager.findEntries(
+            List<Scope> scopes = ldapEntryManager.findEntries(
                     staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("oxId", id));
             if ((scopes != null) && (scopes.size() > 0)) {
                 final Scope scope = scopes.get(0);
@@ -166,13 +166,13 @@ public class ScopeService {
      * @param claimDn
      * @return List of scope
      */
-    public List<org.oxauth.persistence.model.Scope> getScopeByClaim(String claimDn) {
-    	List<org.oxauth.persistence.model.Scope> scopes = fromCacheByClaimDn(claimDn);
+    public List<Scope> getScopeByClaim(String claimDn) {
+    	List<Scope> scopes = fromCacheByClaimDn(claimDn);
     	if (scopes == null) {
 	        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
 	        
 	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-	        scopes = ldapEntryManager.findEntries(scopesBaseDN, org.oxauth.persistence.model.Scope.class, filter);  
+	        scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);
 	
 	        putInCache(claimDn, scopes);
     	}
@@ -180,20 +180,19 @@ public class ScopeService {
         return scopes;
     }
 
-	public List<org.oxauth.persistence.model.Scope> getScopesByClaim(List<org.oxauth.persistence.model.Scope> scopes, String claimDn) {
-		List<org.oxauth.persistence.model.Scope> result = new ArrayList<org.oxauth.persistence.model.Scope>();
-		for (org.oxauth.persistence.model.Scope scope : scopes) {
+	public List<Scope> getScopesByClaim(List<Scope> scopes, String claimDn) {
+		List<Scope> result = new ArrayList<>();
+		for (Scope scope : scopes) {
 			List<String> claims = scope.getOxAuthClaims();
 			if ((claims != null) && claims.contains(claimDn)) {
 				result.add(scope);
 			}
-			
 		}
 
 		return result;
 	}
 
-    private void putInCache(String claimDn, List<org.oxauth.persistence.model.Scope> scopes) {
+    private void putInCache(String claimDn, List<Scope> scopes) {
     	if (scopes == null) {
     		return;
     	}
@@ -208,11 +207,11 @@ public class ScopeService {
     }
 
     @SuppressWarnings("unchecked")
-	private List<org.oxauth.persistence.model.Scope> fromCacheByClaimDn(String claimDn) {
+	private List<Scope> fromCacheByClaimDn(String claimDn) {
     	BaseCacheService usedCacheService = getCacheService();
         try {
         	String key = getClaimDnCacheKey(claimDn);
-            return (List<org.oxauth.persistence.model.Scope>) usedCacheService.get(key);
+            return (List<Scope>) usedCacheService.get(key);
         } catch (Exception ex) {
             log.error("Failed to get scopes from cache, claimDn: '{}'", claimDn, ex);
             return null;
