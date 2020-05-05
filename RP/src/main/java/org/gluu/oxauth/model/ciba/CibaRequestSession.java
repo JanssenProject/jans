@@ -16,6 +16,7 @@ public class CibaRequestSession {
     private String tokenEndpoint;
     private TokenResponse tokenResponse;
     private String clientNotificationToken;
+    private String callbackJsonBody;
 
     public CibaRequestSession() {
 
@@ -98,6 +99,14 @@ public class CibaRequestSession {
 
     public void setClientNotificationToken(String clientNotificationToken) {
         this.clientNotificationToken = clientNotificationToken;
+    }
+
+    public String getCallbackJsonBody() {
+        return callbackJsonBody;
+    }
+
+    public void setCallbackJsonBody(String callbackJsonBody) {
+        this.callbackJsonBody = callbackJsonBody;
     }
 
     @Override
