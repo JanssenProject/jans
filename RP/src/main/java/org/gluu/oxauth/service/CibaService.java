@@ -46,4 +46,9 @@ public class CibaService {
         }
     }
 
+    public void processPushCallback(String callbackJsonBoy, CibaRequestSession session) {
+        log.info("Processing push callback: {}, session: {}", callbackJsonBoy, session);
+        session.setState(CibaFlowState.RESPONSE_GOTTEN);
+        session.setCallbackJsonBody(callbackJsonBoy);
+    }
 }
