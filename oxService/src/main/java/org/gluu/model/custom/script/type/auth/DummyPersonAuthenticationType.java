@@ -88,7 +88,7 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	}
 
 	@Override
-	public Map<String, String> getAuthenticationMethodClaims() {
+	public Map<String, String> getAuthenticationMethodClaims(Map<String, SimpleCustomProperty> configurationAttribute) {
 		return null;
 	}
 
