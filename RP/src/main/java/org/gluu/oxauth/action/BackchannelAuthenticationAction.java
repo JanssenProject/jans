@@ -42,6 +42,7 @@ public class BackchannelAuthenticationAction implements Serializable {
     private CibaSessions cibaSessions;
 
     private String backchannelAuthenticationEndpoint;
+    private String tokenEndpoint;
     private List<String> scope;
     private String clientNotificationToken;
     private String acrValues;
@@ -54,10 +55,12 @@ public class BackchannelAuthenticationAction implements Serializable {
     private String clientId;
     private String clientSecret;
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
+    private String authReqId;
 
     private boolean showResults;
     private String requestString;
     private String responseString;
+    private String jsonResponse;
 
     public void exec() {
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -80,8 +83,13 @@ public class BackchannelAuthenticationAction implements Serializable {
 
         requestString = backchannelAuthenticationClient.getRequestAsString();
         responseString = backchannelAuthenticationClient.getResponseAsString();
+        if (backchannelAuthenticationClient.getResponse().getStatus() >= 200
+                && backchannelAuthenticationClient.getResponse().getStatus() < 300) {
+            jsonResponse = backchannelAuthenticationClient.getResponse().getEntity();
+        }
 
-        tokenAction.setAuthReqId(backchannelAuthenticationResponse.getAuthReqId());
+        authReqId = backchannelAuthenticationResponse.getAuthReqId();
+        tokenAction.setAuthReqId(authReqId);
 
         showResults = true;
 
@@ -93,7 +101,23 @@ public class BackchannelAuthenticationAction implements Serializable {
         session.setTokenDeliveryMode(this.backchannelTokenDeliveryMode);
         session.setClientId(clientId);
         session.setClientSecret(clientSecret);
+        session.setTokenEndpoint(this.tokenEndpoint);
+        session.setClientNotificationToken(clientNotificationToken);
         cibaSessions.getSessions().put(backchannelAuthenticationResponse.getAuthReqId(), session);
+    }
+
+    public String getRequestStatus() {
+        if (cibaSessions.getSessions().containsKey(authReqId)) {
+            CibaRequestSession session = cibaSessions.getSessions().get(authReqId);
+            switch (session.getState()) {
+                case REQUEST_SENT: return "Waiting...";
+                case ACCEPTED: return "User granted the permission. Now you can call to the Token Endpoint.";
+                case REJECTED: return "User has denied the access.";
+                default: return "Invalid state";
+            }
+        } else {
+            return null;
+        }
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -224,4 +248,19 @@ public class BackchannelAuthenticationAction implements Serializable {
         this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
     }
 
+    public String getTokenEndpoint() {
+        return tokenEndpoint;
+    }
+
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
+    }
+
+    public String getJsonResponse() {
+        return jsonResponse;
+    }
+
+    public void setJsonResponse(String jsonResponse) {
+        this.jsonResponse = jsonResponse;
+    }
 }

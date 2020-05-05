@@ -7,7 +7,6 @@
 package org.gluu.oxauth.action;
 
 import com.google.common.collect.Lists;
-
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
@@ -17,6 +16,7 @@ import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
+import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.slf4j.Logger;
 
@@ -175,9 +175,22 @@ public class RegistrationAction implements Serializable {
 
             RegisterClient client = new RegisterClient(registrationClientUri);
             client.setRequest(registerRequest);
-            client.exec();
+            RegisterResponse response = client.exec();
 
             showClientReadResults = true;
+
+            tokenAction.setClientId(response.getClientId());
+            tokenAction.setClientSecret(response.getClientSecret());
+
+            backchannelAuthenticationAction.setClientId(response.getClientId());
+            backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
+            if ( response.getClaims() != null && response.getClaims().containsKey(
+                    RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()) ) {
+                backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(
+                        response.getClaims().get(RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE.toString())));
+                backchannelTokenDeliveryMode = backchannelAuthenticationAction.getBackchannelTokenDeliveryMode();
+            }
+
             clientReadRequestString = client.getRequestAsString();
             clientReadResponseString = client.getResponseAsString();
         } catch (Exception e) {
@@ -552,4 +565,5 @@ public class RegistrationAction implements Serializable {
     public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
     }
+
 }
