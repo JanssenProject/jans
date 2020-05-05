@@ -468,7 +468,7 @@ public class SessionIdService {
         sessionId.setState(SessionIdState.AUTHENTICATED);
 
         final boolean persisted;
-        if (appConfiguration.getChangeSessionIdOnAuthentication()) {
+        if (appConfiguration.getChangeSessionIdOnAuthentication() && httpResponse != null) {
             final String oldSesionId = sessionId.getId();
             final String newSessionId = UUID.randomUUID().toString();
 
