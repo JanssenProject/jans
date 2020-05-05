@@ -135,6 +135,7 @@ public class AppConfiguration implements Configuration {
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private Boolean sessionIdRequestParameterEnabled = false; // #1195
+    private Boolean changeSessionIdOnAuthentication = true;
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
@@ -215,6 +216,11 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getChangeSessionIdOnAuthentication() {
+        if (changeSessionIdOnAuthentication == null) changeSessionIdOnAuthentication = true;
+        return changeSessionIdOnAuthentication;
+    }
 
     public Boolean getReturnClientSecretOnRead() {
         if (returnClientSecretOnRead == null) returnClientSecretOnRead = false;
