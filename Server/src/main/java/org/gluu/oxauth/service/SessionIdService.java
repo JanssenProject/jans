@@ -672,13 +672,20 @@ public class SessionIdService {
 
     @Nullable
     public SessionId getSessionById(@Nullable String sessionId) {
+        return getSessionId(sessionId, false);
+    }
+
+    @Nullable
+    public SessionId getSessionById(@Nullable String sessionId, boolean silently) {
         if (StringUtils.isBlank(sessionId)) {
             return null;
         }
         try {
             return persistenceEntryManager.find(SessionId.class, buildDn(sessionId));
         } catch (Exception e) {
-            log.error("Failed to get session by id: " + sessionId, e);
+            if (!silently) {
+                log.error("Failed to get session by id: " + sessionId, e);
+            }
         }
         return null;
     }
@@ -706,12 +713,16 @@ public class SessionIdService {
     }
 
     public SessionId getSessionId(String sessionId) {
+        return getSessionId(sessionId, false);
+    }
+
+    public SessionId getSessionId(String sessionId, boolean siliently) {
         if (StringHelper.isEmpty(sessionId)) {
             return null;
         }
 
         try {
-            final SessionId entity = getSessionById(sessionId);
+            final SessionId entity = getSessionById(sessionId, siliently);
             log.trace("Try to get session by id: {} ...", sessionId);
             if (entity != null) {
                 log.trace("Session dn: {}", entity.getDn());
@@ -721,7 +732,9 @@ public class SessionIdService {
                 }
             }
         } catch (Exception ex) {
-            log.trace(ex.getMessage(), ex);
+            if (!siliently) {
+                log.trace(ex.getMessage(), ex);
+            }
         }
 
         log.trace("Failed to get session by id: {}", sessionId);
