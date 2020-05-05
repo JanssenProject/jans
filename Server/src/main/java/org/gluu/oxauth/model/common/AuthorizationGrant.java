@@ -60,9 +60,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
-    private PairwiseIdentifierService pairwiseIdentifierService;
-
-    @Inject
     private ClientService clientService;
 
     @Inject
@@ -128,12 +125,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveInCache() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
-        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
     }
 
     private void saveCIBAInCache() {
         CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
-        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
     }
 
     public boolean isImplicitFlow() {
