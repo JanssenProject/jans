@@ -493,6 +493,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @return The grant types.
      */
     public GrantType[] getGrantTypes() {
+        if (grantTypes == null) grantTypes = new GrantType[0];
         return grantTypes;
     }
 
