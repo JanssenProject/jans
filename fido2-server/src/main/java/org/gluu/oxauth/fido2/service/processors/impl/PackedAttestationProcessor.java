@@ -30,7 +30,6 @@ import javax.inject.Inject;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.oxauth.fido2.certification.CertificationKeyStoreUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
@@ -40,6 +39,7 @@ import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
+import org.gluu.oxauth.fido2.service.mds.AuthCertService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     private Base64Service base64Service;
 
     @Inject
-    private CertificationKeyStoreUtils utils;
+    private AuthCertService authCertService;
 
     @Inject
     private CryptoUtils cryptoUtils;
@@ -81,7 +81,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
-        X509TrustManager tm = utils.populateTrustManager(authData);
+        X509TrustManager tm = authCertService.populateTrustManager(authData);
 
         if (attStmt.hasNonNull("x5c")) {
             if (tm.getAcceptedIssuers().length == 0) {
