@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -57,9 +58,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
-
-    @Inject
-    private PairwiseIdentifierService pairwiseIdentifierService;
 
     @Inject
     private ClientService clientService;
@@ -127,12 +125,12 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveInCache() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
-        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
     }
 
     private void saveCIBAInCache() {
         CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
-        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
     }
 
     public boolean isImplicitFlow() {
@@ -209,9 +207,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
-        jwt.getClaims().setAudience(getClientId());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+        Audience.setAudience(jwt.getClaims(), getClient());
 
         if (client.getAttributes().getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims()) {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
@@ -361,7 +359,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        return sectorIdentifierService.getSub(getClient(), getUser(), this instanceof CIBAGrant);
+        return sectorIdentifierService.getSub(this);
     }
 
     public boolean isCachedWithNoPersistence() {

@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
@@ -42,13 +43,12 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
+import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.util.StringHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -114,6 +114,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @Inject
     private PersistenceEntryManager entryManager;
 
+    @Inject
+    private TokenService tokenService;
+
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
         return requestUserInfo(accessToken, authorization, request, securityContext);
@@ -125,11 +128,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     }
 
     public Response requestUserInfo(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
-        if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
-            accessToken = authorization.substring(7);
+
+        if (tokenService.isBearerAuthToken(authorization)) {
+            accessToken = tokenService.getBearerToken(authorization);
         }
-        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}",
-                accessToken, securityContext.isSecure());
+
+        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.USER_INFO);
@@ -250,7 +254,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().addAudience(authorizationGrant.getClientId());
+        Audience.setAudience(jwt.getClaims(), authorizationGrant.getClient());
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
@@ -281,7 +285,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         // The iss value should be the OP's Issuer Identifier URL.
         // The aud value should be or include the RP's Client ID value.
         jwe.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwe.getClaims().addAudience(authorizationGrant.getClientId());
+        Audience.setAudience(jwe.getClaims(), authorizationGrant.getClient());
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
@@ -363,8 +367,6 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
             }
-
-            jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
         }
 
         if (authorizationGrant.getClaims() != null) {
@@ -434,41 +436,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
         }
 
-        // Check for Subject Identifier Type
-        if (authorizationGrant.getClient().getSubjectType() != null &&
-                SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE) &&
-                (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri()) || authorizationGrant.getClient().getRedirectUris() != null)) {
-            String sectorIdentifierUri = null;
-            if (StringUtils.isNotBlank(authorizationGrant.getClient().getSectorIdentifierUri())) {
-                sectorIdentifierUri = authorizationGrant.getClient().getSectorIdentifierUri();
-            } else {
-                sectorIdentifierUri = authorizationGrant.getClient().getRedirectUris()[0];
-            }
-
-            String userInum = authorizationGrant.getUser().getAttribute("inum");
-            String clientId = authorizationGrant.getClientId();
-            PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(
-                    userInum, sectorIdentifierUri, clientId);
-            if (pairwiseIdentifier == null) {
-                pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
-                pairwiseIdentifier.setId(UUID.randomUUID().toString());
-                pairwiseIdentifier.setDn(pairwiseIdentifierService.getDnForPairwiseIdentifier(
-                        pairwiseIdentifier.getId(),
-                        userInum));
-                pairwiseIdentifierService.addPairwiseIdentifier(userInum, pairwiseIdentifier);
-            }
-            jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
-        } else {
-            if (authorizationGrant.getClient().getSubjectType() != null && SubjectType.fromString(authorizationGrant.getClient().getSubjectType()).equals(SubjectType.PAIRWISE)) {
-                log.warn("Unable to calculate the pairwise subject identifier because the client hasn't a redirect uri. A public subject identifier will be used instead.");
-            }
-            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
-            String subValue = authorizationGrant.getUser().getAttribute(openidSubAttribute);
-            if (StringHelper.equalsIgnoreCase(openidSubAttribute, "uid")) {
-                subValue = authorizationGrant.getUser().getUserId();
-            }
-            jsonWebResponse.getClaims().setSubjectIdentifier(subValue);
-        }
+        jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
