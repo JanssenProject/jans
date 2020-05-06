@@ -80,6 +80,9 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
     private Boolean backchannelUserCodeParameterSupported;
 
+    public OpenIdConfigurationResponse() {
+    }
+
     /**
      * Constructs an OpenID Configuration Response.
      *

@@ -45,7 +45,7 @@ public enum CoseEC2Algorithm {
         return ALGORITHM_MAPPINGS.get(value);
     }
 
-    int getNumericValue() {
+    public int getNumericValue() {
         return numericValue;
     }
 }

@@ -55,7 +55,7 @@ import java.util.Date;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version March 5, 2020
+ * @version May 5, 2020
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -193,9 +193,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 authorizationCodeGrant.save();
 
                 RefreshToken reToken = null;
-                if (client.getGrantTypes() != null
-                        && client.getGrantTypes().length > 0
-                        && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                if (isRefreshTokenAllowed(client, authorizationCodeGrant)) {
                     reToken = authorizationCodeGrant.createRefreshToken();
                 }
 
@@ -354,9 +352,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
 
                     RefreshToken reToken = null;
-                    if (client.getGrantTypes() != null
-                            && client.getGrantTypes().length > 0
-                            && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                    if (isRefreshTokenAllowed(client, resourceOwnerPasswordCredentialsGrant)) {
                         reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
                     }
 
@@ -407,7 +403,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         cibaGrant.setLastAccessControl(currentTime);
                         cibaGrant.save();
 
-                        if (cibaGrant.isUserAuthorization() && !cibaGrant.isTokensDelivered()) {
+                        if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED
+                                && !cibaGrant.isTokensDelivered()) {
                             RefreshToken refToken = cibaGrant.createRefreshToken();
                             log.debug("Issuing refresh token: {}", refToken.getCode());
 
@@ -418,14 +415,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     null, null, accessToken, refToken,
                                     null, cibaGrant, false, null);
 
-                            cibaGrant.setUserAuthorization(true);
                             cibaGrant.setTokensDelivered(true);
                             cibaGrant.save();
 
                             RefreshToken reToken = null;
-                            if (client.getGrantTypes() != null
-                                    && client.getGrantTypes().length > 0
-                                    && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                            if (isRefreshTokenAllowed(client, cibaGrant)) {
                                 reToken = refToken;
                             }
 
@@ -441,7 +435,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     idToken));
 
                             oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
-                        } else {
+                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_PENDING) {
                             int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                             long timeFromLastAccess = currentTime - lastAccess;
 
@@ -452,6 +446,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 log.debug("Slow down protection authReqId: '{}'", authReqId);
                                 builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
                             }
+                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_DENIED) {
+                            log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
+                            builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
                         }
                     } else {
                         log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
@@ -470,6 +467,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         return response(builder, oAuth2AuditLog);
+    }
+
+    private boolean isRefreshTokenAllowed(Client client, IAuthorizationGrant grant) {
+        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !grant.getScopes().contains(ScopeConstants.OFFLINE_ACCESS)) {
+            return false;
+        }
+        return Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN);
     }
 
     private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {

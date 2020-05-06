@@ -29,4 +29,5 @@ public class ChallengeGenerator {
         new SecureRandom().nextBytes(buffer);
         return base64Service.urlEncodeToStringWithoutPadding(buffer);
     }
+
 }

@@ -1,16 +1,3 @@
-/*
- * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
- */
-
 package org.gluu.oxauth.fido2.service.mds;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
@@ -26,7 +13,6 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +22,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -63,7 +48,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 
 @ApplicationScoped
-public class MdsTocService {
+public class TocService {
 
     @Inject
     private Logger log;
@@ -86,12 +71,8 @@ public class MdsTocService {
     private Map<String, JsonNode> tocEntries;
     private MessageDigest digester;
 
-    @PostConstruct
-    public void create() {
-        this.tocEntries = Collections.synchronizedMap(new HashMap());
-    }
-
     public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
+        this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
         tocEntries.putAll(parseTOCs());
     }
 
@@ -111,10 +92,8 @@ public class MdsTocService {
         log.info("Populating TOC entries from {}", mdsTocFilesFolder);
 
         Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
-        DirectoryStream<Path> directoryStream = null;
         List<Map<String, JsonNode>> maps = new ArrayList<>();
-        try {
-            directoryStream = Files.newDirectoryStream(path);
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
             Iterator<Path> iter = directoryStream.iterator();
             while (iter.hasNext()) {
                 Path filePath = iter.next();
@@ -131,17 +110,9 @@ public class MdsTocService {
             }
         } catch (Exception e) {
             log.warn("Something wrong with path", e);
-        } finally {
-            if (directoryStream != null) {
-                try {
-                    directoryStream.close();
-                } catch (IOException e) {
-                    log.warn("Something wrong with directory stream");
-                }
-            }
         }
-        return mergeAndResolveDuplicateEntries(maps);
 
+        return mergeAndResolveDuplicateEntries(maps);
     }
 
     private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, String mdsTocFileLocation) {
@@ -155,9 +126,7 @@ public class MdsTocService {
     }
 
     private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, Path path) throws IOException, ParseException {
-        BufferedReader reader = null;
-        try {
-            reader = Files.newBufferedReader(path);
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             JWSObject jwsObject = JWSObject.parse(reader.readLine());
 
             List<String> certificateChain = jwsObject.getHeader().getX509CertChain().stream().map(c -> base64Service.encodeToString(c.decode()))
@@ -170,20 +139,19 @@ public class MdsTocService {
                     log.warn("Unable to verify JWS object using algorithm {} for file {}", algorithm, path);
                     return new Pair<LocalDate, Map<String,JsonNode>>(null, Collections.emptyMap());
                 }
-            } catch (JOSEException e) {
-                log.warn("Unable to verify JWS object using algorithm {} for file {} {} ", algorithm, path, e);
-                return new Pair<LocalDate, Map<String,JsonNode>>(null, Collections.emptyMap());
-            } catch (Fido2RPRuntimeException e) {
+            } catch (Exception e) {
                 log.warn("Unable to verify JWS object using algorithm {} for file {} {}", algorithm, path, e);
                 return new Pair<LocalDate, Map<String,JsonNode>>(null, Collections.emptyMap());
             }
-            this.digester = resolveDigester(algorithm);
+
             String jwtPayload = jwsObject.getPayload().toString();
             JsonNode toc = dataMapperService.readTree(jwtPayload);
             log.info("Legal header {}", toc.get("legalHeader"));
+
             ArrayNode entries = (ArrayNode) toc.get("entries");
             int numberOfEntries = toc.get("no").asInt();
             log.info("Property 'no' value: {}. Number of entries: {}", numberOfEntries, entries.size());
+
             Iterator<JsonNode> iter = entries.elements();
             Map<String, JsonNode> tocEntries = new HashMap<>();
             while (iter.hasNext()) {
@@ -198,56 +166,23 @@ public class MdsTocService {
             String nextUpdateText = toc.get("nextUpdate").asText();
 
             LocalDate nextUpdateDate = LocalDate.parse(nextUpdateText);
+
+            this.digester = resolveDigester(algorithm);
             
             return new Pair<LocalDate, Map<String,JsonNode>>(nextUpdateDate, tocEntries);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.warn("Unable to close reader {}", path);
-                }
-            }
         }
     }
 
     private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder, List<String> certificateChain) {
         List<X509Certificate> x509CertificateChain = cryptoUtils.getCertificates(certificateChain);
-        List<X509Certificate> x509TrustedCertificates = new ArrayList<>();
-
-        DirectoryStream<Path> directoryStream = null;
-        try {
-            Path path = FileSystems.getDefault().getPath(mdsTocRootCertsFolder);
-            directoryStream = Files.newDirectoryStream(path);
-            Iterator<Path> iter = directoryStream.iterator();
-            while (iter.hasNext()) {
-                Path filePath = iter.next();
-                try {
-                    x509TrustedCertificates.add(cryptoUtils.getCertificate(Files.newInputStream(filePath)));
-                } catch (IOException e) {
-                    throw new Fido2RPRuntimeException("Unable to read the root cert " + path, e);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Something wrong with path", e);
-        } finally {
-            if (directoryStream != null) {
-                try {
-                    directoryStream.close();
-                } catch (IOException e) {
-                    log.warn("Something wrong with directory stream");
-                }
-            }
-        }
+        List<X509Certificate> x509TrustedCertificates = cryptoUtils.getCertificates(mdsTocRootCertsFolder);
 
         // TODO: Check if cert verification works well when there is no root cert 
         X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);
 
         if (JWSAlgorithm.ES256.equals(algorithm)) {
-            JWSVerifier verifier;
             try {
-                verifier = new ECDSAVerifier((ECPublicKey) verifiedCert.getPublicKey());
-                return verifier;
+                return new ECDSAVerifier((ECPublicKey) verifiedCert.getPublicKey());
             } catch (JOSEException e) {
                 throw new Fido2RPRuntimeException("Unable to create verifier for algorithm " + algorithm, e);
             }
@@ -268,6 +203,7 @@ public class MdsTocService {
         Map<String, JsonNode> allEntries = new HashMap<>();
         Map<String, JsonNode> a[] = new Map[maps.size()];
         maps.toArray(a);
+
         allEntries.putAll(
                 Stream.of(a).flatMap(m -> m.entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> {
                     log.warn("Duplicate values {} {}", v1, v2);
@@ -281,20 +217,24 @@ public class MdsTocService {
                     } else {
                         result = v2;
                     }
-                    log.warn("Selected value {} ", result);
+
+                    log.debug("Selected value {} ", result);
+
                     return result;
                 })));
+
         return allEntries;
     }
 
-    private LocalDate getDate(JsonNode n) {
-        JsonNode dateNode = n.get("timeOfLastStatusChange");
+    private LocalDate getDate(JsonNode node) {
+        JsonNode dateNode = node.get("timeOfLastStatusChange");
         LocalDate date;
         if (dateNode != null) {
             date = LocalDate.parse(dateNode.asText(), ISO_DATE);
         } else {
             date = LocalDate.now();
         }
+
         return date;
     }
 

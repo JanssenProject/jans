@@ -6,11 +6,7 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
 import org.apache.logging.log4j.util.Strings;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorProxy;
 import org.gluu.oxauth.ciba.CIBAEndUserNotificationProxy;
@@ -38,6 +34,9 @@ import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +61,6 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.
  * @version April 22, 2020
  */
 @Path("/")
-@Api(value = "/oxauth/bc-authorize", description = "Backchannel Authorization Endpoint")
 public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthorizeRestWebService {
 
     @Inject
