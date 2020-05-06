@@ -197,6 +197,7 @@ public class AppConfiguration implements Configuration {
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
+    private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -216,6 +217,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getForceOfflineAccessScopeToEnableRefreshToken() {
+        if (forceOfflineAccessScopeToEnableRefreshToken == null) forceOfflineAccessScopeToEnableRefreshToken = true;
+        return forceOfflineAccessScopeToEnableRefreshToken;
+    }
+
+    public void setForceOfflineAccessScopeToEnableRefreshToken(Boolean forceOfflineAccessScopeToEnableRefreshToken) {
+        this.forceOfflineAccessScopeToEnableRefreshToken = forceOfflineAccessScopeToEnableRefreshToken;
+    }
 
     public Boolean getChangeSessionIdOnAuthentication() {
         if (changeSessionIdOnAuthentication == null) changeSessionIdOnAuthentication = true;

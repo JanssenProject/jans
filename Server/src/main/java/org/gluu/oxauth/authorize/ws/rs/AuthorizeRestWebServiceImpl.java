@@ -315,6 +315,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 acrValues = Lists.newArrayList(client.getDefaultAcrValues());
             }
 
+            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS)) {
+                if (!responseTypes.contains(ResponseType.CODE)) {
+                    log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+                }
+
+                if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
+                    log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+                }
+            }
+
             final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
                     && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
 
