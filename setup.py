@@ -62,18 +62,17 @@ from pylib.schema import ObjectClass
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
-try:
-    from pyDes import *
-except:
-    site_libdir = site.getsitepackages()[0]
-    if not os.path.exists(site_libdir):
-        os.makedirs(site_libdir)
+#copy pyDes to site for further use
+site_libdir = site.getsitepackages()[0]
+if not os.path.exists(site_libdir):
+    os.makedirs(site_libdir)
 
-    shutil.copy(
-            os.path.join(cur_dir, 'pylib/pyDes.py'),
-            site_libdir
-            )
-    from pyDes import *
+shutil.copy(
+        os.path.join(cur_dir, 'pylib/pyDes.py'),
+        site_libdir
+        )
+
+from pyDes import *
 
 os_type, os_version = gluu_utils.get_os_type()
 
