@@ -205,6 +205,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
 
+            final Pair<Boolean, String> validateAlgorithmsResult = registerParamsValidator.validateAlgorithms(r);
+            if (!validateAlgorithmsResult.getFirst()) {
+                log.trace("Client algorithms are invalid, returns invalid_request error. Reason: " + validateAlgorithmsResult.getSecond());
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, validateAlgorithmsResult.getSecond());
+            }
+
             if (r.getIdTokenSignedResponseAlg() == null) {
                 r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
             }
