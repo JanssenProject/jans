@@ -19,7 +19,7 @@ class UserRegistration(UserRegistrationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "User Confirm registration. Initialization"
         print "User Confirm registration. Initialized successfully"
 
@@ -103,4 +103,4 @@ class UserRegistration(UserRegistrationType):
         return False
 
     def getApiVersion(self):
-        return 1
+        return 11

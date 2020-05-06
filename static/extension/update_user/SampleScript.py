@@ -14,7 +14,7 @@ class UpdateUser(UpdateUserType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Update user. Initialization"
         print "Update user. Initialized successfully"
 
@@ -26,7 +26,7 @@ class UpdateUser(UpdateUserType):
         return True   
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     def newUser(self, user, configurationAttributes):
         print "Update user. newUser method"

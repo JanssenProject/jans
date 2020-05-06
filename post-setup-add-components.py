@@ -1,75 +1,209 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+
 import os
 import argparse
 import sys
 import subprocess
 import json
+import zipfile
 
-if not os.path.exists('setup.py'):
-    print "This script should be run from /install/community-edition-setup/"
-    sys.exit()
-    
-if not os.path.exists('/install/community-edition-setup/setup.properties.last'):
-    print "setup.properties.last is missing can't continue"
-    sys.exit()
+from ldap3 import Server, Connection, BASE, SUBTREE, MODIFY_REPLACE
 
-f=open('setup.py').readlines()
-
-for l in f:
-    if l.startswith('from pyDes import *'):
-        break
-else:
-    f.insert(1, 'from pyDes import *\n')
-    with open('setup.py','w') as w:
-        w.write(''.join(f))
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+ces_dir = os.path.join(cur_dir, 'ces_current')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-addshib", help="Install Shibboleth SAML IDP", action="store_true")
 parser.add_argument("-addpassport", help="Install Passport", action="store_true")
-parser.add_argument("-addradius", help="Install Radius", action="store_true")
+parser.add_argument("-addoxd", help="Install Oxd Server", action="store_true")
+parser.add_argument("-addcasa", help="Install Gluu Casa", action="store_true")
+parser.add_argument("-addradius", help="Install Gluu Radius Server", action="store_true")
+
+
 args = parser.parse_args()
 
 if  len(sys.argv)<2:
     parser.print_help()
     parser.exit(1)
 
+def read_properties_file(prop_fn):
+    jprop = JProperties()
+    with open(prop_fn) as f:
+        jprop.load(f)
 
-from setup import *
+    return jprop
 
-setupObj = Setup('.')
+run_oxauth_war_fn = '/opt/gluu/jetty/oxauth/webapps/oxauth.war'
+
+#Determine gluu version
+war_zip = zipfile.ZipFile(run_oxauth_war_fn, 'r')
+menifest = war_zip.read('META-INF/MANIFEST.MF')
+
+for l in menifest.splitlines():
+    ls = l.strip().decode('utf-8')
+    n = ls.find(':')
+
+    if ls[:n].strip() == 'Implementation-Version':
+        oxVersion_current = ls[n+1:].strip()
+        gluu_version_list = oxVersion_current.split('.')
+        if not gluu_version_list[-1].isdigit():
+            gluu_version_list.pop(-1)
+
+        gluu_version = '.'.join(gluu_version_list)
+
+print("Current Gluu Version", gluu_version)
+
+if os.path.exists(ces_dir + '.back'):
+    os.system('rm -r -f ' + ces_dir + '.back')
+
+if os.path.exists(ces_dir):
+    os.system('mv {0} {0}.back'.format(ces_dir))
+
+ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/version_{}.zip'.format(gluu_version)
+
+
+print("Downloading Community Edition Setup {}".format(gluu_version))
+
+os.system('wget -nv {} -O {}/version_{}.zip'.format(ces_url, cur_dir, gluu_version))
+print("Extracting package")
+os.system('unzip -o -qq {}/version_{}.zip'.format(cur_dir, gluu_version))
+os.system('mv {}/community-edition-setup-version_{} {}/ces_current'.format(cur_dir, gluu_version, cur_dir))
+
+os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/generate_properties.py -O {}'.format(os.path.join(ces_dir, 'pylib', 'generate_properties.py')))
+
+open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
+
+sys.path.append(ces_dir)
+
+from ces_current.setup import *
+from ces_current.pylib.cbm import CBM
+from ces_current.pylib.generate_properties import generate_properties
+from ces_current.pylib.jproperties import Properties as JProperties
+from ces_current.pylib.gluu_utils import read_properties_file
+
+class ProgressBar:
+    def progress(self, ptype, msg, incr=True):
+        print(msg)
+
+setup_porperties = generate_properties(True)
+
+setupObj = Setup(ces_dir)
+setupObj.initialize()
+setupObj.pbar = ProgressBar()
 
 setupObj.setup = setupObj
 
-setupObj.load_properties('/install/community-edition-setup/setup.properties.last')
-attribDataTypes.startup('.')
+setupObj.os_type, setupObj.os_version = setupObj.detect_os_type()
+setupObj.os_initdaemon = setupObj.detect_initd()
 
-setupObj.cbm = CBM(setupObj.couchbase_hostname, setupObj.couchebaseClusterAdmin, setupObj.ldapPass)
+for setup_key in setup_porperties:
+    setattr(setupObj, setup_key, setup_porperties[setup_key])
 
+setupObj.log = os.path.join(setupObj.install_dir, 'post_setup.log')
+setupObj.logError = os.path.join(setupObj.install_dir, 'post_setup_error.log')
 
-if not hasattr(setupObj, 'ldap_type'):
-    setupObj.ldap_type = 'open_ldap'
-
-if setupObj.ldap_type == 'opendj':
-    setupObj.ldapCertFn = setupObj.opendj_cert_fn
-else:
-    setupObj.ldapCertFn = setupObj.openldapTLSCert
+print("Log Files:", setupObj.log, setupObj.logError)
 
 setupObj.ldapCertFn = setupObj.opendj_cert_fn
 
+# Determine persistence type
+gluu_cb_prop_fn = '/etc/gluu/conf/gluu-couchbase.properties'
+gluu_prop = read_properties_file(setupObj.gluu_properties_fn)
+persistence_type = gluu_prop['persistence.type']
+setupObj.persistence_type = persistence_type
+
+if persistence_type == 'hybrid':
+    hybrid_prop = read_properties_file(setupObj.gluu_hybrid_roperties)    
+    persistence_type = hybrid_prop['storage.default']
+if persistence_type == 'couchbase':
+    gluu_cb_prop = read_properties_file(setupObj.gluuCouchebaseProperties)
+    cb_serevr = gluu_cb_prop['servers'].split(',')[0].strip()
+    cb_admin = gluu_cb_prop['auth.userName']
+    encoded_cb_password = gluu_cb_prop['auth.userPassword']
+    cb_passwd = os.popen('/opt/gluu/bin/encode.py -D ' + encoded_cb_password).read().strip()
+    
+    from ces_current.pylib.cbm import CBM
+    setupObj.cbm = CBM(cb_serevr, cb_admin, cb_passwd)
+
+else:
+    setupObj.createLdapPw()
+
+    ox_ldap_prop = read_properties_file('/etc/gluu/conf/gluu-ldap.properties')
+
+    bindDN = ox_ldap_prop['bindDN']
+    bindPassword_e = ox_ldap_prop['bindPassword']
+
+    cmd = '/opt/gluu/bin/encode.py -D ' + bindPassword_e    
+    bindPassword = os.popen(cmd).read().strip()
+    ldap_host, ldap_port = ox_ldap_prop['servers'].split(',')[0].strip().split(':')
+
+    ldap_server = Server(ldap_host, port=int(ldap_port), use_ssl=True)
+    ldap_conn = Connection(ldap_server, user=bindDN, password=bindPassword)
+    ldap_conn.bind()
+
+
+def get_oxAuthConfiguration_ldap():
+
+    ldap_conn.search(
+                search_base='o=gluu', 
+                search_scope=SUBTREE,
+                search_filter='(objectClass=oxAuthConfiguration)',
+                attributes=["oxAuthConfDynamic"]
+                )
+
+    dn = ldap_conn.response[0]['dn']
+    oxAuthConfDynamic = json.loads(ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
+
+    return dn, oxAuthConfDynamic
+
+
+def get_oxTrustConfiguration_ldap():
+    ldap_conn.search(
+                search_base='o=gluu',
+                search_scope=SUBTREE,
+                search_filter='(objectClass=oxTrustConfiguration)',
+                attributes=['oxTrustConfApplication']
+                )
+    dn = ldap_conn.response[0]['dn']
+    oxTrustConfApplication = json.loads(ldap_conn.response[0]['attributes']['oxTrustConfApplication'][0])
+
+    return dn, oxTrustConfApplication
+
 def installSaml():
+
+    if os.path.exists('/opt/shibboleth-idp'):
+        print("SAML is already installed on this system")
+        return
+
+    setupObj.run(['cp', '-f', os.path.join(setupObj.gluuOptFolder, 'jetty/identity/webapps/identity.war'), 
+                setupObj.distGluuFolder])
+
+    if not os.path.exists(setupObj.idp3Folder):
+        os.mkdir(setupObj.idp3Folder)
 
     if setupObj.idp3_metadata[0] == '/':
         setupObj.idp3_metadata = setupObj.idp3_metadata[1:]
 
     metadata_file = os.path.join(setupObj.idp3MetadataFolder, setupObj.idp3_metadata)
 
+    setupObj.run(['cp', '-f', './ces_current/templates/jetty.conf.tmpfiles.d',
+                            setupObj.templateFolder])
 
     if os.path.exists(metadata_file):
-        print "Shibboleth is already installed on this system"
+        print("Shibboleth is already installed on this system")
         sys.exit()
 
-    print "Installing Shibboleth ..."
+    print("Installing Shibboleth ...")
     setupObj.oxTrustConfigGeneration = "true"
+
+
+    if setupObj.persistence_type == 'couchbase':
+        if 'user' in setupObj.getMappingType('couchbase'):
+            setupObj.renderTemplateInOut(
+                            os.path.join(ces_dir, 'templates', setupObj.data_source_properties),
+                            os.path.join(ces_dir, 'templates'),
+                            os.path.join(ces_dir, 'output'),
+                            )
 
     if not setupObj.application_max_ram:
         setupObj.application_max_ram = setupObj.getPrompt("Enter maximum RAM for applications in MB", '3072')
@@ -119,73 +253,262 @@ def installSaml():
         F.write(metadata)
     
     setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', setupObj.idp3Folder])
-    print "Shibboleth installation done"
+    if not os.path.exists('/var/run/jetty'):
+        os.mkdir('/var/run/jetty')
+    setupObj.run([setupObj.cmd_chown, '-R', 'jetty:jetty', '/var/run/jetty'])
+    setupObj.enable_service_at_start('idp')
 
-def installRadius():
+    if persistence_type == 'ldap':
 
-    radius_dir = '/opt/gluu/radius'
-    logs_dir = os.path.join(radius_dir,'logs')
-    radius_jar = os.path.join(setupObj.distGluuFolder, 'super-gluu-radius-server.jar')
-    source_dir = os.path.join(setupObj.staticFolder, 'radius')
-    conf_dir = os.path.join(setupObj.gluuBaseFolder, 'conf/radius/')
-    radius_libs = os.path.join(setupObj.distGluuFolder, 'gluu-radius-libs.zip')
-    ldif_file_server = os.path.join(setupObj.outputFolder, 'gluu_radius_server.ldif')
+        dn, oxTrustConfApplication = get_oxTrustConfiguration_ldap()
 
-    if not os.path.exists(logs_dir):
-        setupObj.run([setupObj.cmd_mkdir, '-p', logs_dir])
+        oxTrustConfApplication['configGeneration'] = True
+        oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
 
-    setupObj.run(['unzip', '-n', '-q', radius_libs, '-d', radius_dir ])
-    setupObj.copyFile(radius_jar, radius_dir)
+        ldap_conn.modify( 
+                        dn,
+                        {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                        )
 
-    if setupObj.mappingLocations['default'] == 'ldap':
-        schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
-        setupObj.import_ldif_opendj([schema_ldif])
-        setupObj.import_ldif_opendj([ldif_file_server])
+        ldap_conn.modify(
+                        'ou=configuration,o=gluu',
+                        {"gluuSamlEnabled": [MODIFY_REPLACE, 'true']}
+                        )
+
     else:
-        setupObj.import_ldif_couchebase([ldif_file_server])
+        bucket = gluu_cb_prop['bucket.default']
+        
+        n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET configGeneration=true'.format(bucket)
+        setupObj.cbm.exec_query(n1ql)
+        
+        n1ql = 'UPDATE `{}` USE KEYS "configuration" SET gluuSamlEnabled=true'.format(bucket)
+        setupObj.cbm.exec_query(n1ql)
 
-    setupObj.createUser('radius', homeDir=radius_dir, shell='/bin/false')
-    setupObj.addUserToGroup('gluu', 'radius')
+    print("Shibboleth installation done")
+
+
     
-    setupObj.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), setupObj.osDefault)
-    setupObj.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
-    setupObj.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(setupObj.gluuOptPythonFolder, 'libs'))
-
-    setupObj.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
-    setupObj.run([setupObj.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
-    
-    if setupObj.os_type+setupObj.os_version == 'ubuntu16':
-        setupObj.run(['update-rc.d', 'gluu-radius', 'defaults'])
-    else:
-        setupObj.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
-        setupObj.run([setupObj.systemctl, 'daemon-reload'])
-    
-    #create empty gluu-radius.private-key.pem
-    gluu_radius_private_key_fn = os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')
-    setupObj.writeFile(gluu_radius_private_key_fn, '')
-    
-    setupObj.run([setupObj.cmd_chown, '-R', 'radius:gluu', radius_dir])
-    setupObj.run([setupObj.cmd_chown, '-R', 'root:gluu', conf_dir])
-    setupObj.run([setupObj.cmd_chown, 'root:gluu', os.path.join(setupObj.gluuOptPythonFolder, 'libs/gluu_common.py')])
-
-    setupObj.enable_service_at_start('gluu-radius')
-
-    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
-    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
-
-    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.jks')])
-    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
-
 def installPassport():
     
     if os.path.exists('/opt/gluu/node/passport'):
-        print "Passport is already installed on this system"
-        sys.exit()
+        print("Passport is already installed on this system")
+        return
 
-    print "Installing Passport ..."
+    # we need to find a way to determine node version used by current passport
+    """
+    node_url = 'https://nodejs.org/dist/v{0}/node-v{0}-linux-x64.tar.xz'.format(setupObj.node_version)
+    nod_archive_fn = os.path.basename(node_url)
+
+    print("Downloading {}".format(nod_archive_fn))
+    setupObj.run(['wget', '-nv', node_url, '-O', os.path.join(setupObj.distAppFolder, nod_archive_fn)])
+    cur_node_dir = os.readlink('/opt/node')
+    setupObj.run(['unlink', '/opt/node'])
+    setupObj.run(['mv', cur_node_dir, cur_node_dir+'.back'])
+
+    print("Installing", nod_archive_fn)
+    setupObj.installNode()
+    """
+
+    passport_url = 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(gluu_version)
+    passport_modules_url = 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(gluu_version)
+    passport_fn = os.path.basename(passport_url)
+    passport_modules_fn = os.path.basename(passport_modules_url)
+
+    print("Downloading {}".format(passport_fn))
+    setupObj.run(['wget', '-nv', passport_url, '-O', os.path.join(setupObj.distGluuFolder, 'passport.tgz')])
+
+    print("Downloading {}".format(passport_modules_fn))
+    setupObj.run(['wget', '-nv', passport_modules_url, '-O', os.path.join(setupObj.distGluuFolder, 'passport-node_modules.tar.gz')])
+
+    if setupObj.os_initdaemon == 'systemd':
+        passport_syatemd_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/passport.service'
+        passport_syatemd_fn = os.path.basename(passport_syatemd_url)
+        
+        print("Downloading {}".format(passport_syatemd_fn))
+        setupObj.run(['wget', '-nv', passport_syatemd_url, '-O', '/usr/lib/systemd/system/passport.service'])
+
+    setupObj.installPassport = True
+    setupObj.calculate_selected_aplications_memory()
+    
+    
+    setupObj.renderTemplateInOut(
+                    os.path.join(ces_dir, 'templates/node/passport'),
+                    os.path.join(ces_dir, 'templates/node'),
+                    os.path.join(ces_dir, 'output/node')
+                    )
+
+
+    print("Installing Passport ...")
+
+    if not os.path.exists(os.path.join(setupObj.configFolder, 'passport-inbound-idp-initiated.json')) and os.path.exists('ces_current/templates/passport-inbound-idp-initiated.json'):
+        setupObj.run(['cp', 'ces_current/templates/passport-inbound-idp-initiated.json', setupObj.configFolder])
+
+    proc = subprocess.Popen('echo "" | /opt/jre/bin/keytool -list -v -keystore /etc/certs/passport-rp.jks', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
     setupObj.generate_passport_configuration()
+
+    passport_oxtrust_config = json.loads(
+        setupObj.readFile(setupObj.passport_oxtrust_config_fn)
+        )
+
     setupObj.install_passport()
-    print "Passport installation done"
+    
+    scripts_enable = ['2FDB-CF02', 'D40C-1CA4', '2DAF-F9A5']
+    
+    if persistence_type == 'ldap':
+
+        dn, oxTrustConfApplication = get_oxTrustConfiguration_ldap()
+
+        for k in passport_oxtrust_config:
+            oxTrustConfApplication[k] = passport_oxtrust_config[k]
+        
+        oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
+        
+        ldap_conn.modify(
+                dn,
+                {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                )
+
+        ldap_conn.modify(
+                'ou=configuration,o=gluu',
+                {"gluuPassportEnabled": [MODIFY_REPLACE, 'true']}
+                )
+
+        
+        for scr in scripts_enable:
+            ldap_conn.modify(
+                    'inum={},ou=scripts,o=gluu'.format(scr),
+                    {"oxEnabled": [MODIFY_REPLACE, 'true']}
+                    )
+
+    else:
+        bucket = gluu_cb_prop['bucket.default']
+
+        n1ql = 'UPDATE `{}` USE KEYS "configuration" SET gluuPassportEnabled=true'.format(bucket)
+        setupObj.cbm.exec_query(n1ql)
+        
+        for k in passport_oxtrust_config:
+            n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET {}="{}"'.format(bucket, k, passport_oxtrust_config[k])
+            setupObj.cbm.exec_query(n1ql)
+    
+        for scr in scripts_enable:
+            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxEnabled=true'.format(bucket, scr)
+            setupObj.cbm.exec_query(n1ql)
+    
+    print("Passport installation done")
+
+
+
+def installOxd():
+    
+    if os.path.exists('/opt/oxd-server'):
+        print("Oxd server was already installed")
+        return
+    
+    print("Installing Oxd Server")
+
+    oxd_url = 'https://ox.gluu.org/maven/org/gluu/oxd-server/{0}/oxd-server-{0}-distribution.zip'.format(oxVersion_current)
+
+    print("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
+    oxd_zip_fn = '/tmp/oxd-server.zip'
+    oxd_tmp_dir = '/tmp/oxd-server'
+
+    setupObj.run(['wget', '-nv', oxd_url, '-O', oxd_zip_fn])
+    setupObj.run(['unzip', '-qqo', '/tmp/oxd-server.zip', '-d', oxd_tmp_dir])
+    setupObj.run(['mkdir', os.path.join(oxd_tmp_dir,'data')])
+
+    if setupObj.os_type + setupObj.os_version in ('ubuntu18','debian9'):
+        default_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server-default'.format(gluu_version)
+        setupObj.run(['wget', '-nv', default_url, '-O', os.path.join(oxd_tmp_dir, 'oxd-server-default')])
+
+    service_file = 'oxd-server.init.d' if setupObj.os_type + setupObj.os_version in ('ubuntu18','debian9') else 'oxd-server.service'
+    service_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/{}.file'.format(gluu_version, service_file)
+    setupObj.run(['wget', '-nv', service_url, '-O', os.path.join(oxd_tmp_dir, service_file)])
+
+    oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server.sh'.format(gluu_version)
+    setupObj.run(['wget', '-nv', oxd_server_sh_url, '-O', os.path.join(oxd_tmp_dir, 'bin/oxd-server.sh')])
+
+    setupObj.run(['tar', '-zcf', os.path.join(setupObj.distGluuFolder, 'oxd-server.tgz'), 'oxd-server'], cwd='/tmp')
+
+    setupObj.oxd_package = os.path.join(setupObj.distGluuFolder, 'oxd-server.tgz')
+    setupObj.install_oxd()
+
+
+
+def installCasa():
+
+    if os.path.exists('/opt/gluu/jetty/casa'):
+        print("Casa is already installed on this system")
+        return
+
+    print("Installing Gluu Casa")
+
+
+    setupObj.promptForCasaInstallation(promptForCasa='y')
+    if not setupObj.installCasa:
+        print("Casa installation cancelled")
+
+    setupObj.prepare_base64_extension_scripts()
+
+    casa_script_fn = os.path.basename(setupObj.ldif_scripts_casa)
+    casa_script_fp = os.path.join(ces_dir, 'output', casa_script_fn)
+    
+    setupObj.renderTemplateInOut(
+                    os.path.join(ces_dir, 'templates', casa_script_fn),
+                    os.path.join(ces_dir, 'templates'),
+                    os.path.join(ces_dir, 'output'),
+                    )
+
+    if persistence_type == 'ldap':
+        setupObj.import_ldif_template_opendj(casa_script_fp)
+        
+    else:
+        setupObj.import_ldif_couchebase(ldif_file_list=[casa_script_fp], bucket='gluu')
+
+    if setupObj.installOxd:
+        installOxd()
+        setupObj.run_service_command('oxd-server', 'restart')
+
+    setupObj.import_oxd_certificate()
+
+    setupObj.renderTemplateInOut(
+                    os.path.join(ces_dir, 'templates/casa.json'),
+                    os.path.join(ces_dir, 'templates'),
+                    os.path.join(ces_dir, 'output'),
+                    )
+    setupObj.calculate_selected_aplications_memory()
+    setupObj.install_casa()
+
+
+def installRadius():
+    outputFolder = setupObj.outputFolder
+    setupObj.outputFolder = os.path.join(cur_dir, 'output')
+    setupObj.install_gluu_radius()
+    setupObj.outputFolder = outputFolder
+
+    setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+    setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
+
+    dn, oxAuthConfiguration = get_oxAuthConfiguration_ldap()
+
+    oxAuthConfiguration['openidScopeBackwardCompatibility'] = True
+    oxAuthConfiguration['legacyIdTokenClaims'] = True
+    oxAuthConfiguration_js = json.dumps(oxAuthConfiguration, indent=2)
+
+    ldap_conn.modify(
+            dn,
+            {"oxAuthConfDynamic": [MODIFY_REPLACE, oxAuthConfiguration_js]}
+            )
+
+    ldap_conn.modify(
+            'ou=configuration,o=gluu',
+            {"gluuRadiusEnabled": [MODIFY_REPLACE, 'true']}
+            )
+
+    ldap_conn.modify(
+            'inum=B8FD-4C11,ou=scripts,o=gluu',
+            {"oxEnabled": [MODIFY_REPLACE, 'true']}
+            )
 
 
 if args.addshib:
@@ -194,7 +517,16 @@ if args.addshib:
 if args.addpassport:
     installPassport()
 
+if args.addoxd:
+    installOxd()
+
+if args.addcasa:
+    installCasa()
+
 if args.addradius:
     installRadius()
 
-print "Please exit container and restart Gluu Server"
+if persistence_type == 'ldap':
+    setupObj.deleteLdapPw()
+
+print("Please exit container and restart Gluu Server")

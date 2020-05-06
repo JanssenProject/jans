@@ -16,7 +16,7 @@ class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Client registration. Initialization"
         
         self.clientRedirectUrisSet = self.prepareClientRedirectUris(configurationAttributes)
@@ -69,7 +69,7 @@ class ClientRegistration(ClientRegistrationType):
         return True
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     def prepareClientRedirectUris(self, configurationAttributes):
         clientRedirectUrisSet = HashSet()
