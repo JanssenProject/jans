@@ -6,8 +6,9 @@ import sys
 import subprocess
 import json
 import zipfile
+import ldap3
 
-from ldap3 import Server, Connection, BASE, SUBTREE, MODIFY_REPLACE
+from pylib.dbutils import get_ldap_conn, get_cbm_conn
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.join(cur_dir, 'ces_current')
@@ -115,38 +116,18 @@ setupObj.persistence_type = persistence_type
 if persistence_type == 'hybrid':
     hybrid_prop = read_properties_file(setupObj.gluu_hybrid_roperties)    
     persistence_type = hybrid_prop['storage.default']
-if persistence_type == 'couchbase':
-    gluu_cb_prop = read_properties_file(setupObj.gluuCouchebaseProperties)
-    cb_serevr = gluu_cb_prop['servers'].split(',')[0].strip()
-    cb_admin = gluu_cb_prop['auth.userName']
-    encoded_cb_password = gluu_cb_prop['auth.userPassword']
-    cb_passwd = os.popen('/opt/gluu/bin/encode.py -D ' + encoded_cb_password).read().strip()
-    
-    from ces_current.pylib.cbm import CBM
-    setupObj.cbm = CBM(cb_serevr, cb_admin, cb_passwd)
 
+if persistence_type == 'couchbase':
+    setupObj.cbm = get_cbm_conn()
 else:
     setupObj.createLdapPw()
-
-    ox_ldap_prop = read_properties_file('/etc/gluu/conf/gluu-ldap.properties')
-
-    bindDN = ox_ldap_prop['bindDN']
-    bindPassword_e = ox_ldap_prop['bindPassword']
-
-    cmd = '/opt/gluu/bin/encode.py -D ' + bindPassword_e    
-    bindPassword = os.popen(cmd).read().strip()
-    ldap_host, ldap_port = ox_ldap_prop['servers'].split(',')[0].strip().split(':')
-
-    ldap_server = Server(ldap_host, port=int(ldap_port), use_ssl=True)
-    ldap_conn = Connection(ldap_server, user=bindDN, password=bindPassword)
-    ldap_conn.bind()
-
+    ldap_conn = get_ldap_conn
 
 def get_oxAuthConfiguration_ldap():
 
     ldap_conn.search(
                 search_base='o=gluu', 
-                search_scope=SUBTREE,
+                search_scope=ldap3.SUBTREE,
                 search_filter='(objectClass=oxAuthConfiguration)',
                 attributes=["oxAuthConfDynamic"]
                 )
@@ -160,7 +141,7 @@ def get_oxAuthConfiguration_ldap():
 def get_oxTrustConfiguration_ldap():
     ldap_conn.search(
                 search_base='o=gluu',
-                search_scope=SUBTREE,
+                search_scope=ldap3.SUBTREE,
                 search_filter='(objectClass=oxTrustConfiguration)',
                 attributes=['oxTrustConfApplication']
                 )
@@ -267,12 +248,12 @@ def installSaml():
 
         ldap_conn.modify( 
                         dn,
-                        {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                        {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, oxTrustConfApplication_js]}
                         )
 
         ldap_conn.modify(
                         'ou=configuration,o=gluu',
-                        {"gluuSamlEnabled": [MODIFY_REPLACE, 'true']}
+                        {"gluuSamlEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                         )
 
     else:
@@ -366,19 +347,19 @@ def installPassport():
         
         ldap_conn.modify(
                 dn,
-                {"oxTrustConfApplication": [MODIFY_REPLACE, oxTrustConfApplication_js]}
+                {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, oxTrustConfApplication_js]}
                 )
 
         ldap_conn.modify(
                 'ou=configuration,o=gluu',
-                {"gluuPassportEnabled": [MODIFY_REPLACE, 'true']}
+                {"gluuPassportEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                 )
 
         
         for scr in scripts_enable:
             ldap_conn.modify(
                     'inum={},ou=scripts,o=gluu'.format(scr),
-                    {"oxEnabled": [MODIFY_REPLACE, 'true']}
+                    {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
 
     else:
@@ -497,17 +478,17 @@ def installRadius():
 
     ldap_conn.modify(
             dn,
-            {"oxAuthConfDynamic": [MODIFY_REPLACE, oxAuthConfiguration_js]}
+            {"oxAuthConfDynamic": [ldap3.MODIFY_REPLACE, oxAuthConfiguration_js]}
             )
 
     ldap_conn.modify(
             'ou=configuration,o=gluu',
-            {"gluuRadiusEnabled": [MODIFY_REPLACE, 'true']}
+            {"gluuRadiusEnabled": [ldap3.MODIFY_REPLACE, 'true']}
             )
 
     ldap_conn.modify(
             'inum=B8FD-4C11,ou=scripts,o=gluu',
-            {"oxEnabled": [MODIFY_REPLACE, 'true']}
+            {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
             )
 
 
