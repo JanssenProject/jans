@@ -2,10 +2,7 @@ package org.gluu.oxauth.service;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
@@ -75,7 +72,9 @@ public class SectorIdentifierService {
         return String.format("oxId=%s,%s", oxId, sectorIdentifierDn);
     }
 
-    public String getSub(Client client, User user, boolean isCibaGrant) {
+    public String getSub(IAuthorizationGrant grant) {
+        Client client = grant.getClient();
+        User user = grant.getUser();
         if (user == null) {
             log.trace("User is null, return blank sub");
             return "";
@@ -85,7 +84,12 @@ public class SectorIdentifierService {
             return "";
         }
 
+        if (grant.getAuthorizationGrantType() == AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
+            return user.getUserId();
+        }
+
         final boolean isClientPairwise = SubjectType.PAIRWISE.equals(SubjectType.fromString(client.getSubjectType()));
+        final boolean isCibaGrant = grant instanceof CIBAGrant;
         if (isClientPairwise) {
             final String sectorIdentifierUri;
 

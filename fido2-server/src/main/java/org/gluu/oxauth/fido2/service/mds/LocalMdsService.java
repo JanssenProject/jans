@@ -1,17 +1,4 @@
-/*
- * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
- */
-
-package org.gluu.oxauth.fido2.certification;
+package org.gluu.oxauth.fido2.service.mds;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -39,7 +25,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class DirectoryBasedMetadataLoader {
+public class LocalMdsService {
 
     @Inject
     private Logger log;
@@ -52,12 +38,9 @@ public class DirectoryBasedMetadataLoader {
 
     private Map<String, JsonNode> authenticatorsMetadata;
 
-    @PostConstruct
-    public void create() {
-        this.authenticatorsMetadata = Collections.synchronizedMap(new HashMap());
-    }
-
     public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
+        this.authenticatorsMetadata = Collections.synchronizedMap(new HashMap<String, JsonNode>());
+
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
         if (fido2Configuration == null) {
             return;
@@ -66,22 +49,19 @@ public class DirectoryBasedMetadataLoader {
         String serverMetadataFolder = appConfiguration.getFido2Configuration().getServerMetadataFolder();
 
         log.info("Populating metadata from {}", serverMetadataFolder);
-        authenticatorsMetadata.putAll(getAAGUIDMapOfMetadata());
+        authenticatorsMetadata.putAll(getAAGUIDMapOfMetadata(serverMetadataFolder));
     }
 
-    private Map<String, JsonNode> getAAGUIDMapOfMetadata() {
+    private Map<String, JsonNode> getAAGUIDMapOfMetadata(String serverMetadataFolder) {
         Map<String, JsonNode> nodes = Collections.synchronizedMap(new HashMap<>());
 
-        String serverMetadataFolder = appConfiguration.getFido2Configuration().getServerMetadataFolder();
         if (StringHelper.isEmpty(serverMetadataFolder)) {
             log.debug("Property certificationServerMetadataFolder is empty");
             return nodes;
         }
 
         Path path = FileSystems.getDefault().getPath(serverMetadataFolder);
-        DirectoryStream<Path> directoryStream = null;
-        try {
-            directoryStream = Files.newDirectoryStream(path);
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
             Iterator<Path> iter = directoryStream.iterator();
             while (iter.hasNext()) {
                 Path filePath = iter.next();
@@ -101,18 +81,10 @@ public class DirectoryBasedMetadataLoader {
                     log.warn("Can't process {}", filePath, e);
                 }
             }
-
-        } catch (IOException e) {
-            log.warn("Something wrong with path ", e);
-        } finally {
-            if (directoryStream != null) {
-                try {
-                    directoryStream.close();
-                } catch (IOException e) {
-                    log.warn("Something wrong with directory stream", e);
-                }
-            }
+        } catch (IOException ex) {
+            log.warn("Something wrong with path ", ex);
         }
+
         return nodes;
     }
 
@@ -123,4 +95,5 @@ public class DirectoryBasedMetadataLoader {
     public JsonNode getAuthenticatorsMetadata(String aaguid) {
         return authenticatorsMetadata.get(aaguid);
     }
+
 }
