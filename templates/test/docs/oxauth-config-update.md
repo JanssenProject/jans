@@ -38,6 +38,7 @@ III. These changes should be applied to oxAuth config.
 12. "sessionIdRequestParameterEnabled" : true
 13. "dynamicRegistrationPasswordGrantTypeEnabled": true
 14. "returnClientSecretOnRead": true
+15. "forceOfflineAccessScopeToEnableRefreshToken": false
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies and UMA Claims Gathering scripts.
