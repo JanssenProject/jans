@@ -7,9 +7,9 @@ import json
 import datetime
 import copy
 
-from .jproperties import Properties
-from .ldif3.ldif3 import LDIFParser
-from .attribute_data_types import ATTRUBUTEDATATYPES
+from jproperties import Properties
+from ldif3.ldif3 import LDIFParser
+from attribute_data_types import ATTRUBUTEDATATYPES
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
@@ -183,8 +183,6 @@ def get_key_from(dn):
         key = '_'
 
     return key
-
-
 
 
 def get_documents_from_ldif(ldif_file):
