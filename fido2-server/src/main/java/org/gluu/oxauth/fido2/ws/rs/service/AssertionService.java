@@ -181,21 +181,10 @@ public class AssertionService {
             commonVerifiers.verifyThatString(params.get("response"), "userHandle");
         }
 
-        JsonNode clientDataJSONNode;
-        try {
-            clientDataJSONNode = dataMapperService
-                    .readTree(new String(base64Service.urlDecode(params.get("response").get("clientDataJSON").asText()), Charset.forName("UTF-8")));
-        } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Can't parse message", e);
-        } catch (Exception e) {
-            throw new Fido2RPRuntimeException("Invalid assertion data", e);
-        }
-
-        commonVerifiers.verifyClientJSON(clientDataJSONNode);
+        JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(response);
         commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
 
         String clientDataChallenge = clientDataJSONNode.get("challenge").asText();
-        String clientDataOrigin = clientDataJSONNode.get("origin").asText();
 
         Fido2AuthenticationEntry authenticationEntity = authenticationsRepository.findByChallenge(clientDataChallenge).parallelStream().findFirst()
                 .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find matching request by challenge '%s'", clientDataChallenge)));
@@ -203,7 +192,7 @@ public class AssertionService {
         Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
 
         challengeVerifier.verifyChallenge(authenticationEntity.getChallange(), clientDataChallenge, clientDataChallenge);
-        domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataOrigin);
+        domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataJSONNode);
 
         Fido2RegistrationEntry registrationEntry = registrationsRepository.findByPublicKeyId(keyId)
                 .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));

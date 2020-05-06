@@ -120,6 +120,7 @@ public class AppConfiguration implements Configuration {
     private Boolean persistRefreshTokenInLdap = true;
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
+    private Boolean returnClientSecretOnRead = false;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -134,6 +135,7 @@ public class AppConfiguration implements Configuration {
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
     private Boolean sessionIdRequestParameterEnabled = false; // #1195
+    private Boolean changeSessionIdOnAuthentication = true;
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
@@ -195,6 +197,7 @@ public class AppConfiguration implements Configuration {
     private Boolean useLocalCache = false;
     private Boolean fapiCompatibility = false;
     private Boolean forceIdTokenHintPrecense = false;
+    private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -214,6 +217,29 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getForceOfflineAccessScopeToEnableRefreshToken() {
+        if (forceOfflineAccessScopeToEnableRefreshToken == null) forceOfflineAccessScopeToEnableRefreshToken = true;
+        return forceOfflineAccessScopeToEnableRefreshToken;
+    }
+
+    public void setForceOfflineAccessScopeToEnableRefreshToken(Boolean forceOfflineAccessScopeToEnableRefreshToken) {
+        this.forceOfflineAccessScopeToEnableRefreshToken = forceOfflineAccessScopeToEnableRefreshToken;
+    }
+
+    public Boolean getChangeSessionIdOnAuthentication() {
+        if (changeSessionIdOnAuthentication == null) changeSessionIdOnAuthentication = true;
+        return changeSessionIdOnAuthentication;
+    }
+
+    public Boolean getReturnClientSecretOnRead() {
+        if (returnClientSecretOnRead == null) returnClientSecretOnRead = false;
+        return returnClientSecretOnRead;
+    }
+
+    public void setReturnClientSecretOnRead(Boolean returnClientSecretOnRead) {
+        this.returnClientSecretOnRead = returnClientSecretOnRead;
+    }
 
     public Boolean getFapiCompatibility() {
         if (fapiCompatibility == null) fapiCompatibility = false;
