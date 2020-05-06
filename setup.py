@@ -751,6 +751,15 @@ class Setup(object):
             'oxauth_client_jar_fn': os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
                 }
 
+        self.logIt("Determining oxd server package")
+        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
+
+        if oxd_package_list:
+            self.oxd_package = max(oxd_package_list)
+
+        self.logIt("oxd server package was determined as " + self.oxd_package)
+
+
     def __repr__(self):
         try:
             txt = 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n"
@@ -822,14 +831,6 @@ class Setup(object):
 
         if (not 'key_gen_path' in self.non_setup_properties) or (not 'key_export_path' in self.non_setup_properties):
             self.logIt("Can't determine key generator and/or key exporter path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
-
-        self.logIt("Determining oxd server package")
-        oxd_package_list = glob.glob(os.path.join(self.distGluuFolder, 'oxd-server*.tgz'))
-
-        if oxd_package_list:
-            self.oxd_package = max(oxd_package_list)
-
-        self.logIt("oxd server package was determined as " + self.oxd_package)
 
         if self.installCasa:
             self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
@@ -5344,6 +5345,13 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
         self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
         self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+
+        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+
+        self.run([self.cmd_chmod, '755', self.radius_dir])
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
         self.enable_service_at_start('gluu-radius')
 
