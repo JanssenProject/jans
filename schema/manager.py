@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 manager.py - Script which acts as the user interface for schema management.
 
@@ -28,7 +28,7 @@ def generate(infile, schema_type=None):
         schema_str = gen.generate_ldif()
     else:
         schema_str = gen.generate_schema()
-    print schema_str.encode('utf-8')
+    print(schema_str)
 
 
 def autogenerate():
@@ -43,7 +43,7 @@ def autogenerate():
     fp.close()
     gen = SchemaGenerator(gluu_json)
     with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
-        f.write(gen.generate_ldif().encode('utf-8'))
+        f.write(gen.generate_ldif())
 
     fp = open(os.path.join(localdir, 'custom_schema.json'), 'r')
     custom_json = fp.read()
@@ -51,7 +51,7 @@ def autogenerate():
     gen = SchemaGenerator(custom_json)
     with open(os.path.join(opendj_folder, '77-customAttributes.ldif'), 'w') \
             as f:
-        f.write(gen.generate_ldif().encode('utf-8'))
+        f.write(gen.generate_ldif())
 
 
 def run_tests():
@@ -101,7 +101,7 @@ def make_json(filename):
     schema_dict['objectClasses'] = objectclasses
     schema_dict['attributeTypes'] = attributetypes
     schema_dict['oidMacros'] = definitions['oidMacros']
-    print json.dumps(schema_dict, indent=4, sort_keys=True)
+    print(json.dumps(schema_dict, indent=4, sort_keys=True))
 
 
 def make_schema_docs():
@@ -130,7 +130,7 @@ def make_schema_docs():
                     break
             if not attr_docs_added:
                 docs += "\n* __{}__".format(obj_attr)
-    print docs
+    print(docs)
 
 
 if __name__ == '__main__':
@@ -149,14 +149,14 @@ if __name__ == '__main__':
         if args.filename:
             generate(args.filename, args.type)
         else:
-            print "No JSON Input. Specify a JSON file with --filename"
+            print("No JSON Input. Specify a JSON file with --filename")
     elif args.action == 'test':
         run_tests()
     elif args.action == 'makejson':
         if args.filename:
             make_json(args.filename)
         else:
-            print "No Schema Input. Specify schema file with --filename"
+            print("No Schema Input. Specify schema file with --filename")
     elif args.action == 'autogenerate':
         autogenerate()
     elif args.action == 'makedocs':
