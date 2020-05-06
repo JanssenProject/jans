@@ -1,7 +1,8 @@
 package org.gluu.oxauth.session.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.claims.Audience;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JsonWebResponse;
@@ -40,41 +41,43 @@ public class LogoutTokenFactory {
     @Inject
     private SectorIdentifierService sectorIdentifierService;
 
-    public JsonWebResponse createLogoutToken(Client client, User user, String sessionId) {
+    public JsonWebResponse createLogoutToken(IAuthorizationGrant grant, String sessionId) {
         try {
-            Preconditions.checkNotNull(client);
+            Preconditions.checkNotNull(grant);
+            Preconditions.checkNotNull(grant.getClient());
 
-            JsonWebResponse jwr = jwrService.createJwr(client);
+            JsonWebResponse jwr = jwrService.createJwr(grant.getClient());
 
-            fillClaims(jwr, client, user, sessionId);
+            fillClaims(jwr, grant, sessionId);
 
-            jwrService.encode(jwr, client);
+            jwrService.encode(jwr, grant.getClient());
             return jwr;
         } catch (Exception e) {
-            log.error("Failed to create logout_token for client:" + client.getClientId());
+            log.error("Failed to create logout_token for client:" + grant.getClient().getClientId());
             return null;
         }
     }
 
-    private void fillClaims(JsonWebResponse jwr, Client client, User user, String sessionId) {
+    private void fillClaims(JsonWebResponse jwr, IAuthorizationGrant grant, String sessionId) {
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
         Date expiration = calendar.getTime();
+        Client client = grant.getClient();
 
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwr.getClaims().setAudience(client.getClientId());
         jwr.getClaims().setJwtId(UUID.randomUUID());
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());
+        Audience.setAudience(jwr.getClaims(), client);
 
         if (StringUtils.isNotBlank(sessionId) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
             jwr.getClaims().setClaim("sid", sessionId);
         }
 
-        final String sub = sectorIdentifierService.getSub(client, user, false);
+        final String sub = grant.getSub();
         if (StringUtils.isNotBlank(sub)) {
             jwr.getClaims().setSubjectIdentifier(sub);
         }

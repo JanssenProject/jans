@@ -2,6 +2,17 @@
 
 <suite name="oxAuthClient" parallel="false">
 
+    <test name="JsonApplier Client test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.json.JsonApplierTest"/>
+        </classes>
+    </test>
+    <test name="RegisterRequest Client test" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.client.RegisterRequestTest"/>
+        </classes>
+    </test>
+
     <!-- Address claims test -->
     <test name="Address claims test (HTTP)" enabled="true">
         <classes>

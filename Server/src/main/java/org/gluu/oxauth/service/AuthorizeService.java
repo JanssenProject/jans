@@ -12,6 +12,8 @@ import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.auth.Authenticator;
+import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.*;
@@ -39,7 +41,7 @@ import java.util.Set;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version May 5, 2020
  */
 @Stateless
 @Named
@@ -86,6 +88,15 @@ public class AuthorizeService {
 
     @Inject
     private RequestParameterService requestParameterService;
+
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private CIBASupportProxy cibaSupportProxy;
+
+    @Inject
+    private CIBAPingCallbackProxy cibaPingCallbackProxy;
 
     public SessionId getSession() {
         return getSession(null);
@@ -178,6 +189,23 @@ public class AuthorizeService {
 
         RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
         redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
+
+        // CIBA
+        Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
+        if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
+            CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID));
+            if (cibaGrant != null && cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
+                cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
+                cibaGrant.setTokensDelivered(false);
+                cibaGrant.save();
+
+                cibaPingCallbackProxy.pingCallback(
+                        cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                        cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                        cibaGrant.getClientNotificationToken()
+                );
+            }
+        }
 
         facesService.redirectToExternalURL(redirectUri.toString());
     }

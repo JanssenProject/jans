@@ -28,6 +28,7 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.json.JsonApplier;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.register.RegisterErrorResponseType;
 import org.gluu.oxauth.model.register.RegisterResponseParam;
@@ -319,7 +320,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             clientService.persist(client);
 
-            JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            JSONObject jsonObject = getJSONObject(client);
             builder.entity(jsonObject.toString(4).replace("\\/", "/"));
 
             log.info("Client registered: clientId = {}, applicationType = {}, clientName = {}, redirectUris = {}, sectorIdentifierUri = {}",
@@ -358,6 +359,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
     private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
+
+        JsonApplier.getInstance().transfer(requestObject, p_client);
+        JsonApplier.getInstance().transfer(requestObject, p_client.getAttributes());
+
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<>(new HashSet<>(redirectUris)); // Remove repeated elements
@@ -611,7 +616,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         try {
             log.debug("Attempting to UPDATE client, client_id: {}, requestParams = {}, isSecure = {}",
                     clientId, requestParams, securityContext.isSecure());
-            final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+            final String accessToken = tokenService.getToken(authorization);
 
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
@@ -700,7 +705,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Override
     public Response requestClientRead(String clientId, String authorization, HttpServletRequest httpRequest,
                                       SecurityContext securityContext) {
-        String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+        String accessToken = tokenService.getToken(authorization);
         log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
@@ -745,15 +750,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(p_client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+        final JSONObject jsonObject = getJSONObject(p_client);
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
-    private JSONObject getJSONObject(Client client, boolean authorizationRequestCustomAllowedParameters) throws JSONException, StringEncrypter.EncryptionException {
+    private JSONObject getJSONObject(Client client) throws JSONException, StringEncrypter.EncryptionException {
         JSONObject responseJsonObject = new JSONObject();
 
+        JsonApplier.getInstance().apply(client, responseJsonObject);
+        JsonApplier.getInstance().apply(client.getAttributes(), responseJsonObject);
+
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
+        if (appConfiguration.getReturnClientSecretOnRead()) {
+            Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
+        }
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
                 appConfiguration.getRegistrationEndpoint() + "?" +
@@ -828,7 +838,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         }
 
-        if (authorizationRequestCustomAllowedParameters) {
+        if (appConfiguration.getLegacyDynamicRegistrationScopeParam()) {
             Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
         } else {
             Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
@@ -924,7 +934,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Override
     public Response delete(String clientId, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
         try {
-            String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+            String accessToken = tokenService.getToken(authorization);
 
             log.debug("Attempting to delete client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
                     clientId, accessToken, securityContext.isSecure());

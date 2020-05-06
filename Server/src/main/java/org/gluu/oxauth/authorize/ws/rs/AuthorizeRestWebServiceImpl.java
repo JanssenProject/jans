@@ -8,7 +8,6 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -70,10 +69,9 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version April 10, 2020
+ * @version May 5, 2020
  */
 @Path("/")
-@Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
@@ -315,6 +313,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
                 acrValues = Lists.newArrayList(client.getDefaultAcrValues());
+            }
+
+            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS)) {
+                if (!responseTypes.contains(ResponseType.CODE)) {
+                    log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+                }
+
+                if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
+                    log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
+                    scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+                }
             }
 
             final boolean isResponseTypeValid = AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
@@ -599,7 +609,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     null, null, accessToken, refreshToken,
                     null, cibaGrant, false, null);
 
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(true);
             cibaGrant.save();
 
@@ -613,7 +623,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     accessToken.getExpiresIn()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 
@@ -623,7 +633,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClientNotificationToken()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }

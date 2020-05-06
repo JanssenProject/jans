@@ -26,4 +26,5 @@ public enum AttestationFormat {
     public String getFmt() {
         return fmt;
     }
+
 }
