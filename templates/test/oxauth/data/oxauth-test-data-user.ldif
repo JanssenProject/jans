@@ -58,7 +58,46 @@ zoneinfo: America/Chicago
 memberOf: inum=7890,ou=groups,o=gluu
 memberOf: inum=7891,ou=groups,o=gluu
 memberOf: inum=60B7,ou=groups,o=gluu
+oxAuthBackchannelUserCode: 59b335fb-a2df-4275-be43-1b8d3cc9a5c5
 
+dn: inum=B1F3-AEAE-B799,ou=people,o=gluu
+objectClass: top
+objectClass: gluuPerson
+objectClass: gluuCustomPerson
+cn: Test User2
+sn: User2
+o: Test
+birthdate: 19830106010101.253Z
+displayName: oxAuth Test User2
+emailVerified: true
+gender: Male
+givenName: Test2
+gluuStatus: active
+iname: @test*person*test_user2
+inum: B1F3-AEAE-B799
+locale: en-US
+mail: test_user2@test.org
+middleName: User2
+nickname: user2
+phoneNumberVerified: true
+picture: http://www.gluu.org/wp-content/uploads/2012/04/mike3.png
+preferredUsername: user2
+preferredLanguage: en_US
+profile: http://www.mywebsite.com/profile
+street: 622 East 6th Street
+st: Texas
+c: US
+l: Austin
+telephoneNumber: (512) 516-2414
+mobile: (512) 516-2414
+uid: test_user2
+updatedAt: 20170213135512.220Z
+userPassword: test_user_password2
+website: http://www.gluu.org
+zoneinfo: America/Chicago
+memberOf: inum=7890,ou=groups,o=gluu
+memberOf: inum=7891,ou=groups,o=gluu
+memberOf: inum=60B7,ou=groups,o=gluu
 ######################################
 # Groups
 ######################################

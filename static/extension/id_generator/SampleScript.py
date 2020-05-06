@@ -14,7 +14,7 @@ class IdGenerator(IdGeneratorType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Id generator. Initialization"
         print "Id generator. Initialized successfully"
 
@@ -26,7 +26,7 @@ class IdGenerator(IdGeneratorType):
         return True   
 
     def getApiVersion(self):
-        return 1
+        return 11
 
     # Id generator init method
     #   appId is application Id

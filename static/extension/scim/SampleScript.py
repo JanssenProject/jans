@@ -17,7 +17,7 @@ class ScimEventHandler(ScimType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "ScimEventHandler (init): Initialized successfully"
         return True   
 
@@ -27,7 +27,7 @@ class ScimEventHandler(ScimType):
 
     def getApiVersion(self):
         #return 2 if you want the post* scripts being executed
-        return 1
+        return 11
 
     def createUser(self, user, configurationAttributes):
 

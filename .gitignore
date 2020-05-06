@@ -7,3 +7,5 @@ setup.properties.last
 /.idea
 /output/
 env/
+__pycache_/_
+pylib/__pycache_/
