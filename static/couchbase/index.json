@@ -1,35 +1,30 @@
 {
-  "gluu_user": {
+  "!bucket_prefix!_user": {
     "attributes": [
       ["objectClass"], 
       ["creationDate"], 
       ["inum"], 
-      ["del","exp"] 
+      ["del","exp"], 
+      ["uid"], 
+      ["mail"], 
+      ["oxStatus"], 
+      ["oxApplication"], 
+      ["oxDeviceHashCode"], 
+      ["oxDeviceKeyHandle"],
+      ["oxAuthClientId"],
+      ["oxAuthUserId"]
     ],
     "static" : [
       [["LOWER(`uid`)"], "objectClass = \"gluuPerson\""], 
       [["LOWER(`mail`)"], "objectClass = \"gluuPerson\""], 
-      [["DISTINCT(PAIRS(self))"], "objectClass = \"gluuPerson\""], 
-      [["exp", "oxAuthExpiration"], "del=true"] 
+      [["exp"], "del=true"] 
     ]
   },
 
-  "gluu_authorization": {
-     "attributes": [
-        ["oxAuthExpiration"],
-        ["del"],
-        ["oxAuthClientId"],
-        ["oxAuthUserId"]
-      ],
-    "static" : [
-    ]
-  },
-
-  "gluu": {
+  "!bucket_prefix!": {
     "attributes": [
       ["objectClass"],
       ["oxScriptType"], 
-      ["oxAuthExpiration"], 
       ["iat"], 
       ["oxAuthClientSecretExpiresAt"], 
       ["creationDate"], 
@@ -37,7 +32,7 @@
       ["inum"], 
       ["displayName"], 
       ["oxAuthRegistrationAccessToken"], 
-      ["oxAuthClaimName"], 
+      ["oxAuthUmaScope"], 
       ["mail"], 
       ["oxId"], 
       ["oxTicket"], 
@@ -45,6 +40,9 @@
       ["ssnId"],
       ["oxAuthClientId"],
       ["clnId"],
+      ["oxAuthSessionId"],
+      ["oxAuthUserDN"],
+      ["oxState"],
       ["del","exp"],
       ["objectClass","creationDate","oxStatus"]
     ],
@@ -52,12 +50,12 @@
       [["creationDate"], "objectClass = \"gluuPasswordResetRequest\""],
       [["oxScriptType"], "objectClass = \"oxCustomScript\""],
       [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
-      [["exp", "oxAuthExpiration"], "del=true"]
+      [["exp"], "del=true"]
         
     ]
   },
 
-  "gluu_site": {
+  "!bucket_prefix!_site": {
     "attributes": [
         ["objectClass"], 
         ["inum"]
@@ -66,34 +64,29 @@
     ]
   },
 
-  "gluu_statistic": {
+  "!bucket_prefix!_statistic": {
     "attributes": [
       ["objectClass"], 
       ["oxStartDate"], 
       ["del"], 
-      ["oxAuthExpiration"]
+      ["exp"]
     ],
     "static" : [
     ]
   },
 
-  "gluu_cache": {
+  "!bucket_prefix!_cache": {
     "attributes":[
-      ["del","exp"]
     ],
     "static" : [
-      [["exp", "oxAuthExpiration"], "del=true"],
-      [["oxAuthExpiration"], "objectClass = \"cache\""]
     ]
   },
 
-  "gluu_token": {
+  "!bucket_prefix!_token": {
     "attributes": [
-      ["del","exp"],
       ["authzCode"]
     ],
     "static" : [
-      [["exp", "oxAuthExpiration"], "del=true"],
       [["grtId"], "objectClass = \"token\""],
       [["ssnId"], "objectClass = \"token\""]
     ]

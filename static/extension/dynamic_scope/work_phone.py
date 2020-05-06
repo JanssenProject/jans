@@ -16,7 +16,7 @@ class DynamicScope(DynamicScopeType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Dynamic scope. Initialization"
 
         print "Dynamic scope. Initialized successfully"
@@ -52,4 +52,4 @@ class DynamicScope(DynamicScopeType):
         return Arrays.asList("work_phone")
 
     def getApiVersion(self):
-        return 2
+        return 11

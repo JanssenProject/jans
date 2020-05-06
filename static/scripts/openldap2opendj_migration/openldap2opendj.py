@@ -346,7 +346,7 @@ class Setup(object):
         self.opendj_p12_pass = None
 
         self.ldap_type = 'opendj'
-        self.opendj_ldap_binddn = 'cn=directory manager'
+        self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
         self.ldaps_port = '1636'

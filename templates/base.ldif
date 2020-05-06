@@ -54,6 +54,14 @@ ou: clients
 
 ################################
 
+# Sessions - LEVEL 2
+dn: ou=sessions,o=gluu
+objectClass: top
+objectClass: organizationalUnit
+ou: sessions
+
+################################
+
 # Token data - LEVEL 2
 dn: ou=tokens,o=gluu
 objectClass: top
