@@ -70,7 +70,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version April 10, 2020
+ * @version May 5, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -599,7 +599,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     null, null, accessToken, refreshToken,
                     null, cibaGrant, false, null);
 
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(true);
             cibaGrant.save();
 
@@ -613,7 +613,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     accessToken.getExpiresIn()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 
@@ -623,7 +623,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     cibaGrant.getClientNotificationToken()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-            cibaGrant.setUserAuthorization(true);
+            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }
