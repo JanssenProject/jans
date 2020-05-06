@@ -15,7 +15,7 @@ class UserRegistration(UserRegistrationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "User registration. Initialization"
 
         self.enable_user = StringHelper.toBoolean(configurationAttributes.get("enable_user").getValue2(), False)
@@ -73,4 +73,4 @@ class UserRegistration(UserRegistrationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11

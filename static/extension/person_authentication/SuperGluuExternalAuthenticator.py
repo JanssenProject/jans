@@ -43,7 +43,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Super-Gluu. Initialization"
 
         if not configurationAttributes.containsKey("authentication_mode"):
@@ -154,7 +154,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 2
+        return 11
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -808,8 +808,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         send_notification = True
                         
-                        title = "Super-Gluu"
-                        message = "Super-Gluu login request to: %s" % client_redirect_uri
+                        title = "Super Gluu"
+                        message = "Confirm your sign in request to: %s" % client_redirect_uri
 
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)

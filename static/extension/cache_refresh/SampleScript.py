@@ -16,7 +16,7 @@ class CacheRefresh(CacheRefreshType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Cache refresh. Initialization"
         print "Cache refresh. Initialized successfully"
 
@@ -71,4 +71,4 @@ class CacheRefresh(CacheRefreshType):
         return True
 
     def getApiVersion(self):
-        return 3
+        return 11

@@ -17,7 +17,7 @@ class ConsentGathering(ConsentGatheringType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
         print "Consent-Gathering. Initializing ..."
         print "Consent-Gathering. Initialized successfully"
 
@@ -73,7 +73,7 @@ class ConsentGathering(ConsentGatheringType):
         return True
 
     def getStepsCount(self, context):
-        return 2
+        return 11
 
     def getPageForStep(self, step, context):
         if step == 1:

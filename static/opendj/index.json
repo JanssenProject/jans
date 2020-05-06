@@ -124,7 +124,7 @@
 	},
 
 	{
-		"attribute": "oxAuthExpiration",
+		"attribute": "exp",
 		"type": "date",
 		"index": ["ordering"],
 		"backend": ["userRoot"]
@@ -196,6 +196,13 @@
 	{
 		"attribute": "oxDeviceHashCode",
 		"type": "integer",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxDeviceKeyHandle",
+		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	},

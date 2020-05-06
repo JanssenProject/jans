@@ -39,6 +39,7 @@ from jsonmerge import merge
 from ldifschema_utils import OpenDjSchema
 
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
+cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
@@ -84,7 +85,7 @@ class DBLDIF(LDIFParser):
     def __init__(self, ldif_file):
         LDIFParser.__init__(self, open(ldif_file,'rb'))
         db_file =  os.path.basename(ldif_file)
-        sdb_file = os.path.join('/tmp', db_file+'.sdb')
+        sdb_file = os.path.join(cur_dir, db_file+'.sdb')
         if os.path.exists(sdb_file):
             os.remove(sdb_file)
         #logging.info("\nDumping %s to shelve database" % ldif_file)
@@ -972,7 +973,7 @@ class Migration(object):
                               "user-name": old_entry.get('gluuSmtpUserName',[False])[0],
                             }
                 
-                    new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
+                        new_entry['oxSmtpConfiguration'] = [json.dumps(oxSmtpConfiguration, indent=2)]
                 
                 elif dn == oxauth_client_dn:
                     new_entry['oxAuthLogoutURI'] = ['https://{0}/identity/logout'.format(self.hostname)]
@@ -1257,7 +1258,7 @@ class Migration(object):
             if self.ldap_type == 'opendj':
                 
                 if os.path.exists(ldap_properties_fn):
-                    tmp_fn = '/tmp/ldap.properties_file~'
+                    tmp_fn = os.path.join(cur_dir, 'ldap.properties_file~')
                     out_file = open(tmp_fn,'w')
                     copy_file = False
                     
