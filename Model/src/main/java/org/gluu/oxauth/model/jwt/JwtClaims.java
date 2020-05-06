@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.json.JSONObject;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -97,12 +98,20 @@ public class JwtClaims extends JwtClaimSet {
             return;
         }
 
+        List<String> value = Lists.newArrayList();
         Object currentAudience = getClaim(AUDIENCE);
-        List<String> value = Lists.newArrayList(audience);
         if (currentAudience instanceof String) {
             value.add((String) currentAudience);
-        } else if (currentAudience instanceof List){
-            value.addAll((List) currentAudience);
+        } else if (currentAudience instanceof Collection) {
+            value.addAll((Collection) currentAudience);
+        }
+        if (!value.contains(audience)) {
+            value.add(audience);
+        }
+
+        if (value.size() == 1) {
+            setAudience(value.iterator().next());
+            return;
         }
 
         setClaim(AUDIENCE, value);

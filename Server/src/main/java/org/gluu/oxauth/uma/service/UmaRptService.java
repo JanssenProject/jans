@@ -8,6 +8,7 @@ package org.gluu.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -224,7 +225,7 @@ public class UmaRptService {
         jwt.getClaims().setClaim("client_id", client.getClientId());
         jwt.getClaims().setExpirationTime(expirationDate);
         jwt.getClaims().setIssuedAt(creationDate);
-        jwt.getClaims().setAudience(client.getClientId());
+        Audience.setAudience(jwt.getClaims(), client);
 
         if (permissions != null && !permissions.isEmpty()) {
             String pctCode = permissions.iterator().next().getAttributes().get(UmaPermission.PCT);

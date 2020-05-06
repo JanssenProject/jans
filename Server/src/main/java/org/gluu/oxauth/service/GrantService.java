@@ -155,7 +155,7 @@ public class GrantService {
 
     public SessionTokens getCacheSessionTokens(String sessionDn) {
         SessionTokens sessionTokens = new SessionTokens(sessionDn);
-        Object o = cacheService.get(null, sessionTokens.cacheKey());
+        Object o = cacheService.get(sessionTokens.cacheKey());
         if (o instanceof SessionTokens) {
             return (SessionTokens) o;
         } else {
@@ -178,7 +178,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
+                cacheService.remove(CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -271,7 +271,7 @@ public class GrantService {
     }
 
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
-        List<TokenLdap> grants = new ArrayList<TokenLdap>();
+        List<TokenLdap> grants = new ArrayList<>();
         try {
             List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("ssnId", sessionDn));
             if (ldapGrants != null) {
@@ -300,10 +300,10 @@ public class GrantService {
     }
 
     public List<TokenLdap> getCacheTokensEntries(Set<String> tokenHashes) {
-        List<TokenLdap> tokens = new ArrayList<TokenLdap>();
+        List<TokenLdap> tokens = new ArrayList<>();
 
         for (String tokenHash : tokenHashes) {
-            Object o1 = cacheService.get(null, tokenHash);
+            Object o1 = cacheService.get(tokenHash);
             if (o1 instanceof TokenLdap) {
                 TokenLdap token = (TokenLdap) o1;
                 token.setIsFromCache(true);

@@ -14,5 +14,7 @@
 package org.gluu.oxauth.fido2.ctap;
 
 public enum UserVerification {
-    required, preferred, discouraged
+
+	required, preferred, discouraged;
+
 }

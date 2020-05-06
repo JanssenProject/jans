@@ -6,34 +6,20 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.gluu.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
-import org.gluu.oxauth.model.fido.u2f.U2fConstants;
-import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
+import org.gluu.oxauth.model.fido.u2f.*;
 import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.RegistrationService;
@@ -42,15 +28,11 @@ import org.gluu.oxauth.service.fido.u2f.ValidationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
-import com.wordnik.swagger.annotations.Api;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 import java.util.List;
 
 /**
@@ -60,7 +42,6 @@ import java.util.List;
  * @version August 9, 2017
  */
 @Path("/fido/u2f/registration")
-@Api(value = "/fido/u2f/registration", description = "The endpoint at which the U2F device start registration process.")
 public class U2fRegistrationWS {
 
     @Inject
