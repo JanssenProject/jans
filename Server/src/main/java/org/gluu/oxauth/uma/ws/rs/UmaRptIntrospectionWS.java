@@ -6,10 +6,6 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -40,8 +36,6 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  */
 @Path("/rpt/status")
-@Api(value = "/rpt/status", description = "The endpoint at which the host requests the status of an RPT presented to it by a requester." +
-        " The endpoint is RPT introspection profile implementation defined by UMA specification")
 public class UmaRptIntrospectionWS {
 
     @Inject
@@ -173,10 +167,6 @@ public class UmaRptIntrospectionWS {
     @GET
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    @ApiOperation(value = "Not allowed")
-    @ApiResponses(value = {
-            @ApiResponse(code = 405, message = "Introspection of RPT is not allowed by GET HTTP method.")
-    })
     public Response requestRptStatusGet(@HeaderParam("Authorization") String authorization,
                                         @FormParam("token") String rpt,
                                         @FormParam("token_type_hint") String tokenTypeHint) {

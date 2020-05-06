@@ -42,7 +42,7 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("backchannelLogoutSessionRequired")
     private Boolean backchannelLogoutSessionRequired;
 
-    @JsonProperty("additional_audience")
+    @JsonProperty("additionalAudience")
     private List<String> additionalAudience;
 
     public List<String> getAdditionalAudience() {

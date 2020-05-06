@@ -15,11 +15,15 @@ package org.gluu.oxauth.fido2.cryptoutils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.security.PublicKey;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +50,10 @@ public class CryptoUtils {
 
     public X509Certificate getCertificate(InputStream is) {
         try {
-            return (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        	X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        	certificate.checkValidity();
+        	
+        	return certificate;
         } catch (CertificateException e) {
             throw new Fido2RPRuntimeException(e.getMessage(), e);
         }
@@ -78,16 +85,20 @@ public class CryptoUtils {
 
     }
 
-    public List<X509Certificate> getCertificates(ArrayList<String> certificatePath) {
-        return certificatePath.parallelStream().map(f -> getCertificate(f)).filter(c -> {
-            try {
-                c.checkValidity();
-                PublicKey key = c.getPublicKey();
-                return true;
-            } catch (CertificateException e) {
-                log.warn("Certificate not valid {}", c.getIssuerDN().getName());
-                throw new Fido2RPRuntimeException("Certificate not valid", e);
+    public List<X509Certificate> getCertificates(String rootCertificatePath) {
+        ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
+        Path path = FileSystems.getDefault().getPath(rootCertificatePath);
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
+            Iterator<Path> iter = directoryStream.iterator();
+            while (iter.hasNext()) {
+                Path filePath = iter.next();
+                certificates.add(getCertificate(Files.newInputStream(filePath)));
             }
-        }).collect(Collectors.toList());
+        } catch (Exception ex) {
+            log.warn("Failed to load cert from folder: '{}'", rootCertificatePath, ex);
+        }
+        
+        return certificates;
     }
+
 }
