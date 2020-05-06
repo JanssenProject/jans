@@ -6,8 +6,18 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.gluu.jsf2.service.FacesService;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import org.gluu.oxauth.i18n.LanguageBean;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.AuthorizeService;
+import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
+import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -17,19 +27,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.oxauth.i18n.LanguageBean;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.service.AuthorizeService;
-import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
-import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -183,7 +182,7 @@ public class ConsentGathererService {
     }
 
     private void onSuccess(HttpServletRequest httpRequest, SessionId session, ConsentGatheringContext context) {
-    	sessionService.setAuthenticatedSessionState(httpRequest, session);
+    	sessionService.setAuthenticatedSessionState(httpRequest, context.getHttpResponse(), session);
     	
     	SessionId connectSessionId = sessionService.getConnectSession(httpRequest);
     	

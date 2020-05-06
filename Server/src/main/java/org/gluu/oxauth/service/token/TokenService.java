@@ -9,7 +9,9 @@ package org.gluu.oxauth.service.token;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.util.StringHelper;
+import org.gluu.oxauth.model.token.HttpAuthTokenType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,46 +27,85 @@ public class TokenService {
     @Inject
     private AuthorizationGrantList authorizationGrantList;
 
-	public String getTokenFromAuthorizationParameter(String authorizationParameter) {
-        if (StringHelper.isNotEmpty(authorizationParameter)) {
-            if (authorizationParameter.startsWith("Bearer ")) {
-                return authorizationParameter.substring("Bearer ".length());
-            }
-            if (authorizationParameter.startsWith("Basic ")) {
-                return authorizationParameter.substring("Basic ".length());
-            }
+    public boolean isToken(@Nullable String authorizationParameter, @NotNull HttpAuthTokenType tokenType) {
+        return StringUtils.startsWithIgnoreCase(authorizationParameter, tokenType.getPrefix());
+    }
+
+    @Nullable
+    public String extractToken(@Nullable String authorizationParameter, @NotNull HttpAuthTokenType tokenType) {
+        if (isToken(authorizationParameter, tokenType) && authorizationParameter != null) {
+            return authorizationParameter.substring(tokenType.getPrefix().length()).trim();
         }
         return null;
-	}
+    }
 
-	public String getTokenAfterPrefix(String authorization, String... prefix) {
-	    if (StringUtils.isBlank(authorization) || prefix == null || prefix.length == 0) {
-	        return null;
+    public boolean isBasicAuthToken(@Nullable String authorizationParameter) {
+        return isToken(authorizationParameter, HttpAuthTokenType.Basic);
+    }
+
+    public boolean isBearerAuthToken(@Nullable String authorizationParameter) {
+        return isToken(authorizationParameter, HttpAuthTokenType.Bearer);
+    }
+
+    @Nullable
+    public String getBasicToken(@Nullable String authorizationParameter) {
+        return extractToken(authorizationParameter, HttpAuthTokenType.Basic);
+    }
+
+    @Nullable
+    public String getBearerToken(@Nullable String authorizationParameter) {
+        return extractToken(authorizationParameter, HttpAuthTokenType.Bearer);
+    }
+
+    @Nullable
+    public String getToken(@Nullable String authorization) {
+        return getToken(authorization, HttpAuthTokenType.values());
+    }
+
+    @Nullable
+    public String getToken(@Nullable String authorization, @Nullable HttpAuthTokenType... allowedTokenTypes) {
+        if (StringUtils.isBlank(authorization) || allowedTokenTypes == null || allowedTokenTypes.length == 0) {
+            return null;
         }
-	    for (String pref : prefix) {
-            if (authorization.startsWith(pref)) {
-                return authorization.substring(pref.length());
+
+        for (HttpAuthTokenType tokenType : allowedTokenTypes) {
+            if (tokenType != null && isToken(authorization, tokenType)) {
+                return extractToken(authorization, tokenType);
             }
         }
         return null;
     }
 
-    public AuthorizationGrant getAuthorizationGrant(String p_authorization) {
-        final String token = getTokenFromAuthorizationParameter(p_authorization);
+    @Nullable
+    public AuthorizationGrant getAuthorizationGrant(@Nullable String authorization) {
+        final String token = getToken(authorization);
         if (StringUtils.isNotBlank(token)) {
-    	    return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
+            return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         }
         return null;
     }
 
-    public AuthorizationGrant getAuthorizationGrantByPrefix(String authorization, String prefix) {
-        if (StringUtils.startsWithIgnoreCase(authorization, prefix)) {
-            return authorizationGrantList.getAuthorizationGrantByAccessToken(authorization.substring(prefix.length()));
+    @Nullable
+    public AuthorizationGrant getBearerAuthorizationGrant(@Nullable String authorization) {
+        return getAuthorizationGrant(authorization, HttpAuthTokenType.Bearer);
+    }
+
+    @Nullable
+    public AuthorizationGrant getBasicAuthorizationGrant(@Nullable String authorization) {
+        return getAuthorizationGrant(authorization, HttpAuthTokenType.Basic);
+    }
+
+    @Nullable
+    public AuthorizationGrant getAuthorizationGrant(@Nullable String authorization, @Nullable HttpAuthTokenType tokenType) {
+        final String token = getToken(authorization, tokenType);
+        if (StringUtils.isNotBlank(token)) {
+            return authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         }
         return null;
     }
 
-    public String getClientDn(String p_authorization) {
+    @NotNull
+    public String getClientDn(@Nullable String p_authorization) {
         final AuthorizationGrant grant = getAuthorizationGrant(p_authorization);
         if (grant != null) {
             return grant.getClientDn();
