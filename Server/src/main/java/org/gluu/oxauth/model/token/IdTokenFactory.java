@@ -15,6 +15,7 @@ import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.Claim;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.*;
@@ -93,7 +94,7 @@ public class IdTokenFactory {
             int apiVersion = externalAuthenticator.getApiVersion();
 
             if (apiVersion > 3) {
-                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims();
+                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims(script.getConfigurationAttributes());
                 if (authenticationMethodClaimsOrNull != null) {
                     for (String key : authenticationMethodClaimsOrNull.keySet()) {
                         amrList.add(key + ":" + authenticationMethodClaimsOrNull.get(key));
@@ -111,7 +112,7 @@ public class IdTokenFactory {
                             String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwr.getClaims().setAudience(authorizationGrant.getClient().getClientId());
+        Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
 
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();

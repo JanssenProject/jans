@@ -190,7 +190,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final ExecutorService executorService = EndSessionUtils.getExecutorService();
         for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
-            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), grant != null ? grant.getUser() : null, sessionId);
+            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(grant, sessionId);
             if (logoutToken == null) {
                 log.error("Failed to create logout_token for client: " + entry.getValue().getClientId());
                 return;
