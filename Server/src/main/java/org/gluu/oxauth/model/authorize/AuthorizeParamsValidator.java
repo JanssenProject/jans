@@ -60,11 +60,9 @@ public class AuthorizeParamsValidator {
     }
 
     public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
-        List<GrantType> clientGrantTypes = null;
-        if (clientGrantTypesArray != null) {
-            clientGrantTypes = Arrays.asList(clientGrantTypesArray);
-        }
-        if (responseTypes == null || clientGrantTypes == null || grantTypesSupported == null) {
+        List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+
+        if (responseTypes == null || grantTypesSupported == null) {
             return false;
         }
         if (responseTypes.contains(ResponseType.CODE)) {

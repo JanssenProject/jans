@@ -193,9 +193,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 authorizationCodeGrant.save();
 
                 RefreshToken reToken = null;
-                if (client.getGrantTypes() != null
-                        && client.getGrantTypes().length > 0
-                        && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                if (isRefreshTokenAllowed(client, authorizationCodeGrant)) {
                     reToken = authorizationCodeGrant.createRefreshToken();
                 }
 
@@ -354,9 +352,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
 
                     RefreshToken reToken = null;
-                    if (client.getGrantTypes() != null
-                            && client.getGrantTypes().length > 0
-                            && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                    if (isRefreshTokenAllowed(client, resourceOwnerPasswordCredentialsGrant)) {
                         reToken = resourceOwnerPasswordCredentialsGrant.createRefreshToken();
                     }
 
@@ -423,9 +419,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             cibaGrant.save();
 
                             RefreshToken reToken = null;
-                            if (client.getGrantTypes() != null
-                                    && client.getGrantTypes().length > 0
-                                    && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                            if (isRefreshTokenAllowed(client, cibaGrant)) {
                                 reToken = refToken;
                             }
 
@@ -470,6 +464,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         return response(builder, oAuth2AuditLog);
+    }
+
+    private boolean isRefreshTokenAllowed(Client client, IAuthorizationGrant grant) {
+        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !grant.getScopes().contains(ScopeConstants.OFFLINE_ACCESS)) {
+            return false;
+        }
+        return Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN);
     }
 
     private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
