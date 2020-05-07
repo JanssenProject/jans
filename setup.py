@@ -3939,8 +3939,9 @@ class Setup(object):
 
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
-
+        init_script_fn = '/etc/init.d/opendj'
         if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+            remove_init_script = True
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
             try:
@@ -3951,6 +3952,8 @@ class Setup(object):
             except:
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
+            if os.path.exists(init_script_fn):
+                self.run(['rm', '-f', init_script_fn])
         else:
             self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
             # Make the generated script LSB compliant
@@ -3970,7 +3973,7 @@ class Setup(object):
             if self.os_type in ['ubuntu', 'debian']:
                 self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
 
-            self.fix_init_scripts('opendj', '/etc/init.d/opendj')
+            self.fix_init_scripts('opendj', init_script_fn)
             self.enable_service_at_start('opendj')
 
             self.run([service_path, 'opendj', 'stop'])
@@ -4306,15 +4309,15 @@ class Setup(object):
         for install_type in install_list:
             for package in package_list[os_type_version][install_type].split():
                 if os_type_version in ('centos 7', 'red 7') and package.startswith('python3-'):
-                    package_query = package_query.replace('python3-', 'python36-')
+                    package_query = package.replace('python3-', 'python36-')
                 else:
                     package_query = package
                 sout, serr = self.run(query_command.format(package_query), shell=True, get_stderr=True)
                 if check_text in sout+serr:
-                    self.logIt('Package {0} was not installed'.format(package))
-                    install_list[install_type].append(package)
+                    self.logIt('Package {0} was not installed'.format(package_query))
+                    install_list[install_type].append(package_query)
                 else:
-                    self.logIt('Package {0} was installed'.format(package))
+                    self.logIt('Package {0} was installed'.format(package_query))
 
         install = {'mondatory': True, 'optional': False}
 
