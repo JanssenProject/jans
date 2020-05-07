@@ -125,6 +125,10 @@ public class BackchannelAuthenticationAction implements Serializable {
         return cibaSessions.getSessions().get(this.authReqId).getCallbackJsonBody();
     }
 
+    public String getResponsePingFlow() {
+        return cibaSessions.getSessions().get(this.authReqId).getTokenResponse().getEntity();
+    }
+
     public String getBackchannelAuthenticationEndpoint() {
         return backchannelAuthenticationEndpoint;
     }
