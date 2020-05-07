@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,8 +73,8 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
             int coseCurveCode = coseService.getCodeCurve(uncompressedECPointNode);
-            log.info("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-            log.info("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
+            log.debug("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
             commonVerifiers.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
             commonVerifiers.verifyCounter(registration.getCounter(), counter);

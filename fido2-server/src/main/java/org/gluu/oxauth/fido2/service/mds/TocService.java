@@ -146,11 +146,11 @@ public class TocService {
 
             String jwtPayload = jwsObject.getPayload().toString();
             JsonNode toc = dataMapperService.readTree(jwtPayload);
-            log.info("Legal header {}", toc.get("legalHeader"));
+            log.debug("Legal header {}", toc.get("legalHeader"));
 
             ArrayNode entries = (ArrayNode) toc.get("entries");
             int numberOfEntries = toc.get("no").asInt();
-            log.info("Property 'no' value: {}. Number of entries: {}", numberOfEntries, entries.size());
+            log.debug("Property 'no' value: {}. Number of entries: {}", numberOfEntries, entries.size());
 
             Iterator<JsonNode> iter = entries.elements();
             Map<String, JsonNode> tocEntries = new HashMap<>();

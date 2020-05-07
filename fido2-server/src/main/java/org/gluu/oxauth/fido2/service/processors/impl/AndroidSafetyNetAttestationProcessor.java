@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,10 +78,10 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
             CredAndCounterData credIdAndCounters) {
 
-        commonVerifiers.verifyThatNonEmptyString(attStmt.get("ver"));
+        commonVerifiers.verifyThatNonEmptyString(attStmt, "ver");
         String response = attStmt.get("response").asText();
         String aaguid = Hex.encodeHexString(authData.getAaguid());
-        log.info("Android safetynet payload {} {}", aaguid, new String(base64Service.decode(response)));
+        log.debug("Android safetynet payload {} {}", aaguid, new String(base64Service.decode(response)));
 
         X509TrustManager tm = authCertService.populateTrustManager(authData);
         AttestationStatement stmt;

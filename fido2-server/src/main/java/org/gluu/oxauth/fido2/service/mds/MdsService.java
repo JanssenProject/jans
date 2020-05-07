@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,9 +34,9 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.model.mds.AuthenticatorStatus;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
-import org.gluu.oxauth.fido2.service.mds.model.AuthenticatorStatus;
 import org.gluu.oxauth.fido2.service.processors.impl.ResteasyClientFactory;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -112,7 +112,7 @@ public class MdsService {
         }
 
         verifyTocEntryStatus(aaguid, tocEntry);
-        String metadataHash = commonVerifiers.verifyThatString(tocEntry, "hash");
+        String metadataHash = commonVerifiers.verifyThatFieldString(tocEntry, "hash");
 
         log.debug("Reaching MDS at {}", tocEntryUrl);
 
