@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.server.persistence.providers.SqlPersistenceProvider;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
