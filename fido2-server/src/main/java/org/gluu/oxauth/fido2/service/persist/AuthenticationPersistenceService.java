@@ -1,10 +1,10 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
 
-package org.gluu.oxauth.fido2.persist;
+package org.gluu.oxauth.fido2.service.persist;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -20,7 +20,10 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationStatus;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
@@ -29,9 +32,6 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.UserService;
 
 @ApplicationScoped
 public class AuthenticationPersistenceService {
@@ -50,16 +50,6 @@ public class AuthenticationPersistenceService {
 
     @Inject
     private PersistenceEntryManager ldapEntryManager;
-
-    public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
-        String baseDn = getBaseDnForFido2AuthenticationEntries(null);
-
-        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
-
-        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
-
-        return fido2AuthenticationEntries;
-    }
 
     public void save(Fido2AuthenticationData authenticationData) {
         String userName = authenticationData.getUsername();
@@ -125,6 +115,16 @@ public class AuthenticationPersistenceService {
         if (!containsBranch(baseDn)) {
             addBranch(baseDn);
         }
+    }
+
+    public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
+        String baseDn = getBaseDnForFido2AuthenticationEntries(null);
+
+        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
+
+        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = ldapEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
+
+        return fido2AuthenticationEntries;
     }
 
     public String getDnForAuthenticationEntry(String userInum, String oxId) {

@@ -5,8 +5,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,6 +19,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.KeyStoreCreator;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -55,6 +54,9 @@ public class AuthCertService {
 	@Inject
 	private LocalMdsService localMdsService;
 
+    @Inject
+    private DataMapperService dataMapperService;
+
 	private List<X509Certificate> authenticatorCerts;
 
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
@@ -69,7 +71,7 @@ public class AuthCertService {
 
 	private List<X509Certificate> getCertificates(JsonNode metadataNode) {
 		if (metadataNode == null || !metadataNode.has("attestationRootCertificates")) {
-			return Collections.emptyList();
+			return authenticatorCerts;
 		}
 
 		ArrayNode node = (ArrayNode) metadataNode.get("attestationRootCertificates");
@@ -78,7 +80,6 @@ public class AuthCertService {
 		while (iter.hasNext()) {
 			JsonNode certNode = iter.next();
 			x509certificates.add(certNode.asText());
-
 		}
 
 		return cryptoUtils.getCertificates(x509certificates);
@@ -95,14 +96,18 @@ public class AuthCertService {
 				commonVerifiers.verifyThatMetadataIsValid(metadata);
 				localMdsService.registerAuthenticatorsMetadata(aaguid, metadata);
 				metadataForAuthenticator = metadata;
-	
+				
 				return getCertificates(metadataForAuthenticator);
 			} catch (Fido2RPRuntimeException ex) {
-				log.warn("Faield to get metadaa from Fido2 meta-data server");
+				log.warn("Failed to get metadaa from Fido2 meta-data server");
+				
+				// Store empty data to avoid try to get data again
+				metadataForAuthenticator = dataMapperService.createObjectNode();
+				localMdsService.registerAuthenticatorsMetadata(aaguid, metadataForAuthenticator);
 			}
 		}
-		
-		return authenticatorCerts;
+
+		return getCertificates(metadataForAuthenticator);
 	}
 
 	public KeyStore getCertificationKeyStore(String aaguid, List<X509Certificate> certificates) {

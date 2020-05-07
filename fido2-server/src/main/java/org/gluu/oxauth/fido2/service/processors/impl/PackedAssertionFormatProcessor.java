@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
-import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
@@ -67,7 +66,7 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
         commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
-        log.info("User verification option {}", authenticationEntity.getUserVerificationOption());
+        log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
         commonVerifiers.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
 
         byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
@@ -77,8 +76,8 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
-            log.info("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-            log.info("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
+            log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
 
             commonVerifiers.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());

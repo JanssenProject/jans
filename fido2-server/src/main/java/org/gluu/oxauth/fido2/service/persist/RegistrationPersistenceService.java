@@ -1,10 +1,10 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
 
-package org.gluu.oxauth.fido2.persist;
+package org.gluu.oxauth.fido2.service.persist;
 
 import java.util.Calendar;
 import java.util.Collections;
@@ -22,7 +22,10 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationStatus;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.service.UserService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
@@ -31,9 +34,6 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.UserService;
 
 @ApplicationScoped
 public class RegistrationPersistenceService {
@@ -52,73 +52,6 @@ public class RegistrationPersistenceService {
 
     @Inject
     private PersistenceEntryManager ldapEntryManager;
-
-    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(null);
-
-        Filter publicKeyIdFilter = Filter.createEqualityFilter("oxPublicKeyId", publicKeyId);
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
-        
-        if (fido2RegistrationnEntries.size() > 0) {
-            return Optional.of(fido2RegistrationnEntries.get(0));
-        }
-
-        return Optional.empty();
-    }
-
-    public List<Fido2RegistrationEntry> findAllByUsername(String username) {
-        String userInum = userService.getUserInum(username);
-        if (userInum == null) {
-            return Collections.emptyList();
-        }
-
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
-        	if (!containsBranch(baseDn)) {
-                return Collections.emptyList();
-        	}
-        }
-
-        Filter userFilter = Filter.createEqualityFilter("personInum", userInum);
-
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, userFilter);
-
-        return fido2RegistrationnEntries;
-    }
-
-    public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
-        String userInum = userService.getUserInum(username);
-        if (userInum == null) {
-            return Collections.emptyList();
-        }
-
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
-        	if (!containsBranch(baseDn)) {
-                return Collections.emptyList();
-        	}
-        }
-
-        Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-        Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
-
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
-
-        return fido2RegistrationnEntries;
-    }
-
-    public List<Fido2RegistrationEntry> findAllByChallenge(String challenge) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(null);
-
-        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("oxCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
-        Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
-
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
-
-        return fido2RegistrationnEntries;
-    }
 
     public void save(Fido2RegistrationData registrationData) {
         String userName = registrationData.getUsername();
@@ -185,6 +118,73 @@ public class RegistrationPersistenceService {
         if (!containsBranch(baseDn)) {
             addBranch(baseDn);
         }
+    }
+
+    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
+        String baseDn = getBaseDnForFido2RegistrationEntries(null);
+
+        Filter publicKeyIdFilter = Filter.createEqualityFilter("oxPublicKeyId", publicKeyId);
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
+        
+        if (fido2RegistrationnEntries.size() > 0) {
+            return Optional.of(fido2RegistrationnEntries.get(0));
+        }
+
+        return Optional.empty();
+    }
+
+    public List<Fido2RegistrationEntry> findAllByUsername(String username) {
+        String userInum = userService.getUserInum(username);
+        if (userInum == null) {
+            return Collections.emptyList();
+        }
+
+        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	if (!containsBranch(baseDn)) {
+                return Collections.emptyList();
+        	}
+        }
+
+        Filter userFilter = Filter.createEqualityFilter("personInum", userInum);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, userFilter);
+
+        return fido2RegistrationnEntries;
+    }
+
+    public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
+        String userInum = userService.getUserInum(username);
+        if (userInum == null) {
+            return Collections.emptyList();
+        }
+
+        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        if (ldapEntryManager.hasBranchesSupport(baseDn)) {
+        	if (!containsBranch(baseDn)) {
+                return Collections.emptyList();
+        	}
+        }
+
+        Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
+        Filter registeredFilter = Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue());
+        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
+
+        return fido2RegistrationnEntries;
+    }
+
+    public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
+        String baseDn = getBaseDnForFido2RegistrationEntries(null);
+
+        Filter codeChallengFilter = Filter.createEqualityFilter("oxCodeChallenge", challenge);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("oxCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
+
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = ldapEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
+
+        return fido2RegistrationnEntries;
     }
 
     public String getDnForRegistrationEntry(String userInum, String oxId) {

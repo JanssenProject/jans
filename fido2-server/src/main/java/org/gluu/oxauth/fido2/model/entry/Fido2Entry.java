@@ -1,11 +1,17 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Gluu
+ */
+
 package org.gluu.oxauth.fido2.model.entry;
 
 import java.util.Date;
 
-import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.BaseEntry;
 
 /**
  * Fido2 base persistence entry

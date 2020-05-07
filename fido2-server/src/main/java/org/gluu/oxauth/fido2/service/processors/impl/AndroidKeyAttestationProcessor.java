@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
             CredAndCounterData credIdAndCounters) {
 
-        log.info("Android-key payload ");
+        log.debug("Android-key payload ");
 
         Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
