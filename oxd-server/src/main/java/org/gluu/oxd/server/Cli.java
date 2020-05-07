@@ -24,7 +24,7 @@ import org.gluu.oxd.common.params.GetRpParams;
 import org.gluu.oxd.common.params.RemoveSiteParams;
 import org.gluu.oxd.common.response.GetRpResponse;
 import org.gluu.oxd.common.response.RemoveSiteResponse;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.oxd.server.service.RpService;
