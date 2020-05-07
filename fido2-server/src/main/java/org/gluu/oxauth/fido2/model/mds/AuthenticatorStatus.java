@@ -1,4 +1,10 @@
-package org.gluu.oxauth.fido2.service.mds.model;
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Gluu
+ */
+
+package org.gluu.oxauth.fido2.model.mds;
 
 // https://fidoalliance.org/specs/fido-v2.0-rd-20180702/fido-metadata-service-v2.0-rd-20180702.html
 public enum AuthenticatorStatus {

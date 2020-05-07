@@ -1,32 +1,34 @@
 /*
- * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.oxauth.fido2.service.verifier;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.Base64Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
 public class ChallengeVerifier {
 
-    public boolean verifyChallenge(String challengeSent, String challengeReceived, String challengeInClientDataOrigin) {
-        if (!challengeReceived.equals(challengeInClientDataOrigin)) {
-            throw new Fido2RPRuntimeException("Challenges don't match");
-        }
-        if (!challengeSent.equals(challengeInClientDataOrigin)) {
-            throw new Fido2RPRuntimeException("Challenges don't match");
-        }
-        return true;
-    }
+	@Inject
+	private Base64Service base64Service;
+
+	public String getChallenge(JsonNode clientDataJSONNode) {
+		try {
+			String clientDataChallenge = base64Service
+					.urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
+
+			return clientDataChallenge;
+		} catch (Exception ex) {
+			throw new Fido2RPRuntimeException("Can't get challenge from clientData");
+		}
+	}
+
 }

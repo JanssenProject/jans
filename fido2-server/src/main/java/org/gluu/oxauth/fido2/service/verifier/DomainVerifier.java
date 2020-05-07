@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,14 +34,14 @@ public class DomainVerifier {
     private CommonVerifiers commonVerifiers;
 
     public boolean verifyDomain(String domain, JsonNode clientDataNode) {
-    	String clientDataOrigin = commonVerifiers.verifyThatString(clientDataNode, "origin");
+    	String clientDataOrigin = commonVerifiers.verifyThatFieldString(clientDataNode, "origin");
         // a hack, there is a problem when we are sending https://blah as rp.id
         // which is sent to us from the browser in let rpid = window.location.origin;
         // so instead we are using
         // let rpid = document.domain;
         // but then clientDataOrigin is https://
 
-        log.info("Domains comparison {} {}", domain, clientDataOrigin);
+        log.debug("Domains comparison {} {}", domain, clientDataOrigin);
         //Notes wrt #1114:
         // "The RP ID of a public key credential determines its scope. I.e., it determines the set of origins on which the
         //  public key credential may be exercised"
@@ -66,8 +66,8 @@ public class DomainVerifier {
                 throw new Fido2RPRuntimeException("Domains don't match");
             }
         }
-        return true;
 
+        return true;
     }
 
 }
