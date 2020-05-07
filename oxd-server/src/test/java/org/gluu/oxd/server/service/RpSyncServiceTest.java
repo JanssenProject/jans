@@ -12,7 +12,7 @@ import org.gluu.oxd.server.Tester;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.guice.GuiceModule;
 import org.gluu.oxd.server.mapper.RegisterResponseMapper;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.testng.annotations.*;
 
 import java.io.IOException;

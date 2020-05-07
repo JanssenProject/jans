@@ -9,7 +9,7 @@ import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.TestUtils;
 import org.gluu.oxd.server.guice.GuiceModule;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.testng.annotations.*;
 
 import java.io.IOException;

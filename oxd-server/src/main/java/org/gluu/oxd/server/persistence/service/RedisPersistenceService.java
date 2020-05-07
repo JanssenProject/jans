@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;

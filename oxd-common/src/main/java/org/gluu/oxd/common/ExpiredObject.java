@@ -1,18 +1,36 @@
 package org.gluu.oxd.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import java.io.Serializable;
+import java.util.Calendar;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
 
-public class ExpiredObject {
+@DataEntry
+@ObjectClass("oxExpiredObject")
+public class ExpiredObject implements Serializable {
+
+    @DN
+    private String dn;
+    @AttributeName(name="key")
     private String key;
+    @AttributeName(name="value")
     private String value;
+    @AttributeName(name="createdAt")
     private Long createdAt;
+    @AttributeName(name="expiredAt")
     private Long expiredAt;
+    @AttributeName(name="type")
+    private String typeString;
     private ExpiredObjectType type;
 
     private static final Logger LOG = LoggerFactory.getLogger(ExpiredObject.class);
@@ -27,6 +45,7 @@ public class ExpiredObject {
 
         this.key = key;
         this.type = expiredObjectType;
+        this.typeString = expiredObjectType.getValue();
         this.createdAt = cal.getTimeInMillis();
         cal.add(Calendar.MINUTE, expiredObjectExpirationInMins);
         this.expiredAt = cal.getTimeInMillis();
@@ -44,6 +63,7 @@ public class ExpiredObject {
 
         this.key = key;
         this.type = expiredObjectType;
+        this.typeString = expiredObjectType.getValue();
         this.createdAt = createdAt;
         this.expiredAt = expiredAt;
         try {
@@ -51,6 +71,16 @@ public class ExpiredObject {
         } catch (JsonProcessingException e) {
             LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
         }
+    }
+
+    public String getDn()
+    {
+        return this.dn;
+    }
+
+    public void setDn(String dn)
+    {
+        this.dn = dn;
     }
 
     public String getKey() {
@@ -93,10 +123,21 @@ public class ExpiredObject {
         this.type = type;
     }
 
+    public String getTypeString()
+    {
+        return this.typeString;
+    }
+
+    public void setTypeString(String typeString)
+    {
+        this.typeString = typeString;
+    }
+
     @Override
     public String toString() {
         return "ExpiredObject{" +
-                "key='" + key + '\'' +
+                "dn='" + dn + '\'' +
+                ", key='" + key + '\'' +
                 ", value='" + value + '\'' +
                 ", createdAt=" + createdAt +
                 ", expiredAt=" + expiredAt +
