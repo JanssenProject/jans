@@ -22,7 +22,7 @@ public class CibaService {
         log.info("Processing ping callback: {}, session: {}", callback, session);
 
         TokenResponse tokenResponse = getToken(authReqId, session);
-        if ( tokenResponse.getStatus() == 200 ) {
+        if ( tokenResponse.getStatus() == 200 && tokenResponse.getErrorType() == null ) {
             session.setState(CibaFlowState.ACCEPTED);
         } else {
             session.setState(CibaFlowState.REJECTED);
