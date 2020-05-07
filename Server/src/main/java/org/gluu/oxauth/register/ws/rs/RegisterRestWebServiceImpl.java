@@ -740,10 +740,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Encryption exception occurred.");
         }
 
-        CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoTransform(false);
-        cacheControl.setNoStore(true);
-        builder.cacheControl(cacheControl);
+        builder.cacheControl(ServerUtil.cacheControl(true, false));
         builder.header("Pragma", "no-cache");
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
@@ -955,13 +952,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
             clientService.remove(client);
 
-            CacheControl cacheControl = new CacheControl();
-            cacheControl.setNoTransform(false);
-            cacheControl.setNoStore(true);
-
             return Response
                     .status(Response.Status.NO_CONTENT)
-                    .cacheControl(cacheControl)
+                    .cacheControl(ServerUtil.cacheControl(true, false))
                     .header("Pragma", "no-cache").build();
         } catch (WebApplicationException e) {
             if (e.getResponse() != null) {

@@ -42,7 +42,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -489,10 +488,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private Response response(ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
-        CacheControl cacheControl = new CacheControl();
-        cacheControl.setNoTransform(false);
-        cacheControl.setNoStore(true);
-        builder.cacheControl(cacheControl);
+        builder.cacheControl(ServerUtil.cacheControl(true, false));
         builder.header("Pragma", "no-cache");
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
