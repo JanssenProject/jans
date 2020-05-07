@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.SystemUtils;
