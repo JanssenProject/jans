@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Gluu
+ */
+
 package org.gluu.oxauth.fido2.service.verifier;
 
 import java.io.IOException;
@@ -17,13 +23,18 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
 import org.gluu.oxauth.fido2.ctap.AuthenticatorAttachment;
+import org.gluu.oxauth.fido2.ctap.TokenBindingSupport;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.SignatureValidator;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.service.net.NetworkService;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,6 +49,12 @@ public class CommonVerifiers {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private NetworkService networkService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private Base64Service base64Service;
@@ -163,7 +180,7 @@ public class CommonVerifiers {
             log.debug("rpIDHash from Domain    HEX {}", Hex.encodeHexString(calculatedRpIdHash));
             log.debug("rpIDHash from Assertion HEX {}", Hex.encodeHexString(retrievedRpIdHash));
             if (!Arrays.equals(retrievedRpIdHash, calculatedRpIdHash)) {
-                log.warn("hash from domain doesn't match hash from assertion HEX ");
+                log.warn("hash from domain doesn't match hash from assertion HEX");
                 throw new Fido2RPRuntimeException("Hashes don't match");
             }
         } catch (UnsupportedEncodingException e) {
@@ -197,7 +214,7 @@ public class CommonVerifiers {
     	signatureValidator.verifySignature(signature, signatureBase, certificate.getPublicKey(), signatureAlgorithm);
     }
 
-    public void verifyOptions(JsonNode params) {
+    public void verifyAttestationOptions(JsonNode params) {
 		long count = Arrays.asList(params.hasNonNull("username"),
 				params.hasNonNull("displayName"),
 				params.hasNonNull("attestation"))
@@ -207,8 +224,19 @@ public class CommonVerifiers {
 		}
     }
 
+    public void verifyAssertionOptions(JsonNode params) {
+		long count = Arrays.asList(params.hasNonNull("username"))
+				.parallelStream().filter(f -> f == false).count();
+		if (count != 0) {
+			throw new Fido2RPRuntimeException("Invalid parameters");
+		}
+    }
+
     public void verifyBasicPayload(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("response"), params.hasNonNull("type")
+        long count = Arrays.asList(params.hasNonNull("response"),
+        		params.hasNonNull("type"),
+        		params.hasNonNull("id"),
+        		params.hasNonNull("rawId")
         ).parallelStream().filter(f -> f == false).count();
         if (count != 0) {
             throw new Fido2RPRuntimeException("Invalid parameters");
@@ -216,7 +244,7 @@ public class CommonVerifiers {
     }
 
     public String verifyBase64UrlString(JsonNode node, String fieldName) {
-        String value = verifyThatString(node, fieldName);
+        String value = verifyThatFieldString(node, fieldName);
         try {
             base64Service.urlDecode(value);
         } catch (IllegalArgumentException e) {
@@ -226,29 +254,34 @@ public class CommonVerifiers {
         return value;
     }
 
-    protected String verifyThatString(JsonNode node) {
+    protected String verifyThatString(JsonNode node, String fieldName) {
         if (!node.isTextual()) {
             if (node.fieldNames().hasNext()) {
-                throw new Fido2RPRuntimeException("Invalid field " + node.fieldNames().next());
+                throw new Fido2RPRuntimeException("Invalid field " + node.fieldNames().next() + ". There is no filed " + fieldName);
             } else {
-                throw new Fido2RPRuntimeException("Field hasn't sub fields");
+                throw new Fido2RPRuntimeException("Field hasn't sub field " + fieldName);
             }
         }
 
         return node.asText();
     }
 
-    public String verifyThatString(JsonNode node, String fieldName) {
+    public String verifyThatFieldString(JsonNode node, String fieldName) {
         JsonNode fieldNode = node.get(fieldName);
         if ((fieldNode == null || fieldNode.isNull())) {
             throw new Fido2RPRuntimeException("Invalid \"" + fieldName + "\"");
         }
 
-        return verifyThatString(fieldNode);
+        return verifyThatString(fieldNode, fieldName);
     }
 
-    public String verifyThatNonEmptyString(JsonNode node) {
-        String value = verifyThatString(node);
+    public String verifyThatNonEmptyString(JsonNode node, String fieldName) {
+        JsonNode fieldNode = node.get(fieldName);
+        if ((fieldNode == null || fieldNode.isNull())) {
+            throw new Fido2RPRuntimeException("Invalid \"" + fieldName + "\"");
+        }
+
+        String value = verifyThatString(fieldNode, fieldName);
         if (StringUtils.isEmpty(value)) {
             throw new Fido2RPRuntimeException("Invalid field " + node);
         } else {
@@ -359,7 +392,7 @@ public class CommonVerifiers {
     }
 
     public String verifyFmt(JsonNode fmtNode, String fieldName) {
-        String fmt = verifyThatString(fmtNode, fieldName);
+        String fmt = verifyThatFieldString(fmtNode, fieldName);
         supportedAttestationFormats.stream().filter(f -> f.getAttestationFormat().getFmt().equals(fmt)).findAny()
                 .orElseThrow(() -> new Fido2RPRuntimeException("Unsupported attestation format " + fmt));
         return fmt;
@@ -381,12 +414,17 @@ public class CommonVerifiers {
     }
 
     public AttestationConveyancePreference verifyAttestationConveyanceType(JsonNode params) {
+    	AttestationConveyancePreference attestationConveyancePreference = null;
         if (params.has("attestation")) {
-            String type = verifyThatString(params.get("attestation"));
-            return AttestationConveyancePreference.valueOf(type);
-        } else {
-            return AttestationConveyancePreference.direct;
+            String type = verifyThatFieldString(params, "attestation");
+            attestationConveyancePreference = AttestationConveyancePreference.valueOf(type);
         }
+
+        if (attestationConveyancePreference == null) {
+        	attestationConveyancePreference = AttestationConveyancePreference.direct;
+        }
+        
+        return attestationConveyancePreference;
     }
 
     public void verifyClientJSONTypeIsGet(JsonNode clientJsonNode) {
@@ -431,23 +469,39 @@ public class CommonVerifiers {
         	JsonNode tokenBindingNode = clientJsonNode.get("tokenBinding");
         	
         	if (tokenBindingNode.hasNonNull("status")) {
-        		verifyThatString(tokenBindingNode.get("status"), "status");
+        		String status = verifyThatFieldString(tokenBindingNode, "status");
+        		verifyTokenBindingSupport(status);
         	} else {
-                throw new Fido2RPRuntimeException("Invalid tokenBinding entry. it should coaints status");
+                throw new Fido2RPRuntimeException("Invalid tokenBinding entry. it should contaiss status");
         	}
             if (tokenBindingNode.hasNonNull("id")) {
-            	verifyThatString(tokenBindingNode.get("id"), "id");
+            	verifyThatFieldString(tokenBindingNode, "id");
             }
         }
 
-        String origin = verifyThatString(clientJsonNode.get("origin"));
+        String origin = verifyThatFieldString(clientJsonNode, "origin");
         if (origin.isEmpty()) {
-            throw new Fido2RPRuntimeException("Invalid client json parameters");
+            throw new Fido2RPRuntimeException("Client data origin parameter should be string");
         }
-
-        verifyClientJSONTypeIsCreate(clientJsonNode);
         
         return clientJsonNode;
+    }
+
+    public TokenBindingSupport verifyTokenBindingSupport(String status) {
+    	if (status == null) {
+    		return null;
+    	}
+
+        try {
+        	TokenBindingSupport tokenBindingSupportEnum = TokenBindingSupport.fromStatusValue(status);
+        	if (tokenBindingSupportEnum == null) {
+                throw new Fido2RPRuntimeException("Wrong token binding status parameter " + status);
+        	} else {
+        		return tokenBindingSupportEnum;
+        	}
+        } catch (Exception e) {
+            throw new Fido2RPRuntimeException("Wrong token binding status parameter " + e.getMessage(), e);
+        }
     }
 
     public AuthenticatorAttachment verifyAuthenticatorAttachment(JsonNode authenticatorAttachment) {
@@ -456,7 +510,12 @@ public class CommonVerifiers {
     	}
 
         try {
-            return AuthenticatorAttachment.fromAttachmentValue(authenticatorAttachment.asText());
+        	AuthenticatorAttachment authenticatorAttachmentEnum = AuthenticatorAttachment.fromAttachmentValue(authenticatorAttachment.asText());
+        	if (authenticatorAttachmentEnum == null) {
+                throw new Fido2RPRuntimeException("Wrong authenticator attachment parameter " + authenticatorAttachment);
+        	} else {
+        		return authenticatorAttachmentEnum;
+        	}
         } catch (Exception e) {
             throw new Fido2RPRuntimeException("Wrong authenticator attachment parameter " + e.getMessage(), e);
         }
@@ -468,7 +527,12 @@ public class CommonVerifiers {
     	}
 
     	try {
-            return UserVerification.valueOf(userVerification.asText());
+    		UserVerification userVerificationEnum = UserVerification.valueOf(userVerification.asText());
+        	if (userVerificationEnum == null) {
+                throw new Fido2RPRuntimeException("Wrong user verification parameter " + userVerification);
+        	} else {
+        		return userVerificationEnum;
+        	}
         } catch (Exception e) {
             throw new Fido2RPRuntimeException("Wrong user verification parameter " + e.getMessage(), e);
         }
@@ -501,8 +565,8 @@ public class CommonVerifiers {
         verifySignature(signatureBytes, signatureBase, certificate, signatureAlgorithm);
     }
 
-    public String verifyAssertionType(JsonNode typeNode) {
-        String type = verifyThatString(typeNode);
+    public String verifyAssertionType(JsonNode typeNode, String fieldName) {
+        String type = verifyThatFieldString(typeNode, fieldName);
         if (!"public-key".equals(type)) {
             throw new Fido2RPRuntimeException("Invalid type");
         }
@@ -566,4 +630,42 @@ public class CommonVerifiers {
             throw new Fido2RPRuntimeException("Invalid parameters in metadata");
         }
     }
+
+	public String verifyCredentialId(CredAndCounterData attestationData, JsonNode params) {
+        String paramsKeyId = verifyBase64UrlString(params, "id");
+        
+        if (StringHelper.isEmpty(paramsKeyId)) {
+            throw new Fido2RPRuntimeException("Credential id attestationObject and response id mismatch");
+        }
+        
+//		String attestationDataCredId = attestationData.getCredId();
+//        if (!StringHelper.compare(attestationDataCredId, paramsKeyId)) {
+//            throw new Fido2RPRuntimeException("Credential id attestationObject and response id mismatch");
+//        }
+        
+        return paramsKeyId;
+	}
+
+	public String getRpDomain(JsonNode params) {
+		// TODO: Use domains list to check specified documentDomain
+        String documentDomain;
+        if (params.hasNonNull("documentDomain")) {
+            documentDomain = params.get("documentDomain").asText();
+        } else {
+            documentDomain = appConfiguration.getIssuer();
+        }
+        documentDomain = networkService.getHost(documentDomain);
+
+        return documentDomain;
+	}
+
+	public int getTimeout(JsonNode params) {
+        int timeout = 90;
+        if (params.hasNonNull("timeout")) {
+        	timeout = params.get("timeout").asInt(timeout);
+        }
+
+        return timeout;
+	}
+
 }

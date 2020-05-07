@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.processors.impl.AssertionFormatProcessor;
 import org.gluu.oxauth.fido2.service.processors.impl.AssertionProcessorFactory;
 import org.slf4j.Logger;
@@ -27,7 +26,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class AuthenticatorAssertionVerifier {
+public class AssertionVerifier {
 
     @Inject
     private Logger log;
@@ -46,7 +45,7 @@ public class AuthenticatorAssertionVerifier {
         String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
         String signature = authenticatorResponse.get("signature").asText();
 
-        log.info("Authenticator data {}", base64AuthenticatorData);
+        log.debug("Authenticator data {}", base64AuthenticatorData);
         AssertionFormatProcessor assertionProcessor = assertionProcessorFactory.getCommandProcessor(registration.getAttestationType());
         assertionProcessor.process(base64AuthenticatorData, signature, clientDataJson, registration, authenticationEntity);
     }

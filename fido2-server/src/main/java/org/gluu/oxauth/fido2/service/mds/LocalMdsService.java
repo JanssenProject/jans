@@ -72,13 +72,13 @@ public class LocalMdsService {
                     if (jsonNode.hasNonNull("aaguid")) {
                         String aaguid = jsonNode.get("aaguid").asText();
                         String convertedAaguid = aaguid.replaceAll("-", "");
-                        log.info("AAGUID conversion old {} new {}", aaguid, convertedAaguid);
+                        log.debug("AAGUID conversion old {} new {}", aaguid, convertedAaguid);
                         nodes.put(convertedAaguid, jsonNode);
                     } else {
-                        log.info("No aaguid for file path {}", filePath);
+                        log.debug("No aaguid for file path {}", filePath);
                     }
-                } catch (IOException e) {
-                    log.warn("Can't process {}", filePath, e);
+                } catch (IOException ex) {
+                    log.warn("Can't process {}", filePath, ex);
                 }
             }
         } catch (IOException ex) {
