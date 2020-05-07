@@ -3,6 +3,7 @@
 #
 # Author: Jose Gonzalez
 # Author: Yuriy Movchan
+# Author: Christian Eland
 #
 from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
@@ -31,11 +32,15 @@ import json
 import sys
 import datetime
 
+import base64
+
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    def init(self, customScript, configurationAttributes):
+    # def init(self, customScript, configurationAttributes):
+    def init(self, configurationAttributes):
+    
         print "Passport. init called"
 
         self.extensionModule = self.loadExternalModule(configurationAttributes.get("extension_module"))
@@ -88,14 +93,66 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Detected idp-initiated inbound Saml flow"
                 jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
 
+
+
             if jwt_param == None:
+                print "entered if jwt_param == None"
+
+                # magic happens
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
+                print "jwt_param = %s" % str(jwt_param)
+              
+
 
             if jwt_param != None:
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
+                print "jwt_param = %s" % str(jwt_param)
+                end_index = str(jwt_param).rfind(".")
+                
+
+                print str(jwt_param)[:end_index]
+                first_ponit = str(jwt_param).find(".")
+                header = str(jwt_param)[:first_ponit]
+                print header
+                header = header + "=="
+                
+                payload = str(jwt_param)[first_ponit:end_index]
+                print payload
+
+                #base64_bytes = (header+"===").encode('ascii')
+                header_bytes = base64.b64decode(header)
+                print header_bytes
+                header_decoded = header_bytes.decode('ascii')
+
+                print header_decoded
+
+                new_jwt_header_decoded = {
+                    "alg":"None",
+                    "typ":"JWT"
+                    #"kid":"17d6f10d-a933-4f58-8d3b-3cb0f88b9f33_sig_rs512"
+                    }
+
+                new_jwt_header_decoded = str(new_jwt_header_decoded)
+
+                new_jwt_header_encoded = base64.b64encode(new_jwt_header_decoded)
+
+                print new_jwt_header_encoded
+
+                new_jwt = new_jwt_header_encoded+payload
+
+                jwt_param = new_jwt
+
+
+
+
+
+
+
                 # Parse JWT and validate
                 jwt = Jwt.parse(jwt_param)
+                print "jwt = %s" % str(jwt)
+                print "jwt type is %s" % type(jwt)
                 if not self.validSignature(jwt):
                     return False
 
@@ -127,6 +184,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Basic authentication returned: %s" % logged_in
                 return logged_in
 
+
+            # first time comes here
             elif provider in self.registeredProviders:
                 #it's a recognized external IDP
                 identity.setWorkingParameter("selectedProvider", provider)
@@ -173,13 +232,22 @@ class PersonAuthentication(PersonAuthenticationType):
 
             #this param could have been set previously in authenticate step if current step is being retried
             provider = identity.getWorkingParameter("selectedProvider")
+
+            #if there is a selectedProvider
             if provider != None:
+
+                #get the redirect URL to use at facesService.redirectToExternalURL()
                 url = self.getPassportRedirectUrl(provider)
+
                 identity.setWorkingParameter("selectedProvider", None)
 
+            # if there is customAuthzParameter
             elif providerParam != None:
+
+                # get it from sessionAtributes
                 paramValue = sessionAttributes.get(providerParam)
 
+                #if they exists
                 if paramValue != None:
                     print "Passport. prepareForStep. Found value in custom param of authorization request: %s" % paramValue
                     provider = self.getProviderFromJson(paramValue)
@@ -191,17 +259,24 @@ class PersonAuthentication(PersonAuthenticationType):
                     else:
                         url = self.getPassportRedirectUrl(provider)
 
+
+            # this is the case in the beggining
             if url == None:
                 print "Passport. prepareForStep. A page to manually select an identity provider will be shown"
             else:
+
                 facesService = CdiUtil.bean(FacesService)
+
+                # redirects to Passport getRedirectURL (JWT Token URL?)
+                print "Passport - Redirecting to external url: %s" + url
+
                 facesService.redirectToExternalURL(url)
 
         return True
 
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        print "Passport. getExtraParametersForStep called"
+        print "Passport. getExtraParametersForStep called for step %s" % str(step)
         if step == 1:
             return Arrays.asList("selectedProvider", "externalProviders")
         elif step == 2:
@@ -419,12 +494,15 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getPassportRedirectUrl. Obtaining token from passport at %s" % tokenEndpoint
             resultResponse = httpService.executeGet(httpclient, tokenEndpoint, Collections.singletonMap("Accept", "text/json"))
             httpResponse = resultResponse.getHttpResponse()
+
             bytes = httpService.getResponseContent(httpResponse)
 
             response = httpService.convertEntityToString(bytes)
             print "Passport. getPassportRedirectUrl. Response was %s" % httpResponse.getStatusLine().getStatusCode()
 
             tokenObj = json.loads(response)
+            print "json response is: %s" % str(tokenObj)
+
             url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
         except:
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
@@ -445,8 +523,10 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
+
+            #changed method from .getSignatureAlgorithm() to getAlgorithm() and worked
             valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getSignatureAlgorithm())
+                                                        None, None, jwt.getHeader().getAlgorithm())
         except:
             print "Exception: ", sys.exc_info()[1]
 
