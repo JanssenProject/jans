@@ -1,12 +1,11 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.providers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.Jackson2;
-import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.OxdServerConfiguration;
+import org.gluu.oxd.server.persistence.configuration.JDBCConfiguration;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

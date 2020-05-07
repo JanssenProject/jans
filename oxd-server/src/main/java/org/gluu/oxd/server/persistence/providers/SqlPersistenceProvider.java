@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.providers;
 
 import java.sql.Connection;
 import java.sql.SQLException;
