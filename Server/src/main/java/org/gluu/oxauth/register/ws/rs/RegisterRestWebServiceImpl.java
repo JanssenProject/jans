@@ -205,6 +205,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
 
+            registerParamsValidator.validateAlgorithms(r); // Throws a WebApplicationException whether a validation doesn't pass
+
             if (r.getIdTokenSignedResponseAlg() == null) {
                 r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
             }
