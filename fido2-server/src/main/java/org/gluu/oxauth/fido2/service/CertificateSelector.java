@@ -1,7 +1,7 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.oxauth.fido2.service;
@@ -52,13 +52,9 @@ public class CertificateSelector {
 
     private Map<String, List<X509Certificate>> certMapping;
 
-    @PostConstruct
-    public void create() {
-        this.certMapping = new HashMap<String, List<X509Certificate>>();
-    }
-
     public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
-        certMapping.putAll(parseMapping());
+        this.certMapping = new HashMap<String, List<X509Certificate>>();
+        this.certMapping.putAll(parseMapping());
     }
 
     public List<X509Certificate> selectRootCertificate(X509Certificate certificate) {
@@ -137,7 +133,7 @@ public class CertificateSelector {
                         }
                     }
                 } catch (IOException e) {
-                    log.info("Unable to read authenticator certificates mapping file {} ", e.getMessage(), e);
+                    log.error("Unable to read authenticator certificates mapping file {} ", e.getMessage(), e);
                 } finally {
                     if (reader != null) {
                         try {
@@ -169,7 +165,7 @@ public class CertificateSelector {
         try {
             certFileReader = Files.newInputStream(certFilePath);
         } catch (IOException e) {
-            log.info("Problem {} ", e.getMessage(), e);
+            log.error("Problem {} ", e.getMessage(), e);
             throw new Fido2RPRuntimeException("Can't load authenticator certificate. Certificate doen't exist!");
         }
 

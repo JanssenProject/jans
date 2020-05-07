@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum CoseEC2Algorithm {
-    ED256(-260), // TPM_ECC_BN_P256 curve w/ SHA-256
+
+	ED256(-260), // TPM_ECC_BN_P256 curve w/ SHA-256
     ED512(-261), // ECC_BN_ISOP512 curve w/ SHA-512
     ES256(-7), // ECDSA w/ SHA-256
     ES384(-36), // ECDSA w/ SHA-384
@@ -48,4 +49,5 @@ public enum CoseEC2Algorithm {
     public int getNumericValue() {
         return numericValue;
     }
+
 }

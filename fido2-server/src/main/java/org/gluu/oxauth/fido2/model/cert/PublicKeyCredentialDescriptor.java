@@ -1,25 +1,25 @@
 /*
- * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.oxauth.fido2.model.cert;
 
 public class PublicKeyCredentialDescriptor {
 
-    private final String type;
-    private final String id;
+    private String type;
+    private String transports[];
+    private String id;
 
     public PublicKeyCredentialDescriptor(String type, String id) {
         this.type = type;
+        this.id = id;
+    }
+
+    public PublicKeyCredentialDescriptor(String type, String transports[], String id) {
+        this.type = type;
+        this.transports = transports;
         this.id = id;
     }
 
@@ -27,7 +27,12 @@ public class PublicKeyCredentialDescriptor {
         return type;
     }
 
-    public String getId() {
+    public String[] getTransports() {
+		return transports;
+	}
+
+	public String getId() {
         return id;
     }
+
 }

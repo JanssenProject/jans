@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class AuthenticatorAttestationVerifier {
+public class AttestationVerifier {
 
     @Inject
     private Logger log;
@@ -73,25 +73,28 @@ public class AuthenticatorAttestationVerifier {
                 throw new Fido2RPRuntimeException("Attestation JSON is empty");
             }
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode, "fmt");
-            log.info("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
+            log.debug("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
             
             credential.setAttestationType(fmt);
-            JsonNode authDataNode = authenticatorDataNode.get("authData");
-            String authDataText = commonVerifiers.verifyAuthData(authDataNode);
             
             JsonNode attStmt = authenticatorDataNode.get("attStmt");
             commonVerifiers.verifyAuthStatement(attStmt);
 
+            JsonNode authDataNode = authenticatorDataNode.get("authData");
+            String authDataText = commonVerifiers.verifyAuthData(authDataNode);
             authData = authenticatorDataParser.parseAttestationData(authDataText);
+
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
             commonVerifiers.verifyCounter(counter);
             credIdAndCounters.setCounters(counter);
+
             byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
+
             return credIdAndCounters;
-        } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Problem with processing authenticator data", e);
+        } catch (IOException ex) {
+            throw new Fido2RPRuntimeException("Problem with processing authenticator data", ex);
         }
     }
 }

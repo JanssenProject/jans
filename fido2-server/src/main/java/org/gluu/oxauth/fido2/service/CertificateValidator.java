@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,7 @@
 
 package org.gluu.oxauth.fido2.service;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -43,9 +41,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
@@ -124,15 +120,19 @@ public class CertificateValidator {
     }
 
     private X509Certificate verifyPath(CertPathValidator cpv, CertPath certPath, PKIXParameters params) {
-        try {
+    	if (certPath.getCertificates().size() == 0) {
+    		return null;
+    	}
+
+    	try {
             cpv.validate(certPath, params);
             return (X509Certificate) certPath.getCertificates().get(0);
         } catch (CertPathValidatorException ex) {
             if (ex.getReason() == CertPathValidatorException.BasicReason.UNDETERMINED_REVOCATION_STATUS) {
-                log.info("Cert not validated against the root {}", ex.getMessage());
+                log.warn("Cert not validated against the root {}", ex.getMessage());
                 return null;
             } else {
-                log.warn("Cert not validated against the root {}", ex.getMessage());
+                log.error("Cert not validated against the root {}", ex.getMessage());
                 throw new Fido2RPRuntimeException("Problem with certificate " + ex.getMessage());
             }
         } catch (InvalidAlgorithmParameterException e) {
