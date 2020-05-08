@@ -8,6 +8,10 @@ package org.gluu.oxauth.fido2.model.cert;
 
 import java.security.cert.Certificate;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 public class CertificateHolder {
 
 	private final String alias;

@@ -24,6 +24,10 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class LocalMdsService {
 

@@ -18,7 +18,7 @@ import java.util.Map;
 
 public enum CoseEC2Algorithm {
 
-	ED256(-260), // TPM_ECC_BN_P256 curve w/ SHA-256
+    ED256(-260), // TPM_ECC_BN_P256 curve w/ SHA-256
     ED512(-261), // ECC_BN_ISOP512 curve w/ SHA-512
     ES256(-7), // ECDSA w/ SHA-256
     ES384(-36), // ECDSA w/ SHA-384
