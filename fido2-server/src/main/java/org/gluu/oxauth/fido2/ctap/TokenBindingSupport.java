@@ -9,6 +9,10 @@ package org.gluu.oxauth.fido2.ctap;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Yuriy Movchan
+ * @version March 9, 2020
+ */
 public enum TokenBindingSupport {
 	
 	SUPPORTED("supported"),
