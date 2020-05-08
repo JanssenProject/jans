@@ -16,6 +16,10 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.model.cert.CertificateHolder;
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class KeyStoreCreator {
 
