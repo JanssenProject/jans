@@ -113,7 +113,7 @@ public class SectorIdentifierService {
                 PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum,
                         sectorIdentifierUri, client.getClientId());
                 if (pairwiseIdentifier == null) {
-                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, client.getClientId());
+                    pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, client.getClientId(), userInum);
                     pairwiseIdentifier.setId(UUID.randomUUID().toString());
                     pairwiseIdentifier.setDn(
                             pairwiseIdentifierService.getDnForPairwiseIdentifier(pairwiseIdentifier.getId(), userInum));
