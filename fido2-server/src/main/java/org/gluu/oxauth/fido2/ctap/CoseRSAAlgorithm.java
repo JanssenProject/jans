@@ -18,7 +18,7 @@ import java.util.Map;
 
 public enum CoseRSAAlgorithm {
 
-	RS256(-257), // RSASSA-PKCS1-v1_5 w/ SHA-256 Section 8.2 of [RFC8017]
+    RS256(-257), // RSASSA-PKCS1-v1_5 w/ SHA-256 Section 8.2 of [RFC8017]
     RS65535(-65535), // RSASSA-PKCS1-v1_5 w/ SHA1
     RS384(-258), // RSASSA-PKCS1-v1_5 w/ SHA-384 Section 8.2 of [RFC8017]
     RS512(-259), // RSASSA-PKCS1-v1_5 w/ SHA-512 Section 8.2 of [RFC8017]
