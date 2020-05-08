@@ -16,6 +16,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class Base64Service {
 

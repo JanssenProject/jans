@@ -25,6 +25,10 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 @Path("/fido2/attestation")
 public class AttestationController {

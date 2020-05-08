@@ -18,7 +18,7 @@ import java.util.Map;
 
 public enum CoseKeyType {
 
-	OKP(1), // https://tools.ietf.org/html/rfc8152#section-13
+    OKP(1), // https://tools.ietf.org/html/rfc8152#section-13
     EC2(2), // https://tools.ietf.org/html/rfc8152#section-13
     RSA(3); // https://tools.ietf.org/html/rfc8230#section-4
 
