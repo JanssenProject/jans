@@ -177,7 +177,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/add
  ress
 
 dn: inum=BE64,ou=attributes,o=gluu
-description: Time the End-User's information was last updated. Its value is 
+description: Time the End-User's information was last updated. Its value is
  aJSON number representing the number of seconds from 1970-01-01T0:0:0Z as m
  easured inUTC until the date/time.
 displayName: Last Updated
@@ -397,7 +397,7 @@ urn: urn:mace:dir:attribute-def:mail
 
 dn: inum=A0E8,ou=attributes,o=gluu
 description: Middle name(s) of the End-User. Note that in some cultures,peop
- le can have multiple middle names; all can be present, with the namesbeing 
+ le can have multiple middle names; all can be present, with the namesbeing
  separated by space characters. Also note that in some cultures,middle names
   are not used.
 displayName: Middle Name
@@ -419,7 +419,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/mid
  dle_username
 
 dn: inum=5EC6,ou=attributes,o=gluu
-description: Casual name of the End-User that may or may not be the same as 
+description: Casual name of the End-User that may or may not be the same as
  the given_name.For instance, a nickname value of Mike might be returned alo
  ngside a given_name value of Michael.
 displayName: Nickname
@@ -443,7 +443,7 @@ urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nic
 dn: inum=0C85,ou=attributes,o=gluu
 description: Last Name
 description: Surname(s) or last name(s) of the End-User. Note that in somecu
- ltures, people can have multiple family names or no family name; all canbe 
+ ltures, people can have multiple family names or no family name; all canbe
  present, with the names being separated by space characters.
 displayName: Last Name
 gluuAttributeEditType: user
@@ -1002,7 +1002,7 @@ urn: oid:1.3.6.1.4.1.5923.1.1.1.1
 
 dn: inum=E7BC,ou=attributes,o=gluu
 description: Person's nickname, or the informal name by which the End-User i
- s accustomedto be hailed. A casual name that may or may not be the same as 
+ s accustomedto be hailed. A casual name that may or may not be the same as
  the given_name. For instance,a nickname value of Mike might be returned alo
  ngside a given_name value of Michael.
 displayName: eduPersonNickName
@@ -1020,7 +1020,7 @@ objectClass: gluuAttribute
 urn: oid:1.3.6.1.4.1.5923.1.1.1.2
 
 dn: inum=6366,ou=attributes,o=gluu
-description: The distinguished name (DN) of the directory entryrepresenting 
+description: The distinguished name (DN) of the directory entryrepresenting
  the institution with which the person is associated.
 displayName: eduPersonOrgDN
 gluuAttributeEditType: admin
@@ -1039,7 +1039,7 @@ urn: oid:1.3.6.1.4.1.5923.1.1.1.3
 dn: inum=ED0D,ou=attributes,o=gluu
 description: The distinguished name(s) (DN) of the directory entriesrepresen
  ting the person's Organizational Unit(s). May be multivalued,as for example
- , in the case of a faculty member with appointments inmultiple departments 
+ , in the case of a faculty member with appointments inmultiple departments
  or a person who is a student in one departmentand an employee in another.
 displayName: eduPersonOrgUnitDN
 gluuAttributeEditType: admin
@@ -1130,9 +1130,9 @@ urn: oid:1.3.6.1.4.1.5923.1.1.1.8
 
 dn: inum=002A,ou=attributes,o=gluu
 description: Specifies the person's affiliation within a particular security
-  domainin broad categories such as student, faculty, staff, alum, etc. The 
+  domainin broad categories such as student, faculty, staff, alum, etc. The
  values consistof a left and right component separated by an "@" sign. The l
- eft component is one ofthe values from the eduPersonAffiliation controlled 
+ eft component is one ofthe values from the eduPersonAffiliation controlled
  vocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intenti
  onally matches that used for the right-hand sidevalues for eduPersonPrincip
  alName since both identify a security domain. Multiple "@" signsare not rec
@@ -1312,3 +1312,34 @@ objectClass: gluuAttribute
 oxValidation: {"minLength":null,"maxLength":2048,"regexp":""}
 urn: urn:mace:dir:attribute-def:userCertificate
 
+dn: inum=11AA,ou=attributes,o=gluu
+description: CIBA Device Registration Token
+displayName: CIBA Device Registration Token
+gluuAttributeEditType: admin
+gluuAttributeEditType: user
+gluuAttributeName: oxAuthBackchannelDeviceRegistrationToken
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuStatus: active
+inum: 11AA
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:oxAuthBackchannelDeviceRegistrationToken
+
+dn: inum=11AB,ou=attributes,o=gluu
+description: CIBA User code
+displayName: CIBA User code
+gluuAttributeEditType: admin
+gluuAttributeEditType: user
+gluuAttributeName: oxAuthBackchannelUserCode
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuStatus: active
+inum: 11AB
+objectClass: top
+objectClass: gluuAttribute
+urn: urn:mace:dir:attribute-def:oxAuthBackchannelUserCode
