@@ -74,8 +74,9 @@ public class PairwiseIdentifierService {
             } else {
                 Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
                 Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
+                Filter userInumFilter = Filter.createEqualityFilter("inum", userInum);
 
-                filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter);
+                filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter, userInumFilter);
             }
 
             List<PairwiseIdentifier> entries = ldapEntryManager.findEntries(baseDnForPairwiseIdentifiers, PairwiseIdentifier.class, filter);
@@ -98,7 +99,7 @@ public class PairwiseIdentifierService {
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
                     sectorIdentifierUri, localAccountId, key, salt, appConfiguration);
 
-            PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId);
+            PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri, clientId, userInum);
             pairwiseIdentifier.setId(calculatedSub);
 
             return pairwiseIdentifier;
