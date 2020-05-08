@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.cryptoutils;
+package org.gluu.oxauth.fido2.service;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -38,8 +38,6 @@ import org.gluu.oxauth.fido2.ctap.CoseEC2Algorithm;
 import org.gluu.oxauth.fido2.ctap.CoseKeyType;
 import org.gluu.oxauth.fido2.ctap.CoseRSAAlgorithm;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
-import org.gluu.oxauth.fido2.service.Base64Service;
-import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -165,7 +163,7 @@ public class CoseService {
         try {
             uncompressedECPointNode = dataMapperService.cborReadTree(uncompressedECPointCOSEPubKey);
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Unable to parse the structure ");
+            throw new Fido2RPRuntimeException("Unable to parse the structure");
         }
         log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
         PublicKey publicKey = createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);

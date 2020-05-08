@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -32,18 +32,17 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.cryptoutils.CoseService;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
+import org.gluu.oxauth.fido2.service.CertificateService;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.SignatureValidator;
-import org.gluu.oxauth.fido2.service.mds.AuthCertService;
+import org.gluu.oxauth.fido2.service.mds.AttestationCertificateService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -62,13 +61,13 @@ public class TPMProcessor implements AttestationFormatProcessor {
     private Logger log;
 
     @Inject
-    private CryptoUtils cryptoUtils;
+    private CertificateService certificateService;
 
     @Inject
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AuthCertService authCertService;
+    private AttestationCertificateService attestationCertificateService;
     
     @Inject
     private SignatureValidator signatureValidator;
@@ -78,9 +77,6 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
     @Inject
     private DataMapperService dataMapperService;
-
-    @Inject
-    private CoseService coseService;
 
     @Inject
     private Base64Service base64Service;
@@ -109,17 +105,17 @@ public class TPMProcessor implements AttestationFormatProcessor {
         String certInfo = attStmt.get("certInfo").asText();
 
         if (i.hasNext()) {
-            ArrayList<String> aikCertificatePath = new ArrayList();
+            ArrayList<String> aikCertificatePath = new ArrayList<String>();
             aikCertificatePath.add(i.next().asText());
-            ArrayList<String> certificatePath = new ArrayList();
+            ArrayList<String> certificatePath = new ArrayList<String>();
 
             while (i.hasNext()) {
                 certificatePath.add(i.next().asText());
             }
 
-            List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
-            List<X509Certificate> aikCertificates = cryptoUtils.getCertificates(aikCertificatePath);
-            List<X509Certificate> trustAnchorCertificates = authCertService.getCertificates(authData);
+            List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
+            List<X509Certificate> aikCertificates = certificateService.getCertificates(aikCertificatePath);
+            List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(authData, aikCertificates);
             X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
             X509Certificate aikCertificate = aikCertificates.get(0);
 
@@ -130,7 +126,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             byte[] certInfoBuffer = base64Service.decode(certInfo);
             byte[] signatureBytes = base64Service.decode(signature.getBytes());
 
-            commonVerifiers.verifySignature(signatureBytes, certInfoBuffer, aikCertificate, authData.getKeyType());
+            signatureValidator.verifySignature(signatureBytes, certInfoBuffer, aikCertificate, authData.getKeyType());
 
             byte[] pubAreaBuffer = base64Service.decode(pubArea);
             TPMT_PUBLIC tpmtPublic = TPMT_PUBLIC.fromTpm(pubAreaBuffer);
@@ -142,7 +138,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             verifyThatKeysAreSame(tpmtPublic, keyBufferFromAuthData);
 
         } else {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation. Unsupported ");
+            throw new Fido2RPRuntimeException("Problem with TPM attestation. Unsupported");
         }
 
     }

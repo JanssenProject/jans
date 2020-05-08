@@ -11,35 +11,39 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.net.ssl.X509TrustManager;
 
-import org.gluu.oxauth.fido2.cryptoutils.CoseService;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
+import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
-import org.gluu.oxauth.fido2.service.CertificateSelector;
+import org.gluu.oxauth.fido2.service.CertificateService;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
+import org.gluu.oxauth.fido2.service.CoseService;
+import org.gluu.oxauth.fido2.service.mds.AttestationCertificateService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
+import org.gluu.oxauth.fido2.service.verifier.AuthenticatorDataVerifier;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ApplicationScoped
-public class U2FAttestationProcessor implements AttestationFormatProcessor {
+public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
     @Inject
     private Logger log;
@@ -48,7 +52,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private CertificateSelector certificateSelector;
+    private AuthenticatorDataVerifier authenticatorDataVerifier;
 
     @Inject
     private CertificateValidator certificateValidator;
@@ -60,48 +64,62 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
     private Base64Service base64Service;
 
     @Inject
-    private CryptoUtils cryptoUtils;
+    private AttestationCertificateService attestationCertificateService;
+
+    @Inject
+    private CertificateService certificateService;
 
     @Override
     public AttestationFormat getAttestationFormat() {
-        return AttestationFormat.fido_u2f;
+        return AttestationFormat.packed;
     }
 
     @Override
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData registration, byte[] clientDataHash,
             CredAndCounterData credIdAndCounters) {
-        int alg = -7;
-
+        int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
-        commonVerifiers.verifyAAGUIDZeroed(authData);
 
-        commonVerifiers.verifyUserPresent(authData);
-        commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
         if (attStmt.hasNonNull("x5c")) {
-            Iterator<JsonNode> i = attStmt.get("x5c").elements();
-            ArrayList<String> certificatePath = new ArrayList();
-            while (i.hasNext()) {
-                certificatePath.add(i.next().asText());
-            }
-            List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
+            List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
 
+            X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
+            if (tm.getAcceptedIssuers().length == 0) {
+                throw new Fido2RPRuntimeException(
+                        "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
+            }
 
             credIdAndCounters.setSignatureAlgorithm(alg);
-            List<X509Certificate> trustAnchorCertificates = certificateSelector.selectRootCertificate(certificates.get(0));
-//            certificateValidator.saveCertificate(certificates.get(0));
-            Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-            commonVerifiers.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
 
+            X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
+
+            authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
+
+            if (certificateValidator.isSelfSigned(verifiedCert)) {
+                throw new Fido2RPRuntimeException("Self signed certificate");
+            }
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
-            throw new UnsupportedOperationException("TODO");
+            throw new UnsupportedOperationException("ecdaaKeyId is not supported");
         } else {
             PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
-            commonVerifiers.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+            authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
         }
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
     }
+
+	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {
+		Iterator<JsonNode> i = attStmt.get("x5c").elements();
+		ArrayList<String> certificatePath = new ArrayList<String>();
+		while (i.hasNext()) {
+		    certificatePath.add(i.next().asText());
+		}
+		List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
+
+		return certificates;
+	}
+
 }

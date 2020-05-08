@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processors;
 
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;

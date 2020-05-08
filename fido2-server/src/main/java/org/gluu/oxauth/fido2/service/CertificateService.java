@@ -1,19 +1,13 @@
 /*
- * Copyright (c) 2018 Mastercard
- * Copyright (c) 2020 Gluu
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and limitations under the License.
+ * Copyright (c) 2020, Gluu
  */
 
-package org.gluu.oxauth.fido2.cryptoutils;
+package org.gluu.oxauth.fido2.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
@@ -23,19 +17,24 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
-import org.gluu.oxauth.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
-public class CryptoUtils {
+public class CertificateService {
 
     @Inject
     private Logger log;
@@ -85,6 +84,19 @@ public class CryptoUtils {
 
     }
 
+    public Map<String, X509Certificate> getCertificatesMap(String rootCertificatePath) {
+    	List<X509Certificate> certificates = getCertificates(rootCertificatePath);
+    	
+    	Map<String, X509Certificate> certificatesMap = new HashMap<String, X509Certificate>(certificates.size());
+    	for (X509Certificate certificate : certificates) {
+            String subjectDn = certificate.getSubjectDN().getName().toLowerCase();
+    		
+    		certificatesMap.put(subjectDn, certificate);
+    	}
+    	
+    	return certificatesMap;
+    }
+
     public List<X509Certificate> getCertificates(String rootCertificatePath) {
         ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
         Path path = FileSystems.getDefault().getPath(rootCertificatePath);
@@ -100,5 +112,31 @@ public class CryptoUtils {
         
         return certificates;
     }
+
+    public X509Certificate getCertificate(String certsFolder, String certFileName) {
+        Path certFilePath = FileSystems.getDefault().getPath(certsFolder).resolve(certFileName);
+
+        try (InputStream certFileReader = Files.newInputStream(certFilePath)) {
+            return getCertificate(certFileReader);
+        } catch (IOException ex) {
+            log.error("Faield to load certificates from folder {} with name {}", certFilePath, certFileName, ex);
+            throw new Fido2RPRuntimeException("Can't load authenticator certificate. Certificate doen't exist!");
+		}
+    }
+
+	public List<X509Certificate> selectRootCertificates(Map<String, X509Certificate> trustChainCertificatesMap,
+			List<X509Certificate> certificates) {
+		
+		List<X509Certificate> selecedCertificates = new ArrayList<X509Certificate>();
+		for (X509Certificate certificate : certificates) {
+            String issuerDn = certificate.getIssuerDN().getName().toLowerCase();
+            if (trustChainCertificatesMap.containsKey(issuerDn)) {
+            	X509Certificate rootCert = trustChainCertificatesMap.get(issuerDn);
+            	selecedCertificates.add(rootCert);
+            }
+		}
+
+		return selecedCertificates;
+	}
 
 }

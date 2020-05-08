@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -22,7 +22,6 @@ import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
-import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,9 +32,6 @@ public class NoneAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private Logger log;
 
-    @Inject
-    private CommonVerifiers commonVerifiers;
-
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.none;
@@ -45,10 +41,11 @@ public class NoneAttestationProcessor implements AttestationFormatProcessor {
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
             CredAndCounterData credIdAndCounters) {
         log.debug("None/Surrogate attestation {}", attStmt);
+
         if (attStmt.iterator().hasNext()) {
             throw new Fido2RPRuntimeException("Problem with None/Surrogate attestation");
         }
-        credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
 
+        credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
     }
 }
