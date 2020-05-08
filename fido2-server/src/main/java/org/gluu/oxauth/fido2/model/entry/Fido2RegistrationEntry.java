@@ -44,9 +44,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     public Fido2RegistrationEntry() {
     }
 
-    public Fido2RegistrationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
+    public Fido2RegistrationEntry(String dn, String id, Date creationDate, String userInum,
             Fido2RegistrationData registrationData, String challenge) {
-        super(dn, id, creationDate, sessionId, userInum, challenge);
+        super(dn, id, creationDate, userInum, challenge);
         this.registrationData = registrationData;
     }
 

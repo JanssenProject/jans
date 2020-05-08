@@ -35,9 +35,6 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(name = "oxSessionStateId")
-    private String sessionId;
-
     @AttributeName(name = "personInum")
     private String userInum;
 
@@ -48,11 +45,10 @@ public class Fido2Entry extends BaseEntry {
         super(dn);
     }
 
-    public Fido2Entry(String dn, String id, Date creationDate, String sessionId, String userInum, String challange) {
+    public Fido2Entry(String dn, String id, Date creationDate, String userInum, String challange) {
         super(dn);
         this.id = id;
         this.creationDate = creationDate;
-        this.sessionId = sessionId;
         this.userInum = userInum;
         this.challange = challange;
     }
@@ -87,14 +83,6 @@ public class Fido2Entry extends BaseEntry {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
-    }
-
-    public String getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
     }
 
     public String getUserInum() {

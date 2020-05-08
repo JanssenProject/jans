@@ -26,8 +26,8 @@ import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.AuthenticatorDataParser;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
+import org.gluu.oxauth.fido2.service.processor.attestation.AttestationProcessorFactory;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
-import org.gluu.oxauth.fido2.service.processors.impl.AttestationProcessorFactory;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -62,6 +62,7 @@ public class AttestationVerifier {
         String base64AuthenticatorData = authenticatorResponse.get("attestationObject").asText();
         String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
         byte[] authenticatorDataBuffer = base64Service.urlDecode(base64AuthenticatorData);
+
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         try {
             AuthData authData;
@@ -94,7 +95,9 @@ public class AttestationVerifier {
 
             return credIdAndCounters;
         } catch (IOException ex) {
-            throw new Fido2RPRuntimeException("Problem with processing authenticator data", ex);
+            throw new Fido2RPRuntimeException("Failed to parse and verify authenticator attestation response data", ex);
         }
     }
+
 }
+
