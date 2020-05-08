@@ -20,7 +20,7 @@ import org.gluu.oxauth.fido2.ctap.CoseRSAAlgorithm;
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
-import org.gluu.oxauth.fido2.model.cert.PublicKeyCredentialDescriptor;
+import org.gluu.oxauth.fido2.model.auth.PublicKeyCredentialDescriptor;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationStatus;
@@ -29,7 +29,6 @@ import org.gluu.oxauth.fido2.service.ChallengeGenerator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.fido2.service.verifier.AttestationVerifier;
-import org.gluu.oxauth.fido2.service.verifier.ChallengeVerifier;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.verifier.DomainVerifier;
 import org.gluu.util.StringHelper;
@@ -39,6 +38,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class AttestationService {
 
@@ -56,9 +59,6 @@ public class AttestationService {
 
     @Inject
     private ChallengeGenerator challengeGenerator;
-
-    @Inject
-    private ChallengeVerifier challengeVerifier;
 
     @Inject
     private CommonVerifiers commonVerifiers;
@@ -103,7 +103,7 @@ public class AttestationService {
         log.debug("Put pubKeyCredParams {}", credentialParametersNode);
 
         // Put RP
-        String documentDomain = commonVerifiers.getRpDomain(params);
+        String documentDomain = commonVerifiers.verifyRpDomain(params);
         ObjectNode credentialRpEntityNode = createRpDomain(documentDomain);
         optionsResponseNode.set("rp", credentialRpEntityNode);
         log.debug("Put rp {}", credentialRpEntityNode);
@@ -123,7 +123,7 @@ public class AttestationService {
         log.debug("Put excludeCredentials {}", excludedCredentials);
 
         // Put timeout
-        int timeout = commonVerifiers.getTimeout(params);
+        int timeout = commonVerifiers.verifyTimeout(params);
         log.debug("Put timeout {}", timeout);
         optionsResponseNode.put("timeout", timeout);
 
@@ -146,7 +146,7 @@ public class AttestationService {
         entity.setStatus(Fido2RegistrationStatus.pending);
 
         // Store original requests
-        entity.setAttenstationRequest(optionsResponseNode.toString());
+        entity.setAttenstationRequest(params.toString());
 
         registrationPersistenceService.save(entity);
 
@@ -166,7 +166,7 @@ public class AttestationService {
         // Verify client data
         JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
         commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
-        String challenge = challengeVerifier.getChallenge(clientDataJSONNode);
+        String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
         // Find registration entry
         Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge).parallelStream().findAny()
@@ -190,7 +190,7 @@ public class AttestationService {
         registrationData.setStatus(Fido2RegistrationStatus.registered);
 
         // Store original response
-        registrationData.setAttenstationResponse(responseNode.toString());
+        registrationData.setAttenstationResponse(params.toString());
 
         registrationPersistenceService.update(registrationEntry);
 

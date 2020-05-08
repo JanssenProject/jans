@@ -20,7 +20,6 @@ public class Fido2AuthenticationData extends Fido2Data {
     private static final long serialVersionUID = 1382804326976802044L;
 
     private String id;
-    private String registrationId;
     private String username;
     private String domain;
     private String userId;
@@ -39,14 +38,6 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getRegistrationId() {
-        return registrationId;
-    }
-
-    public void setRegistrationId(String registrationId) {
-        this.registrationId = registrationId;
     }
 
     public String getUsername() {
@@ -115,7 +106,7 @@ public class Fido2AuthenticationData extends Fido2Data {
 
 	@Override
 	public String toString() {
-		return "Fido2AuthenticationData [id=" + id + ", registrationId=" + registrationId + ", username=" + username + ", domain=" + domain
+		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", domain=" + domain
 				+ ", userId=" + userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest + ", assertionResponse="
 				+ assertionResponse + ", userVerificationOption=" + userVerificationOption + ", status=" + status + "]";
 	}

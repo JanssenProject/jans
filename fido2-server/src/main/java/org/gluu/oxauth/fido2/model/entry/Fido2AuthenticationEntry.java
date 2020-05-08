@@ -35,9 +35,8 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     public Fido2AuthenticationEntry() {
     }
 
-    public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
-            Fido2AuthenticationData authenticationData) {
-        super(dn, id, creationDate, sessionId, userInum, authenticationData.getChallenge());
+    public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String userInum, Fido2AuthenticationData authenticationData) {
+        super(dn, id, creationDate, userInum, authenticationData.getChallenge());
         this.authenticationData = authenticationData;
     }
 

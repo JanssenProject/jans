@@ -11,8 +11,13 @@ import java.util.Map;
 
 import org.gluu.persist.annotation.AttributeEnum;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 public enum Fido2AuthenticationStatus implements AttributeEnum {
-    pending("pending", "Pending"), authenticated("authenticated", "Authenticated");
+
+	pending("pending", "Pending"), authenticated("authenticated", "Authenticated");
 
     private String value;
     private String displayName;

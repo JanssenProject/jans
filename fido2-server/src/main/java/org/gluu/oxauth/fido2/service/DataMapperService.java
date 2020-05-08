@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class DataMapperService {
 
@@ -71,4 +75,5 @@ public class DataMapperService {
     public <T> T convertValue(Object fromValue, Class<T> toValueType) {
         return objectMapper.convertValue(fromValue, toValueType);
     }
+
 }

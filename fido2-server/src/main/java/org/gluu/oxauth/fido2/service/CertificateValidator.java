@@ -86,8 +86,7 @@ public class CertificateValidator {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
-                log.error("Empty list of trust managers");
-                return certs.get(0);
+                throw new Fido2RPRuntimeException("Trust anchors certs list is empty!");
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
@@ -96,6 +95,7 @@ public class CertificateValidator {
             PKIXRevocationChecker rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
             rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));
             params.addCertPathChecker(rc);
+
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             CertPath certPath = certFactory.generateCertPath(certs);
 
@@ -112,7 +112,6 @@ public class CertificateValidator {
 
                 return verifyPath(cpv, certPath, params);
             }
-
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
             throw new Fido2RPRuntimeException("Problem with certificate");
@@ -143,7 +142,6 @@ public class CertificateValidator {
 
     public boolean isSelfSigned(X509Certificate cert) {
         return isSelfSigned(cert, cert.getPublicKey());
-
     }
 
     public boolean isSelfSigned(X509Certificate cert, PublicKey key) {

@@ -35,6 +35,10 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class RegistrationPersistenceService {
 
@@ -73,7 +77,7 @@ public class RegistrationPersistenceService {
         final String challenge = registrationData.getChallenge();
 
         String dn = getDnForRegistrationEntry(userInum, id);
-        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, null, userInum, registrationData, challenge);
+        Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
         

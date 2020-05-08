@@ -33,6 +33,10 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class AuthenticationPersistenceService {
 
@@ -70,7 +74,7 @@ public class AuthenticationPersistenceService {
         final String id = UUID.randomUUID().toString();
 
         String dn = getDnForAuthenticationEntry(userInum, id);
-        Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, null, userInum, authenticationData);
+        Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
 
         authenticationData.setCreatedDate(now);
