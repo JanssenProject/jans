@@ -1515,10 +1515,13 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
             
-            # Fido2 authenticators
-            self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-certs.crt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
-            self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-certs.txt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
-            self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-certs.json" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+            # Fido2 authenticator certs
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-cert.crt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V1.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V2.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+
+            # Fido2 MDS TOC cert
+            self.copyFile("%s/static/auth/fido2//mds_toc_cert/metadata-root-ca.cer" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/mds/cert'))
 
     # keep this for backward compatibility
     def detect_os_type(self):
