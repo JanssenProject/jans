@@ -4645,8 +4645,9 @@
             "may": [
                 "oxId", 
                 "oxSectorIdentifier", 
-                "oxAuthClientId"
-            ], 
+                "oxAuthClientId",
+                "oxAuthUserId"
+            ],
             "must": [
                 "objectclass"
             ], 
