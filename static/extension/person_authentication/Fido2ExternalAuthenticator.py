@@ -12,7 +12,7 @@ from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.fido2.client import Fido2ClientFactory
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
-from org.gluu.oxauth.fido2.persist import RegistrationPersistenceService
+from org.gluu.oxauth.fido2.service.persist import RegistrationPersistenceService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
@@ -21,8 +21,10 @@ from java.util.concurrent.locks import ReentrantLock
 
 import java
 import sys
-import json
-
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -134,8 +136,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Fido2. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "Fido2. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -171,7 +173,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    attestationRequest = json.dumps({'username': userName, 'displayName': userName}, separators=(',', ':'))
+                    attestationRequest = json.dumps({'username': userName, 'displayName': userName, 'attestation' : 'direct'}, separators=(',', ':'))
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientResponseFailure, ex:
                     print "Fido2. Prepare for step 2. Failed to start attestation flow. Exception:", sys.exc_info()[1]
@@ -195,6 +197,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
 
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
             return "/auth/fido2/login.xhtml"
@@ -203,6 +208,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def logout(self, configurationAttributes, requestParameters):
         return True
+
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
     
     def getMetaDataConfiguration(self):
         if self.metaDataConfiguration != None:
