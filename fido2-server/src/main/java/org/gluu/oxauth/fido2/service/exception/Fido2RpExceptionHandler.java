@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Gluu
  */
 
-package org.gluu.oxauth.fido2.service;
+package org.gluu.oxauth.fido2.service.exception;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

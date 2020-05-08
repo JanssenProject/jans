@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 import org.gluu.oxauth.fido2.ctap.UserVerification;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
-import org.gluu.oxauth.fido2.model.cert.PublicKeyCredentialDescriptor;
+import org.gluu.oxauth.fido2.model.auth.PublicKeyCredentialDescriptor;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationStatus;
@@ -25,7 +25,6 @@ import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.fido2.service.verifier.AssertionVerifier;
-import org.gluu.oxauth.fido2.service.verifier.ChallengeVerifier;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.fido2.service.verifier.DomainVerifier;
 import org.gluu.util.StringHelper;
@@ -35,6 +34,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class AssertionService {
 
@@ -55,9 +58,6 @@ public class AssertionService {
 
     @Inject
     private ChallengeGenerator challengeGenerator;
-
-    @Inject
-    private ChallengeVerifier challengeVerifier;
 
     @Inject
     private DataMapperService dataMapperService;
@@ -82,7 +82,7 @@ public class AssertionService {
         ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
 
         // Put userVerification
-        UserVerification userVerification = prepareUserVerification(params);
+        UserVerification userVerification = commonVerifiers.prepareUserVerification(params);
         optionsResponseNode.put("userVerification", userVerification.name());
 
         // Generate and put challenge
@@ -91,7 +91,7 @@ public class AssertionService {
         log.debug("Put challenge {}", challenge);
 
         // Put RP
-        String documentDomain = commonVerifiers.getRpDomain(params);
+        String documentDomain = commonVerifiers.verifyRpDomain(params);
         log.debug("Put rpId {}", documentDomain);
         optionsResponseNode.put("rpId", documentDomain);
 
@@ -104,7 +104,7 @@ public class AssertionService {
         log.debug("Put allowedCredentials {}", allowedCredentials);
 
         // Put timeout
-        int timeout = commonVerifiers.getTimeout(params);
+        int timeout = commonVerifiers.verifyTimeout(params);
         log.debug("Put timeout {}", timeout);
         optionsResponseNode.put("timeout", timeout);
 
@@ -126,7 +126,7 @@ public class AssertionService {
         authenticationData.setStatus(Fido2AuthenticationStatus.pending);
 
         // Store original request
-        authenticationData.setAssertionRequest(optionsResponseNode.toString());
+        authenticationData.setAssertionRequest(params.toString());
 
         authenticationPersistenceService.save(authenticationData);
 
@@ -158,7 +158,7 @@ public class AssertionService {
         commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
         
         // Get challenge
-        String challenge = challengeVerifier.getChallenge(clientDataJSONNode);
+        String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
         // Find authentication entry
         Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge).parallelStream().findFirst()
@@ -176,7 +176,7 @@ public class AssertionService {
         assertionVerifier.verifyAuthenticatorAssertionResponse(responseNode, registrationData, authenticationData);
 
         // Store original response
-        authenticationData.setAssertionResponse(responseNode.toString());
+        authenticationData.setAssertionResponse(params.toString());
 
         authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
@@ -193,16 +193,6 @@ public class AssertionService {
 
         return finishResponseNode;
     }
-
-    private UserVerification prepareUserVerification(JsonNode params) {
-        UserVerification userVerification = UserVerification.preferred;
-
-        if (params.hasNonNull("userVerification")) {
-        	userVerification = commonVerifiers.verifyUserVerification(params.get("userVerification"));
-        }
-
-		return userVerification;
-	}
 
 	private ArrayNode prepareAllowedCredentials(String documentDomain, String username) {
         List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService.findAllRegisteredByUsername(username);

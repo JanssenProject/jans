@@ -4,8 +4,12 @@
  * Copyright (c) 2020, Gluu
  */
 
-package org.gluu.oxauth.fido2.model.cert;
+package org.gluu.oxauth.fido2.model.auth;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 public class PublicKeyCredentialDescriptor {
 
     private String type;
