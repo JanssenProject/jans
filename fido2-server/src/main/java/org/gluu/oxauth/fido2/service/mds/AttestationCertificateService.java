@@ -7,6 +7,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
@@ -16,9 +17,9 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
+import org.gluu.oxauth.fido2.service.CertificateService;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.fido2.service.KeyStoreCreator;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
@@ -30,8 +31,12 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
-public class AuthCertService {
+public class AttestationCertificateService {
 
 	@Inject
 	private Logger log;
@@ -43,7 +48,7 @@ public class AuthCertService {
 	private KeyStoreCreator keyStoreCreator;
 
 	@Inject
-	private CryptoUtils cryptoUtils;
+	private CertificateService certificateService;
 
 	@Inject
 	private CommonVerifiers commonVerifiers;
@@ -57,7 +62,7 @@ public class AuthCertService {
     @Inject
     private DataMapperService dataMapperService;
 
-	private List<X509Certificate> authenticatorCerts;
+	private Map<String, X509Certificate> rootCertificatesMap;
 
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) Object init) {
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
@@ -66,12 +71,13 @@ public class AuthCertService {
         }
 
         String authenticatorCertsFolder = appConfiguration.getFido2Configuration().getAuthenticatorCertsFolder();
-        this.authenticatorCerts = cryptoUtils.getCertificates(authenticatorCertsFolder);
+        this.rootCertificatesMap = certificateService.getCertificatesMap(authenticatorCertsFolder);
 	}
 
-	private List<X509Certificate> getCertificates(JsonNode metadataNode) {
+	public List<X509Certificate> getAttestationRootCertificates(JsonNode metadataNode, List<X509Certificate> attestationCertificates) {
 		if (metadataNode == null || !metadataNode.has("attestationRootCertificates")) {
-			return authenticatorCerts;
+            List<X509Certificate> selectedRootCertificate = certificateService.selectRootCertificates(rootCertificatesMap, attestationCertificates);
+			return selectedRootCertificate;
 		}
 
 		ArrayNode node = (ArrayNode) metadataNode.get("attestationRootCertificates");
@@ -82,10 +88,10 @@ public class AuthCertService {
 			x509certificates.add(certNode.asText());
 		}
 
-		return cryptoUtils.getCertificates(x509certificates);
+		return certificateService.getCertificates(x509certificates);
 	}
 
-	public List<X509Certificate> getCertificates(AuthData authData) {
+	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 
 		JsonNode metadataForAuthenticator = localMdsService.getAuthenticatorsMetadata(aaguid);
@@ -97,7 +103,7 @@ public class AuthCertService {
 				localMdsService.registerAuthenticatorsMetadata(aaguid, metadata);
 				metadataForAuthenticator = metadata;
 				
-				return getCertificates(metadataForAuthenticator);
+				return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
 			} catch (Fido2RPRuntimeException ex) {
 				log.warn("Failed to get metadaa from Fido2 meta-data server");
 				
@@ -107,16 +113,12 @@ public class AuthCertService {
 			}
 		}
 
-		return getCertificates(metadataForAuthenticator);
+		return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
 	}
 
-	public KeyStore getCertificationKeyStore(String aaguid, List<X509Certificate> certificates) {
-		return keyStoreCreator.createKeyStore(aaguid, certificates);
-	}
-
-	public X509TrustManager populateTrustManager(AuthData authData) {
+	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
-		List<X509Certificate> trustedCertificates = getCertificates(authData);
+		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates);
 		KeyStore keyStore = getCertificationKeyStore(aaguid, trustedCertificates);
 
 		TrustManagerFactory trustManagerFactory = null;
@@ -131,4 +133,9 @@ public class AuthCertService {
 			return null;
 		}
 	}
+
+	private KeyStore getCertificationKeyStore(String aaguid, List<X509Certificate> certificates) {
+		return keyStoreCreator.createKeyStore(aaguid, certificates);
+	}
+
 }

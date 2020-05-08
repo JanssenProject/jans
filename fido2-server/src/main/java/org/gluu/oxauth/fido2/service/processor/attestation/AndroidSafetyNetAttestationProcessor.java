@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -24,7 +24,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.cryptoutils.CoseService;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.google.safetynet.AttestationStatement;
@@ -33,9 +32,7 @@ import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.oxauth.fido2.service.Base64Service;
-import org.gluu.oxauth.fido2.service.CertificateSelector;
-import org.gluu.oxauth.fido2.service.CertificateValidator;
-import org.gluu.oxauth.fido2.service.mds.AuthCertService;
+import org.gluu.oxauth.fido2.service.mds.AttestationCertificateService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -52,19 +49,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AttestationProcessorFactory attestationProcessorFactory;
-
-    @Inject
-    private CertificateSelector certificateSelector;
-
-    @Inject
-    private CertificateValidator certificateValidator;
-
-    @Inject
-    private CoseService coseService;
-
-    @Inject
-    private AuthCertService authCertService;
+    private AttestationCertificateService attestationCertificateService;
 
     @Inject
     private Base64Service base64Service;
@@ -83,7 +68,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         String aaguid = Hex.encodeHexString(authData.getAaguid());
         log.debug("Android safetynet payload {} {}", aaguid, new String(base64Service.decode(response)));
 
-        X509TrustManager tm = authCertService.populateTrustManager(authData);
+        X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, null);
         AttestationStatement stmt;
         try {
             stmt = OfflineVerify.parseAndVerify(new String(base64Service.decode(response)), tm);
@@ -92,7 +77,7 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         }
 
         if (stmt == null) {
-            throw new Fido2RPRuntimeException("Invalid safety net attestation ");
+            throw new Fido2RPRuntimeException("Invalid safety net attestation");
         }
 
         byte[] b1 = authData.getAuthDataDecoded();
@@ -101,26 +86,25 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
         byte[] hashedBuffer = DigestUtils.getSha256Digest().digest(buffer);
         byte[] nonce = stmt.getNonce();
         if (!Arrays.equals(hashedBuffer, nonce)) {
-            throw new Fido2RPRuntimeException("Invalid safety net attestation ");
+            throw new Fido2RPRuntimeException("Invalid safety net attestation");
         }
 
         if (!stmt.isCtsProfileMatch()) {
-            throw new Fido2RPRuntimeException("Invalid safety net attestation ");
+            throw new Fido2RPRuntimeException("Invalid safety net attestation");
         }
 
         Instant timestamp = Instant.ofEpochMilli(stmt.getTimestampMs());
 
         if (timestamp.isAfter(Instant.now())) {
-            throw new Fido2RPRuntimeException("Invalid safety net attestation ");
+            throw new Fido2RPRuntimeException("Invalid safety net attestation");
         }
 
         if (timestamp.isBefore(Instant.now().minus(1, ChronoUnit.MINUTES))) {
-            throw new Fido2RPRuntimeException("Invalid safety net attestation ");
+            throw new Fido2RPRuntimeException("Invalid safety net attestation");
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
-
     }
 }

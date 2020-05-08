@@ -11,33 +11,39 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
 
 @ApplicationScoped
-public class AssertionProcessorFactory {
+public class AttestationProcessorFactory {
 
-    private Map<AttestationFormat, AssertionFormatProcessor> processorsMap;
+    private Map<AttestationFormat, AttestationFormatProcessor> processorsMap;
 
     @Inject
-    private void initCommandProcessors(@Any Instance<AssertionFormatProcessor> assertionFormatProcessors) {
+    private void initCommandProcessors(@Any Instance<AttestationFormatProcessor> attestationFormatProcessors) {
         this.processorsMap = new EnumMap<>(AttestationFormat.class);
-        for (AssertionFormatProcessor app : assertionFormatProcessors) {
+        for (AttestationFormatProcessor app : attestationFormatProcessors) {
             processorsMap.put(app.getAttestationFormat(), app);
         }
     }
 
-    public AssertionFormatProcessor getCommandProcessor(String fmtFormat) {
+    public AttestationFormatProcessor getCommandProcessor(String fmtFormat) {
         try {
             AttestationFormat attestationFormat = AttestationFormat.valueOf(fmtFormat.replace('-', '_'));
             return processorsMap.get(attestationFormat);
@@ -45,4 +51,12 @@ public class AssertionProcessorFactory {
             throw new Fido2RPRuntimeException("Unsupported format " + e.getMessage());
         }
     }
+
+    @Produces
+    @ApplicationScoped
+    @Named("supportedAttestationFormats")
+    public List<String> getSupportedAttestationFormats() {
+        return Arrays.stream(AttestationFormat.values()).map(f -> f.getFmt()).collect(Collectors.toList());
+    }
+
 }

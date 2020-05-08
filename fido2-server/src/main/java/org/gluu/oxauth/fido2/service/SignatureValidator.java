@@ -8,6 +8,7 @@ import java.security.Provider;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 
@@ -19,14 +20,15 @@ import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class SignatureValidator {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private Base64Service base64Service;
 
     public void verifySignature(byte[] signature, byte[] signatureBase, PublicKey publicKey, int signatureAlgorithm) {
         try {
@@ -109,7 +111,6 @@ public class SignatureValidator {
     }
 
     public MessageDigest getDigest(int signatureAlgorithm) {
-
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         switch (signatureAlgorithm) {
         case -257: {
@@ -121,11 +122,14 @@ public class SignatureValidator {
         }
 
         default: {
-            throw new Fido2RPRuntimeException("Unknown mapping ");
+            throw new Fido2RPRuntimeException("Unknown mapping");
         }
 
         }
+    }
 
+    public void verifySignature(byte[] signature, byte[] signatureBase, Certificate certificate, int signatureAlgorithm) {
+    	verifySignature(signature, signatureBase, certificate.getPublicKey(), signatureAlgorithm);
     }
 
 }

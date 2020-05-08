@@ -19,8 +19,8 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
-import org.gluu.oxauth.fido2.service.processors.impl.AssertionFormatProcessor;
-import org.gluu.oxauth.fido2.service.processors.impl.AssertionProcessorFactory;
+import org.gluu.oxauth.fido2.service.processor.assertion.AssertionProcessorFactory;
+import org.gluu.oxauth.fido2.service.processors.AssertionFormatProcessor;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,13 +40,14 @@ public class AssertionVerifier {
             throw new Fido2RPRuntimeException("Authenticator data is invalid");
         }
 
-        JsonNode authenticatorResponse = response;
-        String base64AuthenticatorData = authenticatorResponse.get("authenticatorData").asText();
-        String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
-        String signature = authenticatorResponse.get("signature").asText();
+        String base64AuthenticatorData = response.get("authenticatorData").asText();
+        String clientDataJson = response.get("clientDataJSON").asText();
+        String signature = response.get("signature").asText();
 
         log.debug("Authenticator data {}", base64AuthenticatorData);
         AssertionFormatProcessor assertionProcessor = assertionProcessorFactory.getCommandProcessor(registration.getAttestationType());
+
         assertionProcessor.process(base64AuthenticatorData, signature, clientDataJson, registration, authenticationEntity);
     }
+
 }

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-package org.gluu.oxauth.fido2.service.processors.impl;
+package org.gluu.oxauth.fido2.service.processor.attestation;
 
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
@@ -26,16 +26,17 @@ import javax.inject.Inject;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.gluu.oxauth.fido2.cryptoutils.AndroidKeyUtils;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
+import org.gluu.oxauth.fido2.androind.AndroidKeyUtils;
 import org.gluu.oxauth.fido2.ctap.AttestationFormat;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.model.auth.AuthData;
 import org.gluu.oxauth.fido2.model.auth.CredAndCounterData;
 import org.gluu.oxauth.fido2.model.entry.Fido2RegistrationData;
+import org.gluu.oxauth.fido2.service.CertificateService;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
-import org.gluu.oxauth.fido2.service.mds.AuthCertService;
+import org.gluu.oxauth.fido2.service.mds.AttestationCertificateService;
 import org.gluu.oxauth.fido2.service.processors.AttestationFormatProcessor;
+import org.gluu.oxauth.fido2.service.verifier.AuthenticatorDataVerifier;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
 
@@ -51,7 +52,10 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private CryptoUtils cryptoUtils;
+    private AuthenticatorDataVerifier authenticatorDataVerifier;
+
+    @Inject
+    private CertificateService certificateService;
 
     @Inject
     private CertificateValidator certificateValidator;
@@ -60,7 +64,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     private AndroidKeyUtils androidKeyUtils;
 
     @Inject
-    private AuthCertService authCertService;
+    private AttestationCertificateService attestationCertificateService;
 
     @Override
     public AttestationFormat getAttestationFormat() {
@@ -71,7 +75,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
             CredAndCounterData credIdAndCounters) {
 
-        log.debug("Android-key payload ");
+        log.debug("Android-key payload");
 
         Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
@@ -79,10 +83,10 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
         while (i.hasNext()) {
             certificatePath.add(i.next().asText());
         }
-        List<X509Certificate> certificates = cryptoUtils.getCertificates(certificatePath);
-        List<X509Certificate> trustAnchorCertificates = authCertService.getCertificates(authData);
+        List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
+        List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(authData, certificates);
+
         X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-        ECPublicKey pubKey = (ECPublicKey) verifiedCert.getPublicKey();
 
         try {
             ASN1Sequence extensionData = androidKeyUtils.extractAttestationSequence(verifiedCert);
@@ -94,7 +98,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
             byte[] attestationChallenge = ((ASN1OctetString) extensionData.getObjectAt(AndroidKeyUtils.ATTESTATION_CHALLENGE_INDEX)).getOctets();
 
             if (!Arrays.equals(clientDataHash, attestationChallenge)) {
-                throw new Fido2RPRuntimeException("Invalid android key attestation ");
+                throw new Fido2RPRuntimeException("Invalid android key attestation");
             }
 
             ASN1Encodable[] softwareEnforced = ((ASN1Sequence) extensionData.getObjectAt(AndroidKeyUtils.SW_ENFORCED_INDEX)).toArray();
@@ -105,7 +109,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
             throw new Fido2RPRuntimeException("Problem with android key");
         }
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
-        commonVerifiers.verifyAttestationSignature(authData, clientDataHash, signature, verifiedCert, authData.getKeyType());
+        authenticatorDataVerifier.verifyAttestationSignature(authData, clientDataHash, signature, verifiedCert, authData.getKeyType());
 
         // credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         // credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
