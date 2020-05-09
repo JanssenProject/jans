@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.uma.UmaConstants;
@@ -18,7 +17,10 @@ import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
@@ -26,7 +28,6 @@ import javax.ws.rs.core.Response;
  * @version 0.9, 22/04/2013
  */
 @Path("/uma/scopes")
-@Api(value="/uma/scopes", description = "UMA Scope Endpoint provides scope description (json document) by scope id.")
 public class UmaScopeWS {
 
     @Inject
