@@ -62,8 +62,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
-
-
+        
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+  
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
