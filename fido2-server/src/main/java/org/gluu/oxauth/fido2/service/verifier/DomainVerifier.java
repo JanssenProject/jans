@@ -22,13 +22,19 @@ import javax.inject.Inject;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 @ApplicationScoped
 public class DomainVerifier {
 
     @Inject
     private Logger log;
+    
+    @Inject
+    private CommonVerifiers commonVerifiers;
 
-    public boolean verifyDomain(String domain, String clientDataOrigin) {
+    public boolean verifyDomain(String domain, JsonNode clientDataNode) {
+    	String clientDataOrigin = commonVerifiers.verifyThatString(clientDataNode, "origin");
         // a hack, there is a problem when we are sending https://blah as rp.id
         // which is sent to us from the browser in let rpid = window.location.origin;
         // so instead we are using

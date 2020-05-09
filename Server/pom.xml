@@ -682,12 +682,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Documentation -->
-		<dependency>
-			<groupId>com.wordnik</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-ciba</artifactId>
