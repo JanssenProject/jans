@@ -2,12 +2,7 @@ package org.gluu.oxd.server.persistence.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.lang.StringUtils;
 import org.gluu.conf.service.ConfigurationFactory;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
@@ -22,31 +17,47 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.persist.model.base.GluuDummyEntry;
-import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class GluuPersistenceService implements PersistenceService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GluuPersistenceService.class);
     private OxdServerConfiguration configuration;
     private PersistenceEntryManager persistenceEntryManager;
+    private String persistenceType;
 
-    @Inject
     public GluuPersistenceService(OxdServerConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public GluuPersistenceService(OxdServerConfiguration configuration, String persistenceType) {
+        this.configuration = configuration;
+        this.persistenceType = persistenceType;
     }
 
     public void create() {
         LOG.debug("Creating GluuPersistenceService ...");
         try {
-            System.setProperty("gluu.base", asGluuConfiguration(this.configuration).getLocation());
+            GluuConfiguration gluuConfiguration = asGluuConfiguration(this.configuration);
+            validate(gluuConfiguration);
+
+            System.setProperty("gluu.base", removeConfigDir(gluuConfiguration.getConfigFileLocation()));
             ConfigurationFactory configurationFactory = OxdConfigurationFactory.instance();
-            //StringEncrypter stringEncrypter = configurationFactory.getStringEncrypter();
 
             this.persistenceEntryManager = configurationFactory.getPersistenceEntryManager();
+            if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(this.persistenceEntryManager.getPersistenceType())) {
+                LOG.error("The value of the `storage` field in `oxd-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
+                        , this.persistenceType, this.persistenceEntryManager.getPersistenceType());
+                throw new RuntimeException("The value of the `storage` field in `oxd-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
+                        + this.persistenceEntryManager.getPersistenceType());
+            }
 
-            Entry base = (Entry) this.persistenceEntryManager.find(GluuDummyEntry.class, getBaseDn());
+            Entry base = this.persistenceEntryManager.find(GluuDummyEntry.class, getBaseDn());
             Preconditions.checkNotNull(base);
         } catch (Exception e) {
             throw new IllegalStateException("Error starting GluuPersistenceService", e);
@@ -244,5 +255,32 @@ public class GluuPersistenceService implements PersistenceService {
             LOG.error("Failed to parse GluuConfiguration.", e);
         }
         return new GluuConfiguration();
+    }
+
+    private static String removeConfigDir(String path) {
+
+        if (StringUtils.isBlank(path)) {
+            return "";
+        }
+        if (path.endsWith("/")) {
+            path = StringUtils.removeEnd(path, "/");
+        }
+        if (path.endsWith("/conf")) {
+            path = StringUtils.removeEnd(path, "/conf");
+        }
+        return path;
+    }
+
+    private void validate(GluuConfiguration gluuConfiguration) {
+
+        if (gluuConfiguration == null) {
+            LOG.error("The `storage_configuration` has been not provided in `oxd-server.yml`");
+            throw new RuntimeException("The `storage_configuration` has been not provided in `oxd-server.yml`");
+        }
+
+        if (StringUtils.isBlank(gluuConfiguration.getConfigFileLocation())) {
+            LOG.error("The `configFileLocation` field under storage_configuration is blank. Please provide the path of Gluu persistence configuration file in this field (in `oxd-server.yml`)");
+            throw new RuntimeException("The `configFileLocation` field under storage_configuration is blank. Please provide the path of Gluu persistence configuration file in this field (in `oxd-server.yml`)");
+        }
     }
 }
