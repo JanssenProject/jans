@@ -70,7 +70,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version May 5, 2020
+ * @version May 9, 2020
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -586,7 +586,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (cibaGrant == null) {
             return;
         }
-
 
         if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             RefreshToken refreshToken = cibaGrant.createRefreshToken();
