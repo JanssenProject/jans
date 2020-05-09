@@ -8,33 +8,27 @@ public class OxdConfigurationFactory extends ConfigurationFactory<OxdAppConfigur
 
     private final Logger LOG = LoggerFactory.getLogger(OxdConfigurationFactory.class);
 
-    private static class ConfigurationSingleton
-    {
+    private static class ConfigurationSingleton {
         static OxdConfigurationFactory INSTANCE = new OxdConfigurationFactory();
     }
 
-    public static OxdConfigurationFactory instance()
-    {
+    public static OxdConfigurationFactory instance() {
         return ConfigurationSingleton.INSTANCE;
     }
 
-    protected String getDefaultConfigurationFileName()
-    {
+    protected String getDefaultConfigurationFileName() {
         return "gluu.properties";
     }
 
-    protected Class<OxdAppConfigurationEntry> getAppConfigurationType()
-    {
+    protected Class<OxdAppConfigurationEntry> getAppConfigurationType() {
         return OxdAppConfigurationEntry.class;
     }
 
-    protected String getApplicationConfigurationPropertyName()
-    {
+    protected String getApplicationConfigurationPropertyName() {
         return "oxd_ConfigurationEntryDN";
     }
 
-    protected String getDefaultPersistanceConfigurationFileName()
-    {
+    protected String getDefaultPersistanceConfigurationFileName() {
         return "gluu-ldap.properties";
     }
 }
