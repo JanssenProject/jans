@@ -1019,7 +1019,7 @@ class Setup(object):
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
 
-        if self.installCasa:
+        if self.installCasa and not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
             self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
