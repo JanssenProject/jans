@@ -213,6 +213,7 @@
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
+    "returnClientSecretOnRead":true,
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",

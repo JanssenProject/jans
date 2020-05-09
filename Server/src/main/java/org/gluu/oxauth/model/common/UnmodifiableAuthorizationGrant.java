@@ -64,6 +64,11 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
     }
 
     @Override
+    public String getSub() {
+        return grant.getSub();
+    }
+
+    @Override
     public AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext) {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }

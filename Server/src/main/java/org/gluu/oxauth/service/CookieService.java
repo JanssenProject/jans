@@ -124,7 +124,7 @@ public class CookieService {
         SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class); // avoid cycle dependency
         Set<String> toRemove = Sets.newHashSet();
         for (String sessionId : currentSessions) {
-            final SessionId sessionIdObject = sessionIdService.getSessionId(sessionId);
+            final SessionId sessionIdObject = sessionIdService.getSessionId(sessionId, true);
             if (sessionIdObject == null) {
                 toRemove.add(sessionId);
             }

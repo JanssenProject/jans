@@ -2,6 +2,13 @@
 
 <suite name="oxAuthServer" parallel="false">
 
+
+    <test name="JsonApplierServerTest" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.json.JsonApplierServerTest" />
+        </classes>
+    </test>
+
 	<!-- Application Type Restriction (embedded) -->
 	<test name="Application Type Restriction (embedded)" enabled="true">
 		<classes>

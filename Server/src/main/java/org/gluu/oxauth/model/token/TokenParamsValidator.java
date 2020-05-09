@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.model.token;
 
+import org.gluu.oxauth.model.common.GrantType;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import org.gluu.oxauth.model.common.GrantType;
 
 /**
  * Validates the parameters received for the token web service.
@@ -74,9 +74,6 @@ public class TokenParamsValidator {
     }
 
     public static boolean validateGrantType(GrantType requestedGrantType, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
-        if (clientGrantTypesArray == null) {
-            return false;
-        }
         List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
 
         return clientGrantTypes.contains(requestedGrantType) && grantTypesSupported.contains(requestedGrantType);

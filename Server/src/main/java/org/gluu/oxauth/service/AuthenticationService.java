@@ -36,6 +36,7 @@ import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
@@ -551,8 +552,7 @@ public class AuthenticationService {
 	}
 
 	public SessionId configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
-		log.trace(
-				"configureSessionUser: credentials: '{}', sessionId: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
+		log.trace("configureSessionUser: credentials: '{}', sessionId: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'",
 				System.identityHashCode(credentials), sessionId, credentials.getUsername(), getAuthenticatedUserId());
 
 		User user = getAuthenticatedUser();
@@ -560,10 +560,10 @@ public class AuthenticationService {
 		String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
 		log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
 
-		SessionId newSessionId = sessionIdService.setSessionIdStateAuthenticated(getHttpRequest(), sessionId, user.getDn());
+		SessionId newSessionId = sessionIdService.setSessionIdStateAuthenticated(getHttpRequest(), getHttpResponse(), sessionId, user.getDn());
 
 		identity.setSessionId(sessionId);
-	        newSessionId.setUser(user);
+		newSessionId.setUser(user);
 
 		return newSessionId;
 	}
@@ -590,6 +590,13 @@ public class AuthenticationService {
 		}
 		return (HttpServletRequest) externalContext.getRequest();
 	}
+
+    private HttpServletResponse getHttpResponse() {
+        if (externalContext == null) {
+            return null;
+        }
+        return (HttpServletResponse) externalContext.getResponse();
+    }
 
 	public void configureEventUser(SessionId sessionId) {
 		sessionIdService.updateSessionId(sessionId);
@@ -666,16 +673,18 @@ public class AuthenticationService {
 		User user = sessionIdService.getUser(sessionUser);
 
 		log.info("Attempting to redirect user: User: {}", user);
+		if (user == null) {
+            log.error("Failed to identify logged in user for session: {}", sessionUser);
+		    return;
+        }
 
-		if (user != null) {
-			final Map<String, String> result = sessionUser.getSessionAttributes();
-			Map<String, String> allowedParameters = requestParameterService.getAllowedParameters(result);
+        final Map<String, String> result = sessionUser.getSessionAttributes();
+        Map<String, String> allowedParameters = requestParameterService.getAllowedParameters(result);
 
-			result.put(SESSION_ID, sessionUser.getId());
+        result.put(SESSION_ID, sessionUser.getId());
 
-			log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
-			facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
-		}
+        log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
+        facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
 	}
 
 	public User getUserOrRemoveSession(SessionId p_sessionId) {

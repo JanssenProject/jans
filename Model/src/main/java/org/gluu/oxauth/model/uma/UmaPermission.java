@@ -6,8 +6,6 @@
 
 package org.gluu.oxauth.model.uma;
 
-import com.wordnik.swagger.annotations.ApiModel;
-import com.wordnik.swagger.annotations.ApiModelProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -34,14 +32,9 @@ import java.util.Map;
 @JsonPropertyOrder({"resource_id", "resource_scopes", "exp"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
-@ApiModel(value = "Register permission request.")
 public class UmaPermission implements Serializable {
 
-    @ApiModelProperty(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource that was previously registered."
-            , required = true)
     private String resourceId;
-    @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource. Each scope identifier MUST correspond to a scope that was registered by RS for the referenced resource."
-            , required = true)
     private List<String> scopes;
     private Integer expiresAt;
 
