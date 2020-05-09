@@ -34,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.emailid = None
         self.identity = CdiUtil.bean(Identity)
 
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
 
         print "Register. Initialized successfully"
         if not (configurationAttributes.containsKey("attributes_json_file_path")):
@@ -50,7 +50,10 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 11
+        
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None        
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
