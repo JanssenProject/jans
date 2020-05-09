@@ -55,6 +55,12 @@ public class PersistenceServiceImpl implements PersistenceService {
             case "gluu_server_configuration":
                 setTimerForDBCleanUpTask();
                 return new GluuPersistenceService(this.configurationService.getConfiguration());
+            case "ldap":
+                setTimerForDBCleanUpTask();
+                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
+            case "couchbase":
+                setTimerForDBCleanUpTask();
+                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + this.configurationService.get());
     }
