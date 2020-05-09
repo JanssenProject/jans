@@ -37,6 +37,8 @@ public interface IAuthorizationGrant {
 
     void setNonce(String nonce);
 
+    String getSub();
+
     AccessToken createAccessToken(String certAsPem, ExecutionContext executionContext);
 
     RefreshToken createRefreshToken();
