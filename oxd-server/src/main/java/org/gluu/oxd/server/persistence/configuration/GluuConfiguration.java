@@ -2,22 +2,21 @@ package org.gluu.oxd.server.persistence.configuration;
 
 public class GluuConfiguration {
 
-    private String location;
+    private String configFileLocation;
 
-    public String getLocation()
-    {
-        return this.location;
+    public String getConfigFileLocation() {
+        return configFileLocation;
     }
 
-    public void setLocation(String location)
-    {
-        this.location = location;
+    public void setConfigFileLocation(String configFileLocation) {
+        this.configFileLocation = configFileLocation;
     }
 
     @Override
     public String toString() {
         return "GluuConfiguration{" +
-                "location='" + location + '\'' +
+                "configFileLocation='" + configFileLocation + '\'' +
                 '}';
     }
+
 }
