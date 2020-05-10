@@ -74,7 +74,7 @@ public class PairwiseIdentifierService {
             } else {
                 Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
                 Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
-                Filter userInumFilter = Filter.createEqualityFilter("inum", userInum);
+                Filter userInumFilter = Filter.createEqualityFilter("oxAuthUserId", userInum);
 
                 filter = Filter.createANDFilter(sectorIdentifierFilter, clientIdFilter, userInumFilter);
             }
