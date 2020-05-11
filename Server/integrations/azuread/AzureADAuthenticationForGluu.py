@@ -248,6 +248,9 @@ class PersonAuthentication(PersonAuthenticationType):
         print "AzureAD. Destroy"
         return True
 
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+
     def getApiVersion(self):
         return 11
 

@@ -25,7 +25,10 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Basic. Destroy"
         print "Basic. Destroyed successfully"
         return True
-
+        
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+        
     def getApiVersion(self):
         return 11
 
