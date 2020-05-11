@@ -27,9 +27,9 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.oxauth.fido2.cryptoutils.CryptoUtils;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.oxauth.fido2.service.Base64Service;
+import org.gluu.oxauth.fido2.service.CertificateService;
 import org.gluu.oxauth.fido2.service.CertificateValidator;
 import org.gluu.oxauth.fido2.service.DataMapperService;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -47,6 +47,10 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class TocService {
 
@@ -60,7 +64,7 @@ public class TocService {
     private CertificateValidator certificateValidator;
 
     @Inject
-    private CryptoUtils cryptoUtils;
+    private CertificateService certificateService;
 
     @Inject
     private Base64Service base64Service;
@@ -146,11 +150,11 @@ public class TocService {
 
             String jwtPayload = jwsObject.getPayload().toString();
             JsonNode toc = dataMapperService.readTree(jwtPayload);
-            log.info("Legal header {}", toc.get("legalHeader"));
+            log.debug("Legal header {}", toc.get("legalHeader"));
 
             ArrayNode entries = (ArrayNode) toc.get("entries");
             int numberOfEntries = toc.get("no").asInt();
-            log.info("Property 'no' value: {}. Number of entries: {}", numberOfEntries, entries.size());
+            log.debug("Property 'no' value: {}. Number of entries: {}", numberOfEntries, entries.size());
 
             Iterator<JsonNode> iter = entries.elements();
             Map<String, JsonNode> tocEntries = new HashMap<>();
@@ -174,8 +178,8 @@ public class TocService {
     }
 
     private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder, List<String> certificateChain) {
-        List<X509Certificate> x509CertificateChain = cryptoUtils.getCertificates(certificateChain);
-        List<X509Certificate> x509TrustedCertificates = cryptoUtils.getCertificates(mdsTocRootCertsFolder);
+        List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
+        List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
 
         // TODO: Check if cert verification works well when there is no root cert 
         X509Certificate verifiedCert = certificateValidator.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);

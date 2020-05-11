@@ -1,8 +1,9 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
+
 package org.gluu.oxauth.fido2.model.entry;
 
 import java.io.Serializable;
@@ -34,9 +35,8 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     public Fido2AuthenticationEntry() {
     }
 
-    public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String sessionId, String userInum,
-            Fido2AuthenticationData authenticationData) {
-        super(dn, id, creationDate, sessionId, userInum, authenticationData.getChallenge());
+    public Fido2AuthenticationEntry(String dn, String id, Date creationDate, String userInum, Fido2AuthenticationData authenticationData) {
+        super(dn, id, creationDate, userInum, authenticationData.getChallenge());
         this.authenticationData = authenticationData;
     }
 

@@ -81,6 +81,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def getApiVersion(self):
         return 11
 
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         if not self.cas_enable_server_validation:
             return True
