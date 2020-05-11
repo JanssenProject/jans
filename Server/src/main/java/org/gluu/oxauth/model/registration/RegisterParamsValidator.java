@@ -7,10 +7,12 @@
 package org.gluu.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.register.RegisterErrorResponseType;
@@ -52,6 +54,9 @@ public class RegisterParamsValidator {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static final String LOCALHOST = "localhost";
@@ -88,6 +93,103 @@ public class RegisterParamsValidator {
         }
 
         return new Pair<>(true, "");
+    }
+
+    /**
+     * Validates all algorithms received for a register client request. It throws a WebApplicationException
+     * whether a validation doesn't pass.
+     *
+     * @param registerRequest Object containing all parameters received to register a client.
+     */
+    public void validateAlgorithms( RegisterRequest registerRequest ) {
+        if ( registerRequest.getIdTokenSignedResponseAlg() != null
+                && registerRequest.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE &&
+                ! appConfiguration.getIdTokenSigningAlgValuesSupported().contains(
+                        registerRequest.getIdTokenSignedResponseAlg().toString()) ) {
+            log.debug("Parameter id_token_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_signed_response_alg is not valid.");
+        }
+
+        if ( registerRequest.getIdTokenEncryptedResponseAlg() != null &&
+                ! appConfiguration.getIdTokenEncryptionAlgValuesSupported().contains(
+                        registerRequest.getIdTokenEncryptedResponseAlg().toString()) ) {
+            log.debug("Parameter id_token_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_encrypted_response_alg is not valid.");
+        }
+
+        if ( registerRequest.getIdTokenEncryptedResponseEnc() != null &&
+                ! appConfiguration.getIdTokenEncryptionEncValuesSupported().contains(
+                        registerRequest.getIdTokenEncryptedResponseEnc().toString()) ) {
+            log.debug("Parameter id_token_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_encrypted_response_enc is not valid.");
+        }
+
+        if ( registerRequest.getUserInfoSignedResponseAlg() != null &&
+                ! appConfiguration.getUserInfoSigningAlgValuesSupported().contains(
+                        registerRequest.getUserInfoSignedResponseAlg().toString()) ) {
+            log.debug("Parameter userinfo_signed_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_signed_response_alg is not valid.");
+        }
+
+        if ( registerRequest.getUserInfoEncryptedResponseAlg() != null &&
+                ! appConfiguration.getUserInfoEncryptionAlgValuesSupported().contains(
+                        registerRequest.getUserInfoEncryptedResponseAlg().toString()) ) {
+            log.debug("Parameter userinfo_encrypted_response_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_alg is not valid.");
+        }
+
+        if ( registerRequest.getUserInfoEncryptedResponseEnc() != null &&
+                ! appConfiguration.getUserInfoEncryptionEncValuesSupported().contains(
+                        registerRequest.getUserInfoEncryptedResponseEnc().toString()) ) {
+            log.debug("Parameter userinfo_encrypted_response_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter userinfo_encrypted_response_enc is not valid.");
+        }
+
+        if ( registerRequest.getRequestObjectSigningAlg() != null &&
+                ! appConfiguration.getRequestObjectSigningAlgValuesSupported().contains(
+                        registerRequest.getRequestObjectSigningAlg().toString()) ) {
+            log.debug("Parameter request_object_signing_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_signing_alg is not valid.");
+        }
+
+        if ( registerRequest.getRequestObjectEncryptionAlg() != null &&
+                ! appConfiguration.getRequestObjectEncryptionAlgValuesSupported().contains(
+                        registerRequest.getRequestObjectEncryptionAlg().toString()) ) {
+            log.debug("Parameter request_object_encryption_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_encryption_alg is not valid.");
+        }
+
+        if ( registerRequest.getRequestObjectEncryptionEnc() != null &&
+                ! appConfiguration.getRequestObjectEncryptionEncValuesSupported().contains(
+                        registerRequest.getRequestObjectEncryptionEnc().toString()) ) {
+            log.debug("Parameter request_object_encryption_enc is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter request_object_encryption_enc is not valid.");
+        }
+
+        if ( registerRequest.getTokenEndpointAuthMethod() != null &&
+                ! appConfiguration.getTokenEndpointAuthMethodsSupported().contains(
+                        registerRequest.getTokenEndpointAuthMethod().toString()) ) {
+            log.debug("Parameter token_endpoint_auth_method is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_method is not valid.");
+        }
+
+        if ( registerRequest.getTokenEndpointAuthSigningAlg() != null &&
+                ! appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported().contains(
+                        registerRequest.getTokenEndpointAuthSigningAlg().toString()) ) {
+            log.debug("Parameter token_endpoint_auth_signing_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_signing_alg is not valid.");
+        }
     }
 
     /**

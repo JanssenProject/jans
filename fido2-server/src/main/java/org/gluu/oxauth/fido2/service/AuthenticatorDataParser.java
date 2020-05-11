@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,11 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 @ApplicationScoped
 public class AuthenticatorDataParser {
 
+	public static final int FLAG_USER_PRESENT = 0x01;
+    public static final int FLAG_USER_VERIFIED = 0x04;
+	public static final int FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED = 0x40;
+    public static final int FLAG_EXTENSION_DATA_INCLUDED = 0x80;
+
     @Inject
     private Logger log;
 
@@ -72,8 +77,8 @@ public class AuthenticatorDataParser {
 
         byte[] flagsBuffer = Arrays.copyOfRange(buffer, offset, offset += 1);
 
-        boolean hasAtFlag = commonVerifiers.verifyAtFlag(flagsBuffer);
-        boolean hasEdFlag = commonVerifiers.verifyEdFlag(flagsBuffer);
+        boolean hasAtFlag = verifyAtFlag(flagsBuffer);
+        boolean hasEdFlag = verifyEdFlag(flagsBuffer);
         log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
@@ -83,7 +88,7 @@ public class AuthenticatorDataParser {
         if (hasAtFlag) {
             byte[] attestationBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
 
-            commonVerifiers.verifyAttestationBuffer(attestationBuffer);
+            verifyAttestationBuffer(attestationBuffer);
 
             byte[] aaguidBuffer = Arrays.copyOfRange(buffer, offset, offset += 16);
             log.debug("AAGUID hex {}", Hex.encodeHexString(aaguidBuffer));
@@ -116,7 +121,7 @@ public class AuthenticatorDataParser {
         if (hasEdFlag) {
             byte[] extensionKeyBuffer = Arrays.copyOfRange(buffer, offset, buffer.length);
 
-            commonVerifiers.verifyExtensionBuffer(extensionKeyBuffer);
+            verifyExtensionBuffer(extensionKeyBuffer);
             
             log.debug("ExtensionKeyBuffer hex {}", Hex.encodeHexString(extensionKeyBuffer));
             authData.setExtensions(extensionKeyBuffer);
@@ -126,7 +131,7 @@ public class AuthenticatorDataParser {
         }
 
         byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
-    	commonVerifiers.verifyNoLeftovers(leftovers);
+    	verifyNoLeftovers(leftovers);
 
     	authData.setAttestationBuffer(buffer);
 
@@ -164,6 +169,32 @@ public class AuthenticatorDataParser {
     public int parseCounter(byte[] counter) {
         int cnt = ByteBuffer.wrap(counter).asIntBuffer().get();
         return cnt;
+    }
+
+    public boolean verifyAtFlag(byte[] flags) {
+        return (flags[0] & FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED) == FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED;
+    }
+
+    public boolean verifyEdFlag(byte[] flags) {
+        return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
+    }
+
+    public void verifyAttestationBuffer(byte[] attestationBuffer) {
+        if (attestationBuffer.length == 0) {
+            throw new Fido2RPRuntimeException("Invalid attestation data buffer");
+        }
+    }
+
+    public void verifyExtensionBuffer(byte[] extensionBuffer) {
+        if (extensionBuffer.length == 0) {
+            throw new Fido2RPRuntimeException("Invalid extension data buffer");
+        }
+    }
+
+    public void verifyNoLeftovers(byte[] leftovers) {
+        if (leftovers.length > 0) {
+            throw new Fido2RPRuntimeException("Invalid attestation data buffer: leftovers");
+        }
     }
 
 }
