@@ -126,7 +126,12 @@ public class BackchannelAuthenticationAction implements Serializable {
     }
 
     public String getResponsePingFlow() {
-        return cibaSessions.getSessions().get(this.authReqId).getTokenResponse().getEntity();
+        if (cibaSessions.getSessions().containsKey(this.authReqId)
+                && cibaSessions.getSessions().get(this.authReqId).getTokenResponse() != null) {
+            return cibaSessions.getSessions().get(this.authReqId).getTokenResponse().getEntity();
+        } else {
+            return null;
+        }
     }
 
     public String getBackchannelAuthenticationEndpoint() {

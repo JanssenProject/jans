@@ -20,6 +20,9 @@ function processCibaAuthorizationResponse() {
 }
 
 function initUpdaterProcess(component) {
+    if (window.updaterInterval) {
+        clearInterval(window.updaterInterval);
+    }
     let initialDate = new Date().getTime();
     window.updaterInterval = setInterval( function() {
         if (new Date().getTime() - initialDate < 300000) {
