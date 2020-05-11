@@ -250,22 +250,7 @@ public class IdTokenFactory {
             if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
                 String ldapClaimName = gluuAttribute.getName();
                 Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
-                if (attribute != null) {
-                    if (attribute instanceof JSONArray) {
-                        JSONArray jsonArray = (JSONArray) attribute;
-                        List<String> values = new ArrayList<String>();
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            String value = jsonArray.optString(i);
-                            if (value != null) {
-                                values.add(value);
-                            }
-                        }
-                        jwr.getClaims().setClaim(claim.getName(), values);
-                    } else {
-                        String value = (String) attribute;
-                        jwr.setClaim(claim.getName(), value);
-                    }
-                }
+                jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
             }
         }
     }

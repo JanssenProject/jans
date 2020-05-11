@@ -1,15 +1,10 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.oxauth.fido2.ws.rs.controller;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.gluu.oxauth.fido2.service.DataMapperService;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,6 +15,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.gluu.oxauth.fido2.service.DataMapperService;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 /**
  * The endpoint at which the requester can obtain FIDO2 metadata
  * configuration
@@ -29,9 +29,6 @@ import javax.ws.rs.core.Response.Status;
 @ApplicationScoped
 @Path("/fido2/configuration")
 public class ConfigurationController {
-
-	@Inject
-	private Logger log;
 
 	@Inject
 	private AppConfiguration appConfiguration;

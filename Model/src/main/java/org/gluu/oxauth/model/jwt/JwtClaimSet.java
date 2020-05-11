@@ -7,12 +7,13 @@
 package org.gluu.oxauth.model.jwt;
 
 import com.google.common.collect.Lists;
+import org.gluu.oxauth.model.exception.InvalidJwtException;
+import org.gluu.oxauth.model.json.JsonApplier;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -249,6 +250,19 @@ public abstract class JwtClaimSet {
 
     public void setClaim(String key, JSONArray values) {
         claims.put(key, values);
+    }
+
+    public void setClaimFromJsonObject(String key, Object attribute) {
+        if (attribute == null) {
+            return;
+        }
+
+        if (attribute instanceof JSONArray) {
+            claims.put(key, JsonApplier.getStringList((JSONArray) attribute));
+        } else {
+            String value = (String) attribute;
+            claims.put(key, value);
+        }
     }
 
     public void removeClaim(String key) {
