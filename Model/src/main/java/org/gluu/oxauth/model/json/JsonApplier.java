@@ -5,9 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -182,5 +180,16 @@ public class JsonApplier {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public static List<String> getStringList(JSONArray jsonArray) {
+        List<String> values = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            String value = jsonArray.optString(i);
+            if (value != null) {
+                values.add(value);
+            }
+        }
+        return values;
     }
 }

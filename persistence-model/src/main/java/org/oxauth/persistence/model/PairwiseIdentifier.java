@@ -1,11 +1,11 @@
 package org.oxauth.persistence.model;
 
-import java.net.URI;
-
-import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.BaseEntry;
+
+import java.net.URI;
 
 /**
  * @author Javier Rojas Blum
@@ -24,12 +24,16 @@ public class PairwiseIdentifier extends BaseEntry {
     @AttributeName(name = "oxAuthClientId")
     private String clientId;
 
+    @AttributeName(name = "oxAuthUserId")
+    private String userInum;
+
     public PairwiseIdentifier() {
     }
 
-    public PairwiseIdentifier(String sectorIdentifierUri, String clientId) {
+    public PairwiseIdentifier(String sectorIdentifierUri, String clientId, String userInum) {
         this.sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
         this.clientId = clientId;
+        this.userInum = userInum;
     }
 
     public String getId() {
@@ -56,14 +60,21 @@ public class PairwiseIdentifier extends BaseEntry {
         this.clientId = clientId;
     }
 
+    public String getUserInum() {
+        return userInum;
+    }
+
+    public void setUserInum(String userInum) {
+        this.userInum = userInum;
+    }
+
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("PairwiseIdentifier [id=")
-                .append(id)
-                .append(", sectorIdentifier=").append(sectorIdentifier)
-                .append(", clientId=").append(clientId)
-                .append("]");
-        return builder.toString();
+        return "PairwiseIdentifier{" +
+                "id='" + id + '\'' +
+                ", sectorIdentifier='" + sectorIdentifier + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", userInum='" + userInum + '\'' +
+                "} " + super.toString();
     }
 }
