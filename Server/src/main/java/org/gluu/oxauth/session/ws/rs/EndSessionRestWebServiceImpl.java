@@ -393,7 +393,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, EndSessionErrorResponseType.INVALID_GRANT, "External logout is present but executed external logout script returned failed result.");
         }
 
-        grantService.removeAllTokensBySession(pair.getFirst().getDn());
+        grantService.logout(pair.getFirst().getDn());
 
         if (identity != null) {
             identity.logout();
