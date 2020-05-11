@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.service;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
@@ -313,7 +314,24 @@ public class GrantService {
         return tokens;
     }
 
-    public void removeAllTokensBySession(String sessionDn) {
+    public void logout(String sessionDn) {
+        final List<TokenLdap> tokens = getGrantsBySessionDn(sessionDn);
+        if (!appConfiguration.getRemoveRefreshTokensForClientOnLogout()) {
+            List<TokenLdap> refreshTokens = Lists.newArrayList();
+            for (TokenLdap token : tokens) {
+                if (token.getTokenTypeEnum() == TokenType.REFRESH_TOKEN) {
+                    refreshTokens.add(token);
+                }
+            }
+            if (!refreshTokens.isEmpty()) {
+                log.trace("Refresh tokens are not removed on logout (because removeRefreshTokensForClientOnLogout configuration property is false)");
+                tokens.removeAll(refreshTokens);
+            }
+        }
+        removeSilently(tokens);
+    }
+
+    public void removeAllTokensBySession(String sessionDn, boolean logout) {
         removeSilently(getGrantsBySessionDn(sessionDn));
     }
 
