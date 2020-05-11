@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,14 +20,13 @@ public class Fido2AuthenticationData extends Fido2Data {
     private static final long serialVersionUID = 1382804326976802044L;
 
     private String id;
-    private String registrationId;
     private String username;
     private String domain;
     private String userId;
     private String challenge;
 
-    private String w3cCredentialRequestOptions;
-    private String w3cAuthenticatorAssertionResponse;
+    private String assertionRequest;
+    private String assertionResponse;
 
     private UserVerification userVerificationOption;
 
@@ -39,14 +38,6 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getRegistrationId() {
-        return registrationId;
-    }
-
-    public void setRegistrationId(String registrationId) {
-        this.registrationId = registrationId;
     }
 
     public String getUsername() {
@@ -81,20 +72,20 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getW3cCredentialRequestOptions() {
-        return w3cCredentialRequestOptions;
+    public String getAssertionRequest() {
+		return assertionRequest;
+	}
+
+	public void setAssertionRequest(String assertionRequest) {
+		this.assertionRequest = assertionRequest;
+	}
+
+	public String getAssertionResponse() {
+        return assertionResponse;
     }
 
-    public void setW3cCredentialRequestOptions(String w3cCredentialRequestOptions) {
-        this.w3cCredentialRequestOptions = w3cCredentialRequestOptions;
-    }
-
-    public String getW3cAuthenticatorAssertionResponse() {
-        return w3cAuthenticatorAssertionResponse;
-    }
-
-    public void setW3cAuthenticatorAssertionResponse(String w3cAuthenticatorAssertionResponse) {
-        this.w3cAuthenticatorAssertionResponse = w3cAuthenticatorAssertionResponse;
+    public void setAssertionResponse(String assertionResponse) {
+        this.assertionResponse = assertionResponse;
     }
 
     public UserVerification getUserVerificationOption() {
@@ -112,5 +103,12 @@ public class Fido2AuthenticationData extends Fido2Data {
     public void setStatus(Fido2AuthenticationStatus status) {
         this.status = status;
     }
+
+	@Override
+	public String toString() {
+		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", domain=" + domain
+				+ ", userId=" + userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest + ", assertionResponse="
+				+ assertionResponse + ", userVerificationOption=" + userVerificationOption + ", status=" + status + "]";
+	}
 
 }

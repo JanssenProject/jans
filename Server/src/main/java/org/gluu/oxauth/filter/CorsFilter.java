@@ -30,6 +30,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.server.filters.AbstractCorsFilter;
 import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 /**
  * CORS Filter to support both Tomcat and Jetty
@@ -43,6 +44,9 @@ import org.gluu.util.StringHelper;
         asyncSupported = true,
         urlPatterns = {"/.well-known/*", "/restv1/*", "/opiframe"})
 public class CorsFilter extends AbstractCorsFilter {
+
+	@Inject
+    private Logger log;
 
     @Inject
     private ConfigurationFactory configurationFactory;
@@ -106,7 +110,11 @@ public class CorsFilter extends AbstractCorsFilter {
             throws IOException, ServletException {
         Collection<String> globalAllowedOrigins = null;
         if (this.filterEnabled) {
-            globalAllowedOrigins = doFilterImpl(servletRequest);
+            try {
+				globalAllowedOrigins = doFilterImpl(servletRequest);
+			} catch (Exception ex) {
+				log.error("Failed to process request", ex);
+			}
             super.doFilter(servletRequest, servletResponse, filterChain);
             setAllowedOrigins(globalAllowedOrigins);
         } else {

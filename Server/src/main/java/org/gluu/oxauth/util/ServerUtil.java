@@ -113,6 +113,12 @@ public class ServerUtil {
         return cacheControl;
     }
 
+    public static CacheControl cacheControlWithNoStoreTransformAndPrivate() {
+        final CacheControl cacheControl = cacheControl(true, false);
+        cacheControl.setPrivate(true);
+        return cacheControl;
+    }
+
     public static ObjectMapper createJsonMapper() {
         final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
