@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,6 @@
 
 package org.gluu.oxauth.fido2.model.entry;
 
-import org.gluu.oxauth.fido2.ctap.AttestationConveyancePreference;
-
 public class Fido2RegistrationData extends Fido2Data {
 
     private static final long serialVersionUID = 4599467930864459334L;
@@ -24,8 +22,8 @@ public class Fido2RegistrationData extends Fido2Data {
     private String userId;
     private String challenge;
 
-    private String credentialCreationOptions;
-    private String authenticatorAttenstationResponse;
+    private String attenstationRequest;
+    private String attenstationResponse;
 
     private String uncompressedECPoint;
     private String publicKeyId;
@@ -72,20 +70,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getCredentialCreationOptions() {
-        return credentialCreationOptions;
+    public String getAttenstationRequest() {
+        return attenstationRequest;
     }
 
-    public void setCredentialCreationOptions(String credentialCreationOptions) {
-        this.credentialCreationOptions = credentialCreationOptions;
+    public void setAttenstationRequest(String attenstationRequest) {
+        this.attenstationRequest = attenstationRequest;
     }
 
-    public String getAuthenticatorAttenstationResponse() {
-        return authenticatorAttenstationResponse;
+    public String getAttenstationResponse() {
+        return attenstationResponse;
     }
 
-    public void setAuthenticatorAttenstationResponse(String authenticatorAttenstationResponse) {
-        this.authenticatorAttenstationResponse = authenticatorAttenstationResponse;
+    public void setAttenstationResponse(String attenstationResponse) {
+        this.attenstationResponse = attenstationResponse;
     }
 
     public String getUncompressedECPoint() {
@@ -147,9 +145,8 @@ public class Fido2RegistrationData extends Fido2Data {
     @Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
-				+ ", credentialCreationOptions=" + credentialCreationOptions + ", authenticatorAttenstationResponse="
-				+ authenticatorAttenstationResponse + ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId
-				+ ", type=" + type + ", status=" + status + ", counter=" + counter + ", attestationType=" + attestationType
-				+ ", signatureAlgorithm=" + signatureAlgorithm + "]";
+				+ ", attenstationRequest=" + attenstationRequest + ", attenstationResponse=" + attenstationResponse
+				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
+				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm + "]";
 	}
 }

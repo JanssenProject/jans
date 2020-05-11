@@ -8,8 +8,9 @@ package org.gluu.oxauth.service;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
-import org.gluu.oxauth.fido2.persist.AuthenticationPersistenceService;
-import org.gluu.oxauth.fido2.persist.RegistrationPersistenceService;
+
+import org.gluu.oxauth.fido2.service.persist.AuthenticationPersistenceService;
+import org.gluu.oxauth.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.fido.u2f.RequestService;

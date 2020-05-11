@@ -44,6 +44,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def getApiVersion(self):
         return 11
 
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         cas2_result = self.cas2ExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
         duo_result = self.duoExternalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes)
