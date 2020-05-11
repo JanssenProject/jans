@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Mastercard
- * Copyright (c) 2018 Gluu
+ * Copyright (c) 2020 Gluu
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,10 +34,10 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.fido2.model.mds.AuthenticatorCertificationStatus;
 import org.gluu.oxauth.fido2.service.Base64Service;
 import org.gluu.oxauth.fido2.service.DataMapperService;
-import org.gluu.oxauth.fido2.service.mds.model.AuthenticatorStatus;
-import org.gluu.oxauth.fido2.service.processors.impl.ResteasyClientFactory;
+import org.gluu.oxauth.fido2.service.client.ResteasyClientFactory;
 import org.gluu.oxauth.fido2.service.verifier.CommonVerifiers;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Fido2Configuration;
@@ -112,7 +112,7 @@ public class MdsService {
         }
 
         verifyTocEntryStatus(aaguid, tocEntry);
-        String metadataHash = commonVerifiers.verifyThatString(tocEntry, "hash");
+        String metadataHash = commonVerifiers.verifyThatFieldString(tocEntry, "hash");
 
         log.debug("Reaching MDS at {}", tocEntryUrl);
 
@@ -146,7 +146,7 @@ public class MdsService {
             try {
             	return dataMapperService.readTree(base64Service.urlDecode(body));
             } catch (IOException e) {
-                log.error("Can't parse payload from the server ");
+                log.error("Can't parse payload from the server");
                 throw new Fido2RPRuntimeException("Unable to parse payload from server for aaguid " + aaguid);
             }
         } else {
@@ -160,7 +160,7 @@ public class MdsService {
         Iterator<JsonNode> iter = statusReports.elements();
         while (iter.hasNext()) {
             JsonNode statusReport = iter.next();
-            AuthenticatorStatus authenticatorStatus = AuthenticatorStatus.valueOf(statusReport.get("status").asText());
+            AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus.valueOf(statusReport.get("status").asText());
             String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
             log.debug("Authenticator AAGUI {} status {} effective date {}", aaguid, authenticatorStatus, authenticatorEffectiveDate);
             verifyStatusAcceptable(aaguid, authenticatorStatus);
@@ -172,11 +172,11 @@ public class MdsService {
                 "$1-$2-$3-$4-$5");
     }
 
-    private void verifyStatusAcceptable(String aaguid, AuthenticatorStatus status) {
-        final List<AuthenticatorStatus> undesiredAuthenticatorStatus = Arrays
-                .asList(new AuthenticatorStatus[] { AuthenticatorStatus.USER_VERIFICATION_BYPASS, AuthenticatorStatus.ATTESTATION_KEY_COMPROMISE,
-                        AuthenticatorStatus.USER_KEY_REMOTE_COMPROMISE, AuthenticatorStatus.USER_KEY_PHYSICAL_COMPROMISE,
-                        AuthenticatorStatus.ATTESTATION_KEY_COMPROMISE });
+    private void verifyStatusAcceptable(String aaguid, AuthenticatorCertificationStatus status) {
+        final List<AuthenticatorCertificationStatus> undesiredAuthenticatorStatus = Arrays
+                .asList(new AuthenticatorCertificationStatus[] { AuthenticatorCertificationStatus.USER_VERIFICATION_BYPASS, AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE,
+                        AuthenticatorCertificationStatus.USER_KEY_REMOTE_COMPROMISE, AuthenticatorCertificationStatus.USER_KEY_PHYSICAL_COMPROMISE,
+                        AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE });
         if (undesiredAuthenticatorStatus.contains(status)) {
             throw new Fido2RPRuntimeException("Authenticator " + aaguid + "status undesirable " + status);
         }

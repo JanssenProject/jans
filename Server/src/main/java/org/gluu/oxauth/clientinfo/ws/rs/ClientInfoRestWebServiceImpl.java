@@ -18,6 +18,7 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.token.TokenService;
+import org.gluu.oxauth.util.ServerUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.oxauth.persistence.model.Scope;
@@ -25,7 +26,6 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Set;
@@ -95,16 +95,9 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                 return Response.status(400).entity(errorResponseFactory.getErrorAsJson(ClientInfoErrorResponseType.INVALID_TOKEN,"","Invalid access token.")).build();
             }
 
-            CacheControl cacheControl = new CacheControl();
-            cacheControl.setPrivate(true);
-            cacheControl.setNoTransform(false);
-            cacheControl.setNoStore(true);
-            builder.cacheControl(cacheControl);
+            builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
             builder.header("Pragma", "no-cache");
-
-            builder.entity(getJSonResponse(authorizationGrant.getClient(),
-                    authorizationGrant.getScopes()));
-
+            builder.entity(getJSonResponse(authorizationGrant.getClient(), authorizationGrant.getScopes()));
         }
 
         return builder.build();

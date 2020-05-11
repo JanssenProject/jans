@@ -7,7 +7,9 @@
 package org.gluu.oxauth.model.error;
 
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.configuration.Configuration;
 import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.gluu.oxauth.model.register.RegisterErrorResponseType;
@@ -19,7 +21,7 @@ import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
+
 import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -41,12 +43,14 @@ public class ErrorResponseFactory implements Configuration {
     private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
     private ErrorMessages messages;
+    private AppConfiguration appConfiguration;
 
     public ErrorResponseFactory() {
     }
 
-    public ErrorResponseFactory(ErrorMessages messages) {
+    public ErrorResponseFactory(ErrorMessages messages, AppConfiguration appConfiguration) {
         this.messages = messages;
+        this.appConfiguration = appConfiguration;
     }
 
     public ErrorMessages getMessages() {
@@ -86,7 +90,7 @@ public class ErrorResponseFactory implements Configuration {
 
     public String errorAsJson(IErrorType p_type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(p_type);
-        error.setReason(reason);
+        error.setReason(appConfiguration.getErrorReasonEnabled() ? reason : "");
         return error.toJSonString();
     }
 

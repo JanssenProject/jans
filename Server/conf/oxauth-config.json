@@ -248,6 +248,7 @@
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
     "sessionIdLifetime":86400,
+    "forceOfflineAccessScopeToEnableRefreshToken":false,
     "configurationUpdateInterval":3600,
     "cssLocation":"${config.oxauth.contextPath}/stylesheet",
     "jsLocation":"${config.oxauth.contextPath}/js",
