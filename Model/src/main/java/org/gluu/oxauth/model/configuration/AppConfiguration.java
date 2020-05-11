@@ -199,6 +199,7 @@ public class AppConfiguration implements Configuration {
     private Boolean forceIdTokenHintPrecense = false;
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled  = false;
+    private Boolean removeRefreshTokensForClientOnLogout  = true;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
     private Fido2Configuration fido2Configuration;
@@ -267,6 +268,15 @@ public class AppConfiguration implements Configuration {
 
     public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
         this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    }
+
+    public Boolean getRemoveRefreshTokensForClientOnLogout() {
+        if (removeRefreshTokensForClientOnLogout == null) removeRefreshTokensForClientOnLogout = true;
+        return removeRefreshTokensForClientOnLogout;
+    }
+
+    public void setRemoveRefreshTokensForClientOnLogout(Boolean removeRefreshTokensForClientOnLogout) {
+        this.removeRefreshTokensForClientOnLogout = removeRefreshTokensForClientOnLogout;
     }
 
     public Boolean getDisableJdkLogger() {
