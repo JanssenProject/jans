@@ -42,7 +42,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -259,11 +258,8 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     expiresIn,
                     interval).toString(4).replace("\\/", "/"));
 
-            CacheControl cacheControl = new CacheControl();
-            cacheControl.setNoTransform(false);
-            cacheControl.setNoStore(true);
             builder.type(MediaType.APPLICATION_JSON_TYPE);
-            builder.cacheControl(cacheControl);
+            builder.cacheControl(ServerUtil.cacheControl(true, false));
         } catch (JSONException e) {
             builder = Response.status(400);
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));

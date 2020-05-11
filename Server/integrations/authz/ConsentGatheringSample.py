@@ -29,6 +29,9 @@ class ConsentGathering(ConsentGatheringType):
 
         return True
 
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+
     def getApiVersion(self):
         return 11
 

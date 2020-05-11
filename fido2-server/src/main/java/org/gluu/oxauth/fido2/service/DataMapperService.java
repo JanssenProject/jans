@@ -1,7 +1,7 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2018, Gluu
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.oxauth.fido2.service;
@@ -22,6 +22,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
+/**
+ * @author Yuriy Movchan
+ * @version May 08, 2020
+ */
 @ApplicationScoped
 public class DataMapperService {
 
@@ -71,4 +75,5 @@ public class DataMapperService {
     public <T> T convertValue(Object fromValue, Class<T> toValueType) {
         return objectMapper.convertValue(fromValue, toValueType);
     }
+
 }

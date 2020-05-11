@@ -19,7 +19,6 @@ import org.gluu.oxauth.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.ApplicationFactory;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
@@ -73,9 +72,6 @@ public class ConfigurationFactory {
 
 	@Inject @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
-
-    @Inject
-    private Instance<PersistenceEntryManagerFactory> persistenceEntryManagerFactoryInstance;
 
     @Inject
 	private PersistanceFactoryService persistanceFactoryService;
@@ -353,7 +349,7 @@ public class ConfigurationFactory {
 		final ErrorMessages errorsFromFile = loadErrorsFromFile();
 		if (errorsFromFile != null) {
 			log.info("Reloaded errors from file: " + errorsFilePath);
-			errorResponseFactory = new ErrorResponseFactory(errorsFromFile);
+			errorResponseFactory = new ErrorResponseFactory(errorsFromFile, conf);
 			return true;
 		} else {
 			log.error("Failed to load errors from file: " + errorsFilePath);
@@ -465,7 +461,7 @@ public class ConfigurationFactory {
 			generateWebKeys();
 		}
 		if (p_conf.getErrors() != null) {
-			errorResponseFactory = new ErrorResponseFactory(p_conf.getErrors());
+			errorResponseFactory = new ErrorResponseFactory(p_conf.getErrors(), p_conf.getDynamic());
 		}
 	}
 
