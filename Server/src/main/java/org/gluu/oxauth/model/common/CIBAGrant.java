@@ -12,7 +12,7 @@ import org.gluu.oxauth.model.registration.Client;
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
  * @author Javier Rojas Blum
- * @version March 4, 2020
+ * @version May 5, 2020
  */
 public class CIBAGrant extends AuthorizationGrant {
 
@@ -20,7 +20,7 @@ public class CIBAGrant extends AuthorizationGrant {
     private String clientNotificationToken;
     private String bindingMessage;
     private Long lastAccessControl;
-    private boolean userAuthorization;
+    private CIBAGrantUserAuthorization userAuthorization;
     private boolean tokensDelivered;
 
     public CIBAGrant() {
@@ -30,6 +30,7 @@ public class CIBAGrant extends AuthorizationGrant {
         super.init(user, AuthorizationGrantType.CIBA, client, null);
         setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
         setIsCachedWithNoPersistence(true);
+        setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING);
     }
 
     public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
@@ -64,11 +65,11 @@ public class CIBAGrant extends AuthorizationGrant {
         this.lastAccessControl = lastAccessControl;
     }
 
-    public boolean isUserAuthorization() {
+    public CIBAGrantUserAuthorization getUserAuthorization() {
         return userAuthorization;
     }
 
-    public void setUserAuthorization(boolean userAuthorization) {
+    public void setUserAuthorization(CIBAGrantUserAuthorization userAuthorization) {
         this.userAuthorization = userAuthorization;
     }
 
