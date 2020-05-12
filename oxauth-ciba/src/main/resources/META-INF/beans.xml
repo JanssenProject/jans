@@ -15,5 +15,6 @@
         <class>org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorInterceptor</class>
         <class>org.gluu.oxauth.ciba.CIBAEndUserNotificationInterceptor</class>
         <class>org.gluu.oxauth.ciba.CIBAPingCallbackInterceptor</class>
+        <class>org.gluu.oxauth.ciba.CIBAPushErrorInterceptor</class>
     </interceptors>
 </beans>

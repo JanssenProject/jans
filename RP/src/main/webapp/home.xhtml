@@ -370,6 +370,7 @@
 						</h:commandButton>
 					</div>
 					<h:panelGroup layout="block" id="registrationResults">
+						<h:inputHidden id="clientCibaTokenDeliveryMode" value="#{registrationAction.backchannelTokenDeliveryMode}" />
 						<h:panelGroup layout="block"
 							rendered="#{registrationAction.showResults}">
 							<b:panel title="Registration Request" look="primary">
@@ -409,8 +410,8 @@
 					</h:panelGroup>
 
 					<div class="actionButtons">
-						<h:commandButton value="Submit" action="#{registrationAction.execClientRead}">
-							<f:ajax execute="@form" render="clientReadResults" />
+						<h:commandButton value="Submit" action="#{registrationAction.execClientRead}" >
+							<f:ajax execute="@form" render="clientReadResults registrationResults clientReadForm authorizationForm backchannelAuthenticationForm tokenForm" />
 						</h:commandButton>
 					</div>
 
@@ -770,12 +771,13 @@
 					</h:panelGroup>
 
 					<div class="actionButtons">
-						<h:commandButton value="Submit" action="#{backchannelAuthenticationAction.exec}">
-							<f:ajax execute="@form" render="backchannelAuthenticationResults tokenForm" />
+						<h:commandButton value="Submit" action="#{backchannelAuthenticationAction.exec}" >
+							<f:ajax execute="@form" render="backchannelAuthenticationResults tokenForm" onevent="bcAuthorizeEventProcessor" />
 						</h:commandButton>
 					</div>
 
 					<h:panelGroup layout="block" id="backchannelAuthenticationResults">
+						<h:inputHidden id="bcAuthorizationResponse" value="#{backchannelAuthenticationAction.jsonResponse}" />
 						<h:panelGroup layout="block"
 									  rendered="#{backchannelAuthenticationAction.showResults}">
 							<b:panel title="Backchannel Authentication Request" look="primary">
@@ -788,7 +790,31 @@
 							<b:panel title="Backchannel Authentication Response" look="primary">
 								<h:panelGroup layout="block">
 									<h:inputTextarea styleClass="width100"
-													 value="#{backchannelAuthenticationAction.responseString}" rows="12" />
+													 value="#{backchannelAuthenticationAction.responseString}" rows="12"/>
+								</h:panelGroup>
+							</b:panel>
+							<b:panel title="CIBA Ping Delivery Mode Status" look="primary"
+									 rendered="#{backchannelAuthenticationAction.requestStatus != null and backchannelAuthenticationAction.backchannelTokenDeliveryMode == 'PING'}">
+								<h:panelGroup id="cibaPingDeliveryPanelGroup" layout="block">
+									<h:outputLabel id="cibaPingStatusComponent" value="#{backchannelAuthenticationAction.requestStatus}"/>
+									<h:inputTextarea styleClass="width100" readonly="true"
+													 rendered="#{backchannelAuthenticationAction.responsePingFlow != null and backchannelAuthenticationAction.responsePingFlow.length() > 0}"
+													 value="#{backchannelAuthenticationAction.responsePingFlow}" rows="12"/>
+									<h:commandButton id="cibaPingStatusButton" action="#{backchannelAuthenticationAction.getRequestStatus()}" value="Update" style="visibility: hidden" >
+										<f:ajax execute="@form" render="cibaPingDeliveryPanelGroup" onevent="updatePingStatusProcessor" />
+									</h:commandButton>
+								</h:panelGroup>
+							</b:panel>
+							<b:panel title="CIBA Push Delivery Mode Status" look="primary"
+									 rendered="#{backchannelAuthenticationAction.requestStatus != null and backchannelAuthenticationAction.backchannelTokenDeliveryMode == 'PUSH'}">
+								<h:panelGroup id="cibaPushDeliveryPanelGroup" layout="block">
+									<h:outputLabel id="cibaPushStatusComponent" value="#{backchannelAuthenticationAction.requestStatus}"/>
+									<h:inputTextarea styleClass="width100" readonly="true"
+													 rendered="#{backchannelAuthenticationAction.responsePushFlow != null and backchannelAuthenticationAction.responsePushFlow.length() > 0}"
+													 value="#{backchannelAuthenticationAction.responsePushFlow}" rows="12"/>
+									<h:commandButton id="cibaPushStatusButton" action="#{backchannelAuthenticationAction.getRequestStatus()}" value="Update" style="visibility: hidden" >
+										<f:ajax execute="@form" render="cibaPushDeliveryPanelGroup" onevent="updatePushStatusProcessor" />
+									</h:commandButton>
 								</h:panelGroup>
 							</b:panel>
 						</h:panelGroup>
@@ -1100,6 +1126,8 @@
 			}
 			//]]>
 		</script>
+
+		<script type="text/javascript" src="javascript/ciba.js" ></script>
 
 	</ui:define>
 </ui:composition>
