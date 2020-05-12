@@ -12,8 +12,12 @@ import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.auth.Authenticator;
+import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
+import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import org.gluu.oxauth.model.ciba.PushErrorResponseType;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
@@ -39,7 +43,7 @@ import java.util.Set;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version May 9, 2020
  */
 @Stateless
 @Named
@@ -86,6 +90,18 @@ public class AuthorizeService {
 
     @Inject
     private RequestParameterService requestParameterService;
+
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private CIBASupportProxy cibaSupportProxy;
+
+    @Inject
+    private CIBAPingCallbackProxy cibaPingCallbackProxy;
+
+    @Inject
+    private CIBAPushErrorProxy cibaPushErrorProxy;
 
     public SessionId getSession() {
         return getSession(null);
@@ -178,6 +194,36 @@ public class AuthorizeService {
 
         RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
         redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
+
+        // CIBA
+        Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
+        if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
+            CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID));
+
+            if (cibaGrant != null  && cibaGrant.getClient() != null) {
+                switch (cibaGrant.getClient().getBackchannelTokenDeliveryMode()) {
+                    case PING:
+                        cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
+                        cibaGrant.setTokensDelivered(false);
+                        cibaGrant.save();
+
+                        cibaPingCallbackProxy.pingCallback(
+                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                                cibaGrant.getClientNotificationToken()
+                        );
+                        break;
+                    case PUSH:
+                        cibaPushErrorProxy.pushError(
+                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
+                                cibaGrant.getClientNotificationToken(),
+                                PushErrorResponseType.ACCESS_DENIED,
+                                "The end-user denied the authorization request.");
+                        break;
+                }
+            }
+        }
 
         facesService.redirectToExternalURL(redirectUri.toString());
     }
