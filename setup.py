@@ -618,6 +618,7 @@ class Setup(object):
         self.installOxd = False
         self.oxd_package = ''
         self.oxd_use_gluu_storage = False
+        self.generateOxdCertificate = False
 
         #casa install options
         self.installCasa = False
@@ -5155,6 +5156,47 @@ class Setup(object):
 
             self.writeFile(oxd_server_yml_fn, yml_str)
 
+        if self.generateOxdCertificate:
+
+            self.run([
+                self.opensslCommand,
+                'req', '-x509', '-newkey', 'rsa:4096', '-nodes',
+                '-out', '/tmp/oxd.crt',
+                '-keyout', '/tmp/oxd.key',
+                '-days', '3650',
+                '-subj', '/C={}/ST={}/L={}/O={}/CN={}/emailAddress={}'.format(self.countryCode, self.state, self.city, self.orgName, self.hostname, self.admin_email),
+                ])
+
+            self.run([
+                self.opensslCommand,
+                'pkcs12', '-export',
+                '-in', '/tmp/oxd.crt',
+                '-inkey', '/tmp/oxd.key',
+                '-out', '/tmp/oxd.p12',
+                '-name', self.hostname,
+                '-passout', 'pass:example'
+                ])
+
+            self.run([
+                self.cmd_keytool,
+                '-importkeystore',
+                '-deststorepass', 'example',
+                '-destkeypass', 'example',
+                '-destkeystore', '/tmp/oxd.keystore',
+                '-srckeystore', '/tmp/oxd.p12',
+                '-srcstoretype', 'PKCS12',
+                '-srcstorepass', 'example',
+                '-alias', self.hostname,
+                ])
+
+            oxd_keystore_fn = os.path.join(oxd_root, 'conf/oxd-server.keystore')
+            self.run(['cp', '-f', '/tmp/oxd.keystore', oxd_keystore_fn])
+            self.run(['chown', 'jetty:jetty', oxd_keystore_fn])
+            
+            for f in ('/tmp/oxd.crt', '/tmp/oxd.key', '/tmp/oxd.p12', '/tmp/oxd.keystore'):
+                self.run(['rm', '-f', f])
+
+
         self.enable_service_at_start('oxd-server')
 
     def install_casa(self):
@@ -5600,6 +5642,7 @@ if __name__ == '__main__':
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
     parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
+    parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
 
     argsp = parser.parse_args()
 
@@ -5715,6 +5758,7 @@ if __name__ == '__main__':
     setupOptions['installCasa'] = argsp.install_casa
     setupOptions['installOxd'] = argsp.install_oxd
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
+    setupOptions['generateOxdCertificate'] = argsp.generate_oxd_certificate
 
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = REMOTE
