@@ -1,27 +1,28 @@
 package org.gluu.oxd.server.persistence.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Preconditions;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.conf.service.ConfigurationFactory;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.common.PersistenceConfigKeys;
 import org.gluu.oxd.server.OxdServerConfiguration;
-import org.gluu.oxd.server.persistence.configuration.GluuConfiguration;
-import org.gluu.oxd.server.persistence.configuration.OxdConfigurationFactory;
+import org.gluu.oxd.server.persistence.modal.OrganizationBranch;
 import org.gluu.oxd.server.persistence.modal.RpObject;
+import org.gluu.oxd.server.persistence.providers.GluuPersistenceConfiguration;
+import org.gluu.oxd.server.persistence.providers.PersistenceEntryManagerFactory;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.Entry;
 import org.gluu.persist.model.base.GluuDummyEntry;
+import org.gluu.persist.model.base.SimpleBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 public class GluuPersistenceService implements PersistenceService {
@@ -30,6 +31,7 @@ public class GluuPersistenceService implements PersistenceService {
     private OxdServerConfiguration configuration;
     private PersistenceEntryManager persistenceEntryManager;
     private String persistenceType;
+    private String BASE_DN = "o=gluu";
 
     public GluuPersistenceService(OxdServerConfiguration configuration) {
         this.configuration = configuration;
@@ -43,25 +45,77 @@ public class GluuPersistenceService implements PersistenceService {
     public void create() {
         LOG.debug("Creating GluuPersistenceService ...");
         try {
-            GluuConfiguration gluuConfiguration = asGluuConfiguration(this.configuration);
-            validate(gluuConfiguration);
+            GluuPersistenceConfiguration gluuPersistenceConfiguration = new GluuPersistenceConfiguration(configuration);
+            Properties props = gluuPersistenceConfiguration.getPersistenceProps();
 
-            System.setProperty("gluu.base", removeConfigDir(gluuConfiguration.getConfigFileLocation()));
-            ConfigurationFactory configurationFactory = OxdConfigurationFactory.instance();
+            if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")) {
+                this.persistenceEntryManager = PersistenceEntryManagerFactory.createLdapPersistenceEntryManager(props);
+            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")) {
+                this.persistenceEntryManager = PersistenceEntryManagerFactory.createCouchbasePersistenceEntryManager(props);
+            }
 
-            this.persistenceEntryManager = configurationFactory.getPersistenceEntryManager();
-            if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(this.persistenceEntryManager.getPersistenceType())) {
+            if (this.persistenceType != null && !this.persistenceType.equalsIgnoreCase(props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()))) {
                 LOG.error("The value of the `storage` field in `oxd-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: {} \n `persistence.type` value : {}"
                         , this.persistenceType, this.persistenceEntryManager.getPersistenceType());
                 throw new RuntimeException("The value of the `storage` field in `oxd-server.yml` does not matches with `persistence.type` in `gluu.property` file. \n `storage` value: " + this.persistenceType + " \n `persistence.type` value : "
                         + this.persistenceEntryManager.getPersistenceType());
             }
-
-            Entry base = this.persistenceEntryManager.find(GluuDummyEntry.class, getBaseDn());
+            prepareBranch();
+            Entry base = this.persistenceEntryManager.find(GluuDummyEntry.class, getOxdDn());
             Preconditions.checkNotNull(base);
         } catch (Exception e) {
             throw new IllegalStateException("Error starting GluuPersistenceService", e);
         }
+    }
+
+    public void prepareBranch() {
+        if (!this.persistenceEntryManager.hasBranchesSupport(BASE_DN)) {
+            return;
+        }
+        //create `o=gluu` if not present
+        if (!containsBranch(BASE_DN)) {
+            addOrganizationBranch(BASE_DN, null);
+        }
+        //create `ou=configuration,o=gluu` if not present
+        if (!containsBranch("ou=configuration,o=gluu")) {
+            addBranch("ou=configuration,o=gluu", "configuration");
+        }
+        //create `ou=oxd,ou=configuration,o=gluu` if not present
+        if (!containsBranch("ou=oxd,ou=configuration,o=gluu")) {
+            addBranch("ou=oxd,ou=configuration,o=gluu", "oxd");
+        }
+        //create `ou=oxd,o=gluu` if not present
+        if (!containsBranch(getOxdDn())) {
+            addBranch(getOxdDn(), "oxd");
+        }
+        //create `ou=rp,ou=oxd,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s", getRpOu(), getOxdDn()))) {
+            addBranch(String.format("%s,%s", getRpOu(), getOxdDn()), "rp");
+        }
+        //create `ou=expiredObjects,ou=oxd,o=gluu` if not present
+        if (!containsBranch(String.format("%s,%s", getExpiredObjOu(), getOxdDn()))) {
+            addBranch(String.format("%s,%s", getExpiredObjOu(), getOxdDn()), "expiredObjects");
+        }
+    }
+
+    public boolean containsBranch(String dn) {
+        return this.persistenceEntryManager.contains(dn, SimpleBranch.class);
+    }
+
+    public void addOrganizationBranch(String dn, String oName) {
+        OrganizationBranch branch = new OrganizationBranch();
+        branch.setOrganizationName(oName);
+        branch.setDn(dn);
+
+        this.persistenceEntryManager.persist(branch);
+    }
+
+    public void addBranch(String dn, String ouName) {
+        SimpleBranch branch = new SimpleBranch();
+        branch.setOrganizationalUnitName(ouName);
+        branch.setDn(dn);
+
+        this.persistenceEntryManager.persist(branch);
     }
 
     public boolean create(Rp rp) {
@@ -155,7 +209,7 @@ public class GluuPersistenceService implements PersistenceService {
     }
 
     public boolean removeAllRps() {
-        List<RpObject> rps = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getBaseDn()}), RpObject.class, null);
+        List<RpObject> rps = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null);
         for (RpObject rp : rps) {
             this.persistenceEntryManager.remove(rp);
         }
@@ -165,7 +219,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public Set<Rp> getRps() {
         try {
-            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getBaseDn()}), RpObject.class, null);
+            List<RpObject> rpObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null);
 
             Set<Rp> result = new HashSet();
             for (RpObject ele : rpObjects) {
@@ -213,7 +267,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean deleteAllExpiredObjects() {
         try {
-            List<ExpiredObject> expiredObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getExpiredObjOu(), getBaseDn()}), ExpiredObject.class, null);
+            List<ExpiredObject> expiredObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, null);
             for (ExpiredObject ele : expiredObjects) {
                 this.persistenceEntryManager.remove(ele);
             }
@@ -226,15 +280,15 @@ public class GluuPersistenceService implements PersistenceService {
     }
 
     public String getDnForRp(String oxdId) {
-        return String.format("id=%s,%s,%s", new Object[]{oxdId, getRpOu(), getBaseDn()});
+        return String.format("id=%s,%s,%s", new Object[]{oxdId, getRpOu(), getOxdDn()});
     }
 
     public String getDnForExpiredObj(String oxdId) {
-        return String.format("key=%s,%s,%s", new Object[]{oxdId, getExpiredObjOu(), getBaseDn()});
+        return String.format("key=%s,%s,%s", new Object[]{oxdId, getExpiredObjOu(), getOxdDn()});
     }
 
-    private String getBaseDn() {
-        return "ou=oxd,o=gluu";
+    private String getOxdDn() {
+        return String.format("%s,%s", "ou=oxd", BASE_DN);
     }
 
     private String getRpOu() {
@@ -243,44 +297,5 @@ public class GluuPersistenceService implements PersistenceService {
 
     private String getExpiredObjOu() {
         return "ou=expiredObjects";
-    }
-
-    public static GluuConfiguration asGluuConfiguration(OxdServerConfiguration configuration) {
-        try {
-            JsonNode node = configuration.getStorageConfiguration();
-            if (node != null) {
-                return Jackson2.createJsonMapper().treeToValue(node, GluuConfiguration.class);
-            }
-        } catch (Exception e) {
-            LOG.error("Failed to parse GluuConfiguration.", e);
-        }
-        return new GluuConfiguration();
-    }
-
-    private static String removeConfigDir(String path) {
-
-        if (StringUtils.isBlank(path)) {
-            return "";
-        }
-        if (path.endsWith("/")) {
-            path = StringUtils.removeEnd(path, "/");
-        }
-        if (path.endsWith("/conf")) {
-            path = StringUtils.removeEnd(path, "/conf");
-        }
-        return path;
-    }
-
-    private void validate(GluuConfiguration gluuConfiguration) {
-
-        if (gluuConfiguration == null) {
-            LOG.error("The `storage_configuration` has been not provided in `oxd-server.yml`");
-            throw new RuntimeException("The `storage_configuration` has been not provided in `oxd-server.yml`");
-        }
-
-        if (StringUtils.isBlank(gluuConfiguration.getConfigFileLocation())) {
-            LOG.error("The `configFileLocation` field under storage_configuration is blank. Please provide the path of Gluu persistence configuration file in this field (in `oxd-server.yml`)");
-            throw new RuntimeException("The `configFileLocation` field under storage_configuration is blank. Please provide the path of Gluu persistence configuration file in this field (in `oxd-server.yml`)");
-        }
     }
 }
