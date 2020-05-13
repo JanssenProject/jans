@@ -67,6 +67,7 @@ public class JwtAuthorizationRequest {
     private Integer exp;
 
     private String encodedJwt;
+    private String payload;
 
     private AppConfiguration appConfiguration;
 
@@ -243,6 +244,7 @@ public class JwtAuthorizationRequest {
                 idTokenMember = new IdTokenMember(claimsJsonObject.getJSONObject("id_token"));
             }
         }
+        this.payload = payload;
     }
 
     private boolean validateSignature(AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
@@ -365,5 +367,13 @@ public class JwtAuthorizationRequest {
 
     public void setAud(List<String> aud) {
         this.aud = aud;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload;
     }
 }

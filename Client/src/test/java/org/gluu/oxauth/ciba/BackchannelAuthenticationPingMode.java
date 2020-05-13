@@ -157,6 +157,8 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
             pollCount++;
         } while (tokenResponse.getStatus() == 400 && pollCount < 5);
 
+        // Uncomment for manual testing
+        /*
         assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
@@ -190,6 +192,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+         */
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode", "userEmail"})
@@ -317,7 +320,7 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint", "backchannelUserCode", "userInum"})
-    @Test
+    @Test(enabled = false) // Enable it for manual testing
     public void backchannelTokenDeliveryModePingLoginHint4(
             final String clientJwksUri, final String backchannelClientNotificationEndpoint, final String backchannelUserCode,
             final String userInum) throws Exception {
