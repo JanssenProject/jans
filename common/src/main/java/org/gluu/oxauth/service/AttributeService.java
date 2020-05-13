@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -17,7 +18,6 @@ import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.service.BaseCacheService;
-import org.gluu.service.CacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -25,8 +25,7 @@ import org.slf4j.Logger;
  * @author Javier Rojas Blum
  * @version May 30, 2018
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class AttributeService extends org.gluu.service.AttributeService {
 
     /**
