@@ -2,21 +2,40 @@ package org.gluu.oxd.server.persistence.configuration;
 
 public class GluuConfiguration {
 
-    private String configFileLocation;
+    private String type;
+    private String connection;
+    private String salt;
 
-    public String getConfigFileLocation() {
-        return configFileLocation;
+    public String getType() {
+        return type;
     }
 
-    public void setConfigFileLocation(String configFileLocation) {
-        this.configFileLocation = configFileLocation;
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getConnection() {
+        return connection;
+    }
+
+    public void setConnection(String connection) {
+        this.connection = connection;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 
     @Override
     public String toString() {
         return "GluuConfiguration{" +
-                "configFileLocation='" + configFileLocation + '\'' +
+                "type='" + type + '\'' +
+                ", connection='" + connection + '\'' +
+                ", salt='" + salt + '\'' +
                 '}';
     }
-
 }
