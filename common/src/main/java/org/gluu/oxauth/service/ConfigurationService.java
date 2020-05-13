@@ -6,32 +6,31 @@
 
 package org.gluu.oxauth.service;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.gluu.model.SmtpConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 
 /**
  * GluuConfiguration service
  *
  * @author Reda Zerrad Date: 08.10.2012
+ * @author Yuriy Movchan Date: 05/13/2020
  */
-@Stateless
-@Named
+@ApplicationScoped
 public class ConfigurationService {
 
 	@Inject
 	private Logger log;
 
 	@Inject
-	private PersistenceEntryManager ldapEntryManager;
+	private PersistenceEntryManager persistenceEntryManager;
 
 	@Inject
 	private StaticConfiguration staticConfiguration;
@@ -44,7 +43,7 @@ public class ConfigurationService {
 	 * @param configuration Configuration
 	 */
 	public void addConfiguration(GluuConfiguration configuration) {
-		ldapEntryManager.persist(configuration);
+		persistenceEntryManager.persist(configuration);
 	}
 
 	/**
@@ -52,7 +51,7 @@ public class ConfigurationService {
 	 * @param configuration GluuConfiguration
 	 */
 	public void updateConfiguration(GluuConfiguration configuration) {
-		ldapEntryManager.merge(configuration);
+		persistenceEntryManager.merge(configuration);
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class ConfigurationService {
 	 * @throws Exception 
 	 */
 	public GluuConfiguration getConfigurationByInum(String inum) {
-		return ldapEntryManager.find(GluuConfiguration.class, getDnForConfiguration(inum));
+		return persistenceEntryManager.find(GluuConfiguration.class, getDnForConfiguration(inum));
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class ConfigurationService {
 			return null;
 		}
 
-		return ldapEntryManager.find(GluuConfiguration.class, configurationDn);
+		return persistenceEntryManager.find(GluuConfiguration.class, configurationDn);
 	}
 
 	/**
