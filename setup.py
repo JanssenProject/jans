@@ -1590,13 +1590,13 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'root:root', jreDestinationPath])
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
         
-        if self.java_type == 'jre':
-            self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
 
         if not os.path.exists('/opt/jre/jre'):
             self.run([self.cmd_mkdir, '-p', '/opt/jre/jre'])
             self.run([self.cmd_ln, '-s', '/opt/jre/lib', '/opt/jre/jre/lib'])
 
+        if self.java_type == 'jre':
+            self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
 
     def extractOpenDJ(self):        
 
