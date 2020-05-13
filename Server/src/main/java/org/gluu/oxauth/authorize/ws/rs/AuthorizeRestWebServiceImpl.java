@@ -297,6 +297,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             }
                         }
                     }
+                    requestParameterService.getCustomParameters(jwtRequest, customParameters);
                 } catch (WebApplicationException e) {
                     throw e;
                 } catch (Exception e) {
