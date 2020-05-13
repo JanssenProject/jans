@@ -324,8 +324,15 @@ public class AuthorizeAction {
             return;
         }
 
-        if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
-            if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
+        if (prompts.contains(Prompt.NONE)) {
+            invalidRequest();
+            return;
+        }
+
+
+        final boolean hasConsentPrompt = prompts.contains(Prompt.CONSENT);
+        if (!hasConsentPrompt) {
+            if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient()) {
                 // if trusted client = true, then skip authorization page and grant access directly
                 permissionGranted(session);
                 return;
@@ -346,9 +353,6 @@ public class AuthorizeAction {
                 permissionGranted(session);
                 return;
             }
-
-        } else {
-            invalidRequest();
         }
 
         if (externalConsentGatheringService.isEnabled()) {

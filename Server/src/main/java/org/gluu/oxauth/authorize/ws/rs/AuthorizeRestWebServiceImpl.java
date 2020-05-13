@@ -406,6 +406,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     client.getClientId(),
                     client.getPersistClientAuthorizations());
             if (scopes.size() > 0) {
+                if (prompts.contains(Prompt.CONSENT)) {
+                    return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                            codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+                }
                 if (client.getTrustedClient()) {
                     sessionUser.addPermission(clientId, true);
                     sessionIdService.updateSessionId(sessionUser);
