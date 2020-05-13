@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
  * @version June 15, 2016
  */
 @ApplicationScoped
-@Named
 public class ConfigurationFactory {
 
 	@Inject

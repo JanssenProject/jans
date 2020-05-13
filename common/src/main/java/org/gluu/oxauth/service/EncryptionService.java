@@ -24,7 +24,6 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 09/23/2014
  */
 @ApplicationScoped
-@Named
 public class EncryptionService {
 
     @Inject
