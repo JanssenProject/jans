@@ -10,10 +10,12 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -198,6 +200,27 @@ public class RequestParameterService {
         }
 
         return stringValue;
+    }
+
+    /**
+     * Process a JWT Request instance and update Custom Parameters according to custom parameters sent.
+     * @param jwtRequest JWT processing
+     * @param customParameters Custom parameters used in the authorization flow.
+     */
+    public void getCustomParameters(JwtAuthorizationRequest jwtRequest, Map<String, String> customParameters) {
+        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration
+                .getAuthorizationRequestCustomAllowedParameters();
+
+        if (authorizationRequestCustomAllowedParameters == null) {
+            return;
+        }
+
+        JSONObject jsonPayload = new JSONObject(jwtRequest.getPayload());
+        for (String customParam : authorizationRequestCustomAllowedParameters) {
+            if (jsonPayload.has( customParam )) {
+                customParameters.put(customParam, jsonPayload.getString(customParam));
+            }
+        }
     }
 
 }
