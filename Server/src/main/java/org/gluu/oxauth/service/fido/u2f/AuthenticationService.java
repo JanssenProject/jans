@@ -15,10 +15,13 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.oxauth.crypto.random.ChallengeGenerator;
+import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.gluu.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
@@ -76,6 +79,11 @@ public class AuthenticationService extends RequestService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+	@Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
+    public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
+        return new SHA256withECDSASignatureVerification();
+    }
 
     public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
         if (applicationService.isValidateApplication()) {
