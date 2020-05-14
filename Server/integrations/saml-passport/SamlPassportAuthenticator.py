@@ -38,8 +38,8 @@ class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
-    # def init(self, customScript, configurationAttributes):
-    def init(self, configurationAttributes):
+    def init(self, customScript, configurationAttributes):
+    # def init(self, configurationAttributes):
     
         print "Passport. init called"
 
