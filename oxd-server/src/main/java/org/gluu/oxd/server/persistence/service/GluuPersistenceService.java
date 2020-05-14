@@ -45,12 +45,12 @@ public class GluuPersistenceService implements PersistenceService {
             GluuPersistenceConfiguration gluuPersistenceConfiguration = new GluuPersistenceConfiguration(configuration);
             Properties props = gluuPersistenceConfiguration.getPersistenceProps();
 
-            if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")) {
+            if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")
+                    || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {
 
                 this.persistenceEntryManager = PersistenceEntryManagerFactory.createLdapPersistenceEntryManager(props);
 
-            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")
-                    || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {
+            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")) {
 
                 this.persistenceEntryManager = PersistenceEntryManagerFactory.createCouchbasePersistenceEntryManager(props);
             }
