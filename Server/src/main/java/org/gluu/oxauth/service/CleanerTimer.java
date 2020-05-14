@@ -6,11 +6,18 @@
 
 package org.gluu.oxauth.service;
 
-import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.gluu.oxauth.fido2.service.persist.AuthenticationPersistenceService;
-import org.gluu.oxauth.fido2.service.persist.RegistrationPersistenceService;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.fido.u2f.RequestService;
@@ -27,16 +34,8 @@ import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.Sets;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -69,12 +68,6 @@ public class CleanerTimer {
 	@Inject
 	@Named("u2fRequestService")
 	private RequestService u2fRequestService;
-
-	@Inject
-	private AuthenticationPersistenceService authenticationPersistenceService;
-
-	@Inject
-	private RegistrationPersistenceService registrationPersistenceService;
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -163,9 +156,6 @@ public class CleanerTimer {
 			}
 
 			processCache(now);
-
-			this.registrationPersistenceService.cleanup(now, chunkSize);
-			this.authenticationPersistenceService.cleanup(now, chunkSize);
 
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Exception e) {
