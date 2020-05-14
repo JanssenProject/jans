@@ -121,7 +121,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 (user_profile, jsonp) = self.getUserProfile(jwt)
 
                 if user_profile == None:
-                    print "if user_profile == None"
                     return False
 
                 return self.attemptAuthentication(identity, user_profile, jsonp)
@@ -518,9 +517,30 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 #changed method from .getSignatureAlgorithm() to getAlgorithm()
                 # class that extends AbstractCryptoProvider
-                
+
+
+                ''' working .getAlgorithm()
                 valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                             None, None, jwt.getHeader().getAlgorithm())
+                '''
+
+                # let's make it clear
+                signing_input = jwt.getSigningInput()
+                encoded_signature = jwt.getEncodedSignature()
+                key_id = jwt.getHeader().getKeyId()
+
+                # gets algorithm from SignagureAlgorithm object
+                algorithm = jwt.getHeader().getAlgorithm()
+
+                # gets SignatureAlgorithm object
+                signature_algorithm_object = jwt.getHeader().getSignatureAlgorithm()
+
+                print "algorithm = %s" % algorithm
+                print "signature_algorithm_object = %s " % signature_algorithm_object
+
+                # sending SignatureAlgorithm object as arg
+                valid = cryptoProvider.verifySignature(signing_input, encoded_signature, key_id, None, None, signature_algorithm_object)
+
 
         except:
             print "Exception: ", sys.exc_info()[1]
