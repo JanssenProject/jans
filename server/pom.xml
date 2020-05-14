@@ -17,7 +17,7 @@
 	</parent>
 
 	<build>
-		<finalName>oxauth-fido2-server</finalName>
+		<finalName>fido2-server</finalName>
 
 		<resources>
 			<resource>
