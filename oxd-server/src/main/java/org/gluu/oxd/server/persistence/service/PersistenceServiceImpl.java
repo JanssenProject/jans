@@ -40,8 +40,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     private PersistenceService createServiceInstance() {
 
         String storage = this.configurationService.getConfiguration().getStorage();
-        switch (storage)
-        {
+        switch (storage) {
             case "h2":
                 this.sqlProvider = new H2PersistenceProvider(this.configurationService);
                 setTimerForDBCleanUpTask();
