@@ -616,7 +616,8 @@ public class Authenticator {
     }
 
     public String prepareAuthenticationForStep() {
-        lastResult = prepareAuthenticationForStepImpl();
+        SessionId sessionId = sessionIdService.getSessionId();
+        lastResult = prepareAuthenticationForStep(sessionId);
 
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
@@ -630,8 +631,7 @@ public class Authenticator {
         return lastResult;
     }
 
-    private String prepareAuthenticationForStepImpl() {
-        SessionId sessionId = sessionIdService.getSessionId();
+    public String prepareAuthenticationForStep(SessionId sessionId) {
         Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
         if (sessionIdAttributes == null) {
             logger.error("Failed to get attributes from session");
