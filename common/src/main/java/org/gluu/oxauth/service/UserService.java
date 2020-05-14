@@ -31,7 +31,6 @@ import java.util.*;
  * @version @version August 20, 2019
  */
 @ApplicationScoped
-@Named
 public class UserService {
 
 	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
