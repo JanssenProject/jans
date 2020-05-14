@@ -139,6 +139,8 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
         String authReqId = backchannelAuthenticationResponse.getAuthReqId();
 
         // 3. Token Request Using CIBA Grant Type
+        // Uncomment for manual testing
+        /*
         TokenResponse tokenResponse = null;
         int pollCount = 0;
         do {
@@ -157,8 +159,6 @@ public class BackchannelAuthenticationPingMode extends BaseTest {
             pollCount++;
         } while (tokenResponse.getStatus() == 400 && pollCount < 5);
 
-        // Uncomment for manual testing
-        /*
         assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
         assertNotNull(tokenResponse.getEntity(), "The entity is null");
         assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
