@@ -172,7 +172,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Basic authentication returned: %s" % logged_in
                 return logged_in
 
-
             # first time comes here
             elif provider in self.registeredProviders:
                 # user selected provider
@@ -569,14 +568,35 @@ class PersonAuthentication(PersonAuthenticationType):
             print "jwt.getHeader().getKeyId(): %s" % jwt.getHeader().getKeyId()
             print "jwt.getHeader().getAlgorithm(): %s" % jwt.getHeader().getAlgorithm()
 
-            #changed method from .getSignatureAlgorithm() to getAlgorithm() and worked
-            # some class that extends AbstractCryptoProvider
+            print type(jwt.getHeader().getAlgorithm())
+            alg_string = str(jwt.getHeader().getAlgorithm())
+            signature_string = str(jwt.getEncodedSignature())
+            print "alg_string = %s" % alg_string
+
+            if alg_string == "none" or alg_string == "None" or alg_string == "NoNe" or alg_string == "nONE" or alg_string == "NONE" or alg_string == "NonE" or alg_string == "nOnE":
+                # blocks none attack
+                print "WARNING: JWT Signature algorithm is none"
+                valid = False
+            elif alg_string != "RS512":
+                # blocks anything that's not RS512
+                print "WARNING: JWT Signature algorithm is NOT RS512"
+                # blocks 
+                valid = False
+            elif signature_string != "" :
+                print "WARNING: JWT Signature not sent"
+                valid = False
+            else:
+                #changed method from .getSignatureAlgorithm() to getAlgorithm() and worked
+                # some class that extends AbstractCryptoProvider
+                
+                valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
+                                                            None, None, jwt.getHeader().getAlgorithm())
+
             
-            valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
-                                                        None, None, jwt.getHeader().getAlgorithm())
-            
-            print "Token validated with getEncodedSignature method as arg"
-            
+
+            '''
+            # Cracking with signature None
+
             if valid == False:
                 # Try without signature
                 print "Entered valid == false"
@@ -586,7 +606,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Token validated sending verifySignature as None"
                 print valid
 
-
+            '''
         except:
             print "Exception: ", sys.exc_info()[1]
 
@@ -612,9 +632,6 @@ class PersonAuthentication(PersonAuthenticationType):
         print "getUserProfile jwt = %s" % str(jwt)
         print type(jwt)
 
-
-        # calling JWT INTERCEPTION (returns altered jwt)
-        # jwt = self.rawParseUserToken(jwt)
 
         # get the claims method located at org.gluu.oxauth.model.token.JsonWebResponse.java as a org.gluu.oxauth.model.jwt.JwtClaims object
         jwt_claims = jwt.getClaims()
