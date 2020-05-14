@@ -515,33 +515,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 valid = False
             
             else:
-                #changed method from .getSignatureAlgorithm() to getAlgorithm()
-                # class that extends AbstractCryptoProvider
-
-
-                ''' working .getAlgorithm()
+                
+                # class extends AbstractCryptoProvider
+                ''' on version 4.2 .getAlgorithm() method was renamed to .getSignatureAlgorithm()
+                for older versions:
                 valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                             None, None, jwt.getHeader().getAlgorithm())
                 '''
 
-                # let's make it clear
-                signing_input = jwt.getSigningInput()
-                encoded_signature = jwt.getEncodedSignature()
-                key_id = jwt.getHeader().getKeyId()
-
-                # gets algorithm from SignagureAlgorithm object
-                algorithm = jwt.getHeader().getAlgorithm()
-
-                # gets SignatureAlgorithm object
-                signature_algorithm_object = jwt.getHeader().getSignatureAlgorithm()
-
-                print "algorithm = %s" % algorithm
-                print "signature_algorithm_object = %s " % signature_algorithm_object
-
-                # sending SignatureAlgorithm object as arg
-                valid = cryptoProvider.verifySignature(signing_input, encoded_signature, key_id, None, None, signature_algorithm_object)
-
-
+                # working on 4.2:
+                valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
+                                                            None, None, jwt.getHeader().getSignatureAlgorithm())
+               
         except:
             print "Exception: ", sys.exc_info()[1]
 
