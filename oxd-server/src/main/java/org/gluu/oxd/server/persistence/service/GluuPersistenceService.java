@@ -1,6 +1,5 @@
 package org.gluu.oxd.server.persistence.service;
 
-import com.google.common.base.Preconditions;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
@@ -14,8 +13,6 @@ import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.model.base.Entry;
-import org.gluu.persist.model.base.GluuDummyEntry;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +46,12 @@ public class GluuPersistenceService implements PersistenceService {
             Properties props = gluuPersistenceConfiguration.getPersistenceProps();
 
             if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("ldap")) {
+
                 this.persistenceEntryManager = PersistenceEntryManagerFactory.createLdapPersistenceEntryManager(props);
-            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")) {
+
+            } else if (props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("couchbase")
+                    || props.getProperty(PersistenceConfigKeys.PersistenceType.getKeyName()).equalsIgnoreCase("hybrid")) {
+
                 this.persistenceEntryManager = PersistenceEntryManagerFactory.createCouchbasePersistenceEntryManager(props);
             }
 
@@ -61,8 +62,6 @@ public class GluuPersistenceService implements PersistenceService {
                         + this.persistenceEntryManager.getPersistenceType());
             }
             prepareBranch();
-            Entry base = this.persistenceEntryManager.find(GluuDummyEntry.class, getOxdDn());
-            Preconditions.checkNotNull(base);
         } catch (Exception e) {
             throw new IllegalStateException("Error starting GluuPersistenceService", e);
         }
@@ -77,11 +76,11 @@ public class GluuPersistenceService implements PersistenceService {
             addOrganizationBranch(BASE_DN, null);
         }
         //create `ou=configuration,o=gluu` if not present
-        if (!containsBranch("ou=configuration,o=gluu")) {
-            addBranch("ou=configuration,o=gluu", "configuration");
+        if (!containsBranch(String.format("%s,%s", ou("configuration"), BASE_DN))) {
+            addBranch(String.format("%s,%s", ou("configuration"), BASE_DN), "configuration");
         }
         //create `ou=oxd,ou=configuration,o=gluu` if not present
-        if (!containsBranch("ou=oxd,ou=configuration,o=gluu")) {
+        if (!containsBranch(String.format("%s,%s,%s", ou("oxd"), ou("configuration"), BASE_DN))) {
             addBranch("ou=oxd,ou=configuration,o=gluu", "oxd");
         }
         //create `ou=oxd,o=gluu` if not present
@@ -192,7 +191,7 @@ public class GluuPersistenceService implements PersistenceService {
             return null;
         } catch (Exception e) {
             if (((e instanceof EntryPersistenceException)) && (e.getMessage().contains("Failed to find entry"))) {
-                LOG.warn("Failed to fetch ExpiredObject by id: {} ", key);
+                LOG.warn("Failed to fetch ExpiredObject by id: {}. {} ", key, e.getMessage());
                 return null;
             }
             LOG.error("Failed to fetch ExpiredObject by id: {} ", key, e);
@@ -209,12 +208,21 @@ public class GluuPersistenceService implements PersistenceService {
     }
 
     public boolean removeAllRps() {
-        List<RpObject> rps = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null);
-        for (RpObject rp : rps) {
-            this.persistenceEntryManager.remove(rp);
+        try {
+            List<RpObject> rps = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null);
+            for (RpObject rp : rps) {
+                this.persistenceEntryManager.remove(rp);
+            }
+            LOG.debug("Removed all Rps successfully. ");
+            return true;
+        } catch (Exception e) {
+            if (((e instanceof EntryPersistenceException)) && (e.getMessage().contains("Failed to find entries"))) {
+                LOG.warn("Failed to fetch RpObjects. {} ", e.getMessage());
+                return true;
+            }
+            LOG.error("Failed to remove all Rps", e);
         }
-        LOG.debug("Removed all Rps successfully. ");
-        return true;
+        return false;
     }
 
     public Set<Rp> getRps() {
@@ -232,6 +240,10 @@ public class GluuPersistenceService implements PersistenceService {
             }
             return result;
         } catch (Exception e) {
+            if (((e instanceof EntryPersistenceException)) && (e.getMessage().contains("Failed to find entries"))) {
+                LOG.warn("Failed to fetch RpObjects. {} ", e.getMessage());
+                return null;
+            }
             LOG.error("Failed to fetch rps. Error: {} ", e.getMessage(), e);
         }
         return null;
@@ -287,15 +299,19 @@ public class GluuPersistenceService implements PersistenceService {
         return String.format("key=%s,%s,%s", new Object[]{oxdId, getExpiredObjOu(), getOxdDn()});
     }
 
+    public String ou(String ouName) {
+        return String.format("ou=%s", ouName);
+    }
+
     private String getOxdDn() {
-        return String.format("%s,%s", "ou=oxd", BASE_DN);
+        return String.format("%s,%s", ou("oxd"), BASE_DN);
     }
 
     private String getRpOu() {
-        return "ou=rp";
+        return ou("rp");
     }
 
     private String getExpiredObjOu() {
-        return "ou=expiredObjects";
+        return ou("expiredObjects");
     }
 }
