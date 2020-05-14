@@ -32,7 +32,6 @@ import json
 import sys
 import datetime
 
-import base64
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -237,8 +236,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 facesService = CdiUtil.bean(FacesService)
 
-                # redirects to Passport getRedirectURL (JWT Token URL?) - what sends browser to IDP. Does IDP receives token? Os passport? What it does with token?
-                
+                # redirects to Passport getRedirectURL - sends browser to IDP.
                 print "Passport. Redirecting to external url: %s" + url
                 
                 facesService.redirectToExternalURL(url)
@@ -486,9 +484,8 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. validSignature. Checking JWT token signature"
         valid = False
 
-        # REMOVED TRY/CATCH TO TRY TO TRACE ERROR
-
         try:
+
             appConfiguration = AppConfiguration()
             appConfiguration.setWebKeysStorage(WebKeyStorage.KEYSTORE)
             appConfiguration.setKeyStoreFile(self.keyStoreFile)
