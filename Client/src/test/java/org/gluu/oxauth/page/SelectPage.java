@@ -1,5 +1,6 @@
 package org.gluu.oxauth.page;
 
+import org.gluu.oxauth.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -44,7 +45,9 @@ public class SelectPage extends AbstractPage {
         waitForPageSwitch(previousUrl);
 
         navigate(driver.getCurrentUrl());
-        new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT).until(d -> !d.getCurrentUrl().contains("/authorize"));
+        if (BaseTest.ENABLE_DIRECT_VIEW_RENDER) {
+            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT).until(d -> !d.getCurrentUrl().contains("/authorize"));
+        }
         return new LoginPage(config);
     }
 

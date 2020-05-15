@@ -134,7 +134,9 @@ public class SelectAccountHttpTest extends BaseTest {
         loginPage.enterUsername(userId);
         loginPage.enterPassword(userSecret);
         loginPage.getLoginButton().click();
-        loginPage.waitForPageSwitch(currentUrl);
+        if (ENABLE_DIRECT_VIEW_RENDER) {
+            loginPage.waitForPageSwitch(currentUrl);
+        }
 
         String authorizationResponseStr = acceptAuthorization(driver, authorizationRequest.getRedirectUri());
 
