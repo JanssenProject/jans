@@ -1,0 +1,7 @@
+dn: ou=fido2,ou=configuration,o=gluu
+objectClass: gluuApplicationConfiguration
+objectClass: top
+ou: fido2
+gluuConfDynamic::%(fido2_dynamic_conf_base64)s
+gluuConfStatic::%(fido2_static_conf_base64)s
+oxRevision: 1
