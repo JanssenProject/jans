@@ -90,6 +90,9 @@ class msg:
     ask_cb_install = "Couchbase Installation"
     cb_install_options = ["Don't Install","Install Locally","Use Remote Couchbase"]
     
+    ask_use_gluu_storage_oxd = "By default oxd uses its own db. Do you want to use Gluu Storage for Oxd?"
+    ask_use_gluu_storage_oxd_title = "Use Gluu Storage for Oxd?"
+    
     notify_select_backend = "Please select one of the backends either local install or remote" 
     weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
     unselected_storages = "Note: Unselected storages will go Couchbase Server"
