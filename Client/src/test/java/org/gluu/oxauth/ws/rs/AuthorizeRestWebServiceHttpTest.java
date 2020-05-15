@@ -2653,8 +2653,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
+        RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
