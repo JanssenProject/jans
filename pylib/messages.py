@@ -39,6 +39,7 @@ class msg:
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
     installScimServer_label = "Install Scim"
+    installFido2_label = "Install Fido2"
     
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
@@ -80,6 +81,8 @@ class msg:
     ask_installOxd = "Install Oxd"
     ask_wrends_install = "Install WrenDS"
     ask_installScimServer = "Install Scim Server"
+    ask_installFido2 = "Install Fido2"
+
 
     wrends_install_options = ["Don't Install","Install Locally","Use Remote WrenDS"]
     oxd_url_label = "oxd Server URL"
