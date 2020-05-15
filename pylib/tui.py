@@ -11,6 +11,7 @@ import curses
 import string
 import inspect
 import threading
+import math
 from queue import Queue
 from .messages import msg
 
@@ -250,7 +251,10 @@ class HostForm(GluuSetupForm):
 
 class ServicesForm(GluuSetupForm):
 
-    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius', 'installOxd', 'installCasa', 'installScimServer')
+    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 
+                'installPassport', 'installGluuRadius', 'installOxd', 
+                'installCasa', 'installScimServer', 'installFido2',
+                )
 
     def create(self):
         for service in self.services:
@@ -567,7 +571,7 @@ class DisplaySummaryForm(GluuSetupForm):
                     "installHttpd", "installSaml", "installOxAuthRP",
                     "installPassport", "installGluuRadius", 
                     "installOxd", "installCasa",
-                    'installScimServer',
+                    'installScimServer', 'installFido2',
                     "java_type",
                     "backend_types", 'wrends_storages')
 
@@ -585,7 +589,7 @@ class DisplaySummaryForm(GluuSetupForm):
                             )
                     )
 
-        sec_col_n = 6
+        sec_col_n = math.ceil(len(self.myfields_2)/2.0)
         for j, wn in enumerate(self.myfields_2):
             if j < sec_col_n:
                 relx=2
