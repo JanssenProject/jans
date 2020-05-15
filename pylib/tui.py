@@ -310,6 +310,11 @@ class ServicesForm(GluuSetupForm):
         self.parentApp.installObject.templateRenderingDict['oxd_hostname'] = oxd_hostname
         self.parentApp.installObject.templateRenderingDict['oxd_port'] = str(oxd_port)
 
+        if self.installOxd.value:
+            result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
+            if result:
+                self.parentApp.installObject.oxd_use_gluu_storage = True
+
         self.parentApp.switchForm('DBBackendForm')
 
 
