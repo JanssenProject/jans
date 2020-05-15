@@ -4637,6 +4637,30 @@
             "substr": "caseIgnoreSubstringsMatch", 
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Gluu Dynamic Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuConfDynamic"
+            ], 
+            "json": true, 
+            "oid": "oxAttribute", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Gluu Static Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuConfStatic"
+            ], 
+            "json": true, 
+            "oid": "oxAttribute", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
         }
     ], 
     "objectClasses": [
@@ -6070,7 +6094,27 @@
                 "top"
             ], 
             "x_origin": "Gluu created objectclass"
-        } 
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "ou",
+                "gluuConfDynamic",
+                "gluuConfStatic",
+                "oxRevision"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "gluuApplicationConfiguration"
+            ],
+            "oid": "oxObjectClass",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
+        }
     ], 
     "oidMacros": {
         "oxAttribute": "oxPublished:3", 
