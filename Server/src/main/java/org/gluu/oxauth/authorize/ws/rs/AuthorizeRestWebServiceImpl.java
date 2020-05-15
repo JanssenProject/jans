@@ -376,7 +376,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     }
                 } else {
                     if (prompts.contains(Prompt.LOGIN)) {
-                        endSession(sessionId, httpRequest, httpResponse);
+                        unauthenticateSession(sessionId, httpRequest);
                         sessionId = null;
                         prompts.remove(Prompt.LOGIN);
                     }
@@ -390,7 +390,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             boolean validAuthenticationMaxAge = authorizeRestWebServiceValidator.validateAuthnMaxAge(maxAge, sessionUser, client);
             if (!validAuthenticationMaxAge) {
-                endSession(sessionId, httpRequest, httpResponse);
+                unauthenticateSession(sessionId, httpRequest);
                 sessionId = null;
 
                 return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
@@ -433,7 +433,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                 //  workaround for #1030 - remove only authenticated session, for set up acr we set it unauthenticated and then drop in AuthorizeAction
                 if (identity.getSessionId().getState() == SessionIdState.AUTHENTICATED) {
-                    endSession(sessionId, httpRequest, httpResponse);
+                    unauthenticateSession(sessionId, httpRequest);
                 }
                 sessionId = null;
                 prompts.remove(Prompt.LOGIN);
@@ -880,10 +880,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void endSession(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        SessionId sessionUser = identity.getSessionId();
-
+    private void unauthenticateSession(String sessionId, HttpServletRequest httpRequest) {
         identity.logout();
+
+        SessionId sessionUser = identity.getSessionId();
 
         if (sessionUser != null) {
             sessionUser.setUserDn(null);
@@ -891,24 +891,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionUser.setAuthenticationTime(null);
         }
 
-
-        String id = sessionId;
-        if (StringHelper.isEmpty(id)) {
-            id = cookieService.getSessionIdFromCookie(httpRequest);
+        if (StringHelper.isEmpty(sessionId)) {
+            sessionId = cookieService.getSessionIdFromCookie(httpRequest);
         }
 
-        if (StringHelper.isNotEmpty(id)) {
-            SessionId ldapSessionId = sessionIdService.getSessionId(id);
-            if (ldapSessionId != null) {
-                boolean result = sessionIdService.remove(ldapSessionId);
-                if (!result) {
-                    log.error("Failed to remove session_id '{}' from LDAP", id);
-                }
-            } else {
-                log.error("Failed to load session from LDAP by session_id: '{}'", id);
-            }
+        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
+        if (ldapSessionId == null) {
+            log.error("Failed to load session from LDAP by session_id: '{}'", sessionId);
+            return;
         }
 
-        cookieService.removeSessionIdCookie(httpResponse);
+        ldapSessionId.setState(SessionIdState.UNAUTHENTICATED);
+        ldapSessionId.setUserDn(null);
+        ldapSessionId.setUser(null);
+        ldapSessionId.setAuthenticationTime(null);
+        boolean result = sessionIdService.updateSessionId(ldapSessionId);
+        if (!result) {
+            log.error("Failed to update session_id '{}'", sessionId);
+        }
     }
 }
