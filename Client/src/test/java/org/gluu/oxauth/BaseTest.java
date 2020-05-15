@@ -75,6 +75,8 @@ import static org.testng.Assert.*;
  */
 public abstract class BaseTest {
 
+    public static final boolean ENABLE_DIRECT_VIEW_RENDER = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false);
+
     protected HtmlUnitDriver driver;
 
     protected String authorizationEndpoint;
@@ -375,7 +377,9 @@ public abstract class BaseTest {
 
             loginButton.click();
 
-            waitForPageSwitch(currentDriver, previousUrl);
+            if (ENABLE_DIRECT_VIEW_RENDER) {
+                waitForPageSwitch(currentDriver, previousUrl);
+            }
         }
 
         return authorizeClient;
