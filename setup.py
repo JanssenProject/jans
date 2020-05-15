@@ -53,6 +53,7 @@ import urllib.request, urllib.error, urllib.parse
 from collections import OrderedDict
 from xml.etree import ElementTree
 from urllib.parse import urlparse
+from pathlib import Path
 
 from pylib import gluu_utils
 from pylib.jproperties import Properties
@@ -1612,7 +1613,8 @@ class Setup(object):
             self.run([self.cmd_ln, '-s', '/opt/jre/lib', '/opt/jre/jre/lib'])
 
         if self.java_type == 'jre':
-            self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
+            for jsfn in Path('/opt/jre').rglob('java.security'):
+                self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', jsfn._str])
 
     def extractOpenDJ(self):        
 
