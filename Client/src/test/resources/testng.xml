@@ -798,27 +798,27 @@
     </test>
 
     <!-- CIBA -->
-    <test name="CIBA Configuration Test" enabled="true">
+    <test name="CIBA Configuration Test" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.ConfigurationTest"/>
         </classes>
     </test>
-    <test name="CIBA Dynamic Client Registration Test" enabled="true">
+    <test name="CIBA Dynamic Client Registration Test" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.RegistrationTest"/>
         </classes>
     </test>
-    <test name="CIBA Ping Mode" enabled="true">
+    <test name="CIBA Ping Mode" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationPingMode"></class>
         </classes>
     </test>
-    <test name="CIBA Poll Mode" enabled="true">
+    <test name="CIBA Poll Mode" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationPollMode"></class>
         </classes>
     </test>
-    <test name="CIBA Push Mode" enabled="true">
+    <test name="CIBA Push Mode" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationPushMode"></class>
         </classes>
