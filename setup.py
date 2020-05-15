@@ -688,7 +688,6 @@ class Setup(object):
                              self.gluu_properties_fn: True,
                              self.data_source_properties: False,
                              self.ldif_casa: False,
-                             self.ldif_fido2: False,
                              self.fido2_dynamic_conf_json: False,
                              self.fido2_static_conf_json: False,
                              }
@@ -3458,11 +3457,11 @@ class Setup(object):
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates")
 
-        fullPath = self.ldif_configuration
         try:
-            self.renderTemplate(fullPath)
+            self.renderTemplate(self.ldif_configuration)
+            self.renderTemplate(self.ldif_fido2)
         except:
-            self.logIt("Error writing template %s" % fullPath, True)
+            self.logIt("Error writing template", True)
             self.logIt(traceback.format_exc(), True)
 
     def render_templates_folder(self, templatesFolder):
