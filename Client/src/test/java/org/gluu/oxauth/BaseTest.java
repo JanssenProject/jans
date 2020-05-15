@@ -495,7 +495,9 @@ public abstract class BaseTest {
         String previousUrl = driver.getCurrentUrl();
         loginButton.click();
 
-        waitForPageSwitch(driver, previousUrl);
+        if (ENABLE_DIRECT_VIEW_RENDER) {
+            waitForPageSwitch(driver, previousUrl);
+        }
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
