@@ -2589,7 +2589,7 @@ class Setup(object):
             self.install_oxtrust()
 
         if self.installScimServer:
-            self.pbar.progress("oxtrust", "Installing Gluu components: Scim Server", False)
+            self.pbar.progress("scim", "Installing Gluu components: Scim Server", False)
             self.install_scim_server()
 
         if self.installSaml:
@@ -5857,6 +5857,7 @@ if __name__ == '__main__':
         msg.installation_step_number = 33
         
         msg.os_type = installObject.os_type
+        msg.os_version = installObject.os_version
         msg.os_initdaemon = installObject.os_initdaemon
         msg.apache_version = installObject.apache_version
         msg.current_mem_size = current_mem_size
