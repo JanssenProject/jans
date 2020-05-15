@@ -334,7 +334,7 @@ public class AuthorizeAction {
             return;
         }
 
-        if (prompts.contains(Prompt.NONE)) {
+        if (prompts.contains(Prompt.NONE) && prompts.size() > 1) {
             invalidRequest();
             return;
         }
