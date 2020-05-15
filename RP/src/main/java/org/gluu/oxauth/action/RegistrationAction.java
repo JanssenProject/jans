@@ -20,10 +20,15 @@ import org.gluu.oxauth.model.register.RegisterRequestParam;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.slf4j.Logger;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -100,6 +105,18 @@ public class RegistrationAction implements Serializable {
     private String backchannelClientNotificationEndpoint;
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
     private Boolean backchannelUserCodeParameter;
+
+    @PostConstruct
+    public void postConstruct() {
+        try {
+            HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+            final URL aURL = new URL(request.getRequestURL().toString());
+            redirectUris = aURL.getProtocol() + "://" + aURL.getAuthority() + "/oxauth-rp/home.htm";
+            backchannelClientNotificationEndpoint = aURL.getProtocol() + "://" + aURL.getAuthority() + "/api/cb";
+        } catch (MalformedURLException e) {
+            log.error("Problems processing oxAuth-RP url", e);
+        }
+    }
 
     public void exec() {
         try {
