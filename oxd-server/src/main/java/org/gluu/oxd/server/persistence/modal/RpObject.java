@@ -2,10 +2,7 @@ package org.gluu.oxd.server.persistence.modal;
 
 import java.io.Serializable;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
 
 @DataEntry
 @ObjectClass("oxRp")
@@ -13,9 +10,10 @@ public class RpObject implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name = "id")
+    @AttributeName(name = "oxId")
     private String id;
-    @AttributeName(name = "data")
+    @JsonObject
+    @AttributeName(name = "dat")
     private String data;
 
     public RpObject(String dn, String id, String data) {

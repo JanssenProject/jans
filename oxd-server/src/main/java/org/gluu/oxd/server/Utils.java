@@ -121,26 +121,15 @@ public class Utils {
 
     public static Properties loadPropertiesFromFile(String filename, Properties props) {
 
-        FileInputStream fileistream = null;
-        try {
-            fileistream = new FileInputStream(filename);
+        try (FileInputStream fileistream = new FileInputStream(filename)) {
             if (props == null) {
                 props = new Properties();
             }
             props.load(fileistream);
             fileistream.close();
             return props;
-        }catch(IOException e) {
-            throw new RuntimeException("Could not load properties from file "+filename,e);
-        }catch(IllegalArgumentException e) {
-            throw new RuntimeException("Could not load properties from file "+filename,e);
-        }finally {
-            if(fileistream != null)
-                try {
-                    fileistream.close();
-                }catch(IOException e) {
-                    //ignore any exception thrown here
-                }
+        } catch (IOException | IllegalArgumentException e) {
+            throw new RuntimeException("Could not load properties from file " + filename, e);
         }
     }
 }
