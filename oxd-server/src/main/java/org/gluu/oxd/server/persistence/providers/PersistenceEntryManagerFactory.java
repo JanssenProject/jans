@@ -13,13 +13,13 @@ public class PersistenceEntryManagerFactory {
 
         try {
             LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory();
-            Properties connProps = createConnectionProperties(properties,ldapEntryManagerFactory.getPersistenceType());
+            Properties connProps = createConnectionProperties(properties, ldapEntryManagerFactory.getPersistenceType());
             PersistenceEntryManager ret = ldapEntryManagerFactory.createEntryManager(connProps);
-            if(ret == null)
+            if (ret == null)
                 throw new RuntimeException("Could not create persistence entry manager");
             return ret;
-        }catch(ConfigurationException e) {
-            throw new RuntimeException(e.getMessage(),e);
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -28,22 +28,22 @@ public class PersistenceEntryManagerFactory {
         try {
             CouchbaseEntryManagerFactory couchbaseEntryManagerFactory = new CouchbaseEntryManagerFactory();
             couchbaseEntryManagerFactory.create();
-            Properties connProps = createConnectionProperties(properties,couchbaseEntryManagerFactory.getPersistenceType());
+            Properties connProps = createConnectionProperties(properties, couchbaseEntryManagerFactory.getPersistenceType());
             PersistenceEntryManager ret = couchbaseEntryManagerFactory.createEntryManager(connProps);
-            if(ret == null)
+            if (ret == null)
                 throw new RuntimeException("Could not create persistence entry manager");
 
             return ret;
-        }catch(ConfigurationException e) {
-            throw new RuntimeException(e.getMessage(),e);
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    private static final Properties createConnectionProperties(Properties properties,String connPrefix) {
+    private static final Properties createConnectionProperties(Properties properties, String connPrefix) {
 
         Properties connProps = new Properties();
-        for(String propname : properties.stringPropertyNames()) {
-            connProps.setProperty(connPrefix+"."+propname,properties.getProperty(propname));
+        for (String propname : properties.stringPropertyNames()) {
+            connProps.setProperty(connPrefix + "." + propname, properties.getProperty(propname));
         }
         return connProps;
     }
