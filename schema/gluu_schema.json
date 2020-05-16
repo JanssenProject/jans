@@ -6114,6 +6114,45 @@
                 "top"
             ],
             "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "oxId",
+                "dat",
+                "iat",
+                "exp",
+                "oxType"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "oxExpiredObject"
+            ],
+            "oid": "oxObjectClass",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind": "STRUCTURAL",
+            "may": [
+                "oxId",
+                "dat"
+            ],
+            "must": [
+                "objectclass"
+            ],
+            "names": [
+                "oxRp"
+            ],
+            "oid": "oxObjectClass",
+            "sup": [
+                "top"
+            ],
+            "x_origin": "Gluu created objectclass"
         }
     ], 
     "oidMacros": {
