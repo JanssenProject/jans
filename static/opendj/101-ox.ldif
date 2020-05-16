@@ -2770,4 +2770,15 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.50 NAME 'gluuApplicationConfiguration'
   MUST ( objectclass )
   MAY ( ou $ gluuConfDynamic $ gluuConfStatic $ oxRevision )
   X-ORIGIN 'Gluu created objectclass' )
-
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.51 NAME 'oxRp'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( oxId $ dat )
+  X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.52 NAME 'oxExpiredObject'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( oxId $ dat $ iat $ exp $ oxType )
+  X-ORIGIN 'Gluu created objectclass' )
