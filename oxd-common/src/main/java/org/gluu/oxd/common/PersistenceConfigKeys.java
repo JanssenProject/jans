@@ -2,6 +2,7 @@ package org.gluu.oxd.common;
 
 public enum PersistenceConfigKeys {
 
+    BaseDn("baseDn"),
     PersistenceType("persistence.type"),
     BindPassword("bindPassword"),
     EncodeSalt("encodeSalt");

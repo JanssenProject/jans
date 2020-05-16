@@ -1,18 +1,13 @@
 package org.gluu.oxd.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.io.Serializable;
-import java.util.Calendar;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 @DataEntry
@@ -21,17 +16,20 @@ public class ExpiredObject implements Serializable {
 
     @DN
     private String dn;
-    @AttributeName(name="key")
+    @AttributeName(name = "oxId")
     private String key;
-    @AttributeName(name="value")
+    @JsonObject
+    @AttributeName(name = "dat")
     private String value;
-    @AttributeName(name="createdAt")
+    @AttributeName(name = "iat")
     private Long createdAt;
-    @AttributeName(name="expiredAt")
+    @AttributeName(name = "exp")
     private Long expiredAt;
-    @AttributeName(name="type")
+    @AttributeName(name = "oxType")
     private String typeString;
     private ExpiredObjectType type;
+    @Expiration
+    private Integer ttl; // in seconds
 
     private static final Logger LOG = LoggerFactory.getLogger(ExpiredObject.class);
 
@@ -49,6 +47,7 @@ public class ExpiredObject implements Serializable {
         this.createdAt = cal.getTimeInMillis();
         cal.add(Calendar.MINUTE, expiredObjectExpirationInMins);
         this.expiredAt = cal.getTimeInMillis();
+        this.ttl = expiredObjectExpirationInMins * 60;
         try {
             this.value = Jackson2.createJsonMapperWithoutEmptyAttributes().writeValueAsString(this);
         } catch (JsonProcessingException e) {
@@ -73,13 +72,11 @@ public class ExpiredObject implements Serializable {
         }
     }
 
-    public String getDn()
-    {
+    public String getDn() {
         return this.dn;
     }
 
-    public void setDn(String dn)
-    {
+    public void setDn(String dn) {
         this.dn = dn;
     }
 
@@ -123,14 +120,20 @@ public class ExpiredObject implements Serializable {
         this.type = type;
     }
 
-    public String getTypeString()
-    {
+    public String getTypeString() {
         return this.typeString;
     }
 
-    public void setTypeString(String typeString)
-    {
+    public void setTypeString(String typeString) {
         this.typeString = typeString;
+    }
+
+    public Integer getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(Integer ttl) {
+        this.ttl = ttl;
     }
 
     @Override
@@ -142,6 +145,7 @@ public class ExpiredObject implements Serializable {
                 ", createdAt=" + createdAt +
                 ", expiredAt=" + expiredAt +
                 ", type=" + type.getValue() +
+                ", ttl=" + ttl +
                 '}';
     }
 
