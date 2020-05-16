@@ -271,10 +271,7 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean deleteAllExpiredObjects() {
         try {
-            List<ExpiredObject> expiredObjects = this.persistenceEntryManager.findEntries(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, null);
-            for (ExpiredObject ele : expiredObjects) {
-                this.persistenceEntryManager.remove(ele);
-            }
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, null, 100);
             LOG.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
