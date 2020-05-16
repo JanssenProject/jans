@@ -13,6 +13,7 @@ import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Properties;
 
 public class GluuPersistenceConfiguration {
@@ -28,16 +29,19 @@ public class GluuPersistenceConfiguration {
 
     public Properties getPersistenceProps() {
         try {
-            GluuConfiguration gluuConfiguration = asGluuConfiguration(this.configuration);
+            Optional<GluuConfiguration> gluuConfiguration = asGluuConfiguration(this.configuration);
             validate(gluuConfiguration);
 
             //read persistence `base` file
-            Properties props = Utils.loadPropertiesFromFile(gluuConfiguration.getType(), null);
+            Properties props = Utils.loadPropertiesFromFile(gluuConfiguration.get().getType(), null);
             //read persistence `connection` file
-            props = Utils.loadPropertiesFromFile(gluuConfiguration.getConnection(), props);
+            props = Utils.loadPropertiesFromFile(gluuConfiguration.get().getConnection(), props);
+            // set baseDn in props
+            props.setProperty(PersistenceConfigKeys.BaseDn.getKeyName(), gluuConfiguration.get().getBaseDn());
+
             this.connectionProperties = props;
             //read salt file
-            Properties saltProps = Utils.loadPropertiesFromFile(gluuConfiguration.getSalt(), null);
+            Properties saltProps = Utils.loadPropertiesFromFile(gluuConfiguration.get().getSalt(), null);
             return preparePersistanceProperties(saltProps.getProperty(PersistenceConfigKeys.EncodeSalt.getKeyName()));
 
         } catch (Exception e) {
@@ -57,36 +61,43 @@ public class GluuPersistenceConfiguration {
         return decryptedConnectionProperties;
     }
 
-    public static GluuConfiguration asGluuConfiguration(OxdServerConfiguration configuration) {
+    public static Optional<GluuConfiguration> asGluuConfiguration(OxdServerConfiguration configuration) {
         try {
             JsonNode node = configuration.getStorageConfiguration();
             if (node != null) {
-                return Jackson2.createJsonMapper().treeToValue(node, GluuConfiguration.class);
+                return Optional.ofNullable(Jackson2.createJsonMapper().treeToValue(node, GluuConfiguration.class));
             }
         } catch (Exception e) {
             LOG.error("Failed to parse GluuConfiguration.", e);
         }
-        return new GluuConfiguration();
+        return Optional.empty();
     }
 
-    private void validate(GluuConfiguration gluuConfiguration) {
+    private void validate(Optional<GluuConfiguration> gluuConfiguration) {
 
-        if (gluuConfiguration == null) {
+        if (!gluuConfiguration.isPresent()) {
             LOG.error("The `storage_configuration` has been not provided in `oxd-server.yml`");
             throw new RuntimeException("The `storage_configuration` has been not provided in `oxd-server.yml`");
         }
 
-        if (StringUtils.isBlank(gluuConfiguration.getType())) {
+        GluuConfiguration configuration = gluuConfiguration.get();
+
+        if (StringUtils.isBlank(configuration.getBaseDn())) {
+            LOG.error("The `baseDn` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `oxd-server.yml`)");
+            throw new RuntimeException("The `baseDn` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `oxd-server.yml`)");
+        }
+
+        if (StringUtils.isBlank(configuration.getType())) {
             LOG.error("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `oxd-server.yml`)");
             throw new RuntimeException("The `type` field under storage_configuration is blank. Please provide the path of base persistence configuration file in this field (in `oxd-server.yml`)");
         }
 
-        if (StringUtils.isBlank(gluuConfiguration.getConnection())) {
+        if (StringUtils.isBlank(configuration.getConnection())) {
             LOG.error("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `oxd-server.yml`)");
             throw new RuntimeException("The `connection` field under storage_configuration is blank. Please provide the path of connection persistence configuration file in this field (in `oxd-server.yml`)");
         }
 
-        if (StringUtils.isBlank(gluuConfiguration.getSalt())) {
+        if (StringUtils.isBlank(configuration.getSalt())) {
             LOG.error("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `oxd-server.yml`)");
             throw new RuntimeException("The `salt` field under storage_configuration is blank. Please provide the path of salt file in this field (in `oxd-server.yml`)");
         }

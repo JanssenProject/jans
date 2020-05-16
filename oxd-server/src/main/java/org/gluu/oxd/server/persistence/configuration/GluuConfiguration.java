@@ -2,9 +2,18 @@ package org.gluu.oxd.server.persistence.configuration;
 
 public class GluuConfiguration {
 
+    private String baseDn;
     private String type;
     private String connection;
     private String salt;
+
+    public String getBaseDn() {
+        return baseDn;
+    }
+
+    public void setBaseDn(String baseDn) {
+        this.baseDn = baseDn;
+    }
 
     public String getType() {
         return type;
@@ -33,7 +42,8 @@ public class GluuConfiguration {
     @Override
     public String toString() {
         return "GluuConfiguration{" +
-                "type='" + type + '\'' +
+                "baseDn='" + baseDn + '\'' +
+                ", type='" + type + '\'' +
                 ", connection='" + connection + '\'' +
                 ", salt='" + salt + '\'' +
                 '}';
