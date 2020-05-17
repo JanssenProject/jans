@@ -134,7 +134,7 @@ public class SelectAccountHttpTest extends BaseTest {
         loginPage.enterUsername(userId);
         loginPage.enterPassword(userSecret);
         loginPage.getLoginButton().click();
-        if (ENABLE_DIRECT_VIEW_RENDER) {
+        if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
             loginPage.waitForPageSwitch(currentUrl);
         }
 
