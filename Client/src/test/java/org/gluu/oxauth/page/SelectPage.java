@@ -45,7 +45,7 @@ public class SelectPage extends AbstractPage {
         waitForPageSwitch(previousUrl);
 
         navigate(driver.getCurrentUrl());
-        if (BaseTest.ENABLE_DIRECT_VIEW_RENDER) {
+        if (BaseTest.ENABLE_REDIRECT_TO_LOGIN_PAGE) {
             new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT).until(d -> !d.getCurrentUrl().contains("/authorize"));
         }
         return new LoginPage(config);
