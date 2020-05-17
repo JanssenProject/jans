@@ -75,7 +75,7 @@ import static org.testng.Assert.*;
  */
 public abstract class BaseTest {
 
-    public static final boolean ENABLE_DIRECT_VIEW_RENDER = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false);
+    public static final boolean ENABLE_REDIRECT_TO_LOGIN_PAGE = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false);
 
     protected HtmlUnitDriver driver;
 
@@ -377,7 +377,7 @@ public abstract class BaseTest {
 
             loginButton.click();
 
-            if (ENABLE_DIRECT_VIEW_RENDER) {
+            if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
                 waitForPageSwitch(currentDriver, previousUrl);
             }
         }
@@ -495,7 +495,7 @@ public abstract class BaseTest {
         String previousUrl = driver.getCurrentUrl();
         loginButton.click();
 
-        if (ENABLE_DIRECT_VIEW_RENDER) {
+        if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
             waitForPageSwitch(driver, previousUrl);
         }
 
