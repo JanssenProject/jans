@@ -49,6 +49,7 @@ import io
 import zipfile
 import datetime
 import urllib.request, urllib.error, urllib.parse
+import locale
 
 from collections import OrderedDict
 from xml.etree import ElementTree
@@ -60,6 +61,9 @@ from pylib.jproperties import Properties
 from pylib.printVersion import get_war_info
 from pylib.ldif3.ldif3 import LDIFWriter
 from pylib.schema import ObjectClass
+
+#set locale to default
+locale.LC_ALL = 6 #en_US.utf8
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
