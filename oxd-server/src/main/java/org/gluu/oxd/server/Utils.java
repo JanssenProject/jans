@@ -126,7 +126,6 @@ public class Utils {
                 props = new Properties();
             }
             props.load(fileistream);
-            fileistream.close();
             return props;
         } catch (IOException | IllegalArgumentException e) {
             throw new RuntimeException("Could not load properties from file " + filename, e);

@@ -77,8 +77,8 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
-            query.setTimestamp(4, new Timestamp(obj.getCreatedAt()));
-            query.setTimestamp(5, new Timestamp(obj.getExpiredAt()));
+            query.setTimestamp(4, new Timestamp(obj.getIat().getTime()));
+            query.setTimestamp(5, new Timestamp(obj.getExp().getTime()));
             query.executeUpdate();
             query.close();
 
@@ -186,7 +186,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
             rs.next();
             if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getTimestamp("iat").getTime(), rs.getTimestamp("exp").getTime());
+                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getDate("iat"), rs.getDate("exp"));
             }
 
             query.close();
