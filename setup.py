@@ -1851,7 +1851,7 @@ class Setup(object):
 
         nodeServiceConfiguration = '%s/node/%s' % (self.outputFolder, serviceName)
         self.copyFile(nodeServiceConfiguration, self.osDefault)
-        self.run([self.cmd_chown, 'root:root', os.pth.join(self.osDefault, serviceName)])
+        self.run([self.cmd_chown, 'root:root', os.path.join(self.osDefault, serviceName)])
 
         if serviceName == 'passport':
             initscript_fn = os.path.join(self.gluuOptSystemFolder, serviceName)
