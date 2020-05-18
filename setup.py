@@ -49,16 +49,21 @@ import io
 import zipfile
 import datetime
 import urllib.request, urllib.error, urllib.parse
+import locale
 
 from collections import OrderedDict
 from xml.etree import ElementTree
 from urllib.parse import urlparse
+from pathlib import Path
 
 from pylib import gluu_utils
 from pylib.jproperties import Properties
 from pylib.printVersion import get_war_info
 from pylib.ldif3.ldif3 import LDIFWriter
 from pylib.schema import ObjectClass
+
+#set locale to default
+locale.LC_ALL = 6 #en_US.utf8
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -236,6 +241,7 @@ class Setup(object):
         self.installPassport = False
         self.installGluuRadius = False
         self.installScimServer = False
+        self.installFido2 = False
 
         self.gluuPassportEnabled = 'false'
         self.gluuRadiusEnabled = 'false'
@@ -314,22 +320,27 @@ class Setup(object):
 
                 ('oxauth-rp', {'name' : 'oxauth-rp',
                                'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                               'memory' : {'ratio' : 0.10, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
+                               'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
                                'installed' : False
                                }),
                 ('passport', {'name' : 'passport',
                               'node' : {},
-                              'memory' : {'ratio' : 0.10, "max_allowed_mb" : 1024},
+                              'memory' : {'ratio' : 0.08, "max_allowed_mb" : 1024},
                               'installed' : False
                                }),
                 ('casa', {'name': 'casa',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
                          'installed': False
                          }),
+                ('fido2', {'name' : 'fido2',
+                            'jetty' : {'modules' : 'server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp'},
+                            'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
+                            'installed' : False
+                            }),
                 ('scim', {'name': 'scim',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.10, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
                          'installed': False
                          }),
             ))
@@ -497,6 +508,9 @@ class Setup(object):
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_scim_clients = '%s/scim_clients.ldif' % self.outputFolder
         
+        self.fido2_dynamic_conf_json = '%s/fido2-dynamic-conf.json' % self.outputFolder
+        self.fido2_static_conf_json = '%s/fido2-static-conf.json' % self.outputFolder
+        self.ldif_fido2 = '%s/fido2.ldif' % self.outputFolder
         
         self.lidf_oxtrust_api = '%s/oxtrust_api.ldif' % self.outputFolder
         self.ldif_oxtrust_api_clients = '%s/oxtrust_api_clients.ldif' % self.outputFolder
@@ -643,6 +657,7 @@ class Setup(object):
                            self.lidf_oxtrust_api,
                            self.ldif_oxtrust_api_clients,
                            self.ldif_casa,
+                           self.ldif_fido2,
                            ]
 
 
@@ -678,11 +693,14 @@ class Setup(object):
                              self.gluu_properties_fn: True,
                              self.data_source_properties: False,
                              self.ldif_casa: False,
+                             self.fido2_dynamic_conf_json: False,
+                             self.fido2_static_conf_json: False,
                              }
 
         self.service_requirements = {
                         'opendj': ['', 70],
                         'oxauth': ['opendj', 72],
+                        'fido2': ['opendj', 73],
                         'identity': ['opendj oxauth', 74],
                         'scim': ['opendj oxauth', 75],
                         'idp': ['opendj oxauth', 76],
@@ -704,6 +722,7 @@ class Setup(object):
                                             self.ldif_scripts,
                                             self.ldif_configuration,
                                             self.ldif_scim,
+                                            self.ldif_fido2,
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
                                             self.ldif_clients,
@@ -790,6 +809,7 @@ class Setup(object):
 
             txt += 'Java Type'.ljust(30) + self.java_type.rjust(35) + "\n"
             txt += 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n"
+            txt += 'Install Fido2 Server'.ljust(30) + repr(self.installFido2).rjust(35) + "\n"
             txt += 'Install Scim Server'.ljust(30) + repr(self.installScimServer).rjust(35) + "\n"
             txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n"
             txt += 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
@@ -1516,6 +1536,7 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
             
+        if self.installFido2:
             # Fido2 authenticator certs
             self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-cert.crt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
             self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V1.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
@@ -1596,7 +1617,8 @@ class Setup(object):
             self.run([self.cmd_ln, '-s', '/opt/jre/lib', '/opt/jre/jre/lib'])
 
         if self.java_type == 'jre':
-            self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', '%s/jre/lib/security/java.security' % self.jre_home])
+            for jsfn in Path('/opt/jre').rglob('java.security'):
+                self.run(['sed', '-i', '/^#crypto.policy=unlimited/s/^#//', jsfn._str])
 
     def extractOpenDJ(self):        
 
@@ -2337,6 +2359,14 @@ class Setup(object):
         # don't send header to server
         self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
+    def install_fido2(self):
+        self.logIt("Copying fido.war into jetty webapps folder...")
+
+        jettyServiceName = 'fido2'
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+
+        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
+        self.copyFile('%s/fido2.war' % self.distGluuFolder, jettyServiceWebapps)
 
     def install_saml(self):
         if self.installSaml:
@@ -2584,12 +2614,16 @@ class Setup(object):
             self.pbar.progress("oxauth", "Installing Gluu components: OxAuth", False)
             self.install_oxauth()
 
+        if self.installFido2:
+            self.pbar.progress("fido2", "Installing Gluu components: Fido2", False)
+            self.install_fido2()
+
         if self.installOxTrust:
             self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
             self.install_oxtrust()
 
         if self.installScimServer:
-            self.pbar.progress("oxtrust", "Installing Gluu components: Scim Server", False)
+            self.pbar.progress("scim", "Installing Gluu components: Scim Server", False)
             self.install_scim_server()
 
         if self.installSaml:
@@ -2705,7 +2739,7 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
             # Create Fido2 folders
-            if self.installOxAuth:
+            if self.installFido2:
                 self.run([self.cmd_mkdir, '-p', self.fido2ConfigFolder])
                 self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/authenticator_cert')])
                 self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/mds/cert')])
@@ -3278,6 +3312,12 @@ class Setup(object):
         if promptForScimServer == 'y':
             self.installScimServer = True
 
+        promptForFido2Server = self.getPrompt("Install Fido2 Server?",
+                                            self.getDefaultOption(self.installFido2)
+                                            )[0].lower()
+        if promptForFido2Server == 'y':
+            self.installFido2 = True
+
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
                                             self.getDefaultOption(self.installSaml)
@@ -3423,11 +3463,11 @@ class Setup(object):
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates")
 
-        fullPath = self.ldif_configuration
         try:
-            self.renderTemplate(fullPath)
+            self.renderTemplate(self.ldif_configuration)
+            self.renderTemplate(self.ldif_fido2)
         except:
-            self.logIt("Error writing template %s" % fullPath, True)
+            self.logIt("Error writing template", True)
             self.logIt(traceback.format_exc(), True)
 
     def render_templates_folder(self, templatesFolder):
@@ -3527,6 +3567,9 @@ class Setup(object):
         self.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
         self.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         self.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+
+        self.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.fido2_dynamic_conf_json)
+        self.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_ldap_file(self.fido2_static_conf_json)
 
         if self.installPassport:
             oxtrust_config = json.loads(self.readFile(self.oxtrust_config_json), object_pairs_hook=OrderedDict)
@@ -4104,7 +4147,7 @@ class Setup(object):
             with open(oxd_cert_tmp_fn,'w') as w:
                 w.write(oxd_cert)
 
-            self.run(['/opt/jre/jre/bin/keytool', '-import', '-trustcacerts', '-keystore', 
+            self.run([self.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
                             '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
                             '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
 
@@ -4302,7 +4345,7 @@ class Setup(object):
                 'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
                 'debian 8': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
                 'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
-                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
+                'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel.yaml bzip2', 'optional': 'memcached'},
                 'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2', 'optional': 'memcached'},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': 'memcached'},
@@ -5639,6 +5682,8 @@ if __name__ == '__main__':
     parser.add_argument('-properties-password', help="Encoded setup.properties file password")
     parser.add_argument('--install-casa', help="Install Casa", action='store_true')
     parser.add_argument('--install-oxd', help="Install Oxd Server", action='store_true')
+    parser.add_argument('--install-scim', help="Install Scim Server", action='store_true')
+    parser.add_argument('--install-fido2', help="Install Fido2")
     parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
     parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
@@ -5673,8 +5718,10 @@ if __name__ == '__main__':
         'installOxAuthRP': False,
         'installPassport': False,
         'installGluuRadius': False,
+        'installScimServer': False,
         'installCasa': False,
         'installOxd': False,
+        'installFido2': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -5756,6 +5803,8 @@ if __name__ == '__main__':
     setupOptions['listenAllInterfaces'] = argsp.listen_all_interfaces
     setupOptions['installCasa'] = argsp.install_casa
     setupOptions['installOxd'] = argsp.install_oxd
+    setupOptions['installScimServer'] = argsp.install_scim
+    setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
     setupOptions['generateOxdCertificate'] = argsp.generate_oxd_certificate
 
@@ -5857,6 +5906,7 @@ if __name__ == '__main__':
         msg.installation_step_number = 33
         
         msg.os_type = installObject.os_type
+        msg.os_version = installObject.os_version
         msg.os_initdaemon = installObject.os_initdaemon
         msg.apache_version = installObject.apache_version
         msg.current_mem_size = current_mem_size
