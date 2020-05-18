@@ -7,12 +7,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxd.server.OxdServerConfiguration;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +50,11 @@ public class RpService {
     }
 
     public void load() {
-        for (Rp rp : persistenceService.getRps()) {
+        Set<Rp> rps = persistenceService.getRps();
+        if (rps == null)
+            return;
+
+        for (Rp rp : rps) {
             put(rp);
         }
     }

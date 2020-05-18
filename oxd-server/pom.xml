@@ -490,6 +490,26 @@
             <artifactId>zipkin-sender-okhttp3</artifactId>
             <version>2.7.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-standalone</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-persistence-ldap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-persistence-standalone</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-persistence-couchbase</artifactId>
+        </dependency>
     </dependencies>
     <profiles>
         <profile>

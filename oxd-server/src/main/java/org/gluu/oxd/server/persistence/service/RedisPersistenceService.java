@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
@@ -103,7 +103,7 @@ public class RedisPersistenceService implements PersistenceService {
                 LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
                 expiredObjectFromDb = new ExpiredObject();
             }
-            ExpiredObject expiredObject = new ExpiredObject(key, expiredObjectFromDb.getType(), expiredObjectFromDb.getCreatedAt(), expiredObjectFromDb.getExpiredAt());
+            ExpiredObject expiredObject = new ExpiredObject(key, expiredObjectFromDb.getType(), expiredObjectFromDb.getIat(), expiredObjectFromDb.getExp());
 
             return expiredObject;
         }

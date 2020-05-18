@@ -8,10 +8,8 @@ import com.google.inject.Singleton;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.op.OpClientFactory;
 import org.gluu.oxd.server.op.OpClientFactoryImpl;
-import org.gluu.oxd.server.persistence.H2PersistenceProvider;
-import org.gluu.oxd.server.persistence.PersistenceService;
-import org.gluu.oxd.server.persistence.PersistenceServiceImpl;
-import org.gluu.oxd.server.persistence.SqlPersistenceProvider;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceServiceImpl;
 import org.gluu.oxd.server.service.*;
 
 /**
