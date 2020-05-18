@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
+import org.gluu.oxd.server.persistence.providers.SqlPersistenceProvider;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.Rp;
@@ -76,8 +77,8 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             query.setString(1, obj.getKey().trim());
             query.setString(2, obj.getValue().trim());
             query.setString(3, obj.getType().getValue());
-            query.setTimestamp(4, new Timestamp(obj.getCreatedAt()));
-            query.setTimestamp(5, new Timestamp(obj.getExpiredAt()));
+            query.setTimestamp(4, new Timestamp(obj.getIat().getTime()));
+            query.setTimestamp(5, new Timestamp(obj.getExp().getTime()));
             query.executeUpdate();
             query.close();
 
@@ -185,7 +186,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
             rs.next();
             if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getTimestamp("iat").getTime(), rs.getTimestamp("exp").getTime());
+                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getDate("iat"), rs.getDate("exp"));
             }
 
             query.close();
