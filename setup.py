@@ -1804,8 +1804,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
-        self.copyFile(jettyServiceConfiguration, "/etc/default")
-        self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
+        self.copyFile(jettyServiceConfiguration, self.osDefault)
+        self.run([self.cmd_chown, 'root:root', os.path.join(self.osDefault, serviceName)])
 
         # Render web eources file
         try:
@@ -1850,8 +1850,8 @@ class Setup(object):
         self.logIt("Installing node service %s..." % serviceName)
 
         nodeServiceConfiguration = '%s/node/%s' % (self.outputFolder, serviceName)
-        self.copyFile(nodeServiceConfiguration, '/etc/default')
-        self.run([self.cmd_chown, 'root:root', '/etc/default/%s' % serviceName])
+        self.copyFile(nodeServiceConfiguration, self.osDefault)
+        self.run([self.cmd_chown, 'root:root', os.pth.join(self.osDefault, serviceName)])
 
         if serviceName == 'passport':
             initscript_fn = os.path.join(self.gluuOptSystemFolder, serviceName)
@@ -5166,7 +5166,8 @@ class Setup(object):
             self.run(['chmod', '+x', target_file])
             self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
-        self.run(['cp', os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
+        self.run(['cp', os.path.join(oxd_root, 'oxd-server-default'),  
+                    os.path.join(self.osDefault, 'oxd-server')])
 
         self.run(['mkdir', '/var/log/oxd-server'])
         self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
