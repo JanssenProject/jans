@@ -6,15 +6,7 @@
 
 package org.gluu.service.custom.script;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-
+import com.google.common.collect.Lists;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.model.CustomScript;
@@ -22,6 +14,13 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 import org.gluu.service.custom.inject.ReloadScript;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external extension
@@ -134,4 +133,16 @@ public abstract class ExternalScriptService implements Serializable {
         return this.customScriptConfigurations;
     }
 
+    public List<CustomScriptConfiguration> getCustomScriptConfigurationsByDns(List<String> dns) {
+        if (dns == null || dns.isEmpty() || customScriptConfigurations == null || customScriptConfigurations.isEmpty()) {
+            return Lists.newArrayList();
+        }
+        List<CustomScriptConfiguration> scripts = Lists.newArrayList();
+        for (CustomScriptConfiguration script : customScriptConfigurations) {
+            if (dns.contains(script.getCustomScript().getDn())) {
+                scripts.add(script);
+            }
+        }
+        return scripts;
+    }
 }
