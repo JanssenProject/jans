@@ -852,10 +852,6 @@ class Setup(object):
         if (not 'key_gen_path' in self.non_setup_properties) or (not 'key_export_path' in self.non_setup_properties):
             self.logIt("Can't determine key generator and/or key exporter path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
 
-        if self.installCasa:
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
-
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
         cmd = 'openssl x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
@@ -1040,8 +1036,11 @@ class Setup(object):
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
 
-        if self.installCasa and not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+        if self.installCasa:
+            if not self.ldif_casa in self.couchbaseBucketDict['default']['ldif']:
+                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
+            if not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
+                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
