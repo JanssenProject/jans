@@ -4147,7 +4147,7 @@ class Setup(object):
             with open(oxd_cert_tmp_fn,'w') as w:
                 w.write(oxd_cert)
 
-            self.run(['/opt/jre/jre/bin/keytool', '-import', '-trustcacerts', '-keystore', 
+            self.run([self.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
                             '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
                             '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
 
