@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Date;
 
 @DataEntry
 @ObjectClass("oxExpiredObject")
@@ -22,9 +23,9 @@ public class ExpiredObject implements Serializable {
     @AttributeName(name = "dat")
     private String value;
     @AttributeName(name = "iat")
-    private Long createdAt;
+    private Date iat;
     @AttributeName(name = "exp")
-    private Long expiredAt;
+    private Date exp;
     @AttributeName(name = "oxType")
     private String typeString;
     private ExpiredObjectType type;
@@ -44,9 +45,9 @@ public class ExpiredObject implements Serializable {
         this.key = key;
         this.type = expiredObjectType;
         this.typeString = expiredObjectType.getValue();
-        this.createdAt = cal.getTimeInMillis();
+        this.iat = cal.getTime();
         cal.add(Calendar.MINUTE, expiredObjectExpirationInMins);
-        this.expiredAt = cal.getTimeInMillis();
+        this.exp = cal.getTime();
         this.ttl = expiredObjectExpirationInMins * 60;
         try {
             this.value = Jackson2.createJsonMapperWithoutEmptyAttributes().writeValueAsString(this);
@@ -55,7 +56,7 @@ public class ExpiredObject implements Serializable {
         }
     }
 
-    public ExpiredObject(String key, ExpiredObjectType expiredObjectType, Long createdAt, Long expiredAt) {
+    public ExpiredObject(String key, ExpiredObjectType expiredObjectType, Date iat, Date exp) {
         Preconditions.checkState(!Strings.isNullOrEmpty(key), "Expired Object contains blank or null value. Please specify valid Expired Object.");
 
         Calendar cal = Calendar.getInstance();
@@ -63,8 +64,8 @@ public class ExpiredObject implements Serializable {
         this.key = key;
         this.type = expiredObjectType;
         this.typeString = expiredObjectType.getValue();
-        this.createdAt = createdAt;
-        this.expiredAt = expiredAt;
+        this.iat = iat;
+        this.exp = exp;
         try {
             this.value = Jackson2.createJsonMapperWithoutEmptyAttributes().writeValueAsString(this);
         } catch (JsonProcessingException e) {
@@ -96,22 +97,6 @@ public class ExpiredObject implements Serializable {
         this.value = value;
     }
 
-    public Long getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Long createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Long getExpiredAt() {
-        return expiredAt;
-    }
-
-    public void setExpiredAt(Long expiredAt) {
-        this.expiredAt = expiredAt;
-    }
-
     public ExpiredObjectType getType() {
         return type;
     }
@@ -136,14 +121,30 @@ public class ExpiredObject implements Serializable {
         this.ttl = ttl;
     }
 
+    public Date getIat() {
+        return iat;
+    }
+
+    public void setIat(Date iat) {
+        this.iat = iat;
+    }
+
+    public Date getExp() {
+        return exp;
+    }
+
+    public void setExp(Date exp) {
+        this.exp = exp;
+    }
+
     @Override
     public String toString() {
         return "ExpiredObject{" +
                 "dn='" + dn + '\'' +
                 ", key='" + key + '\'' +
                 ", value='" + value + '\'' +
-                ", createdAt=" + createdAt +
-                ", expiredAt=" + expiredAt +
+                ", iat=" + iat +
+                ", exp=" + exp +
                 ", type=" + type.getValue() +
                 ", ttl=" + ttl +
                 '}';
