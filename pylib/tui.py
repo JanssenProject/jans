@@ -11,6 +11,7 @@ import curses
 import string
 import inspect
 import threading
+import math
 from queue import Queue
 from .messages import msg
 
@@ -128,7 +129,7 @@ class MAIN(GluuSetupForm):
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
         self.description_label.autowrap = True
 
-        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=msg.os_type, editable=False)
+        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=msg.os_type + ' ' + msg.os_version, editable=False)
         self.init_type = self.add(npyscreen.TitleFixedText, name=msg.init_type_label, begin_entry_at=18, value=msg.os_initdaemon, editable=False)
         self.httpd_type = self.add(npyscreen.TitleFixedText, name=msg.httpd_type_label, begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
@@ -250,7 +251,10 @@ class HostForm(GluuSetupForm):
 
 class ServicesForm(GluuSetupForm):
 
-    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 'installPassport', 'installGluuRadius', 'installOxd', 'installCasa')
+    services = ('installHttpd', 'installSaml', 'installOxAuthRP', 
+                'installPassport', 'installGluuRadius', 'installOxd', 
+                'installCasa', 'installScimServer', 'installFido2',
+                )
 
     def create(self):
         for service in self.services:
@@ -309,6 +313,11 @@ class ServicesForm(GluuSetupForm):
 
         self.parentApp.installObject.templateRenderingDict['oxd_hostname'] = oxd_hostname
         self.parentApp.installObject.templateRenderingDict['oxd_port'] = str(oxd_port)
+
+        if self.installOxd.value:
+            result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
+            if result:
+                self.parentApp.installObject.oxd_use_gluu_storage = True
 
         self.parentApp.switchForm('DBBackendForm')
 
@@ -562,6 +571,7 @@ class DisplaySummaryForm(GluuSetupForm):
                     "installHttpd", "installSaml", "installOxAuthRP",
                     "installPassport", "installGluuRadius", 
                     "installOxd", "installCasa",
+                    'installScimServer', 'installFido2',
                     "java_type",
                     "backend_types", 'wrends_storages')
 
@@ -579,7 +589,7 @@ class DisplaySummaryForm(GluuSetupForm):
                             )
                     )
 
-        sec_col_n = 6
+        sec_col_n = math.ceil(len(self.myfields_2)/2.0)
         for j, wn in enumerate(self.myfields_2):
             if j < sec_col_n:
                 relx=2
