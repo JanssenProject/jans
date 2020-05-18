@@ -25,6 +25,8 @@ import org.gluu.model.custom.script.type.logout.DummyEndSessionType;
 import org.gluu.model.custom.script.type.logout.EndSessionType;
 import org.gluu.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
 import org.gluu.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
+import org.gluu.model.custom.script.type.postauthn.DummyPostAuthnType;
+import org.gluu.model.custom.script.type.postauthn.PostAuthnType;
 import org.gluu.model.custom.script.type.scim.DummyScimType;
 import org.gluu.model.custom.script.type.scim.ScimType;
 import org.gluu.model.custom.script.type.scope.DummyDynamicScopeType;
@@ -75,6 +77,7 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyDynamicScopeType()),
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
+    POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType());
