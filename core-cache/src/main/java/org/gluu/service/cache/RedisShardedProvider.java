@@ -5,10 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisShardInfo;
-import redis.clients.jedis.ShardedJedis;
-import redis.clients.jedis.ShardedJedisPool;
+import redis.clients.jedis.*;
 
 import javax.net.ssl.SSLParameters;
 import java.io.File;
@@ -97,9 +94,11 @@ public class RedisShardedProvider extends AbstractRedisProvider {
 
 	@Override
 	public boolean hasKey(String key) {
-        Boolean hasKey = pool.getResource().exists(key);
+        try (final ShardedJedis resource = pool.getResource()) {
+            Boolean hasKey = resource.exists(key);
 
-        return Boolean.TRUE.equals(hasKey);
+            return Boolean.TRUE.equals(hasKey);
+        }
 	}
 
     @Override
