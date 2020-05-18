@@ -77,6 +77,9 @@ public class OxdServerConfiguration extends Configuration {
     private JsonNode proxyConfiguration;
     @JsonProperty(value = "protect_commands_with_oxd_id")
     private List<String> protectCommandsWithOxdId;
+    @JsonProperty(value = "persistence_manager_remove_count")
+    private int persistenceManagerRemoveCount = 1000;
+
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -342,6 +345,14 @@ public class OxdServerConfiguration extends Configuration {
         this.protectCommandsWithOxdId = protectCommandsWithOxdId;
     }
 
+    public int getPersistenceManagerRemoveCount() {
+        return persistenceManagerRemoveCount;
+    }
+
+    public void setPersistenceManagerRemoveCount(int persistenceManagerRemoveCount) {
+        this.persistenceManagerRemoveCount = persistenceManagerRemoveCount;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -374,6 +385,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", idTokenValidationAtHashRequired=" + idTokenValidationAtHashRequired + '\'' +
                 ", validateUserInfoWithIdToken=" + validateUserInfoWithIdToken + '\'' +
                 ", protectCommandsWithOxdId=" + protectCommandsWithOxdId + '\'' +
+                ", persistenceManagerRemoveCount=" + persistenceManagerRemoveCount + '\'' +
                 '}';
     }
 }
