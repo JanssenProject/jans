@@ -71,48 +71,54 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
 	@Override
 	public boolean hasKey(String key) {
-        Boolean hasKey = pool.getResource().exists(key);
+        try (final Jedis resource = pool.getResource()) {
+            Boolean hasKey = resource.exists(key);
 
-        return Boolean.TRUE.equals(hasKey);
+            return Boolean.TRUE.equals(hasKey);
+        }
 	}
 
     @Override
     public Object get(String key) {
-        byte[] value = pool.getResource().get(key.getBytes());
-        Object deserialized = null;
-        if (value != null && value.length > 0) {
-            deserialized = SerializationUtils.deserialize(value);
+        try (final Jedis resource = pool.getResource()) {
+            byte[] value = resource.get(key.getBytes());
+            Object deserialized = null;
+            if (value != null && value.length > 0) {
+                deserialized = SerializationUtils.deserialize(value);
+            }
+            return deserialized;
         }
-        return deserialized;
     }
 
     @Override
     public void put(int expirationInSeconds, String key, Object object) {
-        String status = pool.getResource().setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
-        LOG.trace("put - key: " + key + ", status: " + status);
+        try (final Jedis resource = pool.getResource()) {
+            String status = resource.setex(key.getBytes(), expirationInSeconds, SerializationUtils.serialize((Serializable) object));
+            LOG.trace("put - key: " + key + ", status: " + status);
+        }
     }
 
     @Override
     public void put(String key, Object object) {
-        String status = pool.getResource().set(key.getBytes(), SerializationUtils.serialize((Serializable) object));
-        LOG.trace("put - key: " + key + ", status: " + status);
+        try (final Jedis resource = pool.getResource()) {
+            String status = resource.set(key.getBytes(), SerializationUtils.serialize((Serializable) object));
+            LOG.trace("put - key: " + key + ", status: " + status);
+        }
     }
 
     @Override
     public void remove(String key) {
-        Long entriesRemoved = pool.getResource().del(key.getBytes());
-        LOG.trace("remove - key: " + key + ", entriesRemoved: " + entriesRemoved);
+        try (final Jedis resource = pool.getResource()) {
+            Long entriesRemoved = resource.del(key.getBytes());
+            LOG.trace("remove - key: " + key + ", entriesRemoved: " + entriesRemoved);
+        }
     }
 
     @Override
     public void clear() {
-        Jedis jedis = pool.getResource();
-
-        try {
-            jedis.flushAll();
+        try (final Jedis resource = pool.getResource()) {
+            resource.flushAll();
             LOG.trace("clear");
-        } finally {
-            jedis.close();
         }
     }
 }
