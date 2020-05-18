@@ -6,7 +6,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import org.gluu.oxd.server.guice.GuiceModule;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 
 import java.io.File;
 
