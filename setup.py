@@ -3407,19 +3407,18 @@ class Setup(object):
         return text % dictionary
 
     def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
-        self.logIt("Rendering template %s" % filePath)
-        fn = os.path.split(filePath)[-1]
-        f = open(os.path.join(templateFolder, fn))
-        template_text = f.read()
-        f.close()
+        fn = os.path.basename(filePath)
+        in_fp = os.path.join(templateFolder, fn) 
+        self.logIt("Rendering template %s" % in_fp)
+        template_text = self.readFile(in_fp)
 
         # Create output folder if needed
         if not os.path.exists(outputFolder):
             os.makedirs(outputFolder)
-        self.backupFile(fn)
-        newFn = open(os.path.join(outputFolder, fn), 'w+')
-        newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
-        newFn.close()
+
+        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict))
+        out_fp = os.path.join(outputFolder, fn)
+        self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
         self.renderTemplateInOut(filePath, self.templateFolder, self.outputFolder)
