@@ -1,8 +1,11 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import com.google.inject.Inject;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.ExpiredObject;
+import org.gluu.oxd.server.persistence.providers.H2PersistenceProvider;
+import org.gluu.oxd.server.persistence.providers.JDBCPersistenceProvider;
+import org.gluu.oxd.server.persistence.providers.SqlPersistenceProvider;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
@@ -35,19 +38,29 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     private PersistenceService createServiceInstance() {
-        String storage = configurationService.getConfiguration().getStorage();
-        if ("h2".equalsIgnoreCase(storage)) {
-            sqlProvider = new H2PersistenceProvider(configurationService);
-            setTimerForDBCleanUpTask();
-            return new SqlPersistenceServiceImpl(sqlProvider, configurationService);
-        } else if ("redis".equalsIgnoreCase(storage)) {
-            return new RedisPersistenceService(configurationService.getConfiguration());
-        } else if ("jdbc".equalsIgnoreCase(storage)) {
-            sqlProvider = new JDBCPersistenceProvider(configurationService);
-            setTimerForDBCleanUpTask();
-            return new SqlPersistenceServiceImpl(sqlProvider, configurationService);
+
+        String storage = this.configurationService.getConfiguration().getStorage();
+        switch (storage) {
+            case "h2":
+                this.sqlProvider = new H2PersistenceProvider(this.configurationService);
+                setTimerForDBCleanUpTask();
+                return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
+            case "redis":
+                return new RedisPersistenceService(this.configurationService.getConfiguration());
+            case "jdbc":
+                this.sqlProvider = new JDBCPersistenceProvider(this.configurationService);
+                setTimerForDBCleanUpTask();
+                return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
+            case "gluu_server_configuration":
+                setTimerForDBCleanUpTask();
+                return new GluuPersistenceService(this.configurationService.getConfiguration());
+            case "ldap":
+                setTimerForDBCleanUpTask();
+                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
+            case "couchbase":
+                return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
         }
-        throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + configurationService.get());
+        throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + this.configurationService.get());
     }
 
     public void setTimerForDBCleanUpTask() {

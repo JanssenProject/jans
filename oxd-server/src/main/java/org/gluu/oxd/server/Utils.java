@@ -8,6 +8,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -115,5 +117,18 @@ public class Utils {
         cal.setTime(date);
         cal.add(timeFormat, timeValue);
         return cal.getTime();
+    }
+
+    public static Properties loadPropertiesFromFile(String filename, Properties props) {
+
+        try (FileInputStream fileistream = new FileInputStream(filename)) {
+            if (props == null) {
+                props = new Properties();
+            }
+            props.load(fileistream);
+            return props;
+        } catch (IOException | IllegalArgumentException e) {
+            throw new RuntimeException("Could not load properties from file " + filename, e);
+        }
     }
 }
