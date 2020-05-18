@@ -5,6 +5,7 @@ import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.PersistenceConfigKeys;
 import org.gluu.oxd.server.OxdServerConfiguration;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.persistence.modal.OrganizationBranch;
 import org.gluu.oxd.server.persistence.modal.RpObject;
 import org.gluu.oxd.server.persistence.providers.GluuPersistenceConfiguration;
@@ -14,13 +15,11 @@ import org.gluu.oxd.server.service.Rp;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 public class GluuPersistenceService implements PersistenceService {
 
@@ -181,12 +180,13 @@ public class GluuPersistenceService implements PersistenceService {
 
     public ExpiredObject getExpiredObject(String key) {
         try {
-            ExpiredObject expiredObject = getExpiredObject(key, null);
-            expiredObject.setType(ExpiredObjectType.fromValue(expiredObject.getTypeString()));
+            ExpiredObject expiredObject = (ExpiredObject) this.persistenceEntryManager.find(getDnForExpiredObj(key), ExpiredObject.class, null);
             if (expiredObject != null) {
+                expiredObject.setType(ExpiredObjectType.fromValue(expiredObject.getTypeString()));
                 LOG.debug("Found ExpiredObject id: {} , ExpiredObject : {} ", key, expiredObject);
                 return expiredObject;
             }
+
             LOG.error("Failed to fetch ExpiredObject by id: {} ", key);
             return null;
         } catch (Exception e) {
@@ -199,17 +199,13 @@ public class GluuPersistenceService implements PersistenceService {
         return null;
     }
 
-    private ExpiredObject getExpiredObject(String key, String... returnAttributes) {
-        return (ExpiredObject) this.persistenceEntryManager.find(getDnForExpiredObj(key), ExpiredObject.class, returnAttributes);
-    }
-
     public boolean isExpiredObjectPresent(String key) {
         return getExpiredObject(key) != null;
     }
 
     public boolean removeAllRps() {
         try {
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null, 100);
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getRpOu(), getOxdDn()}), RpObject.class, null, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all Rps successfully. ");
             return true;
         } catch (Exception e) {
@@ -271,7 +267,12 @@ public class GluuPersistenceService implements PersistenceService {
 
     public boolean deleteAllExpiredObjects() {
         try {
-            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, null, 100);
+            final Calendar cal = Calendar.getInstance();
+            final Date currentTime = cal.getTime();
+            Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp",
+                    this.persistenceEntryManager.encodeTime(baseDn, currentTime));
+
+            this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all expired_objects successfully. ");
             return true;
         } catch (Exception e) {
