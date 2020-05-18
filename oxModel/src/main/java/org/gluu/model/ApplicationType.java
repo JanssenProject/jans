@@ -19,7 +19,8 @@ import org.gluu.persist.annotation.AttributeEnum;
 public enum ApplicationType implements AttributeEnum {
 
     OX_AUTH("oxauth", "oxAuth"),
-    OX_TRUST("oxtrust", "oxTrust");
+    OX_TRUST("oxtrust", "oxTrust"),
+    FIDO2("fido2", "FIDO2");
 
     private String value;
     private String displayName;
