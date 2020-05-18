@@ -6,7 +6,7 @@ import io.dropwizard.testing.DropwizardTestSupport;
 import io.dropwizard.testing.ResourceHelpers;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.gluu.oxd.server.service.RpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
