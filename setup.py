@@ -62,9 +62,6 @@ from pylib.printVersion import get_war_info
 from pylib.ldif3.ldif3 import LDIFWriter
 from pylib.schema import ObjectClass
 
-#set locale to default
-locale.LC_ALL = 6 #en_US.utf8
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 #copy pyDes to site for further use
@@ -5869,6 +5866,9 @@ if __name__ == '__main__':
     print("Detected OS  :  %s" % installObject.os_type)
     print("Detected init:  %s" % installObject.os_initdaemon)
     print("Detected Apache:  %s" % installObject.apache_version)
+
+    if installObject.os_type == 'debian':
+        os.environ['LC_ALL'] = 'C'
 
     print("\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError))
 
