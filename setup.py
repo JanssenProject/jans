@@ -5618,7 +5618,7 @@ def resource_checkings():
 
 
     if available_disk_space < suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1} "
+        print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         gluu_utils.colors.WARNING,
                                                         available_disk_space,
