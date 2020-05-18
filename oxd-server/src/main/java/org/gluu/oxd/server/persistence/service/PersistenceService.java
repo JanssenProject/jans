@@ -1,4 +1,4 @@
-package org.gluu.oxd.server.persistence;
+package org.gluu.oxd.server.persistence.service;
 
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.server.service.Rp;

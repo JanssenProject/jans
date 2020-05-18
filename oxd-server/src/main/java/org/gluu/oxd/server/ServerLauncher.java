@@ -11,7 +11,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxd.server.guice.GuiceModule;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.gluu.oxd.server.service.ConfigurationService;
 import org.gluu.oxd.server.service.MigrationService;
 import org.gluu.oxd.server.service.RpService;

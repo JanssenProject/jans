@@ -6,7 +6,7 @@ import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.mapper.RegisterResponseMapper;
-import org.gluu.oxd.server.persistence.PersistenceService;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
