@@ -112,6 +112,9 @@ except:
     tty_rows = 60
     tty_columns = 120
 
+
+
+
 try:
     from pylib.cbm import CBM
 except:
@@ -5153,14 +5156,14 @@ class Setup(object):
         if os.path.exists(service_file):
             self.run(['cp', service_file, '/lib/systemd/system'])
         else:
-            self.run([self.cmd_ln, service_file, '/etc/init.d/oxd-server'])
+            service_file = os.path.join(oxd_root, 'oxd-server.init.d')
+            target_file = '/etc/init.d/oxd-server'
+            self.run(['cp', service_file, target_file])
+            self.run(['chmod', '+x', target_file])
             self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
-        self.run([
-                'cp', 
-                os.path.join(self.install_dir, 'static/oxd/oxd-server.default'), 
-                os.path.join(self.osDefault, 'oxd-server')
-                ])
+        self.run(['cp', os.path.join(oxd_root, 'oxd-server-default'),  
+                    os.path.join(self.osDefault, 'oxd-server')])
 
         self.run(['mkdir', '/var/log/oxd-server'])
         self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
