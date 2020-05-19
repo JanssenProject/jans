@@ -186,7 +186,6 @@ class Setup(object):
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
-                                        'oxd_hostname': 'localhost',
                                         'oxd_port': '8443',
                                      }
 
@@ -632,7 +631,7 @@ class Setup(object):
         self.installCasa = False
         self.twilio_version = '7.17.0'
         self.jsmmp_version = '2.3.7'
-        self.oxd_server_https = 'https://localhost:8443'
+        self.oxd_server_https = ''
         self.ldif_casa = os.path.join(self.outputFolder, 'casa.ldif')
 
         self.ldif_files = [self.ldif_base,
@@ -1035,6 +1034,14 @@ class Setup(object):
                 self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
             if not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
                 self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+
+        if self.oxd_server_https:
+            self.templateRenderingDict['oxd_hostname'], self.templateRenderingDict['oxd_port'] = self.parse_url(self.oxd_server_https)
+            if not self.templateRenderingDict['oxd_port']: 
+                self.templateRenderingDict['oxd_port'] = 8443
+        else:
+            self.templateRenderingDict['oxd_hostname'] = self.hostname
+
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
@@ -3121,6 +3128,8 @@ class Setup(object):
             else:
                 print("Hostname can't be \033[;1mlocalhost\033[0;0m")
 
+        self.oxd_server_https = 'https://{}:8443'.format(self.hostname)
+
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
         self.state = self.getPrompt("Enter your state or province two letter code")
@@ -3273,8 +3282,6 @@ class Setup(object):
 
         buckets_.append('gluu')
 
-
-
         if self.cb_install == REMOTE:
 
             isCBRoleOK = self.checkCBRoles(buckets_)
@@ -3344,13 +3351,6 @@ class Setup(object):
 
         if os.path.exists(os.path.join(self.distGluuFolder, 'casa.war')):
             self.promptForCasaInstallation()
-
-        oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-        if not oxd_port: 
-            oxd_port=8443
-
-        self.templateRenderingDict['oxd_hostname'] = oxd_hostname
-        self.templateRenderingDict['oxd_port'] = str(oxd_port)
 
         if (not self.installOxd) and self.oxd_package:
             promptForOxd = self.getPrompt("Install Oxd?", 
