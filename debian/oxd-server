@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 # Startup script for oxd-server under *nix systems (it works under NT/cygwin too).
-JAVA_HOME=/opt/jre
-JAVA=$JAVA_HOME/bin/java
-OXD_LOGS=/var/log/oxd-server
-OXD_HOME=/opt/oxd-server
-CONF=/opt/oxd-server/conf
-LIB=$OXD_HOME/lib
-JAVA_OPTIONS="-server -Xms256m -Xmx512m -XX:MaxMetaspaceSize=256m -XX:+DisableExplicitGC -Djava.net.preferIPv4Stack=true -cp /opt/oxd-server/lib/bcprov-jdk15on-1.54.jar:/opt/oxd-server/lib/oxd-server.jar org.gluu.oxd.server.OxdServerApplication server /opt/oxd-server/conf/oxd-server.yml"
-OXD_USER=jetty
+# LSB Tags
+### BEGIN INIT INFO
+# Provides:          oxd-server
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: oxd-server start script.
+# Description:       oxd exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Gluu.
+### END INIT INFO
+
+
+# Read config
+source /etc/default/oxd-server
+
 ##################################################
 # Set the name which is used by other variables.
 # Defaults to the file name without extension.
@@ -69,8 +76,6 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   have shell access, e.g. /bin/false
 #
 # OXD_INIT_LOG
-SERVICE_NAME="oxd-server"
-OXD_INIT_LOG=/var/log/oxd-server/oxd-server.log
 
 usage()
 {
@@ -364,12 +369,12 @@ then
   echo "OXD_HOME     =  $OXD_HOME"
   echo "OXD_BASE     =  $OXD_BASE"
   echo "OXD_CONF     =  $OXD_CONF"
-  echo "OXD_PID_FILE      =  $OXD_PID_FILE"
+  echo "OXD_PID_FILE =  $OXD_PID_FILE"
   echo "OXD_START    =  $OXD_START"
   echo "OXD_ARGS     =  ${OXD_ARGS[*]}"
-  echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
-  echo "JAVA           =  $JAVA"
-  echo "RUN_CMD        =  ${RUN_CMD[*]}"
+  echo "JAVA_OPTIONS =  ${JAVA_OPTIONS[*]}"
+  echo "JAVA         =  $JAVA"
+  echo "RUN_CMD      =  ${RUN_CMD[*]}"
 fi
 dip_in_logs() {
 	if [ ! -f $OXD_INIT_LOG ]; then
@@ -408,7 +413,7 @@ do_start () {
       			then
         			CH_USER="-c$OXD_USER"
       			fi
-	
+
 			start-stop-daemon --start --quiet --chuid $OXD_USER --make-pidfile --pidfile $OXD_PID_FILE --background --exec $JAVA -- ${JAVA_OPTIONS[@]} >> $OXD_LOGS/start.log 2>&1
 
 			#dip_in_logs
@@ -620,15 +625,15 @@ case "$ACTION" in
     echo "OXD_HOME     =  $OXD_HOME"
     echo "OXD_BASE     =  $OXD_BASE"
     echo "OXD_CONF     =  $OXD_CONF"
-    echo "OXD_PID_FILE      =  $OXD_PID_FILE"
+    echo "OXD_PID_FILE =  $OXD_PID_FILE"
     echo "OXD_START    =  $OXD_START"
     echo "OXD_LOGS     =  $OXD_LOGS"
     echo "OXD_STATE    =  $OXD_STATE"
-    echo "CLASSPATH      =  $CLASSPATH"
-    echo "JAVA           =  $JAVA"
-    echo "JAVA_OPTIONS   =  ${JAVA_OPTIONS[*]}"
+    echo "CLASSPATH    =  $CLASSPATH"
+    echo "JAVA         =  $JAVA"
+    echo "JAVA_OPTIONS =  ${JAVA_OPTIONS[*]}"
     echo "OXD_ARGS     =  ${OXD_ARGS[*]}"
-    echo "RUN_CMD        =  ${RUN_CMD[*]}"
+    echo "RUN_CMD      =  ${RUN_CMD[*]}"
     echo
 
     if running "$OXD_PID_FILE"
