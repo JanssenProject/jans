@@ -253,6 +253,7 @@ oxAuthRedirectURI: https://www.gluu.org
 oxAuthRedirectURI: http://localhost:80/oxauth-rp/home.htm
 oxAuthRedirectURI: https://localhost:8443/oxauth-rp/home.htm
 oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
+oxAuthRedirectURI: https://%(hostname)s/oxauth-client/test/resources/jwks.json
 oxAuthRedirectURI: https://client.example.org/callback
 oxAuthRedirectURI: https://client.example.org/callback2
 oxAuthRedirectURI: https://client.other_company.example.net/callback
