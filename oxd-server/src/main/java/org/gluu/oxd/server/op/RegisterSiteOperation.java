@@ -103,8 +103,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         Rp fallback = getConfigurationService().defaultRp();
 
         //op_configuration_endpoint
+        LOG.info("Either 'op_configuration_endpoint' or 'op_host' should be set. oxd will now check which of these parameter is available.");
         if (StringUtils.isBlank(params.getOpConfigurationEndpoint())) {
-            LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'");
+            LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'.");
             String fallbackOpConfigurationEndpoint = fallback.getOpConfigurationEndpoint();
             if (StringUtils.isNotBlank(fallbackOpConfigurationEndpoint)) {
                 LOG.warn("Fallback to op_configuration_endpoint: " + fallbackOpConfigurationEndpoint + ", from configuration file.");
