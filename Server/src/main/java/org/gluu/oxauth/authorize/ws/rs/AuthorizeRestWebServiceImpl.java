@@ -38,6 +38,8 @@ import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.external.ExternalPostAuthnService;
+import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.QueryStringDecoder;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
@@ -132,6 +134,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private CIBAPingCallbackProxy cibaPingCallbackProxy;
+
+    @Inject
+    private ExternalPostAuthnService externalPostAuthnService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -400,6 +405,26 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             oAuth2AuditLog.setUsername(user.getUserId());
+
+            ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, httpRequest, httpResponse);
+            final boolean forceReAuthentication = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
+            if (forceReAuthentication) {
+                unauthenticateSession(sessionId, httpRequest);
+                sessionId = null;
+
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+            }
+
+            final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
+            if (forceAuthorization) {
+                return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                        redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                        idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                        codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+            }
 
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
