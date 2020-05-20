@@ -13,8 +13,8 @@ import javax.inject.Named;
 
 import org.gluu.model.ApplicationType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.fido2.service.server.AppConfiguration;
-import org.gluu.oxauth.service.ApplicationFactory;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.metric.inject.ReportMetric;
 

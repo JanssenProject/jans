@@ -9,7 +9,6 @@ package org.gluu.oxauth.fido2.service.server;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -27,22 +26,19 @@ import javax.servlet.ServletContext;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxauth.service.ApplicationFactory;
-import org.gluu.oxauth.service.EncryptionService;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.service.JsonService;
 import org.gluu.service.PythonService;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.service.cdi.event.ApplicationInitializedEvent;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.util.CdiUtil;
-import org.gluu.service.custom.lib.CustomLibrariesLoader;
 import org.gluu.service.custom.script.CustomScriptManager;
 import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.timer.QuartzSchedulerManager;
-import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
@@ -59,8 +55,6 @@ import com.google.common.collect.Lists;
 @ApplicationScoped
 public class AppInitializer {
 
-	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
-
 	@Inject
 	private Logger log;
 
@@ -68,13 +62,7 @@ public class AppInitializer {
 	private BeanManager beanManager;
 
 	@Inject
-	private Event<String> event;
-
-	@Inject
 	private Event<ApplicationInitializedEvent> eventApplicationInitialized;
-
-	@Inject
-	private Event<TimerEvent> timerEvent;
 
 	@Inject
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -107,19 +95,10 @@ public class AppInitializer {
 	private CleanerTimer cleanerTimer;
 
 	@Inject
-	private CustomLibrariesLoader customLibrariesLoader;
-
-	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
 
 	@Inject
 	private LoggerService loggerService;
-
-	@Inject
-	private JsonService jsonService;
-
-	private AtomicBoolean isActive;
-	private long lastFinishedTime;
 
 	@PostConstruct
 	public void createApplicationComponents() {
@@ -292,17 +271,6 @@ public class AppInitializer {
 		}
 	}
 
-	private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
-		// Close existing connections
-		for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
-			log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
-					oldPersistenceEntryManager);
-			oldPersistenceEntryManager.destroy();
-			log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
-					oldPersistenceEntryManager);
-		}
-	}
-
 	private GluuConfiguration loadConfiguration(PersistenceEntryManager localPersistenceEntryManager,
 			String... persistenceReturnAttributes) {
 		String configurationDn = configurationFactory.getBaseDn().getConfiguration();
@@ -330,14 +298,6 @@ public class AppInitializer {
 
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
 		closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
-	}
-
-	public long getLastFinishedTime() {
-		return lastFinishedTime;
-	}
-
-	public void setLastFinishedTime(long lastFinishedTime) {
-		this.lastFinishedTime = lastFinishedTime;
 	}
 
 }

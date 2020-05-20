@@ -55,9 +55,6 @@ public class ConfigurationFactory {
 	@Inject
 	private Event<AppConfiguration> configurationUpdateEvent;
 
-    @Inject
-    private Event<AbstractCryptoProvider> cryptoProviderEvent;
-
 	@Inject
 	private Event<String> event;
 
