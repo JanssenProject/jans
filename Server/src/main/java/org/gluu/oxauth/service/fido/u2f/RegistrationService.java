@@ -13,13 +13,13 @@ import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.*;
 import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

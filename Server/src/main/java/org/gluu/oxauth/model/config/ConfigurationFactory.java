@@ -16,7 +16,7 @@ import org.gluu.oxauth.model.error.ErrorMessages;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.event.CryptoProviderEvent;
 import org.gluu.oxauth.model.jwk.JSONWebKey;
-import org.gluu.oxauth.service.ApplicationFactory;
+import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
