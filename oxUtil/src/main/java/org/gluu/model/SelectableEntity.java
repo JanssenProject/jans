@@ -45,4 +45,11 @@ public class SelectableEntity<T> implements Serializable {
         this.selected = selected;
     }
 
+    @Override
+    public String toString() {
+        return "SelectableEntity{" +
+                "entity=" + entity +
+                ", selected=" + selected +
+                '}';
+    }
 }
