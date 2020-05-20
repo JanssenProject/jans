@@ -3,6 +3,7 @@ package org.gluu.oxauth.service;
 import org.gluu.oxauth.model.common.PairwiseIdType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.SubjectIdentifierGenerator;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;

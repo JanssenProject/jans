@@ -13,6 +13,7 @@ import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.CleanerTimer;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
+import org.gluu.oxauth.service.common.InumService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.RegistrationService;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
@@ -27,7 +28,6 @@ import org.gluu.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.InumService;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
