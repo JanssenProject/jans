@@ -1,308 +1,314 @@
 [
-	{
-		"attribute": "displayName",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "description",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "owner",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "inum",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "site"]
-	},
-
-	{
-		"attribute": "iname",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "site"]
-	},
-
-	{
-		"attribute": "uniqueIdentifier",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "uuid",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "oxId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "oxAuthClientId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "clnId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "oxAuthClientSecretExpiresAt",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "grtId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "authzCode",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-	{
-		"attribute": "tknCde",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
     {
-    	"attribute": "oxSectorIdentifier",
+        "attribute": "displayName",
         "type": "string",
-    	"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "gluuStatus",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "site"]
-	},
+    {
+        "attribute": "description",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxState",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "owner",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxScriptType",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "site"]
-	},
+    {
+        "attribute": "inum",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
 
-	{
-		"attribute": "exp",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "iname",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
 
-	{
-		"attribute": "oxLastAccessTime",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "uniqueIdentifier",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "lastModifiedTime",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "uuid",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxApplication",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxRequestId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxAuthClientId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "creationDate",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot", "metric"]
-	},
+    {
+        "attribute": "clnId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxStartDate",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot", "metric"]
-	},
+    {
+        "attribute": "oxAuthClientSecretExpiresAt",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxEndDate",
-		"type": "date",
-		"index": ["ordering"],
-		"backend": ["userRoot", "metric"]
-	},
+    {
+        "attribute": "grtId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxApplicationType",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "metric"]
-	},
+    {
+        "attribute": "authzCode",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+    {
+        "attribute": "tknCde",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+    {
+        "attribute": "oxSectorIdentifier",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxMetricType",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot", "metric"]
-	},
+    {
+        "attribute": "gluuStatus",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
 
-	{
-		"attribute": "oxDeviceHashCode",
-		"type": "integer",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxState",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxDeviceKeyHandle",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxScriptType",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "site"]
+    },
 
-	{
-		"attribute": "ssnId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "exp",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxExternalUid",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxLastAccessTime",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxTicket",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "lastModifiedTime",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxCodeChallenge",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxApplication",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "chlng",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxRequestId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxCodeChallengeHash",
-		"type": "integer",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "creationDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
 
-	{
-		"attribute": "oxPublicKeyId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxStartDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
 
-	{
-		"attribute": "oxStatus",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxEndDate",
+        "type": "date",
+        "index": ["ordering"],
+        "backend": ["userRoot", "metric"]
+    },
 
-	{
-		"attribute": "oxAttributes",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxApplicationType",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
 
-	{
-		"attribute": "oxConfigurationCode",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxMetricType",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot", "metric"]
+    },
 
-	{
-		"attribute": "oxResourceSetId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxDeviceHashCode",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxAuthUmaScope",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "oxDeviceKeyHandle",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "oxAuthUserId",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
+    {
+        "attribute": "ssnId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
-	{
-		"attribute": "del",
-		"type": "boolean",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	}
+    {
+        "attribute": "oxExternalUid",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
 
+    {
+        "attribute": "oxTicket",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxCodeChallenge",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "chlng",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxCodeChallengeHash",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxPublicKeyId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxStatus",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxAttributes",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxConfigurationCode",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxResourceSetId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxAuthUmaScope",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxAuthUserId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "del",
+        "type": "boolean",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxTrustExternalId",
+        "type": "string",
+        "index": ["presence", "equality"],
+        "backend": ["userRoot"]
+    }
 ]
