@@ -6,13 +6,13 @@
 
 package org.gluu.util;
 
+import org.gluu.model.SelectableEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.model.SelectableEntity;
-
 /**
- * Converts lis of entities to list of selectable entities
+ * Converts list of entities to list of selectable entities
  *
  * @author Yuriy Movchan Date: 04/25/2013
  */
@@ -40,4 +40,9 @@ public final class SelectableEntityHelper {
         return result;
     }
 
+    public static <T> void select(List<SelectableEntity<T>> selectableEntities, List<T> entities) {
+        for (SelectableEntity<T> selectable : selectableEntities) {
+            selectable.setSelected(entities.contains(selectable.getEntity()));
+        }
+    }
 }
