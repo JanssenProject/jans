@@ -20,6 +20,7 @@ import javax.inject.Named;
 import org.gluu.oxauth.fido2.service.persist.AuthenticationPersistenceService;
 import org.gluu.oxauth.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.fido2.service.server.AppConfiguration;
+import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
@@ -55,6 +56,9 @@ public class CleanerTimer {
 
 	@Inject
 	private AppConfiguration appConfiguration;
+	
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
 	@Inject
 	private AuthenticationPersistenceService authenticationPersistenceService;
@@ -157,7 +161,7 @@ public class CleanerTimer {
 
 	public Set<String> createCleanServiceBaseDns() {
 		final Set<String> cleanServiceBaseDns = Sets.newHashSet();
-//		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getSessions());
+		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
 
 		log.debug("Built-in base dns: " + cleanServiceBaseDns);
 

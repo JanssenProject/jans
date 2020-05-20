@@ -30,14 +30,14 @@ public class AppConfiguration implements Configuration {
 
     private boolean useLocalCache;
 
-    private Boolean disableJdkLogger = true;
+    private boolean disableJdkLogger = true;
     private String loggingLevel;
     private String loggingLayout;
     private String externalLoggerConfiguration;
 
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private Boolean metricReporterEnabled = true;
+    private boolean metricReporterEnabled = true;
 
     private List<String> personCustomObjectClassList;
 
