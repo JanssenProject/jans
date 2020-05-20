@@ -9,7 +9,7 @@ import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaNeedInfoResponse;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;

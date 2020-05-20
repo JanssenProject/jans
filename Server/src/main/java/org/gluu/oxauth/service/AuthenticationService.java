@@ -22,6 +22,8 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;

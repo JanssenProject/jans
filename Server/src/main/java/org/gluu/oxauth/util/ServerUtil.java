@@ -16,7 +16,7 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.service.ApplicationFactory;
+import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
