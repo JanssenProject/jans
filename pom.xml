@@ -49,6 +49,7 @@
 		<module>core-timer-weld</module>
 		<module>security-extension-cdi</module>
 		<module>exception-extension-cdi</module>
+		<module>startup-extension-cdi</module>
 		<module>oxService</module>
 		<module>server</module>
 		<module>oxRadius</module>
