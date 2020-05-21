@@ -51,6 +51,7 @@ class ClientRegistration(ClientRegistrationType):
         cal=GregorianCalendar()
         cal.add(1,10)
         client.setClientSecretExpiresAt(Date(cal.getTimeInMillis()))
+        client.setTrustedClient(True)
         return True
 
     # Update client entry before persistent it
