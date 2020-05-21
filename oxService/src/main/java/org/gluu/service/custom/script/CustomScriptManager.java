@@ -344,7 +344,9 @@ public class CustomScriptManager implements Serializable {
 			CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
 			List<CustomScriptConfiguration> customConfigurationsByScriptType = newCustomScriptConfigurationsByScriptType
 					.get(customScriptType);
-			customConfigurationsByScriptType.add(customScriptConfiguration);
+			if (customConfigurationsByScriptType != null) {
+				customConfigurationsByScriptType.add(customScriptConfiguration);
+			}
 		}
 
 		return newCustomScriptConfigurationsByScriptType;
