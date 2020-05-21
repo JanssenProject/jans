@@ -62,9 +62,6 @@ from pylib.printVersion import get_war_info
 from pylib.ldif3.ldif3 import LDIFWriter
 from pylib.schema import ObjectClass
 
-#set locale to default
-locale.LC_ALL = 6 #en_US.utf8
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
 #copy pyDes to site for further use
@@ -114,9 +111,6 @@ try:
 except:
     tty_rows = 60
     tty_columns = 120
-
-
-
 
 try:
     from pylib.cbm import CBM
@@ -192,7 +186,6 @@ class Setup(object):
                                         'oxauthClient_3_inum': '3E20',
                                         'oxauthClient_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
-                                        'oxd_hostname': 'localhost',
                                         'oxd_port': '8443',
                                      }
 
@@ -638,7 +631,7 @@ class Setup(object):
         self.installCasa = False
         self.twilio_version = '7.17.0'
         self.jsmmp_version = '2.3.7'
-        self.oxd_server_https = 'https://localhost:8443'
+        self.oxd_server_https = ''
         self.ldif_casa = os.path.join(self.outputFolder, 'casa.ldif')
 
         self.ldif_files = [self.ldif_base,
@@ -852,10 +845,6 @@ class Setup(object):
         if (not 'key_gen_path' in self.non_setup_properties) or (not 'key_export_path' in self.non_setup_properties):
             self.logIt("Can't determine key generator and/or key exporter path form {}".format(self.non_setup_properties['oxauth_client_jar_fn']), True, True)
 
-        if self.installCasa:
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
-
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
         cmd = 'openssl x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
@@ -1040,8 +1029,19 @@ class Setup(object):
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
 
-        if self.installCasa and not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+        if self.installCasa:
+            if not self.ldif_casa in self.couchbaseBucketDict['default']['ldif']:
+                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_casa)
+            if not self.ldif_scripts_casa in self.couchbaseBucketDict['default']['ldif']:
+                self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+
+        if self.oxd_server_https:
+            self.templateRenderingDict['oxd_hostname'], self.templateRenderingDict['oxd_port'] = self.parse_url(self.oxd_server_https)
+            if not self.templateRenderingDict['oxd_port']: 
+                self.templateRenderingDict['oxd_port'] = 8443
+        else:
+            self.templateRenderingDict['oxd_hostname'] = self.hostname
+
 
     def enable_service_at_start(self, serviceName, startSequence=None, stopSequence=None, action='enable'):
         # Enable service autoload on Gluu-Server startup
@@ -1805,8 +1805,8 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
-        self.copyFile(jettyServiceConfiguration, "/etc/default")
-        self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
+        self.copyFile(jettyServiceConfiguration, self.osDefault)
+        self.run([self.cmd_chown, 'root:root', os.path.join(self.osDefault, serviceName)])
 
         # Render web eources file
         try:
@@ -1851,8 +1851,8 @@ class Setup(object):
         self.logIt("Installing node service %s..." % serviceName)
 
         nodeServiceConfiguration = '%s/node/%s' % (self.outputFolder, serviceName)
-        self.copyFile(nodeServiceConfiguration, '/etc/default')
-        self.run([self.cmd_chown, 'root:root', '/etc/default/%s' % serviceName])
+        self.copyFile(nodeServiceConfiguration, self.osDefault)
+        self.run([self.cmd_chown, 'root:root', os.path.join(self.osDefault, serviceName)])
 
         if serviceName == 'passport':
             initscript_fn = os.path.join(self.gluuOptSystemFolder, serviceName)
@@ -3128,6 +3128,8 @@ class Setup(object):
             else:
                 print("Hostname can't be \033[;1mlocalhost\033[0;0m")
 
+        self.oxd_server_https = 'https://{}:8443'.format(self.hostname)
+
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
         self.state = self.getPrompt("Enter your state or province two letter code")
@@ -3280,8 +3282,6 @@ class Setup(object):
 
         buckets_.append('gluu')
 
-
-
         if self.cb_install == REMOTE:
 
             isCBRoleOK = self.checkCBRoles(buckets_)
@@ -3352,13 +3352,6 @@ class Setup(object):
         if os.path.exists(os.path.join(self.distGluuFolder, 'casa.war')):
             self.promptForCasaInstallation()
 
-        oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-        if not oxd_port: 
-            oxd_port=8443
-
-        self.templateRenderingDict['oxd_hostname'] = oxd_hostname
-        self.templateRenderingDict['oxd_port'] = str(oxd_port)
-
         if (not self.installOxd) and self.oxd_package:
             promptForOxd = self.getPrompt("Install Oxd?", 
                                                 self.getDefaultOption(self.installOxd)
@@ -3408,19 +3401,18 @@ class Setup(object):
         return text % dictionary
 
     def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
-        self.logIt("Rendering template %s" % filePath)
-        fn = os.path.split(filePath)[-1]
-        f = open(os.path.join(templateFolder, fn))
-        template_text = f.read()
-        f.close()
+        fn = os.path.basename(filePath)
+        in_fp = os.path.join(templateFolder, fn) 
+        self.logIt("Rendering template %s" % in_fp)
+        template_text = self.readFile(in_fp)
 
         # Create output folder if needed
         if not os.path.exists(outputFolder):
             os.makedirs(outputFolder)
-        self.backupFile(fn)
-        newFn = open(os.path.join(outputFolder, fn), 'w+')
-        newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
-        newFn.close()
+
+        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict))
+        out_fp = os.path.join(outputFolder, fn)
+        self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
         self.renderTemplateInOut(filePath, self.templateFolder, self.outputFolder)
@@ -5161,13 +5153,14 @@ class Setup(object):
         if os.path.exists(service_file):
             self.run(['cp', service_file, '/lib/systemd/system'])
         else:
-            service_file = os.path.join(oxd_root, 'oxd-server.init.d')
-            target_file = '/etc/init.d/oxd-server'
-            self.run(['cp', service_file, target_file])
-            self.run(['chmod', '+x', target_file])
+            self.run([self.cmd_ln, service_file, '/etc/init.d/oxd-server'])
             self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
-        self.run(['cp', os.path.join(oxd_root, 'oxd-server-default'),  '/etc/default/oxd-server'])
+        self.run([
+                'cp', 
+                os.path.join(self.install_dir, 'static/oxd/oxd-server.default'), 
+                os.path.join(self.osDefault, 'oxd-server')
+                ])
 
         self.run(['mkdir', '/var/log/oxd-server'])
         self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
@@ -5619,7 +5612,7 @@ def resource_checkings():
 
 
     if available_disk_space < suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1} "
+        print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         gluu_utils.colors.WARNING,
                                                         available_disk_space,
@@ -5870,6 +5863,9 @@ if __name__ == '__main__':
     print("Detected OS  :  %s" % installObject.os_type)
     print("Detected init:  %s" % installObject.os_initdaemon)
     print("Detected Apache:  %s" % installObject.apache_version)
+
+    if installObject.os_type == 'debian':
+        os.environ['LC_ALL'] = 'C'
 
     print("\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError))
 
