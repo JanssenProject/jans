@@ -127,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # Validate license
             try:
-                self.license_content = LicenseValidator.validate(license["public_key"], license["public_password"], license["license_password"], license["license"],
+                self.license_content = LicenseValidator.validate(license["public-key"], license["public-password"], license["license-password"], license["license"],
                                           Product.SUPER_GLUU, Date())
                 self.valid_license = self.license_content.isValid()
             except:
