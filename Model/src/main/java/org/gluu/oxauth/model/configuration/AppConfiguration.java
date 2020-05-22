@@ -219,6 +219,7 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+    private int backchannelRequestsProcessorJobIntervalSec;
 
     public Boolean getErrorReasonEnabled() {
         if (errorReasonEnabled == null) errorReasonEnabled = false;
@@ -1741,5 +1742,13 @@ public class AppConfiguration implements Configuration {
      */
     public void setDynamicRegistrationPasswordGrantTypeEnabled(Boolean dynamicRegistrationPasswordGrantTypeEnabled) {
         this.dynamicRegistrationPasswordGrantTypeEnabled = dynamicRegistrationPasswordGrantTypeEnabled;
+    }
+
+    public int getBackchannelRequestsProcessorJobIntervalSec() {
+        return backchannelRequestsProcessorJobIntervalSec;
+    }
+
+    public void setBackchannelRequestsProcessorJobIntervalSec(int backchannelRequestsProcessorJobIntervalSec) {
+        this.backchannelRequestsProcessorJobIntervalSec = backchannelRequestsProcessorJobIntervalSec;
     }
 }
