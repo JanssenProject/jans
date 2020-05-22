@@ -111,7 +111,7 @@ public class BackchannelAuthenticationAction implements Serializable {
             CibaRequestSession session = cibaSessions.getSessions().get(authReqId);
             switch (session.getState()) {
                 case REQUEST_SENT: return "Waiting...";
-                case ACCEPTED: return "User granted the permission. Now you can call to the Token Endpoint.";
+                case ACCEPTED: return "There is a result,now you can call to the Token Endpoint.";
                 case REJECTED: return "User has denied the access.";
                 case RESPONSE_GOTTEN: return "Push Response : ";
                 default: return "Invalid state";
