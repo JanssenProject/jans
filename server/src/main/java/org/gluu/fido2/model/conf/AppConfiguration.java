@@ -9,7 +9,6 @@ package org.gluu.fido2.model.conf;
 import java.util.List;
 
 import org.gluu.oxauth.model.configuration.Configuration;
-import org.gluu.oxauth.model.configuration.Fido2Configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

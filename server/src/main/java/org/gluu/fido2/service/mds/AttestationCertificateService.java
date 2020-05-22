@@ -24,7 +24,7 @@ import org.gluu.fido2.service.CertificateService;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.KeyStoreCreator;
 import org.gluu.fido2.service.verifier.CommonVerifiers;
-import org.gluu.oxauth.model.configuration.Fido2Configuration;
+import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.slf4j.Logger;
 
