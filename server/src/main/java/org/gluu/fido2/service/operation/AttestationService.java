@@ -21,6 +21,8 @@ import org.gluu.fido2.ctap.UserVerification;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.auth.PublicKeyCredentialDescriptor;
+import org.gluu.fido2.model.conf.AppConfiguration;
+import org.gluu.fido2.model.conf.RequestedParty;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.fido2.model.entry.Fido2RegistrationStatus;
@@ -47,6 +49,9 @@ public class AttestationService {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private RegistrationPersistenceService registrationPersistenceService;
@@ -235,35 +240,74 @@ public class AttestationService {
 	}
 
 	private ArrayNode preparePublicKeyCredentialSelection() {
-		// @TODO: Add parameters to allow specify supported keys
+		List<String> requestedCredentialTypes = appConfiguration.getFido2Configuration().getRequestedCredentialTypes();
+
         ArrayNode credentialParametersNode = dataMapperService.createArrayNode();
+		if ((requestedCredentialTypes == null) || requestedCredentialTypes.isEmpty()) {
+			// Add default requested credential types
+	
+	        // FIDO2 RS256
+	        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+	        credentialParametersNodeRS256.arrayNode().addObject();
+	        credentialParametersNodeRS256.put("type", "public-key");
+	        credentialParametersNodeRS256.put("alg", CoseRSAAlgorithm.RS256.getNumericValue());
+	
+	        // FIDO2 ES256
+	        ObjectNode credentialParametersNodeES256 = credentialParametersNode.addObject();
+	        credentialParametersNodeES256.arrayNode().addObject();
+	        credentialParametersNodeES256.put("type", "public-key");
+	        credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
+		} else {
+			for(String requestedCredentialType : requestedCredentialTypes) {
+				CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
+				if (coseRSAAlgorithm != null) {
+			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+			        credentialParametersNodeRS256.arrayNode().addObject();
+			        credentialParametersNodeRS256.put("type", "public-key");
+			        credentialParametersNodeRS256.put("alg", coseRSAAlgorithm.getNumericValue());
+					break;
+				}
+			}
 
-        // FIDO2 RS256
-        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
-        credentialParametersNodeRS256.arrayNode().addObject();
-        credentialParametersNodeRS256.put("type", "public-key");
-        credentialParametersNodeRS256.put("alg", CoseRSAAlgorithm.RS256.getNumericValue());
+			for(String requestedCredentialType : requestedCredentialTypes) {
+				CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.valueOf(requestedCredentialType);
+				if (coseEC2Algorithm != null) {
+			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+			        credentialParametersNodeRS256.arrayNode().addObject();
+			        credentialParametersNodeRS256.put("type", "public-key");
+			        credentialParametersNodeRS256.put("alg", coseEC2Algorithm.getNumericValue());
+					break;
+				}
+			}
+		}
 
-        // FIDO2 ES256
-        ObjectNode credentialParametersNodeES256 = credentialParametersNode.addObject();
-        credentialParametersNodeES256.arrayNode().addObject();
-        credentialParametersNodeES256.put("type", "public-key");
-        credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
-        
-        // FIDO
-//        ObjectNode credentialParametersNode = credentialParametersArrayNode.addObject();
-//        credentialParametersNode.put("type", "FIDO");
-//        credentialParametersNode.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
 		return credentialParametersNode;
 	}
 
 	private ObjectNode createRpDomain(String documentDomain) {
-		// TODO: Use domain list to get name
-		ObjectNode credentialRpEntityNode = dataMapperService.createObjectNode();
-        credentialRpEntityNode.put("name", "oxAuth RP");
-        credentialRpEntityNode.put("id", documentDomain);
+		List<RequestedParty> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
 
-        return credentialRpEntityNode;
+		if ((requestedParties == null) || requestedParties.isEmpty()) {
+			// Add entry for default RP
+			ObjectNode credentialRpEntityNode = dataMapperService.createObjectNode();
+	        credentialRpEntityNode.put("name", appConfiguration.getIssuer());
+	        credentialRpEntityNode.put("id", documentDomain);
+		} else {
+			for (RequestedParty requestedParty : requestedParties) {
+				for (String domain : requestedParty.getDomains()) {
+					if (StringHelper.equalsIgnoreCase(documentDomain, domain)) {
+						// Add entry for supported RP
+						ObjectNode credentialRpEntityNode = dataMapperService.createObjectNode();
+				        credentialRpEntityNode.put("name", requestedParty.getName());
+				        credentialRpEntityNode.put("id", documentDomain);
+				        
+				        return credentialRpEntityNode;
+					}
+				}
+			}
+		}
+
+        return null;
 	}
 
 	private String generateUserId() {

@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.service.DataMapperService;
-import org.gluu.oxauth.model.configuration.Fido2Configuration;
+import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;

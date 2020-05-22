@@ -28,12 +28,9 @@ public enum CoseEC2Algorithm {
     private static final Map<Integer, CoseEC2Algorithm> ALGORITHM_MAPPINGS = new HashMap<>();
 
     static {
-        ALGORITHM_MAPPINGS.put(-260, ED256);
-        ALGORITHM_MAPPINGS.put(-261, ED512);
-        ALGORITHM_MAPPINGS.put(-7, ES256);
-        ALGORITHM_MAPPINGS.put(-36, ES384);
-        ALGORITHM_MAPPINGS.put(-37, ES512);
-        ALGORITHM_MAPPINGS.put(-25, ECDH_ES_HKDF_256);
+        for (CoseEC2Algorithm enumType : values()) {
+        	ALGORITHM_MAPPINGS.put(enumType.getNumericValue(), enumType);
+        }
     }
 
     private final int numericValue;

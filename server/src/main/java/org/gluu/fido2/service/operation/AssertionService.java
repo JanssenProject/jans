@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.gluu.fido2.ctap.UserVerification;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.fido2.model.auth.PublicKeyCredentialDescriptor;
+import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.fido2.model.entry.Fido2AuthenticationStatus;
@@ -43,6 +44,9 @@ public class AssertionService {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private DomainVerifier domainVerifier;

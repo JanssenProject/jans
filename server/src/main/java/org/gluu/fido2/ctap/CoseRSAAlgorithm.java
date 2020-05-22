@@ -30,14 +30,9 @@ public enum CoseRSAAlgorithm {
     private static final Map<Integer, CoseRSAAlgorithm> ALGORITHM_MAPPINGS = new HashMap<>();
 
     static {
-        ALGORITHM_MAPPINGS.put(-65535, RS65535);
-        ALGORITHM_MAPPINGS.put(-257, RS256);
-        ALGORITHM_MAPPINGS.put(-258, RS384);
-        ALGORITHM_MAPPINGS.put(-259, RS512);
-        ALGORITHM_MAPPINGS.put(-262, RS1);
-        ALGORITHM_MAPPINGS.put(-39, PS512);
-        ALGORITHM_MAPPINGS.put(-38, PS384);
-        ALGORITHM_MAPPINGS.put(-37, PS256);
+        for (CoseRSAAlgorithm enumType : values()) {
+        	ALGORITHM_MAPPINGS.put(enumType.getNumericValue(), enumType);
+        }
     }
 
     private final int numericValue;
