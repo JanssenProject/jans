@@ -8,6 +8,8 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.registration.Client;
 
+import java.util.Date;
+
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
@@ -22,6 +24,7 @@ public class CIBAGrant extends AuthorizationGrant {
     private Long lastAccessControl;
     private CIBAGrantUserAuthorization userAuthorization;
     private boolean tokensDelivered;
+    private Date expirationDate;
 
     public CIBAGrant() {
     }
@@ -80,4 +83,13 @@ public class CIBAGrant extends AuthorizationGrant {
     public void setTokensDelivered(boolean tokensDelivered) {
         this.tokensDelivered = tokensDelivered;
     }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
 }

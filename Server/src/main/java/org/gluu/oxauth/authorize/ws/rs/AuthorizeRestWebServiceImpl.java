@@ -629,6 +629,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return;
         }
 
+        authorizationGrantList.removeCibaGrantFromProcessorCache(authReqId);
+
         if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             RefreshToken refreshToken = cibaGrant.createRefreshToken();
             log.debug("Issuing refresh token: {}", refreshToken.getCode());

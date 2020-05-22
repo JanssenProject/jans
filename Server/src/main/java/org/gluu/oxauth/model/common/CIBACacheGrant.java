@@ -7,11 +7,13 @@
 package org.gluu.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 
 import javax.enterprise.inject.Instance;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -33,6 +35,7 @@ public class CIBACacheGrant implements Serializable {
     private Long lastAccessControl;
     private CIBAGrantUserAuthorization userAuthorization;
     private boolean tokensDelivered;
+    private Date expirationDate;
 
     public CIBACacheGrant() {
     }
@@ -61,6 +64,7 @@ public class CIBACacheGrant implements Serializable {
         } else {
             expiresIn = appConfiguration.getBackchannelAuthenticationResponseExpiresIn();
         }
+        this.expirationDate = DateUtils.addSeconds(new Date(), expiresIn);
     }
 
     public CIBAGrant asCIBAGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
@@ -77,6 +81,7 @@ public class CIBACacheGrant implements Serializable {
         grant.setLastAccessControl(lastAccessControl);
         grant.setUserAuthorization(userAuthorization);
         grant.setTokensDelivered(tokensDelivered);
+        grant.setExpirationDate(expirationDate);
 
         return grant;
     }
