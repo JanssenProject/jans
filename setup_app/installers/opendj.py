@@ -11,8 +11,10 @@ class OpenDjInstaller(SetupUtils):
         self.service_path = self.detect_service_path()
 
 
-    def install_ldap_server(self):
+    def install(self):
         self.logIt("Running OpenDJ Setup")
+
+
         
         self.pbar.progress("opendj", "Extracting OpenDJ", False)
         self.extractOpenDJ()
@@ -58,6 +60,28 @@ class OpenDjInstaller(SetupUtils):
                     self.post_install_opendj()
         except:
             self.logIt(traceback.format_exc(), True)
+
+    def extractOpenDJ(self):        
+
+        openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
+
+        try:
+            self.logIt("Unzipping %s in /opt/" % openDJArchive)
+            self.run(['unzip', '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
+        except:
+            self.logIt("Error encountered while doing unzip %s -d /opt/" % (openDJArchive))
+            self.logIt(traceback.format_exc(), True)
+
+        realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+
+        if self.wrends_install == REMOTE:
+            self.run(['ln', '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
+
+    def create_user(self):
+        self.createUser('ldap', Config.ldap_user_home)
+        self.addUserToGroup('gluu', 'ldap')
+        self.addUserToGroup('adm', 'ldap')
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
