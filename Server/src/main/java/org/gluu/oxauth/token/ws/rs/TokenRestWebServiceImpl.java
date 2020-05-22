@@ -448,6 +448,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_DENIED) {
                             log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
+                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+                            log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
+                            builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired");
                         }
                     } else {
                         log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
