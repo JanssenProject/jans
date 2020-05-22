@@ -1,6 +1,7 @@
 # Gluu CE setup base utilities
 
 import os
+import sys
 import time
 import platform
 import zipfile
@@ -10,16 +11,20 @@ import copy
 import subprocess
 import traceback
 import re
+import multiprocessing
 
 from setup_app import paths
+from setup_app import static
 from setup_app.pylib.jproperties import Properties
 from setup_app.pylib.ldif3.ldif3 import LDIFParser
 from setup_app.utils.attribute_data_types import ATTRUBUTEDATATYPES
 
+# Note!!! This module should be imported after paths
+
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
 
-# Determine nitdaemon
+# Determine initdaemon
 with open('/proc/1/status', 'r') as f:
     os_initdaemon = f.read().split()[1]
 
@@ -27,6 +32,9 @@ with open('/proc/1/status', 'r') as f:
 p = platform.linux_distribution()
 os_type = p[0].split()[0].lower()
 os_version = p[1].split('.')[0]
+
+if os_type == 'debian':
+    os.environ['LC_ALL'] = 'C'
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora') and os_initdaemon == 'systemd') or (os_type + os_version in ('ubuntu18','debian9','debian10')):
@@ -36,7 +44,6 @@ elif self.os_type in ['debian', 'ubuntu']:
 else:
     service_path = '/sbin/service'
 
-
 if os_type in ('centos', 'red', 'fedora'):
     clone_type = 'rpm'
     httpd_name = 'httpd'
@@ -44,9 +51,72 @@ else:
     clone_type = 'deb'
     httpd_name = 'apache2'
 
+# resources
+file_max = int(open("/proc/sys/fs/file-max").read().strip())
+current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
+current_number_of_cpu = multiprocessing.cpu_count()
+disk_st = os.statvfs('/')
+available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
+
+def check_resources():
+
+    if file_max < static.file_max:
+        print(("{0}Maximum number of files that can be opened on this computer is "
+                  "less than 64000. Please increase number of file-max on the "
+                  "host system and re-run setup.py{1}".format(static.colors.DANGER,
+                                                                static.colors.ENDC)))
+        sys.exit(1)
+
+    if current_mem_size < static.suggested_mem_size:
+        print(("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
+               "than the suggested RAM size of {2} GB.{3}").format(static.colors.WARNING,
+                                                        current_mem_size, 
+                                                        suggested_mem_size,
+                                                        static.colors.ENDC))
+
+
+        result = input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+    if current_number_of_cpu < static.suggested_number_of_cpu:
+
+        print(("{0}Warning: Available CPU Units found was {1}. "
+            "This is less than the required amount of {2} CPU Units.{3}".format(
+                                                        static.colors.WARNING,
+                                                        current_number_of_cpu, 
+                                                        suggested_number_of_cpu,
+                                                        static.colors.ENDC)))
+                                                        
+        result = input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+
+
+    if available_disk_space < static.suggested_free_disk_space:
+        print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
+            "GB. This is less than the required disk space of {2} GB.{3}".format(
+                                                        static.colors.WARNING,
+                                                        available_disk_space,
+                                                        static.suggested_free_disk_space,
+                                                        static.colors.ENDC)))
+
+        result = input("Proceed anyways? [Y|n] ")
+        if result and result[0].lower() == 'n':
+            sys.exit()
+
+
+
+
+
+
 attribDataTypes = ATTRUBUTEDATATYPES()
 
 listAttrib = ['member']
+
+
 
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):

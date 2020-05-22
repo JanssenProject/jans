@@ -128,11 +128,7 @@ class RadiusInstaller(SetupUtils):
 
         self.enable_service_at_start('gluu-radius')
 
-    def enable(self):
-        self.enable_service_at_start('opendj')
-    
-    def start(self):
-        self.run([self.service_path, 'opendj', 'start'])
-        
-    def stop(self):
-        self.run([self.service_path, 'opendj', 'stop'])
+    def create_user(self):
+        self.createUser('radius', homeDir=self.radius_dir, shell='/bin/false')
+        self.addUserToGroup('gluu', 'radius')
+
