@@ -625,7 +625,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
-        if (cibaGrant == null) {
+        if (cibaGrant == null || cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+            log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaGrant);
             return;
         }
 
