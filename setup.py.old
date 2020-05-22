@@ -1,0 +1,1094 @@
+#!/usr/bin/python3
+
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Gluu
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import readline
+import sys
+import os
+import os.path
+import site
+import shutil
+import socket
+import string
+import time
+import json
+import traceback
+import subprocess
+import sys
+import argparse
+import hashlib
+import re
+import glob
+import base64
+import copy
+import random
+import ssl
+import uuid
+import multiprocessing
+import io
+import zipfile
+import datetime
+import urllib.request, urllib.error, urllib.parse
+import locale
+
+from collections import OrderedDict
+from xml.etree import ElementTree
+from urllib.parse import urlparse
+from pathlib import Path
+
+from pylib import gluu_utils
+from pylib.jproperties import Properties
+from pylib.printVersion import get_war_info
+from pylib.ldif3.ldif3 import LDIFWriter
+from pylib.schema import ObjectClass
+
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+#copy pyDes to site for further use
+site_libdir = site.getsitepackages()[0]
+if not os.path.exists(site_libdir):
+    os.makedirs(site_libdir)
+
+#shutil.copy(
+#        os.path.join(cur_dir, 'pylib/pyDes.py'),
+#        site_libdir
+#        )
+
+from pyDes import *
+
+re_split_host = re.compile(r'[^,\s,;]+')
+
+istty = False
+thread_queue = None
+try:
+    tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+    istty = True
+except:
+    tty_rows = 60
+    tty_columns = 120
+
+try:
+    from pylib.cbm import CBM
+except:
+    pass
+
+
+class ProgressBar:
+
+    def __init__(self, cols, queue=None, max_steps=33):
+        self.n = 0
+        self.queue = queue
+        self.max_steps = max_steps
+        self.tty_columns = int(tty_columns)
+
+    def complete(self, msg):
+        self.n = self.max_steps
+        self.progress(msg, False)
+
+    def progress(self, ptype, msg, incr=True):
+        if incr and self.n < self.max_steps:
+            self.n +=1
+
+        time.sleep(0.2)
+
+        if self.queue:
+            if msg == 'Completed':
+                self.queue.put((COMPLETED, ptype, msg))
+            else:
+                self.queue.put((self.n, ptype, msg))
+        else:
+            ft = '#' * self.n
+            ft = ft.ljust(self.max_steps)
+            msg =msg.ljust(40)
+
+            if self.tty_columns < 88:
+                msg = msg[:self.tty_columns-47]
+
+            sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))
+            sys.stdout.flush()
+
+
+class Setup(object):
+
+
+    def set_ownership(self):
+        self.logIt("Changing ownership")
+        realCertFolder = os.path.realpath(self.certFolder)
+        realConfigFolder = os.path.realpath(self.configFolder)
+        realOptPythonFolderFolder = os.path.realpath(self.gluuOptPythonFolder)
+
+        self.run([self.cmd_chown, '-R', 'root:gluu', realCertFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', realConfigFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', realOptPythonFolderFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
+
+        # Set right permissions
+        self.run([self.cmd_chmod, '-R', '440', realCertFolder])
+        self.run([self.cmd_chmod, 'a+X', realCertFolder])
+
+        if self.installOxAuth:
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
+            self.run([self.cmd_chmod, '660', self.oxauth_openid_jks_fn])
+
+        if self.installSaml:
+            realIdp3Folder = os.path.realpath(self.idp3Folder)
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
+
+        for fn in (
+                os.path.join(self.jetty_base, 'oxauth/webapps/oxauth.xml'),
+                os.path.join(self.jetty_base, 'identity/webapps/identity.xml'),
+                ):
+            if os.path.exists(fn):
+                cmd = [self.cmd_chown, 'jetty:jetty', fn]
+                self.run(cmd)
+
+        gluu_radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
+        if os.path.exists(gluu_radius_jks_fn):
+            self.run([self.cmd_chown, 'radius:gluu', gluu_radius_jks_fn])
+
+        if self.installGluuRadius:
+            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+
+    def set_permissions(self):
+        self.logIt("Changing permissions")
+
+        ### Below commands help us to set permissions readable if umask is set as 077
+        self.run(['find', "/opt", '-user', 'root', '-perm', '700', '-exec', 'chmod', "755", '{}',  ';'])
+        self.run(['find', "/opt", '-user', 'root', '-perm', '600', '-exec', 'chmod', "644", '{}',  ';'])
+        self.run(['find', "/opt", '-user', 'root', '-perm', '400', '-exec', 'chmod', "444", '{}',  ';'])
+
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+        self.run(['find', "%s" % self.osDefault, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.osDefault, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
+
+        if self.os_type in ['debian', 'ubuntu']:
+            self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
+
+
+        if self.installSaml:
+            realIdp3Folder = os.path.realpath(self.idp3Folder)
+            realIdp3BinFolder = "%s/bin" % realIdp3Folder;
+            if os.path.exists(realIdp3BinFolder):
+                self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
+
+        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
+        if self.installGluuRadius:
+            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+
+
+    def check_installed(self):
+        return os.path.exists(self.configFolder)
+
+
+
+    def set_ulimits(self):
+        try:
+            if self.os_type in ['centos', 'red', 'fedora']:
+                apache_user = 'apache'
+            else:
+                apache_user = 'www-data'
+
+            self.appendLine("ldap       soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("ldap       hard nofile     262144", "/etc/security/limits.conf")
+            self.appendLine("%s     soft nofile     131072" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("%s     hard nofile     262144" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("jetty      soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
+        except:
+            self.logIt("Could not set limits.")
+            self.logIt(traceback.format_exc(), True)
+
+
+
+
+
+    # ================================================================================
+
+
+    def copy_output(self):
+        self.logIt("Copying rendered templates to final destination")
+
+        for dest_fn in list(self.ce_templates.keys()):
+            if self.ce_templates[dest_fn]:
+                fn = os.path.split(dest_fn)[-1]
+                output_fn = os.path.join(self.outputFolder, fn)
+                try:
+                    self.logIt("Copying %s to %s" % (output_fn, dest_fn))
+                    dest_dir = os.path.dirname(dest_fn)
+                    if not os.path.exists(dest_dir):
+                        self.logIt("Created destination folder %s" % dest_dir)
+                        os.makedirs(dest_dir)
+                    self.backupFile(output_fn, dest_fn)
+                    shutil.copyfile(output_fn, dest_fn)
+                except:
+                    self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
+                    self.logIt(traceback.format_exc(), True)
+
+    def copy_scripts(self):
+        self.logIt("Copying script files")
+        for script in self.gluuScriptFiles:
+            self.copyFile(script, self.gluuOptBinFolder)
+        self.logIt("Rendering encode.py")
+        try:
+            f = open('%s/encode.py' % self.templateFolder)
+            encode_script = f.read()
+            f.close()
+            f = open("%s/encode.py" % self.gluuOptBinFolder, 'w')
+            f.write(encode_script % self.merge_dicts(self.__dict__, self.templateRenderingDict))
+            f.close()
+        except:
+            self.logIt("Error rendering encode script")
+            self.logIt(traceback.format_exc(), True)
+        self.run([self.cmd_chmod, '-R', '700', self.gluuOptBinFolder])
+
+    def copy_static(self):
+        if self.installOxAuth:
+            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/libs" % self.gluuOptPythonFolder)
+            self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/super_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/vericloud_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
+            
+        if self.installFido2:
+            # Fido2 authenticator certs
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-cert.crt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V1.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+            self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V2.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+
+            # Fido2 MDS TOC cert
+            self.copyFile("%s/static/auth/fido2//mds_toc_cert/metadata-root-ca.cer" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/mds/cert'))
+
+
+
+    def fix_init_scripts(self, serviceName, initscript_fn):
+
+        changeTo = None
+        os_ = self.os_type + self.os_version
+
+        couchbase_mappings = self.getMappingType('couchbase')
+
+        if self.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
+            changeTo = 'couchbase-server'
+
+        if self.wrends_install == REMOTE or self.cb_install == REMOTE:
+            changeTo = ''
+
+        if changeTo != None:
+            for service in self.service_requirements:
+                self.service_requirements[service][0] = self.service_requirements[service][0].replace('opendj', changeTo)
+
+        initscript = open(initscript_fn).readlines()
+        
+        for i,l in enumerate(initscript):
+            if l.startswith('# Provides:'):
+                initscript[i] = '# Provides:          {0}\n'.format(serviceName)
+            elif l.startswith('# description:'):
+                initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
+            elif l.startswith('# Required-Start:'):
+                initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(self.service_requirements[serviceName][0])
+            elif l.startswith('# chkconfig:'):
+                initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
+
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+            service_init_script_fn = os.path.join(self.distFolder, 'scripts', serviceName)
+        else:
+            service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+
+        with open(service_init_script_fn, 'w') as W:
+            W.write(''.join(initscript))
+
+        self.run([self.cmd_chmod, '+x', service_init_script_fn])
+
+
+    def encode_passwords(self):
+        self.logIt("Encoding passwords")
+        try:
+            self.encoded_oxtrust_admin_password = self.ldap_encode(self.oxtrust_admin_password)
+            self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
+            if self.ldapPass:
+                self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            if self.cb_password:
+                self.encoded_cb_password = self.obscure(self.cb_password)
+            self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
+
+            self.oxauthClient_pw = self.getPW()
+            self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
+
+            self.idpClient_pw = self.getPW()
+            self.idpClient_encoded_pw = self.obscure(self.idpClient_pw)
+
+            self.encoded_couchbaseTrustStorePass = self.obscure(self.couchbaseTrustStorePass)
+        except:
+            self.logIt("Error encoding passwords", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def encode_test_passwords(self):
+        self.logIt("Encoding test passwords")
+        hostname = self.hostname.split('.')[0]
+        try:
+            self.templateRenderingDict['oxauthClient_2_pw'] = self.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname
+            self.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_2_pw'])
+
+            self.templateRenderingDict['oxauthClient_3_pw'] =  self.templateRenderingDict['oxauthClient_3_inum'] + '-' + hostname
+            self.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_3_pw'])
+
+            self.templateRenderingDict['oxauthClient_4_pw'] = self.templateRenderingDict['oxauthClient_4_inum'] + '-' + hostname
+            self.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_4_pw'])
+        except:
+            self.logIt("Error encoding test passwords", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def gen_cert(self, suffix, password, user='root', cn=None):
+        self.logIt('Generating Certificate for %s' % suffix)
+        key_with_password = '%s/%s.key.orig' % (self.certFolder, suffix)
+        key = '%s/%s.key' % (self.certFolder, suffix)
+        csr = '%s/%s.csr' % (self.certFolder, suffix)
+        public_certificate = '%s/%s.crt' % (self.certFolder, suffix)
+        self.run([self.opensslCommand,
+                  'genrsa',
+                  '-des3',
+                  '-out',
+                  key_with_password,
+                  '-passout',
+                  'pass:%s' % password,
+                  '2048'
+                  ])
+        self.run([self.opensslCommand,
+                  'rsa',
+                  '-in',
+                  key_with_password,
+                  '-passin',
+                  'pass:%s' % password,
+                  '-out',
+                  key
+                  ])
+
+        certCn = cn
+        if certCn == None:
+            certCn = self.hostname
+
+        self.run([self.opensslCommand,
+                  'req',
+                  '-new',
+                  '-key',
+                  key,
+                  '-out',
+                  csr,
+                  '-subj',
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (self.countryCode, self.state, self.city, self.orgName, certCn, self.admin_email)
+                  ])
+        self.run([self.opensslCommand,
+                  'x509',
+                  '-req',
+                  '-days',
+                  '365',
+                  '-in',
+                  csr,
+                  '-signkey',
+                  key,
+                  '-out',
+                  public_certificate
+                  ])
+        self.run([self.cmd_chown, '%s:%s' % (user, user), key_with_password])
+        self.run([self.cmd_chmod, '700', key_with_password])
+        self.run([self.cmd_chown, '%s:%s' % (user, user), key])
+        self.run([self.cmd_chmod, '700', key])
+
+        self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (self.hostname, suffix), \
+                  "-file", public_certificate, "-keystore", self.defaultTrustStoreFN, \
+                  "-storepass", "changeit", "-noprompt"])
+
+    def generate_crypto(self):
+        try:
+            self.logIt('Generating certificates and keystores')
+            self.gen_cert('httpd', self.httpdKeyPass, 'jetty')
+            self.gen_cert('shibIDP', self.shibJksPass, 'jetty')
+            self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
+            self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
+
+            self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
+
+            self.gen_keystore('shibIDP',
+                              self.shibJksFn,
+                              self.shibJksPass,
+                              '%s/shibIDP.key' % self.certFolder,
+                              '%s/shibIDP.crt' % self.certFolder,
+                              'jetty')
+
+            # permissions
+            self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
+            self.run([self.cmd_chmod, '-R', '500', self.certFolder])
+
+        except:
+            self.logIt("Error generating cyrpto")
+            self.logIt(traceback.format_exc(), True)
+
+    def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert, user='root'):
+        self.logIt("Creating keystore %s" % suffix)
+        # Convert key to pkcs12
+        pkcs_fn = '%s/%s.pkcs12' % (self.certFolder, suffix)
+        self.run([self.opensslCommand,
+                  'pkcs12',
+                  '-export',
+                  '-inkey',
+                  inKey,
+                  '-in',
+                  inCert,
+                  '-out',
+                  pkcs_fn,
+                  '-name',
+                  self.hostname,
+                  '-passout',
+                  'pass:%s' % keystorePW
+                  ])
+        # Import p12 to keystore
+        self.run([self.cmd_keytool,
+                  '-importkeystore',
+                  '-srckeystore',
+                  '%s/%s.pkcs12' % (self.certFolder, suffix),
+                  '-srcstorepass',
+                  keystorePW,
+                  '-srcstoretype',
+                  'PKCS12',
+                  '-destkeystore',
+                  keystoreFN,
+                  '-deststorepass',
+                  keystorePW,
+                  '-deststoretype',
+                  'JKS',
+                  '-keyalg',
+                  'RSA',
+                  '-noprompt'
+                  ])
+        self.run([self.cmd_chown, '%s:%s' % (user, user), pkcs_fn])
+        self.run([self.cmd_chmod, '700', pkcs_fn])
+        self.run([self.cmd_chown, '%s:%s' % (user, user), keystoreFN])
+        self.run([self.cmd_chmod, '700', keystoreFN])
+
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = self.default_openid_jks_dn_name
+
+        if key_algs == None:
+            key_algs = self.default_key_algs
+
+        if key_expiration == None:
+            key_expiration = self.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = key_algs
+
+        # We can remove this once KeyGenerator will do the same
+        if jks_create == True:
+            self.logIt("Creating empty JKS keystore")
+            # Create JKS with dummy key
+            cmd = " ".join([self.cmd_keytool,
+                            '-genkey',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
+            self.run(['/bin/sh', '-c', cmd])
+
+            # Delete dummy key from JKS
+            cmd = " ".join([self.cmd_keytool,
+                            '-delete',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
+            self.run(['/bin/sh', '-c', cmd])
+
+        cmd = " ".join([self.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", self.non_setup_properties['oxauth_client_jar_fn'], 
+                        self.non_setup_properties['key_gen_path'],
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration])
+
+        args = ['/bin/sh', '-c', cmd]
+
+        self.logIt("Runnning: %s" % " ".join(args))
+
+        output = self.run(args)
+        if output:
+            return output.splitlines()
+
+    def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
+        self.logIt("Exporting oxAuth OpenID Connect keys")
+
+        cmd = " ".join([self.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp",
+                        self.non_setup_properties['oxauth_client_jar_fn'], 
+                        self.non_setup_properties['key_export_path'],
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-alias",
+                        cert_alias,
+                        "-exportfile",
+                        cert_path])
+        self.run(['/bin/sh', '-c', cmd])
+
+    def write_openid_keys(self, fn, jwks):
+        self.logIt("Writing oxAuth OpenID Connect keys")
+        if not jwks:
+            self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
+            return
+
+        self.backupFile(fn)
+
+        try:
+            jwks_text = '\n'.join(jwks)
+            f = open(fn, 'w')
+            f.write(jwks_text)
+            f.close()
+            self.run([self.cmd_chown, 'jetty:jetty', fn])
+            self.run([self.cmd_chmod, '600', fn])
+            self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
+        except:
+            self.logIt("Error writing command : %s" % fn, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def generate_oxauth_openid_keys(self):
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+        self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
+
+    def generate_base64_string(self, lines, num_spaces):
+        if not lines:
+            return None
+
+        plain_text = ''.join(lines)
+        plain_b64encoded_text = base64.encodestring(plain_text.encode('utf-8')).decode('utf-8').strip()
+
+        if num_spaces > 0:
+            plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
+
+        return plain_b64encoded_text
+
+
+    def install_gluu_base(self):
+        self.logIt("Installing Gluu base...")
+        self.generate_oxtrust_api_configuration()
+        self.generate_scim_configuration()
+
+        self.ldapCertFn = self.opendj_cert_fn
+        self.ldapTrustStoreFn = self.opendj_p12_fn
+        self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
+
+        if self.installSaml:
+            self.oxTrustConfigGeneration = "true"
+        else:
+            self.oxTrustConfigGeneration = "false"
+
+    def load_certificate_text(self, filePath):
+        self.logIt("Load certificate %s" % filePath)
+        f = open(filePath)
+        certificate_text = f.read()
+        f.close()
+        certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
+        return certificate_text
+
+
+    def install_gluu_components(self):
+        
+        if self.wrends_install:
+            self.pbar.progress("ldap", "Installing Gluu components: LDAP", False)
+            self.install_ldap_server()
+
+        if self.cb_install:
+            self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
+            self.install_couchbase_server()
+
+        if self.installHttpd:
+            self.pbar.progress("httpd", "Installing Gluu components: HTTPD", False)
+            self.configure_httpd()
+
+        if self.installOxAuth:
+            self.pbar.progress("oxauth", "Installing Gluu components: OxAuth", False)
+            self.install_oxauth()
+
+        if self.installFido2:
+            self.pbar.progress("fido2", "Installing Gluu components: Fido2", False)
+            self.install_fido2()
+
+        if self.installOxTrust:
+            self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
+            self.install_oxtrust()
+
+        if self.installScimServer:
+            self.pbar.progress("scim", "Installing Gluu components: Scim Server", False)
+            self.install_scim_server()
+
+        if self.installSaml:
+            self.pbar.progress("saml", "Installing Gluu components: saml", False)
+            self.install_saml()
+
+        if self.installOxAuthRP:
+            self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
+            self.install_oxauth_rp()
+
+        if self.installPassport:
+            self.pbar.progress("passport", "Installing Gluu components: Passport", False)
+            self.install_passport()
+
+        if self.installOxd:
+            self.pbar.progress("oxd", "Installing Gluu components: oxd", False)
+            self.install_oxd()
+
+        if self.installCasa:
+            self.pbar.progress("casa", "Installing Gluu components: Casa", False)
+            self.install_casa()
+
+        self.install_gluu_radius_base()
+
+
+
+
+
+
+
+
+
+
+
+
+    def start_services(self):
+
+        # Apache HTTPD
+        if self.installHttpd:
+            self.pbar.progress("gluu", "Starting httpd")
+            self.run_service_command(self.get_apache_service_name(), 'restart')
+
+        # LDAP services
+        if self.wrends_install == LOCAL:
+            self.pbar.progress("gluu", "Starting WrenDS")
+            self.run_service_command('opendj', 'stop')
+            self.run_service_command('opendj', 'start')
+
+        # Jetty services
+        # Iterate through all components and start installed
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.items():
+
+            # we will start casa later, after importing oxd certificate
+            if applicationName == 'casa':
+                continue
+                
+            if applicationConfiguration['installed']:
+                self.pbar.progress("gluu", "Starting Gluu Jetty {} Service".format(applicationName))
+                self.run_service_command(applicationName, 'start')
+
+        
+        # Passport service
+        if self.installPassport:
+            self.pbar.progress("gluu", "Starting Passport Service")
+            self.run_service_command('passport', 'start')
+
+        # oxd service
+        if self.installOxd:
+            self.pbar.progress("gluu", "Starting oxd Service")
+            self.run_service_command('oxd-server', 'start')
+            #wait 2 seconds for oxd server is up
+            time.sleep(2)
+
+        # casa service
+        if self.installCasa:
+            # import_oxd_certificate2javatruststore:
+            self.logIt("Importing oxd certificate")
+            self.import_oxd_certificate()
+
+            self.pbar.progress("gluu", "Starting Casa Service")
+            self.run_service_command('casa', 'start')
+
+        # Radius service
+        if self.installGluuRadius:
+            self.pbar.progress("gluu", "Starting Gluu Radius Service")
+            self.run_service_command('gluu-radius', 'start')
+
+
+    def update_hostname(self):
+        self.logIt("Copying hosts and hostname to final destination")
+
+        if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'red', 'fedora']:
+            self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
+        else:
+            if self.os_type in ['debian', 'ubuntu']:
+                self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
+                self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
+
+            if self.os_type in ['centos', 'red', 'fedora']:
+                self.copyFile("%s/network" % self.outputFolder, self.network)
+
+            self.run(['/bin/hostname', self.hostname])
+
+        if not os.path.exists(self.etc_hosts):
+            self.writeFile(self.etc_hosts, '{}\t{}\n'.format(self.ip, self.hostname))
+        else:
+            hostname_file_content = self.readFile(self.etc_hosts)
+            with open(self.etc_hosts,'w') as w:
+                for l in hostname_file_content.splitlines():
+                    if not self.hostname in l.split():
+                        w.write(l+'\n')
+
+                w.write('{}\t{}\n'.format(self.ip, self.hostname))
+
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
+
+
+    def import_custom_ldif(self, fullPath):
+        output_dir = os.path.join(fullPath, '.output')
+        self.logIt("Importing Custom LDIF files")
+        realInstallDir = os.path.realpath(self.install_dir)
+
+        try:
+            for ldif in self.get_filepaths(output_dir):
+                custom_ldif = output_dir + '/' + ldif
+                self.import_ldif_template_opendj(custom_ldif)
+        except:
+            self.logIt("Error importing custom ldif file %s" % ldif, True)
+            self.logIt(traceback.format_exc(), True)
+
+
+
+
+
+
+
+    def getLdapConnection(self):
+
+        ldap_server = Server(self.ldap_hostname, port=int(self.ldaps_port), use_ssl=True)
+        ldap_conn = Connection(
+                    ldap_server,
+                    user=self.ldap_binddn,
+                    password=self.ldapPass,
+                    )
+        ldap_conn.bind()
+
+        return ldap_conn
+
+
+    def fix_systemd_script(self):
+        oxauth_systemd_script_fn = '/lib/systemd/system/oxauth.service'
+        if os.path.exists(oxauth_systemd_script_fn):
+            oxauth_systemd_script = open(oxauth_systemd_script_fn).read()
+            changed = False
+            
+            if self.cb_install == LOCAL:
+                oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', 'After=couchbase-server.service')
+                oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', 'Requires=couchbase-server.service')
+                changed = True
+            
+            elif self.wrends_install != LOCAL:
+                oxauth_systemd_script = oxauth_systemd_script.replace('After=opendj.service', '')
+                oxauth_systemd_script = oxauth_systemd_script.replace('Requires=opendj.service', '')
+                changed = True
+                
+            if changed:
+                with open(oxauth_systemd_script_fn, 'w') as w:
+                    w.write(oxauth_systemd_script)
+                self.run(['rm', '-f', '/lib/systemd/system/opendj.service'])
+                self.run([self.systemctl, 'daemon-reload'])
+
+
+
+
+
+
+
+    def post_install_tasks(self):
+        super_gluu_lisence_renewer_fn = os.path.join(self.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
+        target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
+        self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+        self.run(['chown', 'root:root', target_fn])
+        self.run(['chmod', '+x', target_fn])
+        cron_service = 'cron'
+
+        if self.os_type in ['centos', 'red', 'fedora']:
+            cron_service = 'crond'
+
+        self.run_service_command(cron_service, 'restart')
+
+        print_version_fn = os.path.join(self.install_dir, 'pylib', 'printVersion.py')
+        show_version_fn = os.path.join(self.gluuOptBinFolder, 'show_version.py')
+        self.run(['cp', '-f', print_version_fn, show_version_fn])
+        self.run(['chmod', '+x', show_version_fn])
+
+
+    def do_installation(self, queue=None):
+        try:
+            self.thread_queue = queue
+            self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
+            self.pbar.progress("gluu", "Configuring system")
+            self.configureSystem()
+            self.pbar.progress("download", "Downloading War files")
+            self.downloadWarFiles()
+            self.pbar.progress("gluu", "Calculating application memory")
+            self.calculate_selected_aplications_memory()
+            self.pbar.progress("java", "Installing JRE")
+            self.installJRE()
+            self.pbar.progress("jetty", "Installing Jetty")
+            self.installJetty()
+            self.pbar.progress("jython", "Installing Jython")
+            self.installJython()
+            self.pbar.progress("node", "Installing Node")
+            self.installNode()
+            self.pbar.progress("gluu", "Making salt")
+            self.make_salt()
+            self.pbar.progress("gluu", "Making oxauth salt")
+            self.make_oxauth_salt()
+            self.pbar.progress("scripts", "Copying scripts")
+            self.copy_scripts()
+            self.pbar.progress("gluu", "Encoding passwords")
+            self.encode_passwords()
+            self.pbar.progress("gluu", "Encoding test passwords")
+            self.encode_test_passwords()
+            
+            if self.installPassport:
+                self.generate_passport_configuration()
+            
+            self.pbar.progress("gluu", "Installing Gluu base")
+            self.install_gluu_base()
+            self.pbar.progress("gluu", "Preparing base64 extention scripts")
+            self.prepare_base64_extension_scripts()
+            self.pbar.progress("gluu", "Rendering templates")
+            self.render_templates()
+            self.pbar.progress("gluu", "Generating crypto")
+            self.generate_crypto()
+            self.pbar.progress("gluu","Generating oxauth openid keys")
+            self.generate_oxauth_openid_keys()
+            self.pbar.progress("gluu", "Generating base64 configuration")
+            self.generate_base64_configuration()
+            self.pbar.progress("gluu", "Rendering configuratipn template")
+            self.render_configuration_template()
+            self.pbar.progress("gluu", "Updating hostname")
+            self.update_hostname()
+            self.pbar.progress("gluu", "Setting ulimits")
+            self.set_ulimits()
+            self.pbar.progress("gluu", "Copying output")
+            self.copy_output()
+            self.pbar.progress("gluu", "Setting up init scripts")
+            self.setup_init_scripts()
+            self.pbar.progress("node", "Rendering node templates")
+            self.render_node_templates()
+            self.pbar.progress("gluu", "Installing Gluu components")
+            self.install_gluu_components()
+            self.pbar.progress("gluu", "Rendering test templates")
+            self.render_test_templates()
+            self.pbar.progress("gluu", "Copying static")
+            self.copy_static()
+            self.fix_systemd_script()
+            self.pbar.progress("gluu", "Setting ownerships")
+            self.set_ownership()
+            self.pbar.progress("gluu", "Setting permissions")
+            self.set_permissions()
+            self.pbar.progress("gluu", "Starting services")
+            self.start_services()
+            self.pbar.progress("gluu", "Saving properties")
+            self.save_properties()
+
+            if setupOptions['loadTestData']:
+                self.pbar.progress("gluu", "Loading test data", False)
+                self.load_test_data()
+
+            if 'importLDIFDir' in list(setupOptions.keys()):
+                self.pbar.progress("gluu", "Importing LDIF files")
+                self.render_custom_templates(setupOptions['importLDIFDir'])
+                self.import_custom_ldif(setupOptions['importLDIFDir'])
+
+            self.deleteLdapPw()
+
+            self.post_install_tasks()
+
+            self.pbar.progress("gluu", "Completed")
+            if not self.thread_queue:
+                print()
+                self.print_post_messages()
+
+        except:
+            if self.thread_queue:
+                self.thread_queue.put((ERROR, "", str(traceback.format_exc())))
+            else:
+                installObject.logIt("***** Error caught in main loop *****", True)
+                installObject.logIt(traceback.format_exc(), True)
+                print("***** Error caught in main loop *****")
+                print(traceback.format_exc())
+
+    def print_post_messages(self):
+        print()
+        for m in self.post_messages:
+            print(m)
+
+############################   Main Loop   #################################################
+
+
+
+
+
+if __name__ == '__main__':
+
+    cur_dir = os.path.dirname(os.path.realpath(__file__))
+
+
+
+    # Get the OS type
+    installObject.os_type, installObject.os_version = installObject.detect_os_type()
+    # Get the init type
+    installObject.os_initdaemon = installObject.detect_initd()
+    
+    installObject.check_and_install_packages()
+    #it is time to import pyDes library
+    from pyDes import *
+    from pylib.cbm import CBM
+    import ruamel.yaml
+    from ldap3 import Server, Connection, BASE, MODIFY_REPLACE
+    from ldap3.utils import dn as dnutils
+    gluu_utils.dnutils = dnutils
+
+    if setupOptions['loadTestDataExit']:
+        installObject.initialize()
+        installObject.load_test_data_exit()
+
+    if installObject.check_installed():
+        print("\nThis instance already configured. If you need to install new one you should reinstall package first.")
+        sys.exit(2)
+
+
+    # Get apache version
+    installObject.apache_version = installObject.determineApacheVersionForOS()
+
+    print("\nInstalling Gluu Server...")
+    print("Detected OS  :  %s" % installObject.os_type)
+    print("Detected init:  %s" % installObject.os_initdaemon)
+    print("Detected Apache:  %s" % installObject.apache_version)
+
+    if installObject.os_type == 'debian':
+        os.environ['LC_ALL'] = 'C'
+
+    print("\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError))
+
+    try:
+        os.remove(installObject.log)
+        installObject.logIt('Removed %s' % installObject.log)
+    except:
+        pass
+    try:
+        os.remove(installObject.logError)
+        installObject.logIt('Removed %s' % installObject.logError)
+    except:
+        pass
+
+    installObject.logIt("Installing Gluu Server", True)
+    installObject.initialize()
+
+    setup_loaded = None
+
+    if setupOptions['setup_properties']:
+        installObject.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
+        setup_loaded = installObject.load_properties(setupOptions['setup_properties'])
+    elif os.path.isfile(installObject.setup_properties_fn):
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn)
+        setup_loaded = installObject.load_properties(installObject.setup_properties_fn)
+    elif os.path.isfile(installObject.setup_properties_fn+'.enc'):
+        installObject.logIt('%s Properties found!\n' % installObject.setup_properties_fn+'.enc')
+        setup_loaded = installObject.load_properties(installObject.setup_properties_fn+'.enc')
+
+    if thread_queue:
+
+        msg = tui.msg
+        msg.storages = list(installObject.couchbaseBucketDict.keys())
+        msg.installation_step_number = 33
+        
+        msg.os_type = installObject.os_type
+        msg.os_version = installObject.os_version
+        msg.os_initdaemon = installObject.os_initdaemon
+        msg.apache_version = installObject.apache_version
+        msg.current_mem_size = current_mem_size
+        msg.current_number_of_cpu = current_number_of_cpu
+        msg.current_free_disk_space = available_disk_space
+        msg.current_file_max = file_max
+
+        GSA = tui.GluuSetupApp()
+        GSA.installObject = installObject
+
+        GSA.run()
+    else:
+
+        if not setup_loaded:
+            installObject.logIt("{0} or {0}.enc Properties not found. Interactive setup commencing...".format(installObject.setup_properties_fn))
+            installObject.promptForProperties()
+
+        # Validate Properties
+        installObject.check_properties()
+
+        proceed = True
+
+        # Show to properties for approval
+        print('\n%s\n' % repr(installObject))
+        if not setupOptions['noPrompt']:
+            proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
+            if proceed_prompt and proceed_prompt[0] !='y':
+                proceed = False
+
+
+        if setupOptions['noPrompt'] or proceed:
+            installObject.do_installation()
+            print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % installObject.hostname)
+        else:
+            installObject.save_properties()
+    
+
+# END
