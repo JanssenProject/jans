@@ -43,4 +43,7 @@ public interface IAuthorizationGrantList {
     AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
 
     CIBAGrant getCIBAGrant(String authenticationRequestId);
+
+    void removeCibaGrantFromProcessorCache(String cibaGrantKey);
+
 }
