@@ -1,0 +1,95 @@
+{
+  "oxauth": {
+    "memory": {
+      "max_allowed_mb": 2048,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.2
+    },
+    "jetty": {
+      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "oxauth"
+  },
+  "identity": {
+    "memory": {
+      "max_allowed_mb": 2048,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.2
+    },
+    "jetty": {
+      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "identity"
+  },
+  "idp": {
+    "memory": {
+      "max_allowed_mb": 2048,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.2
+    },
+    "jetty": {
+      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp"
+    },
+    "installed": false,
+    "name": "idp"
+  },
+  "oxauth-rp": {
+    "memory": {
+      "max_allowed_mb": 384,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.08
+    },
+    "jetty": {
+      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "oxauth-rp"
+  },
+  "passport": {
+    "node": {},
+    "memory": {
+      "max_allowed_mb": 1024,
+      "ratio": 0.08
+    },
+    "installed": false,
+    "name": "passport"
+  },
+  "casa": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.08
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp"
+    },
+    "installed": false,
+    "name": "casa"
+  },
+  "fido2": {
+    "memory": {
+      "max_allowed_mb": 512,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.08
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
+    },
+    "installed": false,
+    "name": "fido2"
+  },
+  "scim": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.08
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp"
+    },
+    "installed": false,
+    "name": "scim"
+  }
+}
