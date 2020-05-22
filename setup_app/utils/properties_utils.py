@@ -4,10 +4,15 @@ import json
 import subprocess
 import uuid
 import traceback
+import glob
+import urllib
+import ssl
 
 from setup_app import paths
-from setup_app.utils.base import read_properties_file
-from setup_app.config import Config, InstallTypes
+from setup_app.utils import base
+from setup_app.static import InstallTypes, colors
+
+from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 
 from setup_app.pylib.jproperties import Properties
@@ -69,37 +74,59 @@ class PropertiesUtils(SetupUtils):
             except:
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
+
         if not Config.httpdKeyPass:
             Config.httpdKeyPass = self.getPW()
+
+        if not Config.oxtrust_admin_password and Config.ldapPass:
+            Config.oxtrust_admin_password = Config.ldapPass
+        
+        if not Config.oxtrust_admin_password:
+            Config.oxtrust_admin_password = self.getPW()
+
         if not Config.ldapPass:
-            Config.ldapPass = self.getPW()
+            Config.ldapPass = Config.oxtrust_admin_password
+
         if not Config.shibJksPass:
             Config.shibJksPass = self.getPW()
+
         if not Config.oxauth_openid_jks_pass:
             Config.oxauth_openid_jks_pass = self.getPW()
+
         if not Config.opendj_p12_pass:
             Config.opendj_p12_pass = self.getPW()
+
         if not Config.passportSpKeyPass:
             Config.passportSpKeyPass = self.getPW()
             Config.passportSpJksPass = self.getPW()
+
         if not Config.encode_salt:
             Config.encode_salt= self.getPW() + self.getPW()
+
         if not Config.oxauth_client_id:
             Config.oxauth_client_id = '1001.'+ str(uuid.uuid4())
+
         if not Config.idp_client_id:
             Config.idp_client_id = '1101.'+ str(uuid.uuid4())
+
         if not Config.scim_rs_client_id:
             Config.scim_rs_client_id = '1201.' + str(uuid.uuid4())
+
         if not Config.scim_rp_client_id:
             Config.scim_rp_client_id = '1202.' + str(uuid.uuid4())
+
         if not Config.scim_resource_oxid:
             Config.scim_resource_oxid = '1203.' + str(uuid.uuid4())
+
         if not Config.oxtrust_resource_server_client_id:
             Config.oxtrust_resource_server_client_id = '1401.'  + str(uuid.uuid4())
+
         if not Config.oxtrust_requesting_party_client_id:
             Config.oxtrust_requesting_party_client_id = '1402.'  + str(uuid.uuid4())
+
         if not Config.oxtrust_resource_id:
             Config.oxtrust_resource_id = '1403.'  + str(uuid.uuid4())
+
         if not Config.admin_inum:
             Config.admin_inum = str(uuid.uuid4())
 
@@ -155,7 +182,7 @@ class PropertiesUtils(SetupUtils):
             prop_file = self.decrypt_properties(prop_file, Config.properties_password)
 
         try:
-            p = read_properties_file(prop_file)
+            p = base.read_properties_file(prop_file)
         except:
             self.logIt("Error loading properties", True)
             self.logIt(traceback.format_exc(), True)
@@ -299,6 +326,137 @@ class PropertiesUtils(SetupUtils):
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
 
+    def getBackendTypes(self):
+
+        backend_types = []
+
+        if glob.glob(Config.distFolder+'/app/opendj-server-*4*.zip'):
+            backend_types.append('wrends')
+
+        if glob.glob(Config.distFolder+'/couchbase/couchbase-server-enterprise*.' + base.clone_type):
+            backend_types.append('couchbase')
+
+        return backend_types
+
+
+
+    def test_cb_servers(self, couchbase_hostname):
+        cb_hosts = re_split_host.findall(couchbase_hostname)
+
+        cb_query_node = None
+        retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
+
+        for i, cb_host in enumerate(cb_hosts):
+
+                cbm_ = CBM(cb_host, Config.couchebaseClusterAdmin, Config.cb_password)
+                if not Config.thread_queue:
+                    print("    Checking Couchbase connection for " + cb_host)
+
+                cbm_result = cbm_.test_connection()
+                if not cbm_result.ok:
+                    if not Config.thread_queue:
+                        print("    Can't establish connection to Couchbase server with given parameters.")
+                        print("**", cbm_result.reason)
+                    retval['result'] = False
+                    retval['reason'] = cb_host + ': ' + cbm_result.reason
+                    return retval
+                try:
+                    qr = cbm_.exec_query('select * from system:indexes limit 1')
+                    if qr.ok:
+                        cb_query_node = i
+                except:
+                    pass
+        else:
+
+            if cbm_result.ok and cb_query_node != None:
+                if not Config.thread_queue:
+                    print("    Successfully connected to Couchbase server")
+                cb_host_ = cb_hosts[self.cb_query_node]
+                return retval
+            if cb_query_node == None:
+                if not Config.thread_queue:
+                    print("Can't find any query node")
+                retval['result'] = False
+                retval['reason'] = "Can't find any query node"
+
+        return retval
+
+    def prompt_remote_couchbase(self):
+    
+        while True:
+            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts")
+            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
+            Config.cb_password =self.getPrompt("    Couchbase Password")
+
+            result = self.test_cb_servers(Config.couchbase_hostname)
+
+            if result['result']:
+                self.cb_query_node = result['query_node']
+                break
+
+    def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
+        
+        result = {'result': True, 'reason': ''}
+        
+        ldap_server = Server(ldap_host, port=int(Config.ldaps_port), use_ssl=True)
+        conn = Connection(
+            ldap_server,
+            user=ldap_binddn,
+            password=ldap_password,
+            )
+
+        try:
+            conn.bind()
+        except Exception as e:
+            result['result'] = False
+            result['reason'] = str(e)
+        
+        return result
+
+    def check_oxd_server(self, oxd_url, error_out=True):
+
+        oxd_url = os.path.join(oxd_url, 'health-check')
+        try:
+            result = urllib.request.urlopen(
+                        oxd_url,
+                        timeout = 2,
+                        context=ssl._create_unverified_context()
+                    )
+            if result.code == 200:
+                oxd_status = json.loads(result.read().decode())
+                if oxd_status['status'] == 'running':
+                    return True
+        except Exception as e:
+            if Config.thread_queue:
+                return str(e)
+            if error_out:
+                print(colors.DANGER)
+                print("Can't connect to oxd-server with url {}".format(oxd_url))
+                print("Reason: ", e)
+                print(colors.ENDC)
+
+    def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
+
+        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+        self.writeFile(oxd_crt_fn, oxd_cert)
+        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+        
+        if ssl_subjects['CN'] != oxd_hostname:
+            return ssl_subjects
+
+    def add_couchbase_post_messages(self):
+        self.post_messages.append( 
+                "Please note that you have to update your firewall configuration to\n"
+                "allow connections to the following ports on Couchbase Server:\n"
+                "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
+                "11214, 11215, 18091 to 18093, and from 21100 to 21299."
+            )
+        (w, e) = ('', '') if Config.thread_queue else (gluu_utils.colors.WARNING, gluu_utils.colors.ENDC)
+        self.post_messages.append(
+            w+"By using Couchbase Server you agree to the End User License Agreement.\n"
+            "See /opt/couchbase/LICENSE.txt"+e
+            )
 
     def promptForBackendMappings(self):
 
@@ -336,24 +494,24 @@ class PropertiesUtils(SetupUtils):
         
         if promptForCasa == 'n':
             promptForCasa = self.getPrompt("Install Casa?", 
-                                            self.getDefaultOption(self.installCasa)
+                                            self.getDefaultOption(Config.installCasa)
                                             )[0].lower()
         if promptForCasa == 'y':
-            self.installCasa = True
-            self.couchbaseBucketDict['default']['ldif'].append(self.ldif_scripts_casa)
+            Config.installCasa = True
+            Config.couchbaseBucketDict['default']['ldif'].append(Config.ldif_scripts_casa)
         else:
-            self.installCasa = False
+            Config.installCasa = False
 
-        if self.installCasa:
+        if Config.installCasa:
             print ("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
-            if self.oxd_package:
+            if Config.oxd_package:
                 print ("Else leave blank to install oxd server locally.")
 
             while True:
                 oxd_server_https = input("oxd Server URL: ").lower()
                 
-                if (not oxd_server_https) and self.oxd_package:
-                    self.installOxd = True
+                if (not oxd_server_https) and Config.oxd_package:
+                    Config.installOxd = True
                     break
 
                 print ("Checking oxd server ...")
@@ -374,12 +532,12 @@ class PropertiesUtils(SetupUtils):
                                         oxd_hostname
                                         ))
                     else:
-                        self.oxd_server_https = oxd_server_https
+                        Config.oxd_server_https = oxd_server_https
                         break
 
     def promptForProperties(self):
 
-        if self.noPrompt:
+        if Config.noPrompt:
             return
 
         promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the Apache-2.0 license?", "N|y")[0].lower()
@@ -387,8 +545,8 @@ class PropertiesUtils(SetupUtils):
             sys.exit(0)
 
         # IP address needed only for Apache2 and hosts file update
-        if self.installHttpd:
-            self.ip = self.get_ip()
+        if Config.installHttpd:
+            Config.ip = self.get_ip()
 
         detectedHostname = self.detect_hostname()
 
@@ -397,43 +555,43 @@ class PropertiesUtils(SetupUtils):
 
         while True:
             if detectedHostname:
-                self.hostname = self.getPrompt("Enter hostname", detectedHostname)
+                Config.hostname = self.getPrompt("Enter hostname", detectedHostname)
             else:
-                self.hostname = self.getPrompt("Enter hostname")
+                Config.hostname = self.getPrompt("Enter hostname")
 
-            if self.hostname != 'localhost':
+            if Config.hostname != 'localhost':
                 break
             else:
                 print("Hostname can't be \033[;1mlocalhost\033[0;0m")
 
-        self.oxd_server_https = 'https://{}:8443'.format(self.hostname)
+        Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
 
         # Get city and state|province code
-        self.city = self.getPrompt("Enter your city or locality")
-        self.state = self.getPrompt("Enter your state or province two letter code")
+        Config.city = self.getPrompt("Enter your city or locality", Config.city)
+        Config.state = self.getPrompt("Enter your state or province two letter code", Config.state)
 
         # Get the Country Code
         long_enough = False
         while not long_enough:
-            countryCode = self.getPrompt("Enter two letter Country Code")
+            countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
             if len(countryCode) != 2:
                 print("Country code must be two characters")
             else:
-                self.countryCode = countryCode
+                Config.countryCode = countryCode
                 long_enough = True
 
-        self.orgName = self.getPrompt("Enter Organization Name")
+        Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
 
         while True:
-            self.admin_email = self.getPrompt('Enter email address for support at your organization')
-            if self.check_email(self.admin_email):
+            Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
+            if self.check_email(Config.admin_email):
                 break
             else:
                 print("Please enter valid email address")
         
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
+        Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
 
-        oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
+        oxtrust_admin_password = Config.oxtrust_admin_password if Config.oxtrust_admin_password else self.getPW(special='.*=!%&+/-')
 
         while True:
             oxtrust_admin_password = self.getPrompt("Enter oxTrust Admin Password", oxtrust_admin_password)
@@ -442,87 +600,85 @@ class PropertiesUtils(SetupUtils):
             else:
                 print("Password must be at least 6 characters")
         
-        self.oxtrust_admin_password = oxtrust_admin_password
-
+        Config.oxtrust_admin_password = oxtrust_admin_password
 
         available_backends = self.getBackendTypes()
 
         localWrendsOnly = False
 
-        if (self.wrends_install != REMOTE) and (not self.cb_install) and (available_backends == ['wrends']):
-            self.wrends_install = LOCAL
+        if (Config.wrends_install != InstallTypes.REMOTE) and (not Config.cb_install) and (available_backends == ['wrends']):
+            Config.wrends_install = InstallTypes.LOCAL
             
-        elif self.wrends_install != REMOTE and (self.cb_install == REMOTE or 'couchbase' in available_backends):
+        elif Config.wrends_install != InstallTypes.REMOTE and (Config.cb_install == InstallTypes.REMOTE or 'couchbase' in available_backends):
             promptForLDAP = self.getPrompt("Install Local WrenDS Server?", "Yes")[0].lower()
             if promptForLDAP[0] == 'y':
-                self.wrends_install = LOCAL
+                Config.wrends_install = InstallTypes.LOCAL
             else:
-                self.wrends_install = NONE
+                Config.wrends_install = NONE
 
-        if self.wrends_install == LOCAL:
+        if Config.wrends_install == InstallTypes.LOCAL:
 
-            ldapPass = self.ldapPass if self.ldapPass else self.oxtrust_admin_password
+            ldapPass = Config.ldapPass if Config.ldapPass else Config.oxtrust_admin_password
 
             while True:
-                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(self.ldap_binddn), self.oxtrust_admin_password)
+                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), Config.oxtrust_admin_password)
 
                 if self.checkPassword(ldapPass):
                     break
                 else:
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
-            self.ldapPass = ldapPass
+            Config.ldapPass = ldapPass
 
-        elif self.wrends_install == REMOTE:
+        elif Config.wrends_install == InstallTypes.REMOTE:
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
-                ldapPass = self.getPrompt("    Password for '{0}'".format(self.ldap_binddn))
-                conn_check = self.check_remote_ldap(ldapHost, self.ldap_binddn, ldapPass)
+                ldapPass = self.getPrompt("    Password for '{0}'".format(Config.ldap_binddn))
+                conn_check = self.check_remote_ldap(ldapHost, Config.ldap_binddn, ldapPass)
                 if conn_check['result']:
                     break
                 else:
-                    print("    {}Error connecting to LDAP server: {} {}".format(gluu_utils.colors.FAIL, conn_check['reason'], gluu_utils.colors.ENDC))
+                    print("    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC))
 
-            self.ldapPass = ldapPass
-            self.ldap_hostname = ldapHost
+            Config.ldapPass = ldapPass
+            Config.ldap_hostname = ldapHost
 
-        if self.cb_install == REMOTE:
+        if Config.cb_install == InstallTypes.REMOTE:
             self.prompt_remote_couchbase()
 
         elif 'couchbase' in available_backends:
             promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
             if promptForCB[0] == 'y':
-                self.cb_install = LOCAL
+                self.cb_install = InstallTypes.LOCAL
                 self.isCouchbaseUserAdmin = True
 
                 while True:
-                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(gluu_utils.colors.BOLD, gluu_utils.colors.ENDC), self.oxtrust_admin_password)
+                    cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), Config.oxtrust_admin_password)
 
                     if self.checkPassword(cbPass):
                         break
                     else:
                         print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
-                self.cb_password = cbPass
-            self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
+                Config.cb_password = cbPass
 
-        if not (self.wrends_install or self.cb_install):
-            print("{}You must have at least one DB backend. Exiting...{}".format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+        if not (Config.wrends_install or Config.cb_install):
+            print("{}You must have at least one DB backend. Exiting...{}".format(colors.WARNING, colors.ENDC))
             sys.exit(False)
 
-        if self.cb_install:
-            self.cache_provider_type = 'NATIVE_PERSISTENCE'
+        if Config.cb_install:
+            Config.cache_provider_type = 'NATIVE_PERSISTENCE'
             self.add_couchbase_post_messages()
 
-        if not self.wrends_install and self.cb_install:
-            self.mappingLocations = { group: 'couchbase' for group in self.couchbaseBucketDict }
-            self.persistence_type = 'couchbase'
+        if not Config.wrends_install and Config.cb_install:
+            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+            Config.persistence_type = 'couchbase'
 
-        elif self.wrends_install and self.cb_install:
-            self.promptForBackendMappings()
-            self.persistence_type = 'hybrid'
+        elif Config.wrends_install and Config.cb_install:
+            Config.promptForBackendMappings()
+            Config.persistence_type = 'hybrid'
 
-        if setupOptions['allowPreReleasedFeatures']:
+        if Config.allowPreReleasedFeatures:
             while True:
                 java_type = self.getPrompt("Select Java type: 1.Jre-1.8   2.OpenJDK-11", '1')
                 if not java_type:
@@ -534,13 +690,13 @@ class PropertiesUtils(SetupUtils):
                     print("Please enter 1 or 2")
 
             if java_type == '1':
-                self.java_type = 'jre'
+                Config.java_type = 'jre'
             else:
-                self.java_type = 'jdk'
-                self.defaultTrustStoreFN = '%s/lib/security/cacerts' % self.jre_home
+                Config.java_type = 'jdk'
+                Config.defaultTrustStoreFN = '%s/lib/security/cacerts' % Config.jre_home
                 
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", 
-                                        self.getDefaultOption(self.installOxAuth)
+                                        self.getDefaultOption(Config.installOxAuth)
                                             )[0].lower()
         if promptForOxAuth == 'y':
             self.installOxAuth = True
@@ -548,115 +704,115 @@ class PropertiesUtils(SetupUtils):
             self.installOxAuth = False
 
         promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?",
-                                            self.getDefaultOption(self.installOxTrust)
+                                            self.getDefaultOption(Config.installOxTrust)
                                             )[0].lower()
         if promptForOxTrust == 'y':
-            self.installOxTrust = True
+            Config.installOxTrust = True
         else:
-            self.installOxTrust = False
+            Config.installOxTrust = False
 
         couchbase_mappings_ = self.getMappingType('couchbase')
         buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
 
         buckets_.append('gluu')
 
-        if self.cb_install == REMOTE:
+        if Config.cb_install == InstallTypes.REMOTE:
 
             isCBRoleOK = self.checkCBRoles(buckets_)
 
             if not isCBRoleOK[0]:
                 print("{}Please check user {} has roles {} on bucket(s) {}{}".format(
-                                gluu_utils.colors.DANGER,
+                                colors.DANGER,
                                 self.cbm.auth.username,
                                 ', '.join(self.cb_bucket_roles),
                                 ', '.join(isCBRoleOK[1]),
-                                gluu_utils.colors.ENDC
+                                colors.ENDC
                                 ))
                 sys.exit(False)
 
 
 
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
-                                        self.getDefaultOption(self.installHTTPD)
+                                        self.getDefaultOption(Config.installHTTPD)
                                         )[0].lower()
         if promptForHTTPD == 'y':
-            self.installHttpd = True
+            Config.installHttpd = True
         else:
-            self.installHttpd = False
+            Config.installHttpd = False
 
         promptForScimServer = self.getPrompt("Install Scim Server?",
-                                            self.getDefaultOption(self.installScimServer)
+                                            self.getDefaultOption(Config.installScimServer)
                                             )[0].lower()
         if promptForScimServer == 'y':
-            self.installScimServer = True
+            Config.installScimServer = True
 
         promptForFido2Server = self.getPrompt("Install Fido2 Server?",
-                                            self.getDefaultOption(self.installFido2)
+                                            self.getDefaultOption(Config.installFido2)
                                             )[0].lower()
         if promptForFido2Server == 'y':
-            self.installFido2 = True
+            Config.installFido2 = True
 
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
-                                            self.getDefaultOption(self.installSaml)
+                                            self.getDefaultOption(Config.installSaml)
                                             )[0].lower()
         if promptForShibIDP == 'y':
-            self.shibboleth_version = 'v3'
-            self.installSaml = True
-            self.gluuSamlEnabled = 'true'
-            if self.persistence_type in ('couchbase','hybrid'):
-                self.couchbaseShibUserPassword = self.getPW()
+            Config.shibboleth_version = 'v3'
+            Config.installSaml = True
+            Config.gluuSamlEnabled = 'true'
+            if Config.persistence_type in ('couchbase','hybrid'):
+                Config.couchbaseShibUserPassword = self.getPW()
         else:
-            self.installSaml = False
+            Config.installSaml = False
 
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?",
-                                            self.getDefaultOption(self.installOxAuthRP)
+                                            self.getDefaultOption(Config.installOxAuthRP)
                                             )[0].lower()
         if promptForOxAuthRP == 'y':
-            self.installOxAuthRP = True
+            Config.installOxAuthRP = True
         else:
-            self.installOxAuthRP = False
+            Config.installOxAuthRP = False
 
         promptForPassport = self.getPrompt("Install Passport?", 
-                                            self.getDefaultOption(self.installPassport)
+                                            self.getDefaultOption(Config.installPassport)
                                             )[0].lower()
         if promptForPassport == 'y':
-            self.installPassport = True
-            self.gluuPassportEnabled = 'true'
-            self.enable_scim_access_policy = 'true'
+            Config.installPassport = True
+            Config.gluuPassportEnabled = 'true'
+            Config.enable_scim_access_policy = 'true'
         else:
-            self.installPassport = False
+            Config.installPassport = False
 
-        if os.path.exists(os.path.join(self.distGluuFolder, 'casa.war')):
+        if os.path.exists(os.path.join(Config.distGluuFolder, 'casa.war')):
             self.promptForCasaInstallation()
 
-        if (not self.installOxd) and self.oxd_package:
+        if (not Config.installOxd) and Config.oxd_package:
             promptForOxd = self.getPrompt("Install Oxd?", 
-                                                self.getDefaultOption(self.installOxd)
+                                                self.getDefaultOption(Config.installOxd)
                                                 )[0].lower()
             if promptForOxd == 'y':
-                self.installOxd = True
+                Config.installOxd = True
             else:
-                self.installOxd = False
+                Config.installOxd = False
 
 
-        if self.installOxd:
+        if Config.installOxd:
 
             promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
-                                                self.getDefaultOption(self.oxd_use_gluu_storage)
+                                                self.getDefaultOption(Config.oxd_use_gluu_storage)
                                                 )[0].lower()
             if promptForOxdGluuStorage == 'y':
-                self.oxd_use_gluu_storage = True
+                Config.oxd_use_gluu_storage = True
 
 
         promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
-                                            self.getDefaultOption(self.installGluuRadius)
+                                            self.getDefaultOption(Config.installGluuRadius)
                                             )[0].lower()
         if promptForGluuRadius == 'y':
-            self.installGluuRadius = True
-            self.oxauth_legacyIdTokenClaims = 'true'
-            self.oxauth_openidScopeBackwardCompatibility =  'true'
-            self.enableRadiusScripts = 'true'
-            self.gluuRadiusEnabled = 'true'
+            Config.installGluuRadius = True
+            Config.oxauth_legacyIdTokenClaims = 'true'
+            Config.oxauth_openidScopeBackwardCompatibility =  'true'
+            Config.enableRadiusScripts = 'true'
+            Config.gluuRadiusEnabled = 'true'
         else:
-            self.installGluuRadius = False
+            Config.installGluuRadius = False

@@ -7,6 +7,16 @@ from setup_app.config import Config
 
 class BaseInstaller:
 
+    def start_installation(self):
+        Config.pbar.progress(self.service_name, self.pbar_text)
+        # execute for each installer
+        if Config.downloadWars:
+            self.download_files()
+        self.create_user()
+        self.create_folders()
+
+        self.install()
+
     def run_service_command(self, operation):
         try:
             if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_type + os_version in ('ubuntu18','debian9','debian10')):
@@ -26,5 +36,11 @@ class BaseInstaller:
     def start(self):
         self.run_service_command('start')
     
-    
+    def download_files(self):
+        pass
 
+    def create_user(self):
+        pass
+
+    def create_folders(self):
+        pass
