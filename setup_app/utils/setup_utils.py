@@ -15,9 +15,11 @@ import random
 from urllib.parse import urlparse
 
 from setup_app import paths
+
 from setup_app.pylib.pyDes import triple_des, ECB, PAD_PKCS5
 from setup_app.utils.base import logIt, logOSChanges, run
-from setup_app.config import Config, InstallTypes
+from setup_app.static import InstallTypes
+from setup_app.config import Config
 
 class SetupUtils:
 
@@ -81,8 +83,6 @@ class SetupUtils:
         return retDict
 
 
-
-
     # keep this for backward compatibility
     def detect_os_type(self):
         return Config.os_type, Config.os_version
@@ -121,13 +121,13 @@ class SetupUtils:
 
 
     def detect_hostname(self):
-        if not self.ip:
-            self.ip = self.detect_ip()
+        if not Config.ip:
+            Config.ip = self.detect_ip()
 
         detectedHostname = None
 
         try:
-            detectedHostname = socket.gethostbyaddr(self.ip)[0]
+            detectedHostname = socket.gethostbyaddr(Config.ip)[0]
         except:
             try:
                 detectedHostname = os.popen("/bin/hostname").read().strip()
@@ -329,9 +329,8 @@ class SetupUtils:
         
     def createLdapPw(self):
         try:
-            f = open(self.ldapPassFn, 'w')
-            f.write(self.ldapPass)
-            f.close()
+            with open(self.ldapPassFn, 'w') as w:
+                w.write(self.ldapPass)
             self.run([paths.cmd_chown, 'ldap:ldap', self.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
@@ -340,3 +339,89 @@ class SetupUtils:
     def deleteLdapPw(self):
         if os.path.isfile(self.ldapPassFn):
             os.remove(self.ldapPassFn)
+
+    def getMappingType(self, mtype):
+        location = []
+        for group in Config.mappingLocations:
+            if group != 'default' and Config.mappingLocations[group] == mtype:
+                location.append(group)
+
+        return location
+
+    def merge_dicts(self, *dict_args):
+        result = {}
+        for dictionary in dict_args:
+            result.update(dictionary)
+
+        return result
+
+    def get_filepaths(self, directory):
+        file_paths = []
+
+        for root, directories, files in os.walk(directory):
+            for filename in files:
+                # filepath = os.path.join(root, filename)
+                file_paths.append(filename)
+
+        return file_paths
+
+    def fomatWithDict(self, text, dictionary):
+        text = re.sub(r"%([^\(])", r"%%\1", text)
+        text = re.sub(r"%$", r"%%", text)  # There was a % at the end?
+
+        return text % dictionary
+
+    def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
+        fn = os.path.basename(filePath)
+        in_fp = os.path.join(templateFolder, fn) 
+        self.logIt("Rendering template %s" % in_fp)
+        template_text = self.readFile(in_fp)
+
+        # Create output folder if needed
+        if not os.path.exists(outputFolder):
+            os.makedirs(outputFolder)
+
+        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+        out_fp = os.path.join(outputFolder, fn)
+        self.writeFile(out_fp, rendered_text)
+
+    def renderTemplate(self, filePath):
+        self.renderTemplateInOut(filePath, Config.templateFolder, Config.outputFolder)
+
+    def createUser(self, userName, homeDir, shell='/bin/bash'):
+        
+        try:
+            useradd = '/usr/sbin/useradd'
+            cmd = [useradd, '--system', '--user-group', '--shell', shell, userName]
+            if homeDir:
+                cmd.insert(-1, '--create-home')
+                cmd.insert(-1, '--home-dir')
+                cmd.insert(-1, homeDir)
+            else:
+                cmd.insert(-1, '--no-create-home')
+            self.run(cmd)
+            if homeDir:
+                self.logOSChanges("User %s with homedir %s was created" % (userName, homeDir))
+            else:
+                self.logOSChanges("User %s without homedir was created" % (userName))
+        except:
+            self.logIt("Error adding user", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def createGroup(self, groupName):
+        try:
+            groupadd = '/usr/sbin/groupadd'
+            self.run([groupadd, groupName])
+            self.logOSChanges("Group %s was created" % (groupName))
+        except:
+            self.logIt("Error adding group", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def addUserToGroup(self, groupName, userName):
+        try:
+            usermod = '/usr/sbin/usermod'
+            self.run([usermod, '-a', '-G', groupName, userName])
+            self.logOSChanges("User %s was added to group %s" % (userName,groupName))
+        except:
+            self.logIt("Error adding group", True)
+            self.logIt(traceback.format_exc(), True)

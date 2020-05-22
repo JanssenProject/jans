@@ -18,4 +18,5 @@ cmd_mkdir = '/bin/mkdir'
 cmd_rpm = '/bin/rpm'
 cmd_dpkg = '/usr/bin/dpkg'
 opensslCommand = '/usr/bin/openssl'
-sysemProfile = '/etc/profile'
+cmd_wget = os.popen('which wget').read().strip()
+cmd_sed = os.popen('which sed').read().strip()

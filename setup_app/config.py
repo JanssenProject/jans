@@ -5,26 +5,9 @@ import json
 from collections import OrderedDict
 
 from setup_app.paths import DATA_DIR, INSTALL_DIR
+from setup_app.static import InstallTypes
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils.base import os_type, os_version, os_initdaemon
-
-cur_dir = os.path.dirname(os.path.realpath(__file__))
-
-class InstallTypes:
-    NONE = 0
-    LOCAL = '1'
-    REMOTE = '2'
-
-class colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    DANGER = '\033[31m'
 
 class Config:
 
@@ -35,13 +18,6 @@ class Config:
         self.currentGluuVersion = re.search('([\d.]+)', oxauth_info['version']).group().strip('.')
         self.githubBranchName = oxauth_info['branch']
 
-        # Used only if -w (get wars) options is given to setup.py
-        self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp3_war = 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp3_dist_jar = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
-        self.idp3_cml_keygenerator = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
     @classmethod
@@ -49,6 +25,7 @@ class Config:
 
         self.install_dir = install_dir
         self.thread_queue = None
+        self.pbar = None
         self.properties_password = None
         self.noPrompt = False
 
@@ -142,6 +119,7 @@ class Config:
         self.etc_hostname = '/etc/hostname'
         # OS /etc/default folder
         self.osDefault = '/etc/default'
+        self.sysemProfile = '/etc/profile'
 
         self.jython_home = '/opt/jython'
 
@@ -151,7 +129,6 @@ class Config:
         self.node_user_home = '/home/node'
         self.passport_initd_script = os.path.join(self.install_dir, 'static/system/initd/passport')
 
-        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.java_type = 'jre'
 
         self.jetty_home = '/opt/jetty'
