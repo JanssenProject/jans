@@ -131,6 +131,10 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private void saveCIBAInCache() {
         CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
         cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
+
+        CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
+        cibaCacheAuthReqIds.getAuthReqIds().add(cachedGrant.cacheKey());
+        cacheService.put(CIBACacheAuthReqIds.CACHE_KEY, cibaCacheAuthReqIds);
     }
 
     public boolean isImplicitFlow() {
