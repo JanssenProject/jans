@@ -277,7 +277,7 @@ border-color: #d6e9c6;
 				name = name ? name : provider;
 				if (logo_img == null) {
 					logo_img = "/oxauth/img/glu_icon.png"
-				} else if (logo_img.substring(0,4) != "http") {
+				} else if (logo_img.startsWith("http")) {
 					logo_img = "/oxauth/auth/passport/" + logo_img
 				}
 
