@@ -289,15 +289,6 @@
 
 		<dependency>
 			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-fido2-server</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-fido2-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-client</artifactId>
 		</dependency>
 		<dependency>
