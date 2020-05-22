@@ -47,7 +47,7 @@ public class AssertionController {
     @Produces({ "application/json" })
     @Path("/options")
     public Response authenticate(String content) {
-        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisableFido2()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
@@ -69,7 +69,7 @@ public class AssertionController {
     @Produces({ "application/json" })
     @Path("/result")
     public Response verify(String content) {
-        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisableFido2()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 

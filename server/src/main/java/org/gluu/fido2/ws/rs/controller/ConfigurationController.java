@@ -39,7 +39,7 @@ public class ConfigurationController {
 	@GET
 	@Produces({ "application/json" })
 	public Response getConfiguration() {
-        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisable()) {
+        if ((appConfiguration.getFido2Configuration() == null) || appConfiguration.getFido2Configuration().isDisableFido2()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
