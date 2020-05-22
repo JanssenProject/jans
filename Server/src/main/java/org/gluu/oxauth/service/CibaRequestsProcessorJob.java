@@ -26,6 +26,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -117,16 +118,14 @@ public class CibaRequestsProcessorJob {
 			}
 
 			CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
-			for (String authReqId : cibaCacheAuthReqIds.getAuthReqIds()) {
-				CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
-				if (cibaGrant == null) {
-					authorizationGrantList.removeCibaGrantFromProcessorCache(authReqId);
-					continue;
-				}
+			for (Map.Entry<String, Long> entry : cibaCacheAuthReqIds.getAuthReqIds().entrySet()) {
 				Date now = new Date();
-				if (now.getTime() > cibaGrant.getExpirationDate().getTime()) {
-					processExpiredRequest(cibaGrant);
-					authorizationGrantList.removeCibaGrantFromProcessorCache(authReqId);
+				if (entry.getValue() < now.getTime()) {
+					CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(entry.getKey());
+					if (cibaGrant != null) {
+						processExpiredRequest(cibaGrant);
+					}
+					authorizationGrantList.removeCibaGrantFromProcessorCache(entry.getKey());
 				}
 			}
 
@@ -137,6 +136,10 @@ public class CibaRequestsProcessorJob {
 	}
 
 	private void processExpiredRequest(CIBAGrant cibaGrant) {
+		if (cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_PENDING
+				&& cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+			return;
+		}
 		log.info("Authentication request id {} has expired", cibaGrant.getCIBAAuthenticationRequestId());
 
 		cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED);
