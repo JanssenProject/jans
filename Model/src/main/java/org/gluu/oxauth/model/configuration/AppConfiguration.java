@@ -220,6 +220,7 @@ public class AppConfiguration implements Configuration {
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
     private int backchannelRequestsProcessorJobIntervalSec;
+    private int cibaGrantLifeExtraTimeSec;
 
     public Boolean getErrorReasonEnabled() {
         if (errorReasonEnabled == null) errorReasonEnabled = false;
@@ -1750,5 +1751,13 @@ public class AppConfiguration implements Configuration {
 
     public void setBackchannelRequestsProcessorJobIntervalSec(int backchannelRequestsProcessorJobIntervalSec) {
         this.backchannelRequestsProcessorJobIntervalSec = backchannelRequestsProcessorJobIntervalSec;
+    }
+
+    public int getCibaGrantLifeExtraTimeSec() {
+        return cibaGrantLifeExtraTimeSec;
+    }
+
+    public void setCibaGrantLifeExtraTimeSec(int cibaGrantLifeExtraTimeSec) {
+        this.cibaGrantLifeExtraTimeSec = cibaGrantLifeExtraTimeSec;
     }
 }
