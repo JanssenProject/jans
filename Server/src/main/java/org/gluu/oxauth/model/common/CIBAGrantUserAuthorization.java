@@ -13,5 +13,6 @@ package org.gluu.oxauth.model.common;
 public enum CIBAGrantUserAuthorization {
     AUTHORIZATION_PENDING,
     AUTHORIZATION_GRANTED,
-    AUTHORIZATION_DENIED
+    AUTHORIZATION_DENIED,
+    AUTHORIZATION_EXPIRED
 }

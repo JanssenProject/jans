@@ -123,6 +123,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
         cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
+
+        CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
+        cibaCacheAuthReqIds.getAuthReqIds().add(memcachedGrant.cacheKey());
+        cacheService.put(CIBACacheAuthReqIds.CACHE_KEY, cibaCacheAuthReqIds);
+        log.trace("Put {} grant into the list of authentication request ids", memcachedGrant.cacheKey());
+
         return grant;
     }
 
@@ -135,6 +141,14 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
         }
         return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
+    }
+
+    @Override
+    public void removeCibaGrantFromProcessorCache(String cibaGrantKey) {
+        CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
+        cibaCacheAuthReqIds.getAuthReqIds().remove(cibaGrantKey);
+        cacheService.put(CIBACacheAuthReqIds.CACHE_KEY, cibaCacheAuthReqIds);
+        log.trace("Removed {} grant from the list of requests pending to be answered", cibaGrantKey);
     }
 
     @Override
