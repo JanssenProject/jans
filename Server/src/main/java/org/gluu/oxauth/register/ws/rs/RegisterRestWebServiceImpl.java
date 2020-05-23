@@ -75,7 +75,7 @@ import static org.gluu.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 22, 2019
+ * @version May 20, 2020
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -260,6 +260,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     r.getGrantTypes(),
                     r.getSubjectType(),
                     r.getSectorIdentifierUri(),
+                    r.getJwks(),
                     r.getJwksUri()
             )) { // CIBA
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA,
@@ -644,6 +645,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 request.getGrantTypes(),
                                 request.getSubjectType(),
                                 request.getSectorIdentifierUri(),
+                                request.getJwks(),
                                 request.getJwksUri()
                         )) {
                             return Response.status(Response.Status.BAD_REQUEST).
