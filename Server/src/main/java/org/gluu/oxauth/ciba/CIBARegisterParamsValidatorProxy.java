@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version May 20, 2020
  */
 @Stateless
 @Named
@@ -30,7 +30,7 @@ public class CIBARegisterParamsValidatorProxy implements CIBARegisterParamsValid
     public boolean validateParams(
             BackchannelTokenDeliveryMode backchannelTokenDeliveryMode, String backchannelClientNotificationEndpoint,
             AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg, Boolean backchannelUserCodeParameter,
-            List<GrantType> grantTypes, SubjectType subjectType, String sectorIdentifierUri, String jwksUri) {
+            List<GrantType> grantTypes, SubjectType subjectType, String sectorIdentifierUri, String jwks, String jwksUri) {
         return false;
     }
 }
