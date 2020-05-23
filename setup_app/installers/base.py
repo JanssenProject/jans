@@ -8,8 +8,7 @@ from setup_app.config import Config
 class BaseInstaller:
 
     def start_installation(self):
-        self.logIt(self.pbar_text)
-        Config.pbar.progress(self.service_name, self.pbar_text)
+        self.logIt(self.pbar_text, pbar=self.service_name)
         # execute for each installer
         if Config.downloadWars:
             self.download_files()
