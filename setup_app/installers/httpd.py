@@ -16,6 +16,8 @@ class HttpdInstaller(SetupUtils, BaseInstaller):
     def __init__(self):
         super().__init__()
         self.service_name = httpd_name
+        self.pbar_text = "Configuring Apache"
+
         self.apache_version = determineApacheVersion()
 
     def configure(self):
