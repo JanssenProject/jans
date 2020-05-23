@@ -33,6 +33,12 @@ from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.node import NodeInstaller
+from setup_app.installers.oxauth import OxauthInstaller
+from setup_app.installers.oxtrust import OxtrustInstaller
+from setup_app.installers.scim import ScimInstaller
+
+from setup_app.installers.passport import PassportInstaller
+
 
 
 thread_queue = None
@@ -71,10 +77,8 @@ if not argsp.n and not thread_queue:
 Config.pbar = ProgressBar(cols=tty_columns, queue=thread_queue)
 
 
-
 for key in setupOptions:
     setattr(Config, key, setupOptions[key])
-
 
 
 gluuInstaller = GluuInstaller()
@@ -89,6 +93,7 @@ Config.countryCode = 'GC'
 Config.city = 'GluuCity'
 Config.state = 'GluuState'
 Config.admin_email = 'admin@mygluu.org'
+Config.installPassport = True
 
 print()
 print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
@@ -102,16 +107,21 @@ print()
 # We need OxdInstaller initilized before prompting properties, since oxd package is determined by OxdInstaller
 oxdInstaller = OxdInstaller()
 
+# initialize installers
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 nodeInstaller = NodeInstaller()
+oxauthInstaller = OxauthInstaller()
+passportInstaller = PassportInstaller()
+oxtrustInstaller = OxtrustInstaller()
+scimInstaller = ScimInstaller()
 
 propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
 propertiesUtils.check_properties()
-print()
 
+print()
 print(gluuInstaller)
 
 proceed = True
@@ -123,40 +133,32 @@ if not Config.noPrompt:
 
 if proceed:
 
-    Config.pbar.progress("gluu", "Configuring system")
-    gluuInstaller.configureSystem()
-
-    Config.pbar.progress("gluu", "Calculating application memory")
-    gluuInstaller.calculate_selected_aplications_memory()
-
+    
+    #gluuInstaller.configureSystem()
+    #gluuInstaller.calculate_selected_aplications_memory()
     #jreInstaller.start_installation()
     #jettyInstaller.start_installation()
     #jythonInstaller.start_installation()
-    nodeInstaller.start_installation()
-    
+    #nodeInstaller.start_installation()
+    gluuInstaller.make_salt()
+    oxauthInstaller.make_oxauth_salt()
+    gluuInstaller.copy_scripts()
+    gluuInstaller.encode_passwords()
+    gluuInstaller.encode_test_passwords()
+
+    #generate configurations
+    Config.pbar.progress('gluu', 'Generating Configurations')
+    if Config.installPassport:
+        passportInstaller.generate_configuration()
+
+    oxtrustInstaller.generate_api_configuration()
+    scimInstaller.generate_configuration()
+
+    gluuInstaller.install_gluu_base()
+    gluuInstaller.prepare_base64_extension_scripts()
+    gluuInstaller.render_templates()
+
     """
-    self.pbar.progress("node", "Installing Node")
-    self.installNode()
-    self.pbar.progress("gluu", "Making salt")
-    self.make_salt()
-    self.pbar.progress("gluu", "Making oxauth salt")
-    self.make_oxauth_salt()
-    self.pbar.progress("scripts", "Copying scripts")
-    self.copy_scripts()
-    self.pbar.progress("gluu", "Encoding passwords")
-    self.encode_passwords()
-    self.pbar.progress("gluu", "Encoding test passwords")
-    self.encode_test_passwords()
-    
-    if self.installPassport:
-        self.generate_passport_configuration()
-    
-    self.pbar.progress("gluu", "Installing Gluu base")
-    self.install_gluu_base()
-    self.pbar.progress("gluu", "Preparing base64 extention scripts")
-    self.prepare_base64_extension_scripts()
-    self.pbar.progress("gluu", "Rendering templates")
-    self.render_templates()
     self.pbar.progress("gluu", "Generating crypto")
     self.generate_crypto()
     self.pbar.progress("gluu","Generating oxauth openid keys")

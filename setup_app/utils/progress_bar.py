@@ -28,7 +28,7 @@ class ProgressBar:
         else:
             ft = '#' * self.n
             ft = ft.ljust(self.max_steps)
-            msg =msg.ljust(40)
+            msg = msg.ljust(40)
             msg = msg[:self.max_text]
 
             sys.stdout.write("\rInstalling [{0}] {1}".format(ft, msg))

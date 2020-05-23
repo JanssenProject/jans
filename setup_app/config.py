@@ -25,7 +25,20 @@ class Config:
 
         self.install_dir = install_dir
         self.thread_queue = None
-        self.pbar = None
+
+        #create dummy progress bar in case not defined
+        class DummyProgressBar:
+            def __init__(self, *args):
+                 pass
+
+            def complete(self, *args):
+                pass
+
+            def progress(self, *args):
+                pass
+
+        self.pbar = DummyProgressBar()
+
         self.properties_password = None
         self.noPrompt = False
 

@@ -2,13 +2,16 @@ import os
 import glob
 import shutil
 
-from setup_app.config.config import Config
+from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 
-class ScimInstaller(SetupUtils):
+class ScimInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        pass
+        super().__init__()
+        self.service_name = 'scim'
+        self.pbar_text = "Installing Scim"
 
 
     def install(self):
@@ -24,14 +27,14 @@ class ScimInstaller(SetupUtils):
         self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
 
 
-    def generate_scim_configuration(self):
-        self.scim_rs_client_jks_pass = self.getPW()
+    def generate_configuration(self):
+        Config.scim_rs_client_jks_pass = self.getPW()
 
-        self.scim_rs_client_jks_pass_encoded = self.obscure(self.scim_rs_client_jks_pass)
+        Config.scim_rs_client_jks_pass_encoded = self.obscure(Config.scim_rs_client_jks_pass)
 
-        self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rs_client_jks_pass)
-        self.templateRenderingDict['scim_rs_client_base64_jwks'] = self.generate_base64_string(self.scim_rs_client_jwks, 1)
+        Config.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(Config.scim_rs_client_jks_fn, Config.scim_rs_client_jks_pass)
+        Config.templateRenderingDict['scim_rs_client_base64_jwks'] = self.generate_base64_string(Config.scim_rs_client_jwks, 1)
 
-        self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
-        self.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(self.scim_rp_client_jwks, 1)
+        Config.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(Config.scim_rp_client_jks_fn, Config.scim_rp_client_jks_pass)
+        Config.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(Config.scim_rp_client_jwks, 1)
 

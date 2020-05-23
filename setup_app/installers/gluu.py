@@ -2,6 +2,8 @@ import os
 import time
 import zipfile
 import inspect
+import base64
+import traceback
 
 from setup_app import paths
 from setup_app import static
@@ -93,6 +95,7 @@ class GluuInstaller(SetupUtils):
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
     def configureSystem(self):
+        Config.pbar.progress("gluu", "Configuring system")
         self.customiseSystem()
         self.createGroup('gluu')
         self.makeFolders()
@@ -140,23 +143,23 @@ class GluuInstaller(SetupUtils):
         self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
+        Config.pbar.progress("gluu", "Making salt")
         try:
-            f = open("%s/salt" % self.configFolder, 'w')
-            f.write('encodeSalt = %s' % self.encode_salt)
-            f.close()
+            salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
+            self.writeFile(os.path.join(Config.configFolder,'salt'), salt_text)
         except:
             self.logIt("Error writing salt", True)
             self.logIt(traceback.format_exc(), True)
             sys.exit()
 
     def render_templates(self, templates=None):
-        self.logIt("Rendering templates")
+        self.logIt("Rendering templates", pbar='gluu')
 
         if not templates:
-            templates = self.ce_templates
+            templates = Config.ce_templates
 
-        if self.persistence_type=='couchbase':
-            self.ce_templates[self.ox_ldap_properties] = False
+        if Config.persistence_type=='couchbase':
+            Config.ce_templates[Config.ox_ldap_properties] = False
 
         for fullPath in templates:
             try:
@@ -237,12 +240,13 @@ class GluuInstaller(SetupUtils):
         self.render_templates_folder(nodeTepmplatesFolder)
 
     def prepare_base64_extension_scripts(self):
+        self.logIt("Preparing scripts", pbar='gluu')
         try:
-            if not os.path.exists(self.extensionFolder):
+            if not os.path.exists(Config.extensionFolder):
                 return None
 
-            for extensionType in os.listdir(self.extensionFolder):
-                extensionTypeFolder = os.path.join(self.extensionFolder, extensionType)
+            for extensionType in os.listdir(Config.extensionFolder):
+                extensionTypeFolder = os.path.join(Config.extensionFolder, extensionType)
                 if not os.path.isdir(extensionTypeFolder):
                     continue
 
@@ -254,13 +258,12 @@ class GluuInstaller(SetupUtils):
                     extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
                     extensionScriptName = extensionScriptName.lower()
 
-                    self.templateRenderingDict[extensionScriptName] = base64ScriptFile
+                    Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
                     self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
 
         except:
-            self.logIt("Error loading scripts from %s" % self.extensionFolder, True)
+            self.logIt("Error loading scripts from %s" % Config.extensionFolder, True)
             self.logIt(traceback.format_exc(), True)
-
 
 
     def generate_base64_file(self, fn, num_spaces):
@@ -409,6 +412,8 @@ class GluuInstaller(SetupUtils):
                 Config.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - Config.templateRenderingDict["%s_max_heap_mem" % applicationName]
 
     def calculate_selected_aplications_memory(self):
+        Config.pbar.progress("gluu", "Calculating application memory")
+
         installedComponents = []
 
         # Jetty apps
@@ -431,3 +436,65 @@ class GluuInstaller(SetupUtils):
             installedComponents.append(Config.jetty_app_configuration['passport'])
             
         self.calculate_aplications_memory(Config.application_max_ram, Config.jetty_app_configuration, installedComponents)
+
+    def copy_scripts(self):
+        self.logIt("Copying script files", pbar='gluu')
+
+        for script in Config.gluuScriptFiles:
+            self.copyFile(script, Config.gluuOptBinFolder)
+
+        self.logIt("Rendering encode.py")
+        try:
+            encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))            
+            encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+            self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
+        except:
+            self.logIt("Error rendering encode script")
+            self.logIt(traceback.format_exc(), True)
+
+        self.run([paths.cmd_chmod, '-R', '700', Config.gluuOptBinFolder])
+
+    def encode_passwords(self):
+        self.logIt("Encoding passwords", pbar='gluu')
+        
+        try:
+            Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
+            Config.encoded_shib_jks_pw = self.obscure(Config.shibJksPass)
+            if Config.ldapPass:
+                Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
+            if Config.cb_password:
+                Config.encoded_cb_password = self.obscure(Config.cb_password)
+            Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
+
+            Config.oxauthClient_pw = self.getPW()
+            Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
+
+            Config.idpClient_pw = self.getPW()
+            Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)
+
+            Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
+        except:
+            self.logIt("Error encoding passwords", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def encode_test_passwords(self):
+        self.logIt("Encoding test passwords", pbar='gluu')
+        hostname = Config.hostname.split('.')[0]
+        try:
+            Config.templateRenderingDict['oxauthClient_2_pw'] = Config.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname
+            Config.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_2_pw'])
+
+            Config.templateRenderingDict['oxauthClient_3_pw'] =  Config.templateRenderingDict['oxauthClient_3_inum'] + '-' + hostname
+            Config.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_3_pw'])
+
+            Config.templateRenderingDict['oxauthClient_4_pw'] = Config.templateRenderingDict['oxauthClient_4_inum'] + '-' + hostname
+            Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
+        except:
+            self.logIt("Error encoding test passwords", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def install_gluu_base(self):
+        Config.ldapCertFn = Config.opendj_cert_fn
+        Config.ldapTrustStoreFn = Config.opendj_p12_fn
+        Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
+        Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
