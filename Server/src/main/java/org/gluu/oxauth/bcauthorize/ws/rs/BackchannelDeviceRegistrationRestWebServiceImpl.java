@@ -18,7 +18,7 @@ import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.DefaultErrorResponse;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 

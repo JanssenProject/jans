@@ -27,10 +27,10 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz
