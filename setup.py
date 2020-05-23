@@ -31,6 +31,7 @@ from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
+from setup_app.installers.jython import JythonInstaller
 
 thread_queue = None
 istty = False
@@ -101,6 +102,7 @@ oxdInstaller = OxdInstaller()
 
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
+jythonInstaller = JythonInstaller()
 
 propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
@@ -125,12 +127,10 @@ if proceed:
     gluuInstaller.calculate_selected_aplications_memory()
 
     #jreInstaller.start_installation()
-
-    jettyInstaller.start_installation()
-
+    #jettyInstaller.start_installation()
+    jythonInstaller.start_installation()
+    
     """
-    self.pbar.progress("jython", "Installing Jython")
-    self.installJython()
     self.pbar.progress("node", "Installing Node")
     self.installNode()
     self.pbar.progress("gluu", "Making salt")
