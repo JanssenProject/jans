@@ -15,14 +15,11 @@ import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauthconfigapi.configuration.ConfigurationFactory;
 import org.gluu.oxtrust.service.ApplicationFactory;
 import org.gluu.oxtrust.service.EncryptionService;
-import org.gluu.oxtrust.service.cdi.event.CentralLdap;
-import org.gluu.oxtrust.service.custom.LdapCentralConfigurationReload;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.util.CdiUtil;
-import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
@@ -41,16 +38,6 @@ public class OxauthConfigApiApplication {
 	@Inject
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
-
-	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
-	@ReportMetric
-	Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
-
-	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_CENTRAL_ENTRY_MANAGER_NAME)
-	@CentralLdap
-	Instance<PersistenceEntryManager> persistenceCentralEntryManagerInstance;
 
 	@Inject
 	Instance<EncryptionService> encryptionServiceInstance;
@@ -76,16 +63,13 @@ public class OxauthConfigApiApplication {
 		logger.info("===============STOPPING APPLICATION==============================");
 	}
 
-	
-	
-	
-	
 	@Produces
 	@ApplicationScoped
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	public PersistenceEntryManager createPersistenceEntryManager() {
-		Properties connectionProperties = preparePersistanceProperties();		
-		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
+		Properties connectionProperties = preparePersistanceProperties();
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory
+				.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory
 				.createEntryManager(connectionProperties);
 		logger.info("Created {}: {} with operation service: {}",
@@ -93,8 +77,7 @@ public class OxauthConfigApiApplication {
 						persistenceEntryManager.getOperationService() });
 		return persistenceEntryManager;
 	}
-	
-	
+
 	@Produces
 	@ApplicationScoped
 	public StringEncrypter getStringEncrypter() throws OxIntializationException {
@@ -132,19 +115,8 @@ public class OxauthConfigApiApplication {
 		closePersistenceEntryManager(oldLdapEntryManager, persistenceEntryManagerName);
 		PersistenceEntryManager ldapEntryManager = instance.get();
 		instance.destroy(ldapEntryManager);
-		logger.info("Recreated instance {}: {} with operation service: {}", persistenceEntryManagerName, ldapEntryManager,
-				ldapEntryManager.getOperationService());
-	}
-
-	public void recreateCentralPersistanceEntryManager(@Observes @LdapCentralConfigurationReload String event) {
-		PersistenceEntryManager oldCentralLdapEntryManager = CdiUtil.getContextBean(beanManager,
-				PersistenceEntryManager.class, ApplicationFactory.PERSISTENCE_CENTRAL_ENTRY_MANAGER_NAME);
-		closePersistenceEntryManager(oldCentralLdapEntryManager,
-				ApplicationFactory.PERSISTENCE_CENTRAL_ENTRY_MANAGER_NAME);
-		PersistenceEntryManager ldapCentralEntryManager = persistenceCentralEntryManagerInstance.get();
-		persistenceEntryManagerInstance.destroy(ldapCentralEntryManager);
-		logger.info("Recreated instance {}: {}", ApplicationFactory.PERSISTENCE_CENTRAL_ENTRY_MANAGER_NAME,
-				ldapCentralEntryManager);
+		logger.info("Recreated instance {}: {} with operation service: {}", persistenceEntryManagerName,
+				ldapEntryManager, ldapEntryManager.getOperationService());
 	}
 
 	private void closePersistenceEntryManager(PersistenceEntryManager oldPersistenceEntryManager,

@@ -118,7 +118,6 @@ public class ConfigurationFactory extends Initializable {
 	protected void initInternal() {
 		this.isActive = new AtomicBoolean(true);
 		try {
-			log.info("======Reading application configuration======");
 			loadBaseConfiguration();
 			this.persistenceConfiguration = persistanceFactoryService
 					.loadPersistenceConfiguration(LDAP_PROPERTIES_FILE);
