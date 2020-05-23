@@ -1,19 +1,23 @@
 import os
 import glob
-import shutil
+import re
+import traceback
 
-from setup_app.config.config import Config
+from setup_app import paths
+from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 
-class NodeInstaller(SetupUtils):
+class JythonInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        pass
+        super().__init__()
+        self.service_name = 'jython'
+        self.pbar_text = "Installing Jython"
 
-    def installJython(self):
-        self.logIt("Installing Jython")
+    def install(self):
 
-        jython_installer_list = glob.glob(os.path.join(self.distAppFolder, 'jython-installer-*'))
+        jython_installer_list = glob.glob(os.path.join(Config.distAppFolder, 'jython-installer-*'))
 
         if not jython_installer_list:
             self.logIt("Jython installer not found in. Exiting...", True, True)
@@ -28,11 +32,11 @@ class NodeInstaller(SetupUtils):
 
         try:
             self.run(['rm', '-rf', '/opt*-%s' % jython_version])
-            self.run([self.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard', '-e', 'ensurepip'])
+            self.run([Config.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % jython_version)
             self.logIt(traceback.format_exc(), True)
 
-        self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, self.jython_home])
-        self.run([self.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % jython_version])
-        self.run([self.cmd_chown, '-h', 'root:root', self.jython_home])
+        self.run([paths.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, Config.jython_home])
+        self.run([paths.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % jython_version])
+        self.run([paths.cmd_chown, '-h', 'root:root', Config.jython_home])
