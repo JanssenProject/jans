@@ -22,7 +22,6 @@ import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
@@ -48,9 +47,6 @@ public class CibaRequestsProcessorJob {
 	private Event<TimerEvent> processorEvent;
 
 	@Inject
-	private Instance<AbstractAuthorizationGrant> grantInstance;
-
-	@Inject
 	private CIBAPushErrorProxy cibaPushErrorProxy;
 
 	@Inject
@@ -66,6 +62,9 @@ public class CibaRequestsProcessorJob {
 
 	private AtomicBoolean isActive;
 
+	/**
+	 * Method invoked from the appInitializer to start processing every some time.
+	 */
 	public void initTimer() {
 		log.debug("Initializing CIBA requests processor");
 		this.isActive = new AtomicBoolean(false);
@@ -83,40 +82,43 @@ public class CibaRequestsProcessorJob {
 		if (this.isActive.get()) {
 			return;
 		}
-
 		if (!this.isActive.compareAndSet(false, true)) {
 			return;
 		}
 
 		try {
-			processImpl();
+			if (jobIsFree()) {
+				processImpl();
+				this.lastFinishedTime = System.currentTimeMillis();
+			} else {
+				log.trace("Starting conditions aren't reached for CIBA requestes processor");
+			}
 		} finally {
 			this.isActive.set(false);
 		}
 	}
 
-	private boolean isStartProcess() {
+	/**
+	 * Defines whether the job is still in process or it is free according to the time interval defined.
+	 * @return True in case it is free to start a new process.
+	 */
+	private boolean jobIsFree() {
 		int interval = appConfiguration.getBackchannelRequestsProcessorJobIntervalSec();
 		if (interval < 0) {
-			log.info("Cleaner Timer is disabled.");
-			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+			log.info("CIBA Requests processor timer is disabled.");
+			log.warn("CIBA Requests processor timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal CIBA Requests processor up timer run.");
 			return false;
 		}
 
-		long cleaningInterval = interval * 1000;
-
 		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
-
-		return timeDiffrence >= cleaningInterval;
+		return timeDiffrence >= interval * 1000;
 	}
 
+	/**
+	 * Main process that process CIBA requests in cache.
+	 */
 	public void processImpl() {
         try {
-			if (!isStartProcess()) {
-				log.trace("Starting conditions aren't reached");
-				return;
-			}
-
 			CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
 			for (Map.Entry<String, Long> entry : cibaCacheAuthReqIds.getAuthReqIds().entrySet()) {
 				Date now = new Date();
@@ -128,13 +130,16 @@ public class CibaRequestsProcessorJob {
 					authorizationGrantList.removeCibaGrantFromProcessorCache(entry.getKey());
 				}
 			}
-
-			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Exception e) {
 			log.error("Failed to process CIBA request from cache.", e);
 		}
 	}
 
+	/**
+	 * Method responsible to process expired CIBA grants, set them as expired in cache
+	 * and send callbacks to the client
+	 * @param cibaGrant Object containing data related to the CIBA grant.
+	 */
 	private void processExpiredRequest(CIBAGrant cibaGrant) {
 		if (cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_PENDING
 				&& cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
