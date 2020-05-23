@@ -32,6 +32,8 @@ from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
+from setup_app.installers.node import NodeInstaller
+
 
 thread_queue = None
 istty = False
@@ -103,6 +105,7 @@ oxdInstaller = OxdInstaller()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
+nodeInstaller = NodeInstaller()
 
 propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
@@ -128,7 +131,8 @@ if proceed:
 
     #jreInstaller.start_installation()
     #jettyInstaller.start_installation()
-    jythonInstaller.start_installation()
+    #jythonInstaller.start_installation()
+    nodeInstaller.start_installation()
     
     """
     self.pbar.progress("node", "Installing Node")
