@@ -1,6 +1,8 @@
 import os
 import glob
 import shutil
+import traceback
+
 from pathlib import Path
 
 from setup_app import paths
@@ -8,7 +10,7 @@ from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
-class JreInstaller(SetupUtils, BaseInstaller):
+class JreInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         super().__init__()

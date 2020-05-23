@@ -1,6 +1,7 @@
 import os
 import glob
 import re
+import traceback
 
 from setup_app import paths
 from setup_app.config import Config
@@ -15,7 +16,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.pbar_text = "Installing Jetty"
 
     def install(self):
-        self.logIt("Installing jetty ...")
 
         jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
 
