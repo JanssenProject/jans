@@ -149,6 +149,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
     }
 
+    /**
+     * Responsible to remove a Ciba grant from cache item that contains all pending to be answered requests.
+     * @param cibaGrantKey Key used in cache, normally it is authentication request ID.
+     */
     @Override
     public void removeCibaGrantFromProcessorCache(String cibaGrantKey) {
         CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
