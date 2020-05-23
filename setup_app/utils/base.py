@@ -72,7 +72,7 @@ def check_resources():
         print(("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
                "than the suggested RAM size of {2} GB.{3}").format(static.colors.WARNING,
                                                         current_mem_size, 
-                                                        suggested_mem_size,
+                                                        static.suggested_mem_size,
                                                         static.colors.ENDC))
 
 
@@ -86,9 +86,9 @@ def check_resources():
             "This is less than the required amount of {2} CPU Units.{3}".format(
                                                         static.colors.WARNING,
                                                         current_number_of_cpu, 
-                                                        suggested_number_of_cpu,
+                                                        static.suggested_number_of_cpu,
                                                         static.colors.ENDC)))
-                                                        
+
         result = input("Proceed anyways? [Y|n] ")
         if result and result[0].lower() == 'n':
             sys.exit()
