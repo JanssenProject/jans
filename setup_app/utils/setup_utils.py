@@ -11,22 +11,33 @@ import base64
 import json
 import string
 import random
+import hashlib
 
 from urllib.parse import urlparse
 
 from setup_app import paths
 
+from setup_app.utils.base import logIt as logOnly
+from setup_app.utils.base import logOSChanges, run
 from setup_app.pylib.pyDes import triple_des, ECB, PAD_PKCS5
-from setup_app.utils.base import logIt, logOSChanges, run
 from setup_app.static import InstallTypes
 from setup_app.config import Config
 
 class SetupUtils:
 
     def __init__(self):
-        self.logIt = logIt
         self.logOSChanges = logOSChanges
         self.run = run
+
+    def logIt(self, *args, **kwargs):
+        #if pbar in args, pass to progress bar
+        if 'pbar' in kwargs:
+            ptype = kwargs.pop('pbar')
+            msg = kwargs['msg'] if 'msg' in kwargs else args[0]
+            Config.pbar.progress(ptype, msg)
+
+        logOnly(*args, **kwargs)
+
 
     def obscure(self, data=""):
         engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
@@ -425,3 +436,129 @@ class SetupUtils:
         except:
             self.logIt("Error adding group", True)
             self.logIt(traceback.format_exc(), True)
+
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = Config.default_openid_jks_dn_name
+
+        if key_algs == None:
+            key_algs = Config.default_key_algs
+
+        if key_expiration == None:
+            key_expiration = Config.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = key_algs
+
+        # We can remove this once KeyGenerator will do the same
+        if jks_create == True:
+            self.logIt("Creating empty JKS keystore")
+            # Create JKS with dummy key
+            cmd = " ".join([Config.cmd_keytool,
+                            '-genkey',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
+            self.run([cmd], shell=True)
+
+            # Delete dummy key from JKS
+            cmd = " ".join([Config.cmd_keytool,
+                            '-delete',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
+            self.run([cmd], shell=True)
+
+        cmd = " ".join([Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        Config.non_setup_properties['key_gen_path'],
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration])
+
+        output = self.run([cmd], shell=True)
+
+        if output:
+            return output.splitlines()
+
+    def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
+        self.logIt("Exporting oxAuth OpenID Connect keys")
+
+        cmd = " ".join([self.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp",
+                        self.non_setup_properties['oxauth_client_jar_fn'], 
+                        self.non_setup_properties['key_export_path'],
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-alias",
+                        cert_alias,
+                        "-exportfile",
+                        cert_path])
+        self.run(['/bin/sh', '-c', cmd])
+
+    def write_openid_keys(self, fn, jwks):
+        self.logIt("Writing oxAuth OpenID Connect keys")
+        if not jwks:
+            self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
+            return
+
+        self.backupFile(fn)
+
+        try:
+            jwks_text = '\n'.join(jwks)
+            f = open(fn, 'w')
+            f.write(jwks_text)
+            f.close()
+            self.run([self.cmd_chown, 'jetty:jetty', fn])
+            self.run([self.cmd_chmod, '600', fn])
+            self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
+        except:
+            self.logIt("Error writing command : %s" % fn, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def generate_oxauth_openid_keys(self):
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, self.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+        self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
+
+    def generate_base64_string(self, lines, num_spaces):
+        if not lines:
+            return None
+
+        plain_text = ''.join(lines)
+        plain_b64encoded_text = base64.encodestring(plain_text.encode('utf-8')).decode('utf-8').strip()
+
+        if num_spaces > 0:
+            plain_b64encoded_text = self.reindent(plain_b64encoded_text, num_spaces)
+
+        return plain_b64encoded_text
