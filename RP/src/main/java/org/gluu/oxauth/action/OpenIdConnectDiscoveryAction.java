@@ -111,7 +111,6 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 				authorizationAction.setAuthorizationEndpoint(openIdConfigurationResponse.getAuthorizationEndpoint());
 				authorizationAction.setJwksUri(openIdConfigurationResponse.getJwksUri());
 				backchannelAuthenticationAction.setBackchannelAuthenticationEndpoint(openIdConfigurationResponse.getBackchannelAuthenticationEndpoint());
-				backchannelAuthenticationAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
 				tokenAction.setTokenEndpoint(openIdConfigurationResponse.getTokenEndpoint());
 				userInfoAction.setUserInfoEndpoint(openIdConfigurationResponse.getUserInfoEndpoint());
 				checkSessionAction.setCheckSessionEndpoint(openIdConfigurationResponse.getCheckSessionIFrame());
