@@ -30,6 +30,8 @@ from setup_app.installers.gluu import GluuInstaller
 from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.httpd import HttpdInstaller
 from setup_app.installers.jre import JreInstaller
+from setup_app.installers.jetty import JettyInstaller
+
 thread_queue = None
 istty = False
 
@@ -76,8 +78,8 @@ gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
 
 
-#Config.hostname = 'idp.mygluu.org'
-#Config.ip = '192.168.56.1'
+Config.hostname = 'idp.mygluu.org'
+Config.ip = '192.168.56.1'
 Config.oxtrust_admin_password = 'Top!Secret-20'
 Config.orgName = 'MyGluu'
 Config.countryCode = 'GC'
@@ -98,6 +100,7 @@ print()
 oxdInstaller = OxdInstaller()
 
 jreInstaller = JreInstaller()
+jettyInstaller = JettyInstaller()
 
 propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
@@ -121,11 +124,11 @@ if proceed:
     Config.pbar.progress("gluu", "Calculating application memory")
     gluuInstaller.calculate_selected_aplications_memory()
 
-    jreInstaller.start_installation()
+    #jreInstaller.start_installation()
+
+    jettyInstaller.start_installation()
 
     """
-    self.pbar.progress("jetty", "Installing Jetty")
-    self.installJetty()
     self.pbar.progress("jython", "Installing Jython")
     self.installJython()
     self.pbar.progress("node", "Installing Node")
