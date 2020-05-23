@@ -11,7 +11,7 @@ from setup_app.installers.base import BaseInstaller
 from setup_app import paths
 
 
-class HttpdInstaller(SetupUtils, BaseInstaller):
+class HttpdInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         super().__init__()

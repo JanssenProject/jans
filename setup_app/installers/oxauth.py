@@ -1,14 +1,12 @@
 import os
 import glob
+import random
+import string
 
-
-from setup_app.utils.base import httpd_name, clone_type, \
-    os_initdaemon, os_type, determineApacheVersion
-
+from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app import paths
 
 
 class OxauthInstaller(SetupUtils, BaseInstaller):
@@ -16,6 +14,7 @@ class OxauthInstaller(SetupUtils, BaseInstaller):
     def __init__(self):
         super().__init__()
         self.service_name = 'oxauth'
+        self.pbar_text = "Installing oxauth"
         self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion)
 
@@ -47,8 +46,9 @@ class OxauthInstaller(SetupUtils, BaseInstaller):
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
     def make_oxauth_salt(self):
-        self.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
-        self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
+        Config.pbar.progress("gluu", "Making oxauth salt")
+        Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def download_files(self):
         Config.pbar.progress('oxauth', "Downloading oxAuth war file")
