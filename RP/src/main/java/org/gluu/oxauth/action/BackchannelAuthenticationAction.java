@@ -42,7 +42,6 @@ public class BackchannelAuthenticationAction implements Serializable {
     private CibaSessions cibaSessions;
 
     private String backchannelAuthenticationEndpoint;
-    private String tokenEndpoint;
     private List<String> scope;
     private String clientNotificationToken;
     private String acrValues;
@@ -101,7 +100,6 @@ public class BackchannelAuthenticationAction implements Serializable {
         session.setTokenDeliveryMode(this.backchannelTokenDeliveryMode);
         session.setClientId(clientId);
         session.setClientSecret(clientSecret);
-        session.setTokenEndpoint(this.tokenEndpoint);
         session.setClientNotificationToken(clientNotificationToken);
         cibaSessions.getSessions().put(backchannelAuthenticationResponse.getAuthReqId(), session);
     }
@@ -111,9 +109,7 @@ public class BackchannelAuthenticationAction implements Serializable {
             CibaRequestSession session = cibaSessions.getSessions().get(authReqId);
             switch (session.getState()) {
                 case REQUEST_SENT: return "Waiting...";
-                case ACCEPTED: return "There is a result,now you can call to the Token Endpoint.";
-                case REJECTED: return "User has denied the access.";
-                case RESPONSE_GOTTEN: return "Push Response : ";
+                case RESPONSE_GOTTEN: return "Response : ";
                 default: return "Invalid state";
             }
         } else {
@@ -126,12 +122,10 @@ public class BackchannelAuthenticationAction implements Serializable {
     }
 
     public String getResponsePingFlow() {
-        if (cibaSessions.getSessions().containsKey(this.authReqId)
-                && cibaSessions.getSessions().get(this.authReqId).getTokenResponse() != null) {
-            return cibaSessions.getSessions().get(this.authReqId).getTokenResponse().getEntity();
-        } else {
-            return null;
+        if (cibaSessions.getSessions().containsKey(this.authReqId)) {
+            return cibaSessions.getSessions().get(this.authReqId).getCallbackJsonBody();
         }
+        return null;
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -260,14 +254,6 @@ public class BackchannelAuthenticationAction implements Serializable {
 
     public void setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode backchannelTokenDeliveryMode) {
         this.backchannelTokenDeliveryMode = backchannelTokenDeliveryMode;
-    }
-
-    public String getTokenEndpoint() {
-        return tokenEndpoint;
-    }
-
-    public void setTokenEndpoint(String tokenEndpoint) {
-        this.tokenEndpoint = tokenEndpoint;
     }
 
     public String getJsonResponse() {
