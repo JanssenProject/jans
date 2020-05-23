@@ -37,6 +37,8 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
