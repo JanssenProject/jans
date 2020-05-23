@@ -65,10 +65,22 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-client</artifactId>
 		</dependency>
+		<!-- OPEN API via Swagger 2 -->
 		<dependency>
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-smallrye-openapi</artifactId>
 		</dependency>
+		<!-- Health Check -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-smallrye-health</artifactId>
+		</dependency>
+		<!-- Metrics -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-smallrye-metrics</artifactId>
+		</dependency>
+		<!-- gluu dependencies -->
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-annotation</artifactId>
@@ -161,52 +173,52 @@
 				<version>${compiler-plugin.version}</version>
 			</plugin>
 			<plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire-plugin.version}</version>
-                <configuration>
-                    <excludedGroups>integration</excludedGroups>
-                    <systemProperties>
-                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                    </systemProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <excludedGroups>!integration</excludedGroups>
-                            <groups>integration</groups>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${surefire-plugin.version}</version>
+				<configuration>
+					<excludedGroups>integration</excludedGroups>
+					<systemProperties>
+						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+					</systemProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<excludedGroups>!integration</excludedGroups>
+							<groups>integration</groups>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.version}</version>
 				<executions>
 					<execution>
-                        <id>prepare-agent-ut</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco-ut.exec</destFile>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>prepare-agent-it</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
-                        </configuration>
-                    </execution>
+						<id>prepare-agent-ut</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.build.directory}/jacoco-ut.exec</destFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-agent-it</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<destFile>${project.build.directory}/jacoco-it.exec</destFile>
+						</configuration>
+					</execution>
 					<execution>
 						<id>jacoco-check</id>
 						<goals>
@@ -228,26 +240,26 @@
 						</configuration>
 					</execution>
 					<execution>
-                        <id>report-ut</id>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${project.build.directory}/jacoco-ut.exec</dataFile>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>report-it</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <dataFile>${project.build.directory}/jacoco-it.exec</dataFile>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
-                        </configuration>
-                    </execution>
+						<id>report-ut</id>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco-ut.exec</dataFile>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>report-it</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<dataFile>${project.build.directory}/jacoco-it.exec</dataFile>
+							<outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
