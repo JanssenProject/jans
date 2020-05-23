@@ -18,5 +18,8 @@ cmd_mkdir = '/bin/mkdir'
 cmd_rpm = '/bin/rpm'
 cmd_dpkg = '/usr/bin/dpkg'
 opensslCommand = '/usr/bin/openssl'
+
 cmd_wget = os.popen('which wget').read().strip()
 cmd_sed = os.popen('which sed').read().strip()
+cmd_tar = os.popen('which tar').read().strip()
+cmd_unzip = os.popen('which unzip').read().strip()
