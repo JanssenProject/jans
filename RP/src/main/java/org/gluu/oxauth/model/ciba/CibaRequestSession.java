@@ -13,8 +13,6 @@ public class CibaRequestSession {
     private BackchannelTokenDeliveryMode tokenDeliveryMode;
     private String clientId;
     private String clientSecret;
-    private String tokenEndpoint;
-    private TokenResponse tokenResponse;
     private String clientNotificationToken;
     private String callbackJsonBody;
 
@@ -75,22 +73,6 @@ public class CibaRequestSession {
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
-    }
-
-    public String getTokenEndpoint() {
-        return tokenEndpoint;
-    }
-
-    public void setTokenEndpoint(String tokenEndpoint) {
-        this.tokenEndpoint = tokenEndpoint;
-    }
-
-    public TokenResponse getTokenResponse() {
-        return tokenResponse;
-    }
-
-    public void setTokenResponse(TokenResponse tokenResponse) {
-        this.tokenResponse = tokenResponse;
     }
 
     public String getClientNotificationToken() {
