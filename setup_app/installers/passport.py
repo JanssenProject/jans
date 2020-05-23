@@ -1,14 +1,11 @@
 import os
 import glob
+import uuid
 
-
-from setup_app.utils.base import httpd_name, clone_type, \
-    os_initdaemon, os_type, determineApacheVersion
-
+from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app import paths
 
 
 class PassportInstaller(SetupUtils, BaseInstaller):
@@ -16,10 +13,9 @@ class PassportInstaller(SetupUtils, BaseInstaller):
     def __init__(self):
         super().__init__()
         self.service_name = 'passport'
-
+        self.pbar_text = "Installing Passport"
 
     def install(self):
-        self.logIt("Installing Passport...")
 
         self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
         self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
@@ -102,16 +98,17 @@ class PassportInstaller(SetupUtils, BaseInstaller):
         self.enable_service_at_start('passport')
 
     def generate_configuration(self):
-        self.passport_rs_client_jks_pass = self.getPW()
-        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
+        self.logIt("Generating Passport configuration")
+        Config.passport_rs_client_jks_pass = self.getPW()
+        Config.passport_rs_client_jks_pass_encoded = self.obscure(Config.passport_rs_client_jks_pass)
 
-        if not self.passport_rs_client_id:
-            self.passport_rs_client_id = '1501.' + str(uuid.uuid4())
-        if not self.passport_rp_client_id:
-            self.passport_rp_client_id = '1502.' + str(uuid.uuid4())
-        if not self.passport_rp_ii_client_id:
-            self.passport_rp_ii_client_id = '1503.'  + str(uuid.uuid4())
-        if not self.passport_resource_id:
-            self.passport_resource_id = '1504.'  + str(uuid.uuid4())
+        if not Config.passport_rs_client_id:
+            Config.passport_rs_client_id = '1501.{}'.format(uuid.uuid4())
+        if not Config.passport_rp_client_id:
+            Config.passport_rp_client_id = '1502.{}'.format(uuid.uuid4())
+        if not Config.passport_rp_ii_client_id:
+            Config.passport_rp_ii_client_id = '1503.{}'.format(uuid.uuid4())
+        if not Config.passport_resource_id:
+            Config.passport_resource_id = '1504.{}'.format(uuid.uuid4())
 
-        self.renderTemplate(self.passport_oxtrust_config_fn)
+        self.renderTemplate(Config.passport_oxtrust_config_fn)
