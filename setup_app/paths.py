@@ -1,5 +1,6 @@
 import os
 import pathlib
+import shutil
 
 APP_ROOT = pathlib.Path(__file__).parent.as_posix()
 INSTALL_DIR = pathlib.Path(__file__).parent.parent.as_posix()
@@ -19,7 +20,7 @@ cmd_rpm = '/bin/rpm'
 cmd_dpkg = '/usr/bin/dpkg'
 opensslCommand = '/usr/bin/openssl'
 
-cmd_wget = os.popen('which wget').read().strip()
-cmd_sed = os.popen('which sed').read().strip()
-cmd_tar = os.popen('which tar').read().strip()
-cmd_unzip = os.popen('which unzip').read().strip()
+cmd_wget = shutil.which('wget')
+cmd_sed = shutil.which('sed')
+cmd_tar = shutil.which('tar')
+cmd_unzip = shutil.which('unzip')
