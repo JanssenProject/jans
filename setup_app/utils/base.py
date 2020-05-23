@@ -11,6 +11,7 @@ import copy
 import subprocess
 import traceback
 import re
+import shutil
 import multiprocessing
 
 from setup_app import paths
@@ -38,7 +39,7 @@ if os_type == 'debian':
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora') and os_initdaemon == 'systemd') or (os_type + os_version in ('ubuntu18','debian9','debian10')):
-    service_path = os.popen('which systemctl').read().strip()
+    service_path = shutil.which('systemctl')
 elif self.os_type in ['debian', 'ubuntu']:
     service_path = '/usr/sbin/service'
 else:
