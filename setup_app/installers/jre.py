@@ -28,7 +28,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.logIt("Extracting %s into /opt/" % os.path.basename(self.jreArchive))
-            self.run(['tar', '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run([paths.cdm_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % self.jreArchive)
             self.logIt(traceback.format_exc(), True)
