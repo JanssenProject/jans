@@ -656,3 +656,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return response
 
         return None
+
+        
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
