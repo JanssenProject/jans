@@ -1067,3 +1067,7 @@ class PersonAuthentication(PersonAuthenticationType):
             subject = "User log in: %s" % user_id
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
