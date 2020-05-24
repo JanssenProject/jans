@@ -80,6 +80,11 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-smallrye-metrics</artifactId>
 		</dependency>
+		<!-- Jsonb -->
+		<dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-resteasy-jsonb</artifactId>
+		</dependency>
 		<!-- gluu dependencies -->
 		<dependency>
 			<groupId>org.gluu</groupId>
