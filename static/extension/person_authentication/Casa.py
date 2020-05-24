@@ -87,10 +87,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
-        
+
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         print "Casa. isValidAuthenticationMethod called"
@@ -195,7 +194,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Casa. prepareForStep %s" % str(step)
         identity = CdiUtil.bean(Identity)
-        
+
         if step == 1:
             self.prepareUIParams(identity)
             return True
@@ -656,4 +655,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return response
 
+        return None
+
+        
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
         return None
