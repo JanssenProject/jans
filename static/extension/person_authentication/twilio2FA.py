@@ -69,7 +69,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -182,7 +182,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
-            facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
 
             return False
 
@@ -213,6 +213,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return "/auth/otp_sms/otp_sms.xhtml"
 
         return ""
+        
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
 
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
+        
     def logout(self, configurationAttributes, requestParameters):
         return True
