@@ -55,7 +55,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -214,7 +214,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-    
+        
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None    
+        
+        
     def getMetaDataConfiguration(self):
         if self.metaDataConfiguration != None:
             return self.metaDataConfiguration
