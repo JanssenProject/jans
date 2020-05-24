@@ -52,15 +52,20 @@ public class OxauthConfigApiApplication {
 	ConfigurationFactory configurationFactory;
 
 	void onStart(@Observes StartupEvent ev) {
-		logger.info("===============STARTING API APPLICATION==========================");
+		logger.info("=================================================================");
+		logger.info("=============  STARTING API APPLICATION  ========================");
+		logger.info("=================================================================");
 		configurationFactory.create();
 		persistenceEntryManagerInstance.get();
-		configurationFactory.initTimer();
-		logger.info("===============STARTUP PROCESS COMPLETED=========================");
+		logger.info("=================================================================");
+		logger.info("==============  APPLICATION IS UP AND RUNNING ===================");
+		logger.info("=================================================================");
 	}
 
 	void onStop(@Observes ShutdownEvent ev) {
-		logger.info("===============STOPPING APPLICATION==============================");
+		logger.info("================================================================");
+		logger.info("===========  API APPLICATION STOPPED  ==========================");
+		logger.info("================================================================");
 	}
 
 	@Produces

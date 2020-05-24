@@ -32,7 +32,6 @@ import org.gluu.service.cdi.event.ConfigurationEvent;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
 import org.gluu.util.StringHelper;
 import org.gluu.util.init.Initializable;
 import org.gluu.util.properties.FileConfiguration;
@@ -74,8 +73,6 @@ public class ConfigurationFactory extends Initializable {
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String PERSISTENCE_CENTRAL_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceCentralConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
-
-	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	static {
 		if (System.getProperty("gluu.base") != null) {
@@ -138,14 +135,6 @@ public class ConfigurationFactory extends Initializable {
 		} else {
 			log.info("Configuration loaded successfully.");
 		}
-	}
-
-	public void initTimer() {
-		log.debug("Initializing Configuration Timer");
-		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
-		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new ConfigurationEvent(),
-				Scheduled.Literal.INSTANCE));
 	}
 
 	@Asynchronous
@@ -229,7 +218,7 @@ public class ConfigurationFactory extends Initializable {
 	@Produces
 	@ApplicationScoped
 	public PersistenceConfiguration getPersistenceConfiguration() {
-		log.info("Returning PersistenceConfiguration "+ persistenceConfiguration);
+		log.info("Returning PersistenceConfiguration " + persistenceConfiguration);
 		return persistenceConfiguration;
 	}
 
