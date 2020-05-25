@@ -9,7 +9,6 @@ from setup_app.utils.setup_utils import SetupUtils
 class ScimInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'scim'
         self.pbar_text = "Installing Scim"
 

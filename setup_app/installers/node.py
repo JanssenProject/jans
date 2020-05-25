@@ -10,7 +10,6 @@ from setup_app.installers.base import BaseInstaller
 class NodeInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'node'
         self.pbar_text = "Installing Node"
 

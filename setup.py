@@ -27,7 +27,7 @@ from setup_app.utils import printVersion
 
 
 from setup_app.utils.properties_utils import PropertiesUtils
-
+from setup_app.utils.setup_utils import SetupUtils
 
 from setup_app.installers.gluu import GluuInstaller
 from setup_app.installers.oxd import OxdInstaller
@@ -39,8 +39,9 @@ from setup_app.installers.node import NodeInstaller
 from setup_app.installers.oxauth import OxauthInstaller
 from setup_app.installers.oxtrust import OxtrustInstaller
 from setup_app.installers.scim import ScimInstaller
-
+from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.passport import PassportInstaller
+from setup_app.installers.opendj import OpenDjInstaller
 
 
 
@@ -51,6 +52,8 @@ istty = False
 Config.init(paths.INSTALL_DIR)
 Config.determine_version()
 
+# we must initilize SetupUtils after initilizing Config
+SetupUtils.init()
 
 # get setup options from args
 argsp, setupOptions = get_setup_options()
@@ -126,6 +129,7 @@ oxauthInstaller = OxauthInstaller()
 passportInstaller = PassportInstaller()
 oxtrustInstaller = OxtrustInstaller()
 scimInstaller = ScimInstaller()
+openDjInstaller = OpenDjInstaller()
 
 print()
 print(gluuInstaller)
@@ -139,13 +143,14 @@ if not Config.noPrompt:
 
 if proceed:
 
-    
-    #gluuInstaller.configureSystem()
-    #gluuInstaller.calculate_selected_aplications_memory()
-    #jreInstaller.start_installation()
-    #jettyInstaller.start_installation()
-    #jythonInstaller.start_installation()
-    #nodeInstaller.start_installation()
+
+    gluuInstaller.configureSystem()
+    gluuInstaller.calculate_selected_aplications_memory()
+
+    jreInstaller.start_installation()
+    jettyInstaller.start_installation()
+    jythonInstaller.start_installation()
+    nodeInstaller.start_installation()
     gluuInstaller.make_salt()
     oxauthInstaller.make_oxauth_salt()
     gluuInstaller.copy_scripts()
@@ -175,18 +180,19 @@ if proceed:
     gluuInstaller.generate_base64_configuration()
     gluuInstaller.render_configuration_template()
     gluuInstaller.update_hostname()
+    
+    gluuInstaller.set_ulimits()
+    gluuInstaller.copy_output()
+    gluuInstaller.setup_init_scripts()
+    gluuInstaller.render_node_templates()
+
+    # Installing gluu components
+
+    if Config.wrends_install:
+        openDjInstaller.start_installation()
+
 
     """
-    self.pbar.progress("gluu", "Updating hostname")
-    self.update_hostname()
-    self.pbar.progress("gluu", "Setting ulimits")
-    self.set_ulimits()
-    self.pbar.progress("gluu", "Copying output")
-    self.copy_output()
-    self.pbar.progress("gluu", "Setting up init scripts")
-    self.setup_init_scripts()
-    self.pbar.progress("node", "Rendering node templates")
-    self.render_node_templates()
     self.pbar.progress("gluu", "Installing Gluu components")
     self.install_gluu_components()
     self.pbar.progress("gluu", "Rendering test templates")

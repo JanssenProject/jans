@@ -19,9 +19,6 @@ from setup_app.pylib.jproperties import Properties
 
 class PropertiesUtils(SetupUtils):
 
-    def __init__(self):
-        super().__init__()
-
     def getDefaultOption(self, val):
         return 'Yes' if val else 'No'
         
@@ -101,7 +98,7 @@ class PropertiesUtils(SetupUtils):
             Config.passportSpJksPass = self.getPW()
 
         if not Config.encode_salt:
-            Config.encode_salt= self.getPW() + self.getPW()
+            Config.encode_salt = self.getPW() + self.getPW()
 
         if not Config.oxauth_client_id:
             Config.oxauth_client_id = '1001.'+ str(uuid.uuid4())

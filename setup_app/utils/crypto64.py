@@ -331,6 +331,7 @@ class Crypto64:
 
     def write_openid_keys(self, fn, jwks):
         self.logIt("Writing oxAuth OpenID Connect keys")
+
         if not jwks:
             self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
             return
