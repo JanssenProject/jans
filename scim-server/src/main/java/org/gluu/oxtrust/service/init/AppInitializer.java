@@ -1,8 +1,16 @@
 package org.gluu.oxtrust.service.init;
 
+import java.util.Properties;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxtrust.config.ConfigurationFactory;
 import org.gluu.oxtrust.service.ApplicationFactory;
 import org.gluu.oxtrust.service.logger.LoggerService;
 import org.gluu.persist.PersistenceEntryManager;
@@ -15,14 +23,6 @@ import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.PropertiesDecrypter;
 import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Properties;
 
 @ApplicationScoped
 public class AppInitializer {
