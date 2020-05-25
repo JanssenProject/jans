@@ -79,7 +79,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -123,8 +123,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Authenticate for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -234,8 +234,8 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Prepare for step 2"
 
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -308,6 +308,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return "/auth/uaf/login.xhtml"
 
         return ""
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
 
     def logout(self, configurationAttributes, requestParameters):
         return True
@@ -387,11 +394,4 @@ class PersonAuthentication(PersonAuthenticationType):
             return response_string
         finally:
             http_service_response.closeConnection()
-        return None
-
-    def getNextStep(self, configurationAttributes, requestParameters, step):
-        return -1
-
-    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
-        print "Get external logout URL call"
         return None
