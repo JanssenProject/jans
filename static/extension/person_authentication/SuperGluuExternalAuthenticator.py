@@ -158,7 +158,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -348,15 +348,15 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-                if StringHelper.isEmpty(session_id):
+                session = CdiUtil.bean(SessionIdService).getSessionId()
+                if session == None:
                     print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                     return False
-            
+
                 issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
-                                   'state': session_id,
+                                   'state': session.getId(),
                                    'licensed': self.valid_license,
                                    'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
@@ -387,8 +387,8 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
             
-            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
-            if StringHelper.isEmpty(session_id):
+            session = CdiUtil.bean(SessionIdService).getSessionId()
+            if session == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                 return False
 
@@ -404,7 +404,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
-                               'state': session_id,
+                               'state': session.getId(),
                                'licensed': self.valid_license,
                                'created': DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now().withNano(0))}
 
@@ -473,6 +473,10 @@ class PersonAuthentication(PersonAuthenticationType):
                     return "/auth/super-gluu/login.xhtml"
 
         return ""
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
 
     def logout(self, configurationAttributes, requestParameters):
         return True
@@ -1067,7 +1071,3 @@ class PersonAuthentication(PersonAuthenticationType):
             subject = "User log in: %s" % user_id
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)
-
-    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
-        print "Get external logout URL call"
-        return None
