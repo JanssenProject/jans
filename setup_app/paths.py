@@ -18,8 +18,7 @@ cmd_chgrp = '/bin/chgrp'
 cmd_mkdir = '/bin/mkdir'
 cmd_rpm = '/bin/rpm'
 cmd_dpkg = '/usr/bin/dpkg'
-opensslCommand = '/usr/bin/openssl'
-
+cmd_openssl = shutil.which('openssl')
 cmd_wget = shutil.which('wget')
 cmd_sed = shutil.which('sed')
 cmd_tar = shutil.which('tar')
