@@ -220,6 +220,7 @@ public class AppConfiguration implements Configuration {
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
     private int backchannelRequestsProcessorJobIntervalSec;
     private int cibaGrantLifeExtraTimeSec;
+    private int cibaMaxExpirationTimeAllowedSec;
 
     public Boolean getErrorReasonEnabled() {
         if (errorReasonEnabled == null) errorReasonEnabled = false;
@@ -1751,4 +1752,13 @@ public class AppConfiguration implements Configuration {
     public void setCibaGrantLifeExtraTimeSec(int cibaGrantLifeExtraTimeSec) {
         this.cibaGrantLifeExtraTimeSec = cibaGrantLifeExtraTimeSec;
     }
+
+    public int getCibaMaxExpirationTimeAllowedSec() {
+        return cibaMaxExpirationTimeAllowedSec;
+    }
+
+    public void setCibaMaxExpirationTimeAllowedSec(int cibaMaxExpirationTimeAllowedSec) {
+        this.cibaMaxExpirationTimeAllowedSec = cibaMaxExpirationTimeAllowedSec;
+    }
+
 }
