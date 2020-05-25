@@ -9,6 +9,7 @@ from setup_app import paths
 from setup_app import static
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils import base
 
 class GluuInstaller(SetupUtils):
 
@@ -188,11 +189,11 @@ class GluuInstaller(SetupUtils):
             self.logIt(traceback.format_exc(), True)
 
     def render_configuration_template(self):
-        self.logIt("Rendering configuration templates")
+        self.logIt("Rendering configuration templates", pbar='gluu')
 
         try:
-            self.renderTemplate(self.ldif_configuration)
-            self.renderTemplate(self.ldif_fido2)
+            self.renderTemplate(Config.ldif_configuration)
+            self.renderTemplate(Config.ldif_fido2)
         except:
             self.logIt("Error writing template", True)
             self.logIt(traceback.format_exc(), True)
@@ -239,73 +240,6 @@ class GluuInstaller(SetupUtils):
         nodeTepmplatesFolder = '%s/node/' % self.templateFolder
         self.render_templates_folder(nodeTepmplatesFolder)
 
-    def prepare_base64_extension_scripts(self):
-        self.logIt("Preparing scripts", pbar='gluu')
-        try:
-            if not os.path.exists(Config.extensionFolder):
-                return None
-
-            for extensionType in os.listdir(Config.extensionFolder):
-                extensionTypeFolder = os.path.join(Config.extensionFolder, extensionType)
-                if not os.path.isdir(extensionTypeFolder):
-                    continue
-
-                for scriptFile in os.listdir(extensionTypeFolder):
-                    scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
-                    base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
-
-                    # Prepare key for dictionary
-                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
-                    extensionScriptName = extensionScriptName.lower()
-
-                    Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
-                    self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
-
-        except:
-            self.logIt("Error loading scripts from %s" % Config.extensionFolder, True)
-            self.logIt(traceback.format_exc(), True)
-
-
-    def generate_base64_file(self, fn, num_spaces):
-        self.logIt('Loading file %s' % fn)
-        plain_file_b64encoded_text = None
-        try:
-            plain_file_text = self.readFile(fn, rmode='rb')
-            plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
-        except:
-            self.logIt("Error loading file", True)
-            self.logIt(traceback.format_exc(), True)
-
-        if num_spaces > 0:
-            plain_file_b64encoded_text = self.reindent(plain_file_b64encoded_text, num_spaces)
-
-        return plain_file_b64encoded_text
-
-    def generate_base64_ldap_file(self, fn):
-        return self.generate_base64_file(fn, 1)
-
-    def generate_base64_configuration(self):
-        self.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
-        self.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
-        self.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
-        self.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
-
-        self.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_ldap_file(self.fido2_dynamic_conf_json)
-        self.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_ldap_file(self.fido2_static_conf_json)
-
-        if self.installPassport:
-            oxtrust_config = json.loads(self.readFile(self.oxtrust_config_json), object_pairs_hook=OrderedDict)
-            passport_oxtrust_config = json.loads(self.readFile(self.passport_oxtrust_config_fn), object_pairs_hook=OrderedDict)
-            oxtrust_config.update(passport_oxtrust_config)
-
-            with open(self.oxtrust_config_json, 'w') as w:
-                json.dump(oxtrust_config, w, indent=2)
-
-        self.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(self.oxtrust_config_json);
-        self.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
-        self.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
-
-        self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
 
     def writeHybridProperties(self):
 
@@ -454,47 +388,31 @@ class GluuInstaller(SetupUtils):
 
         self.run([paths.cmd_chmod, '-R', '700', Config.gluuOptBinFolder])
 
-    def encode_passwords(self):
-        self.logIt("Encoding passwords", pbar='gluu')
-        
-        try:
-            Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
-            Config.encoded_shib_jks_pw = self.obscure(Config.shibJksPass)
-            if Config.ldapPass:
-                Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
-            if Config.cb_password:
-                Config.encoded_cb_password = self.obscure(Config.cb_password)
-            Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
 
-            Config.oxauthClient_pw = self.getPW()
-            Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
+    def update_hostname(self):
+        self.logIt("Copying hosts and hostname to final destination")
 
-            Config.idpClient_pw = self.getPW()
-            Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)
+        if base.os_initdaemon == 'systemd' and base.clone_type == 'rpm':
+            self.run(['/usr/bin/hostnamectl', 'set-hostname', Config.hostname])
+        else:
+            if Config.os_type in ['debian', 'ubuntu']:
+                self.copyFile("%s/hostname" % Config.outputFolder, Config.etc_hostname)
+                self.run(['/bin/chmod', '-f', '644', Config.etc_hostname])
 
-            Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
-        except:
-            self.logIt("Error encoding passwords", True)
-            self.logIt(traceback.format_exc(), True)
+            if Config.os_type in ['centos', 'red', 'fedora']:
+                self.copyFile("%s/network" % Config.outputFolder, Config.network)
 
-    def encode_test_passwords(self):
-        self.logIt("Encoding test passwords", pbar='gluu')
-        hostname = Config.hostname.split('.')[0]
-        try:
-            Config.templateRenderingDict['oxauthClient_2_pw'] = Config.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_2_pw'])
+            self.run(['/bin/hostname', Config.hostname])
 
-            Config.templateRenderingDict['oxauthClient_3_pw'] =  Config.templateRenderingDict['oxauthClient_3_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_3_pw'])
+        if not os.path.exists(Config.etc_hosts):
+            self.writeFile(Config.etc_hosts, '{}\t{}\n'.format(Config.ip, Config.hostname))
+        else:
+            hostname_file_content = self.readFile(Config.etc_hosts)
+            with open(Config.etc_hosts,'w') as w:
+                for l in hostname_file_content.splitlines():
+                    if not Config.hostname in l.split():
+                        w.write(l+'\n')
 
-            Config.templateRenderingDict['oxauthClient_4_pw'] = Config.templateRenderingDict['oxauthClient_4_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
-        except:
-            self.logIt("Error encoding test passwords", True)
-            self.logIt(traceback.format_exc(), True)
+                w.write('{}\t{}\n'.format(Config.ip, Config.hostname))
 
-    def install_gluu_base(self):
-        Config.ldapCertFn = Config.opendj_cert_fn
-        Config.ldapTrustStoreFn = Config.opendj_p12_fn
-        Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
-        Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
+        self.run(['/bin/chmod', '-R', '644', Config.etc_hosts])

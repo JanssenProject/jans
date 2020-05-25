@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import sys
 import time
@@ -25,6 +27,7 @@ from setup_app.utils import printVersion
 
 
 from setup_app.utils.properties_utils import PropertiesUtils
+
 
 from setup_app.installers.gluu import GluuInstaller
 from setup_app.installers.oxd import OxdInstaller
@@ -107,6 +110,13 @@ print()
 # We need OxdInstaller initilized before prompting properties, since oxd package is determined by OxdInstaller
 oxdInstaller = OxdInstaller()
 
+
+# initialize util classes
+propertiesUtils = PropertiesUtils()
+propertiesUtils.promptForProperties()
+propertiesUtils.check_properties()
+
+
 # initialize installers
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
@@ -116,10 +126,6 @@ oxauthInstaller = OxauthInstaller()
 passportInstaller = PassportInstaller()
 oxtrustInstaller = OxtrustInstaller()
 scimInstaller = ScimInstaller()
-
-propertiesUtils = PropertiesUtils()
-propertiesUtils.promptForProperties()
-propertiesUtils.check_properties()
 
 print()
 print(gluuInstaller)
@@ -154,19 +160,23 @@ if proceed:
     oxtrustInstaller.generate_api_configuration()
     scimInstaller.generate_configuration()
 
-    gluuInstaller.install_gluu_base()
+    Config.ldapCertFn = Config.opendj_cert_fn
+    Config.ldapTrustStoreFn = Config.opendj_p12_fn
+    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
+    Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
+    
     gluuInstaller.prepare_base64_extension_scripts()
     gluuInstaller.render_templates()
+    gluuInstaller.generate_crypto()
+
+    #TODO: Consider moving to oxauth installer
+    gluuInstaller.generate_oxauth_openid_keys()
+
+    gluuInstaller.generate_base64_configuration()
+    gluuInstaller.render_configuration_template()
+    gluuInstaller.update_hostname()
 
     """
-    self.pbar.progress("gluu", "Generating crypto")
-    self.generate_crypto()
-    self.pbar.progress("gluu","Generating oxauth openid keys")
-    self.generate_oxauth_openid_keys()
-    self.pbar.progress("gluu", "Generating base64 configuration")
-    self.generate_base64_configuration()
-    self.pbar.progress("gluu", "Rendering configuratipn template")
-    self.render_configuration_template()
     self.pbar.progress("gluu", "Updating hostname")
     self.update_hostname()
     self.pbar.progress("gluu", "Setting ulimits")
