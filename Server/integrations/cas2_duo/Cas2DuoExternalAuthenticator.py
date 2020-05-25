@@ -168,6 +168,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return result
 
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
+
     def logout(self, configurationAttributes, requestParameters):
         cas2_result = self.cas2ExternalAuthenticator.logout(configurationAttributes, requestParameters)
         duo_result = self.duoExternalAuthenticator.logout(configurationAttributes, requestParameters)

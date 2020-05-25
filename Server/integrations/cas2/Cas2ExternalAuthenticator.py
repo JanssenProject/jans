@@ -327,5 +327,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return str[tag1_pos2+1:tag2_pos1].strip()
 
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
+
     def logout(self, configurationAttributes, requestParameters):
         return True
