@@ -33,6 +33,7 @@ with open('/proc/1/status', 'r') as f:
 p = platform.linux_distribution()
 os_type = p[0].split()[0].lower()
 os_version = p[1].split('.')[0]
+os_name = os_type + os_version
 
 if os_type == 'debian':
     os.environ['LC_ALL'] = 'C'
