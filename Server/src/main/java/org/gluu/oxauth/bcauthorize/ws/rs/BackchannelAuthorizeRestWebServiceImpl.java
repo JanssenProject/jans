@@ -213,7 +213,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
                     scopeList, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
                     loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
-                    userCodeParam, userCode);
+                    userCodeParam, userCode, requestedExpiry);
             if (cibaAuthorizeParamsValidation != null) {
                 builder = Response.status(cibaAuthorizeParamsValidation.getStatus());
                 builder.entity(errorResponseFactory.errorAsJson(
