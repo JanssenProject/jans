@@ -8,7 +8,6 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.proxy.ProxyConfiguration;
