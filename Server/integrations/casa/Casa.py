@@ -64,7 +64,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         application_id = configurationAttributes.get("supergluu_app_id").getValue2()
                         configAttrs.put("application_id", SimpleCustomProperty("application_id", application_id))
 
-                    if module.init(configAttrs):
+                    if module.init(None, configAttrs):
                         module.configAttrs = configAttrs
                         self.authenticators[acr] = module
                     else:
@@ -655,4 +655,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 return response
 
+        return None
+
+        
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
         return None

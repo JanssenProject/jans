@@ -12,10 +12,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.oxauth.model.common.IdType;
+import org.gluu.oxauth.service.common.api.IdGenerator;
 import org.gluu.oxauth.service.external.ExternalIdGeneratorService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.service.api.IdGenerator;
 
 /**
  * @author Yuriy Zabrovarnyy
