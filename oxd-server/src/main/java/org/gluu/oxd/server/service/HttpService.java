@@ -59,7 +59,7 @@ public class HttpService {
             LOG.error(e.getMessage(), e);
             LOG.error("Failed to create http client based on oxd configuration. Created default client.");
         }
-        return CoreUtils.createClient(null, proxyConfig);
+        return CoreUtils.createClientFallback(proxyConfig);
     }
 
     private static Optional<ProxyConfiguration> asProxyConfiguration(OxdServerConfiguration configuration) {
