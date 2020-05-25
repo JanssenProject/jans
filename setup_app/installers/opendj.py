@@ -1,82 +1,88 @@
 import os
 import glob
 import shutil
+import traceback
+import ssl
+import json
 
-from setup_app.config.config import Config
+from setup_app import paths
+from setup_app.config import Config
+from setup_app.utils import base
+from setup_app.static import InstallTypes
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 
-class OpenDjInstaller(SetupUtils):
+
+
+class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        self.service_path = self.detect_service_path()
-
+        self.service_name = 'opendj'
+        self.pbar_text = "Installing OpenDj"
 
     def install(self):
         self.logIt("Running OpenDJ Setup")
 
-
-        
-        self.pbar.progress("opendj", "Extracting OpenDJ", False)
+        Config.pbar.progress("opendj", "Extracting OpenDJ", False)
         self.extractOpenDJ()
 
         self.createLdapPw()
         
         try:
-            self.pbar.progress("opendj", "OpenDJ: installing", False)
-            if self.wrends_install == LOCAL:
+            Config.pbar.progress("opendj", "OpenDJ: installing", False)
+            if Config.wrends_install == InstallTypes.LOCAL:
                 self.install_opendj()
-
-                self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
+                Config.pbar.progress("opendj", "OpenDJ: preparing schema", False)
                 self.prepare_opendj_schema()
-                self.pbar.progress("opendj", "OpenDJ: setting up service", False)
+                Config.pbar.progress("opendj", "OpenDJ: setting up service", False)
                 self.setup_opendj_service()
 
-            if self.wrends_install:
-                self.pbar.progress("opendj", "OpenDJ: configuring", False)
+            if Config.wrends_install:
+                Config.pbar.progress("opendj", "OpenDJ: configuring", False)
                 self.configure_opendj()
-                self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
+                Config.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
                 self.export_opendj_public_cert()
-                self.pbar.progress("opendj", "OpenDJ: creating indexes", False)
+                Config.pbar.progress("opendj", "OpenDJ: creating indexes", False)
                 self.index_opendj()
-                self.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
+                Config.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
                 
                 ldif_files = []
 
-                if self.mappingLocations['default'] == 'ldap':
-                    ldif_files += self.couchbaseBucketDict['default']['ldif']
+                if Config.mappingLocations['default'] == 'ldap':
+                    ldif_files += Config.couchbaseBucketDict['default']['ldif']
 
                 ldap_mappings = self.getMappingType('ldap')
   
                 for group in ldap_mappings:
-                    ldif_files +=  self.couchbaseBucketDict[group]['ldif']
+                    ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
   
-                if not self.ldif_base in ldif_files:
-                    ldif_files.insert(0, self.ldif_base)
+                if not Config.ldif_base in ldif_files:
+                    ldif_files.insert(0, Config.ldif_base)
 
                 self.import_ldif_opendj(ldif_files)
-                
-                self.pbar.progress("opendj", "OpenDJ: post installation", False)
-                if self.wrends_install == LOCAL:
+
+                Config.pbar.progress("opendj", "OpenDJ: post installation", False)
+                if Config.wrends_install == InstallTypes.LOCAL:
                     self.post_install_opendj()
         except:
             self.logIt(traceback.format_exc(), True)
 
     def extractOpenDJ(self):        
 
-        openDJArchive = max(glob.glob(os.path.join(self.distFolder, 'app/opendj-server-*4*.zip')))
+        openDJArchive = max(glob.glob(os.path.join(Config.distFolder, 'app/opendj-server-*4*.zip')))
 
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
-            self.run(['unzip', '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
+            self.run([paths.cmd_unzip, '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
         except:
             self.logIt("Error encountered while doing unzip %s -d /opt/" % (openDJArchive))
             self.logIt(traceback.format_exc(), True)
 
-        realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+        realLdapBaseFolder = os.path.realpath(Config.ldapBaseFolder)
+        self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
 
-        if self.wrends_install == REMOTE:
-            self.run(['ln', '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
+        if Config.wrends_install == InstallTypes.REMOTE:
+            self.run([paths.cmd_ln, '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
 
     def create_user(self):
         self.createUser('ldap', Config.ldap_user_home)
@@ -93,10 +99,10 @@ class OpenDjInstaller(SetupUtils):
         #TODO: Why we require this?
         #self.set_ownership()
         
-        self.run(['chown', 'ldap:ldap', setupPropsFN])
+        self.run([paths.cmd_chown, 'ldap:ldap', setupPropsFN])
 
         try:
-            ldapSetupCommand = '%s/setup' % Config.ldapBaseFolder
+            ldapSetupCommand = os.path.join(Config.ldapBaseFolder, 'setup')
             setupCmd = " ".join([ldapSetupCommand,
                                 '--no-prompt',
                                 '--cli',
@@ -147,7 +153,7 @@ class OpenDjInstaller(SetupUtils):
                           ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                           ]
                           
-        if self.mappingLocations['site'] == 'ldap':
+        if Config.mappingLocations['site'] == 'ldap':
             config_changes.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
         config_changes += [
@@ -162,7 +168,7 @@ class OpenDjInstaller(SetupUtils):
                           ]
 
 
-        if (not Config.listenAllInterfaces) and (Config.wrends_install == LOCAL):
+        if (not Config.listenAllInterfaces) and (Config.wrends_install == InstallTypes.LOCAL):
             config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
             config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
                           
@@ -177,7 +183,7 @@ class OpenDjInstaller(SetupUtils):
                                     '--port',
                                     Config.ldap_admin_port,
                                     '--bindDN',
-                                    '"%s"' % self.ldap_binddn,
+                                    '"%s"' % Config.ldap_binddn,
                                     '--bindPasswordFile',
                                     Config.ldapPassFn] + changes)
             self.run(['/bin/su',
@@ -271,7 +277,7 @@ class OpenDjInstaller(SetupUtils):
         
         for ldif_file_fn in ldif_file_list:
             ldif_file_fullpath = os.path.realpath(ldif_file_fn)
-            cwd = os.path.join(self.ldapBaseFolder, 'bin')
+            cwd = os.path.join(Config.ldapBaseFolder, 'bin')
             importParams = [
                               Config.loadLdifCommand,
                               '--hostname',
@@ -279,7 +285,7 @@ class OpenDjInstaller(SetupUtils):
                               '--port',
                               Config.ldap_admin_port,
                               '--bindDN',
-                              '"%s"' % self.ldap_binddn,
+                              '"%s"' % Config.ldap_binddn,
                               '-j',
                               Config.ldapPassFn,
                               '--trustAll',
@@ -298,7 +304,7 @@ class OpenDjInstaller(SetupUtils):
 
     def index_opendj_backend(self, backend):
         index_command = 'create-backend-index'
-        cwd = os.path.join(self.ldapBaseFolder, 'bin')
+        cwd = os.path.join(Config.ldapBaseFolder, 'bin')
         try:
             self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
@@ -355,25 +361,25 @@ class OpenDjInstaller(SetupUtils):
 
     def prepare_opendj_schema(self):
         self.logIt("Copying OpenDJ schema")
-        for schemaFile in self.openDjschemaFiles:
+        for schemaFile in Config.openDjschemaFiles:
             self.copyFile(schemaFile, Config.openDjSchemaFolder)
 
 
-        self.run([self.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
+        self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
+        self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
+
+        self.stop()
+        self.start()
 
     def setup_opendj_service(self):
         
         init_script_fn = '/etc/init.d/opendj'
-        if (Config.os_type in ['centos', 'red', 'fedora'] and Config.os_initdaemon == 'systemd') or (Config.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
             remove_init_script = True
-            opendj_script_name = os.path.split(Config.opendj_service_centos7)[-1]
+            opendj_script_name = os.path.basename(Config.opendj_service_centos7)
             opendj_dest_folder = "/etc/systemd/system"
             try:
                 self.copyFile(Config.opendj_service_centos7, opendj_dest_folder)
-                self.run([self.service_path, 'daemon-reload'])
-                self.run([self.service_path, 'enable', 'opendj.service'])
-                self.run([self.service_path, 'start', 'opendj.service'])
             except:
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
@@ -399,12 +405,3 @@ class OpenDjInstaller(SetupUtils):
                 self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
 
             self.fix_init_scripts('opendj', init_script_fn)
-
-    def enable(self):
-        self.enable_service_at_start('opendj')
-    
-    def start(self):
-        self.run([self.service_path, 'opendj', 'start'])
-        
-    def stop(self):
-        self.run([self.service_path, 'opendj', 'stop'])

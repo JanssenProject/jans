@@ -14,7 +14,6 @@ from setup_app import paths
 class CouchbaseInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'identity'
 
     def install(self):

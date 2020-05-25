@@ -11,7 +11,6 @@ from setup_app.installers.base import BaseInstaller
 class JettyInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"
 

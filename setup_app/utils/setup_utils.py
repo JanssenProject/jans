@@ -18,20 +18,29 @@ from urllib.parse import urlparse
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.base import logIt as logOnly
-from setup_app.utils.base import logOSChanges, run
+from setup_app.utils.base import logOSChanges as logOSChangesOnly
+from setup_app.utils.base import run as runOnly
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
 class SetupUtils(Crypto64):
 
-    def __init__(self):
-        self.logOSChanges = logOSChanges
-        self.run = run
-
+    @classmethod
+    def init(self):
         #let's make commands available via Config object
         for attr in dir(paths):
             if attr.startswith('cmd_'):
                 setattr(Config, attr, getattr(paths, attr))
+
+
+    def run(self, *args, **kwargs):
+        if kwargs:
+            return runOnly(*args, **kwargs)
+        else:
+            return runOnly(*args)
+
+    def logOSChanges(self, *args):
+        logOSChangesOnly(*args)
 
     def logIt(self, *args, **kwargs):
         #if pbar in args, pass to progress bar
@@ -325,9 +334,9 @@ class SetupUtils(Crypto64):
         
     def createLdapPw(self):
         try:
-            with open(self.ldapPassFn, 'w') as w:
-                w.write(self.ldapPass)
-            self.run([paths.cmd_chown, 'ldap:ldap', self.ldapPassFn])
+            with open(Config.ldapPassFn, 'w') as w:
+                w.write(Config.ldapPass)
+            self.run([paths.cmd_chown, 'ldap:ldap', Config.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
             self.logIt(traceback.format_exc(), True)
