@@ -139,6 +139,13 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             return "/auth/register/register.xhtml"
 
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
+
     def logout(self, configurationAttributes, requestParameters):
         return True
 
