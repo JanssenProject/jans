@@ -51,7 +51,7 @@ public class ConsentGatheringSessionService {
 
         return null;
     }
-    public boolean hasSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public boolean hasCookie(HttpServletRequest httpRequest) {
         String cookieId = cookieService.getConsentSessionIdFromCookie(httpRequest);
 
         return StringUtils.isNotBlank(cookieId);
@@ -94,7 +94,7 @@ public class ConsentGatheringSessionService {
     }
 
     public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
-        boolean hasSession = hasSession(httpRequest, null);
+        boolean hasSession = hasCookie(httpRequest);
         
         if (hasSession) {
             final SessionId session = getConsentSession(httpRequest, null, null, false);

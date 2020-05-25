@@ -217,7 +217,7 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>2.1.12</version>
+                <version>2.2.6</version>
                 <executions>
                     <execution>
                         <id>get-the-git-infos</id>
@@ -287,15 +287,6 @@
 			<artifactId>oxauth-persistence-model</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-fido2-server</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-fido2-client</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxauth-client</artifactId>
