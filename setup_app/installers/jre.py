@@ -13,7 +13,6 @@ from setup_app.installers.base import BaseInstaller
 class JreInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.service_name = 'jre'
         self.pbar_text = "Installing JRE"
@@ -28,7 +27,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.logIt("Extracting %s into /opt/" % os.path.basename(self.jreArchive))
-            self.run([paths.cdm_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run([paths.cmd_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % self.jreArchive)
             self.logIt(traceback.format_exc(), True)

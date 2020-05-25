@@ -11,7 +11,6 @@ from setup_app.installers.base import BaseInstaller
 class PassportInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'passport'
         self.pbar_text = "Installing Passport"
 

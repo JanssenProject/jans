@@ -14,7 +14,6 @@ from setup_app import paths
 class HttpdInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.service_name = httpd_name
         self.pbar_text = "Configuring Apache"
 

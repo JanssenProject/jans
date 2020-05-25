@@ -9,7 +9,6 @@ from setup_app.utils.setup_utils import SetupUtils
 class OxtrustInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'identity'
         self.pbar_text = "Installing Oxtrust"
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
