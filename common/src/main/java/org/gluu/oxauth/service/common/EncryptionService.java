@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.service;
+package org.gluu.oxauth.service.common;
 
 import java.util.Properties;
 
