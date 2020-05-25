@@ -472,3 +472,10 @@ class PersonAuthentication(PersonAuthenticationType):
         response = json.loads(response_string)
         
         return response["success"]
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
