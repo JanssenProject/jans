@@ -33,7 +33,6 @@ import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.util.StringHelper;
-import org.gluu.util.init.Initializable;
 import org.gluu.util.properties.FileConfiguration;
 import org.slf4j.Logger;
 
@@ -41,7 +40,7 @@ import io.quarkus.arc.AlternativePriority;
 
 @ApplicationScoped
 @AlternativePriority(1)
-public class ConfigurationFactory extends Initializable {
+public class ConfigurationFactory extends org.gluu.oxtrust.config.ConfigurationFactory {
 
 	@Inject
 	Logger log;
@@ -108,6 +107,7 @@ public class ConfigurationFactory extends Initializable {
 	private boolean loadedFromLdap = true;
 
 	public void init(@Observes @ApplicationInitialized(ApplicationScoped.class) ApplicationInitializedEvent init) {
+		log.info("=============================Initializaing Config factory");
 		init();
 	}
 

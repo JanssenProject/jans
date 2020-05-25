@@ -33,7 +33,7 @@ public class HealthCheck {
 	@Operation(summary = "Return json object containing the state of the api.")
 	@APIResponse(responseCode = "200", content = @Content(mediaType = APPLICATION_JSON, schema = @Schema(implementation = ApiHealth.class, required = true)))
 	public Response health() {
-		return Response.ok(new ApiHealth(true, "running")).build();
+		return Response.ok(new ApiHealth(true, "running-"+clientService.getAllClients().size())).build();
 	}
 
 }
