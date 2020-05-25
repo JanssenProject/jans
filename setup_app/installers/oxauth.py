@@ -12,7 +12,6 @@ from setup_app.installers.base import BaseInstaller
 class OxauthInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'oxauth'
         self.pbar_text = "Installing oxauth"
         self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)

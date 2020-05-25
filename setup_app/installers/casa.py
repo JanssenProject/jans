@@ -14,9 +14,7 @@ from setup_app import paths
 class CasaInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'oxauth'
-
 
     def install(self):
         self.logIt("Installing Casa...")

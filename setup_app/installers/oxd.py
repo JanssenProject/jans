@@ -7,7 +7,6 @@ from setup_app.utils.setup_utils import SetupUtils
 class OxdInstaller(SetupUtils):
 
     def __init__(self):
-        super().__init__()
         self.oxd_root = '/opt/oxd-server/'
 
         self.logIt("Determining oxd server package")

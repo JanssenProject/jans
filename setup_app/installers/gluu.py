@@ -4,6 +4,8 @@ import zipfile
 import inspect
 import base64
 import traceback
+import shutil
+import re
 
 from setup_app import paths
 from setup_app import static
@@ -12,9 +14,6 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils import base
 
 class GluuInstaller(SetupUtils):
-
-    def __init__(self):
-        super().__init__()
 
     def __repr__(self):
 
@@ -96,7 +95,7 @@ class GluuInstaller(SetupUtils):
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
     def configureSystem(self):
-        Config.pbar.progress("gluu", "Configuring system")
+        self.logIt("Configuring system", 'gluu')
         self.customiseSystem()
         self.createGroup('gluu')
         self.makeFolders()
@@ -144,7 +143,7 @@ class GluuInstaller(SetupUtils):
         self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
-        Config.pbar.progress("gluu", "Making salt")
+        self.logIt("Making salt", pbar='gluu')
         try:
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
             self.writeFile(os.path.join(Config.configFolder,'salt'), salt_text)
@@ -201,29 +200,31 @@ class GluuInstaller(SetupUtils):
     def render_templates_folder(self, templatesFolder):
         self.logIt("Rendering templates folder: %s" % templatesFolder)
 
-        coucbase_dict = self.couchbaseDict()
+        #coucbase_dict = self.couchbaseDict()
 
         for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
             for templateFile in templateFiles:
-                fullPath = '%s/%s' % (templateBase, templateFile)
+                fullPath = os.path.join(templateBase, templateFile)
                 try:
                     self.logIt("Rendering test template %s" % fullPath)
+                    
+                    print("Full path", fullPath)
                     # Remove ./template/ and everything left of it from fullPath
                     fn = re.match(r'(^.+/templates/)(.*$)', fullPath).groups()[1]
-                    f = open(os.path.join(self.templateFolder, fn))
-                    template_text = f.read()
-                    f.close()
+                    
+                    print("Fn:", fn)
+                    
+                    template_text = self.readFile(os.path.join(Config.templateFolder, fn))
 
-                    fullOutputFile = os.path.join(self.outputFolder, fn)
+                    fullOutputFile = os.path.join(Config.outputFolder, fn)
                     # Create full path to the output file
                     fullOutputDir = os.path.dirname(fullOutputFile)
                     if not os.path.exists(fullOutputDir):
                         os.makedirs(fullOutputDir)
 
-                    self.backupFile(fullOutputFile)
-                    newFn = open(fullOutputFile, 'w+')
-                    newFn.write(template_text % self.merge_dicts(coucbase_dict, self.templateRenderingDict, self.__dict__))
-                    newFn.close()
+                    # TODO: check if we need coucbase_dict coucbase_dict as argument for merge_dicts
+                    rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
+                    self.writeFile(fullOutputFile, rendered_text)
                 except:
                     self.logIt("Error writing template %s" % fullPath, True)
                     self.logIt(traceback.format_exc(), True)
@@ -237,7 +238,7 @@ class GluuInstaller(SetupUtils):
     def render_node_templates(self):
         self.logIt("Rendering node templates")
 
-        nodeTepmplatesFolder = '%s/node/' % self.templateFolder
+        nodeTepmplatesFolder = '%s/node/' % Config.templateFolder
         self.render_templates_folder(nodeTepmplatesFolder)
 
 
@@ -280,24 +281,22 @@ class GluuInstaller(SetupUtils):
 
 
     def setup_init_scripts(self):
-        if self.os_initdaemon == 'initd':
-            for init_file in self.init_files:
+        self.logIt("Setting up init scripts", pbar='gluu')
+        if base.os_initdaemon == 'initd':
+            for init_file in Config.init_files:
                 try:
                     script_name = os.path.split(init_file)[-1]
                     self.copyFile(init_file, "/etc/init.d")
-                    self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
+                    self.run([paths.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
                     self.logIt(traceback.format_exc(), True)
 
-        if self.os_type in ['centos', 'fedora']:
-            for service in self.redhat_services:
+        if base.clone_type == 'rpm':
+            for service in Config.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        elif self.os_type in ['red']:
-            for service in self.redhat_services:
-                self.run(["/sbin/chkconfig", service, "on"])
-        elif self.os_type in ['ubuntu', 'debian']:
-            for service in self.debian_services:
+        else:
+            for service in Config.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
@@ -416,3 +415,38 @@ class GluuInstaller(SetupUtils):
                 w.write('{}\t{}\n'.format(Config.ip, Config.hostname))
 
         self.run(['/bin/chmod', '-R', '644', Config.etc_hosts])
+
+    def set_ulimits(self):
+        self.logIt("Setting ulimist")
+        try:
+            apache_user = 'apache' if base.clone_type == 'rpm' else 'www-data'
+
+            self.appendLine("ldap       soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("ldap       hard nofile     262144", "/etc/security/limits.conf")
+            self.appendLine("%s     soft nofile     131072" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("%s     hard nofile     262144" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("jetty      soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
+        except:
+            self.logIt("Could not set limits.")
+            self.logIt(traceback.format_exc(), True)
+
+
+    def copy_output(self):
+        self.logIt("Copying rendered templates to final destination")
+
+        for dest_fn in list(Config.ce_templates.keys()):
+            if Config.ce_templates[dest_fn]:
+                fn = os.path.split(dest_fn)[-1]
+                output_fn = os.path.join(Config.outputFolder, fn)
+                try:
+                    self.logIt("Copying %s to %s" % (output_fn, dest_fn))
+                    dest_dir = os.path.dirname(dest_fn)
+                    if not os.path.exists(dest_dir):
+                        self.logIt("Created destination folder %s" % dest_dir)
+                        os.makedirs(dest_dir)
+                    self.backupFile(output_fn, dest_fn)
+                    shutil.copyfile(output_fn, dest_fn)
+                except:
+                    self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
+                    self.logIt(traceback.format_exc(), True)
