@@ -5,6 +5,7 @@
 #
 #
 
+from org.gluu.model.custom.script.type.postauthn import PostAuthnType
 from java.lang import String
 
 class PostAuthn(PostAuthnType):
