@@ -277,12 +277,12 @@ border-color: #d6e9c6;
 				name = name ? name : provider;
 				if (logo_img == null) {
 					logo_img = "/oxauth/img/glu_icon.png"
+				} else if (logo_img.startsWith("http")) {
+					logo_img = "/oxauth/auth/passport/" + logo_img
 				}
 
-				imgMarkup = '<img style="cursor:pointer;max-width:48px" alt="'
-						+ name
-						+ '" onclick="idp_redirect(\''
-						+ provider
+				imgMarkup = '<img style="cursor:pointer;max-width:48px" alt="' + name
+						+ '" onclick="idp_redirect(\'' + provider
 						+ '\')" src="' + logo_img + '"></img>';
 				leftMarkup = '<div style="padding:10px">' + imgMarkup + '</div>';
 				rightMarkup = '<h4>' + name + '</h4>'
@@ -293,24 +293,25 @@ border-color: #d6e9c6;
 
 			jQuery(document).ready(
 					function() {
-                        var jsonProviders = '${identity.getWorkingParameter('externalProviders')}'
+                        let jsonProviders = '${identity.getWorkingParameter('externalProviders')}'
                         try {
-                            var providers = JSON.parse(jsonProviders)
+                            let providers = JSON.parse(jsonProviders)
 
-                            for (var idprv in providers) {
+                            for (let idprv in providers) {
                                 dynamic_link(idprv, providers[idprv].logo_img, providers[idprv].displayName)
                             }
                         } catch (e) {
                         }
 
 						//error message display
-						var errormsg = window.location.href.split("=");
-						if (errormsg[1]) {
-							history.replaceState({}, 'oxAuth-Login',
-									'/oxauth/auth/passport/passport-login');
-							jQuery('.errormsg').html(
-									decodeURIComponent(errormsg[1]));
-							jQuery('.errormsg').css('display', 'block');
+						let errormsg = "?failure="
+						let idxErrormsg = window.location.href.indexOf(errormsg)
+						if (idxErrormsg != -1) {
+							errormsg = window.location.href.substr(idxErrormsg + errormsg.length)
+						
+							history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-login')
+							jQuery('.errormsg').html(decodeURIComponent(errormsg))
+							jQuery('.errormsg').css('display', 'block')
 						}
 
 					});

@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.context.ExternalScriptContext;
 import org.gluu.oxauth.uma.service.RedirectParameters;
 import org.gluu.oxauth.uma.service.UmaPctService;
@@ -28,7 +29,6 @@ import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
 import org.gluu.oxauth.uma.ws.rs.UmaMetadataWS;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.UserService;
 
 /**
  * @author yuriyz
