@@ -9,6 +9,11 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,7 +25,9 @@ import org.gluu.oxd.common.proxy.ProxyConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -171,7 +178,7 @@ public class CoreUtils {
     public static boolean allNotBlank(String... p_strings) {
         if (p_strings != null && p_strings.length > 0) {
             for (String s : p_strings) {
-                if (org.apache.commons.lang.StringUtils.isBlank(s)) {
+                if (StringUtils.isBlank(s)) {
                     return false;
                 }
             }
@@ -209,14 +216,51 @@ public class CoreUtils {
                 return true;
             }
         }).build();
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+        //No operation verifier for trust All Client
+        HostnameVerifier allowAllHosts = new HostnameVerifier() {
+
+            public boolean verify(String s, SSLSession sslSession) {
+                return true;
+            }
+
+            public final String toString() {
+                return "NO_OP";
+            }
+        };
+
+        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
 
         return createClient(sslContextFactory, proxyConfiguration);
     }
 
+    public static HttpClient createClientFallback(Optional<ProxyConfiguration> proxyConfiguration) {
+        if (proxyConfiguration.isPresent() && !Strings.isNullOrEmpty(proxyConfiguration.get().getHost())) {
+            HttpHost proxyhost = null;
+            ProxyConfiguration proxyConfigObj = proxyConfiguration.get();
+
+            if (isSafePort(proxyConfigObj.getPort()) && !Strings.isNullOrEmpty(proxyConfigObj.getProtocol())) {
+                proxyhost = new HttpHost(proxyConfigObj.getHost(), proxyConfigObj.getPort(), proxyConfigObj.getProtocol());
+            } else if (isSafePort(proxyConfigObj.getPort())) {
+                proxyhost = new HttpHost(proxyConfigObj.getHost(), proxyConfigObj.getPort());
+            } else {
+                proxyhost = new HttpHost(proxyConfigObj.getHost());
+            }
+
+            return HttpClientBuilder.create().setProxy(proxyhost).build();
+        }
+        return HttpClientBuilder.create().build();
+    }
+
     public static HttpClient createClient(SSLConnectionSocketFactory connectionFactory, Optional<ProxyConfiguration> proxyConfiguration) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+
         HttpClientBuilder httClientBuilder = HttpClients.custom();
+
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
+                        .register("https", connectionFactory)
+                        .register("http", new PlainConnectionSocketFactory())
+                        .build();
+
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
         if (connectionFactory != null) {
             httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
@@ -238,7 +282,6 @@ public class CoreUtils {
         }
 
         CloseableHttpClient httpClient = httClientBuilder
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
                 .setConnectionManager(cm).build();
 
         cm.setMaxTotal(200); // Increase max total connection to 200
