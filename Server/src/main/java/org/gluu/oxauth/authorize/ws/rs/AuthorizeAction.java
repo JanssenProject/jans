@@ -30,9 +30,19 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.AuthorizeService;
+import org.gluu.oxauth.service.ClientAuthorizationsService;
+import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.CookieService;
+import org.gluu.oxauth.service.ErrorHandlerService;
+import org.gluu.oxauth.service.RedirectionUriService;
+import org.gluu.oxauth.service.RequestParameterService;
+import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.common.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
+import org.gluu.oxauth.service.external.ExternalPostAuthnService;
+import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
@@ -141,6 +151,9 @@ public class AuthorizeAction {
     
     @Inject
     private Authenticator authenticator;
+
+    @Inject
+    private ExternalPostAuthnService externalPostAuthnService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -339,9 +352,11 @@ public class AuthorizeAction {
             return;
         }
 
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest)externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        final boolean forceAuthorization = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(Prompt.CONSENT);
-        if (!hasConsentPrompt) {
+        if (!hasConsentPrompt && !forceAuthorization) {
             if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient()) {
                 // if trusted client = true, then skip authorization page and grant access directly
                 permissionGranted(session);

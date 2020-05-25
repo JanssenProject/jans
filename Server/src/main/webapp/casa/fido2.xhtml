@@ -46,7 +46,7 @@
 					} else if (err.name === 'AbortError') {
 						addMessage('This operation is canceled by user.');
 					} else if (err.message) {
-						addMessage(`${err.name}: ${err.message}`);
+						addMessage(err.name + ': ' + err.message);
 					} else if (err.messages) {
 						addMessages(err.messages);
 					}
@@ -54,9 +54,10 @@
 					return false;
 				});
 			}
-
-			if (assertion_request != null) {
-				setTimeout(startAssertion(), 1000);
+			window.onload = function() {
+				if (assertion_request != null) {
+					setTimeout(startAssertion(), 1000);
+				}
 			}
 
 		</script>

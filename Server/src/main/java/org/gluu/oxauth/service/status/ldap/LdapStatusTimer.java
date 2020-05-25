@@ -16,7 +16,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.service.ApplicationFactory;
+import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;

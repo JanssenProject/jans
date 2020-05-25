@@ -202,7 +202,6 @@ public class AppConfiguration implements Configuration {
     private Boolean removeRefreshTokensForClientOnLogout  = true;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
-    private Fido2Configuration fido2Configuration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
@@ -1585,14 +1584,6 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthenticationProtectionConfiguration(AuthenticationProtectionConfiguration authenticationProtectionConfiguration) {
         this.authenticationProtectionConfiguration = authenticationProtectionConfiguration;
-    }
-
-    public Fido2Configuration getFido2Configuration() {
-        return fido2Configuration;
-    }
-
-    public void setFido2Configuration(Fido2Configuration fido2Configuration) {
-        this.fido2Configuration = fido2Configuration;
     }
 
     public ErrorHandlingMethod getErrorHandlingMethod() {

@@ -19,7 +19,7 @@ import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterStatus;
 import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.UserService;
+import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.gluu.oxauth.service.fido.u2f.RegistrationService;

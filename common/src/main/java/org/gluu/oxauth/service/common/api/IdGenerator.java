@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.oxauth.service.api;
+package org.gluu.oxauth.service.common.api;
 
 import org.gluu.oxauth.model.common.IdType;
 
