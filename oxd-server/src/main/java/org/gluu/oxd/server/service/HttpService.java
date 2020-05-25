@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.proxy.ProxyConfiguration;
@@ -59,7 +60,7 @@ public class HttpService {
             LOG.error(e.getMessage(), e);
             LOG.error("Failed to create http client based on oxd configuration. Created default client.");
         }
-        return CoreUtils.createClient(null, proxyConfig);
+        return CoreUtils.createClientFallback(proxyConfig);
     }
 
     private static Optional<ProxyConfiguration> asProxyConfiguration(OxdServerConfiguration configuration) {
