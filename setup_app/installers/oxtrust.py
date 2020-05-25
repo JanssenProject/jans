@@ -3,9 +3,8 @@ import glob
 
 from setup_app import paths
 from setup_app.config import Config
-from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-
+from setup_app.utils.setup_utils import SetupUtils
 
 class OxtrustInstaller(BaseInstaller, SetupUtils):
 
