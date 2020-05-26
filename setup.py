@@ -198,6 +198,9 @@ if proceed:
     if Config.installOxAuth:
         oxauthInstaller.start_installation()
 
+    if Config.installOxTrust:
+        oxtrustInstaller.start_installation()
+
     """
     self.pbar.progress("gluu", "Installing Gluu components")
     self.install_gluu_components()
