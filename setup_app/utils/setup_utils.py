@@ -470,3 +470,9 @@ class SetupUtils(Crypto64):
             W.write(''.join(initscript))
 
         self.run([paths.cmd_chmod, '+x', service_init_script_fn])
+
+    def load_certificate_text(self, filePath):
+        self.logIt("Load certificate %s" % filePath)
+        certificate_text = self.readFile(filePath)
+        certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
+        return certificate_text
