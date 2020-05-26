@@ -97,3 +97,27 @@ class CasaInstaller(SetupUtils, BaseInstaller):
             self.run(['cp', script_fn, pylib_folder])
 
         self.enable_service_at_start('casa')
+
+    def import_oxd_certificate(self):
+
+        # import_oxd_certificate2javatruststore:
+        self.logIt("Importing oxd certificate")
+
+        try:
+
+            oxd_hostname, oxd_port = self.parse_url(Config.oxd_server_https)
+            if not oxd_port: oxd_port=8443
+
+            oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+            oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
+            oxd_cert_tmp_fn = '/tmp/{}.crt'.format(oxd_alias)
+
+            with open(oxd_cert_tmp_fn,'w') as w:
+                w.write(oxd_cert)
+
+            self.run([self.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
+                            '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
+                            '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
+
+        except:
+            self.logIt(traceback.format_exc(), True)
