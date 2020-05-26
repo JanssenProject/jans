@@ -2,37 +2,40 @@ import os
 import glob
 import shutil
 
-from setup_app.config.config import Config
-from setup_app.utils.setup_utils import SetupUtils
+from setup_app import paths
+from setup_app.config import Config
+from setup_app.installers.jetty import JettyInstaller
 
-class FidoInstaller(SetupUtils):
+class FidoInstaller(JettyInstaller):
 
     def __init__(self):
-        pass
+        self.service_name = 'fido2'
+        self.pbar_text = "Installing fido2"
 
 
     def install(self):
         self.logIt("Copying fido.war into jetty webapps folder...")
 
-        jettyServiceName = 'fido2'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/fido2.war' % self.distGluuFolder, jettyServiceWebapps)
+        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name, 'webapps')
+        self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
 
 
     def create_folders(self):
-        self.run([self.cmd_mkdir, '-p', self.fido2ConfigFolder])
-        self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/authenticator_cert')])
-        self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/mds/cert')])
-        self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/mds/toc')])
-        self.run([self.cmd_mkdir, '-p', '%s/%s' % (self.fido2ConfigFolder, '/server_metadata')])
+        for d in ('authenticator_cert', 'mds/cert', 'mds/toc', 'server_metadata'):
+            dpath = os.path.join(Config.fido2ConfigFolder, d)
+            self.run([paths.cmd_mkdir, '-p', dpath])
 
     def copy_static(self):
         # Fido2 authenticator certs
-        self.copyFile("%s/static/auth/fido2//authenticator_cert/yubico-u2f-ca-cert.crt" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
-        self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V1.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
-        self.copyFile("%s/static/auth/fido2//authenticator_cert/HyperFIDO_CA_Cert_V2.pem" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/authenticator_cert'))
+        target_dir = os.path.join(Config.fido2ConfigFolder, 'authenticator_cert')
+        for f in ('yubico-u2f-ca-cert.crt', 'HyperFIDO_CA_Cert_V1.pem', 'HyperFIDO_CA_Cert_V2.pem'):
+            src = os.path.join(Config.install_dir, 'static/auth/fido2/authenticator_cert/', f)
+            self.copyFile(src, target_dir)
 
         # Fido2 MDS TOC cert
-        self.copyFile("%s/static/auth/fido2//mds_toc_cert/metadata-root-ca.cer" % self.install_dir, "%s/%s" % (self.fido2ConfigFolder, '/mds/cert'))
+        self.copyFile(
+            os.path.join(Config.install_dir, 'static/auth/fido2/mds_toc_cert/metadata-root-ca.cer'),
+            os.path.join(Config.fido2ConfigFolder, 'mds/cert')
+            )

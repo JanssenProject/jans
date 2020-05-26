@@ -227,16 +227,6 @@ class Setup(object):
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
-
-
-        if self.installFido2:
-            self.pbar.progress("fido2", "Installing Gluu components: Fido2", False)
-            self.install_fido2()
-
-        if self.installOxTrust:
-            self.pbar.progress("oxtrust", "Installing Gluu components: oxTrust", False)
-            self.install_oxtrust()
-
         if self.installScimServer:
             self.pbar.progress("scim", "Installing Gluu components: Scim Server", False)
             self.install_scim_server()
