@@ -235,8 +235,9 @@ class Config:
         self.ldapTrustStoreFn = None
         self.encoded_ldapTrustStorePass = None
 
-        self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-        self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
+        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
+        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
+        
         self.opendj_p12_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
