@@ -5,7 +5,6 @@ import string
 
 from setup_app import paths
 from setup_app.config import Config
-from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.jetty import JettyInstaller
 
 class OxauthInstaller(JettyInstaller):
