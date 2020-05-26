@@ -42,6 +42,7 @@ from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.passport import PassportInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.fido import FidoInstaller
+from setup_app.installers.saml import SamlInstaller
 
 
 thread_queue = None
@@ -100,6 +101,9 @@ Config.state = 'GluuState'
 Config.admin_email = 'admin@mygluu.org'
 Config.installPassport = True
 Config.installFido2 = True
+Config.installScimServer = True
+Config.installSaml = True
+
 
 print()
 print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
@@ -131,6 +135,7 @@ oxtrustInstaller = OxtrustInstaller()
 scimInstaller = ScimInstaller()
 openDjInstaller = OpenDjInstaller()
 fidoInstaller = FidoInstaller()
+samlInstaller = SamlInstaller()
 
 print()
 print(gluuInstaller)
@@ -207,6 +212,9 @@ if proceed:
 
     if Config.installScimServer:
         scimInstaller.start_installation()
+
+    if Config.installSaml:
+        samlInstaller.start_installation()
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
