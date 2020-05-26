@@ -21,6 +21,7 @@ class FidoInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name, 'webapps')
         self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
 
+        self.enable()
 
     def create_folders(self):
         for d in ('authenticator_cert', 'mds/cert', 'mds/toc', 'server_metadata'):

@@ -39,11 +39,9 @@ from setup_app.installers.node import NodeInstaller
 from setup_app.installers.oxauth import OxauthInstaller
 from setup_app.installers.oxtrust import OxtrustInstaller
 from setup_app.installers.scim import ScimInstaller
-from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.passport import PassportInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.fido import FidoInstaller
-
 
 
 thread_queue = None
@@ -206,6 +204,9 @@ if proceed:
 
     if Config.installOxTrust:
         oxtrustInstaller.start_installation()
+
+    if Config.installScimServer:
+        scimInstaller.start_installation()
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
