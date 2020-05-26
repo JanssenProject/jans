@@ -1,12 +1,17 @@
 import os
 import glob
 
+from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 
-class OxdInstaller(SetupUtils):
+class OxdInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
+        self.service_name = 'oxd-server'
+        self.pbar_text = "Installing Oxd Server"
+        
         self.oxd_root = '/opt/oxd-server/'
 
         self.logIt("Determining oxd server package")
@@ -18,10 +23,61 @@ class OxdInstaller(SetupUtils):
         self.logIt("oxd server package was determined as " + Config.oxd_package)
 
 
+    def install(self):
+        
+        oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
+        
+        self.run(['tar', '-zxf', Config.oxd_package, '-C', '/opt'])
+        self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
+        
+        service_file = os.path.join(self.oxd_root, 'oxd-server.service')
+        if os.path.exists(service_file):
+            self.run(['cp', service_file, '/lib/systemd/system'])
+        else:
+            self.run([Config.cmd_ln, service_file, '/etc/init.d/oxd-server'])
+            self.run(['update-rc.d', 'oxd-server', 'defaults'])
+
+        self.run([
+                'cp', 
+                os.path.join(Config.install_dir, 'static/oxd/oxd-server.default'), 
+                os.path.join(Config.osDefault, 'oxd-server')
+                ])
+
+        log_dir = '/var/log/oxd-server'
+        if not os.path.exists(log_dir):
+            self.run([paths.cmd_mkdir, log_dir])
+
+        self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
+
+        for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
+            self.run([paths.cmd_chmod, '+x', fn])
+
+        if Config.oxd_use_gluu_storage:
+            oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
+            yml_str = self.readFile(oxd_server_yml_fn)
+            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+            oxd_yaml['storage_configuration'].pop('dbFileLocation')
+            oxd_yaml['storage'] = 'gluu_server_configuration'
+            oxd_yaml['storage_configuration']['type'] = Config.gluu_properties_fn
+            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties \
+                if self.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
+
+            try:
+                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
+            except:
+                pass
+            
+            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+
+            self.writeFile(oxd_server_yml_fn, yml_str)
+
+        self.generate_keystore()
+
     def generate_keystore(self):
         # generate oxd-server.keystore for the hostname
         self.run([
-            self.opensslCommand,
+            paths.cmd_openssl,
             'req', '-x509', '-newkey', 'rsa:4096', '-nodes',
             '-out', '/tmp/oxd.crt',
             '-keyout', '/tmp/oxd.key',
@@ -30,7 +86,7 @@ class OxdInstaller(SetupUtils):
             ])
 
         self.run([
-            Config.opensslCommand,
+            paths.cmd_openssl,
             'pkcs12', '-export',
             '-in', '/tmp/oxd.crt',
             '-inkey', '/tmp/oxd.key',
@@ -51,89 +107,10 @@ class OxdInstaller(SetupUtils):
             '-alias', Config.hostname,
             ])
 
-        oxd_keystore_fn = os.path.join(Config.oxd_root, 'conf/oxd-server.keystore')
+        oxd_keystore_fn = os.path.join(self.oxd_root, 'conf/oxd-server.keystore')
         self.run(['cp', '-f', '/tmp/oxd.keystore', oxd_keystore_fn])
-        self.run(['chown', 'jetty:jetty', oxd_keystore_fn])
+        self.run([paths.cmd_chown, 'jetty:jetty', oxd_keystore_fn])
         
         for f in ('/tmp/oxd.crt', '/tmp/oxd.key', '/tmp/oxd.p12', '/tmp/oxd.keystore'):
-            self.run(['rm', '-f', f])
+            self.run([paths.cmd_rm, '-f', f])
 
-    def install(self):
-        self.logIt("Installing oxd server...")
-        
-        oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
-        
-        self.run(['tar', '-zxf', Config.oxd_package, '-C', '/opt'])
-        self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
-        
-        service_file = os.path.join(self.oxd_root, 'oxd-server.service')
-        if os.path.exists(service_file):
-            self.run(['cp', service_file, '/lib/systemd/system'])
-        else:
-            self.run([Config.cmd_ln, service_file, '/etc/init.d/oxd-server'])
-            self.run(['update-rc.d', 'oxd-server', 'defaults'])
-
-        self.run([
-                'cp', 
-                os.path.join(Config.install_dir, 'static/oxd/oxd-server.default'), 
-                os.path.join(Config.osDefault, 'oxd-server')
-                ])
-
-        self.run(['mkdir', '/var/log/oxd-server'])
-        self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
-
-        for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
-            self.run(['chmod', '+x', fn])
-
-        if Config.oxd_use_gluu_storage:
-            oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
-            yml_str = self.readFile(oxd_server_yml_fn)
-            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-
-            oxd_yaml['storage_configuration'].pop('dbFileLocation')
-
-            oxd_yaml['storage'] = 'gluu_server_configuration'
-
-            oxd_yaml['storage_configuration']['type'] = Config.gluu_properties_fn
-
-            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties \
-                if self.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
-
-            try:
-                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
-            except:
-                pass
-            
-            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
-
-            self.writeFile(oxd_server_yml_fn, yml_str)
-
-        self.generate_keystore()
-
-    def import_oxd_certificate(self):
-
-        # import_oxd_certificate2javatruststore:
-        self.logIt("Importing oxd certificate")
-
-        try:
-
-            oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-            if not oxd_port: oxd_port=8443
-
-            oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-            oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
-            oxd_cert_tmp_fn = '/tmp/{}.crt'.format(oxd_alias)
-
-            with open(oxd_cert_tmp_fn,'w') as w:
-                w.write(oxd_cert)
-
-            self.run([self.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
-                            '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
-                            '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
-
-        except:
-            self.logIt(traceback.format_exc(), True)
-
-
-    def enable(self):
-        self.enable_service_at_start('oxd-server')
