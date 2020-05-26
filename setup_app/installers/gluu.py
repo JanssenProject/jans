@@ -7,6 +7,8 @@ import traceback
 import shutil
 import re
 
+from pathlib import Path
+
 from setup_app import paths
 from setup_app import static
 from setup_app.config import Config
@@ -202,45 +204,37 @@ class GluuInstaller(SetupUtils):
 
         #coucbase_dict = self.couchbaseDict()
 
-        for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
-            for templateFile in templateFiles:
-                fullPath = os.path.join(templateBase, templateFile)
-                try:
-                    self.logIt("Rendering test template %s" % fullPath)
-                    
-                    print("Full path", fullPath)
-                    # Remove ./template/ and everything left of it from fullPath
-                    fn = re.match(r'(^.+/templates/)(.*$)', fullPath).groups()[1]
-                    
-                    print("Fn:", fn)
-                    
-                    template_text = self.readFile(os.path.join(Config.templateFolder, fn))
+        tp = Path(templatesFolder)
+        for te in tp.rglob('*'):
+            if te.is_file():
+                self.logIt("Rendering template {}".format(te))
+                rp = te.relative_to(Config.templateFolder)
+                output_dir = rp.parent
+                template_name = rp.name
 
-                    fullOutputFile = os.path.join(Config.outputFolder, fn)
-                    # Create full path to the output file
-                    fullOutputDir = os.path.dirname(fullOutputFile)
-                    if not os.path.exists(fullOutputDir):
-                        os.makedirs(fullOutputDir)
+                fullOutputDir = Path(Config.outputFolder, output_dir)
+                fullOutputFile = Path(Config.outputFolder, rp)
+                
+                if not fullOutputDir.exists():
+                    fullOutputDir.mkdir(parents=True, exist_ok=True)
 
-                    # TODO: check if we need coucbase_dict coucbase_dict as argument for merge_dicts
-                    rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
-                    self.writeFile(fullOutputFile, rendered_text)
-                except:
-                    self.logIt("Error writing template %s" % fullPath, True)
-                    self.logIt(traceback.format_exc(), True)
+                template_text = te.read_text()
+                rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
+                self.logIt("Writing rendered template {}".format(fullOutputFile))
+                fullOutputFile.write_text(rendered_text)
+
 
     def render_test_templates(self):
         self.logIt("Rendering test templates")
 
-        testTepmplatesFolder = '%s/test/' % self.templateFolder
+        testTepmplatesFolder = os.path.join(self.templateFolder, 'test')
         self.render_templates_folder(testTepmplatesFolder)
 
     def render_node_templates(self):
         self.logIt("Rendering node templates")
 
-        nodeTepmplatesFolder = '%s/node/' % Config.templateFolder
+        nodeTepmplatesFolder = os.path.join(Config.templateFolder, 'node')
         self.render_templates_folder(nodeTepmplatesFolder)
-
 
     def writeHybridProperties(self):
 
