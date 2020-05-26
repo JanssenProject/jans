@@ -135,13 +135,15 @@ class myLdifParser(LDIFParser):
                             entry[e][i] = v.decode('utf-8')
                 self.entries.append((dn, entry))
 
-def determineApacheVersion():
+def determineApacheVersion(full=False):
     httpd_cmd = shutil.which(httpd_name)
-    cmd = "/usr/sbin/%s -v | egrep '^Server version'" % httpd_name
+    cmd = httpd_name + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
     if apache_version_re:
         (major, minor, pathc) =  apache_version_re.groups()
+        if full:
+            return '.'.join((major, minor, pathc))
         return '.'.join((major, minor))
 
 def get_os_package_list():

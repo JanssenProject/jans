@@ -195,6 +195,9 @@ if proceed:
         httpdinstaller = HttpdInstaller()
         httpdinstaller.configure()
 
+    if Config.installOxAuth:
+        oxauthInstaller.start_installation()
+
     """
     self.pbar.progress("gluu", "Installing Gluu components")
     self.install_gluu_components()

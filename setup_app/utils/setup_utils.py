@@ -20,6 +20,7 @@ from setup_app.config import Config
 from setup_app.utils.base import logIt as logOnly
 from setup_app.utils.base import logOSChanges as logOSChangesOnly
 from setup_app.utils.base import run as runOnly
+from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
@@ -431,3 +432,41 @@ class SetupUtils(Crypto64):
             self.logIt("Error adding group", True)
             self.logIt(traceback.format_exc(), True)
 
+    def fix_init_scripts(self, serviceName, initscript_fn):
+
+        changeTo = None
+
+        couchbase_mappings = self.getMappingType('couchbase')
+
+        if Config.persistence_type == 'couchbase' or 'default' in couchbase_mappings:
+            changeTo = 'couchbase-server'
+
+        if Config.wrends_install == InstallTypes.REMOTE or Config.cb_install == InstallTypes.REMOTE:
+            changeTo = ''
+
+        if changeTo != None:
+            for service in Config.service_requirements:
+                Config.service_requirements[service][0] = Config.service_requirements[service][0].replace('opendj', changeTo)
+
+        with open(initscript_fn) as f:
+            initscript = f.readlines()
+        
+        for i,l in enumerate(initscript):
+            if l.startswith('# Provides:'):
+                initscript[i] = '# Provides:          {0}\n'.format(serviceName)
+            elif l.startswith('# description:'):
+                initscript[i] = '# description: Jetty 9 {0}\n'.format(serviceName)
+            elif l.startswith('# Required-Start:'):
+                initscript[i] = '# Required-Start:    $local_fs $network {0}\n'.format(Config.service_requirements[serviceName][0])
+            elif l.startswith('# chkconfig:'):
+                initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
+
+        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_name in ('ubuntu18','debian9','debian10')):
+            service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
+        else:
+            service_init_script_fn = os.path.join('/etc/init.d', serviceName)
+
+        with open(service_init_script_fn, 'w') as W:
+            W.write(''.join(initscript))
+
+        self.run([paths.cmd_chmod, '+x', service_init_script_fn])
