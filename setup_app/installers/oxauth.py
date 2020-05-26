@@ -6,10 +6,9 @@ import string
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
-from setup_app.installers.base import BaseInstaller
+from setup_app.installers.jetty import JettyInstaller
 
-
-class OxauthInstaller(SetupUtils, BaseInstaller):
+class OxauthInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'oxauth'
@@ -22,23 +21,28 @@ class OxauthInstaller(SetupUtils, BaseInstaller):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[jettyServiceName], True)
 
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/oxauth.war' % self.distGluuFolder, jettyServiceWebapps)
-
+        jettyServiceWebapps = os.path.join(Config.jetty_base, jettyServiceName,  'webapps')
+        src_war = os.path.join(Config.distGluuFolder, 'oxauth.war')
+        self.copyFile(src_war, jettyServiceWebapps)
+        self.copy_static()
+        
+        self.enable()
+        self.start()
 
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
-        distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, oxAuthRPWar)
+        distOxAuthRpPath = os.path.join(Config.distGluuFolder, oxAuthRPWar)
 
         self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth-rp'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
+        self.installJettyService(Config.jetty_app_configuration[jettyServiceName])
 
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/oxauth-rp.war' % self.distGluuFolder, jettyServiceWebapps)
+        jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
+        src_war = os.path.join(Config.distGluuFolder, 'oxauth-rp.war')
+        self.copyFile(src_war, jettyServiceWebapps)
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
@@ -60,3 +64,14 @@ class OxauthInstaller(SetupUtils, BaseInstaller):
                 self.pbar.progress('oxauth', "Downloading oxAuth RP war file", False)
                 self.run([paths.cmd_wget, self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', os.path.join(self.distGluuFolder,  'oxauth-rp.war')])
 
+    def copy_static(self):
+        self.copyFile(
+                os.path.join(Config.install_dir, 'static/auth/lib/duo_web.py'),
+                os.path.join(Config.gluuOptPythonFolder, 'libs' )
+            )
+        
+        for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',
+                        'vericloud_gluu_creds.json', 'cert_creds.json', 'otp_configuration.json'):
+            
+            src_fn = os.path.join(Config.install_dir, 'static/auth/conf', conf_fn)
+            self.copyFile(src_fn, Config.certFolder)

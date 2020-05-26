@@ -14,23 +14,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"
 
+
     def install(self):
 
-        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
-
-        if not jetty_archive_list:
-            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.distAppFolder), True, True)
-
-        jettyArchive = max(jetty_archive_list)
-
-        jettyArchive_fn = os.path.basename(jettyArchive)
-        jetty_regex = re.search('jetty-distribution-(\d*\.\d*)', jettyArchive_fn)
-
-        if not jetty_regex:
-            self.logIt("Can't determine Jetty version", True, True)
-
-        jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
-        Config.templateRenderingDict['jetty_dist'] = jetty_dist
+        jettyArchive, jetty_dist = self.get_jetty_info()
+        
         jettyTemp = os.path.join(jetty_dist, 'temp')
         self.run([paths.cmd_mkdir, '-p', jettyTemp])
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyTemp])
@@ -65,6 +53,25 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % Config.jetty_home])
         self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % Config.jetty_home])
 
+    def get_jetty_info(self):
+        jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
+
+        if not jetty_archive_list:
+            self.logIt("Jetty archive not found in {}. Exiting...".format(Config.distAppFolder), True, True)
+
+        jettyArchive = max(jetty_archive_list)
+
+        jettyArchive_fn = os.path.basename(jettyArchive)
+        jetty_regex = re.search('jetty-distribution-(\d*\.\d*)', jettyArchive_fn)
+
+        if not jetty_regex:
+            self.logIt("Can't determine Jetty version", True, True)
+
+        jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
+        Config.templateRenderingDict['jetty_dist'] = jetty_dist
+
+        return jettyArchive, jetty_dist
+
     def create_user(self):
         self.createUser('jetty', Config.jetty_user_home)
         self.addUserToGroup('gluu', 'jetty')
@@ -78,6 +85,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyServiceBase = '%s/%s' % (Config.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
+
+        # we need this, because this method may be called externally
+        jettyArchive, jetty_dist = self.get_jetty_info()
 
         self.logIt("Preparing %s service base folders" % serviceName)
         self.run([paths.cmd_mkdir, '-p', jettyServiceBase])
@@ -101,7 +111,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % Config.jre_home + jettyEnv['PATH']
 
-        self.run([paths.cmd_java, '-jar', '%s/start.jar' % Config.jetty_home, 'jetty.home=%s' % Config.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
+        self.run([Config.cmd_java, '-jar', '%s/start.jar' % Config.jetty_home, 'jetty.home=%s' % Config.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
         try:
@@ -118,7 +128,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         try:
             web_resources = '%s_web_resources.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_resources)):
-                self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % Config.outputFolder)
+                self.renderTemplateInOut(web_resources, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
                 self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_resources), "%s/%s/webapps" % (Config.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
