@@ -16,6 +16,7 @@ class BaseInstaller:
         self.create_folders()
 
         self.install()
+        self.copy_static()
 
     def run_service_command(self, operation):
         try:
@@ -47,4 +48,7 @@ class BaseInstaller:
         pass
 
     def create_folders(self):
+        pass
+    
+    def copy_static(self):
         pass
