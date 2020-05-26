@@ -211,13 +211,7 @@ class Setup(object):
 
 
 
-    def load_certificate_text(self, filePath):
-        self.logIt("Load certificate %s" % filePath)
-        f = open(filePath)
-        certificate_text = f.read()
-        f.close()
-        certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
-        return certificate_text
+
 
 
     def install_gluu_components(self):
@@ -226,14 +220,6 @@ class Setup(object):
         if self.cb_install:
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
-
-        if self.installScimServer:
-            self.pbar.progress("scim", "Installing Gluu components: Scim Server", False)
-            self.install_scim_server()
-
-        if self.installSaml:
-            self.pbar.progress("saml", "Installing Gluu components: saml", False)
-            self.install_saml()
 
         if self.installOxAuthRP:
             self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
