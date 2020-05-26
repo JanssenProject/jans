@@ -3,10 +3,9 @@ import glob
 
 from setup_app import paths
 from setup_app.config import Config
-from setup_app.installers.base import BaseInstaller
-from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.jetty import JettyInstaller
 
-class OxtrustInstaller(BaseInstaller, SetupUtils):
+class OxtrustInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'identity'
@@ -17,13 +16,16 @@ class OxtrustInstaller(BaseInstaller, SetupUtils):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
         jettyServiceName = 'identity'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[jettyServiceName], True)
 
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/identity.war' % self.distGluuFolder, jettyServiceWebapps)
+        jettyServiceWebapps = os.path.join(Config.jetty_base, jettyServiceName, 'webapps')
+        self.copyFile(os.path.join(Config.distGluuFolder, 'identity.war'), jettyServiceWebapps)
 
         # don't send header to server
         self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
+        self.enable()
+        self.start()
 
     def generate_api_configuration(self):
         Config.api_rs_client_jks_pass_encoded = self.obscure(Config.api_rs_client_jks_pass)
