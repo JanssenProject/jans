@@ -5,11 +5,10 @@ import glob
 from setup_app.utils.base import httpd_name, clone_type, \
     os_initdaemon, os_type, determineApacheVersion
 
+from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
-from setup_app import paths
-
 
 class HttpdInstaller(BaseInstaller, SetupUtils):
 
