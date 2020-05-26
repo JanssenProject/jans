@@ -308,10 +308,7 @@ class Setup(object):
 
 
     def install_gluu_components(self):
-        
-        if self.wrends_install:
-            self.pbar.progress("ldap", "Installing Gluu components: LDAP", False)
-            self.install_ldap_server()
+
 
         if self.cb_install:
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)

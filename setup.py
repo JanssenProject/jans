@@ -191,6 +191,9 @@ if proceed:
     if Config.wrends_install:
         openDjInstaller.start_installation()
 
+    if Config.installHttpd:
+        httpdinstaller = HttpdInstaller()
+        httpdinstaller.configure()
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
@@ -212,8 +215,6 @@ if proceed:
 
 
 
-#http_installer_obj = HttpdInstaller()
-#http_installer_obj.configure()
 
 
     
