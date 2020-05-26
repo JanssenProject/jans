@@ -42,6 +42,7 @@ from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.passport import PassportInstaller
 from setup_app.installers.opendj import OpenDjInstaller
+from setup_app.installers.fido import FidoInstaller
 
 
 
@@ -100,6 +101,7 @@ Config.city = 'GluuCity'
 Config.state = 'GluuState'
 Config.admin_email = 'admin@mygluu.org'
 Config.installPassport = True
+Config.installFido2 = True
 
 print()
 print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
@@ -130,6 +132,7 @@ passportInstaller = PassportInstaller()
 oxtrustInstaller = OxtrustInstaller()
 scimInstaller = ScimInstaller()
 openDjInstaller = OpenDjInstaller()
+fidoInstaller = FidoInstaller()
 
 print()
 print(gluuInstaller)
@@ -197,6 +200,9 @@ if proceed:
 
     if Config.installOxAuth:
         oxauthInstaller.start_installation()
+
+    if Config.installFido2:
+        fidoInstaller.start_installation()
 
     if Config.installOxTrust:
         oxtrustInstaller.start_installation()

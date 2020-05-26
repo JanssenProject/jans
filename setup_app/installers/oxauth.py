@@ -19,14 +19,12 @@ class OxauthInstaller(JettyInstaller):
     def install(self):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
-        jettyServiceName = 'oxauth'
-        self.installJettyService(Config.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = os.path.join(Config.jetty_base, jettyServiceName,  'webapps')
+        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name,  'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'oxauth.war')
         self.copyFile(src_war, jettyServiceWebapps)
-        self.copy_static()
-        
+
         self.enable()
         self.start()
 
@@ -39,7 +37,7 @@ class OxauthInstaller(JettyInstaller):
         jettyServiceName = 'oxauth-rp'
         self.installJettyService(Config.jetty_app_configuration[jettyServiceName])
 
-        jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
+        jettyServiceWebapps = os.path.join(Config.jetty_base, jettyServiceName, 'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'oxauth-rp.war')
         self.copyFile(src_war, jettyServiceWebapps)
 
