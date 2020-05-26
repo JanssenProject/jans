@@ -5,15 +5,14 @@
  */
 package org.gluu.service;
 
-import java.util.Date;
-import java.util.function.Supplier;
-
-import javax.inject.Inject;
-
 import org.gluu.service.cache.CacheInterface;
 import org.gluu.service.cache.CacheProvider;
 import org.gluu.service.cache.CacheProviderType;
 import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.function.Supplier;
 
 /**
  * Provides operations with cache
@@ -120,6 +119,7 @@ public abstract class BaseCacheService implements CacheInterface {
         cacheProvider.cleanup(now);
     }
 
+    @Deprecated
     public void put(String key, Object object) {
         put(DEFAULT_EXPIRATION, key, object);
     }
