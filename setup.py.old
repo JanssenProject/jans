@@ -227,13 +227,7 @@ class Setup(object):
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
-        if self.installHttpd:
-            self.pbar.progress("httpd", "Installing Gluu components: HTTPD", False)
-            self.configure_httpd()
 
-        if self.installOxAuth:
-            self.pbar.progress("oxauth", "Installing Gluu components: OxAuth", False)
-            self.install_oxauth()
 
         if self.installFido2:
             self.pbar.progress("fido2", "Installing Gluu components: Fido2", False)
