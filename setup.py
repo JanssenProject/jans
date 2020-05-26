@@ -103,7 +103,7 @@ Config.installPassport = True
 Config.installFido2 = True
 Config.installScimServer = True
 Config.installSaml = True
-
+Config.installOxd = True
 
 print()
 print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
@@ -215,6 +215,10 @@ if proceed:
 
     if Config.installSaml:
         samlInstaller.start_installation()
+
+    if Config.installOxd:
+        oxdInstaller.start_installation()
+
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
