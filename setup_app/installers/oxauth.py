@@ -26,7 +26,6 @@ class OxauthInstaller(JettyInstaller):
         self.copyFile(src_war, jettyServiceWebapps)
 
         self.enable()
-        self.start()
 
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
