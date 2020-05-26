@@ -24,8 +24,8 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         # CentOS 7.* + systemd + apache 2.4
         if self.service_name == 'httpd' and self.apache_version == "2.4":
-            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
+            self.copyFile(Config.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(Config.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
 
         if clone_type == 'rpm' and os_initdaemon == 'init':
             self.copyFile(Config.apache2_conf, '/etc/httpd/conf/httpd.conf')

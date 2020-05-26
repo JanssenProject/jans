@@ -136,6 +136,7 @@ class myLdifParser(LDIFParser):
                 self.entries.append((dn, entry))
 
 def determineApacheVersion():
+    httpd_cmd = shutil.which(httpd_name)
     cmd = "/usr/sbin/%s -v | egrep '^Server version'" % httpd_name
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
