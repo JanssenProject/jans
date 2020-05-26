@@ -15,10 +15,9 @@ class OxtrustInstaller(JettyInstaller):
     def install(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
-        jettyServiceName = 'identity'
-        self.installJettyService(Config.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = os.path.join(Config.jetty_base, jettyServiceName, 'webapps')
+        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name, 'webapps')
         self.copyFile(os.path.join(Config.distGluuFolder, 'identity.war'), jettyServiceWebapps)
 
         # don't send header to server
