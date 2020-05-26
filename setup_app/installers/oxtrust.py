@@ -18,13 +18,10 @@ class OxtrustInstaller(JettyInstaller):
         self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
         jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name, 'webapps')
-        self.copyFile(os.path.join(Config.distGluuFolder, 'identity.war'), jettyServiceWebapps)
-
-        # don't send header to server
-        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
+        src_war = os.path.join(Config.distGluuFolder, 'identity.war')
+        self.copyFile(src_war, jettyServiceWebapps)
 
         self.enable()
-        self.start()
 
     def generate_api_configuration(self):
         Config.api_rs_client_jks_pass_encoded = self.obscure(Config.api_rs_client_jks_pass)

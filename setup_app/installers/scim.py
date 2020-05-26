@@ -3,10 +3,9 @@ import glob
 import shutil
 
 from setup_app.config import Config
-from setup_app.installers.base import BaseInstaller
-from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.jetty import JettyInstaller
 
-class ScimInstaller(BaseInstaller, SetupUtils):
+class ScimInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'scim'
@@ -16,15 +15,13 @@ class ScimInstaller(BaseInstaller, SetupUtils):
     def install(self):
         self.logIt("Copying scim.war into jetty webapps folder...")
 
-        jettyServiceName = 'scim'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
+        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/scim.war' % self.distGluuFolder, jettyServiceWebapps)
+        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name,  'webapps')
+        src_war = os.path.join(Config.distGluuFolder, 'scim.war')
+        self.copyFile(src_war, jettyServiceWebapps)
 
-        # don't send header to server
-        self.set_jetty_param(jettyServiceName, 'jetty.httpConfig.sendServerVersion', 'false')
-
+        self.enable()
 
     def generate_configuration(self):
         Config.scim_rs_client_jks_pass = self.getPW()
