@@ -32,10 +32,10 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             Config.pbar.progress("opendj", "OpenDJ: installing", False)
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.install_opendj()
-                Config.pbar.progress("opendj", "OpenDJ: preparing schema", False)
-                self.prepare_opendj_schema()
                 Config.pbar.progress("opendj", "OpenDJ: setting up service", False)
                 self.setup_opendj_service()
+                Config.pbar.progress("opendj", "OpenDJ: preparing schema", False)
+                self.prepare_opendj_schema()
 
             if Config.wrends_install:
                 Config.pbar.progress("opendj", "OpenDJ: configuring", False)
@@ -128,7 +128,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.logIt('Stopping opendj server')
-            cmd = os.path.join(self.ldapBaseFolder, 'bin/stop-ds')
+            cmd = os.path.join(Config.ldapBaseFolder, 'bin/stop-ds')
             self.run(['/bin/su','ldap', '-c', cmd], cwd='/opt/opendj/bin')
         except:
             self.logIt("Error stopping opendj", True)
@@ -364,10 +364,10 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         for schemaFile in Config.openDjschemaFiles:
             self.copyFile(schemaFile, Config.openDjSchemaFolder)
 
-
         self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
-
+        
+        self.logIt("Re-starting OpenDj after schema update")
         self.stop()
         self.start()
 
@@ -405,3 +405,5 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
 
             self.fix_init_scripts('opendj', init_script_fn)
+
+        self.reload_daemon()
