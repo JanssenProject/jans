@@ -7,7 +7,6 @@ from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.installers.node import NodeInstaller
-from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.utils.ldap_utils import LDAPUtils
 
 
