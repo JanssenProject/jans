@@ -115,8 +115,7 @@ public class ConsentGathererService {
         final List<String> consentGatheringScripts = clientService.getClient(clientId).getAttributes().getConsentGatheringScripts();
         final List<CustomScriptConfiguration> scripts = external.getCustomScriptConfigurationsByDns(consentGatheringScripts);
         if (!scripts.isEmpty()) {
-            scripts.sort(Comparator.comparingInt(CustomScriptConfiguration::getLevel)); // flow supports single script, thus taking the one with higher level
-            final CustomScriptConfiguration script = scripts.iterator().next();
+            final CustomScriptConfiguration script = Collections.max(scripts, Comparator.comparingInt(CustomScriptConfiguration::getLevel)); // flow supports single script, thus taking the one with higher level
             log.debug("Determined consent gathering script `%s`", script.getName());
             return script;
         }
