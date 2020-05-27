@@ -11,6 +11,7 @@ import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.CibaRequestsProcessorEvent;
 import org.gluu.service.cdi.event.Scheduled;
@@ -79,9 +80,7 @@ public class CibaRequestsProcessorJob {
 				new CibaRequestsProcessorEvent(), Scheduled.Literal.INSTANCE));
 
 		this.lastFinishedTime = System.currentTimeMillis();
-
-		int threadPoolSize = Runtime.getRuntime().availableProcessors() * 2;
-		this.executorService = Executors.newFixedThreadPool(threadPoolSize);
+		this.executorService = Executors.newCachedThreadPool(ServerUtil.daemonThreadFactory());
 	}
 
 	@Asynchronous
