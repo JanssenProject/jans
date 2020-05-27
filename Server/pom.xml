@@ -372,6 +372,12 @@
 			<artifactId>oxlicense-validator</artifactId>
 		</dependency>
 
+		<!-- Fido2 -->
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>fido2-client</artifactId>
+		</dependency>
+
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
