@@ -204,6 +204,9 @@ if proceed:
     if Config.installOxAuth:
         oxauthInstaller.start_installation()
 
+    if Config.installOxAuthRP:
+        oxauthInstaller.install_oxauth_rp()
+
     if Config.installFido2:
         fidoInstaller.start_installation()
 
