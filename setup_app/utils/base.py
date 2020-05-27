@@ -400,4 +400,7 @@ def get_documents_from_ldif(ldif_file):
     return documents
 
 
-    
+def readJsonFile(jsonFile):
+    if os.path.exists(jsonFile):
+        with open(jsonFile) as f:
+            return json.load(f)
