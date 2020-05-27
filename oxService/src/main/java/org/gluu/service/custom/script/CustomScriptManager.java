@@ -150,8 +150,13 @@ public class CustomScriptManager implements Serializable {
 
 	private boolean reloadImpl() {
 		// Load current script revisions
-		List<CustomScript> customScripts = customScriptService.findCustomScripts(supportedCustomScriptTypes,
-				CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
+		List<CustomScript> customScripts;
+		if (supportedCustomScriptTypes.isEmpty()) {
+			customScripts = new ArrayList<CustomScript>();
+		} else {
+			customScripts = customScriptService.findCustomScripts(supportedCustomScriptTypes,
+					CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
+		}
 
 		// Store updated external authenticator configurations
 		ReloadResult reloadResult = reloadCustomScriptConfigurations(this.customScriptConfigurations, customScripts);
