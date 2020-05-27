@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.gluu.fido.model.entry.DeviceRegistration;
 import org.gluu.fido2.ctap.UserVerification;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.fido2.model.auth.PublicKeyCredentialDescriptor;
@@ -28,6 +29,8 @@ import org.gluu.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.fido2.service.verifier.AssertionVerifier;
 import org.gluu.fido2.service.verifier.CommonVerifiers;
 import org.gluu.fido2.service.verifier.DomainVerifier;
+import org.gluu.service.net.NetworkService;
+import org.gluu.u2f.service.persist.DeviceRegistrationService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -56,6 +59,9 @@ public class AssertionService {
 
     @Inject
     private AuthenticationPersistenceService authenticationPersistenceService;
+    
+    @Inject
+    private DeviceRegistrationService deviceRegistrationService;
 
     @Inject
     private AssertionVerifier assertionVerifier;
@@ -68,6 +74,9 @@ public class AssertionService {
 
     @Inject
     private CommonVerifiers commonVerifiers;
+    
+    @Inject
+    private NetworkService networkService;
 
     /*
      * Requires mandatory parameters: username
@@ -122,17 +131,17 @@ public class AssertionService {
         optionsResponseNode.put("status", "ok");
         optionsResponseNode.put("errorMessage", "");
 
-        Fido2AuthenticationData authenticationData = new Fido2AuthenticationData();
-        authenticationData.setUserId(username);
-        authenticationData.setChallenge(challenge);
-        authenticationData.setDomain(documentDomain);
-        authenticationData.setUserVerificationOption(userVerification);
-        authenticationData.setStatus(Fido2AuthenticationStatus.pending);
+        Fido2AuthenticationData entity = new Fido2AuthenticationData();
+        entity.setUsername(username);
+        entity.setChallenge(challenge);
+        entity.setDomain(documentDomain);
+        entity.setUserVerificationOption(userVerification);
+        entity.setStatus(Fido2AuthenticationStatus.pending);
 
         // Store original request
-        authenticationData.setAssertionRequest(params.toString());
+        entity.setAssertionRequest(params.toString());
 
-        authenticationPersistenceService.save(authenticationData);
+        authenticationPersistenceService.save(entity);
 
         return optionsResponseNode;
 
@@ -199,8 +208,17 @@ public class AssertionService {
     }
 
 	private ArrayNode prepareAllowedCredentials(String documentDomain, String username) {
-        List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService.findAllRegisteredByUsername(username);
-        List<JsonNode> allowedKeys = existingRegistrations.parallelStream()
+        List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username, null);
+        List<JsonNode> allowedFidoKeys = existingFidoRegistrations.parallelStream()
+                .filter(f -> StringHelper.equals(documentDomain, networkService.getHost(f.getApplication())))
+                .filter(f -> StringHelper.isNotEmpty(f.getKeyHandle()))
+                .map(f -> dataMapperService.convertValue(
+                        new PublicKeyCredentialDescriptor("public-key", new String[] {"usb", "ble", "nfc"}, f.getKeyHandle()),
+                        JsonNode.class))
+                .collect(Collectors.toList());
+
+        List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findAllRegisteredByUsername(username);
+        List<JsonNode> allowedFido2Keys = existingFido2Registrations.parallelStream()
                 .filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
                 .filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
                 .map(f -> dataMapperService.convertValue(
@@ -209,7 +227,8 @@ public class AssertionService {
                 .collect(Collectors.toList());
 
         ArrayNode allowedCredentials = dataMapperService.createArrayNode();
-        allowedCredentials.addAll(allowedKeys);
+        allowedCredentials.addAll(allowedFidoKeys);
+        allowedCredentials.addAll(allowedFido2Keys);
 
         return allowedCredentials;
 	}

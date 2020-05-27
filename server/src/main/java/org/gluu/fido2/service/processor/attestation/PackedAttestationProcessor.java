@@ -85,7 +85,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
             List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
 
             X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
-            if (tm.getAcceptedIssuers().length == 0) {
+            if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
                 throw new Fido2RPRuntimeException(
                         "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
             }

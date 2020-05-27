@@ -4,7 +4,7 @@
  * Copyright (c) 2018, Gluu
  */
 
-package org.gluu.oxauth.fido2.client;
+package org.gluu.fido2.client;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;

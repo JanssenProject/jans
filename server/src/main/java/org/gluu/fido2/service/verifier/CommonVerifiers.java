@@ -76,7 +76,6 @@ public class CommonVerifiers {
     }
 
 	public String verifyRpDomain(JsonNode params) {
-		// TODO: Use domains list to check specified documentDomain
         String documentDomain;
         if (params.hasNonNull("documentDomain")) {
             documentDomain = params.get("documentDomain").asText();
@@ -428,7 +427,7 @@ public class CommonVerifiers {
 	public String getChallenge(JsonNode clientDataJSONNode) {
 		try {
 			String clientDataChallenge = base64Service
-					.urlEncodeToString(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
+					.urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
 
 			return clientDataChallenge;
 		} catch (Exception ex) {

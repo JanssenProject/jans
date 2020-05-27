@@ -181,7 +181,6 @@ public class TocService {
         List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
         List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
 
-        // TODO: Check if cert verification works well when there is no root cert 
         X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);
 
         if (JWSAlgorithm.ES256.equals(algorithm)) {

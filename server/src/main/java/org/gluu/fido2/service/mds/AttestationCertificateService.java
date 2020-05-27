@@ -116,6 +116,11 @@ public class AttestationCertificateService {
 	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates);
+		if ((trustedCertificates == null) || (trustedCertificates.size() == 0)) {
+			log.error("Failed to get trusted certificates");
+			return null;
+		}
+
 		KeyStore keyStore = getCertificationKeyStore(aaguid, trustedCertificates);
 
 		TrustManagerFactory trustManagerFactory = null;
@@ -126,7 +131,7 @@ public class AttestationCertificateService {
 
 			return (X509TrustManager) tms[0];
 		} catch (NoSuchAlgorithmException | KeyStoreException e) {
-			log.error("Unrecoverable problem with the platform", e);
+			log.error("Failed to initialize trust manager", e);
 			return null;
 		}
 	}
