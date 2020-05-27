@@ -26,6 +26,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -62,6 +64,8 @@ public class CibaRequestsProcessorJob {
 
 	private AtomicBoolean isActive;
 
+	private ExecutorService executorService;
+
 	/**
 	 * Method invoked from the appInitializer to start processing every some time.
 	 */
@@ -75,6 +79,9 @@ public class CibaRequestsProcessorJob {
 				new CibaRequestsProcessorEvent(), Scheduled.Literal.INSTANCE));
 
 		this.lastFinishedTime = System.currentTimeMillis();
+
+		int threadPoolSize = Runtime.getRuntime().availableProcessors() * 2;
+		this.executorService = Executors.newFixedThreadPool(threadPoolSize);
 	}
 
 	@Asynchronous
@@ -118,14 +125,16 @@ public class CibaRequestsProcessorJob {
 	 * Main process that process CIBA requests in cache.
 	 */
 	public void processImpl() {
-        try {
+		try {
 			CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
 			for (Map.Entry<String, Long> entry : cibaCacheAuthReqIds.getAuthReqIds().entrySet()) {
 				Date now = new Date();
 				if (entry.getValue() < now.getTime()) {
 					CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(entry.getKey());
 					if (cibaGrant != null) {
-						processExpiredRequest(cibaGrant);
+						executorService.execute(() ->
+							processExpiredRequest(cibaGrant)
+						);
 					}
 					authorizationGrantList.removeCibaGrantFromProcessorCache(entry.getKey());
 				}
