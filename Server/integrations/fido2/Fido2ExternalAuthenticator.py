@@ -9,10 +9,9 @@ from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
 from javax.ws.rs.core import Response
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.fido2.client import Fido2ClientFactory
+from org.gluu.fido2.client import Fido2ClientFactory
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
-from org.gluu.oxauth.fido2.service.persist import RegistrationPersistenceService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
@@ -38,6 +37,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         self.fido2_server_uri = configurationAttributes.get("fido2_server_uri").getValue2()
+
+        self.fido2_domain = None
+        if configurationAttributes.containsKey("fido2_domain"):
+            self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
 
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
@@ -70,20 +73,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_name = credentials.getUsername()
 
-        if (step == 1):
+        if step == 1:
             print "Fido2. Authenticate for step 1"
 
             user_password = credentials.getPassword()
             logged_in = False
-            if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
+            if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
                 userService = CdiUtil.bean(UserService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
-            if (not logged_in):
+            if not logged_in:
                 return False
 
             return True
-        elif (step == 2):
+        elif step == 2:
             print "Fido2. Authenticate for step 2"
 
             token_response = ServerUtil.getFirstValue(requestParameters, "tokenResponse")
@@ -98,27 +101,27 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if (user == None):
+            if user == None:
                 print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
-            if (auth_method == 'authenticate'):
+            if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
                 assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
                 assertionStatus = assertionService.verify(token_response)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
 
-                if (assertionStatus.getStatus() != Response.Status.OK.getStatusCode()):
+                if assertionStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
                     return False
 
                 return True
-            elif (auth_method == 'enroll'):
+            elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
                 attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
                 attestationStatus = attestationService.verify(token_response)
 
-                if (attestationStatus.getStatus() != Response.Status.OK.getStatusCode()):
+                if attestationStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
                     return False
 
@@ -134,9 +137,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
 
-        if (step == 1):
+        if step == 1:
             return True
-        elif (step == 2):
+        elif step == 2:
             print "Fido2. Prepare for step 2"
 
             session = CdiUtil.bean(SessionIdService).getSessionId()
@@ -146,22 +149,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
-            if (user == None):
+            if user == None:
                 print "Fido2. Prepare for step 2. Failed to determine user name"
                 return False
 
             userName = user.getUserId()
 
             metaDataConfiguration = self.getMetaDataConfiguration()
-
-            # Check if user have registered devices
-            registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
             
             assertionResponse = None
             attestationResponse = None
 
-            userFido2Devices = registrationPersistenceService.findAllRegisteredByUsername(userName)
-            if (userFido2Devices.size() > 0):
+            # Check if user have registered devices
+            userService = CdiUtil.bean(UserService)
+            countFido2Devices = userService.countFidoAndFido2Devices(userName, self.fido2_domain)
+            if countFido2Devices > 0:
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 
                 try:
@@ -187,7 +189,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Fido2. Prepare for step 2. Successfully start flow with next requests.\nfido2_assertion_request: '%s'\nfido2_attestation_request: '%s'" % ( assertionResponse, attestationResponse )
 
             return True
-        elif (step == 3):
+        elif step == 3:
             print "Fido2. Prepare for step 3"
 
             return True
@@ -204,7 +206,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return -1
 
     def getPageForStep(self, configurationAttributes, step):
-        if (step == 2):
+        if step == 2:
             return "/auth/fido2/login.xhtml"
 
         return ""
@@ -232,7 +234,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             print "Fido2. Initialization. Downloading Fido2 metadata"
             self.fido2_server_metadata_uri = self.fido2_server_uri + "/.well-known/fido2-configuration"
-            #self.fido2_server_metadata_uri = self.fido2_server_uri + "/oxauth/restv1/fido2/configuration"
+            #self.fido2_server_metadata_uri = self.fido2_server_uri + "/fido2/restv1/fido2/configuration"
 
             metaDataConfigurationService = Fido2ClientFactory.instance().createMetaDataConfigurationService(self.fido2_server_metadata_uri)
     
