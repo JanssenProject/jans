@@ -40,8 +40,6 @@ class Crypto64:
             self.gen_cert('idp-encryption', Config.shibJksPass, 'jetty')
             self.gen_cert('idp-signing', Config.shibJksPass, 'jetty')
 
-            self.gen_cert('passport-sp', Config.passportSpKeyPass, 'ldap', Config.ldap_hostname)
-
             self.gen_keystore('shibIDP',
                               Config.shibJksFn,
                               Config.shibJksPass,
@@ -314,11 +312,11 @@ class Crypto64:
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
         self.logIt("Exporting oxAuth OpenID Connect keys")
 
-        cmd = " ".join([self.cmd_java,
+        cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        self.non_setup_properties['oxauth_client_jar_fn'], 
-                        self.non_setup_properties['key_export_path'],
+                        Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        Config.non_setup_properties['key_export_path'],
                         "-keystore",
                         jks_path,
                         "-keypasswd",

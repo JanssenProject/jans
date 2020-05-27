@@ -104,6 +104,7 @@ Config.installFido2 = True
 Config.installScimServer = True
 Config.installSaml = True
 Config.installOxd = True
+Config.installPassport = True
 
 print()
 print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
@@ -177,7 +178,6 @@ if proceed:
     Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
     
     gluuInstaller.prepare_base64_extension_scripts()
-    gluuInstaller.render_templates()
     gluuInstaller.generate_crypto()
 
     #TODO: Consider moving to oxauth installer
@@ -222,6 +222,8 @@ if proceed:
     if Config.installOxd:
         oxdInstaller.start_installation()
 
+    if Config.installPassport:
+        passportInstaller.start_installation()
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
