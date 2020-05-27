@@ -132,7 +132,7 @@ public class CibaRequestsProcessorJob {
                     CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(entry.getKey());
                     if (cibaGrant != null) {
                         executorService.execute(() ->
-                            processExpiredRequest(cibaGrant)
+                            processExpiredRequest(cibaGrant, entry.getKey())
                         );
                     }
                     authorizationGrantList.removeCibaGrantFromProcessorCache(entry.getKey());
@@ -147,13 +147,14 @@ public class CibaRequestsProcessorJob {
      * Method responsible to process expired CIBA grants, set them as expired in cache
      * and send callbacks to the client
      * @param cibaGrant Object containing data related to the CIBA grant.
+     * @param authReqId Authentication request id.
      */
-    private void processExpiredRequest(CIBAGrant cibaGrant) {
+    private void processExpiredRequest(CIBAGrant cibaGrant, String authReqId) {
         if (cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_PENDING
                 && cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
             return;
         }
-        log.info("Authentication request id {} has expired", cibaGrant.getCIBAAuthenticationRequestId());
+        log.info("Authentication request id {} has expired", authReqId);
 
         cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED);
         cibaGrant.setTokensDelivered(false);
