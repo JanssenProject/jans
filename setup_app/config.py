@@ -133,14 +133,8 @@ class Config:
         # OS /etc/default folder
         self.osDefault = '/etc/default'
         self.sysemProfile = '/etc/profile'
-
-        self.jython_home = '/opt/jython'
-
         self.node_home = '/opt/node'
-        self.node_initd_script = os.path.join(self.install_dir, 'static/system/initd/node')
-        self.node_base = os.path.join(self.gluuOptFolder, 'node')
-        self.node_user_home = '/home/node'
-        self.passport_initd_script = os.path.join(self.install_dir, 'static/system/initd/passport')
+        self.jython_home = '/opt/jython'
 
         self.java_type = 'jre'
 
@@ -218,6 +212,8 @@ class Config:
         self.templateFolder = os.path.join(self.install_dir, 'templates')
         self.staticFolder = os.path.join(self.install_dir, 'static')
 
+        self.ldif_idp = os.path.join(self.outputFolder, 'oxidp.ldif')
+
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
 
         self.oxauth_error_json = os.path.join(self.staticFolder, 'oxauth/oxauth-errors.json')
@@ -284,17 +280,9 @@ class Config:
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'
 
-        self.passportSpKeyPass = None
-        self.passportSpTLSCACert = os.path.join(self.certFolder, 'passport-sp.pem')
-        self.passportSpTLSCert = os.path.join(self.certFolder, 'passport-sp.crt')
-        self.passportSpTLSKey = os.path.join(self.certFolder, 'passport-sp.key')
-        self.passportSpJksPass = None
-        self.passportSpJksFn = os.path.join(self.certFolder, 'passport-sp.jks')
-
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        self.passport_central_config_json = os.path.join(self.outputFolder, 'passport-central-config.json')
         self.oxauth_config_json = os.path.join(self.outputFolder, 'oxauth-config.json')
         self.oxtrust_config_json = os.path.join(self.outputFolder, 'oxtrust-config.json')
         self.oxtrust_cache_refresh_json = os.path.join(self.outputFolder, 'oxtrust-cache-refresh.json')
@@ -331,7 +319,6 @@ class Config:
         self.ldif_oxtrust_api_clients = os.path.join(self.outputFolder, 'oxtrust_api_clients.ldif')
 
         self.ldif_scripts_casa = os.path.join(self.outputFolder, 'scripts_casa.ldif')
-        self.passport_config = os.path.join(self.configFolder, 'passport-config.json')
         self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
         self.network = '/etc/sysconfig/network'
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
@@ -385,30 +372,6 @@ class Config:
         self.oxtrust_requesting_party_client_id = None
         self.oxtrust_resource_server_client_id = None
 
-        # oxPassport Configuration
-        self.gluu_passport_base = os.path.join(self.node_base, 'passport')
-        self.passport_oxtrust_config_fn = os.path.join(self.outputFolder, 'passport_oxtrust_config.son')
-        self.ldif_passport_config = os.path.join(self.outputFolder, 'oxpassport-config.ldif')
-        self.ldif_passport = os.path.join(self.outputFolder, 'passport.ldif')
-        self.ldif_passport_clients = os.path.join(self.outputFolder, 'passport_clients.ldif')
-        self.ldif_idp = os.path.join(self.outputFolder, 'oxidp.ldif')
-        
-        self.passport_rs_client_id = None
-        self.passport_rs_client_jwks = None
-        self.passport_rs_client_jks_fn = os.path.join(self.certFolder, 'passport-rs.jks')
-        self.passport_rs_client_jks_pass = None
-        self.passport_rs_client_jks_pass_encoded = None
-
-        self.passport_rp_ii_client_id = None
-        self.passport_rp_client_id = None
-        self.passport_rp_client_jwks = None
-        self.passport_rp_client_jks_fn = os.path.join(self.certFolder, 'passport-rp.jks')
-        self.passport_rp_client_cert_alg = 'RS512'
-        self.passport_rp_client_cert_alias = None
-        self.passport_rp_client_cert_fn = os.path.join(self.certFolder, 'passport-rp.pem')
-        self.passport_rp_client_jks_pass = 'secret'
-        self.passport_resource_id = None
-        
         self.oxauth_legacyIdTokenClaims = 'false'
         self.oxauth_openidScopeBackwardCompatibility =  'false'
         self.enableRadiusScripts = 'false'

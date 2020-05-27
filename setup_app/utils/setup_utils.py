@@ -13,6 +13,7 @@ import string
 import random
 import hashlib
 
+from pathlib import Path
 from urllib.parse import urlparse
 
 from setup_app import paths
@@ -358,7 +359,8 @@ class SetupUtils(Crypto64):
         result = {}
         for dictionary in dict_args:
             result.update(dictionary)
-
+            if 'non_setup_properties' in dictionary:
+                result.update(dictionary['non_setup_properties'])
         return result
 
     def get_filepaths(self, directory):
@@ -476,3 +478,30 @@ class SetupUtils(Crypto64):
         certificate_text = self.readFile(filePath)
         certificate_text = certificate_text.replace('-----BEGIN CERTIFICATE-----', '').replace('-----END CERTIFICATE-----', '').strip()
         return certificate_text
+
+    def render_templates_folder(self, templatesFolder):
+        self.logIt("Rendering templates folder: %s" % templatesFolder)
+
+        #coucbase_dict = self.couchbaseDict()
+
+        tp = Path(templatesFolder)
+        for te in tp.rglob('*'):
+            if te.is_file():
+                self.logIt("Rendering template {}".format(te))
+                rp = te.relative_to(Config.templateFolder)
+                output_dir = rp.parent
+                template_name = rp.name
+
+                fullOutputDir = Path(Config.outputFolder, output_dir)
+                fullOutputFile = Path(Config.outputFolder, rp)
+                
+                if not fullOutputDir.exists():
+                    fullOutputDir.mkdir(parents=True, exist_ok=True)
+
+                
+                print(Config.non_setup_properties)
+
+                template_text = te.read_text()
+                rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
+                self.logIt("Writing rendered template {}".format(fullOutputFile))
+                fullOutputFile.write_text(rendered_text)

@@ -13,6 +13,12 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.service_name = 'node'
         self.pbar_text = "Installing Node"
 
+        self.node_base = os.path.join(Config.gluuOptFolder, 'node')
+        self.node_initd_script = os.path.join(Config.install_dir, 'static/system/initd/node')
+        self.node_base = os.path.join(Config.gluuOptFolder, 'node')
+        self.node_user_home = '/home/node'
+
+
     def install(self):
 
         node_archieve_list = glob.glob(os.path.join(Config.distAppFolder, 'node-*-linux-x64.tar.xz'))
@@ -34,26 +40,32 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_ln, '-sf', nodeDestinationPath, Config.node_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
 
+        self.render_templates()
+
         # Create temp folder
         self.run([paths.cmd_mkdir, '-p', "%s/temp" % Config.node_home])
 
         # Copy init.d script
-        self.copyFile(Config.node_initd_script, Config.gluuOptSystemFolder)
-        self.copyFile(Config.passport_initd_script, Config.gluuOptSystemFolder)
+        self.copyFile(self.node_initd_script, Config.gluuOptSystemFolder)
         self.run([paths.cmd_chmod, '-R', "755", "%s/node" % Config.gluuOptSystemFolder])
-        self.run([paths.cmd_chmod, '-R', "755", "%s/passport" % Config.gluuOptSystemFolder])
 
         self.run([paths.cmd_chown, '-R', 'node:node', nodeDestinationPath])
         self.run([paths.cmd_chown, '-h', 'node:node', Config.node_home])
 
-        self.run([paths.cmd_mkdir, '-p', Config.node_base])
-        self.run([paths.cmd_chown, '-R', 'node:node', Config.node_base])
+        self.run([paths.cmd_mkdir, '-p', self.node_base])
+        self.run([paths.cmd_chown, '-R', 'node:node', self.node_base])
 
+    def render_templates(self):
+        self.logIt("Rendering node templates")
+
+        nodeTepmplatesFolder = os.path.join(Config.templateFolder, 'node')
+        Config.non_setup_properties.update(self.__dict__)
+        self.render_templates_folder(nodeTepmplatesFolder)
 
     def installNodeService(self, serviceName):
         self.logIt("Installing node service %s..." % serviceName)
 
-        nodeServiceConfiguration = '%s/node/%s' % (Config.outputFolder, serviceName)
+        nodeServiceConfiguration = os.path.join(Config.outputFolder, 'node', serviceName)
         self.copyFile(nodeServiceConfiguration, Config.osDefault)
         self.run([paths.cmd_chown, 'root:root', os.path.join(Config.osDefault, serviceName)])
 
@@ -64,5 +76,5 @@ class NodeInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_ln, '-sf', '%s/node' % Config.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
     def create_user(self):
-        self.createUser('node', Config.node_user_home)
+        self.createUser('node', self.node_user_home)
         self.addUserToGroup('gluu', 'node')

@@ -221,9 +221,6 @@ class Setup(object):
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
 
-        if self.installOxAuthRP:
-            self.pbar.progress("oxauthrp", "Installing Gluu components: OxAuthRP", False)
-            self.install_oxauth_rp()
 
         if self.installPassport:
             self.pbar.progress("passport", "Installing Gluu components: Passport", False)
