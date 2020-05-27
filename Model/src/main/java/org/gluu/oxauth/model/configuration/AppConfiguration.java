@@ -200,6 +200,7 @@ public class AppConfiguration implements Configuration {
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled  = false;
     private Boolean removeRefreshTokensForClientOnLogout  = true;
+    private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
@@ -218,6 +219,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getConsentGatheringScriptBackwardCompatibility() {
+        if (consentGatheringScriptBackwardCompatibility == null) consentGatheringScriptBackwardCompatibility = false;
+        return consentGatheringScriptBackwardCompatibility;
+    }
+
+    public void setConsentGatheringScriptBackwardCompatibility(Boolean consentGatheringScriptBackwardCompatibility) {
+        this.consentGatheringScriptBackwardCompatibility = consentGatheringScriptBackwardCompatibility;
+    }
 
     public Boolean getErrorReasonEnabled() {
         if (errorReasonEnabled == null) errorReasonEnabled = false;
