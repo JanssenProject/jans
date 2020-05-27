@@ -13,6 +13,7 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.AuthorizeService;
+import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
@@ -27,8 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -67,6 +67,9 @@ public class ConsentGathererService {
     @Inject
     private AuthorizeService authorizeService;
 
+    @Inject
+    private ClientService clientService;
+
     private final Map<String, String> pageAttributes = new HashMap<String, String>();
     private ConsentGatheringContext context;
     
@@ -76,9 +79,9 @@ public class ConsentGathererService {
 
         final SessionId session = sessionService.getConsentSession(httpRequest, httpResponse, userDn, true);
 
-        CustomScriptConfiguration script = external.getDefaultExternalCustomScript();
+        CustomScriptConfiguration script = determineConsentScript(clientId);
         if (script == null) {
-            log.error("Failed to determine consent-gathering default script");
+            log.error("Failed to determine consent-gathering script");
             return false;
         }
 
@@ -101,6 +104,25 @@ public class ConsentGathererService {
 		facesService.redirectWithExternal(redirectTo, null);
 
 		return true;
+    }
+
+    private CustomScriptConfiguration determineConsentScript(String clientId) {
+        if (appConfiguration.getConsentGatheringScriptBackwardCompatibility()) {
+            // in 4.1 and earlier we returned default consent script
+            return external.getDefaultExternalCustomScript();
+        }
+
+        final List<String> consentGatheringScripts = clientService.getClient(clientId).getAttributes().getConsentGatheringScripts();
+        final List<CustomScriptConfiguration> scripts = external.getCustomScriptConfigurationsByDns(consentGatheringScripts);
+        if (!scripts.isEmpty()) {
+            scripts.sort(Comparator.comparingInt(CustomScriptConfiguration::getLevel)); // flow supports single script, thus taking the one with higher level
+            final CustomScriptConfiguration script = scripts.iterator().next();
+            log.debug("Determined consent gathering script `%s`", script.getName());
+            return script;
+        }
+
+        log.debug("There no consent gathering script configured for client `%s`. Therefore taking default consent script.", clientId);
+        return external.getDefaultExternalCustomScript();
     }
 
     public boolean authorize() {
