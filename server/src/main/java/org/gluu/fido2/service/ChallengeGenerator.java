@@ -27,7 +27,7 @@ public class ChallengeGenerator {
     public String getChallenge() {
         byte buffer[] = new byte[32];
         new SecureRandom().nextBytes(buffer);
-        return base64Service.urlEncodeToString(buffer);
+        return base64Service.urlEncodeToStringWithoutPadding(buffer);
     }
 
 }

@@ -4,7 +4,7 @@
  * Copyright (c) 2018, Gluu
  */
 
-package org.gluu.oxauth.fido2.client;
+package org.gluu.fido2.client;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -13,18 +13,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
- * The endpoint allows to start and finish Fido2 assertion process
+ * The endpoint allows to start and finish Fido2 attestation process
  *
  * @author Yuriy Movchan
  * @version 12/21/2018
  */
-public interface AssertionService {
+public interface AttestationService {
 
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public Response authenticate(String content);
+    public Response register(String content);
 
     @POST
     @Consumes({ "application/json" })

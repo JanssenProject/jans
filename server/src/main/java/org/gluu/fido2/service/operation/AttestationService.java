@@ -110,8 +110,10 @@ public class AttestationService {
         // Put RP
         String documentDomain = commonVerifiers.verifyRpDomain(params);
         ObjectNode credentialRpEntityNode = createRpDomain(documentDomain);
-        optionsResponseNode.set("rp", credentialRpEntityNode);
-        log.debug("Put rp {}", credentialRpEntityNode);
+        if (credentialRpEntityNode != null) {
+	        optionsResponseNode.set("rp", credentialRpEntityNode);
+	        log.debug("Put rp {}", credentialRpEntityNode);
+        }
 
         // Put user
         String userId = generateUserId();
@@ -259,7 +261,11 @@ public class AttestationService {
 	        credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
 		} else {
 			for(String requestedCredentialType : requestedCredentialTypes) {
-				CoseRSAAlgorithm coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
+				CoseRSAAlgorithm coseRSAAlgorithm = null;
+				try {
+					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
+				} catch (IllegalArgumentException ex) {}
+
 				if (coseRSAAlgorithm != null) {
 			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
 			        credentialParametersNodeRS256.arrayNode().addObject();
@@ -270,7 +276,11 @@ public class AttestationService {
 			}
 
 			for(String requestedCredentialType : requestedCredentialTypes) {
-				CoseEC2Algorithm coseEC2Algorithm = CoseEC2Algorithm.valueOf(requestedCredentialType);
+				CoseEC2Algorithm coseEC2Algorithm = null;
+				try {
+					coseEC2Algorithm = CoseEC2Algorithm.valueOf(requestedCredentialType);
+				} catch (IllegalArgumentException ex) {}
+
 				if (coseEC2Algorithm != null) {
 			        ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
 			        credentialParametersNodeRS256.arrayNode().addObject();

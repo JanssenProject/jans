@@ -54,6 +54,10 @@ public class Base64Service {
     }
 
     public String urlEncodeToString(byte[] src) {
+        return base64UrlEncoder.encodeToString(src);
+    }
+
+    public String urlEncodeToStringWithoutPadding(byte[] src) {
         return base64UrlEncoder.withoutPadding().encodeToString(src);
     }
 
