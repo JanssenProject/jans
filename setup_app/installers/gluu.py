@@ -199,42 +199,12 @@ class GluuInstaller(SetupUtils):
             self.logIt("Error writing template", True)
             self.logIt(traceback.format_exc(), True)
 
-    def render_templates_folder(self, templatesFolder):
-        self.logIt("Rendering templates folder: %s" % templatesFolder)
-
-        #coucbase_dict = self.couchbaseDict()
-
-        tp = Path(templatesFolder)
-        for te in tp.rglob('*'):
-            if te.is_file():
-                self.logIt("Rendering template {}".format(te))
-                rp = te.relative_to(Config.templateFolder)
-                output_dir = rp.parent
-                template_name = rp.name
-
-                fullOutputDir = Path(Config.outputFolder, output_dir)
-                fullOutputFile = Path(Config.outputFolder, rp)
-                
-                if not fullOutputDir.exists():
-                    fullOutputDir.mkdir(parents=True, exist_ok=True)
-
-                template_text = te.read_text()
-                rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
-                self.logIt("Writing rendered template {}".format(fullOutputFile))
-                fullOutputFile.write_text(rendered_text)
-
 
     def render_test_templates(self):
         self.logIt("Rendering test templates")
 
         testTepmplatesFolder = os.path.join(self.templateFolder, 'test')
         self.render_templates_folder(testTepmplatesFolder)
-
-    def render_node_templates(self):
-        self.logIt("Rendering node templates")
-
-        nodeTepmplatesFolder = os.path.join(Config.templateFolder, 'node')
-        self.render_templates_folder(nodeTepmplatesFolder)
 
     def writeHybridProperties(self):
 

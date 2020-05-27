@@ -93,10 +93,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.opendj_p12_pass:
             Config.opendj_p12_pass = self.getPW()
 
-        if not Config.passportSpKeyPass:
-            Config.passportSpKeyPass = self.getPW()
-            Config.passportSpJksPass = self.getPW()
-
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
