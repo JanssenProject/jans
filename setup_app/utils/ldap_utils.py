@@ -124,3 +124,6 @@ class LDAPUtils:
                 if not self.dn_exists(dn):
                     base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
                     self.ldap_conn.add(dn, attributes=entry)
+
+    def __del__(self):
+        self.ldap_conn.unbind()
