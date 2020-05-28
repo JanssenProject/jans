@@ -33,7 +33,6 @@ class NodeInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_tar, '-xJf', nodeArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % nodeArchive)
-            self.logIt(traceback.format_exc(), True)
 
         nodeDestinationPath = max(glob.glob('/opt/node-*-linux-x64'))
 

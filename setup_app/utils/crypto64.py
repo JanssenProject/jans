@@ -57,7 +57,6 @@ class Crypto64:
 
         except:
             self.logIt("Error generating cyrpto")
-            self.logIt(traceback.format_exc(), True)
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
@@ -148,7 +147,6 @@ class Crypto64:
 
         except:
             self.logIt("Error loading scripts from %s" % Config.extensionFolder, True)
-            self.logIt(traceback.format_exc(), True)
 
 
     def generate_base64_file(self, fn, num_spaces):
@@ -159,7 +157,6 @@ class Crypto64:
             plain_file_b64encoded_text = base64.b64encode(plain_file_text).decode('utf-8').strip()
         except:
             self.logIt("Error loading file", True)
-            self.logIt(traceback.format_exc(), True)
 
         if num_spaces > 0:
             plain_file_b64encoded_text = self.reindent(plain_file_b64encoded_text, num_spaces)
@@ -342,7 +339,6 @@ class Crypto64:
             self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
         except:
             self.logIt("Error writing command : %s" % fn, True)
-            self.logIt(traceback.format_exc(), True)
 
     #TODO: Consider moving to oxauth installer
     def generate_oxauth_openid_keys(self):
@@ -385,7 +381,6 @@ class Crypto64:
             Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
         except:
             self.logIt("Error encoding passwords", True)
-            self.logIt(traceback.format_exc(), True)
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords", pbar='gluu')
@@ -401,4 +396,3 @@ class Crypto64:
             Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
-            self.logIt(traceback.format_exc(), True)
