@@ -40,6 +40,7 @@ III. These changes should be applied to oxAuth config.
 14. "returnClientSecretOnRead": true
 15. "forceOfflineAccessScopeToEnableRefreshToken": false
 16. "errorReasonEnabled": true 
+17. "rejectJwtWithNoneAlg": false  
 
 IV. Next custom scripts should be enabled:
 1. Enable all UMA RPT Policies and UMA Claims Gathering scripts.
