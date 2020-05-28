@@ -178,7 +178,6 @@ class PropertiesUtils(SetupUtils):
             p = base.read_properties_file(prop_file)
         except:
             self.logIt("Error loading properties", True)
-            self.logIt(traceback.format_exc(), True)
 
         if p.get('ldap_type') == 'openldap':
             self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
@@ -204,7 +203,6 @@ class PropertiesUtils(SetupUtils):
                     setattr(Config, prop, False)
             except:
                 self.logIt("Error loading property %s" % prop)
-                self.logIt(traceback.format_exc(), True)
 
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
@@ -317,7 +315,6 @@ class PropertiesUtils(SetupUtils):
             
         except:
             self.logIt("Error saving properties", True)
-            self.logIt(traceback.format_exc(), True)
 
     def getBackendTypes(self):
 

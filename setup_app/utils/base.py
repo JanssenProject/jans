@@ -170,6 +170,8 @@ def logIt(msg, errorLog=False, fatal=False):
     log_fn = paths.LOG_ERROR_FILE if errorLog else paths.LOG_FILE
     with open(log_fn, 'a') as w:
         w.write('{} {}\n'.format(time.strftime('%X %x'), msg))
+        if errorLog and 'NoneType: None' not in traceback.format_exc():
+             w.write('{} {}\n'.format(time.strftime('%X %x'), traceback.format_exc()))
 
     if fatal:
         print("FATAL:", errorLog)
