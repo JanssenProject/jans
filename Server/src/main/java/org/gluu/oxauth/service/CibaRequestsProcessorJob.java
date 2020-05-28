@@ -9,8 +9,12 @@ package org.gluu.oxauth.service;
 import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
 import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.AuthorizationGrantList;
+import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
+import org.gluu.oxauth.model.common.CIBAGrant;
+import org.gluu.oxauth.model.common.CIBAGrantUserAuthorization;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.ldap.CIBARequest;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.CibaRequestsProcessorEvent;
@@ -25,8 +29,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,7 +62,7 @@ public class CibaRequestsProcessorJob {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-    private GrantService grantService;
+    private CibaRequestService cibaRequestService;
 
     private long lastFinishedTime;
 
@@ -125,18 +128,17 @@ public class CibaRequestsProcessorJob {
      */
     public void processImpl() {
         try {
-            CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
-            for (Map.Entry<String, Long> entry : cibaCacheAuthReqIds.getAuthReqIds().entrySet()) {
-                Date now = new Date();
-                if (entry.getValue() < now.getTime()) {
-                    CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(entry.getKey());
-                    if (cibaGrant != null) {
-                        executorService.execute(() ->
-                            processExpiredRequest(cibaGrant, entry.getKey())
-                        );
-                    }
-                    authorizationGrantList.removeCibaGrantFromProcessorCache(entry.getKey());
+            List<CIBARequest> expiredRequests = cibaRequestService.loadExpiredByStatus(
+                    CIBAGrantUserAuthorization.AUTHORIZATION_PENDING);
+
+            for (CIBARequest expiredRequest : expiredRequests) {
+                CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(expiredRequest.getAuthReqId());
+                if (cibaGrant != null) {
+                    executorService.execute(() ->
+                        processExpiredRequest(cibaGrant, expiredRequest.getAuthReqId())
+                    );
                 }
+                cibaRequestService.updateStatus(expiredRequest, CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED);
             }
         } catch (Exception e) {
             log.error("Failed to process CIBA request from cache.", e);

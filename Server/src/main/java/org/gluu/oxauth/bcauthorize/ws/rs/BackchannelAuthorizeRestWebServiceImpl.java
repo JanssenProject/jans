@@ -31,6 +31,7 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.CibaRequestService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
@@ -94,6 +95,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
     @Inject
     private CIBAEndUserNotificationProxy cibaEndUserNotificationProxy;
+
+    @Inject
+    private CibaRequestService cibaRequestService;
 
     @Override
     public Response requestBackchannelAuthorizationPost(
@@ -243,6 +247,8 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             cibaGrant.setLastAccessControl(currentTime);
             cibaGrant.setAcrValues(acrValues);
             cibaGrant.save(); // call save after object modification!!!
+
+            cibaRequestService.persistRequest(cibaGrant, expiresIn);
 
             String authReqId = cibaGrant.getCIBAAuthenticationRequestId().getCode();
 
