@@ -150,7 +150,6 @@ if not Config.noPrompt:
 
 if proceed:
 
-
     gluuInstaller.configureSystem()
     gluuInstaller.calculate_selected_aplications_memory()
 
@@ -164,10 +163,6 @@ if proceed:
     gluuInstaller.encode_passwords()
     gluuInstaller.encode_test_passwords()
 
-    #generate configurations
-    Config.pbar.progress('gluu', 'Generating Configurations')
-    if Config.installPassport:
-        passportInstaller.generate_configuration()
 
     oxtrustInstaller.generate_api_configuration()
     scimInstaller.generate_configuration()
@@ -176,8 +171,9 @@ if proceed:
     Config.ldapTrustStoreFn = Config.opendj_p12_fn
     Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
     Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
-    
+
     gluuInstaller.prepare_base64_extension_scripts()
+    gluuInstaller.render_templates()
     gluuInstaller.generate_crypto()
 
     #TODO: Consider moving to oxauth installer
@@ -186,11 +182,10 @@ if proceed:
     gluuInstaller.generate_base64_configuration()
     gluuInstaller.render_configuration_template()
     gluuInstaller.update_hostname()
-    
+
     gluuInstaller.set_ulimits()
     gluuInstaller.copy_output()
     gluuInstaller.setup_init_scripts()
-    gluuInstaller.render_node_templates()
 
     # Installing gluu components
 

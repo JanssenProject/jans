@@ -498,9 +498,6 @@ class SetupUtils(Crypto64):
                 if not fullOutputDir.exists():
                     fullOutputDir.mkdir(parents=True, exist_ok=True)
 
-                
-                print(Config.non_setup_properties)
-
                 template_text = te.read_text()
                 rendered_text = template_text % self.merge_dicts(Config.templateRenderingDict, Config.__dict__)
                 self.logIt("Writing rendered template {}".format(fullOutputFile))
