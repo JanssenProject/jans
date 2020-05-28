@@ -1,4 +1,3 @@
-import traceback
 
 from setup_app.utils.base import logIt, run, os_type, os_version, os_name, \
     os_initdaemon, service_path, clone_type
@@ -28,7 +27,6 @@ class BaseInstaller:
                 run([service_path, service, operation], None, None, True)
         except:
             logIt("Error running operation {} for service {}".format(operation, service))
-            logIt(traceback.format_exc(), True)
 
     def enable(self, service=None):
         self.run_service_command('enable', service)
@@ -36,9 +34,9 @@ class BaseInstaller:
     def stop(self, service=None):
         self.run_service_command('stop', service)
 
-    def start(self, service=None):       
+    def start(self, service=None):
         self.run_service_command('start', service)
-    
+
     def reload_daemon(self):
         if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_name in ('ubuntu18','debian9','debian10')):
             run([service_path, 'daemon-reload'])
