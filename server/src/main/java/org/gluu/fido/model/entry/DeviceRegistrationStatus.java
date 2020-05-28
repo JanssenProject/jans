@@ -19,7 +19,8 @@ import org.gluu.persist.annotation.AttributeEnum;
 public enum DeviceRegistrationStatus implements AttributeEnum {
 
     ACTIVE("active", "Active device registration"),
-	COMPROMISED("compromised", "Compromised device registration");
+	COMPROMISED("compromised", "Compromised device registration"),
+	MIGRATED("migrated", "Migrated to Fido2");
 
     private final String value;
 	private final String displayName;

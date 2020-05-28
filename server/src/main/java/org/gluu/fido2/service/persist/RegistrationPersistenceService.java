@@ -18,6 +18,7 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -58,7 +59,13 @@ public class RegistrationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void save(Fido2RegistrationData registrationData) {
-        String userName = registrationData.getUsername();
+        Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData);
+
+        persistenceEntryManager.persist(registrationEntry);
+    }
+
+    public Fido2RegistrationEntry buildFido2RegistrationEntry(Fido2RegistrationData registrationData) {
+		String userName = registrationData.getUsername();
         
         User user = userService.getUser(userName, "inum");
         if (user == null) {
@@ -79,13 +86,15 @@ public class RegistrationPersistenceService {
         String dn = getDnForRegistrationEntry(userInum, id);
         Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
-        registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
+        if (StringUtils.isNotEmpty(challenge)) {
+        	registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
+        }
         
         registrationData.setCreatedDate(now);
         registrationData.setCreatedBy(userName);
 
-        persistenceEntryManager.persist(registrationEntry);
-    }
+        return registrationEntry;
+	}
 
     public void update(Fido2RegistrationEntry registrationEntry) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();

@@ -37,6 +37,8 @@ public class Fido2RegistrationData extends Fido2Data {
     private String attestationType;
 
     private int signatureAlgorithm;
+    
+    private String applicationId;
 
     public String getUsername() {
         return username;
@@ -142,11 +144,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    @Override
+    public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
+	}
+
+	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
 				+ ", attenstationRequest=" + attenstationRequest + ", attenstationResponse=" + attenstationResponse
 				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
-				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm + "]";
+				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm
+				+ ", applicationId=" + applicationId + "]";
 	}
 }
