@@ -404,3 +404,16 @@ def readJsonFile(jsonFile):
     if os.path.exists(jsonFile):
         with open(jsonFile) as f:
             return json.load(f)
+
+
+def find_script_names(ldif_file):
+    name_list = []
+    rec = re.compile('\%\(((?s).*)\)s')
+    with open(ldif_file) as f:
+        for l in f:
+            if l.startswith('oxScript::'):
+                result = rec.search(l)
+                if result:
+                    name_list.append(result.groups()[0])
+                
+    return name_list
