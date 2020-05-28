@@ -140,11 +140,7 @@ class Crypto64:
                     extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
                     extensionScriptName = extensionScriptName.lower()
 
-                    load = True
-                    if extensions and not extensionScriptName in extensions:
-                        load = False
-
-                    if load:
+                    if (False if extensions and not extensionScriptName in extensions else True):
                         # Prepare key for dictionary
                         base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
                         Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
