@@ -122,6 +122,9 @@ class GluuInstaller(SetupUtils):
                 self.run([paths.cmd_mkdir, '-m', '775', '-p', folder])
                 self.run([paths.cmd_chown, '-R', 'root:gluu', folder])
 
+        self.run([paths.cmd_chown, '-R', 'root:gluu', Config.certFolder])
+        self.run([paths.cmd_chmod, '551', Config.certFolder])
+        
 
     def customiseSystem(self):
         if Config.os_initdaemon == 'init':
