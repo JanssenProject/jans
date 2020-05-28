@@ -245,7 +245,6 @@ def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
                 logIt(err, True)
     except:
         logIt("Error running command : %s" % " ".join(args), True)
-        logIt(traceback.format_exc(), True)
 
     if get_stderr:
         return output, err
