@@ -102,9 +102,10 @@ class PassportInstaller(NodeInstaller):
         # Create logs folder
         self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])
         
-        #create empty log file
+        #create empty log file unless exists
         log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
-        self.writeFile(log_file, '')
+        if not os.path.exists(log_file):
+            self.writeFile(log_file, '')
 
         self.run([paths.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
@@ -127,6 +128,11 @@ class PassportInstaller(NodeInstaller):
         # Copy init.d script
         self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
         self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
+        
+        # set owner and mode of certificate files
+        cert_files = os.path.join(Config.certFolder, 'passport*')
+        self.run([paths.cmd_chmod, '500', cert_files])
+        self.run([paths.cmd_chown, 'root:gluu', cert_files])
 
         # enable service at startup
         self.enable()
