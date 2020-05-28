@@ -20,6 +20,7 @@ class PassportInstaller(NodeInstaller):
         self.gluu_passport_base = os.path.join(self.node_base, 'passport')
         self.passport_oxtrust_config_fn = os.path.join(Config.outputFolder, 'passport_oxtrust_config.son')
         self.passport_central_config_json = os.path.join(Config.outputFolder, 'passport-central-config.json')
+        self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')
         self.passport_config = os.path.join(Config.configFolder, 'passport-config.json')
         self.ldif_passport_config = os.path.join(Config.outputFolder, 'oxpassport-config.ldif')
         self.ldif_passport = os.path.join(Config.outputFolder, 'passport.ldif')
@@ -27,7 +28,6 @@ class PassportInstaller(NodeInstaller):
         self.passport_rs_client_jks_fn = os.path.join(Config.certFolder, 'passport-rs.jks')
         self.passport_rp_client_jks_fn = os.path.join(Config.certFolder, 'passport-rp.jks')
         self.passport_rp_client_cert_fn = os.path.join(Config.certFolder, 'passport-rp.pem')
-        self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')
         self.passportSpTLSCACert = os.path.join(Config.certFolder, 'passport-sp.pem')
         self.passportSpTLSCert = os.path.join(Config.certFolder, 'passport-sp.crt')
         self.passportSpTLSKey = os.path.join(Config.certFolder, 'passport-sp.key')
@@ -39,6 +39,12 @@ class PassportInstaller(NodeInstaller):
 
         self.generate_configuration()
 
+        # backup existing files
+        for f in glob.glob(os.path.join(Config.certFolder, 'passport-*')):
+            if not f.endswith('~'):
+                self.backupFile(f, move=True)
+
+        # create certificates
         self.gen_cert('passport-sp', Config.passportSpKeyPass, 'ldap', Config.ldap_hostname)
 
         Config.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, Config.passport_rs_client_jks_pass)
@@ -120,12 +126,15 @@ class PassportInstaller(NodeInstaller):
 
         # Copy init.d script
         self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
-        self.run([paths.cmd_chmod, '-R', "755", "%s/passport" % Config.gluuOptSystemFolder])
+        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
 
         # enable service at startup
         self.enable()
 
     def generate_configuration(self):
+        # check ldap server if clients and resources exist
+        self.check_clients_resources()
+        
         self.logIt("Generating Passport configuration")
         
         if not(hasattr(Config, 'passportSpKeyPass') and getattr(Config, 'passportSpKeyPass')):
@@ -156,9 +165,26 @@ class PassportInstaller(NodeInstaller):
         if not(hasattr(Config, 'passport_resource_id') and getattr(Config, 'passport_resource_id')):
             Config.passport_resource_id = '1504.{}'.format(uuid.uuid4())
 
-
         Config.non_setup_properties.update(self.__dict__)
         self.renderTemplate(self.passport_oxtrust_config_fn)
+
+    def check_clients_resources(self):
+        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1501.*)'):
+            Config.passport_rs_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+            self.logIt("passport_rs_client_id was found in ldap as {}".format(Config.passport_rs_client_id))
+
+        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1502.*)'):
+            Config.passport_rp_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+            self.logIt("passport_rp_client_id was found in ldap as {}".format(Config.passport_rp_client_id))
+            
+        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1503.*)'):
+            Config.passport_rp_ii_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+            self.logIt("passport_rp_ii_client_id was found in ldap as {}".format(Config.passport_rp_ii_client_id))
+            
+        if self.ldapUtils.search('ou=resources,ou=uma,o=gluu', '(oxId=1504.*)'):
+            Config.passport_resource_id = self.ldapUtils.ldap_conn.response[0]['attributes']['oxId'][0]
+            self.logIt("passport_resource_id was found in ldap as {}".format(Config.passport_resource_id))
+
 
     def update_ldap(self):
 

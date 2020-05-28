@@ -54,7 +54,7 @@ class SetupUtils(Crypto64):
         logOnly(*args, **kwargs)
 
 
-    def backupFile(self, inFile, destFolder=None):
+    def backupFile(self, inFile, destFolder=None, move=False):
 
         if destFolder:
             if os.path.isfile(destFolder):
@@ -73,7 +73,7 @@ class SetupUtils(Crypto64):
             bc += 1
 
         if os.path.exists(destFile):
-            self.run(['cp', '-f', destFile, backupFile_fn])
+            self.run(['mv' if move else 'cp', '-f', destFile, backupFile_fn])
 
         if not destFile.startswith('/opt'):
             self.logOSChanges("File %s was backed up as %s" % (destFile, backupFile_fn))
