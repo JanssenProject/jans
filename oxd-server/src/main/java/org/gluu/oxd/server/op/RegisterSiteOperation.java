@@ -476,9 +476,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
                 LOG.trace("Registered client for site - client_id: " + response.getClientId() + ", claims: " + response.getClaims() + ", registration_client_uri:" + response.getRegistrationClientUri());
                 return response;
-            } else {
-                LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
             }
+            LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
+            if (Strings.isNullOrEmpty(response.getClientId())) {
+                LOG.error("`client_id` is not returned from OP host. Please check OP log file for error (oxauth.log).");
+                throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_RETURNED);
+            }
+
+            if (Strings.isNullOrEmpty(response.getClientSecret())) {
+                LOG.error("`client_secret` is not returned from OP host. Please check: 1) OP log file for error (oxauth.log) 2) whether `returnClientSecretOnRead` configuration property is set to true on OP host.");
+                throw new HttpException(ErrorResponseCode.NO_CLIENT_SECRET_RETURNED);
+            }
+
         } else {
             LOG.error("RegisterClient response is null.");
         }
