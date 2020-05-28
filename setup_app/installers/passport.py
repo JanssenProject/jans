@@ -18,13 +18,19 @@ class PassportInstaller(NodeInstaller):
         self.pbar_text = "Installing Passport"
 
         self.gluu_passport_base = os.path.join(self.node_base, 'passport')
-        self.passport_oxtrust_config_fn = os.path.join(Config.outputFolder, 'passport_oxtrust_config.son')
-        self.passport_central_config_json = os.path.join(Config.outputFolder, 'passport-central-config.json')
         self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')
         self.passport_config = os.path.join(Config.configFolder, 'passport-config.json')
-        self.ldif_passport_config = os.path.join(Config.outputFolder, 'oxpassport-config.ldif')
-        self.ldif_passport = os.path.join(Config.outputFolder, 'passport.ldif')
-        self.ldif_passport_clients = os.path.join(Config.outputFolder, 'passport_clients.ldif')
+
+        self.passport_templates_folder = os.path.join(Config.templateFolder, 'passport')
+        
+        
+        self.ldif_scripts_fn = os.path.join(Config.outputFolder, 'passport/scripts.ldif')
+        self.passport_oxtrust_config_fn = os.path.join(Config.outputFolder, 'passport/passport_oxtrust_config.son')
+        self.passport_central_config_json = os.path.join(Config.outputFolder, 'passport/passport-central-config.json')
+        self.ldif_passport_config = os.path.join(Config.outputFolder, 'passport/oxpassport-config.ldif')
+        self.ldif_passport = os.path.join(Config.outputFolder, 'passport/passport.ldif')
+        self.ldif_passport_clients = os.path.join(Config.outputFolder, 'passport/passport_clients.ldif')
+        
         self.passport_rs_client_jks_fn = os.path.join(Config.certFolder, 'passport-rs.jks')
         self.passport_rp_client_jks_fn = os.path.join(Config.certFolder, 'passport-rp.jks')
         self.passport_rp_client_cert_fn = os.path.join(Config.certFolder, 'passport-rp.pem')
@@ -54,19 +60,6 @@ class PassportInstaller(NodeInstaller):
 
         Config.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass)
         Config.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(Config.passport_rp_client_jwks, 1)
-
-        self.logIt("Rendering Passport templates")
-        self.renderTemplate(self.passport_central_config_json)
-        Config.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
-        self.renderTemplate(self.ldif_passport_config)
-        self.renderTemplate(self.ldif_passport)
-        self.renderTemplate(self.ldif_passport_clients)
-
-        if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.import_ldif([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
-        else:
-            #TODO: implement for couchbase ???
-            self.import_ldif_couchebase([self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients])
 
 
         self.logIt("Preparing passport service base folders")
@@ -120,8 +113,37 @@ class PassportInstaller(NodeInstaller):
                 Config.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
+
         self.export_openid_key(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass, Config.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
-        self.renderTemplateInOut(self.passport_config, Config.templateFolder, Config.configFolder)
+
+        self.logIt("Rendering Passport templates")
+        output_folder = os.path.join(Config.outputFolder,'passport')
+        self.renderTemplateInOut(self.passport_config, self.passport_templates_folder, Config.configFolder)
+        self.renderTemplateInOut(self.passport_central_config_json, self.passport_templates_folder, output_folder)
+        
+        Config.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
+
+        scripts_template = os.path.join(self.passport_templates_folder, os.path.basename(self.ldif_scripts_fn))
+        extensions = base.find_script_names(scripts_template)
+        self.prepare_base64_extension_scripts(extensions=extensions)
+
+        for tmp in (
+                    self.passport_oxtrust_config_fn,
+                    self.ldif_scripts_fn,
+                    self.passport_config,
+                    self.ldif_passport,
+                    self.ldif_passport_clients,
+                    self.ldif_passport_config,
+                    ):
+            self.renderTemplateInOut(tmp, self.passport_templates_folder, output_folder)
+
+        ldif_files = (self.ldif_scripts_fn, self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients)
+
+        if Config.mappingLocations['default'] == 'ldap':
+            self.ldapUtils.import_ldif(ldif_files)
+        else:
+            #TODO: implement for couchbase ???
+            self.import_ldif_couchebase(ldif_files)
 
         self.update_ldap()
         
@@ -132,8 +154,6 @@ class PassportInstaller(NodeInstaller):
         # Install passport system service script
         self.installNodeService('passport')
 
-
-        
         # set owner and mode of certificate files
         cert_files = os.path.join(Config.certFolder, 'passport*')
         self.run([paths.cmd_chmod, '500', cert_files])
@@ -177,7 +197,6 @@ class PassportInstaller(NodeInstaller):
             Config.passport_resource_id = '1504.{}'.format(uuid.uuid4())
 
         Config.non_setup_properties.update(self.__dict__)
-        self.renderTemplate(self.passport_oxtrust_config_fn)
 
     def check_clients_resources(self):
         if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1501.*)'):
