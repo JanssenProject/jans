@@ -98,7 +98,9 @@ public enum ErrorResponseCode {
     AT_HASH_NOT_FOUND(500, "at_hash_not_found", "`at_hash` is missing in `ID_TOKEN`."),
     C_HASH_NOT_FOUND(500, "c_hash_not_found", "`c_hash` is missing in `ID_TOKEN`."),
     INVALID_AUTHORIZATION_OXD_ID(400, "invalid_authorization_oxd_id", "`oxd_id` in `AuthorizationOxdId` header is invalid. The `AuthorizationOxdId` header should contain `oxd_id` from `protect_commands_with_oxd_id` field in oxd-server.yml."),
-    AUTHORIZATION_OXD_ID_NOT_FOUND(400, "authorization_oxd_id_not_found", "`oxd_id` in `AuthorizationOxdId` header is not registered in oxd.");
+    AUTHORIZATION_OXD_ID_NOT_FOUND(400, "authorization_oxd_id_not_found", "`oxd_id` in `AuthorizationOxdId` header is not registered in oxd."),
+    NO_CLIENT_ID_RETURNED(500, "no_client_id_returned", "`client_id` is not returned from OP host. Please check OP log file for error (oxauth.log)."),
+    NO_CLIENT_SECRET_RETURNED(500, "no_client_secret_returned", "`client_secret` is not returned from OP host. Please check: 1) OP log file for error (oxauth.log) 2) whether `returnClientSecretOnRead` configuration property is set to true on OP host.");
 
     private final int httpStatus;
     private final String code;
