@@ -7,11 +7,14 @@
 package org.gluu.fido2.service.operation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.gluu.fido.model.entry.DeviceRegistration;
 import org.gluu.fido2.ctap.UserVerification;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
@@ -107,9 +110,12 @@ public class AssertionService {
         String documentDomain = commonVerifiers.verifyRpDomain(params);
         log.debug("Put rpId {}", documentDomain);
         optionsResponseNode.put("rpId", documentDomain);
+        
+        // TODO: Verify documentDomain
 
         // Put allowCredentials
-        ArrayNode allowedCredentials = prepareAllowedCredentials(documentDomain, username);
+        Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username); 
+        ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
         if (allowedCredentials.isEmpty()) {
             throw new Fido2RPRuntimeException("Can't find associated key(s). Username: " + username);
         }
@@ -126,6 +132,18 @@ public class AssertionService {
         	JsonNode extensions = params.get("extensions");
             optionsResponseNode.set("extensions", extensions);
             log.debug("Put extensions {}", extensions);
+        }
+        
+        String fidoApplicationId = allowedCredentialsPair.getRight();
+        if (fidoApplicationId != null) {
+        	if (optionsResponseNode.hasNonNull("extensions")) {
+        		ObjectNode extensions = (ObjectNode) optionsResponseNode.get("extensions");
+        		extensions.put("appid", fidoApplicationId);
+        	} else {
+            	ObjectNode extensions = dataMapperService.createObjectNode();
+        		extensions.put("appid", fidoApplicationId);
+                optionsResponseNode.set("extensions", extensions);
+        	}
         }
 
         optionsResponseNode.put("status", "ok");
@@ -207,30 +225,36 @@ public class AssertionService {
         return finishResponseNode;
     }
 
-	private ArrayNode prepareAllowedCredentials(String documentDomain, String username) {
-        List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username, null);
-        List<JsonNode> allowedFidoKeys = existingFidoRegistrations.parallelStream()
-                .filter(f -> StringHelper.equals(documentDomain, networkService.getHost(f.getApplication())))
-                .filter(f -> StringHelper.isNotEmpty(f.getKeyHandle()))
-                .map(f -> dataMapperService.convertValue(
-                        new PublicKeyCredentialDescriptor("public-key", new String[] {"usb", "ble", "nfc"}, f.getKeyHandle()),
-                        JsonNode.class))
-                .collect(Collectors.toList());
+	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username) {
+		// TODO: Add property to enable/disable U2F -> Fido2 migration
+        List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username, documentDomain);
+        if (existingFidoRegistrations.size() > 0) {
+        	deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
+        }
 
         List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findAllRegisteredByUsername(username);
-        List<JsonNode> allowedFido2Keys = existingFido2Registrations.parallelStream()
+        List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
                 .filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
                 .filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
-                .map(f -> dataMapperService.convertValue(
+                .collect(Collectors.toList());
+
+        List<JsonNode> allowedFido2Keys = allowedFido2Registrations.parallelStream().map(f -> dataMapperService.convertValue(
                         new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(), new String[] {"usb", "ble", "nfc"}, f.getRegistrationData().getPublicKeyId()),
                         JsonNode.class))
                 .collect(Collectors.toList());
 
+        Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
+                .filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId()))
+                .findAny();
+        String applicationId = null;
+        if (fidoRegistration.isPresent()) {
+        	applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
+        }
+
         ArrayNode allowedCredentials = dataMapperService.createArrayNode();
-        allowedCredentials.addAll(allowedFidoKeys);
         allowedCredentials.addAll(allowedFido2Keys);
 
-        return allowedCredentials;
+        return Pair.of(allowedCredentials, applicationId);
 	}
 
 }
