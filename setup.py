@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import readline
 import os
 import sys
 import time
