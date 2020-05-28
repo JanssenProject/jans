@@ -79,7 +79,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
-        this(keyStoreFile, keyStoreSecret, dnName, true);
+        this(keyStoreFile, keyStoreSecret, dnName, false);
     }
 
     public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
