@@ -72,7 +72,6 @@ class PassportInstaller(NodeInstaller):
             self.run([paths.cmd_tar, '--strip', '1', '-xzf', os.path.join(Config.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive {}".format(passportArchive))
-            self.logIt(traceback.format_exc(), True)
         
         passport_modules_archive = os.path.join(Config.distGluuFolder, 'passport-{}-node_modules.tar.gz'.format(Config.githubBranchName))
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
@@ -92,7 +91,6 @@ class PassportInstaller(NodeInstaller):
                 self.run([cmd_npm, 'install', '-P'], self.gluu_passport_base, nodeEnv, True)
             except:
                 self.logIt("Error encountered running npm install in {}".format(self.gluu_passport_base))
-                self.logIt(traceback.format_exc(), True)
 
         # Create logs folder
         self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])

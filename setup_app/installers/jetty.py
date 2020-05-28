@@ -28,7 +28,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             self.run(['tar', '-xzf', jettyArchive, '-C', jetty_dist, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
-            self.logIt(traceback.format_exc(), True)
 
         jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, 'jetty-distribution-*')))
 
@@ -118,7 +117,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
         except:
             self.logIt("Error rendering service '%s' defaults" % serviceName, True)
-            self.logIt(traceback.format_exc(), True)
 
         jettyServiceConfiguration = '%s/jetty/%s' % (Config.outputFolder, serviceName)
         self.copyFile(jettyServiceConfiguration, Config.osDefault)
@@ -132,7 +130,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_resources), "%s/%s/webapps" % (Config.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
-            self.logIt(traceback.format_exc(), True)
 
         # Render web context file
         try:
@@ -142,7 +139,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_context), "%s/%s/webapps" % (Config.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' context xml" % serviceName, True)
-            self.logIt(traceback.format_exc(), True)
 
         initscript_fn = os.path.join(Config.jetty_home, 'bin/jetty.sh')
         self.fix_init_scripts(serviceName, initscript_fn)
