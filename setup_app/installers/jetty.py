@@ -1,7 +1,6 @@
 import os
 import glob
 import re
-import traceback
 
 from setup_app import paths
 from setup_app.config import Config
@@ -18,7 +17,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def install(self):
 
         jettyArchive, jetty_dist = self.get_jetty_info()
-        
+
         jettyTemp = os.path.join(jetty_dist, 'temp')
         self.run([paths.cmd_mkdir, '-p', jettyTemp])
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyTemp])

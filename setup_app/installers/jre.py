@@ -1,7 +1,6 @@
 import os
 import glob
 import shutil
-import traceback
 
 from pathlib import Path
 

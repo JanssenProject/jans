@@ -3,7 +3,6 @@ import sys
 import json
 import subprocess
 import uuid
-import traceback
 import glob
 import urllib
 import ssl
