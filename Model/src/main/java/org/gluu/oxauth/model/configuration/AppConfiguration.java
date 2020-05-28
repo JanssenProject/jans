@@ -121,6 +121,7 @@ public class AppConfiguration implements Configuration {
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
     private Boolean returnClientSecretOnRead = false;
+    private Boolean rejectJwtWithNoneAlg = true;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -219,6 +220,15 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getRejectJwtWithNoneAlg() {
+        if (rejectJwtWithNoneAlg == null) rejectJwtWithNoneAlg = true;
+        return rejectJwtWithNoneAlg;
+    }
+
+    public void setRejectJwtWithNoneAlg(Boolean rejectJwtWithNoneAlg) {
+        this.rejectJwtWithNoneAlg = rejectJwtWithNoneAlg;
+    }
 
     public Boolean getConsentGatheringScriptBackwardCompatibility() {
         if (consentGatheringScriptBackwardCompatibility == null) consentGatheringScriptBackwardCompatibility = false;
