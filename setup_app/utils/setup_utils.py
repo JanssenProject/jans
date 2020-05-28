@@ -104,7 +104,6 @@ class SetupUtils(Crypto64):
                            testSocket.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
         except:
             self.logIt("No detected IP address", True)
-            self.logIt(traceback.format_exc(), True)
 
         return detectedIP
 
@@ -140,7 +139,6 @@ class SetupUtils(Crypto64):
                 detectedHostname = os.popen("/bin/hostname").read().strip()
             except:
                 self.logIt("No detected hostname", True)
-                self.logIt(traceback.format_exc(), True)
 
         return detectedHostname
 
@@ -153,7 +151,6 @@ class SetupUtils(Crypto64):
         except:
             if logError:
                 self.logIt("Error reading %s" % inFilePathText, True)
-                self.logIt(traceback.format_exc(), True)
 
         return inFilePathText
 
@@ -166,7 +163,6 @@ class SetupUtils(Crypto64):
                 w.write(text)
         except:
             self.logIt("Error writing %s" % inFilePathText, True)
-            self.logIt(traceback.format_exc(), True)
 
         return inFilePathText
 
@@ -181,10 +177,8 @@ class SetupUtils(Crypto64):
                     self.writeFile(inFilePath, inFileText)
                 except:            
                     self.logIt("Error writing %s" % inFilePathLines, True)            
-                    self.logIt(traceback.format_exc(), True)
             except:            
                 self.logIt("Error reading %s" % inFilePathLines, True)
-                self.logIt(traceback.format_exc(), True)        
                     
     def commentOutText(self, text):
         textLines = text.splitlines()
@@ -224,7 +218,6 @@ class SetupUtils(Crypto64):
             self.logIt("Copied %s to %s" % (inFile, destFolder))
         except:
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
-            self.logIt(traceback.format_exc(), True)
 
     def copyTree(self, src, dst, overwrite=False):
         try:
@@ -247,7 +240,6 @@ class SetupUtils(Crypto64):
             self.logIt("Copied tree %s to %s" % (src, dst))
         except:
             self.logIt("Error copying tree %s to %s" % (src, dst), True)
-            self.logIt(traceback.format_exc(), True)
 
     def createDirs(self, name):
         try:
@@ -256,7 +248,6 @@ class SetupUtils(Crypto64):
                 self.logIt('Created dir: %s' % name)
         except:
             self.logIt("Error making directory %s" % name, True)
-            self.logIt(traceback.format_exc(), True)
 
     def removeDirs(self, name):
         try:
@@ -265,7 +256,6 @@ class SetupUtils(Crypto64):
                 self.logIt('Removed dir: %s' % name)
         except:
             self.logIt("Error removing directory %s" % name, True)
-            self.logIt(traceback.format_exc(), True)
 
     def removeFile(self, fileName):
         try:
@@ -274,7 +264,6 @@ class SetupUtils(Crypto64):
                 self.logIt('Removed file: %s' % fileName)
         except:
             self.logIt("Error removing file %s" % fileName, True)
-            self.logIt(traceback.format_exc(), True)
 
     def parse_url(self, url):
         o = urlparse(url)
@@ -341,7 +330,6 @@ class SetupUtils(Crypto64):
             self.run([paths.cmd_chown, 'ldap:ldap', Config.ldapPassFn])
         except:
             self.logIt("Error writing temporary LDAP password.")
-            self.logIt(traceback.format_exc(), True)
 
     def deleteLdapPw(self):
         if os.path.isfile(self.ldapPassFn):
@@ -414,7 +402,6 @@ class SetupUtils(Crypto64):
                 self.logOSChanges("User %s without homedir was created" % (userName))
         except:
             self.logIt("Error adding user", True)
-            self.logIt(traceback.format_exc(), True)
 
     def createGroup(self, groupName):
         try:
@@ -423,7 +410,6 @@ class SetupUtils(Crypto64):
             self.logOSChanges("Group %s was created" % (groupName))
         except:
             self.logIt("Error adding group", True)
-            self.logIt(traceback.format_exc(), True)
 
     def addUserToGroup(self, groupName, userName):
         try:
@@ -432,7 +418,6 @@ class SetupUtils(Crypto64):
             self.logOSChanges("User %s was added to group %s" % (userName,groupName))
         except:
             self.logIt("Error adding group", True)
-            self.logIt(traceback.format_exc(), True)
 
     def fix_init_scripts(self, serviceName, initscript_fn):
 
