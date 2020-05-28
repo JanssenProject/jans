@@ -120,4 +120,3 @@ class CasaInstaller(SetupUtils, BaseInstaller):
                             '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
 
         except:
-            self.logIt(traceback.format_exc(), True)

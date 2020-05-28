@@ -65,7 +65,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 if Config.wrends_install == InstallTypes.LOCAL:
                     self.post_install_opendj()
         except:
-            self.logIt(traceback.format_exc(), True)
+            self.logIt("Error installing opendj", True)
 
     def extractOpenDJ(self):        
 
@@ -76,7 +76,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_unzip, '-n', '-q', '%s' % (openDJArchive), '-d', '/opt/' ])
         except:
             self.logIt("Error encountered while doing unzip %s -d /opt/" % (openDJArchive))
-            self.logIt(traceback.format_exc(), True)
 
         realLdapBaseFolder = os.path.realpath(Config.ldapBaseFolder)
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
@@ -117,7 +116,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                       )
         except:
             self.logIt("Error running LDAP setup script", True)
-            self.logIt(traceback.format_exc(), True)
 
         #Append self.jre_home to OpenDj java.properties        
         opendj_java_properties_fn = os.path.join(Config.ldapBaseFolder, 'config/java.properties')
@@ -132,14 +130,12 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.run(['/bin/su','ldap', '-c', cmd], cwd='/opt/opendj/bin')
         except:
             self.logIt("Error stopping opendj", True)
-            self.logIt(traceback.format_exc(), True)
 
     def post_install_opendj(self):
         try:
             os.remove(os.path.join(Config.ldapBaseFolder, 'opendj-setup.properties'))
         except:
             self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldapBaseFolder)
-            self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
         self.logIt("Configuring OpenDJ")
@@ -351,7 +347,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
-            self.logIt(traceback.format_exc(), True)
 
     def index_opendj(self):
         self.index_opendj_backend('userRoot')
@@ -382,7 +377,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.copyFile(Config.opendj_service_centos7, opendj_dest_folder)
             except:
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
-                self.logIt(traceback.format_exc(), True)
             if os.path.exists(init_script_fn):
                 self.run(['rm', '-f', init_script_fn])
         else:

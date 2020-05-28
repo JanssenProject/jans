@@ -73,7 +73,7 @@ class GluuInstaller(SetupUtils):
             print("Please ensure that you are running this script inside Gluu container.")
             sys.exit(1)
 
-        #TO DO: uncomment later
+        #TODO: uncomment later
         #Download oxauth-client-jar-with-dependencies
         #if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
         #    oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/oxauth-client/{0}/oxauth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
@@ -154,7 +154,6 @@ class GluuInstaller(SetupUtils):
             self.writeFile(os.path.join(Config.configFolder,'salt'), salt_text)
         except:
             self.logIt("Error writing salt", True)
-            self.logIt(traceback.format_exc(), True)
             sys.exit()
 
     def render_templates(self, templates=None):
@@ -171,7 +170,6 @@ class GluuInstaller(SetupUtils):
                 self.renderTemplate(fullPath)
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
-                self.logIt(traceback.format_exc(), True)
 
     def render_custom_templates(self, fullPath):
         output_dir = fullPath + '.output'
@@ -183,14 +181,12 @@ class GluuInstaller(SetupUtils):
             self.run([paths.cmd_mkdir, '-p', output_dir])
         except:
             self.logIt("Error creating output directory %s" % output_dir, True)
-            self.logIt(traceback.format_exc(), True)
 
         try:
             for filename in self.get_filepaths(fullPath):
                 self.renderTemplateInOut(filename, fullPath, output_dir)
         except:
             self.logIt("Error writing template %s" % fullPath, True)
-            self.logIt(traceback.format_exc(), True)
 
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates", pbar='gluu')
@@ -200,7 +196,6 @@ class GluuInstaller(SetupUtils):
             self.renderTemplate(Config.ldif_fido2)
         except:
             self.logIt("Error writing template", True)
-            self.logIt(traceback.format_exc(), True)
 
 
     def render_test_templates(self):
@@ -257,7 +252,6 @@ class GluuInstaller(SetupUtils):
                     self.run([paths.cmd_chmod, "755", "/etc/init.d/%s" % script_name])
                 except:
                     self.logIt("Error copying script file %s to /etc/init.d" % init_file)
-                    self.logIt(traceback.format_exc(), True)
 
         if base.clone_type == 'rpm':
             for service in Config.redhat_services:
@@ -350,7 +344,6 @@ class GluuInstaller(SetupUtils):
             self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
         except:
             self.logIt("Error rendering encode script")
-            self.logIt(traceback.format_exc(), True)
 
         self.run([paths.cmd_chmod, '-R', '700', Config.gluuOptBinFolder])
 
@@ -396,7 +389,6 @@ class GluuInstaller(SetupUtils):
             self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
         except:
             self.logIt("Could not set limits.")
-            self.logIt(traceback.format_exc(), True)
 
 
     def copy_output(self):
@@ -416,4 +408,3 @@ class GluuInstaller(SetupUtils):
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
-                    self.logIt(traceback.format_exc(), True)

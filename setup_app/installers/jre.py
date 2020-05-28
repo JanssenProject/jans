@@ -30,7 +30,6 @@ class JreInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_tar, '-xzf', self.jreArchive, '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % self.jreArchive)
-            self.logIt(traceback.format_exc(), True)
 
         if Config.java_type == 'jdk':
             jreDestinationPath = max(glob.glob('/opt/jdk-11*'))
