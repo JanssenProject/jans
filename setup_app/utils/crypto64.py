@@ -50,9 +50,10 @@ class Crypto64:
                               # 'jetty' TODO: chown later, users are not ready at this time
                               )
 
+            #TODO: check this
             # permissions
-            self.run([paths.cmd_chown, '-R', 'jetty:jetty', Config.certFolder])
-            self.run([paths.cmd_chmod, '-R', '500', Config.certFolder])
+            #self.run([paths.cmd_chown, '-R', 'jetty:jetty', Config.certFolder])
+            #self.run([paths.cmd_chmod, '-R', '500', Config.certFolder])
 
         except:
             self.logIt("Error generating cyrpto")
@@ -121,8 +122,9 @@ class Crypto64:
                   "-file", public_certificate, "-keystore", truststore_fn, \
                   "-storepass", "changeit", "-noprompt"])
 
-    def prepare_base64_extension_scripts(self):
-        self.logIt("Preparing scripts", pbar='gluu')
+    def prepare_base64_extension_scripts(self, extensions=[]):
+        pbar = None if extensions else 'gluu'
+        self.logIt("Preparing scripts", pbar=pbar)
         try:
             if not os.path.exists(Config.extensionFolder):
                 return None
@@ -134,14 +136,19 @@ class Crypto64:
 
                 for scriptFile in os.listdir(extensionTypeFolder):
                     scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
-                    base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
 
-                    # Prepare key for dictionary
                     extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
                     extensionScriptName = extensionScriptName.lower()
 
-                    Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
-                    self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
+                    load = True
+                    if extensions and not extensionScriptName in extensions:
+                        load = False
+
+                    if load:
+                        # Prepare key for dictionary
+                        base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
+                        Config.templateRenderingDict[extensionScriptName] = base64ScriptFile
+                        self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
 
         except:
             self.logIt("Error loading scripts from %s" % Config.extensionFolder, True)
