@@ -56,11 +56,18 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+        if (configurationFactory.getAppConfiguration().getRejectJwtWithNoneAlg() && signatureAlgorithm == SignatureAlgorithm.NONE) {
+            throw new UnsupportedOperationException("None algorithm is forbidden by `rejectJwtWithNoneAlg` configuration property.");
+        }
         return cryptoProvider.sign(signingInput, keyId, sharedSecret, signatureAlgorithm);
     }
 
     @Override
     public boolean verifySignature(String signingInput, String encodedSignature, String keyId, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
+        if (configurationFactory.getAppConfiguration().getRejectJwtWithNoneAlg() && signatureAlgorithm == SignatureAlgorithm.NONE) {
+            LOG.trace("None algorithm is forbidden by `rejectJwtWithNoneAlg` configuration property.");
+            return false;
+        }
         return cryptoProvider.verifySignature(signingInput, encodedSignature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
