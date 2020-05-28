@@ -32,6 +32,8 @@ class Crypto64:
         encoded_pw = base64.b64encode(en_data)
         return encoded_pw.decode('utf-8')
 
+
+    #TODO: consider moving to installers, passport is done
     def generate_crypto(self):
         self.logIt('Generating certificates and keystores', pbar='gluu')
         try:
