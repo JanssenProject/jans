@@ -6,14 +6,12 @@
 
 package org.gluu.oxauth.service;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.model.common.CIBAGrant;
 import org.gluu.oxauth.model.common.CIBAGrantUserAuthorization;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
-import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 
@@ -51,13 +49,15 @@ public class CibaRequestService {
         ldapEntryManager.merge(cibaRequest);
     }
 
-    public void persistRequest(CIBAGrant grant) {
+    public void persistRequest(CIBAGrant grant, int expiresIn) {
+        Date expirationDate = DateUtils.addSeconds(new Date(), expiresIn);
+
         String authReqId = grant.getCIBAAuthenticationRequestId().getCode();
         CIBARequest cibaRequest = new CIBARequest();
         cibaRequest.setDn("authReqId=" + authReqId + "," + this.cibaBaseDn());
         cibaRequest.setAuthReqId(authReqId);
         cibaRequest.setClientId(grant.getClientId());
-        cibaRequest.setExpirationDate(grant.getExpirationDate());
+        cibaRequest.setExpirationDate(expirationDate);
         cibaRequest.setRequestDate(new Date());
         cibaRequest.setStatus(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING.getValue());
         cibaRequest.setUserId(grant.getUserId());
@@ -83,6 +83,25 @@ public class CibaRequestService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
+        }
+    }
+
+    public void updateStatus(String authReqId, CIBAGrantUserAuthorization authorizationStatus) {
+        try {
+            CIBARequest cibaRequest = ldapEntryManager.find(CIBARequest.class, authReqId);
+            cibaRequest.setStatus(authorizationStatus.getValue());
+            ldapEntryManager.merge(cibaRequest);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void updateStatus(CIBARequest cibaRequest, CIBAGrantUserAuthorization authorizationStatus) {
+        try {
+            cibaRequest.setStatus(authorizationStatus.getValue());
+            ldapEntryManager.merge(cibaRequest);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
