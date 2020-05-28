@@ -353,17 +353,4 @@ public class GrantService {
         removeSilently(getGrantsByGrantId(p_grantId));
     }
 
-    /**
-     * Return map of CIBA grants registered that could be expired.
-     */
-    public CIBACacheAuthReqIds getCacheCibaAuthReqIds() {
-        CIBACacheAuthReqIds clientTokens = new CIBACacheAuthReqIds();
-        Object o = cacheService.get(CIBACacheAuthReqIds.CACHE_KEY);
-        if (o instanceof CIBACacheAuthReqIds) {
-            return (CIBACacheAuthReqIds) o;
-        } else {
-            return clientTokens;
-        }
-    }
-
 }
