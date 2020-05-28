@@ -6,6 +6,20 @@
 
 package org.gluu.oxauth.auth;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
@@ -22,32 +36,15 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.AuthenticationService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ErrorHandlerService;
 import org.gluu.oxauth.service.RequestParameterService;
 import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.common.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
-import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
-import org.json.JSONException;
 import org.slf4j.Logger;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Authenticator component
@@ -62,8 +59,6 @@ public class Authenticator {
 
     public static final String INVALID_SESSION_MESSAGE = "login.errorSessionInvalidMessage";
     public static final String AUTHENTICATION_ERROR_MESSAGE = "login.failedToAuthenticate";
-
-    private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
 
     @Inject
     private Logger logger;
@@ -427,7 +422,7 @@ public class Authenticator {
 
             if (this.authStep == countAuthenticationSteps) {
                 // Store/Update extra parameters in session attributes map
-                updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
+            	updateExtraParameters(customScriptConfiguration, this.authStep + 1, sessionIdAttributes);
 
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId, sessionIdAttributes);
 
@@ -464,7 +459,7 @@ public class Authenticator {
         return Constants.RESULT_FAILURE;
     }
 
-    protected void handleSessionInvalid() {
+	protected void handleSessionInvalid() {
         errorHandlerService.handleError(INVALID_SESSION_MESSAGE, AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID, "Create authorization request to start new authentication session.");
     }
 
@@ -536,74 +531,8 @@ public class Authenticator {
         return false;
     }
 
-    private void updateExtraParameters(CustomScriptConfiguration customScriptConfiguration, final int step,
-                                       Map<String, String> sessionIdAttributes) {
-        List<String> extraParameters = externalAuthenticationService
-                .executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
-
-        // Load extra parameters set
-        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
-
-        if (extraParameters != null) {
-        	logger.trace("Attempting to store extraParameters: {}", extraParameters);
-            for (String extraParameter : extraParameters) {
-                if (authenticationService.isParameterExists(extraParameter)) {
-                    Pair<String, String> extraParameterValueWithType = requestParameterService
-                            .getParameterValueWithType(extraParameter);
-                    String extraParameterValue = extraParameterValueWithType.getFirst();
-                    String extraParameterType = extraParameterValueWithType.getSecond();
-
-                    // Store parameter name and value
-                    sessionIdAttributes.put(extraParameter, extraParameterValue);
-
-                    // Store parameter name and type
-                    authExternalAttributes.put(extraParameter, extraParameterType);
-                }
-            }
-        }
-
-        // Store identity working parameters in session
-        setExternalScriptExtraParameters(sessionIdAttributes, authExternalAttributes);
-    	logger.trace("Storing sessionIdAttributes: {}", sessionIdAttributes);
-    	logger.trace("Storing authExternalAttributes: {}", authExternalAttributes);
-    }
-
-    private Map<String, String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
-        String authExternalAttributesString = sessionIdAttributes.get(AUTH_EXTERNAL_ATTRIBUTES);
-        Map<String, String> authExternalAttributes = new HashMap<String, String>();
-        try {
-            authExternalAttributes = Util.jsonObjectArrayStringAsMap(authExternalAttributesString);
-        } catch (JSONException ex) {
-            logger.error("Failed to convert JSON array of auth_external_attributes to Map<String, String>");
-        }
-
-        return authExternalAttributes;
-    }
-
-    private void setExternalScriptExtraParameters(Map<String, String> sessionIdAttributes,
-                                                  Map<String, String> authExternalAttributes) {
-        String authExternalAttributesString = null;
-        try {
-            authExternalAttributesString = Util.mapAsString(authExternalAttributes);
-        } catch (JSONException ex) {
-            logger.error("Failed to convert Map<String, String> of auth_external_attributes to JSON array");
-        }
-
-        sessionIdAttributes.put(AUTH_EXTERNAL_ATTRIBUTES, authExternalAttributesString);
-    }
-
-    private void clearExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
-        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
-
-        for (String authExternalAttribute : authExternalAttributes.keySet()) {
-            sessionIdAttributes.remove(authExternalAttribute);
-        }
-
-        sessionIdAttributes.remove(AUTH_EXTERNAL_ATTRIBUTES);
-    }
-
     private void setIdentityWorkingParameters(Map<String, String> sessionIdAttributes) {
-        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+        Map<String, String> authExternalAttributes = authenticationService.getExternalScriptExtraParameters(sessionIdAttributes);
 
         HashMap<String, Object> workingParameters = identity.getWorkingParameters();
         for (Entry<String, String> authExternalAttributeEntry : authExternalAttributes.entrySet()) {
@@ -714,7 +643,9 @@ public class Authenticator {
                 sessionIdAttributes.put("auth_step", Integer.toString(1));
 
                 // Remove old session parameters from session
-                clearExternalScriptExtraParameters(sessionIdAttributes);
+                if (!appConfiguration.getKeepAuthenticatorAttributesOnAcrChange()) {
+                	authenticationService.clearExternalScriptExtraParameters(sessionIdAttributes);
+                }
 
                 if (sessionId != null) {
                     boolean updateResult = updateSession(sessionId, sessionIdAttributes);
@@ -733,7 +664,7 @@ public class Authenticator {
                 externalContext.getRequestParameterValuesMap(), this.authStep);
         if ((result != null) && result) {
             // Store/Update extra parameters in session attributes map
-            updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
+        	updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
 
             if (sessionId != null) {
                 boolean updateResult = updateSession(sessionId, sessionIdAttributes);
@@ -826,6 +757,13 @@ public class Authenticator {
         }
 
         return true;
+    }
+
+    private void updateExtraParameters(CustomScriptConfiguration customScriptConfiguration, int step,
+			Map<String, String> sessionIdAttributes) {
+        List<String> extraParameters = externalAuthenticationService
+                .executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
+        authenticationService.updateExtraParameters(sessionIdAttributes, extraParameters);
     }
 
     public void configureSessionClient(Client client) {
