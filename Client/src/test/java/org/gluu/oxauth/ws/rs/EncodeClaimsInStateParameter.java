@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.JwtState;
 import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -20,6 +20,7 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -1246,7 +1247,7 @@ public class EncodeClaimsInStateParameter extends BaseTest {
     public void jwtStateNONETest() throws Exception {
         showTitle("jwtStateNONETest");
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AbstractCryptoProvider cryptoProvider = createCryptoProviderWithAllowedNone();
 
         String rfp = UUID.randomUUID().toString();
         String jti = UUID.randomUUID().toString();
