@@ -33,9 +33,11 @@ class PassportInstaller(NodeInstaller):
         self.passportSpTLSKey = os.path.join(Config.certFolder, 'passport-sp.key')
         self.passportSpJksFn = os.path.join(Config.certFolder, 'passport-sp.jks')
 
-        self.ldapUtils = LDAPUtils()
 
     def install(self):
+
+        # make ldap connection
+        self.ldapUtils = LDAPUtils()
 
         self.generate_configuration()
 
@@ -122,12 +124,15 @@ class PassportInstaller(NodeInstaller):
         self.renderTemplateInOut(self.passport_config, Config.templateFolder, Config.configFolder)
 
         self.update_ldap()
-        # Install passport system service script
-        self.installNodeService('passport')
-
+        
         # Copy init.d script
         self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
         self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
+        
+        # Install passport system service script
+        self.installNodeService('passport')
+
+
         
         # set owner and mode of certificate files
         cert_files = os.path.join(Config.certFolder, 'passport*')
