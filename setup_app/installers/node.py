@@ -1,6 +1,5 @@
 import os
 import glob
-import traceback
 
 from setup_app import paths
 from setup_app.config import Config
