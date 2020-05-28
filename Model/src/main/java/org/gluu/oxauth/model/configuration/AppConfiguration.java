@@ -206,6 +206,8 @@ public class AppConfiguration implements Configuration {
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
+    private Boolean keepAuthenticatorAttributesOnAcrChange = false;
+
     // CIBA
     private String backchannelClientId;
     private String backchannelRedirectUri;
@@ -1612,7 +1614,15 @@ public class AppConfiguration implements Configuration {
         this.useLocalCache = useLocalCache;
     }
 
-    public String getBackchannelClientId() {
+    public Boolean getKeepAuthenticatorAttributesOnAcrChange() {
+		return keepAuthenticatorAttributesOnAcrChange;
+	}
+
+	public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
+		this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+	}
+
+	public String getBackchannelClientId() {
         return backchannelClientId;
     }
 
