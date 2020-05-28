@@ -179,13 +179,6 @@ class Crypto64:
         Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_ldap_file(Config.fido2_dynamic_conf_json)
         Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_ldap_file(Config.fido2_static_conf_json)
 
-        if Config.installPassport:
-            oxtrust_config = json.loads(self.readFile(Config.oxtrust_config_json), object_pairs_hook=OrderedDict)
-            passport_oxtrust_config = json.loads(self.readFile(Config.passport_oxtrust_config_fn), object_pairs_hook=OrderedDict)
-            oxtrust_config.update(passport_oxtrust_config)
-            oxtrust_config_json = json.dumps(oxtrust_config, indent=2)
-            self.writeFile(Config.oxtrust_config_json, oxtrust_config_json)
-
         Config.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(Config.oxtrust_config_json);
         Config.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(Config.oxtrust_cache_refresh_json)
         Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(Config.oxtrust_import_person_json)
