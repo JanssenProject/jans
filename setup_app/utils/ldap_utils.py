@@ -92,6 +92,9 @@ class LDAPUtils:
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
+    def search(self, search_base, search_filter, search_scope=ldap3.LEVEL):
+        return self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*'])
+
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
         if self.dn_exists(dn):
@@ -126,4 +129,7 @@ class LDAPUtils:
                     self.ldap_conn.add(dn, attributes=entry)
 
     def __del__(self):
-        self.ldap_conn.unbind()
+        try:
+            self.ldap_conn.unbind()
+        except:
+            pass
