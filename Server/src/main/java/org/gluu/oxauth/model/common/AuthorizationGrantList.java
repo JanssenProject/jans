@@ -118,7 +118,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
-        Long expirationDate = DateUtils.addSeconds(new Date(), expiresIn).getTime();
         if (appConfiguration.getCibaGrantLifeExtraTimeSec() > 0) {
             expiresIn += appConfiguration.getCibaGrantLifeExtraTimeSec();
         }
@@ -129,12 +128,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(),
                 memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
-
-        CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
-        cibaCacheAuthReqIds.getAuthReqIds().put(memcachedGrant.cacheKey(), expirationDate);
-        cacheService.put(CIBACacheAuthReqIds.CACHE_KEY, cibaCacheAuthReqIds);
-        log.trace("Put {} grant into the list of authentication request ids", memcachedGrant.cacheKey());
-
         return grant;
     }
 
@@ -147,18 +140,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
         }
         return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
-    }
-
-    /**
-     * Responsible to remove a Ciba grant from cache item that contains all pending to be answered requests.
-     * @param cibaGrantKey Key used in cache, normally it is authentication request ID.
-     */
-    @Override
-    public void removeCibaGrantFromProcessorCache(String cibaGrantKey) {
-        CIBACacheAuthReqIds cibaCacheAuthReqIds = grantService.getCacheCibaAuthReqIds();
-        cibaCacheAuthReqIds.getAuthReqIds().remove(cibaGrantKey);
-        cacheService.put(CIBACacheAuthReqIds.CACHE_KEY, cibaCacheAuthReqIds);
-        log.trace("Removed {} grant from the list of requests pending to be answered", cibaGrantKey);
     }
 
     @Override
