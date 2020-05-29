@@ -1,10 +1,7 @@
-
-from setup_app.utils.base import logIt, run, os_type, os_version, os_name, \
-    os_initdaemon, service_path, clone_type
+from setup_app.utils import base
 from setup_app.config import Config
 
-
-class BaseInstaller:
+class BaseInstaller():
 
     def start_installation(self):
         self.logIt(self.pbar_text, pbar=self.service_name)
@@ -16,17 +13,22 @@ class BaseInstaller:
 
         self.install()
         self.copy_static()
+        self.render_import_templates()
 
     def run_service_command(self, operation, service):
         if not service:
             service = self.service_name
         try:
-            if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_name in ('ubuntu18','debian9','debian10')):
-                run([service_path, operation, service], None, None, True)
+            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
+                self.run([base.service_path, operation, service], None, None, True)
             else:
-                run([service_path, service, operation], None, None, True)
+                self.run([base.service_path, service, operation], None, None, True)
         except:
-            logIt("Error running operation {} for service {}".format(operation, service))
+            self.logIt("Error running operation {} for service {}".format(operation, service), True)
+
+    def render_import_templates(self):
+        pass
+
 
     def enable(self, service=None):
         self.run_service_command('enable', service)
@@ -38,8 +40,8 @@ class BaseInstaller:
         self.run_service_command('start', service)
 
     def reload_daemon(self):
-        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_name in ('ubuntu18','debian9','debian10')):
-            run([service_path, 'daemon-reload'])
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
+            run([base.service_path, 'daemon-reload'])
 
     def download_files(self):
         pass

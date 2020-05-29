@@ -1,26 +1,19 @@
 import os
 import glob
+import ruamel.yaml
 
 from setup_app import paths
+from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
-class OxdInstaller(BaseInstaller, SetupUtils):
+class OxdInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
         self.service_name = 'oxd-server'
         self.pbar_text = "Installing Oxd Server"
-        
         self.oxd_root = '/opt/oxd-server/'
-
-        self.logIt("Determining oxd server package")
-        oxd_package_list = glob.glob(os.path.join(Config.distGluuFolder, 'oxd-server*.tgz'))
-
-        if oxd_package_list:
-            Config.oxd_package = max(oxd_package_list)
-
-        self.logIt("oxd server package was determined as " + Config.oxd_package)
 
 
     def install(self):
@@ -35,7 +28,6 @@ class OxdInstaller(BaseInstaller, SetupUtils):
             self.run(['cp', service_file, '/lib/systemd/system'])
         else:
             self.run([Config.cmd_ln, service_file, '/etc/init.d/oxd-server'])
-            self.run(['update-rc.d', 'oxd-server', 'defaults'])
 
         self.run([
                 'cp', 
@@ -73,6 +65,8 @@ class OxdInstaller(BaseInstaller, SetupUtils):
             self.writeFile(oxd_server_yml_fn, yml_str)
 
         self.generate_keystore()
+
+        self.enable()
 
     def generate_keystore(self):
         # generate oxd-server.keystore for the hostname
