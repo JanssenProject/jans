@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.ciba;
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version May 28, 2020
  */
 public interface BackchannelAuthenticationRequestParam {
 
@@ -62,4 +62,9 @@ public interface BackchannelAuthenticationRequestParam {
      * A positive integer allowing the client to request the expires_in value for the auth_req_id the server will return.
      */
     String REQUESTED_EXPIRY = "requested_expiry";
+
+    String CLIENT_ID = "client_id";
+    String CLIENT_SECRET = "client_secret";
+    String CLIENT_ASSERTION_TYPE = "client_assertion_type";
+    String CLIENT_ASSERTION = "client_assertion";
 }

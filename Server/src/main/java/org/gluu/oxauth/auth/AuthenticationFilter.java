@@ -49,7 +49,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
 
 /**
  * @author Javier Rojas Blum
- * @version August 20, 2019
+ * @version May 29, 2020
  */
 @WebFilter(
         asyncSupported = true,
@@ -159,7 +159,11 @@ public class AuthenticationFilter implements Filter {
                     httpResponse.sendError(401, "Not authorized");
                 }
             } else if (backchannelAuthenticationEnpoint) {
-                if (tokenService.isBasicAuthToken(authorizationHeader)) {
+                if (httpRequest.getParameter("client_assertion") != null
+                        && httpRequest.getParameter("client_assertion_type") != null) {
+                    log.debug("Starting JWT token endpoint authentication");
+                    processJwtAuth(httpRequest, httpResponse, filterChain);
+                } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
                     String entity = errorResponseFactory.getErrorAsJson(INVALID_CLIENT);
