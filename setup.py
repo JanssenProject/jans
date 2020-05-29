@@ -116,10 +116,6 @@ print("Detected Apache :  {}".format(base.determineApacheVersion()))
 print()
 
 
-# We need OxdInstaller initilized before prompting properties, since oxd package is determined by OxdInstaller
-oxdInstaller = OxdInstaller()
-
-
 # initialize util classes
 propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
@@ -138,6 +134,7 @@ scimInstaller = ScimInstaller()
 openDjInstaller = OpenDjInstaller()
 fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
+oxdInstaller = OxdInstaller()
 
 print()
 print(gluuInstaller)

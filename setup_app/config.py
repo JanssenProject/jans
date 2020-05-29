@@ -7,7 +7,7 @@ from collections import OrderedDict
 from setup_app.paths import DATA_DIR, INSTALL_DIR
 from setup_app.static import InstallTypes
 from setup_app.utils.printVersion import get_war_info
-from setup_app.utils.base import os_type, os_version, os_initdaemon
+from setup_app.utils import base
 
 class Config:
 
@@ -100,9 +100,9 @@ class Config:
         self.allowPreReleasedFeatures = False
 
         # backward compatibility
-        self.os_type = os_type
-        self.os_version = os_version
-        self.os_initdaemon = os_initdaemon
+        self.os_type = base.os_type
+        self.os_version = base.os_version
+        self.os_initdaemon = base.os_initdaemon
 
         self.persistence_type = 'ldap'
         self.shibboleth_version = 'v3'
@@ -288,7 +288,6 @@ class Config:
         self.oxtrust_cache_refresh_json = os.path.join(self.outputFolder, 'oxtrust-cache-refresh.json')
         self.oxtrust_import_person_json = os.path.join(self.outputFolder, 'oxtrust-import-person.json')
         self.oxidp_config_json = os.path.join(self.outputFolder, 'oxidp-config.json')
-        self.gluu_python_base = os.path.join(self.gluuOptFolder, 'python')
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
         self.oxauth_static_conf_json = os.path.join(self.outputFolder, 'oxauth-static-conf.json')
@@ -407,16 +406,12 @@ class Config:
 
         #oxd install options
         self.installOxd = False
-        self.oxd_package = ''
+        self.oxd_server_https = ''
+        self.oxd_package = base.determine_package(os.path.join(Config.distGluuFolder, 'oxd-server*.tgz'))
         self.oxd_use_gluu_storage = False
         self.generateOxdCertificate = False
 
-        #casa install options
         self.installCasa = False
-        self.twilio_version = '7.17.0'
-        self.jsmmp_version = '2.3.7'
-        self.oxd_server_https = ''
-        self.ldif_casa = os.path.join(self.outputFolder, 'casa.ldif')
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
@@ -433,7 +428,6 @@ class Config:
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
                            self.ldif_oxtrust_api_clients,
-                           self.ldif_casa,
                            self.ldif_fido2,
                            ]
 
@@ -469,7 +463,6 @@ class Config:
                              self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,
                              self.data_source_properties: False,
-                             self.ldif_casa: False,
                              self.fido2_dynamic_conf_json: False,
                              self.fido2_static_conf_json: False,
                              }

@@ -1,64 +1,60 @@
 import os
+import re
 import glob
+import ssl
 
+from xml.etree import ElementTree
 
-from setup_app.utils.base import httpd_name, clone_type, \
-    os_initdaemon, os_type, determineApacheVersion
-
-from setup_app.config import Config
-from setup_app.utils.setup_utils import SetupUtils
-from setup_app.installers.base import BaseInstaller
 from setup_app import paths
+from setup_app.utils import base
+from setup_app.config import Config
+from setup_app.utils.ldap_utils import LDAPUtils
+from setup_app.installers.jetty import JettyInstaller
 
 
-class CasaInstaller(SetupUtils, BaseInstaller):
+class CasaInstaller(JettyInstaller):
 
     def __init__(self):
-        self.service_name = 'oxauth'
+        self.service_name = 'casa'
+        self.pbar_text = "Installing Casa"
+        
+        self.templates_folder = os.path.join(Config.templateFolder, 'casa')
+        self.output_folder = os.path.join(Config.outputFolder, 'casa')
+        self.ldif = os.path.join(Config.outputFolder, 'casa/casa.ldif')
+        self.ldif_scripts = os.path.join(Config.outputFolder, 'casa/scripts.ldif')
+        self.pylib_folder = os.path.join(Config.gluuOptPythonFolder, 'libs')
+        self.casa_jetty_dir = os.path.join(Config.jetty_base, 'casa')
 
     def install(self):
-        self.logIt("Installing Casa...")
 
-        self.run(['chmod', 'g+w', '/opt/gluu/python/libs'])
+        #TODO: load casa.ldif
+
+        self.run([paths.cmd_chmod , 'g+w', self.pylib_folder])
         self.logIt("Copying casa.war into jetty webapps folder...")
-        self.installJettyService(self.jetty_app_configuration['casa'])
+        self.installJettyService(Config.jetty_app_configuration['casa'])
 
-        jettyServiceWebapps = os.path.join(self.jetty_base,
-                                            'casa',
-                                            'webapps'
-                                            )
+        jettyServiceWebapps = os.path.join(self.casa_jetty_dir, 'webapps')
 
         self.copyFile(
-                    os.path.join(self.distGluuFolder, 'casa.war'),
+                    os.path.join(Config.distGluuFolder, 'casa.war'),
                     jettyServiceWebapps
                     )
 
-        jettyServiceOxAuthCustomLibsPath = os.path.join(self.jetty_base,
+        jettyServiceOxAuthCustomLibsPath = os.path.join(Config.jetty_base,
                                                         "oxauth", 
                                                         "custom/libs"
                                                         )
-        
-        self.copyFile(
-                os.path.join(self.distGluuFolder, 
-                'twilio-{0}.jar'.format(self.twilio_version)), 
-                jettyServiceOxAuthCustomLibsPath
-                )
-        
-        self.copyFile(
-                os.path.join(self.distGluuFolder, 'jsmpp-{}.jar'.format(self.jsmmp_version)), 
-                jettyServiceOxAuthCustomLibsPath
-                )
-        
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceOxAuthCustomLibsPath])
 
-        # Make necessary Directories for Casa
-        for path in ('/opt/gluu/jetty/casa/static/', '/opt/gluu/jetty/casa/plugins'):
-            if not os.path.exists(path):
-                self.run(['mkdir', '-p', path])
-                self.run(['chown', '-R', 'jetty:jetty', path])
-        
+        twillo_package = base.determine_package(os.path.join(Config.distGluuFolder, 'twilio-*.jar'))
+        self.copyFile(twillo_package, jettyServiceOxAuthCustomLibsPath)
+
+        jsmpp_package = base.determine_package(os.path.join(Config.distGluuFolder, 'jsmpp-*.jar'))
+        self.copyFile(jsmpp_package, jettyServiceOxAuthCustomLibsPath)
+
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceOxAuthCustomLibsPath])
+
         #Adding twilio jar path to oxauth.xml
-        oxauth_xml_fn = '/opt/gluu/jetty/oxauth/webapps/oxauth.xml'
+        oxauth_xml_fn = os.path.join(Config.jetty_base,  'oxauth/webapps/oxauth.xml')
         if os.path.exists(oxauth_xml_fn):
             
             class CommentedTreeBuilder(ElementTree.TreeBuilder):
@@ -86,17 +82,42 @@ class CasaInstaller(SetupUtils, BaseInstaller):
                 if (not ecp) or re.search('twilio-(.*)\.jar', ecp) or re.search('jsmpp-(.*)\.jar', ecp):
                     extraClasspath_list.remove(ecp)
 
-            extraClasspath_list.append('./custom/libs/twilio-{}.jar'.format(self.twilio_version))
-            extraClasspath_list.append('./custom/libs/jsmpp-{}.jar'.format(self.jsmmp_version))
+            extraClasspath_list.append('./custom/libs/{}'.format(os.path.basename(twillo_package)))
+            extraClasspath_list.append('./custom/libs/{}'.format(os.path.basename(jsmpp_package)))
             element.text = ','.join(extraClasspath_list)
 
             self.writeFile(oxauth_xml_fn, xml_headers+ElementTree.tostring(root).decode('utf-8'))
+        
+        self.import_oxd_certificate()
+        
+        self.enable('casa')
 
-        pylib_folder = os.path.join(self.gluuOptPythonFolder, 'libs')
-        for script_fn in glob.glob(os.path.join(self.staticFolder, 'casa/scripts/*.*')):
-            self.run(['cp', script_fn, pylib_folder])
+    def copy_static(self):
+        for script_fn in glob.glob(os.path.join(Config.staticFolder, 'casa/scripts/*.*')):
+            self.run(['cp', script_fn, self.pylib_folder])
 
-        self.enable_service_at_start('casa')
+    def render_import_templates(self):
+
+        self.ldapUtils = LDAPUtils()
+        scripts_template = os.path.join(self.templates_folder, os.path.basename(self.ldif_scripts))
+        extensions = base.find_script_names(scripts_template)
+        self.prepare_base64_extension_scripts(extensions=extensions)
+
+        for tmp in (
+                    self.ldif,
+                    self.ldif_scripts,
+                    ):
+        
+            self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
+
+        ldif_files = (self.ldif, self.ldif_scripts)
+
+        if Config.mappingLocations['default'] == 'ldap':
+            self.ldapUtils.import_ldif(ldif_files)
+        else:
+            #TODO: implement for couchbase ???
+            self.import_ldif_couchebase(ldif_files)
+
 
     def import_oxd_certificate(self):
 
@@ -111,12 +132,20 @@ class CasaInstaller(SetupUtils, BaseInstaller):
             oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
             oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
             oxd_cert_tmp_fn = '/tmp/{}.crt'.format(oxd_alias)
-
-            with open(oxd_cert_tmp_fn,'w') as w:
-                w.write(oxd_cert)
-
-            self.run([self.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
+            self.writeFile(oxd_cert_tmp_fn, oxd_cert)
+            
+            self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
                             '/opt/jre/jre/lib/security/cacerts', '-storepass', 'changeit', 
                             '-noprompt', '-alias', oxd_alias, '-file', oxd_cert_tmp_fn])
+            
+            os.remove(oxd_cert_tmp_fn)
 
         except:
+            self.logIt("Error importing oxd server certificate", True)
+            
+    def create_folders(self):
+        for path_name in ('static', 'plugins'):
+            path = os.path.join(self.casa_jetty_dir, path_name)
+            if not os.path.exists(path):
+                self.run([paths.cmd_mkdir, '-p', path])
+            self.run([paths.cmd_chown, '-R', 'jetty:jetty', path])
