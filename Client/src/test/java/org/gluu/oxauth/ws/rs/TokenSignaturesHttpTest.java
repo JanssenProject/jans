@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.Jwt;
@@ -118,7 +119,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
 
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AbstractCryptoProvider cryptoProvider = createCryptoProviderWithAllowedNone();
         boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
                 null, null, SignatureAlgorithm.NONE);
         assertTrue(validJwt);

@@ -30,6 +30,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.service.AuthenticationService;
 import org.gluu.oxauth.service.AuthorizeService;
 import org.gluu.oxauth.service.ClientAuthorizationsService;
 import org.gluu.oxauth.service.ClientService;
@@ -46,6 +47,7 @@ import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
+import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
@@ -67,6 +69,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author Javier Rojas Blum
@@ -151,6 +154,9 @@ public class AuthorizeAction {
     
     @Inject
     private Authenticator authenticator;
+    
+    @Inject
+    private AuthenticationService authenticationService;
 
     @Inject
     private ExternalPostAuthnService externalPostAuthnService;
@@ -296,6 +302,11 @@ public class AuthorizeAction {
             SessionId unauthenticatedSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             unauthenticatedSession.addPermission(clientId, false);
+            
+            // Copy ACR script parameters
+            if (appConfiguration.getKeepAuthenticatorAttributesOnAcrChange()) {
+            	authenticationService.copyAuthenticatorExternalAttributes(session, unauthenticatedSession);
+            }
 
             // #1030, fix for flow 4 - transfer previous session permissions to new session
             if (session != null && session.getPermissionGrantedMap() != null && session.getPermissionGrantedMap().getPermissionGranted() != null) {
