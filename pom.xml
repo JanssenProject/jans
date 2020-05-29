@@ -17,6 +17,7 @@
 		<oxeleven.version>4.2.0-SNAPSHOT</oxeleven.version>
 		<oxnotify.version>4.2.0-SNAPSHOT</oxnotify.version>
 		<oxlicense.version>4.2.0-SNAPSHOT</oxlicense.version>
+		<fido2.version>4.2.0-SNAPSHOT</fido2.version>
 
 		<json.version>20180813</json.version>
 		<jackson.version>2.10.1</jackson.version>
@@ -238,6 +239,12 @@
 				<groupId>org.gluu</groupId>
 				<artifactId>oxeleven-model</artifactId>
 				<version>${oxeleven.version}</version>
+			</dependency>
+			<!-- Fido2 -->
+			<dependency>
+				<groupId>org.gluu</groupId>
+				<artifactId>fido2-client</artifactId>
+				<version>${fido2.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.gluu</groupId>
