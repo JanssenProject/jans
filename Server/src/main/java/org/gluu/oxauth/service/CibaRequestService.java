@@ -88,7 +88,8 @@ public class CibaRequestService {
 
     public void updateStatus(String authReqId, CIBAGrantUserAuthorization authorizationStatus) {
         try {
-            CIBARequest cibaRequest = ldapEntryManager.find(CIBARequest.class, authReqId);
+            String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
+            CIBARequest cibaRequest = ldapEntryManager.find(CIBARequest.class, requestDn);
             cibaRequest.setStatus(authorizationStatus.getValue());
             ldapEntryManager.merge(cibaRequest);
         } catch (Exception e) {
