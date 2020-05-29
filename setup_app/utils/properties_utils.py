@@ -128,12 +128,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.couchbaseShibUserPassword:
             Config.couchbaseShibUserPassword = self.getPW()
 
-        if Config.installCasa:
-            if not Config.ldif_casa in Config.couchbaseBucketDict['default']['ldif']:
-                Config.couchbaseBucketDict['default']['ldif'].append(Config.ldif_casa)
-            if not Config.ldif_scripts_casa in Config.couchbaseBucketDict['default']['ldif']:
-                Config.couchbaseBucketDict['default']['ldif'].append(Config.ldif_scripts_casa)
-
         if Config.oxd_server_https:
             Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
             if not Config.templateRenderingDict['oxd_port']: 

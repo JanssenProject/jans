@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import glob
 import platform
 import zipfile
 import json
@@ -418,3 +419,10 @@ def find_script_names(ldif_file):
                     name_list.append(result.groups()[0])
                 
     return name_list
+
+
+def determine_package(glob_pattern):
+    logIt("Determining package for pattern: {}".format(glob_pattern))
+    package_list = glob.glob(glob_pattern)
+    if package_list:
+        return max(package_list)
