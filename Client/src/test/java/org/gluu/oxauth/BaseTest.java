@@ -26,6 +26,8 @@ import org.apache.http.ssl.SSLContexts;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.dev.HostnameVerifierType;
 import org.gluu.oxauth.model.common.ResponseMode;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.error.IErrorType;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.Util;
@@ -1040,5 +1042,9 @@ public abstract class BaseTest {
 
     public static void output(String str) {
         System.out.println(str); // switch to logger?
+    }
+
+    public static AbstractCryptoProvider createCryptoProviderWithAllowedNone() throws Exception {
+        return new OxAuthCryptoProvider(null, null, null, false);
     }
 }

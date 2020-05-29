@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.Claim;
 import org.gluu.oxauth.client.model.authorize.ClaimValue;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -32,6 +32,7 @@ import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.model.util.Util;
+import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -1692,7 +1693,7 @@ public class MultivaluedClaims extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        AbstractCryptoProvider cryptoProvider = createCryptoProviderWithAllowedNone();
 
         List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();

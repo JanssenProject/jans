@@ -121,6 +121,7 @@ public class AppConfiguration implements Configuration {
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
     private Boolean returnClientSecretOnRead = false;
+    private Boolean rejectJwtWithNoneAlg = true;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -200,10 +201,14 @@ public class AppConfiguration implements Configuration {
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled  = false;
     private Boolean removeRefreshTokensForClientOnLogout  = true;
+    private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+    private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+
+    private Boolean keepAuthenticatorAttributesOnAcrChange = false;
 
     // CIBA
     private String backchannelClientId;
@@ -218,6 +223,33 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    public Boolean getRejectJwtWithNoneAlg() {
+        if (rejectJwtWithNoneAlg == null) rejectJwtWithNoneAlg = true;
+        return rejectJwtWithNoneAlg;
+    }
+
+    public void setRejectJwtWithNoneAlg(Boolean rejectJwtWithNoneAlg) {
+        this.rejectJwtWithNoneAlg = rejectJwtWithNoneAlg;
+    }
+
+    public Boolean getIntrospectionScriptBackwardCompatibility() {
+        if (introspectionScriptBackwardCompatibility == null) introspectionScriptBackwardCompatibility = false;
+        return introspectionScriptBackwardCompatibility;
+    }
+
+    public void setIntrospectionScriptBackwardCompatibility(Boolean introspectionScriptBackwardCompatibility) {
+        this.introspectionScriptBackwardCompatibility = introspectionScriptBackwardCompatibility;
+    }
+
+    public Boolean getConsentGatheringScriptBackwardCompatibility() {
+        if (consentGatheringScriptBackwardCompatibility == null) consentGatheringScriptBackwardCompatibility = false;
+        return consentGatheringScriptBackwardCompatibility;
+    }
+
+    public void setConsentGatheringScriptBackwardCompatibility(Boolean consentGatheringScriptBackwardCompatibility) {
+        this.consentGatheringScriptBackwardCompatibility = consentGatheringScriptBackwardCompatibility;
+    }
 
     public Boolean getErrorReasonEnabled() {
         if (errorReasonEnabled == null) errorReasonEnabled = false;
@@ -1602,7 +1634,15 @@ public class AppConfiguration implements Configuration {
         this.useLocalCache = useLocalCache;
     }
 
-    public String getBackchannelClientId() {
+    public Boolean getKeepAuthenticatorAttributesOnAcrChange() {
+		return keepAuthenticatorAttributesOnAcrChange;
+	}
+
+	public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
+		this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+	}
+
+	public String getBackchannelClientId() {
         return backchannelClientId;
     }
 

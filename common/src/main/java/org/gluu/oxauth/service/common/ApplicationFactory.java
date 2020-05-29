@@ -69,7 +69,9 @@ public class ApplicationFactory {
 
 			log.info("IN-MEMORY cache configuration is created.");
 		} else if (cacheConfiguration.getNativePersistenceConfiguration() != null) {
-			cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(StringUtils.remove(staticConfiguration.getBaseDn().getUmaBase(), "ou=uma,").trim());
+			if (!StringUtils.isEmpty(staticConfiguration.getBaseDn().getUmaBase())) {
+				cacheConfiguration.getNativePersistenceConfiguration().setBaseDn(StringUtils.remove(staticConfiguration.getBaseDn().getUmaBase(), "ou=uma,").trim());
+			}
 		}
 		log.info("Cache configuration: " + cacheConfiguration);
 		return cacheConfiguration;
