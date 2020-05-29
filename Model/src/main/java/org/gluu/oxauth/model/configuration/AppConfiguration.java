@@ -202,6 +202,7 @@ public class AppConfiguration implements Configuration {
     private Boolean errorReasonEnabled  = false;
     private Boolean removeRefreshTokensForClientOnLogout  = true;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+    private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
@@ -230,6 +231,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRejectJwtWithNoneAlg(Boolean rejectJwtWithNoneAlg) {
         this.rejectJwtWithNoneAlg = rejectJwtWithNoneAlg;
+    }
+
+    public Boolean getIntrospectionScriptBackwardCompatibility() {
+        if (introspectionScriptBackwardCompatibility == null) introspectionScriptBackwardCompatibility = false;
+        return introspectionScriptBackwardCompatibility;
+    }
+
+    public void setIntrospectionScriptBackwardCompatibility(Boolean introspectionScriptBackwardCompatibility) {
+        this.introspectionScriptBackwardCompatibility = introspectionScriptBackwardCompatibility;
     }
 
     public Boolean getConsentGatheringScriptBackwardCompatibility() {
