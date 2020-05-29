@@ -103,6 +103,9 @@ public class AuthorizeService {
     @Inject
     private CIBAPushErrorProxy cibaPushErrorProxy;
 
+    @Inject
+    private CibaRequestService cibaRequestService;
+
     public SessionId getSession() {
         return getSession(null);
     }
@@ -198,7 +201,9 @@ public class AuthorizeService {
         // CIBA
         Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
         if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
-            CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID));
+            String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
+            CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+            cibaRequestService.updateStatus(authReqId, CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
 
             if (cibaGrant != null  && cibaGrant.getClient() != null) {
                 switch (cibaGrant.getClient().getBackchannelTokenDeliveryMode()) {
