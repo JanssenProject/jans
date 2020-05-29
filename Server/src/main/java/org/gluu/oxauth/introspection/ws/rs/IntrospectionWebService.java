@@ -129,7 +129,6 @@ public class IntrospectionWebService {
             AbstractToken tokenToIntrospect = null;
             if (grantOfIntrospectionToken != null) {
                 tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
-                final User user = grantOfIntrospectionToken.getUser();
 
                 response.setActive(tokenToIntrospect.isValid());
                 response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
