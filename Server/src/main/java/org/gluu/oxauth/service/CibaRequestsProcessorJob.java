@@ -35,6 +35,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Job responsible to process all expired CIBA requests and update their status.
+ *
  * @author Milton BO
  * @version May 20, 2020
  */

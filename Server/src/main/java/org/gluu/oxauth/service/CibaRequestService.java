@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Service used to access to the database for CibaRequest ObjectClass.
+ *
  * @author Milton BO
  * @version May 28, 2020
  */
@@ -49,6 +51,11 @@ public class CibaRequestService {
         ldapEntryManager.merge(cibaRequest);
     }
 
+    /**
+     * Uses request data and expiration sent by the client and save request data in database.
+     * @param grant Object containing information related to the request.
+     * @param expiresIn Expiration time that end user has to answer.
+     */
     public void persistRequest(CIBAGrant grant, int expiresIn) {
         Date expirationDate = DateUtils.addSeconds(new Date(), expiresIn);
 
@@ -64,6 +71,10 @@ public class CibaRequestService {
         ldapEntryManager.persist(cibaRequest);
     }
 
+    /**
+     * Load a CIBARequest entry from database.
+     * @param authReqId Identifier of the entry.
+     */
     public CIBARequest load(String authReqId) {
         try {
             return ldapEntryManager.find(CIBARequest.class, authReqId);
@@ -73,6 +84,10 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Generates a list of requests that are expired and also filter them using a Status.
+     * @param authorizationStatus Status used to filter entries.
+     */
     public List<CIBARequest> loadExpiredByStatus(CIBAGrantUserAuthorization authorizationStatus) {
         try {
             Date now = new Date();
@@ -86,6 +101,11 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Change the status field in database for a specific request.
+     * @param authReqId Identificator of the request.
+     * @param authorizationStatus New status.
+     */
     public void updateStatus(String authReqId, CIBAGrantUserAuthorization authorizationStatus) {
         try {
             String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
@@ -97,6 +117,11 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Change the status field in database for a specific request.
+     * @param cibaRequest Entry containing information of the CIBA request.
+     * @param authorizationStatus New status.
+     */
     public void updateStatus(CIBARequest cibaRequest, CIBAGrantUserAuthorization authorizationStatus) {
         try {
             cibaRequest.setStatus(authorizationStatus.getValue());
