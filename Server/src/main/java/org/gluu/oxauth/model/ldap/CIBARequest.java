@@ -6,6 +6,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
+ * Object class used to save information of every CIBA request.
+ *
  * @author Milton BO
  * @version May 27, 2020
  */
