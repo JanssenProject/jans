@@ -42,7 +42,7 @@ public abstract class UserService {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    protected PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     private InumService inumService;
@@ -57,7 +57,7 @@ public abstract class UserService {
         if (Util.isNullOrEmpty(dn)) {
             return null;
         }
-        return ldapEntryManager.find(dn, User.class, returnAttributes);
+        return persistenceEntryManager.find(dn, User.class, returnAttributes);
     }
 
 	public User getUserByInum(String inum, String... returnAttributes) {
@@ -83,7 +83,7 @@ public abstract class UserService {
 
 		Filter userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(userId));
 
-		List<User> entries = ldapEntryManager.findEntries(getPeopleBaseDn(), User.class, userUidFilter, returnAttributes);
+		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, userUidFilter, returnAttributes);
 		log.debug("Found {} entries for user id = {}", entries.size(), userId);
 
 		if (entries.size() > 0) {
@@ -111,7 +111,7 @@ public abstract class UserService {
 
     public User updateUser(User user) {
         user.setUpdatedAt(new Date());
-		return ldapEntryManager.merge(user);
+		return persistenceEntryManager.merge(user);
 	}
 
     public User addDefaultUser(String uid) {
@@ -133,7 +133,7 @@ public abstract class UserService {
     	}
 
     	user.setCreatedAt(new Date());
-		ldapEntryManager.persist(user);
+		persistenceEntryManager.persist(user);
 		
 		return getUser(uid);
 	}
@@ -163,7 +163,7 @@ public abstract class UserService {
     	}
 
     	user.setCreatedAt(new Date());
-    	ldapEntryManager.persist(user);
+    	persistenceEntryManager.persist(user);
 
 		return getUserByDn(user.getDn());
 	}
@@ -183,7 +183,7 @@ public abstract class UserService {
 
         user.setCustomAttributes(customAttributes);
 
-        List<User> entries = ldapEntryManager.findEntries(user, 1);
+        List<User> entries = persistenceEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
@@ -209,7 +209,7 @@ public abstract class UserService {
 				searchUser.setCustomAttributes(customAttributes);
 
 				try {
-					List<User> entries = ldapEntryManager.findEntries(searchUser);
+					List<User> entries = persistenceEntryManager.findEntries(searchUser);
 					log.debug("Found '{}' entries", entries.size());
 
 					if (entries.size() == 0) {
@@ -249,7 +249,7 @@ public abstract class UserService {
 			searchFiler = Filter.createORFilter(filters);
 		}
 
-		List<User> entries = ldapEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes);
+		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes);
 		log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
 
 		if (entries.size() > 0) {
@@ -262,7 +262,7 @@ public abstract class UserService {
     public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");
 
-        List<User> entries = ldapEntryManager.findEntries(user, limit);
+        List<User> entries = persistenceEntryManager.findEntries(user, limit);
         log.debug("Found '{}' entries", entries.size());
 
         return entries;
@@ -436,7 +436,7 @@ public abstract class UserService {
         String baseDN = getPeopleBaseDn();
         Filter filter = Filter.createPresenceFilter("oxAuthPersistentJWT");
 
-        return ldapEntryManager.findEntries(baseDN, User.class, filter);
+        return persistenceEntryManager.findEntries(baseDN, User.class, filter);
     }
 
     public String getDnForUser(String inum) {
@@ -475,12 +475,12 @@ public abstract class UserService {
 
 	public String encodeGeneralizedTime(Date date) {
 		String baseDn = getDnForUser(null);
-		return ldapEntryManager.encodeTime(baseDn, date);
+		return persistenceEntryManager.encodeTime(baseDn, date);
 	}
 
 	public Date decodeGeneralizedTime(String date) {
 		String baseDn = getDnForUser(null);
-		return ldapEntryManager.decodeTime(baseDn, date);
+		return persistenceEntryManager.decodeTime(baseDn, date);
 	}
 
 	protected abstract List<String> getPersonCustomObjectClassList();

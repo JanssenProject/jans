@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.GluuStatus;
 import org.gluu.model.SimpleProperty;
+import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.model.metric.MetricType;
 import org.gluu.model.security.Credentials;
@@ -21,6 +22,7 @@ import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
+import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.UserService;
@@ -31,6 +33,7 @@ import org.gluu.persist.model.base.CustomEntry;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -42,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
+import java.util.Map.Entry;
 
 import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
@@ -55,6 +59,8 @@ import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 @Stateless
 @Named
 public class AuthenticationService {
+
+    private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
 
 	@Inject
 	private Logger log;
@@ -723,6 +729,93 @@ public class AuthenticationService {
 
 	public boolean isParameterExists(String p_name) {
 		return identity.isSetWorkingParameter(p_name);
+	}
+
+	public void updateExtraParameters(Map<String, String> sessionIdAttributes, List<String> extraParameters) {
+        // Load extra parameters set
+        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+
+        if (extraParameters != null) {
+        	log.trace("Attempting to store extraParameters: {}", extraParameters);
+            for (String extraParameter : extraParameters) {
+                if (isParameterExists(extraParameter)) {
+                    Pair<String, String> extraParameterValueWithType = requestParameterService
+                            .getParameterValueWithType(extraParameter);
+                    String extraParameterValue = extraParameterValueWithType.getFirst();
+                    String extraParameterType = extraParameterValueWithType.getSecond();
+
+                    // Store parameter name and value
+                    sessionIdAttributes.put(extraParameter, extraParameterValue);
+
+                    // Store parameter name and type
+                    authExternalAttributes.put(extraParameter, extraParameterType);
+                }
+            }
+        }
+
+        // Store identity working parameters in session
+        setExternalScriptExtraParameters(sessionIdAttributes, authExternalAttributes);
+    	log.trace("Storing sessionIdAttributes: {}", sessionIdAttributes);
+    	log.trace("Storing authExternalAttributes: {}", authExternalAttributes);
+    }
+
+    public Map<String, String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
+        String authExternalAttributesString = sessionIdAttributes.get(AUTH_EXTERNAL_ATTRIBUTES);
+        Map<String, String> authExternalAttributes = new HashMap<String, String>();
+        try {
+            authExternalAttributes = Util.jsonObjectArrayStringAsMap(authExternalAttributesString);
+        } catch (JSONException ex) {
+            log.error("Failed to convert JSON array of auth_external_attributes to Map<String, String>");
+        }
+
+        return authExternalAttributes;
+    }
+
+    public void setExternalScriptExtraParameters(Map<String, String> sessionIdAttributes,
+                                                  Map<String, String> authExternalAttributes) {
+        String authExternalAttributesString = null;
+        try {
+            authExternalAttributesString = Util.mapAsString(authExternalAttributes);
+        } catch (JSONException ex) {
+            log.error("Failed to convert Map<String, String> of auth_external_attributes to JSON array");
+        }
+
+        sessionIdAttributes.put(AUTH_EXTERNAL_ATTRIBUTES, authExternalAttributesString);
+    }
+
+    public void clearExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
+        Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+
+        for (String authExternalAttribute : authExternalAttributes.keySet()) {
+            sessionIdAttributes.remove(authExternalAttribute);
+        }
+
+        sessionIdAttributes.remove(AUTH_EXTERNAL_ATTRIBUTES);
+    }
+
+    public void copyAuthenticatorExternalAttributes(SessionId oldSession, SessionId newSession) {
+		if ((oldSession != null) && (oldSession.getSessionAttributes() != null) &&
+			(newSession != null) && (newSession.getSessionAttributes() != null)) {
+
+			Map<String, String> newSessionIdAttributes = newSession.getSessionAttributes();
+			Map<String, String> oldSessionIdAttributes = oldSession.getSessionAttributes();
+
+			Map<String, String> authExternalAttributes = getExternalScriptExtraParameters(oldSession.getSessionAttributes());
+
+		    if (authExternalAttributes != null) {
+		    	log.trace("Attempting to copy extraParameters into new session: {}", authExternalAttributes);
+		        for (String authExternalAttributeName : authExternalAttributes.keySet()) {
+		            if (oldSessionIdAttributes.containsKey(authExternalAttributeName)) {
+		                String authExternalAttributeValue = oldSessionIdAttributes.get(authExternalAttributeName);
+
+		                // Store in new session
+		                newSessionIdAttributes.put(authExternalAttributeName, authExternalAttributeValue);
+		            }
+		        }
+		    }
+
+		    setExternalScriptExtraParameters(newSessionIdAttributes, authExternalAttributes);
+		}
 	}
 
 }
