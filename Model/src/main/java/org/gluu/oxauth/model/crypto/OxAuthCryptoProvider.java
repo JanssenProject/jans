@@ -72,12 +72,18 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
     private String keyStoreFile;
     private String keyStoreSecret;
     private String dnName;
+    private final boolean rejectNoneAlg;
 
     public OxAuthCryptoProvider() throws Exception {
         this(null, null, null);
     }
 
     public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName) throws Exception {
+        this(keyStoreFile, keyStoreSecret, dnName, false);
+    }
+
+    public OxAuthCryptoProvider(String keyStoreFile, String keyStoreSecret, String dnName, boolean rejectNoneAlg) throws Exception {
+        this.rejectNoneAlg = rejectNoneAlg;
         if (!Util.isNullOrEmpty(keyStoreFile) && !Util.isNullOrEmpty(keyStoreSecret) /* && !Util.isNullOrEmpty(dnName) */) {
             this.keyStoreFile = keyStoreFile;
             this.keyStoreSecret = keyStoreSecret;
@@ -261,7 +267,10 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public boolean verifySignature(String signingInput, String encodedSignature, String alias, JSONObject jwks, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws Exception {
-        boolean verified = false;
+        if (rejectNoneAlg && signatureAlgorithm == SignatureAlgorithm.NONE) {
+            LOG.trace("None algorithm is forbidden by `rejectJwtWithNoneAlg` property.");
+            return false;
+        }
 
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
             return Util.isNullOrEmpty(encodedSignature);
@@ -291,28 +300,17 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
                 verifier.initVerify(publicKey);
                 verifier.update(signingInput.getBytes());
                 try {
-                	verified = verifier.verify(signatureDer);
+                	return verifier.verify(signatureDer);
                 } catch (SignatureException e) {
                 	// Fall back to old format
                 	// TODO: remove in Gluu 5.0
-                	verified = verifier.verify(signature);
+                	return verifier.verify(signature);
                 }
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error(e.getMessage(), e);
-                verified = false;
-            } catch (SignatureException e) {
-                LOG.error(e.getMessage(), e);
-                verified = false;
-            } catch (InvalidKeyException e) {
-                LOG.error(e.getMessage(), e);
-                verified = false;
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-                verified = false;
+                return false;
             }
         }
-
-        return verified;
     }
 
     private String getJWKSValue(JSONObject jwks, String node) throws JSONException {
