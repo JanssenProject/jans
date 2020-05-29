@@ -134,6 +134,7 @@ class PropertiesUtils(SetupUtils):
                 Config.templateRenderingDict['oxd_port'] = 8443
         else:
             Config.templateRenderingDict['oxd_hostname'] = Config.hostname
+            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
 
     def decrypt_properties(self, fn, passwd):
         out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
