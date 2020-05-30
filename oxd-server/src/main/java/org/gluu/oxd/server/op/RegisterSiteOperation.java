@@ -103,8 +103,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         Rp fallback = getConfigurationService().defaultRp();
 
         //op_configuration_endpoint
+        LOG.info("Either 'op_configuration_endpoint' or 'op_host' should be set. oxd will now check which of these parameter is available.");
         if (StringUtils.isBlank(params.getOpConfigurationEndpoint())) {
-            LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'");
+            LOG.warn("'op_configuration_endpoint' is not set for parameter: " + params + ". Look up at configuration file for fallback of 'op_configuration_endpoint'.");
             String fallbackOpConfigurationEndpoint = fallback.getOpConfigurationEndpoint();
             if (StringUtils.isNotBlank(fallbackOpConfigurationEndpoint)) {
                 LOG.warn("Fallback to op_configuration_endpoint: " + fallbackOpConfigurationEndpoint + ", from configuration file.");
@@ -475,9 +476,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
                 LOG.trace("Registered client for site - client_id: " + response.getClientId() + ", claims: " + response.getClaims() + ", registration_client_uri:" + response.getRegistrationClientUri());
                 return response;
-            } else {
-                LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
             }
+            LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
+            if (Strings.isNullOrEmpty(response.getClientId())) {
+                LOG.error("`client_id` is not returned from OP host. Please check OP log file for error (oxauth.log).");
+                throw new HttpException(ErrorResponseCode.NO_CLIENT_ID_RETURNED);
+            }
+
+            if (Strings.isNullOrEmpty(response.getClientSecret())) {
+                LOG.error("`client_secret` is not returned from OP host. Please check: 1) OP log file for error (oxauth.log) 2) whether `returnClientSecretOnRead` configuration property is set to true on OP host.");
+                throw new HttpException(ErrorResponseCode.NO_CLIENT_SECRET_RETURNED);
+            }
+
         } else {
             LOG.error("RegisterClient response is null.");
         }
