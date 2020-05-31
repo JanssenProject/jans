@@ -31,7 +31,7 @@ import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version May 28, 2020
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -120,7 +120,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         try {
             URL theUrl = new URL(url);
 
-            if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT)) {
+            if (getHttpMethod().equals(HttpMethod.POST) || getHttpMethod().equals(HttpMethod.PUT) || getHttpMethod().equals(HttpMethod.DELETE)) {
                 sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
                 if (StringUtils.isNotBlank(request.getContentType())) {
                     sb.append("\n");
@@ -161,7 +161,7 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                 sb.append("\n");
                 sb.append(request.getQueryString());
             } else if (getHttpMethod().equals(HttpMethod.GET)) {
-                sb.append("GET ").append(theUrl.getPath());
+                sb.append(getHttpMethod()).append(" ").append(theUrl.getPath()).append(" HTTP/1.1");
                 if (StringUtils.isNotBlank(request.getQueryString())) {
                     sb.append("?").append(request.getQueryString());
                 }

@@ -42,7 +42,7 @@ import static org.testng.Assert.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version March 13, 2019
+ * @version May 28, 2020
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -651,6 +651,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         deleteClient.setExecutor(clientExecutor(true));
         RegisterResponse deleteResponse = deleteClient.exec();
 
+        showClient(deleteClient);
         assertEquals(deleteResponse.getStatus(), 204, "Unexpected response code: " + response.getEntity());
     }
 }
