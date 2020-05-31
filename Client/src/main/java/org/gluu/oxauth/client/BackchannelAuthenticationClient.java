@@ -8,7 +8,9 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.AuthorizationMethod;
+import org.gluu.oxauth.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.util.Util;
 import org.json.JSONObject;
 
@@ -66,7 +68,7 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         // Prepare request parameters
         clientRequest.setHttpMethod(getHttpMethod());
         clientRequest.header("Content-Type", request.getContentType());
-        if (request.getAuthorizationMethod() != AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER && request.hasCredentials()) {
+        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
             clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
         }
 
@@ -99,6 +101,23 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         }
         if (getRequest().getRequestedExpiry() != null) {
             clientRequest.formParameter(REQUESTED_EXPIRY, getRequest().getRequestedExpiry());
+        }
+        if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
+            if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
+                clientRequest.formParameter(CLIENT_ID, getRequest().getAuthUsername());
+            }
+            if (getRequest().getAuthPassword() != null && !getRequest().getAuthPassword().isEmpty()) {
+                clientRequest.formParameter(CLIENT_SECRET, getRequest().getAuthPassword());
+            }
+        } else if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
+                getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
+            clientRequest.formParameter(CLIENT_ASSERTION_TYPE, ClientAssertionType.JWT_BEARER);
+            if (getRequest().getClientAssertion() != null) {
+                clientRequest.formParameter(CLIENT_ASSERTION, getRequest().getClientAssertion());
+            }
+            if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
+                clientRequest.formParameter(CLIENT_ID, getRequest().getAuthUsername());
+            }
         }
 
         // Call REST Service and handle response

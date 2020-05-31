@@ -35,7 +35,7 @@ import static org.gluu.oxauth.model.common.GrantType.CIBA;
 
 /**
  * @author Javier Rojas Blum
- * @version October 7, 2019
+ * @version May 20, 2020
  */
 @Interceptor
 @CIBARegisterParamsValidatorInterception
@@ -64,9 +64,10 @@ public class CIBARegisterParamsValidatorInterceptor implements CIBARegisterParam
             List<GrantType> grantTypes = (List<GrantType>) ctx.getParameters()[4];
             SubjectType subjectType = (SubjectType) ctx.getParameters()[5];
             String sectorIdentifierUri = (String) ctx.getParameters()[6];
-            String jwksUri = (String) ctx.getParameters()[7];
+            String jwks = (String) ctx.getParameters()[7];
+            String jwksUri = (String) ctx.getParameters()[8];
             valid = validateParams(backchannelTokenDeliveryMode, backchannelClientNotificationEndpoint, backchannelAuthenticationRequestSigningAlg,
-                    backchannelUserCodeParameter, grantTypes, subjectType, sectorIdentifierUri, jwksUri);
+                    backchannelUserCodeParameter, grantTypes, subjectType, sectorIdentifierUri, jwks, jwksUri);
             ctx.proceed();
         } catch (Exception e) {
             log.error("Failed to validate register params.", e);
@@ -79,7 +80,7 @@ public class CIBARegisterParamsValidatorInterceptor implements CIBARegisterParam
     public boolean validateParams(
             BackchannelTokenDeliveryMode backchannelTokenDeliveryMode, String backchannelClientNotificationEndpoint,
             AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg, Boolean backchannelUserCodeParameter,
-            List<GrantType> grantTypes, SubjectType subjectType, String sectorIdentifierUri, String jwksUri) {
+            List<GrantType> grantTypes, SubjectType subjectType, String sectorIdentifierUri, String jwks, String jwksUri) {
         try {
             // Not CIBA Registration
             if (backchannelTokenDeliveryMode == null && Strings.isBlank(backchannelClientNotificationEndpoint) && backchannelAuthenticationRequestSigningAlg == null) {
@@ -113,7 +114,7 @@ public class CIBARegisterParamsValidatorInterceptor implements CIBARegisterParam
             if (subjectType != null && subjectType == SubjectType.PAIRWISE) {
 
                 if (backchannelTokenDeliveryMode == PING || backchannelTokenDeliveryMode == POLL) {
-                    if (Strings.isBlank(jwksUri)) {
+                    if (Strings.isBlank(jwks) && Strings.isBlank(jwksUri)) {
                         return false;
                     }
                 }
@@ -135,7 +136,7 @@ public class CIBARegisterParamsValidatorInterceptor implements CIBARegisterParam
                     if (backchannelTokenDeliveryMode == PING || backchannelTokenDeliveryMode == POLL) {
                         // If a sector_identifier_uri is explicitly provided, then the jwks_uri must be included in the list of
                         // URIs pointed to by the sector_identifier_uri.
-                        if (!Util.asList(sectorIdentifierJsonArray).contains(jwksUri)) {
+                        if (!Strings.isBlank(jwksUri) && !Util.asList(sectorIdentifierJsonArray).contains(jwksUri)) {
                             return false;
                         }
                     } else if (backchannelTokenDeliveryMode == PUSH) {
