@@ -83,9 +83,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.ldapPass:
             Config.ldapPass = Config.oxtrust_admin_password
 
-        if not Config.shibJksPass:
-            Config.shibJksPass = self.getPW()
-
         if not Config.oxauth_openid_jks_pass:
             Config.oxauth_openid_jks_pass = self.getPW()
 
@@ -124,9 +121,6 @@ class PropertiesUtils(SetupUtils):
 
         if not Config.application_max_ram:
             Config.application_max_ram = 3072
-
-        if not Config.couchbaseShibUserPassword:
-            Config.couchbaseShibUserPassword = self.getPW()
 
         if Config.oxd_server_https:
             Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
