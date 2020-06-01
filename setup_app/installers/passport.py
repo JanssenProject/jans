@@ -139,6 +139,7 @@ class PassportInstaller(NodeInstaller):
 
         if Config.mappingLocations['default'] == 'ldap':
             self.ldapUtils.import_ldif(ldif_files)
+            self.ldapUtils.enable_service('gluuPassportEnabled')
         else:
             #TODO: implement for couchbase ???
             self.import_ldif_couchebase(ldif_files)

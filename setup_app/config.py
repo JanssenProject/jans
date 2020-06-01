@@ -95,7 +95,6 @@ class Config:
         self.installScimServer = False
         self.installFido2 = False
 
-        self.gluuPassportEnabled = 'false'
         self.gluuSamlEnabled = 'false'
         self.scimTestMode = 'false'
 
