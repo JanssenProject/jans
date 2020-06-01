@@ -128,6 +128,25 @@ class LDAPUtils:
                     base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
                     self.ldap_conn.add(dn, attributes=entry)
 
+
+    def import_schema(self, schema_file):
+        base.logIt("Importing schema {}".format(schema_file))
+        parser = base.myLdifParser(schema_file)
+        parser.parse()
+        for dn, entry in parser.entries:
+            if 'changetype' in entry:
+                entry.pop('changetype')
+            if 'add' in entry:
+                entry.pop('add')
+            for entry_type in entry:
+                for e in entry[entry_type]:
+                    base.logIt("Adding to schema, type: {}  value: {}".format(entry_type, e))
+                    self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
+
+        #we need unbind and re-bind after schema operations
+        self.ldap_conn.unbind()
+        self.ldap_conn.bind()
+
     def __del__(self):
         try:
             self.ldap_conn.unbind()

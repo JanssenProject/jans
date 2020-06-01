@@ -1,134 +1,171 @@
 import os
 import glob
-import shutil
+import json
+import uuid
+import base64
 
-from setup_app.config.config import Config
+from setup_app import paths
+from setup_app.utils import base
+from setup_app.config import Config
+from setup_app.utils.ldap_utils import LDAPUtils
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 
-class RadiusInstaller(SetupUtils):
+
+class RadiusInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
-        self.service_path = self.detect_service_path()
+        self.service_name = 'gluu-radius'
+        self.pbar_text = "Installing Radius"
 
+        self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
+        self.source_dir = os.path.join(Config.staticFolder, 'radius')
+        self.conf_dir = os.path.join(Config.gluuBaseFolder, 'conf/radius/')
+        self.templates_folder = os.path.join(self.source_dir, 'templates')
+        self.output_folder = os.path.join(Config.outputFolder, 'radius')
+        self.config_generated = False
 
-    def install_base(self):
+    def install(self):
+        # always install radius base
 
-        if not self.gluu_radius_client_id:
-            self.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
-
-        source_dir = os.path.join(self.staticFolder, 'radius')
-        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
-        self.createDirs(conf_dir)
-
-        self.radius_jwt_pass = self.getPW()
-        radius_jwt_pass = self.obscure(self.radius_jwt_pass)
-        radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
+        #generate configuration
+        self.generate_configuration()
         
-        self.raidus_client_jwks = self.gen_openid_jwks_jks_keys(radius_jks_fn, self.radius_jwt_pass)
-
-        raidus_client_jwks = ''.join(self.raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
-        
-        raidus_client_jwks = json.loads(raidus_client_jwks)
-        
-        self.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
-
-
-        raidus_client_jwks_json = json.dumps(raidus_client_jwks, indent=2)
-        
-        self.templateRenderingDict['gluu_ro_client_base64_jwks'] = base64.encodestring(raidus_client_jwks_json.encode('utf-8')).decode('utf-8').replace(' ','').replace('\n','')
-
-        for k in raidus_client_jwks['keys']:
-            if k.get('alg') == 'RS512':
-                self.templateRenderingDict['radius_jwt_keyId'] = k['kid']
-        
-        self.gluu_ro_pw = self.getPW()
-        self.gluu_ro_encoded_pw = self.obscure(self.gluu_ro_pw)
-
-        scripts_dir = os.path.join(source_dir,'scripts')
-
+        scripts_dir = os.path.join(self.source_dir,'scripts')
         for scriptFile, scriptName in ( ('super_gluu_ro_session.py', 'super_gluu_ro_session_script'),
                             ('super_gluu_ro.py','super_gluu_ro_script'),
                           ):
-            
             scriptFilePath = os.path.join(scripts_dir, scriptFile)
             base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
-            self.templateRenderingDict[scriptName] = base64ScriptFile
+            Config.templateRenderingDict[scriptName] = base64ScriptFile
 
-        for tmp_ in ('gluu_radius_base.ldif', 'gluu_radius_clients.ldif', 'gluu_radius_server.ldif'):
-            tmp_fn = os.path.join(source_dir, 'templates', tmp_)
-            self.renderTemplateInOut(tmp_fn, os.path.join(source_dir, 'templates'), self.outputFolder)
         
-        self.renderTemplateInOut('gluu-radius.properties', os.path.join(source_dir, 'etc/gluu/conf/radius/'), conf_dir)
+        for template in ('gluu_radius_base.ldif', 'gluu_radius_clients.ldif'):
+            tmp_fn = os.path.join(self.source_dir, 'templates', template)
+            self.renderTemplateInOut(tmp_fn, self.templates_folder, self.output_folder)
+        
+        self.renderTemplateInOut(
+                    'gluu-radius.properties', 
+                    os.path.join(self.source_dir, 'etc/gluu/conf/radius/'), 
+                    self.conf_dir)
 
+        ldif_file_base = os.path.join(self.output_folder, 'gluu_radius_base.ldif')
+        ldif_file_clients = os.path.join(self.output_folder, 'gluu_radius_clients.ldif')
 
-        ldif_file_clients = os.path.join(self.outputFolder, 'gluu_radius_clients.ldif')
-        ldif_file_base = os.path.join(self.outputFolder, 'gluu_radius_base.ldif')
-
-        if self.mappingLocations['default'] == 'ldap':
-            self.import_ldif_opendj([ldif_file_base, ldif_file_clients])
+        #TODO: couchbase
+        if Config.mappingLocations['default'] == 'ldap':
+            self.ldapUtils.import_ldif([ldif_file_base, ldif_file_clients])
         else:
-            self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
-
-        if self.installGluuRadius:
-            self.install_gluu_radius()
+            pass
+            #self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
 
 
-    def install(self):
+    def install_gluu_radius(self):
 
-        self.pbar.progress("radius", "Installing Gluu components: Radius", False)
-        
-        radius_libs = os.path.join(self.distGluuFolder, 'gluu-radius-libs.zip')
-        radius_jar = os.path.join(self.distGluuFolder, 'super-gluu-radius-server.jar')
-        conf_dir = os.path.join(self.gluuBaseFolder, 'conf/radius/')
-        ldif_file_server = os.path.join(self.outputFolder, 'gluu_radius_server.ldif')
-        source_dir = os.path.join(self.staticFolder, 'radius')
+        Config.pbar.progress("radius", self.pbar_text, False)
+        self.get_client_id_ro_password()
+
+        radius_libs = os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip')
+        radius_jar = os.path.join(Config.distGluuFolder, 'super-gluu-radius-server.jar')
+        ldif_file_server = os.path.join(self.output_folder, 'gluu_radius_server.ldif')
         logs_dir = os.path.join(self.radius_dir,'logs')
 
+        self.renderTemplateInOut(ldif_file_server, self.templates_folder, self.output_folder)
+
+
         if not os.path.exists(logs_dir):
-            self.run([self.cmd_mkdir, '-p', logs_dir])
+            self.run([paths.cmd_mkdir, '-p', logs_dir])
 
         self.run(['unzip', '-n', '-q', radius_libs, '-d', self.radius_dir ])
         self.copyFile(radius_jar, self.radius_dir)
 
-        if self.mappingLocations['default'] == 'ldap':
-            schema_ldif = os.path.join(source_dir, 'schema/98-radius.ldif')
-            self.import_ldif_opendj([schema_ldif])
-            self.import_ldif_opendj([ldif_file_server])
+        #TODO: couchbase
+        if Config.mappingLocations['default'] == 'ldap':
+            schema_ldif = os.path.join(self.source_dir, 'schema/98-radius.ldif')
+            self.ldapUtils.import_schema(schema_ldif)
+            self.ldapUtils.import_ldif([ldif_file_server])
         else:
-            self.import_ldif_couchebase([ldif_file_server])
+            pass
+            #self.import_ldif_couchebase([ldif_file_server])
         
-        self.copyFile(os.path.join(source_dir, 'etc/default/gluu-radius'), self.osDefault)
-        self.copyFile(os.path.join(source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), conf_dir)
-        self.copyFile(os.path.join(source_dir, 'scripts/gluu_common.py'), os.path.join(self.gluuOptPythonFolder, 'libs'))
+        self.copyFile(os.path.join(self.source_dir, 'etc/default/gluu-radius'), Config.osDefault)
+        self.copyFile(os.path.join(self.source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), self.conf_dir)
+        self.copyFile(os.path.join(self.source_dir, 'scripts/gluu_common.py'), os.path.join(Config.gluuOptPythonFolder, 'libs'))
 
+        self.copyFile(os.path.join(self.source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+        self.run([paths.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
         
-        self.copyFile(os.path.join(source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
-        self.run([self.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
-        
-        if self.os_type+self.os_version == 'ubuntu16':
-            self.run(['update-rc.d', 'gluu-radius', 'defaults'])
-        else:
-            self.copyFile(os.path.join(source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
-            self.run([self.systemctl, 'daemon-reload'])
-        
+        if base.os_name != 'ubuntu16':
+            self.copyFile(os.path.join(self.source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+
         #create empty gluu-radius.private-key.pem
-        gluu_radius_private_key_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
+        gluu_radius_private_key_fn = os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')
         self.writeFile(gluu_radius_private_key_fn, '')
         
-        self.run([self.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
-        self.run([self.cmd_chown, '-R', 'root:gluu', conf_dir])
-        self.run([self.cmd_chown, 'root:gluu', os.path.join(self.gluuOptPythonFolder, 'libs/gluu_common.py')])
+        self.run([paths.cmd_chown, '-R', 'radius:gluu', self.radius_dir])
+        self.run([paths.cmd_chown, '-R', 'root:gluu', self.conf_dir])
+        self.run([paths.cmd_chown, 'root:gluu', os.path.join(Config.gluuOptPythonFolder, 'libs/gluu_common.py')])
+        self.run([paths.cmd_chown, 'radius:gluu', os.path.join(Config.certFolder, 'gluu-radius.jks')])
+        self.run([paths.cmd_chown, 'radius:gluu', os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')])
 
-        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.jks')])
-        self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+        self.run([paths.cmd_chmod, '755', self.radius_dir])
+        self.run([paths.cmd_chmod, '755', self.conf_dir])
+        self.run([paths.cmd_chmod, '660', os.path.join(Config.certFolder, 'gluu-radius.jks')])
+        self.run([paths.cmd_chmod, '660', os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')])
 
-        self.run([self.cmd_chmod, '755', self.radius_dir])
-        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
-        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
-
-        self.enable_service_at_start('gluu-radius')
+        self.ldapUtils.enable_script('5866-4202')
+        self.ldapUtils.enable_script('B8FD-4C11')
+        
+        self.reload_daemon()
+        self.enable()
 
     def create_user(self):
         self.createUser('radius', homeDir=self.radius_dir, shell='/bin/false')
         self.addUserToGroup('gluu', 'radius')
 
+    def create_folders(self):
+        self.createDirs(self.conf_dir)
+
+
+    def get_client_id_ro_password(self):
+        if not hasattr(self, 'ldapUtils'):
+            # make ldap connection
+            self.ldapUtils = LDAPUtils()
+
+        if not Config.get('gluu_radius_client_id'):
+            if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1701.*)'):
+                Config.gluu_radius_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+                self.logIt("gluu_radius_client_id was found in ldap as {}".format(Config.gluu_radius_client_id))
+
+                Config.gluu_ro_encoded_pw = self.ldapUtils.ldap_conn.response[0]['attributes']['oxAuthClientSecret'][0]
+                self.logIt("gluu_ro_encoded_pw was found in ldap as {}".format(Config.gluu_ro_encoded_pw))
+        
+        if not Config.get('gluu_radius_client_id'):
+            Config.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
+
+        if not Config.get('gluu_ro_encoded_pw'):
+            Config.gluu_ro_pw = self.getPW()
+            Config.gluu_ro_encoded_pw = self.obscure(Config.gluu_ro_pw)
+
+    def generate_configuration(self):
+        self.get_client_id_ro_password()
+
+        if not Config.get('radius_jwt_pass'):
+            Config.radius_jwt_pass = self.getPW()
+
+        radius_jwt_pass = self.obscure(Config.radius_jwt_pass)
+        radius_jks_fn = os.path.join(Config.certFolder, 'gluu-radius.jks')
+        
+        raidus_client_jwks = self.gen_openid_jwks_jks_keys(radius_jks_fn, Config.radius_jwt_pass)
+        raidus_client_jwks = ''.join(raidus_client_jwks).replace('\'','').replace(',,',',').replace('{,','{')
+        raidus_client_jwks = json.loads(raidus_client_jwks)
+        Config.templateRenderingDict['radius_jwt_pass'] = radius_jwt_pass
+        raidus_client_jwks_json = json.dumps(raidus_client_jwks, indent=2)
+        Config.templateRenderingDict['gluu_ro_client_base64_jwks'] = base64.encodestring(raidus_client_jwks_json.encode('utf-8')).decode('utf-8').replace(' ','').replace('\n','')
+
+        for k in raidus_client_jwks['keys']:
+            if k.get('alg') == 'RS512':
+                Config.templateRenderingDict['radius_jwt_keyId'] = k['kid']
+        
+
+       
