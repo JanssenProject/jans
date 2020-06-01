@@ -80,33 +80,19 @@ public class CibaRequestService {
     /**
      * Generates a list of requests that are expired and also filter them using a Status.
      * @param authorizationStatus Status used to filter entries.
+     * @param maxRequestsToGet Limit of requests that would be returned.
      */
-    public List<CIBARequest> loadExpiredByStatus(CIBAGrantUserAuthorization authorizationStatus) {
+    public List<CIBARequest> loadExpiredByStatus(CIBAGrantUserAuthorization authorizationStatus,
+                                                 int maxRequestsToGet) {
         try {
             Date now = new Date();
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("status", authorizationStatus.getValue()),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(this.cibaBaseDn(), now)));
-            return entryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter);
+            return entryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter, maxRequestsToGet);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
-        }
-    }
-
-    /**
-     * Change the status field in database for a specific request.
-     * @param authReqId Identificator of the request.
-     * @param authorizationStatus New status.
-     */
-    public void updateStatus(String authReqId, CIBAGrantUserAuthorization authorizationStatus) {
-        try {
-            String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
-            CIBARequest cibaRequest = entryManager.find(CIBARequest.class, requestDn);
-            cibaRequest.setStatus(authorizationStatus.getValue());
-            entryManager.merge(cibaRequest);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
         }
     }
 
@@ -124,4 +110,20 @@ public class CibaRequestService {
         }
     }
 
+    public void removeCibaRequest(CIBARequest cibaRequest) {
+        try {
+            entryManager.remove(cibaRequest);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void removeCibaRequest(String authReqId) {
+        try {
+            String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
+            entryManager.remove(requestDn);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }

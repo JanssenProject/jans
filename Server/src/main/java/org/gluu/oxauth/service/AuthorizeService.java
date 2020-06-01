@@ -203,7 +203,7 @@ public class AuthorizeService {
         if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
             String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
             CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
-            cibaRequestService.updateStatus(authReqId, CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
+            cibaRequestService.removeCibaRequest(authReqId);
 
             if (cibaGrant != null  && cibaGrant.getClient() != null) {
                 switch (cibaGrant.getClient().getBackchannelTokenDeliveryMode()) {

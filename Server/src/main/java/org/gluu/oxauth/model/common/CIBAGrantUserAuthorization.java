@@ -16,7 +16,8 @@ public enum CIBAGrantUserAuthorization {
     AUTHORIZATION_PENDING("pending"),
     AUTHORIZATION_GRANTED("granted"),
     AUTHORIZATION_DENIED("denied"),
-    AUTHORIZATION_EXPIRED("expired");
+    AUTHORIZATION_EXPIRED("expired"),
+    AUTHORIZATION_IN_PROCESS("in_process");
 
     private final String value;
 
