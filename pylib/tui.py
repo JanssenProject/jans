@@ -278,6 +278,9 @@ class ServicesForm(GluuSetupForm):
             cb_val = getattr(self, service).value
             setattr(self.parentApp.installObject, service, cb_val)
 
+        if self.installOxd.value:
+            self.parentApp.installObject.oxd_server_https = 'https://{}:8443'.format(self.parentApp.installObject.hostname)
+
         if self.installCasa.value:
             if not self.installOxd.value and not self.oxd_url.value:
                 npyscreen.notify_confirm(msg.install_oxd_or_url_warning, title="Warning")
@@ -306,7 +309,7 @@ class ServicesForm(GluuSetupForm):
                     return
         
                 self.parentApp.installObject.oxd_server_https = oxd_server_https
-
+            
         oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(self.parentApp.installObject.oxd_server_https)
         if not oxd_port: 
             oxd_port=8443
