@@ -30,8 +30,6 @@ public class Fido2Configuration {
 
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
 
-    private boolean disableFido2;
-
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
     }
@@ -111,13 +109,5 @@ public class Fido2Configuration {
 	public void setRequestedParties(List<RequestedParty> requestedParties) {
 		this.requestedParties = requestedParties;
 	}
-
-	public boolean isDisableFido2() {
-        return disableFido2;
-    }
-
-    public void setDisableFido2(boolean disableFido2) {
-        this.disableFido2 = disableFido2;
-    }
 
 }
