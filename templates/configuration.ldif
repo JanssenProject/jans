@@ -11,7 +11,7 @@ gluuVdsCacheRefreshEnabled: false
 gluuScimEnabled: false
 oxAuthenticationMode: simple_password_auth
 oxTrustAuthenticationMode: simple_password_auth
-gluuPassportEnabled: %(gluuPassportEnabled)s
+gluuPassportEnabled: false
 gluuRadiusEnabled: false
 gluuSamlEnabled: %(gluuSamlEnabled)s
 oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
