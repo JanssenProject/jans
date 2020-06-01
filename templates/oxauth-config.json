@@ -345,6 +345,7 @@
     "backchannelAuthenticationResponseExpiresIn": 3600,
     "backchannelAuthenticationResponseInterval": 2,
     "backchannelRequestsProcessorJobIntervalSec": 5,
+    "backchannelRequestsProcessorJobChunkSize": 100,
     "cibaGrantLifeExtraTimeSec": 180,
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
