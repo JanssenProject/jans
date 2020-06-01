@@ -37,25 +37,13 @@ class Crypto64:
         self.logIt('Generating certificates and keystores', pbar='gluu')
         try:
             self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
-            self.gen_cert('shibIDP', Config.shibJksPass, 'jetty')
-            self.gen_cert('idp-encryption', Config.shibJksPass, 'jetty')
-            self.gen_cert('idp-signing', Config.shibJksPass, 'jetty')
-
-            self.gen_keystore('shibIDP',
-                              Config.shibJksFn,
-                              Config.shibJksPass,
-                              '%s/shibIDP.key' % Config.certFolder,
-                              '%s/shibIDP.crt' % Config.certFolder,
-                              # 'jetty' TODO: chown later, users are not ready at this time
-                              )
-
             #TODO: check this
             # permissions
             #self.run([paths.cmd_chown, '-R', 'jetty:jetty', Config.certFolder])
             #self.run([paths.cmd_chmod, '-R', '500', Config.certFolder])
 
         except:
-            self.logIt("Error generating cyrpto")
+            self.logIt("Error generating cyrpto", True)
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
@@ -364,7 +352,6 @@ class Crypto64:
         
         try:
             Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
-            Config.encoded_shib_jks_pw = self.obscure(Config.shibJksPass)
             if Config.ldapPass:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
             if Config.cb_password:
@@ -379,7 +366,7 @@ class Crypto64:
 
             Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
         except:
-            self.logIt("Error encoding passwords", True)
+            self.logIt("Error encoding passwords", True, True)
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords", pbar='gluu')

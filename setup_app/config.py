@@ -95,7 +95,6 @@ class Config:
         self.installScimServer = False
         self.installFido2 = False
 
-        self.gluuSamlEnabled = 'false'
         self.scimTestMode = 'false'
 
         self.enable_scim_access_policy = 'false'
@@ -108,7 +107,6 @@ class Config:
         self.os_initdaemon = base.os_initdaemon
 
         self.persistence_type = 'ldap'
-        self.shibboleth_version = 'v3'
 
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
@@ -175,17 +173,6 @@ class Config:
             }
         }
 
-        self.idp3Folder = '/opt/shibboleth-idp'
-        self.idp3MetadataFolder = os.path.join(self.idp3Folder, 'metadata')
-        self.idp3MetadataCredentialsFolder = os.path.join(self.idp3MetadataFolder, 'credentials')
-        self.idp3LogsFolder = os.path.join(self.idp3Folder, 'logs')
-        self.idp3LibFolder = os.path.join(self.idp3Folder, 'lib')
-        self.idp3ConfFolder = os.path.join(self.idp3Folder, 'conf')
-        self.idp3ConfAuthnFolder = os.path.join(self.idp3Folder, 'conf/authn')
-        self.idp3CredentialsFolder = os.path.join(self.idp3Folder, 'credentials')
-        self.idp3WebappFolder = os.path.join(self.idp3Folder, 'webapp')
-        self.couchbaseShibUserPassword = None
-
         self.hostname = None
         self.ip = None
         self.orgName = None
@@ -194,7 +181,6 @@ class Config:
         self.state = None
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
-        self.encoded_shib_jks_pw = None
         self.application_max_ram = 3072    # in MB
         self.encode_salt = None
         self.admin_inum = None
@@ -228,8 +214,6 @@ class Config:
         self.httpdKeyPass = None
         self.httpdKeyFn = os.path.join(self.certFolder, 'httpd.key')
         self.httpdCertFn = os.path.join(self.certFolder, 'httpd.crt')
-        self.shibJksPass = None
-        self.shibJksFn = os.path.join(self.certFolder, 'shibIDP.jks')
 
         self.ldapTrustStoreFn = None
         self.encoded_ldapTrustStorePass = None
@@ -324,16 +308,6 @@ class Config:
         self.network = '/etc/sysconfig/network'
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
         self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
-
-        self.staticIDP3FolderConf = os.path.join(self.install_dir, 'static/idp3/conf')
-        self.staticIDP3FolderMetadata = os.path.join(self.install_dir, 'static/idp3/metadata')
-        self.idp3_configuration_properties = 'idp.properties'
-        self.idp3_configuration_ldap_properties = 'ldap.properties'
-        self.idp3_configuration_saml_nameid = 'saml-nameid.properties'
-        self.idp3_configuration_services = 'services.properties'
-        self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
-        self.idp3_metadata = 'idp-metadata.xml'
-        self.data_source_properties = 'datasource.properties'
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
@@ -455,7 +429,6 @@ class Config:
                              self.lidf_oxtrust_api: False,
                              self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,
-                             self.data_source_properties: False,
                              self.fido2_dynamic_conf_json: False,
                              self.fido2_static_conf_json: False,
                              }
