@@ -44,6 +44,7 @@ from setup_app.installers.passport import PassportInstaller
 from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.saml import SamlInstaller
+from setup_app.installers.radius import RadiusInstaller
 
 
 thread_queue = None
@@ -135,6 +136,7 @@ openDjInstaller = OpenDjInstaller()
 fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
+radiusInstaller = RadiusInstaller
 
 print()
 print(gluuInstaller)
@@ -159,8 +161,8 @@ if proceed:
     oxauthInstaller.make_oxauth_salt()
     gluuInstaller.copy_scripts()
     gluuInstaller.encode_passwords()
-    gluuInstaller.encode_test_passwords()
-
+    if Config.loadTestData:
+        gluuInstaller.encode_test_passwords()
 
     oxtrustInstaller.generate_api_configuration()
     scimInstaller.generate_configuration()
@@ -217,6 +219,13 @@ if proceed:
 
     if Config.installPassport:
         passportInstaller.start_installation()
+
+    # this will install only base
+    radiusInstaller.start_installation()
+
+    if Config.installRadius:
+        radiusInstaller.install_gluu_radius()
+
 
     """
     self.pbar.progress("gluu", "Installing Gluu components")
