@@ -33,7 +33,7 @@
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
         <Logger name="org.gluu.fido2" level="INFO">
-            <AppenderRef ref="LOG_FILE" />
+            <AppenderRef ref="FILE" />
         </Logger>
 
 		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">

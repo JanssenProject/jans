@@ -181,7 +181,8 @@ public class CleanerTimer {
 
 	private void processCache(Date now) {
 		try {
-			cacheProvider.cleanup(now);
+			// TODO: Enable when shared cache will be splitted by applications 
+//			cacheProvider.cleanup(now);
 		} catch (Exception e) {
 			log.error("Failed to clean up cache.", e);
 		}
