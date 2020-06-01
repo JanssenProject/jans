@@ -1,6 +1,9 @@
 package org.gluu.oxauth.model.ldap;
 
-import org.gluu.persist.annotation.*;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.ObjectClass;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -27,13 +30,13 @@ public class CIBARequest implements Serializable {
     @AttributeName(name = "usrId", consistency = true)
     private String userId;
 
-    @AttributeName(name = "requestDate")
-    private Date requestDate;
+    @AttributeName(name = "creationDate")
+    private Date creationDate;
 
     @AttributeName(name = "exp")
     private Date expirationDate;
 
-    @AttributeName(name = "status")
+    @AttributeName(name = "oxStatus")
     private String status;
 
 
@@ -69,12 +72,12 @@ public class CIBARequest implements Serializable {
         this.userId = userId;
     }
 
-    public Date getRequestDate() {
-        return requestDate;
+    public Date getCreationDate() {
+        return creationDate;
     }
 
-    public void setRequestDate(Date requestDate) {
-        this.requestDate = requestDate;
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public Date getExpirationDate() {
