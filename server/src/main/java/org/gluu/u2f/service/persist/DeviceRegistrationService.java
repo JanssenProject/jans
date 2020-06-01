@@ -1,5 +1,6 @@
 package org.gluu.u2f.service.persist;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,9 @@ import org.gluu.fido2.ctap.CoseEC2Algorithm;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.fido2.model.entry.Fido2RegistrationEntry;
 import org.gluu.fido2.model.entry.Fido2RegistrationStatus;
+import org.gluu.fido2.service.Base64Service;
+import org.gluu.fido2.service.CoseService;
+import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.persist.RegistrationPersistenceService;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 
@@ -30,6 +34,9 @@ import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.net.NetworkService;
 import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Provides search operations with user U2F devices
@@ -38,6 +45,9 @@ import org.gluu.util.StringHelper;
  */
 @ApplicationScoped
 public class DeviceRegistrationService {
+
+    @Inject
+    private Logger log;
 
 	@Inject
 	private PersistenceEntryManager persistenceEntryManager;
@@ -53,6 +63,15 @@ public class DeviceRegistrationService {
 
 	@Inject
 	private NetworkService networkService;
+	
+	@Inject
+	private CoseService coseService;
+
+    @Inject
+    private Base64Service base64Service;
+    
+    @Inject
+    private DataMapperService dataMapperService;
 
 	public boolean containsBranch(final String baseDn) {
 		return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
@@ -78,7 +97,9 @@ public class DeviceRegistrationService {
 				returnAttributes);
 
 		fidoRegistrations = fidoRegistrations.parallelStream()
-				.filter(f -> StringHelper.equals(domain, networkService.getHost(f.getApplication()))).collect(Collectors.toList());
+				.filter(f -> StringHelper.equals(domain, networkService.getHost(f.getApplication())))
+				.filter(f -> (f.getDeviceData() == null)) /* Ignore Super Gluu */
+				.collect(Collectors.toList());
 
 		return fidoRegistrations;
 	}
@@ -86,7 +107,13 @@ public class DeviceRegistrationService {
 	public void migrateToFido2(List<DeviceRegistration> fidoRegistrations, String documentDomain, String username) {
 		for (DeviceRegistration fidoRegistration: fidoRegistrations) {
 
-			Fido2RegistrationData fido2RegistrationData = convertToFido2RegistrationData(documentDomain, username, fidoRegistration);
+			Fido2RegistrationData fido2RegistrationData;
+			try {
+				fido2RegistrationData = convertToFido2RegistrationData(documentDomain, username, fidoRegistration);
+			} catch (IOException ex) {
+				log.error("Faield to migrate Fido to Fido2 device: {}" , fidoRegistration.getId());
+				continue;
+			}
 
 			// Save converted Fido2 entry
 			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData);
@@ -102,7 +129,7 @@ public class DeviceRegistrationService {
 	}
 
 	protected Fido2RegistrationData convertToFido2RegistrationData(String documentDomain, String username,
-			DeviceRegistration fidoRegistration) {
+			DeviceRegistration fidoRegistration) throws IOException {
 		Fido2RegistrationData registrationData = new Fido2RegistrationData();
 		
 		registrationData.setCreatedDate(fidoRegistration.getCreationDate());
@@ -113,8 +140,10 @@ public class DeviceRegistrationService {
 		registrationData.setUsername(username);
 		registrationData.setDomain(documentDomain);
 
-		// TODO: Fix key conversion
-		registrationData.setUncompressedECPoint(fidoRegistration.getDeviceRegistrationConfiguration().getPublicKey());
+		JsonNode uncompressedECPoint = coseService.convertECKeyToUncompressedPoint(
+				base64Service.urlDecode(fidoRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
+		registrationData.setUncompressedECPoint(base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(uncompressedECPoint)));
+
 		registrationData.setPublicKeyId(fidoRegistration.getKeyHandle());
 
 		registrationData.setCounter((int) fidoRegistration.getCounter());

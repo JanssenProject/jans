@@ -68,6 +68,10 @@ public class DataMapperService {
         return cborObjectMapper.readTree(content);
     }
 
+    public byte[] cborWriteAsBytes(JsonNode jsonNode) throws IOException {
+        return cborObjectMapper.writeValueAsBytes(jsonNode);
+    }
+
     public CBORParser cborCreateParser(byte[] data) throws IOException {
         return cborFactory.createParser(data);
     }

@@ -131,7 +131,7 @@ public class CertificateService {
 
 	public List<X509Certificate> selectRootCertificates(Map<String, X509Certificate> trustChainCertificatesMap,
 			List<X509Certificate> certificates) {
-		
+
 		List<X509Certificate> selecedCertificates = new ArrayList<X509Certificate>();
 		for (X509Certificate certificate : certificates) {
             String issuerDn = certificate.getIssuerDN().getName().toLowerCase();
