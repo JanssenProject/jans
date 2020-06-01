@@ -3009,7 +3009,7 @@ class Setup(object):
         
         return result
 
-    def check_oxd_server(self, oxd_url, error_out=True):
+    def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
 
         oxd_url = os.path.join(oxd_url, 'health-check')
         try:
@@ -3023,13 +3023,14 @@ class Setup(object):
                 if oxd_status['status'] == 'running':
                     return True
         except Exception as e:
-            if thread_queue:
-                return str(e)
-            if error_out:
-                print(gluu_utils.colors.DANGER)
-                print("Can't connect to oxd-server with url {}".format(oxd_url))
-                print("Reason: ", e)
-                print(gluu_utils.colors.ENDC)
+            if log_error:
+                if thread_queue:
+                    return str(e)
+                if error_out:
+                    print(gluu_utils.colors.DANGER)
+                    print("Can't connect to oxd-server with url {}".format(oxd_url))
+                    print("Reason: ", e)
+                    print(gluu_utils.colors.ENDC)
 
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
@@ -4105,8 +4106,6 @@ class Setup(object):
         if self.installOxd:
             self.pbar.progress("gluu", "Starting oxd Service")
             self.run_service_command('oxd-server', 'start')
-            #wait 2 seconds for oxd server is up
-            time.sleep(2)
 
         # casa service
         if self.installCasa:
@@ -4125,7 +4124,17 @@ class Setup(object):
     def import_oxd_certificate(self):
 
         # import_oxd_certificate2javatruststore:
-        self.logIt("Importing oxd certificate")
+        self.logIt("Importing oxd-server certificate")
+
+        # check oxd status for 25 seconds:
+        for i in range(5):
+            self.logIt("Checking oxd-server status. Try {}".format(i+1))
+            if self.check_oxd_server(self.oxd_server_https, log_error=False):
+                self.logIt("oxd-server seems good")
+                break
+            time.sleep(5)
+        else:
+            self.logIt("oxd server at  {} did not repond in 15 seconds".format(self.oxd_server_https), True)
 
         try:
 
@@ -5178,16 +5187,15 @@ class Setup(object):
 
             oxd_yaml['storage'] = 'gluu_server_configuration'
 
+            oxd_yaml['storage_configuration']['baseDn'] = 'o=gluu'
             oxd_yaml['storage_configuration']['type'] = self.gluu_properties_fn
-
+            
+            
             oxd_yaml['storage_configuration']['connection'] = self.ox_ldap_properties \
                 if self.mappingLocations['default'] == 'ldap' else self.gluuCouchebaseProperties
-
-            try:
-                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
-            except:
-                pass
             
+            oxd_yaml['storage_configuration']['salt'] = os.path.join(self.configFolder, "salt")
+
             yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
 
             self.writeFile(oxd_server_yml_fn, yml_str)
