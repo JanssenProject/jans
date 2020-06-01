@@ -12,7 +12,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.util import StringHelper
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.service import EncryptionService
+from org.gluu.oxauth.service.common import EncryptionService
 from java.util import Arrays
 from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
 from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
