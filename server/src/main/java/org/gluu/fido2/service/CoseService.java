@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.AlgorithmParameters;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -34,13 +35,17 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
+import org.bouncycastle.asn1.sec.SECNamedCurves;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.gluu.fido2.ctap.CoseEC2Algorithm;
 import org.gluu.fido2.ctap.CoseKeyType;
 import org.gluu.fido2.ctap.CoseRSAAlgorithm;
 import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.oxauth.model.exception.SignatureException;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @ApplicationScoped
 public class CoseService {
@@ -114,7 +119,6 @@ public class CoseService {
 
     private PublicKey convertUncompressedPointToRSAKey(byte[] rsaKey_n, byte[] rsaKey_e) {
         try {
-
             BigInteger n = new BigInteger(1, rsaKey_n);
             BigInteger e = new BigInteger(1, rsaKey_e);
             RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(n, e);
@@ -169,5 +173,39 @@ public class CoseService {
         log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
         return publicKey;
     }
+    
+   	public JsonNode convertECKeyToUncompressedPoint(byte[] encodedPublicKey) {
+           X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+           org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
+
+           ObjectNode uncompressedECPointNode = dataMapperService.createObjectNode();
+           uncompressedECPointNode.put("1", 2);
+           uncompressedECPointNode.put("3", -7);
+           uncompressedECPointNode.put("-1", 1);
+           uncompressedECPointNode.put("-2", point.getAffineXCoord().toBigInteger().toByteArray());
+           uncompressedECPointNode.put("-3", point.getAffineYCoord().toBigInteger().toByteArray());
+
+           return uncompressedECPointNode;
+   }
+
+   	public PublicKey decodePublicKey(byte[] encodedPublicKey) throws SignatureException {
+        X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+        org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
+
+        try {
+			return KeyFactory.getInstance("ECDSA").generatePublic(
+			        new org.bouncycastle.jce.spec.ECPublicKeySpec(point,
+			                new org.bouncycastle.jce.spec.ECParameterSpec(
+			                        curve.getCurve(),
+			                        curve.getG(),
+			                        curve.getN(),
+			                        curve.getH()
+			                )
+			        )
+			);
+		} catch (GeneralSecurityException ex) {
+			throw new SignatureException(ex);
+		}
+}
 
 }

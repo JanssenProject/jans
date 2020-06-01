@@ -45,6 +45,10 @@ public class Base64Service {
         return base64Encoder.encodeToString(src);
     }
 
+    public byte[] encode(byte[] src) {
+        return base64Encoder.encode(src);
+    }
+
     public byte[] decode(byte[] src) {
         return base64Decoder.decode(src);
     }
