@@ -55,6 +55,7 @@ class RadiusInstaller(SetupUtils, BaseInstaller):
         #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
             self.ldapUtils.import_ldif([ldif_file_base, ldif_file_clients])
+            self.ldapUtils.enable_service('gluuRadiusEnabled')
         else:
             pass
             #self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
