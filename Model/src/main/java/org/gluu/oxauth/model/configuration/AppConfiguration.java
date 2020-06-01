@@ -224,6 +224,7 @@ public class AppConfiguration implements Configuration {
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
     private int backchannelRequestsProcessorJobIntervalSec;
+    private int backchannelRequestsProcessorJobChunkSize;
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
 
@@ -1801,4 +1802,11 @@ public class AppConfiguration implements Configuration {
         this.cibaMaxExpirationTimeAllowedSec = cibaMaxExpirationTimeAllowedSec;
     }
 
+    public int getBackchannelRequestsProcessorJobChunkSize() {
+        return backchannelRequestsProcessorJobChunkSize;
+    }
+
+    public void setBackchannelRequestsProcessorJobChunkSize(int backchannelRequestsProcessorJobChunkSize) {
+        this.backchannelRequestsProcessorJobChunkSize = backchannelRequestsProcessorJobChunkSize;
+    }
 }

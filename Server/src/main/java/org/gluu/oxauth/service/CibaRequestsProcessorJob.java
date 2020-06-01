@@ -45,6 +45,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Named
 public class CibaRequestsProcessorJob {
 
+    public static final int CHUNK_SIZE = 500; // Default value whether there isn't backchannelRequestsProcessorJobChunkSize json property value
+
     @Inject
     private Logger log;
 
@@ -130,8 +132,13 @@ public class CibaRequestsProcessorJob {
      */
     public void processImpl() {
         try {
+            int chunkSize = appConfiguration.getBackchannelRequestsProcessorJobChunkSize() <= 0 ?
+                    CHUNK_SIZE : appConfiguration.getBackchannelRequestsProcessorJobChunkSize();
+
             List<CIBARequest> expiredRequests = cibaRequestService.loadExpiredByStatus(
-                    CIBAGrantUserAuthorization.AUTHORIZATION_PENDING);
+                    CIBAGrantUserAuthorization.AUTHORIZATION_PENDING, chunkSize);
+            expiredRequests.forEach(cibaRequest -> cibaRequestService.updateStatus(cibaRequest,
+                    CIBAGrantUserAuthorization.AUTHORIZATION_IN_PROCESS));
 
             for (CIBARequest expiredRequest : expiredRequests) {
                 CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(expiredRequest.getAuthReqId());
@@ -140,7 +147,7 @@ public class CibaRequestsProcessorJob {
                         processExpiredRequest(cibaGrant, expiredRequest.getAuthReqId())
                     );
                 }
-                cibaRequestService.updateStatus(expiredRequest, CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED);
+                cibaRequestService.removeCibaRequest(expiredRequest);
             }
         } catch (Exception e) {
             log.error("Failed to process CIBA request from cache.", e);
