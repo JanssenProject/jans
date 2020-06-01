@@ -82,6 +82,13 @@ class LDAPUtils:
                 'inum={},ou=scripts,o=gluu'.format(inum),
                 {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                 )
+    
+    def enable_service(self, service):
+        self.ldap_conn.modify(
+            'ou=configuration,o=gluu',
+            {service: [ldap3.MODIFY_REPLACE, 'true']}
+            )
+
     def set_configuration(self, component, value):
                 self.ldap_conn.modify(
                 'ou=configuration,o=gluu',
