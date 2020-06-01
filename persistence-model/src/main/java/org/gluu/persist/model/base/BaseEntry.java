@@ -8,6 +8,10 @@ package org.gluu.persist.model.base;
 
 import org.gluu.persist.annotation.DN;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Provides DN attribute
  *
@@ -47,4 +51,7 @@ public class BaseEntry {
         return String.format("BaseEntry [dn=%s]", dn);
     }
 
+    public static List<String> getDNs(Collection<? extends BaseEntry> collection) {
+        return collection.stream().map(BaseEntry::getDn).collect(Collectors.toList());
+    }
 }
