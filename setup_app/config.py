@@ -96,7 +96,6 @@ class Config:
         self.installFido2 = False
 
         self.gluuPassportEnabled = 'false'
-        self.gluuRadiusEnabled = 'false'
         self.gluuSamlEnabled = 'false'
         self.scimTestMode = 'false'
 
