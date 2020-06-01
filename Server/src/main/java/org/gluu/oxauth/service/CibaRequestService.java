@@ -35,9 +35,6 @@ public class CibaRequestService {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
-
-    @Inject
     private PersistenceEntryManager entryManager;
 
     @Inject
@@ -45,10 +42,6 @@ public class CibaRequestService {
 
     private String cibaBaseDn() {
         return staticConfiguration.getBaseDn().getCiba();  // ou=ciba,o=gluu
-    }
-
-    public void merge(CIBARequest cibaRequest) {
-        ldapEntryManager.merge(cibaRequest);
     }
 
     /**
@@ -68,7 +61,7 @@ public class CibaRequestService {
         cibaRequest.setRequestDate(new Date());
         cibaRequest.setStatus(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING.getValue());
         cibaRequest.setUserId(grant.getUserId());
-        ldapEntryManager.persist(cibaRequest);
+        entryManager.persist(cibaRequest);
     }
 
     /**
@@ -77,7 +70,7 @@ public class CibaRequestService {
      */
     public CIBARequest load(String authReqId) {
         try {
-            return ldapEntryManager.find(CIBARequest.class, authReqId);
+            return entryManager.find(CIBARequest.class, authReqId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -94,7 +87,7 @@ public class CibaRequestService {
             Filter filter = Filter.createANDFilter(
                     Filter.createEqualityFilter("status", authorizationStatus.getValue()),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(this.cibaBaseDn(), now)));
-            return ldapEntryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter);
+            return entryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -109,9 +102,9 @@ public class CibaRequestService {
     public void updateStatus(String authReqId, CIBAGrantUserAuthorization authorizationStatus) {
         try {
             String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
-            CIBARequest cibaRequest = ldapEntryManager.find(CIBARequest.class, requestDn);
+            CIBARequest cibaRequest = entryManager.find(CIBARequest.class, requestDn);
             cibaRequest.setStatus(authorizationStatus.getValue());
-            ldapEntryManager.merge(cibaRequest);
+            entryManager.merge(cibaRequest);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -125,7 +118,7 @@ public class CibaRequestService {
     public void updateStatus(CIBARequest cibaRequest, CIBAGrantUserAuthorization authorizationStatus) {
         try {
             cibaRequest.setStatus(authorizationStatus.getValue());
-            ldapEntryManager.merge(cibaRequest);
+            entryManager.merge(cibaRequest);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
