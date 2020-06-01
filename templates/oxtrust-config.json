@@ -9,9 +9,6 @@
     "idpUrl":"https://%(hostname)s",
     "applicationUrl":"https://%(hostname)s",
 
-    "keystorePath":"%(shibJksFn)s",
-    "keystorePassword":"%(shibJksPass)s",
-
     "personObjectClassTypes":[
         "gluuCustomPerson",
         "gluuPerson",
@@ -62,7 +59,6 @@
 
     "idpSecurityCert":"/etc/certs/shibIDP.crt",
     "idpSecurityKey":"/etc/certs/shibIDP.key",
-    "idpSecurityKeyPassword":"%(encoded_shib_jks_pw)s",
     "gluuSpCert":"/etc/certs/shibIDP.crt",
 
     "idpBindDn":"cn=Directory Manager",
@@ -120,9 +116,6 @@
     "rptConnectionPoolValidateAfterInactivity":10,
     "rptConnectionPoolCustomKeepAliveTimeout":5,
 
-    "shibbolethVersion":"%(shibboleth_version)s",
-    "shibboleth3IdpRootDir":"%(idp3Folder)s",
-    "shibboleth3SpConfDir":"%(idp3Folder)s/sp",
     "organizationName":"%(orgName)s",
     "idp3SigningCert":"/etc/certs/idp-signing.crt",
     "idp3EncryptionCert":"/etc/certs/idp-encryption.crt",
