@@ -205,45 +205,12 @@ class Setup(object):
 
 
 
-
-
-
-
-
-
-
-
-
     def install_gluu_components(self):
 
 
         if self.cb_install:
             self.pbar.progress("couchbase", "Installing Gluu components: Couchbase", False)
             self.install_couchbase_server()
-
-
-        if self.installPassport:
-            self.pbar.progress("passport", "Installing Gluu components: Passport", False)
-            self.install_passport()
-
-        if self.installOxd:
-            self.pbar.progress("oxd", "Installing Gluu components: oxd", False)
-            self.install_oxd()
-
-        if self.installCasa:
-            self.pbar.progress("casa", "Installing Gluu components: Casa", False)
-            self.install_casa()
-
-        self.install_gluu_radius_base()
-
-
-
-
-
-
-
-
-
 
 
 

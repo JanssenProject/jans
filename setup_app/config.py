@@ -12,6 +12,11 @@ from setup_app.utils import base
 class Config:
 
     @classmethod
+    def get(self, attr, default=None):
+        return getattr(self, attr) if hasattr(self, attr) else default
+
+
+    @classmethod
     def determine_version(self):
         oxauth_info = get_war_info(os.path.join(self.distGluuFolder, 'oxauth.war'))
         self.oxVersion = oxauth_info['version']
@@ -317,7 +322,6 @@ class Config:
         self.lidf_oxtrust_api = os.path.join(self.outputFolder, 'oxtrust_api.ldif')
         self.ldif_oxtrust_api_clients = os.path.join(self.outputFolder, 'oxtrust_api_clients.ldif')
 
-        self.ldif_scripts_casa = os.path.join(self.outputFolder, 'scripts_casa.ldif')
         self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
         self.network = '/etc/sysconfig/network'
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
@@ -373,15 +377,7 @@ class Config:
 
         self.oxauth_legacyIdTokenClaims = 'false'
         self.oxauth_openidScopeBackwardCompatibility =  'false'
-        self.enableRadiusScripts = 'false'
-        self.gluu_radius_client_id = None
-        self.gluu_ro_pw = None
-        self.gluu_ro_encoded_pw = None
-        self.ox_radius_client_id = None
-        self.oxRadiusClientIpAddress = None
-        self.oxRadiusClientName = None
-        self.oxRadiusClientSecret = None
-        self.radius_dir = os.path.join(self.gluuOptFolder, 'radius')
+
 
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'
@@ -458,7 +454,6 @@ class Config:
                              self.ldif_scim_clients: False,
                              self.ldif_idp: False,
                              self.network: False,
-                             self.ldif_scripts_casa: False,
                              self.lidf_oxtrust_api: False,
                              self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,

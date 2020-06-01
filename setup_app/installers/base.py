@@ -39,9 +39,13 @@ class BaseInstaller():
     def start(self, service=None):
         self.run_service_command('start', service)
 
-    def reload_daemon(self):
+    def reload_daemon(self, service=None):
+        if not service:
+            service = self.service_name
         if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
-            run([base.service_path, 'daemon-reload'])
+            self.run([base.service_path, 'daemon-reload'])
+        elif base.os_name == 'ubuntu16'
+            self.run([paths.cmd_update_rc, service, 'defaults'])
 
     def download_files(self):
         pass
