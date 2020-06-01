@@ -58,7 +58,7 @@ public class CibaRequestService {
         cibaRequest.setAuthReqId(authReqId);
         cibaRequest.setClientId(grant.getClientId());
         cibaRequest.setExpirationDate(expirationDate);
-        cibaRequest.setRequestDate(new Date());
+        cibaRequest.setCreationDate(new Date());
         cibaRequest.setStatus(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING.getValue());
         cibaRequest.setUserId(grant.getUserId());
         entryManager.persist(cibaRequest);
@@ -87,7 +87,7 @@ public class CibaRequestService {
         try {
             Date now = new Date();
             Filter filter = Filter.createANDFilter(
-                    Filter.createEqualityFilter("status", authorizationStatus.getValue()),
+                    Filter.createEqualityFilter("oxStatus", authorizationStatus.getValue()),
                     Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(this.cibaBaseDn(), now)));
             return entryManager.findEntries(this.cibaBaseDn(), CIBARequest.class, filter, maxRequestsToGet);
         } catch (Exception e) {
