@@ -19,7 +19,9 @@
     <build>
         <finalName>Fido2-Client</finalName>
         <filters>
+<!--
             <filter>profiles/${cfg}/config-fido2-test.properties</filter>
+-->
         </filters>
 
         <testResources>
