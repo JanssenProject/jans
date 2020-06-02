@@ -197,8 +197,8 @@ class Setup(object):
         self.cmd_mkdir = '/bin/mkdir'
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
-        self.opensslCommand = '/usr/bin/openssl'
-        self.systemctl = os.popen('which systemctl').read().strip()
+        self.opensslCommand = shutil.which('openssl')
+        self.systemctl = shutil.which('systemctl')
 
         self.sysemProfile = "/etc/profile"
 
