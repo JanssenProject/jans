@@ -5,7 +5,6 @@ import shutil
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
-from setup_app.utils.ldap_utils import ldapUtils
 
 class FidoInstaller(JettyInstaller):
 
@@ -36,7 +35,7 @@ class FidoInstaller(JettyInstaller):
         ldif_files = (self.ldif_fido2,)
 
         if Config.mappingLocations['default'] == 'ldap':
-            ldapUtils.import_ldif(ldif_files)
+            self.ldapUtils.import_ldif(ldif_files)
         else:
             #TODO: implement for couchbase ???
             self.import_ldif_couchebase(ldif_files)

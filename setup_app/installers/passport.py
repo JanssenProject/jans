@@ -7,7 +7,6 @@ from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.installers.node import NodeInstaller
-from setup_app.utils.ldap_utils import LDAPUtils
 
 
 class PassportInstaller(NodeInstaller):
@@ -41,9 +40,6 @@ class PassportInstaller(NodeInstaller):
 
 
     def install(self):
-
-        # make ldap connection
-        self.ldapUtils = LDAPUtils()
 
         self.generate_configuration()
 
