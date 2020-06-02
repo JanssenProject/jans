@@ -18,6 +18,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = 'opendj'
         self.pbar_text = "Installing OpenDj"
+        self.needldap = False # we don't need ldap connection in this class
 
     def install(self):
         self.logIt("Running OpenDJ Setup")

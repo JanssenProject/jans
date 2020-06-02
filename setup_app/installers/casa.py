@@ -8,7 +8,6 @@ from xml.etree import ElementTree
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
-from setup_app.utils.ldap_utils import LDAPUtils
 from setup_app.installers.jetty import JettyInstaller
 
 
@@ -98,7 +97,6 @@ class CasaInstaller(JettyInstaller):
 
     def render_import_templates(self):
 
-        self.ldapUtils = LDAPUtils()
         scripts_template = os.path.join(self.templates_folder, os.path.basename(self.ldif_scripts))
         extensions = base.find_script_names(scripts_template)
         self.prepare_base64_extension_scripts(extensions=extensions)

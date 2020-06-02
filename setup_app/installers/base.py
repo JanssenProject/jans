@@ -1,10 +1,20 @@
 from setup_app.utils import base
 from setup_app.config import Config
+from setup_app.utils.ldap_utils import ldapUtils
 
 class BaseInstaller():
+    ldapUtils = ldapUtils
+    needldap = True
 
     def start_installation(self):
         self.logIt(self.pbar_text, pbar=self.service_name)
+
+        if self.needldap and not self.ldapUtils.ready:
+            try:
+                self.ldapUtils.connect()
+            except:
+                pass
+
         # execute for each installer
         if Config.downloadWars:
             self.download_files()
@@ -44,7 +54,7 @@ class BaseInstaller():
             service = self.service_name
         if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
             self.run([base.service_path, 'daemon-reload'])
-        elif base.os_name == 'ubuntu16'
+        elif base.os_name == 'ubuntu16':
             self.run([paths.cmd_update_rc, service, 'defaults'])
 
     def download_files(self):

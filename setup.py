@@ -29,6 +29,7 @@ from setup_app.utils import printVersion
 
 from setup_app.utils.properties_utils import PropertiesUtils
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils.ldap_utils import ldapUtils
 
 from setup_app.installers.gluu import GluuInstaller
 from setup_app.installers.oxd import OxdInstaller
@@ -122,7 +123,6 @@ propertiesUtils = PropertiesUtils()
 propertiesUtils.promptForProperties()
 propertiesUtils.check_properties()
 
-
 # initialize installers
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
@@ -192,6 +192,10 @@ if proceed:
     if Config.wrends_install:
         openDjInstaller.start_installation()
 
+
+    # now bind to ldap
+
+    ldapUtils.bind()
     if Config.installHttpd:
         httpdinstaller = HttpdInstaller()
         httpdinstaller.configure()
