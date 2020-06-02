@@ -30,16 +30,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.AuthenticationService;
-import org.gluu.oxauth.service.AuthorizeService;
-import org.gluu.oxauth.service.ClientAuthorizationsService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.CookieService;
-import org.gluu.oxauth.service.ErrorHandlerService;
-import org.gluu.oxauth.service.RedirectionUriService;
-import org.gluu.oxauth.service.RequestParameterService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
@@ -47,7 +38,6 @@ import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.net.NetworkService;
-import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.gluu.util.ilocale.LocaleUtil;
 import org.jboss.resteasy.client.ClientRequest;
@@ -69,7 +59,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * @author Javier Rojas Blum
@@ -381,8 +370,7 @@ public class AuthorizeAction {
 
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
-                    client.getClientId(),
-                    client.getPersistClientAuthorizations());
+                    client.getClientId());
             if (clientAuthorization != null && clientAuthorization.getScopes() != null &&
                     Arrays.asList(clientAuthorization.getScopes()).containsAll(
                             org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
