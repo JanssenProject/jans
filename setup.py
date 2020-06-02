@@ -192,10 +192,6 @@ if proceed:
     if Config.wrends_install:
         openDjInstaller.start_installation()
 
-
-    # now bind to ldap
-
-    ldapUtils.bind()
     if Config.installHttpd:
         httpdinstaller = HttpdInstaller()
         httpdinstaller.configure()
