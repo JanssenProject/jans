@@ -383,7 +383,7 @@ class Setup(object):
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
         self.encoded_shib_jks_pw = None
-        self.application_max_ram = 3072    # in MB
+        self.application_max_ram = int(current_mem_size * .83 * 1000) # 83% of physical memory
         self.encode_salt = None
         self.admin_inum = None
 
@@ -1019,7 +1019,7 @@ class Setup(object):
             self.admin_inum = str(uuid.uuid4())
 
         if not self.application_max_ram:
-            self.application_max_ram = 3072
+            self.application_max_ram = int(current_mem_size * .83 * 1000) # 83% of physical memory
 
         if not self.couchbaseShibUserPassword:
             self.couchbaseShibUserPassword = self.getPW()
@@ -3149,7 +3149,7 @@ class Setup(object):
             else:
                 print("Please enter valid email address")
         
-        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
+        self.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(self.application_max_ram))
 
         oxtrust_admin_password = self.getPW(special='.*=!%&+/-')
 
