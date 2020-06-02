@@ -117,7 +117,6 @@ class Config:
         self.gluuOptPythonFolder = os.path.join(self.gluuOptFolder, 'python')
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = os.path.join(self.gluuBaseFolder, 'conf') 
-        self.fido2ConfigFolder = os.path.join(self.configFolder, 'fido2')
         self.certFolder = '/etc/certs'
         
         self.gluu_properties_fn = os.path.join(self.configFolder,'gluu.properties')
@@ -296,11 +295,7 @@ class Config:
         self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
         self.ldif_scim = os.path.join(self.outputFolder, 'scim.ldif')
         self.ldif_scim_clients = os.path.join(self.outputFolder, 'scim_clients.ldif')
-        
-        self.fido2_dynamic_conf_json = os.path.join(self.outputFolder, 'fido2-dynamic-conf.json')
-        self.fido2_static_conf_json = os.path.join(self.outputFolder, 'fido2-static-conf.json')
-        self.ldif_fido2 = os.path.join(self.outputFolder, 'fido2.ldif')
-        
+
         self.lidf_oxtrust_api = os.path.join(self.outputFolder, 'oxtrust_api.ldif')
         self.ldif_oxtrust_api_clients = os.path.join(self.outputFolder, 'oxtrust_api_clients.ldif')
 
@@ -393,7 +388,6 @@ class Config:
                            self.ldif_idp,
                            self.lidf_oxtrust_api,
                            self.ldif_oxtrust_api_clients,
-                           self.ldif_fido2,
                            ]
 
 
@@ -426,8 +420,6 @@ class Config:
                              self.lidf_oxtrust_api: False,
                              self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,
-                             self.fido2_dynamic_conf_json: False,
-                             self.fido2_static_conf_json: False,
                              }
 
         self.service_requirements = {
@@ -455,7 +447,6 @@ class Config:
                                             self.ldif_scripts,
                                             self.ldif_configuration,
                                             self.ldif_scim,
-                                            self.ldif_fido2,
                                             self.ldif_idp,
                                             self.lidf_oxtrust_api,
                                             self.ldif_clients,
