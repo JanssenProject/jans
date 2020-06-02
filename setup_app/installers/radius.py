@@ -52,6 +52,12 @@ class RadiusInstaller(SetupUtils, BaseInstaller):
         ldif_file_base = os.path.join(self.output_folder, 'gluu_radius_base.ldif')
         ldif_file_clients = os.path.join(self.output_folder, 'gluu_radius_clients.ldif')
 
+        oxauth_updates = {
+                        'oxauth_legacyIdTokenClaims': True, 
+                        'oxauth_openidScopeBackwardCompatibility': True
+                        }
+        self.ldapUtils.set_oxAuthConfDynamic(oxauth_updates)
+
         #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
             self.ldapUtils.import_ldif([ldif_file_base, ldif_file_clients])

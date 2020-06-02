@@ -752,16 +752,13 @@ class PropertiesUtils(SetupUtils):
 
 
         if Config.installOxd:
-
             promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
                                                 self.getDefaultOption(Config.oxd_use_gluu_storage)
                                                 )[0].lower()
-
             Config.oxd_use_gluu_storage = True if promptForOxdGluuStorage == 'y' else False
 
 
         promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
                                             self.getDefaultOption(Config.installGluuRadius)
                                             )[0].lower()
-        
         Config.installGluuRadius = True if promptForGluuRadius == 'y' else False
