@@ -163,9 +163,6 @@ class Crypto64:
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(Config.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(Config.oxauth_openid_jwks_fn)
 
-        Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_ldap_file(Config.fido2_dynamic_conf_json)
-        Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_ldap_file(Config.fido2_static_conf_json)
-
         Config.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(Config.oxtrust_config_json);
         Config.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(Config.oxtrust_cache_refresh_json)
         Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(Config.oxtrust_import_person_json)
