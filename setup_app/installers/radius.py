@@ -10,8 +10,7 @@ from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
-
-class RadiusInstaller(SetupUtils, BaseInstaller):
+class RadiusInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'gluu-radius'
@@ -25,7 +24,6 @@ class RadiusInstaller(SetupUtils, BaseInstaller):
         self.config_generated = False
 
     def install(self):
-        # always install radius base
 
         #generate configuration
         self.generate_configuration()

@@ -141,18 +141,19 @@ class PassportInstaller(NodeInstaller):
             self.import_ldif_couchebase(ldif_files)
 
         self.update_ldap()
-        
+
         # Copy init.d script
         self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
         self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
-        
+
         # Install passport system service script
         self.installNodeService('passport')
 
         # set owner and mode of certificate files
-        cert_files = os.path.join(Config.certFolder, 'passport*')
-        self.run([paths.cmd_chmod, '500', cert_files])
-        self.run([paths.cmd_chown, 'root:gluu', cert_files])
+        cert_files = glob.glob(os.path.join(Config.certFolder, 'passport*'))
+        for fn in cert_files:
+            self.run([paths.cmd_chmod, '500', fn])
+            self.run([paths.cmd_chown, 'root:gluu', fn])
 
         # enable service at startup
         self.enable()
