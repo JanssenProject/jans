@@ -103,7 +103,7 @@ public class MailService {
                 }
             });
         } else {
-            Session.getInstance(props, null);
+            session = Session.getInstance(props, null);
         }
 
         MimeMessage msg = new MimeMessage(session);
