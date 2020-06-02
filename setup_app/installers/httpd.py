@@ -15,6 +15,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = httpd_name
         self.pbar_text = "Configuring Apache"
+        self.needldap = False # we don't need ldap connection in this class
 
         self.apache_version = determineApacheVersion()
 

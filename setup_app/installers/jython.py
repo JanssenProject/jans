@@ -12,6 +12,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = 'jython'
         self.pbar_text = "Installing Jython"
+        self.needldap = False # we don't need ldap connection in this class
 
     def install(self):
 
