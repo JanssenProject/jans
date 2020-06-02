@@ -283,6 +283,8 @@ class PropertiesUtils(SetupUtils):
                 key = str(key)
                 if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties'):
                     continue
+                if key.startswith('cmd_'):
+                    continue
                 if key == 'mappingLocations':
                     p[key] = json.dumps(Config.__dict__[key])
                 else:
@@ -474,11 +476,7 @@ class PropertiesUtils(SetupUtils):
             promptForCasa = self.getPrompt("Install Casa?", 
                                             self.getDefaultOption(Config.installCasa)
                                             )[0].lower()
-        if promptForCasa == 'y':
-            Config.installCasa = True
-            Config.couchbaseBucketDict['default']['ldif'].append(Config.ldif_scripts_casa)
-        else:
-            Config.installCasa = False
+        Config.installCasa = True if promptForCasa == 'y' else False
 
         if Config.installCasa:
             print ("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
@@ -676,18 +674,12 @@ class PropertiesUtils(SetupUtils):
         promptForOxAuth = self.getPrompt("Install oxAuth OAuth2 Authorization Server?", 
                                         self.getDefaultOption(Config.installOxAuth)
                                             )[0].lower()
-        if promptForOxAuth == 'y':
-            self.installOxAuth = True
-        else:
-            self.installOxAuth = False
+        self.installOxAuth = True if promptForOxAuth == 'y' else False
 
         promptForOxTrust = self.getPrompt("Install oxTrust Admin UI?",
                                             self.getDefaultOption(Config.installOxTrust)
                                             )[0].lower()
-        if promptForOxTrust == 'y':
-            Config.installOxTrust = True
-        else:
-            Config.installOxTrust = False
+        Config.installOxTrust = True if promptForOxTrust == 'y' else False
 
         couchbase_mappings_ = self.getMappingType('couchbase')
         buckets_ = [ 'gluu_{}'.format(b) for b in couchbase_mappings_ ]
@@ -713,22 +705,18 @@ class PropertiesUtils(SetupUtils):
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", 
                                         self.getDefaultOption(Config.installHTTPD)
                                         )[0].lower()
-        if promptForHTTPD == 'y':
-            Config.installHttpd = True
-        else:
-            Config.installHttpd = False
+        Config.installHttpd = True if promptForHTTPD == 'y' else False
 
         promptForScimServer = self.getPrompt("Install Scim Server?",
                                             self.getDefaultOption(Config.installScimServer)
                                             )[0].lower()
-        if promptForScimServer == 'y':
-            Config.installScimServer = True
+        Config.installScimServer = True if promptForScimServer == 'y' else False
+            
 
         promptForFido2Server = self.getPrompt("Install Fido2 Server?",
                                             self.getDefaultOption(Config.installFido2)
                                             )[0].lower()
-        if promptForFido2Server == 'y':
-            Config.installFido2 = True
+        Config.installFido2 = True if promptForFido2Server == 'y' else False
 
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?",
@@ -746,20 +734,12 @@ class PropertiesUtils(SetupUtils):
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?",
                                             self.getDefaultOption(Config.installOxAuthRP)
                                             )[0].lower()
-        if promptForOxAuthRP == 'y':
-            Config.installOxAuthRP = True
-        else:
-            Config.installOxAuthRP = False
+        Config.installOxAuthRP = True if promptForOxAuthRP == 'y'else False
 
         promptForPassport = self.getPrompt("Install Passport?", 
                                             self.getDefaultOption(Config.installPassport)
                                             )[0].lower()
-        if promptForPassport == 'y':
-            Config.installPassport = True
-            Config.gluuPassportEnabled = 'true'
-            Config.enable_scim_access_policy = 'true'
-        else:
-            Config.installPassport = False
+        Config.installPassport = True if promptForPassport == 'y' else False
 
         if os.path.exists(os.path.join(Config.distGluuFolder, 'casa.war')):
             self.promptForCasaInstallation()
@@ -768,10 +748,7 @@ class PropertiesUtils(SetupUtils):
             promptForOxd = self.getPrompt("Install Oxd?", 
                                                 self.getDefaultOption(Config.installOxd)
                                                 )[0].lower()
-            if promptForOxd == 'y':
-                Config.installOxd = True
-            else:
-                Config.installOxd = False
+            Config.installOxd = True if promptForOxd == 'y' else False
 
 
         if Config.installOxd:
@@ -779,18 +756,12 @@ class PropertiesUtils(SetupUtils):
             promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
                                                 self.getDefaultOption(Config.oxd_use_gluu_storage)
                                                 )[0].lower()
-            if promptForOxdGluuStorage == 'y':
-                Config.oxd_use_gluu_storage = True
+
+            Config.oxd_use_gluu_storage = True if promptForOxdGluuStorage == 'y' else False
 
 
         promptForGluuRadius = self.getPrompt("Install Gluu Radius?", 
                                             self.getDefaultOption(Config.installGluuRadius)
                                             )[0].lower()
-        if promptForGluuRadius == 'y':
-            Config.installGluuRadius = True
-            Config.oxauth_legacyIdTokenClaims = 'true'
-            Config.oxauth_openidScopeBackwardCompatibility =  'true'
-            Config.enableRadiusScripts = 'true'
-            Config.gluuRadiusEnabled = 'true'
-        else:
-            Config.installGluuRadius = False
+        
+        Config.installGluuRadius = True if promptForGluuRadius == 'y' else False
