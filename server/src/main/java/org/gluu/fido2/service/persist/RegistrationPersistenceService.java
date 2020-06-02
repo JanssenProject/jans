@@ -275,11 +275,12 @@ public class RegistrationPersistenceService {
 
         // Build unfinished request expiration filter
         Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.registered.getValue()));
+        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("oxStatus", Fido2RegistrationStatus.compromised.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
         
-        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, exirationDateFilter);
+        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, compomisedStatusFilter, exirationDateFilter);
 
         return unfinishedRequestFilter;
     }
