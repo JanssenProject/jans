@@ -310,23 +310,12 @@ class GluuInstaller(SetupUtils):
         installedComponents = []
 
         # Jetty apps
-        if Config.installOxAuth:
-            installedComponents.append(Config.jetty_app_configuration['oxauth'])
-
-        if Config.installOxTrust:
-            installedComponents.append(Config.jetty_app_configuration['identity'])
-
-        if Config.installSaml:
-            installedComponents.append(Config.jetty_app_configuration['idp'])
-
-        if Config.installOxAuthRP:
-            installedComponents.append(Config.jetty_app_configuration['oxauth-rp'])
-
-        if Config.installCasa:
-            installedComponents.append(Config.jetty_app_configuration['casa'])
-
-        if Config.installPassport:
-            installedComponents.append(Config.jetty_app_configuration['passport'])
+        for config_var, service in (
+                    ('installOxAuth', 'oxauth'), ('installOxTrust', 'identity'),
+                    ('installSaml', 'idp'), ('installOxAuthRP', 'oxauth-rp'),
+                    ('installCasa', 'casa', 'installPassport', 'passport')):
+            if Config.get(config_var):
+                installedComponents.append(service)
             
         self.calculate_aplications_memory(Config.application_max_ram, Config.jetty_app_configuration, installedComponents)
 
