@@ -889,11 +889,11 @@ class Setup(object):
                 self.run(cmd)
 
         gluu_radius_jks_fn = os.path.join(self.certFolder, 'gluu-radius.jks')
-        if os.path.exists(gluu_radius_jks_fn):
-            self.run([self.cmd_chown, 'radius:gluu', gluu_radius_jks_fn])
-
-        if self.installGluuRadius:
-            self.run([self.cmd_chown, 'radius:gluu', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
+        gluu_radius_pem_fn = os.path.join(self.certFolder, 'gluu-radius.private-key.pem')
+        for fn in (gluu_radius_jks_fn, gluu_radius_pem_fn):
+            if os.path.exists(fn):
+                self.run([self.cmd_chown, 'radius:gluu', fn])
+                self.run([self.cmd_chmod, '660', fn])
 
     def set_permissions(self):
         self.logIt("Changing permissions")
@@ -914,16 +914,11 @@ class Setup(object):
         if self.os_type in ['debian', 'ubuntu']:
             self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
-
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             realIdp3BinFolder = "%s/bin" % realIdp3Folder;
             if os.path.exists(realIdp3BinFolder):
                 self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
-
-        self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.jks')])
-        if self.installGluuRadius:
-            self.run([self.cmd_chmod, '660', os.path.join(self.certFolder, 'gluu-radius.private-key.pem')])
 
     def detect_ip(self):
         detectedIP = None
