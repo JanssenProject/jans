@@ -6047,7 +6047,8 @@
                 "oxPublicKeyId", 
                 "personInum", 
                 "oxRegistrationData", 
-                "oxDeviceNotificationConf", 
+                "oxDeviceNotificationConf",
+                "oxCounter",
                 "oxStatus"
             ], 
             "must": [
