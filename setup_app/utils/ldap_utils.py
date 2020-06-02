@@ -5,10 +5,9 @@ from setup_app.config import Config
 from setup_app.utils import base
 
 class LDAPUtils:
+    ready = False
 
-    def connect(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
-
-        print(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn, Config.ldapPass)
+    def bind(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
 
         if not ldap_hostname:
             ldap_hostname = Config.ldap_hostname
@@ -30,7 +29,7 @@ class LDAPUtils:
                     )
         base.logIt("Making LDAP Connection to host {}:{} with user {}".format(ldap_hostname, port, ldap_binddn))
         self.ldap_conn.bind()
-
+        self.ready = True
 
 
     def get_oxAuthConfDynamic(self):
@@ -159,6 +158,7 @@ class LDAPUtils:
     def __del__(self):
         try:
             self.ldap_conn.unbind()
+            self.ready = False
         except:
             pass
 

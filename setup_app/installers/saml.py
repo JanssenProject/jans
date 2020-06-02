@@ -2,7 +2,6 @@ import os
 import glob
 import shutil
 
-from setup_app.utils.ldap_utils import LDAPUtils
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
@@ -133,10 +132,8 @@ class SamlInstaller(JettyInstaller):
 
         #TODO: implement for couchbase ???
         if Config.mappingLocations['default'] == 'ldap':
-            ldapUtils = LDAPUtils()
-            ldapUtils.enable_service('gluuSamlEnabled')
-
-            ldapUtils.set_oxTrustConfApplication(oxtrust_conf)
+            self.ldapUtils.enable_service('gluuSamlEnabled')
+            self.ldapUtils.set_oxTrustConfApplication(oxtrust_conf)
 
         self.enable()
 
