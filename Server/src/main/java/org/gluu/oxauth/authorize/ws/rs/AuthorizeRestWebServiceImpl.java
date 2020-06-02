@@ -37,15 +37,7 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.AuthenticationFilterService;
-import org.gluu.oxauth.service.ClientAuthorizationsService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.CookieService;
-import org.gluu.oxauth.service.RedirectUriResponse;
-import org.gluu.oxauth.service.RequestParameterService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.UserService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.QueryStringDecoder;
@@ -145,6 +137,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ExternalPostAuthnService externalPostAuthnService;
+
+    @Inject
+    private CibaRequestService cibaRequestService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -633,9 +628,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
 
-        if (cibaGrant == null) {
+        if (cibaGrant == null || cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+            log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaGrant);
             return;
         }
+
+        cibaRequestService.removeCibaRequest(authReqId);
 
         if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             RefreshToken refreshToken = cibaGrant.createRefreshToken();

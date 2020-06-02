@@ -7,6 +7,7 @@
 package org.gluu.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -117,11 +118,15 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
+        if (appConfiguration.getCibaGrantLifeExtraTimeSec() > 0) {
+            expiresIn += appConfiguration.getCibaGrantLifeExtraTimeSec();
+        }
+
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
         grant.init(user, client, expiresIn);
-
         CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
-        cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
+        cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(),
+                memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
         return grant;
     }
