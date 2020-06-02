@@ -136,7 +136,7 @@ openDjInstaller = OpenDjInstaller()
 fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
-radiusInstaller = RadiusInstaller
+radiusInstaller = RadiusInstaller()
 
 print()
 print(gluuInstaller)

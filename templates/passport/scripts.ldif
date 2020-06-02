@@ -3,7 +3,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Passport SAML authentication module
 displayName: passport_saml
-oxEnabled: %(gluuPassportEnabled)s
+oxEnabled: true
 inum: D40C-1CA4
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
@@ -20,7 +20,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Passport authentication module
 displayName: passport_social
-oxEnabled: %(gluuPassportEnabled)s
+oxEnabled: true
 inum: 2FDB-CF02
 oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
 oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}

@@ -192,7 +192,6 @@ class GluuInstaller(SetupUtils):
 
         try:
             self.renderTemplate(Config.ldif_configuration)
-            self.renderTemplate(Config.ldif_fido2)
         except:
             self.logIt("Error writing template", True)
 
@@ -313,10 +312,10 @@ class GluuInstaller(SetupUtils):
         for config_var, service in (
                     ('installOxAuth', 'oxauth'), ('installOxTrust', 'identity'),
                     ('installSaml', 'idp'), ('installOxAuthRP', 'oxauth-rp'),
-                    ('installCasa', 'casa', 'installPassport', 'passport')):
+                    ('installCasa', 'casa'), ('installPassport', 'passport')):
             if Config.get(config_var):
-                installedComponents.append(service)
-            
+                installedComponents.append(Config.jetty_app_configuration[service])
+
         self.calculate_aplications_memory(Config.application_max_ram, Config.jetty_app_configuration, installedComponents)
 
     def copy_scripts(self):
