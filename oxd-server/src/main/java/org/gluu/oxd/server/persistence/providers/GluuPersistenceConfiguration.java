@@ -83,8 +83,8 @@ public class GluuPersistenceConfiguration {
         GluuConfiguration configuration = gluuConfiguration.get();
 
         if (StringUtils.isBlank(configuration.getBaseDn())) {
-            LOG.error("The `baseDn` field under storage_configuration is blank. Please provide the of this field (in `oxd-server.yml`)");
-            throw new RuntimeException("The `baseDn` field under storage_configuration is blank. Please provide the of this field (in `oxd-server.yml`)");
+            LOG.error("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `oxd-server.yml`)");
+            throw new RuntimeException("The `baseDn` field under storage_configuration is blank. Please provide value of this field (in `oxd-server.yml`)");
         }
 
         if (StringUtils.isBlank(configuration.getType())) {
