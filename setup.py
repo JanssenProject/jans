@@ -5581,7 +5581,7 @@ current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 
 disk_st = os.statvfs('/')
-available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
+available_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 def resource_checkings():
 
@@ -5620,7 +5620,7 @@ def resource_checkings():
 
 
     if available_disk_space < suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
+        print(("{0}Warning: Available free disk space was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         gluu_utils.colors.WARNING,
                                                         available_disk_space,
