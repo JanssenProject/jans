@@ -176,3 +176,11 @@ dn: ou=sector_identifiers,o=gluu
 objectClass: top
 objectClass: organizationalunit
 ou: sector_identifiers
+
+################################
+
+# CIBA Requests - LEVEL 2
+dn: ou=ciba,o=gluu
+objectClass: top
+objectClass: organizationalunit
+ou: ciba
