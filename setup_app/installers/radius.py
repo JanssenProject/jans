@@ -7,7 +7,6 @@ import base64
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
-from setup_app.utils.ldap_utils import LDAPUtils
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
@@ -135,9 +134,6 @@ class RadiusInstaller(SetupUtils, BaseInstaller):
 
 
     def get_client_id_ro_password(self):
-        if not hasattr(self, 'ldapUtils'):
-            # make ldap connection
-            self.ldapUtils = LDAPUtils()
 
         if not Config.get('gluu_radius_client_id'):
             if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1701.*)'):

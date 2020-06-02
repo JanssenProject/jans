@@ -12,10 +12,12 @@ from setup_app.installers.base import BaseInstaller
 class JreInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
-        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
         self.service_name = 'jre'
         self.pbar_text = "Installing JRE"
+        self.needldap = False # we don't need ldap connection in this class
 
+        self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
+    
     def install(self):
 
         # we need to call download_files() unless it called by base installer
