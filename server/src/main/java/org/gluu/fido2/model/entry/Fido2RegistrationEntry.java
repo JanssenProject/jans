@@ -34,6 +34,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "oxRegistrationData")
     private Fido2RegistrationData registrationData;
 
+    @AttributeName(name = "oxCounter")
+	private int counter;
+
     @JsonObject
     @AttributeName(name = "oxStatus")
     private Fido2RegistrationStatus registrationStatus;
@@ -66,7 +69,15 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.registrationData = registrationData;
     }
 
-    public Fido2RegistrationStatus getRegistrationStatus() {
+    public int getCounter() {
+		return counter;
+	}
+
+	public void setCounter(int counter) {
+		this.counter = counter;
+	}
+
+	public Fido2RegistrationStatus getRegistrationStatus() {
         return registrationStatus;
     }
 

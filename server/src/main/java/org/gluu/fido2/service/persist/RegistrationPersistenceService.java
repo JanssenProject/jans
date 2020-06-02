@@ -19,7 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.fido2.model.entry.Fido2RegistrationEntry;
@@ -72,7 +72,7 @@ public class RegistrationPersistenceService {
             if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
                 user = userService.addDefaultUser(userName);
             } else {
-                throw new Fido2RPRuntimeException("Auto user enrollment was disabled. User not exists!");
+                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
             }
         }
         String userInum = userService.getUserInum(user);

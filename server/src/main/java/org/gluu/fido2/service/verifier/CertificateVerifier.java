@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.service.Base64Service;
 import org.slf4j.Logger;
 
@@ -56,7 +56,7 @@ public class CertificateVerifier {
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .filter(sig -> trustedSignatures.contains(sig)).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
-            throw new Fido2RPRuntimeException("Root certificate in the attestation");
+            throw new Fido2RuntimeException("Root certificate in the attestation");
         }
     }
 
@@ -66,7 +66,7 @@ public class CertificateVerifier {
             Set<TrustAnchor> trustAnchors = trustChainCertificates.parallelStream().map(f -> new TrustAnchor(f, null)).collect(Collectors.toSet());
 
             if (trustAnchors.isEmpty()) {
-                throw new Fido2RPRuntimeException("Trust anchors certs list is empty!");
+                throw new Fido2RuntimeException("Trust anchors certs list is empty!");
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
@@ -94,7 +94,7 @@ public class CertificateVerifier {
             }
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RPRuntimeException("Problem with certificate");
+            throw new Fido2RuntimeException("Problem with certificate");
         }
     }
 
@@ -112,11 +112,11 @@ public class CertificateVerifier {
                 return null;
             } else {
                 log.error("Cert not validated against the root {}", ex.getMessage());
-                throw new Fido2RPRuntimeException("Problem with certificate " + ex.getMessage());
+                throw new Fido2RuntimeException("Problem with certificate " + ex.getMessage());
             }
         } catch (InvalidAlgorithmParameterException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
-            throw new Fido2RPRuntimeException("Problem with certificate");
+            throw new Fido2RuntimeException("Problem with certificate");
         }
     }
 

@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.fido2.ctap.UserVerification;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.service.AuthenticatorDataParser;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class UserVerificationVerifier {
         if ((authData.getFlags()[0] & AuthenticatorDataParser.FLAG_USER_PRESENT) == 1) {
             return true;
         } else {
-            throw new Fido2RPRuntimeException("User not present");
+            throw new Fido2RuntimeException("User not present");
         }
     }
 
@@ -59,7 +59,7 @@ public class UserVerificationVerifier {
         byte flags = authData.getFlags()[0];
 
         if (!isUserVerified(flags)) {
-            throw new Fido2RPRuntimeException("User required is not present");
+            throw new Fido2RuntimeException("User required is not present");
         }
     }
 

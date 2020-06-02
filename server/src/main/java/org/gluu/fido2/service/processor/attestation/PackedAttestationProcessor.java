@@ -26,7 +26,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -86,7 +86,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
             X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
             if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
-                throw new Fido2RPRuntimeException(
+                throw new Fido2RuntimeException(
                         "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
             }
 
@@ -97,7 +97,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
             authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
 
             if (certificateVerifier.isSelfSigned(verifiedCert)) {
-                throw new Fido2RPRuntimeException("Self signed certificate");
+                throw new Fido2RuntimeException("Self signed certificate");
             }
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();

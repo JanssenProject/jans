@@ -17,7 +17,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.gluu.fido.model.entry.DeviceRegistration;
 import org.gluu.fido2.ctap.UserVerification;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2CompromisedDevice;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.PublicKeyCredentialDescriptor;
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.model.entry.Fido2AuthenticationData;
@@ -25,6 +26,7 @@ import org.gluu.fido2.model.entry.Fido2AuthenticationEntry;
 import org.gluu.fido2.model.entry.Fido2AuthenticationStatus;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.fido2.model.entry.Fido2RegistrationEntry;
+import org.gluu.fido2.model.entry.Fido2RegistrationStatus;
 import org.gluu.fido2.service.ChallengeGenerator;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.persist.AuthenticationPersistenceService;
@@ -117,7 +119,7 @@ public class AssertionService {
         Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username); 
         ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
         if (allowedCredentials.isEmpty()) {
-            throw new Fido2RPRuntimeException("Can't find associated key(s). Username: " + username);
+            throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);
         }
         optionsResponseNode.set("allowCredentials", allowedCredentials);
         log.debug("Put allowedCredentials {}", allowedCredentials);
@@ -193,7 +195,7 @@ public class AssertionService {
 
         // Find authentication entry
         Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge).parallelStream().findFirst()
-                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find associated assertion request by challenge '%s'", challenge)));
+                .orElseThrow(() -> new Fido2RuntimeException(String.format("Can't find associated assertion request by challenge '%s'", challenge)));
         Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
 
         // Verify domain
@@ -201,10 +203,20 @@ public class AssertionService {
         
         // Find registered public key
         Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId)
-                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
+                .orElseThrow(() -> new Fido2RuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
         Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
-        assertionVerifier.verifyAuthenticatorAssertionResponse(responseNode, registrationData, authenticationData);
+        // Set actual counter value. Note: Fido2 not update initial value in Fido2RegistrationData to minimize DB updates
+        registrationData.setCounter(registrationEntry.getCounter());
+
+    	try {
+    		assertionVerifier.verifyAuthenticatorAssertionResponse(responseNode, registrationData, authenticationData);
+    	} catch (Fido2CompromisedDevice ex) {
+    		registrationData.setStatus(Fido2RegistrationStatus.compromised);
+            registrationPersistenceService.update(registrationEntry);
+
+            throw ex;
+    	}
 
         // Store original response
         authenticationData.setAssertionResponse(params.toString());
@@ -212,6 +224,10 @@ public class AssertionService {
         authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
         authenticationPersistenceService.update(authenticationEntity);
+
+        // Store actual counter value in separate attribute. Note: Fido2 not update initial value in Fido2RegistrationData to minimize DB updates
+        registrationEntry.setCounter(registrationData.getCounter());
+        registrationPersistenceService.update(registrationEntry);
 
         // Create result object
         ObjectNode finishResponseNode = dataMapperService.createObjectNode();

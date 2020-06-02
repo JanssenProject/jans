@@ -33,7 +33,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -93,7 +93,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         try {
             cborPublicKey = dataMapperService.cborReadTree(authData.getCosePublicKey());
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation");
+            throw new Fido2RuntimeException("Problem with TPM attestation");
         }
 
         byte[] hashedBuffer = getHashedBuffer(cborPublicKey.get("3").asInt(), authData.getAttestationBuffer(), clientDataHash);
@@ -138,7 +138,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             verifyThatKeysAreSame(tpmtPublic, keyBufferFromAuthData);
 
         } else {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation. Unsupported");
+            throw new Fido2RuntimeException("Problem with TPM attestation. Unsupported");
         }
 
     }
@@ -148,13 +148,13 @@ public class TPMProcessor implements AttestationFormatProcessor {
         byte[] keyBufferFromTPM = Arrays.copyOfRange(tmp, 2, tmp.length);
 
         if (!Arrays.equals(keyBufferFromTPM, keyBufferFromAuthData)) {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation.");
+            throw new Fido2RuntimeException("Problem with TPM attestation.");
         }
     }
 
     private void verifyTPMSExtraData(byte[] hashedBuffer, byte[] extraData) {
         if (!Arrays.equals(hashedBuffer, extraData)) {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation.");
+            throw new Fido2RuntimeException("Problem with TPM attestation.");
         }
     }
 
@@ -168,7 +168,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         }
             break;
         default:
-            throw new Fido2RPRuntimeException("Problem with TPM attestation");
+            throw new Fido2RuntimeException("Problem with TPM attestation");
         }
         // this is not really certificate info but nameAlgID + hex.encode(pubAreaDigest)
         // reverse engineered from FIDO Certification tool
@@ -176,13 +176,13 @@ public class TPMProcessor implements AttestationFormatProcessor {
         TPMS_CERTIFY_INFO certifyInfo = (TPMS_CERTIFY_INFO) tpmsAttest.attested;
         byte[] certificateName = Arrays.copyOfRange(certifyInfo.name, 2, certifyInfo.name.length);
         if (!Arrays.equals(certificateName, pubAreaDigest)) {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation.");
+            throw new Fido2RuntimeException("Problem with TPM attestation.");
         }
     }
 
     private void verifyMagicInTpms(TPMS_ATTEST tpmsAttest) {
         if (tpmsAttest.magic.toInt() != TPM_GENERATED.VALUE.toInt()) {
-            throw new Fido2RPRuntimeException("Problem with TPM attestation");
+            throw new Fido2RuntimeException("Problem with TPM attestation");
         }
     }
 
@@ -199,7 +199,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
         if (ext != null && ext.length > 0) {
             String fidoAAGUID = new String(ext, Charset.forName("UTF-8"));
             if (!authData.getAaguid().equals(fidoAAGUID)) {
-                throw new Fido2RPRuntimeException("Problem with TPM attestation");
+                throw new Fido2RuntimeException("Problem with TPM attestation");
             }
         }
     }
@@ -209,7 +209,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             aikCertificate.verify(rootCertificate.getPublicKey());
         } catch (CertificateException | NoSuchAlgorithmException | InvalidKeyException | NoSuchProviderException | SignatureException e) {
             log.warn("Problem with AIK certificate {}", e.getMessage());
-            throw new Fido2RPRuntimeException("Problem with TPM attestation");
+            throw new Fido2RuntimeException("Problem with TPM attestation");
         }
     }
 }

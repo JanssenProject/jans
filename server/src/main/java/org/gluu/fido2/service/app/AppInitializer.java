@@ -31,7 +31,6 @@ import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.service.PythonService;
 import org.gluu.service.cdi.event.ApplicationInitialized;
@@ -45,7 +44,6 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Lists;

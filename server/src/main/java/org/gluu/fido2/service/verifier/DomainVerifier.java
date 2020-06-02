@@ -19,7 +19,7 @@ import java.net.URL;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RpRuntimeException;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -63,7 +63,7 @@ public class DomainVerifier {
         if (!domain.equals(effectiveDomain)) {
             //Check registrable domain suffix rule
             if (!effectiveDomain.endsWith("." + domain)) {
-                throw new Fido2RPRuntimeException("Domains don't match");
+                throw new Fido2RpRuntimeException("Domains don't match");
             }
         }
 

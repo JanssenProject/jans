@@ -16,7 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 
@@ -36,11 +36,11 @@ public class SignatureVerifier {
             signatureChecker.initVerify(publicKey);
             signatureChecker.update(signatureBase);
             if (!signatureChecker.verify(signature)) {
-                throw new Fido2RPRuntimeException("Unable to verify signature");
+                throw new Fido2RuntimeException("Unable to verify signature");
             }
         } catch (IllegalArgumentException | InvalidKeyException | SignatureException e) {
             log.error("Can't verify the signature ", e);
-            throw new Fido2RPRuntimeException("Can't verify the signature");
+            throw new Fido2RuntimeException("Can't verify the signature");
         }
     }
 
@@ -100,13 +100,13 @@ public class SignatureVerifier {
             }
 
             default: {
-                throw new Fido2RPRuntimeException("Unknown mapping");
+                throw new Fido2RuntimeException("Unknown mapping");
             }
 
             }
 
         } catch (InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
-            throw new Fido2RPRuntimeException("Problem with crypto");
+            throw new Fido2RuntimeException("Problem with crypto");
         }
     }
 
@@ -122,7 +122,7 @@ public class SignatureVerifier {
         }
 
         default: {
-            throw new Fido2RPRuntimeException("Unknown mapping");
+            throw new Fido2RuntimeException("Unknown mapping");
         }
 
         }

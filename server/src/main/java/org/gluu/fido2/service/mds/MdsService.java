@@ -33,14 +33,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.conf.AppConfiguration;
+import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.fido2.model.mds.AuthenticatorCertificationStatus;
 import org.gluu.fido2.service.Base64Service;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.client.ResteasyClientFactory;
 import org.gluu.fido2.service.verifier.CommonVerifiers;
-import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.util.StringHelper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -81,12 +81,12 @@ public class MdsService {
     public JsonNode fetchMetadata(byte[] aaguidBuffer) {
         Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
         if (fido2Configuration == null) {
-            throw new Fido2RPRuntimeException("Fido2 configuration not exists");
+            throw new Fido2RuntimeException("Fido2 configuration not exists");
         }
 
         String mdsAccessToken = fido2Configuration.getMdsAccessToken();
         if (StringHelper.isEmpty(mdsAccessToken)) {
-            throw new Fido2RPRuntimeException("Fido2 MDS access token should be set");
+            throw new Fido2RuntimeException("Fido2 MDS access token should be set");
         }
 
         String aaguid = deconvert(aaguidBuffer);
@@ -99,7 +99,7 @@ public class MdsService {
 
         JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
         if (tocEntry == null) {
-            throw new Fido2RPRuntimeException("Authenticator not in TOC aaguid " + aaguid);
+            throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
         }
 
         String tocEntryUrl = tocEntry.get("url").asText();
@@ -108,7 +108,7 @@ public class MdsService {
             metadataUrl = new URI(String.format("%s/?token=%s", tocEntryUrl, mdsAccessToken));
             log.debug("Authenticator AAGUI {} url metadataUrl {} downloaded", aaguid, metadataUrl);
         } catch (URISyntaxException e) {
-            throw new Fido2RPRuntimeException("Invalid URI in TOC aaguid " + aaguid);
+            throw new Fido2RuntimeException("Invalid URI in TOC aaguid " + aaguid);
         }
 
         verifyTocEntryStatus(aaguid, tocEntry);
@@ -135,22 +135,22 @@ public class MdsService {
             try {
                 bodyBuffer = body.getBytes("UTF-8");
             } catch (UnsupportedEncodingException e) {
-                throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
+                throw new Fido2RuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
             }
 
             byte[] digest = tocService.getDigester().digest(bodyBuffer);
             if (!Arrays.equals(digest, base64Service.urlDecode(metadataHash))) {
-                throw new Fido2RPRuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
+                throw new Fido2RuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
             }
 
             try {
             	return dataMapperService.readTree(base64Service.urlDecode(body));
             } catch (IOException e) {
                 log.error("Can't parse payload from the server");
-                throw new Fido2RPRuntimeException("Unable to parse payload from server for aaguid " + aaguid);
+                throw new Fido2RuntimeException("Unable to parse payload from server for aaguid " + aaguid);
             }
         } else {
-            throw new Fido2RPRuntimeException("Unable to retrieve metadata for aaguid " + aaguid + " status " + status);
+            throw new Fido2RuntimeException("Unable to retrieve metadata for aaguid " + aaguid + " status " + status);
         }
 	}
 
@@ -178,7 +178,7 @@ public class MdsService {
                         AuthenticatorCertificationStatus.USER_KEY_REMOTE_COMPROMISE, AuthenticatorCertificationStatus.USER_KEY_PHYSICAL_COMPROMISE,
                         AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE });
         if (undesiredAuthenticatorStatus.contains(status)) {
-            throw new Fido2RPRuntimeException("Authenticator " + aaguid + "status undesirable " + status);
+            throw new Fido2RuntimeException("Authenticator " + aaguid + "status undesirable " + status);
         }
 
     }

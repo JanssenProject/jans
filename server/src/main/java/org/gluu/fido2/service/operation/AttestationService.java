@@ -18,7 +18,7 @@ import org.gluu.fido2.ctap.AuthenticatorAttachment;
 import org.gluu.fido2.ctap.CoseEC2Algorithm;
 import org.gluu.fido2.ctap.CoseRSAAlgorithm;
 import org.gluu.fido2.ctap.UserVerification;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.auth.PublicKeyCredentialDescriptor;
 import org.gluu.fido2.model.conf.AppConfiguration;
@@ -179,7 +179,7 @@ public class AttestationService {
 
         // Find registration entry
         Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge).parallelStream().findAny()
-                .orElseThrow(() -> new Fido2RPRuntimeException(String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
+                .orElseThrow(() -> new Fido2RuntimeException(String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
         Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
         // Verify domain
@@ -200,6 +200,9 @@ public class AttestationService {
 
         // Store original response
         registrationData.setAttenstationResponse(params.toString());
+
+        // Set actual counter value. Note: Fido2 not update initial value in Fido2RegistrationData to minimize DB updates
+        registrationData.setCounter(registrationEntry.getCounter());
 
         registrationPersistenceService.update(registrationEntry);
 

@@ -27,7 +27,7 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.gluu.fido2.androind.AndroidKeyUtils;
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -97,7 +97,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
             byte[] attestationChallenge = ((ASN1OctetString) extensionData.getObjectAt(AndroidKeyUtils.ATTESTATION_CHALLENGE_INDEX)).getOctets();
 
             if (!Arrays.equals(clientDataHash, attestationChallenge)) {
-                throw new Fido2RPRuntimeException("Invalid android key attestation");
+                throw new Fido2RuntimeException("Invalid android key attestation");
             }
 
             ASN1Encodable[] softwareEnforced = ((ASN1Sequence) extensionData.getObjectAt(AndroidKeyUtils.SW_ENFORCED_INDEX)).toArray();
@@ -105,7 +105,7 @@ public class AndroidKeyAttestationProcessor implements AttestationFormatProcesso
 
         } catch (Exception e) {
             log.warn("Problem with android key", e);
-            throw new Fido2RPRuntimeException("Problem with android key");
+            throw new Fido2RuntimeException("Problem with android key");
         }
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
         authenticatorDataVerifier.verifyAttestationSignature(authData, clientDataHash, signature, verifiedCert, authData.getKeyType());

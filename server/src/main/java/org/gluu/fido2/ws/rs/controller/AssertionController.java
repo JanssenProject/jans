@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RpRuntimeException;
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.operation.AssertionService;
@@ -55,7 +55,7 @@ public class AssertionController {
         try {
         	params = dataMapperService.readTree(content);
         } catch (IOException ex) {
-            throw new Fido2RPRuntimeException("Failed to parse options assertion request", ex);
+            throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
         }
 
         JsonNode result = assertionService.options(params);
@@ -77,7 +77,7 @@ public class AssertionController {
         try {
         	params = dataMapperService.readTree(content);
         } catch (IOException ex) {
-            throw new Fido2RPRuntimeException("Failed to parse finish assertion request", ex);
+            throw new Fido2RpRuntimeException("Failed to parse finish assertion request", ex);
         }
 
         JsonNode result = assertionService.verify(params);

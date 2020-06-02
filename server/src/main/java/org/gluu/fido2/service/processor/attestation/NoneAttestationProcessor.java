@@ -17,7 +17,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -43,7 +43,7 @@ public class NoneAttestationProcessor implements AttestationFormatProcessor {
         log.debug("None/Surrogate attestation {}", attStmt);
 
         if (attStmt.iterator().hasNext()) {
-            throw new Fido2RPRuntimeException("Problem with None/Surrogate attestation");
+            throw new Fido2RuntimeException("Problem with None/Surrogate attestation");
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
