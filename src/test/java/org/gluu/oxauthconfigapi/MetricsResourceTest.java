@@ -28,13 +28,19 @@ public class MetricsResourceTest {
 
 	@Test
 	public void getMetricsConfiguration() {
-		given().when().get(API_V1_OXAUTH_METRICS).then().statusCode(OK.getStatusCode());
+		given().log().all()
+		.when()
+		.get(API_V1_OXAUTH_METRICS).then().statusCode(OK.getStatusCode());
 	}
 	
 	@Test
 	public void updateMetricsConfiguration() {
 		Metrics metrics = new Metrics();
-		given().body(metrics).header(CONTENT_TYPE, APPLICATION_JSON).header(ACCEPT,APPLICATION_JSON).when()
+		given().log().all()
+		.body(metrics)
+		.header(CONTENT_TYPE, APPLICATION_JSON)
+		.header(ACCEPT,APPLICATION_JSON)
+		.when()
 		.put(API_V1_OXAUTH_METRICS).then().statusCode(OK.getStatusCode());
 		
 	}

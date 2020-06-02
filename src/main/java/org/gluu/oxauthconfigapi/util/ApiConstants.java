@@ -8,5 +8,6 @@ public class ApiConstants {
 	public static final String BASE_API_URL = "/oxauth";
 	public static final String LOGGING = "/logging";
 	public static final String METRICS = "/metrics";
+	public static final String BACKCHANNEL = "/backchannel";
 
 }

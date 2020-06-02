@@ -21,10 +21,12 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import org.slf4j.Logger;
 
+import com.couchbase.client.core.message.ResponseStatus;
+
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxtrust.service.JsonConfigurationService;
 import org.gluu.oxauthconfigapi.rest.model.Metrics;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
-import org.gluu.oxtrust.service.JsonConfigurationService;
 
 /**
  * @author Puja Sharma
@@ -60,7 +62,7 @@ public class MetricsResource {
 			
 			return Response.ok(metrics).build();
 		}catch(Exception ex) {
-			log.error("Failed to retrieve oxAuth metric  configuration", ex);
+			log.error("Failed to retrieve oxAuth metric configuration", ex);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
@@ -68,7 +70,7 @@ public class MetricsResource {
 	@PUT
 	@Operation(summary = "Update oxAuth metric configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Metrics.class, required = true))),
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	public Response updateMetricsConfiguration(@Valid Metrics metrics) {		
 		try {
@@ -80,7 +82,7 @@ public class MetricsResource {
 			
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 			
-			return Response.ok(metrics).build();
+			return Response.ok(ResponseStatus.SUCCESS).build();
 			
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth metric  configuration", ex);
