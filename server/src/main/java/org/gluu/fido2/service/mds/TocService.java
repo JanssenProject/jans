@@ -27,13 +27,13 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.conf.AppConfiguration;
+import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.fido2.service.Base64Service;
 import org.gluu.fido2.service.CertificateService;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.verifier.CertificateVerifier;
-import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
@@ -123,9 +123,9 @@ public class TocService {
         try {
             return parseTOC(mdsTocRootCertFile, FileSystems.getDefault().getPath(mdsTocFileLocation)).getSecond();
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Unable to read TOC at " + mdsTocFileLocation, e);
+            throw new Fido2RuntimeException("Unable to read TOC at " + mdsTocFileLocation, e);
         } catch (ParseException e) {
-            throw new Fido2RPRuntimeException("Unable to parse TOC at " + mdsTocFileLocation, e);
+            throw new Fido2RuntimeException("Unable to parse TOC at " + mdsTocFileLocation, e);
         }
     }
 
@@ -187,10 +187,10 @@ public class TocService {
             try {
                 return new ECDSAVerifier((ECPublicKey) verifiedCert.getPublicKey());
             } catch (JOSEException e) {
-                throw new Fido2RPRuntimeException("Unable to create verifier for algorithm " + algorithm, e);
+                throw new Fido2RuntimeException("Unable to create verifier for algorithm " + algorithm, e);
             }
         } else {
-            throw new Fido2RPRuntimeException("Don't know what to do with " + algorithm);
+            throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
         }
     }
 
@@ -198,7 +198,7 @@ public class TocService {
         if (JWSAlgorithm.ES256.equals(algorithm)) {
             return DigestUtils.getSha256Digest();
         } else {
-            throw new Fido2RPRuntimeException("Don't know what to do with " + algorithm);
+            throw new Fido2RuntimeException("Don't know what to do with " + algorithm);
         }
     }
 

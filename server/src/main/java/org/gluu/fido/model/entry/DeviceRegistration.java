@@ -5,12 +5,6 @@
  */
 package org.gluu.fido.model.entry;
 
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.BaseEntry;
-
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -18,6 +12,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
+import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.Expiration;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.BaseEntry;
 
 /**
  * U2F Device registration

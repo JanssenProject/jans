@@ -15,6 +15,9 @@ package org.gluu.fido2.model.entry;
 
 import org.gluu.fido2.ctap.UserVerification;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2AuthenticationData extends Fido2Data {
 
     private static final long serialVersionUID = 1382804326976802044L;

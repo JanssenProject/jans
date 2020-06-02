@@ -15,7 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.service.Base64Service;
 import org.gluu.fido2.service.DataMapperService;
@@ -134,7 +134,7 @@ public class AuthenticatorDataVerifier {
             log.debug("KeyBytes HEX {}", Hex.encodeHexString(keyBytes));
             return keyBytes;
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Can't parse public key");
+            throw new Fido2RuntimeException("Can't parse public key");
         }
     }
 

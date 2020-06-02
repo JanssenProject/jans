@@ -21,7 +21,8 @@ import javax.inject.Inject;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2CompromisedDevice;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.entry.Fido2AuthenticationData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -81,6 +82,10 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
         byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
 
         try {
+            int counter = authenticatorDataParser.parseCounter(authData.getCounters());
+            commonVerifiers.verifyCounter(registration.getCounter(), counter);
+            registration.setCounter(counter);
+
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
@@ -88,11 +93,10 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
             log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
 
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
-            int counter = authenticatorDataParser.parseCounter(authData.getCounters());
-            commonVerifiers.verifyCounter(registration.getCounter(), counter);
-            registration.setCounter(counter);
+        } catch (Fido2CompromisedDevice ex) {
+        	throw ex;
         } catch (Exception ex) {
-            throw new Fido2RPRuntimeException("Failed to check packet assertion", ex);
+            throw new Fido2RuntimeException("Failed to check packet assertion", ex);
         }
     }
 

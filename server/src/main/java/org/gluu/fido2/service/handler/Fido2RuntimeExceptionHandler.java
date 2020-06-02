@@ -15,7 +15,7 @@ package org.gluu.fido2.service.handler;
 
 import javax.inject.Inject;
 
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.service.exception.ExceptionHandler;
 import org.slf4j.Logger;
 
@@ -24,8 +24,8 @@ public class Fido2RuntimeExceptionHandler {
     @Inject
     private Logger log;
 
-    @ExceptionHandler(value = { Fido2RPRuntimeException.class })
-    public void handleException(Fido2RPRuntimeException ex) {
+    @ExceptionHandler(value = { Fido2RuntimeException.class })
+    public void handleException(Fido2RuntimeException ex) {
         log.error("Get exception: {}", ex.getFormattedMessage().getErrorMessage(), ex);
         // return handleExceptionInternal(ex, ex.getFormattedMessage(), new
         // HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);

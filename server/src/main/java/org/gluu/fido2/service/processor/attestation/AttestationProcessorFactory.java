@@ -27,7 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.fido2.ctap.AttestationFormat;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.service.processors.AttestationFormatProcessor;
 
 @ApplicationScoped
@@ -48,7 +48,7 @@ public class AttestationProcessorFactory {
             AttestationFormat attestationFormat = AttestationFormat.valueOf(fmtFormat.replace('-', '_'));
             return processorsMap.get(attestationFormat);
         } catch (Exception e) {
-            throw new Fido2RPRuntimeException("Unsupported format " + e.getMessage());
+            throw new Fido2RuntimeException("Unsupported format " + e.getMessage());
         }
     }
 

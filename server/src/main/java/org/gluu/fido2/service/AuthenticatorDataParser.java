@@ -21,7 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.service.verifier.CommonVerifiers;
 import org.slf4j.Logger;
@@ -112,7 +112,7 @@ public class AuthenticatorDataParser {
                 keyType = key.get("3").asInt();
                 log.debug("AttestedCredentialData cosePublicKey {}", key);
             } catch (IOException e) {
-                throw new Fido2RPRuntimeException("Unable to parse public key CBOR", e);
+                throw new Fido2RuntimeException("Unable to parse public key CBOR", e);
             }
             authData.setAaguid(aaguidBuffer).setCredId(credIDBuffer).setCosePublicKey(cosePublicKeyBuffer).setKeyType(keyType);
         }
@@ -152,7 +152,7 @@ public class AuthenticatorDataParser {
 		        }
 		    }
 		} catch (IOException e) {
-		    throw new Fido2RPRuntimeException(e.getMessage(), e);
+		    throw new Fido2RuntimeException(e.getMessage(), e);
 		} finally {
 		    if (parser != null) {
 		        try {
@@ -181,19 +181,19 @@ public class AuthenticatorDataParser {
 
     public void verifyAttestationBuffer(byte[] attestationBuffer) {
         if (attestationBuffer.length == 0) {
-            throw new Fido2RPRuntimeException("Invalid attestation data buffer");
+            throw new Fido2RuntimeException("Invalid attestation data buffer");
         }
     }
 
     public void verifyExtensionBuffer(byte[] extensionBuffer) {
         if (extensionBuffer.length == 0) {
-            throw new Fido2RPRuntimeException("Invalid extension data buffer");
+            throw new Fido2RuntimeException("Invalid extension data buffer");
         }
     }
 
     public void verifyNoLeftovers(byte[] leftovers) {
         if (leftovers.length > 0) {
-            throw new Fido2RPRuntimeException("Invalid attestation data buffer: leftovers");
+            throw new Fido2RuntimeException("Invalid attestation data buffer: leftovers");
         }
     }
 

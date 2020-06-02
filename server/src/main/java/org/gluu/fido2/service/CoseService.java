@@ -40,7 +40,7 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.gluu.fido2.ctap.CoseEC2Algorithm;
 import org.gluu.fido2.ctap.CoseKeyType;
 import org.gluu.fido2.ctap.CoseRSAAlgorithm;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.oxauth.model.exception.SignatureException;
 import org.slf4j.Logger;
 
@@ -66,7 +66,7 @@ public class CoseService {
         case 1:
             return "secp256r1";
         default:
-            throw new Fido2RPRuntimeException("Unsupported curve");
+            throw new Fido2RuntimeException("Unsupported curve");
         }
     }
 
@@ -90,7 +90,7 @@ public class CoseService {
                 return convertUncompressedPointToRSAKey(rsaKey_n, rsaKey_e);
             }
             default: {
-                throw new Fido2RPRuntimeException("Don't know what to do with this key" + keyType);
+                throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
             }
             }
         }
@@ -105,15 +105,15 @@ public class CoseService {
                 return convertUncompressedPointToECKey(buffer, curve);
             }
             default: {
-                throw new Fido2RPRuntimeException("Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
+                throw new Fido2RuntimeException("Don't know what to do with this key" + keyType + " and algorithm " + coseEC2Algorithm);
             }
             }
         }
         case OKP: {
-            throw new Fido2RPRuntimeException("Don't know what to do with this key" + keyType);
+            throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
         }
         default:
-            throw new Fido2RPRuntimeException("Don't know what to do with this key" + keyType);
+            throw new Fido2RuntimeException("Don't know what to do with this key" + keyType);
         }
     }
 
@@ -126,7 +126,7 @@ public class CoseService {
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Problem here ", e);
-            throw new Fido2RPRuntimeException(e.getMessage());
+            throw new Fido2RuntimeException(e.getMessage());
         }
     }
 
@@ -157,7 +157,7 @@ public class CoseService {
             final KeyFactory keyFactory = KeyFactory.getInstance("EC");
             return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException e) {
-            throw new Fido2RPRuntimeException(e.getMessage());
+            throw new Fido2RuntimeException(e.getMessage());
         }
     }
 
@@ -166,7 +166,7 @@ public class CoseService {
         try {
             uncompressedECPointNode = dataMapperService.cborReadTree(uncompressedECPointCOSEPubKey);
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Unable to parse the structure");
+            throw new Fido2RuntimeException("Unable to parse the structure");
         }
         log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
         PublicKey publicKey = createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);

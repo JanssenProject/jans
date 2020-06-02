@@ -20,7 +20,6 @@ import javax.inject.Named;
 import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.service.persist.AuthenticationPersistenceService;
 import org.gluu.fido2.service.persist.RegistrationPersistenceService;
-import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.gluu.search.filter.Filter;

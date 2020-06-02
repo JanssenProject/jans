@@ -19,7 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -55,7 +55,7 @@ public class AttestationVerifier {
 
     public CredAndCounterData verifyAuthenticatorAttestationResponse(JsonNode response, Fido2RegistrationData credential) {
         if (!(response.hasNonNull("attestationObject") && response.hasNonNull("clientDataJSON"))) {
-            throw new Fido2RPRuntimeException("Authenticator data is invalid");
+            throw new Fido2RuntimeException("Authenticator data is invalid");
         }
 
         JsonNode authenticatorResponse = response;
@@ -67,11 +67,11 @@ public class AttestationVerifier {
         try {
             AuthData authData;
             if (authenticatorDataBuffer == null) {
-                throw new Fido2RPRuntimeException("Attestation object is empty");
+                throw new Fido2RuntimeException("Attestation object is empty");
             }
             JsonNode authenticatorDataNode = dataMapperService.cborReadTree(authenticatorDataBuffer);
             if (authenticatorDataNode == null) {
-                throw new Fido2RPRuntimeException("Attestation JSON is empty");
+                throw new Fido2RuntimeException("Attestation JSON is empty");
             }
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode, "fmt");
             log.debug("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
@@ -95,7 +95,7 @@ public class AttestationVerifier {
 
             return credIdAndCounters;
         } catch (IOException ex) {
-            throw new Fido2RPRuntimeException("Failed to parse and verify authenticator attestation response data", ex);
+            throw new Fido2RuntimeException("Failed to parse and verify authenticator attestation response data", ex);
         }
     }
 

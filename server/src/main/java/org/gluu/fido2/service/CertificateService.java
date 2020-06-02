@@ -31,7 +31,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.slf4j.Logger;
 
 /**
@@ -59,7 +59,7 @@ public class CertificateService {
         	
         	return certificate;
         } catch (CertificateException e) {
-            throw new Fido2RPRuntimeException(e.getMessage(), e);
+            throw new Fido2RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -68,14 +68,14 @@ public class CertificateService {
         try {
             cf = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {
-            throw new Fido2RPRuntimeException(e.getMessage(), e);
+            throw new Fido2RuntimeException(e.getMessage(), e);
         }
 
         return certificatePath.parallelStream().map(x509certificate -> {
             try {
                 return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
             } catch (CertificateException e) {
-                throw new Fido2RPRuntimeException(e.getMessage(), e);
+                throw new Fido2RuntimeException(e.getMessage(), e);
             }
         }).filter(c -> {
             try {
@@ -83,7 +83,7 @@ public class CertificateService {
                 return true;
             } catch (CertificateException e) {
                 log.warn("Certificate not valid {}", c.getIssuerDN().getName());
-                throw new Fido2RPRuntimeException("Certificate not valid", e);
+                throw new Fido2RuntimeException("Certificate not valid", e);
             }
         }).collect(Collectors.toList());
 
@@ -125,7 +125,7 @@ public class CertificateService {
             return getCertificate(certFileReader);
         } catch (IOException ex) {
             log.error("Faield to load certificates from folder {} with name {}", certFilePath, certFileName, ex);
-            throw new Fido2RPRuntimeException("Can't load authenticator certificate. Certificate doen't exist!");
+            throw new Fido2RuntimeException("Can't load authenticator certificate. Certificate doen't exist!");
 		}
     }
 
@@ -155,7 +155,7 @@ public class CertificateService {
                 IOUtils.closeQuietly(pemWriter);
             }
         } catch (IOException e) {
-            throw new Fido2RPRuntimeException("Failed to write root certificate");
+            throw new Fido2RuntimeException("Failed to write root certificate");
         }
     }
 

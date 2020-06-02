@@ -13,6 +13,9 @@
 
 package org.gluu.fido2.model.entry;
 
+import com.couchbase.client.deps.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Fido2RegistrationData extends Fido2Data {
 
     private static final long serialVersionUID = 4599467930864459334L;

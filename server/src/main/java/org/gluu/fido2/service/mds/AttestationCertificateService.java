@@ -17,14 +17,14 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.conf.AppConfiguration;
+import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.fido2.service.CertificateService;
 import org.gluu.fido2.service.DataMapperService;
 import org.gluu.fido2.service.KeyStoreCreator;
 import org.gluu.fido2.service.verifier.CommonVerifiers;
-import org.gluu.fido2.model.conf.Fido2Configuration;
 import org.gluu.service.cdi.event.ApplicationInitialized;
 import org.slf4j.Logger;
 
@@ -103,7 +103,7 @@ public class AttestationCertificateService {
 				metadataForAuthenticator = metadata;
 				
 				return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
-			} catch (Fido2RPRuntimeException ex) {
+			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadaa from Fido2 meta-data server");
 				
 				metadataForAuthenticator = dataMapperService.createObjectNode();

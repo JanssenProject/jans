@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.gluu.fido2.exception.Fido2RPRuntimeException;
+import org.gluu.fido2.exception.Fido2RuntimeException;
 import org.slf4j.Logger;
 
 /**
@@ -23,13 +23,13 @@ import org.slf4j.Logger;
  */
 @ApplicationScoped
 @Provider
-public class Fido2ExceptionHandler implements ExceptionMapper<Fido2RPRuntimeException> {
+public class Fido2ExceptionHandler implements ExceptionMapper<Fido2RuntimeException> {
 
     @Inject
     private Logger log;
 
     @Override
-    public Response toResponse(Fido2RPRuntimeException ex) {
+    public Response toResponse(Fido2RuntimeException ex) {
         log.error("Handled Fido2 RP exception", ex);
 
         return Response.status(Status.BAD_REQUEST).entity(ex.getMessage()).build();
