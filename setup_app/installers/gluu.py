@@ -331,7 +331,7 @@ class GluuInstaller(SetupUtils):
             encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
         except:
-            self.logIt("Error rendering encode script")
+            self.logIt("Error rendering encode script", True)
 
         self.run([paths.cmd_chmod, '-R', '700', Config.gluuOptBinFolder])
 

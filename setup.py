@@ -227,6 +227,9 @@ if proceed:
         radiusInstaller.install_gluu_radius()
 
 
+    propertiesUtils.save_properties()
+
+
     """
     self.pbar.progress("gluu", "Installing Gluu components")
     self.install_gluu_components()
