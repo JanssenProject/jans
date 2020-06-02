@@ -281,7 +281,7 @@ class PropertiesUtils(SetupUtils):
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties'):
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties', 'opensslCommand'):
                     continue
                 if key.startswith('cmd_'):
                     continue
@@ -295,7 +295,7 @@ class PropertiesUtils(SetupUtils):
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
             
-            self.run([paths.opensslCommand, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
+            self.run([Config.opensslCommand, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
             
             Config.post_messages.append(
                 "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(

@@ -366,7 +366,8 @@ class SetupUtils(Crypto64):
 
         return text % dictionary
 
-    def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
+
+    def renderTemplateInOut(self, filePath, templateFolder, outputFolder, me=''):
         fn = os.path.basename(filePath)
         in_fp = os.path.join(templateFolder, fn) 
         self.logIt("Rendering template %s" % in_fp)

@@ -6,7 +6,9 @@ from setup_app.utils import base
 
 class LDAPUtils:
 
-    def __init__(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
+    def connect(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
+
+        print(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn, Config.ldapPass)
 
         if not ldap_hostname:
             ldap_hostname = Config.ldap_hostname
@@ -159,3 +161,6 @@ class LDAPUtils:
             self.ldap_conn.unbind()
         except:
             pass
+
+
+ldapUtils = LDAPUtils()
