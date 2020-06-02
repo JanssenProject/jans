@@ -63,10 +63,11 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
             Boolean backchannelUserCodeParameter = (Boolean) ctx.getParameters()[7];
             String userCodeParam = (String) ctx.getParameters()[8];
             String userCode = (String) ctx.getParameters()[9];
+            Integer requestedExpirity = (Integer) ctx.getParameters()[10];
             errorResponse = validateParams(
                     scopeList, clientNotificationToken, tokenDeliveryMode,
                     loginHintToken, idTokenHint, loginHint, bindingMessage,
-                    backchannelUserCodeParameter, userCodeParam, userCode);
+                    backchannelUserCodeParameter, userCodeParam, userCode, requestedExpirity);
             ctx.proceed();
         } catch (Exception e) {
             log.error("Failed to validate authorize params.", e);
@@ -79,7 +80,7 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
     public DefaultErrorResponse validateParams(
             List<String> scopeList, String clientNotificationToken, BackchannelTokenDeliveryMode tokenDeliveryMode,
             String loginHintToken, String idTokenHint, String loginHint, String bindingMessage,
-            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode) {
+            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode, Integer requestedExpirity) {
 
         if (tokenDeliveryMode == null) {
             DefaultErrorResponse errorResponse = new DefaultErrorResponse();
@@ -159,6 +160,16 @@ public class CIBAAuthorizeParamsValidatorInterceptor implements CIBAAuthorizePar
 
                 return errorResponse;
             }
+        }
+
+        if (requestedExpirity != null && (requestedExpirity < 1
+                || requestedExpirity > appConfiguration.getCibaMaxExpirationTimeAllowedSec())) {
+            DefaultErrorResponse errorResponse = new DefaultErrorResponse();
+            errorResponse.setStatus(Response.Status.BAD_REQUEST.getStatusCode());
+            errorResponse.setType(INVALID_REQUEST);
+            errorResponse.setReason("Requested expirity is not allowed.");
+
+            return errorResponse;
         }
 
         return null;
