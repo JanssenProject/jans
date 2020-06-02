@@ -347,9 +347,6 @@ class Config:
         self.oxtrust_requesting_party_client_id = None
         self.oxtrust_resource_server_client_id = None
 
-        self.oxauth_legacyIdTokenClaims = 'false'
-        self.oxauth_openidScopeBackwardCompatibility =  'false'
-
 
         #definitions for couchbase
         self.couchebaseInstallDir = '/opt/couchbase/'

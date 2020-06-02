@@ -283,7 +283,7 @@
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-    "legacyIdTokenClaims": %(oxauth_legacyIdTokenClaims)s,
+    "legacyIdTokenClaims": false,
     "customHeadersWithAuthorizationResponse": true,
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": false,
@@ -314,7 +314,7 @@
         "customParam3"
     ],
     "legacyDynamicRegistrationScopeParam": false,
-    "openidScopeBackwardCompatibility": %(oxauth_openidScopeBackwardCompatibility)s,
+    "openidScopeBackwardCompatibility": false,
     "useCacheForAllImplicitFlowObjects":false,
     "disableU2fEndpoint":false,
     "authenticationProtectionConfiguration": {
