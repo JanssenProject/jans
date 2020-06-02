@@ -17,7 +17,7 @@ from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.util import StringHelper
-from org.gluu.oxauth.service import EncryptionService
+from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.service import MailService
 from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService 
 from org.gluu.oxnotify.client import NotifyClientFactory 
