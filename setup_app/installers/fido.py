@@ -11,6 +11,7 @@ class FidoInstaller(JettyInstaller):
     def __init__(self):
         self.service_name = 'fido2'
         self.pbar_text = "Installing fido2"
+        self.needldap = True
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
         self.output_folder = os.path.join(Config.outputFolder, 'fido2')
