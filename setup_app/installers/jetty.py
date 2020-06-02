@@ -12,7 +12,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"
-
+        self.needldap = False # we don't need ldap connection in this class
 
     def install(self):
 

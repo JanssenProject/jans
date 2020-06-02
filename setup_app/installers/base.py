@@ -2,16 +2,15 @@ from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.ldap_utils import ldapUtils
 
-class BaseInstaller():
-    ldapUtils = ldapUtils
+class BaseInstaller:
     needldap = True
 
     def start_installation(self):
+        self.ldapUtils = ldapUtils
         self.logIt(self.pbar_text, pbar=self.service_name)
-
         if self.needldap and not self.ldapUtils.ready:
             try:
-                self.ldapUtils.connect()
+                self.ldapUtils.bind()
             except:
                 pass
 
