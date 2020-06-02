@@ -37,15 +37,7 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.AuthenticationFilterService;
-import org.gluu.oxauth.service.ClientAuthorizationsService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.CookieService;
-import org.gluu.oxauth.service.RedirectUriResponse;
-import org.gluu.oxauth.service.RequestParameterService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.UserService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.util.QueryStringDecoder;
@@ -436,8 +428,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
-                    client.getClientId(),
-                    client.getPersistClientAuthorizations());
+                    client.getClientId());
             if (scopes.size() > 0) {
                 if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
