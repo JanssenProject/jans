@@ -434,7 +434,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
                     }
                 } else {
-                    final CibaCacheRequest cibaRequest = cibaRequestService.getCibaRequest(authReqId);
+                    final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
                     log.trace("Ciba request : '{}'", cibaRequest);
                     if (cibaRequest != null) {
                         long currentTime = new Date().getTime();
@@ -445,7 +445,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         cibaRequest.setLastAccessControl(currentTime);
                         cibaRequestService.update(cibaRequest);
 
-                        if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_PENDING) {
+                        if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
                             int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                             long timeFromLastAccess = currentTime - lastAccess;
 
@@ -456,10 +456,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 log.debug("Slow down protection authReqId: '{}'", authReqId);
                                 builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
                             }
-                        } else if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_DENIED) {
+                        } else if (cibaRequest.getStatus() == CibaRequestStatus.DENIED) {
                             log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
-                        } else if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_EXPIRED) {
+                        } else if (cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
                             log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired");
                         }
