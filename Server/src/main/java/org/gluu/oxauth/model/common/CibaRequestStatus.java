@@ -12,16 +12,16 @@ import org.apache.commons.lang.StringUtils;
  * @author Javier Rojas Blum
  * @version May 9, 2020
  */
-public enum CIBARequestStatus {
-    AUTHORIZATION_PENDING("pending"),
-    AUTHORIZATION_GRANTED("granted"),
-    AUTHORIZATION_DENIED("denied"),
-    AUTHORIZATION_EXPIRED("expired"),
-    AUTHORIZATION_IN_PROCESS("in_process");
+public enum CibaRequestStatus {
+    PENDING("pending"),
+    GRANTED("granted"),
+    DENIED("denied"),
+    EXPIRED("expired"),
+    IN_PROCESS("in_process");
 
     private final String value;
 
-    CIBARequestStatus(String name) {
+    CibaRequestStatus(String name) {
         value = name;
     }
 
@@ -29,9 +29,9 @@ public enum CIBARequestStatus {
         return value;
     }
 
-    public static CIBARequestStatus fromValue(String value) {
+    public static CibaRequestStatus fromValue(String value) {
         if (StringUtils.isNotBlank(value)) {
-            for (CIBARequestStatus t : values()) {
+            for (CibaRequestStatus t : values()) {
                 if (t.getValue().endsWith(value)) {
                     return t;
                 }

@@ -202,27 +202,27 @@ public class AuthorizeService {
         Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
         if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
             String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
-            CibaCacheRequest request = cibaRequestService.getCibaRequest(authReqId);
+            CibaRequestCacheControl request = cibaRequestService.getCibaRequest(authReqId);
 
             if (request != null  && request.getClient() != null) {
-                if (request.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_PENDING) {
+                if (request.getStatus() == CibaRequestStatus.PENDING) {
                     cibaRequestService.removeCibaRequest(authReqId);
                 }
                 switch (request.getClient().getBackchannelTokenDeliveryMode()) {
                     case PING:
-                        request.setRequestStatus(CIBARequestStatus.AUTHORIZATION_DENIED);
+                        request.setStatus(CibaRequestStatus.DENIED);
                         request.setTokensDelivered(false);
                         cibaRequestService.update(request);
 
                         cibaPingCallbackProxy.pingCallback(
-                                request.getCibaAuthenticationRequestId().getCode(),
+                                request.getCibaAuthReqId().getCode(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken()
                         );
                         break;
                     case PUSH:
                         cibaPushErrorProxy.pushError(
-                                request.getCibaAuthenticationRequestId().getCode(),
+                                request.getCibaAuthReqId().getCode(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken(),
                                 PushErrorResponseType.ACCESS_DENIED,
