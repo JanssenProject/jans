@@ -15,6 +15,10 @@ import math
 from queue import Queue
 from .messages import msg
 
+# for putty connections we need the following env
+os.environ['NCURSES_NO_UTF8_ACS'] = "1" 
+
+
 import npyscreen
 
 queue = Queue()
