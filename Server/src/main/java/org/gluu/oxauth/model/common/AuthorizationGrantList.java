@@ -7,7 +7,6 @@
 package org.gluu.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -117,29 +116,24 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
-        if (appConfiguration.getCibaGrantLifeExtraTimeSec() > 0) {
-            expiresIn += appConfiguration.getCibaGrantLifeExtraTimeSec();
-        }
-
+    public CIBAGrant createCIBAGrant(CibaCacheRequest request) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
-        grant.init(user, client, expiresIn);
-        CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
+        grant.init(request);
         cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(),
-                memcachedGrant.cacheKey(), memcachedGrant);
-        log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
+                grant.getCIBAAuthenticationRequestId().getCode(), grant);
+        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", grant.getCIBAAuthenticationRequestId().getCode(), grant.getGrantId());
         return grant;
     }
 
     @Override
     public CIBAGrant getCIBAGrant(String authenticationRequestId) {
-        Object cachedGrant = cacheService.get(CIBACacheGrant.cacheKey(authenticationRequestId, null));
+        Object cachedGrant = cacheService.get(authenticationRequestId);
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(CIBACacheGrant.cacheKey(authenticationRequestId, null));
+            cachedGrant = cacheService.get(CibaCacheRequest.cacheKey(authenticationRequestId, null));
             log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
         }
-        return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
+        return cachedGrant instanceof CIBAGrant ? ((CIBAGrant) cachedGrant) : null;
     }
 
     @Override
