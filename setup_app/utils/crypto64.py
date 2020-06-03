@@ -32,19 +32,6 @@ class Crypto64:
         return encoded_pw.decode('utf-8')
 
 
-    #TODO: consider moving to installers, passport is done
-    def generate_crypto(self):
-        self.logIt('Generating certificates and keystores', pbar='gluu')
-        try:
-            self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
-            #TODO: check this
-            # permissions
-            #self.run([paths.cmd_chown, '-R', 'jetty:jetty', Config.certFolder])
-            #self.run([paths.cmd_chmod, '-R', '500', Config.certFolder])
-
-        except:
-            self.logIt("Error generating cyrpto", True)
-
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
         key_with_password = '%s/%s.key.orig' % (Config.certFolder, suffix)
