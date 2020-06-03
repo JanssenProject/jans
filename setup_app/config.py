@@ -186,10 +186,6 @@ class Config:
 
         self.ldapBaseFolderldapPass = None
 
-        self.oxauth_client_id = None
-        self.oxauthClient_pw = None
-        self.oxauthClient_encoded_pw = None
-
         self.idp_client_id = None
         self.idpClient_pw = None
         self.idpClient_encoded_pw = None
@@ -204,11 +200,6 @@ class Config:
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
 
-        self.oxauth_error_json = os.path.join(self.staticFolder, 'oxauth/oxauth-errors.json')
-
-        self.oxauth_openid_jwks_fn = os.path.join(self.outputFolder, 'oxauth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(self.certFolder, 'oxauth-keys.jks')
-        self.oxauth_openid_jks_pass = None
 
         self.httpdKeyPass = None
         self.httpdKeyFn = os.path.join(self.certFolder, 'httpd.key')
@@ -269,14 +260,14 @@ class Config:
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
-        self.oxauth_config_json = os.path.join(self.outputFolder, 'oxauth-config.json')
+        
         self.oxtrust_config_json = os.path.join(self.outputFolder, 'oxtrust-config.json')
         self.oxtrust_cache_refresh_json = os.path.join(self.outputFolder, 'oxtrust-cache-refresh.json')
         self.oxtrust_import_person_json = os.path.join(self.outputFolder, 'oxtrust-import-person.json')
         self.oxidp_config_json = os.path.join(self.outputFolder, 'oxidp-config.json')
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
-        self.oxauth_static_conf_json = os.path.join(self.outputFolder, 'oxauth-static-conf.json')
+        
         self.oxTrust_log_rotation_configuration = os.path.join(self.gluuBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
         self.apache2_conf = os.path.join(self.outputFolder, 'httpd.conf')
         self.apache2_ssl_conf = os.path.join(self.outputFolder, 'https_gluu.conf')
@@ -391,14 +382,13 @@ class Config:
                            ]
 
 
-        self.ce_templates = {self.oxauth_config_json: False,
+        self.ce_templates = {
                              self.gluu_python_readme: True,
                              self.oxtrust_config_json: False,
                              self.oxtrust_cache_refresh_json: False,
                              self.oxtrust_import_person_json: False,
                              self.oxidp_config_json: False,
                              self.ox_ldap_properties: True,
-                             self.oxauth_static_conf_json: False,
                              self.oxTrust_log_rotation_configuration: True,
                              self.ldap_setup_properties: False,
                              self.apache2_conf: False,

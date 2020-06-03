@@ -1,0 +1,26 @@
+dn: inum=%(oxauth_client_id)s,ou=clients,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+displayName: oxTrust Admin GUI
+inum: %(oxauth_client_id)s
+oxAuthClientSecret: %(oxauthClient_encoded_pw)s
+oxAuthAppType: web
+oxAuthResponseType: code
+oxAuthGrantType: authorization_code
+oxAuthGrantType: implicit
+oxAuthGrantType: refresh_token
+oxAuthScope: inum=F0C4,ou=scopes,o=gluu
+oxAuthScope: inum=10B2,ou=scopes,o=gluu
+oxAuthScope: inum=764C,ou=scopes,o=gluu
+oxAuthLogoutURI: https://%(hostname)s/identity/ssologout.htm
+oxAuthRedirectURI: https://%(hostname)s/identity/scim/auth
+oxAuthRedirectURI: https://%(hostname)s/identity/authcode.htm
+oxAuthRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims?authentication=true
+oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
+oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/finishlogout.htm
+oxAuthTokenEndpointAuthMethod: client_secret_basic
+oxAuthIdTokenSignedResponseAlg: HS256
+oxAuthTrustedClient: true
+oxAuthSubjectType: public
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: true
