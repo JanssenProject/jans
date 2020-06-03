@@ -142,17 +142,12 @@ class Crypto64:
 
     def generate_base64_configuration(self):
         self.logIt("Generating base64 configuration", pbar='gluu')
-
-
         #TODO: explore possibility of moving these to oxauth, oxtrust, passport ... installers
-        Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(Config.oxauth_config_json)
-        Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(Config.oxauth_static_conf_json)
-        Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(Config.oxauth_error_json)
-        Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(Config.oxauth_openid_jwks_fn)
 
         Config.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(Config.oxtrust_config_json);
         Config.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(Config.oxtrust_cache_refresh_json)
         Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(Config.oxtrust_import_person_json)
+        
         Config.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(Config.oxidp_config_json)
 
     def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
@@ -311,13 +306,7 @@ class Crypto64:
         except:
             self.logIt("Error writing command : %s" % fn, True)
 
-    #TODO: Consider moving to oxauth installer
-    def generate_oxauth_openid_keys(self):
-        self.logIt("Generating oxauth openid keys", pbar='gluu')
-        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
-        enc_keys = 'RSA1_5 RSA-OAEP'
-        jwks = self.gen_openid_jwks_jks_keys(Config.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
-        self.write_openid_keys(Config.oxauth_openid_jwks_fn, jwks)
+
 
     def generate_base64_string(self, lines, num_spaces):
         if not lines:
@@ -341,9 +330,6 @@ class Crypto64:
             if Config.cb_password:
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
             Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
-
-            Config.oxauthClient_pw = self.getPW()
-            Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
 
             Config.idpClient_pw = self.getPW()
             Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)

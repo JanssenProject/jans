@@ -23,6 +23,10 @@ class OxtrustInstaller(JettyInstaller):
 
         self.enable()
 
+
+
+
+
     def generate_api_configuration(self):
         Config.api_rs_client_jks_pass_encoded = self.obscure(Config.api_rs_client_jks_pass)
         Config.api_rs_client_jwks = self.gen_openid_jwks_jks_keys(Config.api_rs_client_jks_fn, Config.api_rs_client_jks_pass)
@@ -31,6 +35,11 @@ class OxtrustInstaller(JettyInstaller):
         Config.api_rp_client_jks_pass_encoded = self.obscure(Config.api_rp_client_jks_pass)
         Config.api_rp_client_jwks = self.gen_openid_jwks_jks_keys(Config.api_rp_client_jks_fn, Config.api_rp_client_jks_pass)
         Config.templateRenderingDict['api_rp_client_base64_jwks'] = self.generate_base64_string(Config.api_rp_client_jwks, 1)
+
+
+        #TODO: Add these to oxtrust-config.json
+        #"oxAuthClientId":"%(oxauth_client_id)s",
+        #"oxAuthClientPassword":"%(oxauthClient_encoded_pw)s",
 
 
     def download_files(self):
