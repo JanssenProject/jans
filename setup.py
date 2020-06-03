@@ -175,7 +175,6 @@ if proceed:
 
     gluuInstaller.prepare_base64_extension_scripts()
     gluuInstaller.render_templates()
-    gluuInstaller.generate_crypto()
 
     #TODO: Consider moving to oxauth installer
     gluuInstaller.generate_oxauth_openid_keys()
