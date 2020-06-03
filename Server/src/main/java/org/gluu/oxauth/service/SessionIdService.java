@@ -39,6 +39,7 @@ import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -861,5 +862,10 @@ public class SessionIdService {
         }
 
         return null;
+    }
+
+    public List<SessionId> findByUser(String userDn) {
+        Filter filter = Filter.createEqualityFilter("oxAuthUserDN", userDn);
+        return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
     }
 }
