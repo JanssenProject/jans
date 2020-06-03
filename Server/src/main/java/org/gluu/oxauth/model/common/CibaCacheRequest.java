@@ -28,7 +28,7 @@ public class CibaCacheRequest implements Serializable {
     private String clientNotificationToken;
     private String bindingMessage;
     private Long lastAccessControl;
-    private CIBAGrantUserAuthorization userAuthorization;
+    private CIBARequestStatus requestStatus;
     private boolean tokensDelivered;
     private String acrValues;
 
@@ -43,7 +43,7 @@ public class CibaCacheRequest implements Serializable {
         this.client = client;
         this.scopes = scopeList;
         this.cibaAuthenticationRequestId = authenticationRequestId;
-        this.userAuthorization = CIBAGrantUserAuthorization.AUTHORIZATION_PENDING;
+        this.requestStatus = CIBARequestStatus.AUTHORIZATION_PENDING;
         this.authorizationRequestId = authenticationRequestId.getCode();
         this.expiresIn = expiresIn;
         this.clientNotificationToken = clientNotificationToken;
@@ -136,12 +136,12 @@ public class CibaCacheRequest implements Serializable {
         this.lastAccessControl = lastAccessControl;
     }
 
-    public CIBAGrantUserAuthorization getUserAuthorization() {
-        return userAuthorization;
+    public CIBARequestStatus getRequestStatus() {
+        return requestStatus;
     }
 
-    public void setUserAuthorization(CIBAGrantUserAuthorization userAuthorization) {
-        this.userAuthorization = userAuthorization;
+    public void setRequestStatus(CIBARequestStatus requestStatus) {
+        this.requestStatus = requestStatus;
     }
 
     public boolean isTokensDelivered() {
@@ -180,7 +180,7 @@ public class CibaCacheRequest implements Serializable {
                 ", clientNotificationToken='" + clientNotificationToken + '\'' +
                 ", bindingMessage='" + bindingMessage + '\'' +
                 ", lastAccessControl=" + lastAccessControl +
-                ", userAuthorization=" + userAuthorization +
+                ", userAuthorization=" + requestStatus +
                 ", tokensDelivered=" + tokensDelivered +
                 ", acrValues='" + acrValues + '\'' +
                 '}';

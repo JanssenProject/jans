@@ -12,7 +12,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Javier Rojas Blum
  * @version May 9, 2020
  */
-public enum CIBAGrantUserAuthorization {
+public enum CIBARequestStatus {
     AUTHORIZATION_PENDING("pending"),
     AUTHORIZATION_GRANTED("granted"),
     AUTHORIZATION_DENIED("denied"),
@@ -21,7 +21,7 @@ public enum CIBAGrantUserAuthorization {
 
     private final String value;
 
-    CIBAGrantUserAuthorization(String name) {
+    CIBARequestStatus(String name) {
         value = name;
     }
 
@@ -29,9 +29,9 @@ public enum CIBAGrantUserAuthorization {
         return value;
     }
 
-    public static CIBAGrantUserAuthorization fromValue(String value) {
+    public static CIBARequestStatus fromValue(String value) {
         if (StringUtils.isNotBlank(value)) {
-            for (CIBAGrantUserAuthorization t : values()) {
+            for (CIBARequestStatus t : values()) {
                 if (t.getValue().endsWith(value)) {
                     return t;
                 }
