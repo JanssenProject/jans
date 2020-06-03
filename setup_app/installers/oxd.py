@@ -14,7 +14,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.service_name = 'oxd-server'
         self.pbar_text = "Installing Oxd Server"
         self.oxd_root = '/opt/oxd-server/'
-
+        self.needdb = False # we don't need backend connection in this class
 
     def install(self):
         

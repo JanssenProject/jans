@@ -1,22 +1,23 @@
 from setup_app.utils import base
 from setup_app.config import Config
-from setup_app.utils.ldap_utils import ldapUtils
+from setup_app.utils.db_utils import dbUtils
 
 class BaseInstaller:
-    needldap = True
+    needdb = True
 
     def start_installation(self):
-        self.ldapUtils = ldapUtils
+        self.dbUtils = dbUtils
         self.logIt(self.pbar_text, pbar=self.service_name)
-        if self.needldap and not self.ldapUtils.ready:
+        if self.needdb and not self.dbUtils.ready:
             try:
-                self.ldapUtils.bind()
+                self.dbUtils.bind()
             except:
                 pass
 
         # execute for each installer
         if Config.downloadWars:
             self.download_files()
+
         self.create_user()
         self.create_folders()
 

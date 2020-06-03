@@ -11,7 +11,7 @@ class SamlInstaller(JettyInstaller):
     def __init__(self):
         self.service_name = 'idp'
         self.pbar_text = "Installing Saml"
-        self.needldap = True
+        self.needdb = True
         self.idp3_war = 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.idp3_dist_jar = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (Config.oxVersion, Config.oxVersion)
         self.idp3_cml_keygenerator = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (Config.oxVersion, Config.oxVersion)
@@ -133,8 +133,8 @@ class SamlInstaller(JettyInstaller):
 
         #TODO: implement for couchbase ???
         if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.enable_service('gluuSamlEnabled')
-            self.ldapUtils.set_oxTrustConfApplication(oxtrust_conf)
+            self.dbUtils.enable_service('gluuSamlEnabled')
+            self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
 
         self.enable()
 
