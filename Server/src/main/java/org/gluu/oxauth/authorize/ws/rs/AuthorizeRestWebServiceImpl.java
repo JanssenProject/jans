@@ -626,30 +626,31 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+        CibaCacheRequest cibaRequest = cibaRequestService.getCibaRequest(authReqId);
 
-        if (cibaGrant == null || cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
-            log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaGrant);
+        if (cibaRequest == null || cibaRequest.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+            log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaRequest);
             return;
         }
 
         cibaRequestService.removeCibaRequest(authReqId);
+        CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-            RefreshToken refreshToken = cibaGrant.createRefreshToken();
-            log.debug("Issuing refresh token: {}", refreshToken.getCode());
+        RefreshToken refreshToken = cibaGrant.createRefreshToken();
+        log.debug("Issuing refresh token: {}", refreshToken.getCode());
 
-            AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-            log.debug("Issuing access token: {}", accessToken.getCode());
+        AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+        log.debug("Issuing access token: {}", accessToken.getCode());
 
-            IdToken idToken = cibaGrant.createIdToken(
-                    null, null, accessToken, refreshToken,
-                    null, cibaGrant, false, null);
+        IdToken idToken = cibaGrant.createIdToken(
+                null, null, accessToken, refreshToken,
+                null, cibaGrant, false, null);
 
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
-            cibaGrant.setTokensDelivered(true);
-            cibaGrant.save();
+        cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
+        cibaGrant.setTokensDelivered(true);
+        cibaGrant.save();
 
+        if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushTokenDeliveryProxy.pushTokenDelivery(
                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
@@ -660,7 +661,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     accessToken.getExpiresIn()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 

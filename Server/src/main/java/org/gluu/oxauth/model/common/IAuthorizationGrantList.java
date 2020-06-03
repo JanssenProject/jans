@@ -30,7 +30,7 @@ public interface IAuthorizationGrantList {
 
     ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
-    CIBAGrant createCIBAGrant(User user, Client client, int expiresIn);
+    CIBAGrant createCIBAGrant(CibaCacheRequest request);
 
     AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode);
 
