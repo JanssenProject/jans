@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.enterprise.inject.Vetoed;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -139,6 +140,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private List<String> clientWhiteList;
     private List<String> clientBlackList;
+    private List<String> supportedUserStatus= Arrays.asList("active","inactive");
 
     private String loggingLevel;
     private String loggingLayout;
@@ -796,6 +798,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
     public void setMetricReporterInterval(int metricReporterInterval) {
         this.metricReporterInterval = metricReporterInterval;
+    }
+
+    public List<String> getSupportedUserStatus() {
+        return supportedUserStatus;
+    }
+
+    public void setSupportedUserStatus(List<String> supportedUserStatus) {
+        this.supportedUserStatus = supportedUserStatus;
     }
 
     /**
