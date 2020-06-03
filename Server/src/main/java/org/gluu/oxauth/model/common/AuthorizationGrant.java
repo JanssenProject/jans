@@ -26,7 +26,6 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
 import org.gluu.oxauth.service.SectorIdentifierService;
-import org.gluu.oxauth.service.common.*;
 import org.gluu.oxauth.service.external.ExternalIntrospectionService;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.gluu.oxauth.util.TokenHashUtil;
@@ -112,7 +111,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
                 saveInCache();
             } else if (getAuthorizationGrantType() == AuthorizationGrantType.CIBA) {
-                saveCIBAInCache();
                 saveInCache();
             } else {
                 throw new UnsupportedOperationException(
@@ -129,11 +127,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private void saveInCache() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
-        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
-    }
-
-    private void saveCIBAInCache() {
-        CIBACacheGrant cachedGrant = new CIBACacheGrant((CIBAGrant) this, appConfiguration);
         cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.cacheKey(), cachedGrant);
     }
 
