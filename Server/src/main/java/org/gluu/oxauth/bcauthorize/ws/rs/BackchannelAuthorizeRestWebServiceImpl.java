@@ -237,17 +237,17 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     null : appConfiguration.getBackchannelAuthenticationResponseInterval();
             long currentTime = new Date().getTime();
 
-            CibaCacheRequest cibaCacheRequest = new CibaCacheRequest(user, client, expiresIn, scopeList,
+            CibaRequestCacheControl cibaRequestCacheControl = new CibaRequestCacheControl(user, client, expiresIn, scopeList,
                     clientNotificationToken, bindingMessage, currentTime, acrValues);
 
-            cibaRequestService.save(cibaCacheRequest, expiresIn);
+            cibaRequestService.save(cibaRequestCacheControl, expiresIn);
 
-            String authReqId = cibaCacheRequest.getCibaAuthenticationRequestId().getCode();
+            String authReqId = cibaRequestCacheControl.getCibaAuthReqId().getCode();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
-                    cibaCacheRequest.getScopesAsString(),
-                    cibaCacheRequest.getAcrValues(),
+                    cibaRequestCacheControl.getScopesAsString(),
+                    cibaRequestCacheControl.getAcrValues(),
                     authReqId,
                     deviceRegistrationToken);
 

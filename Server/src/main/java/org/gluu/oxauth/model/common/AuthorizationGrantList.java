@@ -116,7 +116,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public CIBAGrant createCIBAGrant(CibaCacheRequest request) {
+    public CIBAGrant createCIBAGrant(CibaRequestCacheControl request) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
         grant.init(request);
         cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(),
@@ -126,12 +126,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public CIBAGrant getCIBAGrant(String authenticationRequestId) {
-        Object cachedGrant = cacheService.get(authenticationRequestId);
+    public CIBAGrant getCIBAGrant(String authReqId) {
+        Object cachedGrant = cacheService.get(authReqId);
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(CibaCacheRequest.cacheKey(authenticationRequestId, null));
-            log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
+            cachedGrant = cacheService.get(authReqId);
+            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", authReqId);
         }
         return cachedGrant instanceof CIBAGrant ? ((CIBAGrant) cachedGrant) : null;
     }
