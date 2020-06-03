@@ -26,8 +26,6 @@ import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
-import org.gluu.oxauth.service.UserService;
-import org.gluu.oxauth.service.common.*;
 import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
@@ -447,7 +445,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         cibaRequest.setLastAccessControl(currentTime);
                         cibaRequestService.update(cibaRequest);
 
-                        if (cibaRequest.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_PENDING) {
+                        if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_PENDING) {
                             int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                             long timeFromLastAccess = currentTime - lastAccess;
 
@@ -458,10 +456,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 log.debug("Slow down protection authReqId: '{}'", authReqId);
                                 builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
                             }
-                        } else if (cibaRequest.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_DENIED) {
+                        } else if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_DENIED) {
                             log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
-                        } else if (cibaRequest.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+                        } else if (cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_EXPIRED) {
                             log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired");
                         }

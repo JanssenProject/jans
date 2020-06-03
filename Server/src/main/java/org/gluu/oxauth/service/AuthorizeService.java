@@ -205,12 +205,12 @@ public class AuthorizeService {
             CibaCacheRequest request = cibaRequestService.getCibaRequest(authReqId);
 
             if (request != null  && request.getClient() != null) {
-                if (request.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_PENDING) {
+                if (request.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_PENDING) {
                     cibaRequestService.removeCibaRequest(authReqId);
                 }
                 switch (request.getClient().getBackchannelTokenDeliveryMode()) {
                     case PING:
-                        request.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
+                        request.setRequestStatus(CIBARequestStatus.AUTHORIZATION_DENIED);
                         request.setTokensDelivered(false);
                         cibaRequestService.update(request);
 
