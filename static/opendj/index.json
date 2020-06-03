@@ -310,5 +310,12 @@
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "oxAuthUserDN",
+        "type": "string",
+        "index": ["presence", "equality"],
+        "backend": ["userRoot"]
     }
 ]
