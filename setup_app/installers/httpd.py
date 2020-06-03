@@ -92,6 +92,8 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
                 if not f_name in mods_enabled:
                     self.run(['unlink', mod_load_fn])
 
+        # generate httpd self signed certificate
+        self.gen_cert('httpd', Config.httpdKeyPass, 'jetty')
 
         self.enable()
         self.start()
