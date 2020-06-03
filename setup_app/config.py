@@ -180,7 +180,7 @@ class Config:
         self.state = None
         self.admin_email = None
         self.encoded_ox_ldap_pw = None
-        self.application_max_ram = 3072    # in MB
+        self.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
         self.encode_salt = None
         self.admin_inum = None
 
