@@ -163,7 +163,7 @@ public class CibaRequestsProcessorJob {
         }
         log.info("Authentication request id {} has expired", authReqId);
 
-        cibaRequestService.removeCibaCacheRequest(cibaRequest);
+        cibaRequestService.removeCibaCacheRequest(cibaRequest.cacheKey());
 
         if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushErrorProxy.pushError(cibaRequest.getCibaAuthenticationRequestId().getCode(),

@@ -118,6 +118,10 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Removes a CibaRequest object from the database.
+     * @param cibaRequest Object to be removed.
+     */
     public void removeCibaRequest(CIBARequest cibaRequest) {
         try {
             entryManager.remove(cibaRequest);
@@ -126,6 +130,10 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Removes a CibaRequest from the database.
+     * @param authReqId Identifier of the CibaRequest.
+     */
     public void removeCibaRequest(String authReqId) {
         try {
             String requestDn = String.format("authReqId=%s,%s", authReqId, this.cibaBaseDn());
@@ -135,6 +143,11 @@ public class CibaRequestService {
         }
     }
 
+    /**
+     * Register a new CibaCacheRequest instance in Cache and in the database.
+     * @param request New instance to be saved.
+     * @param expiresIn Expiration time of the request in Cache and memory.
+     */
     public void save(CibaCacheRequest request, int expiresIn) {
         int expiresInCache = expiresIn;
         if (appConfiguration.getCibaGrantLifeExtraTimeSec() > 0) {
@@ -146,6 +159,10 @@ public class CibaRequestService {
         log.trace("Ciba request saved in cache, authReqId: {} clientId: {}", request.getCibaAuthenticationRequestId().getCode(), request.getClient().getClientId());
     }
 
+    /**
+     * Put in cache a CibaCacheRequest object, it uses same expiration time that it has.
+     * @param request Object to be updated, replaced or created.
+     */
     public void update(CibaCacheRequest request) {
         int expiresInCache = request.getExpiresIn();
         if (appConfiguration.getCibaGrantLifeExtraTimeSec() > 0) {
@@ -155,6 +172,10 @@ public class CibaRequestService {
         cacheService.put(expiresInCache, request.cacheKey(), request);
     }
 
+    /**
+     * Get a CibaCacheRequest object from Cache service.
+     * @param authReqId Identifier of the object to be gotten.
+     */
     public CibaCacheRequest getCibaRequest(String authReqId) {
         Object cachedObject = cacheService.get(authReqId);
         if (cachedObject == null) {
@@ -165,9 +186,13 @@ public class CibaRequestService {
         return cachedObject instanceof CibaCacheRequest ? (CibaCacheRequest) cachedObject : null;
     }
 
-    public void removeCibaCacheRequest(CibaCacheRequest cibaRequest) {
+    /**
+     * Removes from cache a request.
+     * @param cacheKey Object to be removed from Cache.
+     */
+    public void removeCibaCacheRequest(String cacheKey) {
         try {
-            cacheService.remove(cibaRequest.cacheKey());
+            cacheService.remove(cacheKey);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
