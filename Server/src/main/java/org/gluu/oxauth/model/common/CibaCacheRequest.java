@@ -13,8 +13,10 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @author Javier Rojas Blum
- * @version May 5, 2020
+ * Class used to keep all data about a CIBA request that should be processed and saved in Cache.
+ *
+ * @author Milton BO
+ * @version June 2, 2020
  */
 public class CibaCacheRequest implements Serializable {
 
