@@ -2,6 +2,7 @@ import os
 import glob
 import random
 import string
+import uuid
 
 from setup_app import paths
 from setup_app.config import Config
@@ -16,6 +17,17 @@ class OxauthInstaller(JettyInstaller):
         self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.oxAuthRPWar = 'oxauth-rp.war'
 
+        self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
+        self.output_folder = os.path.join(Config.outputFolder, self.service_name)
+
+        self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
+        self.ldif_clients = os.path.join(self.output_folder, 'clients.ldif')
+        self.oxauth_config_json = os.path.join(self.output_folder, 'oxauth-config.json')
+        self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'oxauth-static-conf.json')
+        self.oxauth_error_json = os.path.join(self.templates_folder, 'oxauth-errors.json')
+        self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'oxauth-keys.json')
+        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'oxauth-keys.jks')
+
     def install(self):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
@@ -24,8 +36,49 @@ class OxauthInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name,  'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'oxauth.war')
         self.copyFile(src_war, jettyServiceWebapps)
-
+        self.generate_configuration()
+        self.render_import_templates()
         self.enable()
+
+    def generate_configuration(self):
+        if not Config.get('oxauth_openid_jks_pass'):
+            Config.oxauth_openid_jks_pass = self.getPW()
+        
+        if not Config.get('oxauth_client_id'):
+            Config.oxauth_client_id = '1001.'+ str(uuid.uuid4())
+        
+        if not Config.get('oxauthClient_pw'):
+            Config.oxauthClient_pw = self.getPW()
+            Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
+            
+        self.logIt("Generating oxauth openid keys", pbar='gluu')
+        sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
+        enc_keys = 'RSA1_5 RSA-OAEP'
+        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+        self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
+
+    def render_import_templates(self):
+        # make variables of this class accesible from Config
+        Config.templateRenderingDict.update(self.__dict__)
+        
+        self.renderTemplateInOut(self.oxauth_config_json, self.templates_folder, self.output_folder)
+
+        Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
+        Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
+        Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
+        Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+        
+        self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
+        self.renderTemplateInOut(self.ldif_clients, self.templates_folder, self.output_folder)
+
+        #TODO: couchbase
+        if Config.mappingLocations['default'] == 'ldap':
+            self.ldapUtils.import_ldif([self.ldif_config, self.ldif_clients])
+        else:
+            pass
+            #self.import_ldif_couchebase([self.ldif_config])
+            
+        
 
     def install_oxauth_rp(self):
         Config.pbar.progress("oxauthrp", "Installing OxAuthRP", False)
