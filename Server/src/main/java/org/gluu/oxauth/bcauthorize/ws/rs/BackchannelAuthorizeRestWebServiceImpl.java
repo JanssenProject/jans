@@ -237,25 +237,17 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     null : appConfiguration.getBackchannelAuthenticationResponseInterval();
             long currentTime = new Date().getTime();
 
-            CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(
-                    user,
-                    client,
-                    expiresIn);
-            cibaGrant.setScopes(scopeList);
-            cibaGrant.setClientNotificationToken(clientNotificationToken);
-            cibaGrant.setBindingMessage(bindingMessage);
-            cibaGrant.setLastAccessControl(currentTime);
-            cibaGrant.setAcrValues(acrValues);
-            cibaGrant.save(); // call save after object modification!!!
+            CibaRequestCacheControl cibaRequestCacheControl = new CibaRequestCacheControl(user, client, expiresIn, scopeList,
+                    clientNotificationToken, bindingMessage, currentTime, acrValues);
 
-            cibaRequestService.persistRequest(cibaGrant, expiresIn);
+            cibaRequestService.save(cibaRequestCacheControl, expiresIn);
 
-            String authReqId = cibaGrant.getCIBAAuthenticationRequestId().getCode();
+            String authReqId = cibaRequestCacheControl.getCibaAuthReqId().getCode();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
-                    cibaGrant.getScopesAsString(),
-                    cibaGrant.getAcrValues(),
+                    cibaRequestCacheControl.getScopesAsString(),
+                    cibaRequestCacheControl.getAcrValues(),
                     authReqId,
                     deviceRegistrationToken);
 
