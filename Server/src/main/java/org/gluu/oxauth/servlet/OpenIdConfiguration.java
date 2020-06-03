@@ -89,6 +89,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
             jsonObj.put(TOKEN_REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint()); // remove this line in 5.x
             jsonObj.put(REVOCATION_ENDPOINT, appConfiguration.getTokenRevocationEndpoint());
+            jsonObj.put(SESSION_REVOCATION_ENDPOINT, endpointUrl( "/revoke_session"));
             jsonObj.put(USER_INFO_ENDPOINT, appConfiguration.getUserInfoEndpoint());
             jsonObj.put(CLIENT_INFO_ENDPOINT, appConfiguration.getClientInfoEndpoint());
             jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
@@ -304,6 +305,10 @@ public class OpenIdConfiguration extends HttpServlet {
             log.error(e.getMessage(), e);
         }
 	}
+
+	private String endpointUrl(String path) {
+        return StringUtils.replace(appConfiguration.getEndSessionEndpoint(), "/end_session", path);
+    }
 
 	/**
 	 * @deprecated theses params:

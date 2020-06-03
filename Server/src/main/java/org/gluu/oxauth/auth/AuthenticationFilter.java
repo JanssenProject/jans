@@ -122,14 +122,15 @@ public class AuthenticationFilter implements Filter {
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
+            boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             String authorizationHeader = httpRequest.getHeader("Authorization");
 
             if (processMTLS(httpRequest, httpResponse, filterChain)) {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint) {
-                log.debug("Starting token endpoint authentication");
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint) {
+                log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
                 final String accessToken = tokenService.getToken(authorizationHeader,
