@@ -14,7 +14,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'gluu-radius'
-        self.pbar_text = "Installing Radius"
+        self.pbar_text = "Installing Radius Base"
 
         self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
         self.source_dir = os.path.join(Config.staticFolder, 'radius')
@@ -66,7 +66,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
 
     def install_gluu_radius(self):
 
-        Config.pbar.progress("radius", self.pbar_text, False)
+        Config.pbar.progress("radius", "Installing Radius Server", False)
         self.get_client_id_ro_password()
 
         radius_libs = os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip')
