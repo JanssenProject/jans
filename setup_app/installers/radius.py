@@ -53,12 +53,12 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
                         'oxauth_legacyIdTokenClaims': True, 
                         'oxauth_openidScopeBackwardCompatibility': True
                         }
-        self.ldapUtils.set_oxAuthConfDynamic(oxauth_updates)
+        self.dbUtils.set_oxAuthConfDynamic(oxauth_updates)
 
         #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.import_ldif([ldif_file_base, ldif_file_clients])
-            self.ldapUtils.enable_service('gluuRadiusEnabled')
+            self.dbUtils.import_ldif([ldif_file_base, ldif_file_clients])
+            self.dbUtils.enable_service('gluuRadiusEnabled')
         else:
             pass
             #self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
@@ -86,8 +86,8 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
             schema_ldif = os.path.join(self.source_dir, 'schema/98-radius.ldif')
-            self.ldapUtils.import_schema(schema_ldif)
-            self.ldapUtils.import_ldif([ldif_file_server])
+            self.dbUtils.import_schema(schema_ldif)
+            self.dbUtils.import_ldif([ldif_file_server])
         else:
             pass
             #self.import_ldif_couchebase([ldif_file_server])
@@ -117,8 +117,8 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chmod, '660', os.path.join(Config.certFolder, 'gluu-radius.jks')])
         self.run([paths.cmd_chmod, '660', os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')])
 
-        self.ldapUtils.enable_script('5866-4202')
-        self.ldapUtils.enable_script('B8FD-4C11')
+        self.dbUtils.enable_script('5866-4202')
+        self.dbUtils.enable_script('B8FD-4C11')
         
         self.reload_daemon()
         self.enable()
@@ -134,11 +134,11 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
     def get_client_id_ro_password(self):
 
         if not Config.get('gluu_radius_client_id'):
-            if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1701.*)'):
-                Config.gluu_radius_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+            if self.dbUtils.search('ou=clients,o=gluu', '(inum=1701.*)'):
+                Config.gluu_radius_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
                 self.logIt("gluu_radius_client_id was found in ldap as {}".format(Config.gluu_radius_client_id))
 
-                Config.gluu_ro_encoded_pw = self.ldapUtils.ldap_conn.response[0]['attributes']['oxAuthClientSecret'][0]
+                Config.gluu_ro_encoded_pw = self.dbUtils.ldap_conn.response[0]['attributes']['oxAuthClientSecret'][0]
                 self.logIt("gluu_ro_encoded_pw was found in ldap as {}".format(Config.gluu_ro_encoded_pw))
         
         if not Config.get('gluu_radius_client_id'):
