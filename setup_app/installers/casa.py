@@ -8,6 +8,7 @@ from xml.etree import ElementTree
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
+from setup_app.utils.properties_utils import PropertiesUtils
 from setup_app.installers.jetty import JettyInstaller
 
 
@@ -121,6 +122,17 @@ class CasaInstaller(JettyInstaller):
 
         # import_oxd_certificate2javatruststore:
         self.logIt("Importing oxd certificate")
+
+        # check oxd status for 25 seconds:
+        propertiesUtils = PropertiesUtils()
+        for i in range(5):
+            self.logIt("Checking oxd-server status. Try {}".format(i+1))
+            if propertiesUtils.check_oxd_server(Config.oxd_server_https, log_error=False):
+                self.logIt("oxd-server seems good")
+                break
+            time.sleep(5)
+        else:
+            self.logIt("oxd server at  {} did not repond in 15 seconds".format(self.oxd_server_https), True)
 
         try:
 

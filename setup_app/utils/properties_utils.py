@@ -393,7 +393,7 @@ class PropertiesUtils(SetupUtils):
         
         return result
 
-    def check_oxd_server(self, oxd_url, error_out=True):
+    def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
 
         oxd_url = os.path.join(oxd_url, 'health-check')
         try:
@@ -407,13 +407,14 @@ class PropertiesUtils(SetupUtils):
                 if oxd_status['status'] == 'running':
                     return True
         except Exception as e:
-            if Config.thread_queue:
-                return str(e)
-            if error_out:
-                print(colors.DANGER)
-                print("Can't connect to oxd-server with url {}".format(oxd_url))
-                print("Reason: ", e)
-                print(colors.ENDC)
+            if log_error:
+                if Config.thread_queue:
+                    return str(e)
+                if error_out:
+                    print(colors.DANGER)
+                    print("Can't connect to oxd-server with url {}".format(oxd_url))
+                    print("Reason: ", e)
+                    print(colors.ENDC)
 
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
 
