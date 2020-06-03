@@ -565,7 +565,7 @@ class PropertiesUtils(SetupUtils):
             else:
                 print("Please enter valid email address")
         
-        Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(3072))
+        Config.application_max_ram = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.application_max_ram))
 
         oxtrust_admin_password = Config.oxtrust_admin_password if Config.oxtrust_admin_password else self.getPW(special='.*=!%&+/-')
 
