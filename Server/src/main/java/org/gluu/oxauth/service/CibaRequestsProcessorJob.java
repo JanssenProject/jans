@@ -9,10 +9,9 @@ package org.gluu.oxauth.service;
 import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
 import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.CIBAGrant;
-import org.gluu.oxauth.model.common.CIBAGrantUserAuthorization;
+import org.gluu.oxauth.model.common.CibaRequestCacheControl;
+import org.gluu.oxauth.model.common.CibaRequestStatus;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
 import org.gluu.oxauth.util.ServerUtil;
@@ -61,9 +60,6 @@ public class CibaRequestsProcessorJob {
 
     @Inject
     private CIBAPingCallbackProxy cibaPingCallbackProxy;
-
-    @Inject
-    private AuthorizationGrantList authorizationGrantList;
 
     @Inject
     private CibaRequestService cibaRequestService;
@@ -136,15 +132,15 @@ public class CibaRequestsProcessorJob {
                     CHUNK_SIZE : appConfiguration.getBackchannelRequestsProcessorJobChunkSize();
 
             List<CIBARequest> expiredRequests = cibaRequestService.loadExpiredByStatus(
-                    CIBAGrantUserAuthorization.AUTHORIZATION_PENDING, chunkSize);
+                    CibaRequestStatus.PENDING, chunkSize);
             expiredRequests.forEach(cibaRequest -> cibaRequestService.updateStatus(cibaRequest,
-                    CIBAGrantUserAuthorization.AUTHORIZATION_IN_PROCESS));
+                    CibaRequestStatus.IN_PROCESS));
 
             for (CIBARequest expiredRequest : expiredRequests) {
-                CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(expiredRequest.getAuthReqId());
-                if (cibaGrant != null) {
+                CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(expiredRequest.getAuthReqId());
+                if (cibaRequest != null) {
                     executorService.execute(() ->
-                        processExpiredRequest(cibaGrant, expiredRequest.getAuthReqId())
+                        processExpiredRequest(cibaRequest, expiredRequest.getAuthReqId())
                     );
                 }
                 cibaRequestService.removeCibaRequest(expiredRequest);
@@ -155,33 +151,31 @@ public class CibaRequestsProcessorJob {
     }
 
     /**
-     * Method responsible to process expired CIBA grants, set them as expired in cache
+     * Method responsible to process expired CIBA requests, set them as expired in cache
      * and send callbacks to the client
-     * @param cibaGrant Object containing data related to the CIBA grant.
+     * @param cibaRequest Object containing data related to the CIBA request.
      * @param authReqId Authentication request id.
      */
-    private void processExpiredRequest(CIBAGrant cibaGrant, String authReqId) {
-        if (cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_PENDING
-                && cibaGrant.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+    private void processExpiredRequest(CibaRequestCacheControl cibaRequest, String authReqId) {
+        if (cibaRequest.getStatus() != CibaRequestStatus.PENDING
+                && cibaRequest.getStatus() != CibaRequestStatus.EXPIRED) {
             return;
         }
         log.info("Authentication request id {} has expired", authReqId);
 
-        cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED);
-        cibaGrant.setTokensDelivered(false);
-        cibaGrant.save();
+        cibaRequestService.removeCibaCacheRequest(cibaRequest.cacheKey());
 
-        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-            cibaPushErrorProxy.pushError(cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken(),
+        if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+            cibaPushErrorProxy.pushError(cibaRequest.getCibaAuthReqId().getCode(),
+                    cibaRequest.getClient().getBackchannelClientNotificationEndpoint(),
+                    cibaRequest.getClientNotificationToken(),
                     PushErrorResponseType.EXPIRED_TOKEN,
                     "Request has expired and there was no answer from the end user.");
-        } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
+        } else if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
             cibaPingCallbackProxy.pingCallback(
-                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                    cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken()
+                    cibaRequest.getCibaAuthReqId().getCode(),
+                    cibaRequest.getClient().getBackchannelClientNotificationEndpoint(),
+                    cibaRequest.getClientNotificationToken()
             );
         }
     }

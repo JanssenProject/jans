@@ -6,10 +6,6 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.oxauth.model.registration.Client;
-
-import java.util.Date;
-
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
@@ -18,62 +14,24 @@ import java.util.Date;
  */
 public class CIBAGrant extends AuthorizationGrant {
 
-    private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
-    private String clientNotificationToken;
-    private String bindingMessage;
-    private Long lastAccessControl;
-    private CIBAGrantUserAuthorization userAuthorization;
+    private CibaAuthReqId cibaAuthReqId;
     private boolean tokensDelivered;
-    private Date expirationDate;
 
     public CIBAGrant() {
     }
 
-    public void init(User user, Client client, int expiresIn) {
-        super.init(user, AuthorizationGrantType.CIBA, client, null);
-        setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
+    public void init(CibaRequestCacheControl cibaRequest) {
+        super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
+        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthReqId());
         setIsCachedWithNoPersistence(true);
-        setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING);
     }
 
-    public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
-        return cibaAuthenticationRequestId;
+    public CibaAuthReqId getCIBAAuthenticationRequestId() {
+        return cibaAuthReqId;
     }
 
-    public void setCIBAAuthenticationRequestId(CIBAAuthenticationRequestId cibaAuthenticationRequestId) {
-        this.cibaAuthenticationRequestId = cibaAuthenticationRequestId;
-    }
-
-    public String getClientNotificationToken() {
-        return clientNotificationToken;
-    }
-
-    public void setClientNotificationToken(String clientNotificationToken) {
-        this.clientNotificationToken = clientNotificationToken;
-    }
-
-    public String getBindingMessage() {
-        return bindingMessage;
-    }
-
-    public void setBindingMessage(String bindingMessage) {
-        this.bindingMessage = bindingMessage;
-    }
-
-    public Long getLastAccessControl() {
-        return lastAccessControl;
-    }
-
-    public void setLastAccessControl(Long lastAccessControl) {
-        this.lastAccessControl = lastAccessControl;
-    }
-
-    public CIBAGrantUserAuthorization getUserAuthorization() {
-        return userAuthorization;
-    }
-
-    public void setUserAuthorization(CIBAGrantUserAuthorization userAuthorization) {
-        this.userAuthorization = userAuthorization;
+    public void setCIBAAuthenticationRequestId(CibaAuthReqId cibaAuthReqId) {
+        this.cibaAuthReqId = cibaAuthReqId;
     }
 
     public boolean isTokensDelivered() {
@@ -82,14 +40,6 @@ public class CIBAGrant extends AuthorizationGrant {
 
     public void setTokensDelivered(boolean tokensDelivered) {
         this.tokensDelivered = tokensDelivered;
-    }
-
-    public Date getExpirationDate() {
-        return expirationDate;
-    }
-
-    public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
     }
 
 }
