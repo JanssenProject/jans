@@ -51,15 +51,11 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
             oxd_yaml['storage'] = 'gluu_server_configuration'
+            oxd_yaml['storage_configuration']['baseDn'] = 'o=gluu'
             oxd_yaml['storage_configuration']['type'] = Config.gluu_properties_fn
-            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties \
-                if self.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
+            oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if self.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
+            oxd_yaml['storage_configuration']['salt'] = os.path.join(self.configFolder, "salt")
 
-            try:
-                oxd_yaml.yaml_set_comment_before_after_key('server', '\nConnectors')
-            except:
-                pass
-            
             yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
 
             self.writeFile(oxd_server_yml_fn, yml_str)
