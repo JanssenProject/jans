@@ -14,24 +14,24 @@ package org.gluu.oxauth.model.common;
  */
 public class CIBAGrant extends AuthorizationGrant {
 
-    private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
+    private CibaAuthReqId cibaAuthReqId;
     private boolean tokensDelivered;
 
     public CIBAGrant() {
     }
 
-    public void init(CibaCacheRequest cibaRequest) {
+    public void init(CibaRequestCacheControl cibaRequest) {
         super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
-        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthenticationRequestId());
+        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthReqId());
         setIsCachedWithNoPersistence(true);
     }
 
-    public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
-        return cibaAuthenticationRequestId;
+    public CibaAuthReqId getCIBAAuthenticationRequestId() {
+        return cibaAuthReqId;
     }
 
-    public void setCIBAAuthenticationRequestId(CIBAAuthenticationRequestId cibaAuthenticationRequestId) {
-        this.cibaAuthenticationRequestId = cibaAuthenticationRequestId;
+    public void setCIBAAuthenticationRequestId(CibaAuthReqId cibaAuthReqId) {
+        this.cibaAuthReqId = cibaAuthReqId;
     }
 
     public boolean isTokensDelivered() {
