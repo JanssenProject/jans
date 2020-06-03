@@ -155,6 +155,11 @@ class SetupUtils(Crypto64):
 
     def writeFile(self, outFilePath, text):
         self.logIt("Writing file %s" % outFilePath)
+
+        dir_name = os.path.dirname(outFilePath)
+        if not os.path.exists(dir_name):
+            self.run([paths.cmd_mkdir, '-p', dir_name])
+
         inFilePathText = None
         self.backupFile(outFilePath)
         try:

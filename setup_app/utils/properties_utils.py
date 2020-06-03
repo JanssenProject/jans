@@ -83,17 +83,13 @@ class PropertiesUtils(SetupUtils):
         if not Config.ldapPass:
             Config.ldapPass = Config.oxtrust_admin_password
 
-        if not Config.oxauth_openid_jks_pass:
-            Config.oxauth_openid_jks_pass = self.getPW()
-
         if not Config.opendj_p12_pass:
             Config.opendj_p12_pass = self.getPW()
 
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
-        if not Config.oxauth_client_id:
-            Config.oxauth_client_id = '1001.'+ str(uuid.uuid4())
+
 
         if not Config.idp_client_id:
             Config.idp_client_id = '1101.'+ str(uuid.uuid4())
