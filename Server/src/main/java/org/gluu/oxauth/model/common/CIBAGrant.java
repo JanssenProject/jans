@@ -29,11 +29,12 @@ public class CIBAGrant extends AuthorizationGrant {
     public CIBAGrant() {
     }
 
-    public void init(User user, Client client, int expiresIn) {
-        super.init(user, AuthorizationGrantType.CIBA, client, null);
-        setCIBAAuthenticationRequestId(new CIBAAuthenticationRequestId(expiresIn));
+    public void init(CibaCacheRequest cibaRequest) {
+        super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
+        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthenticationRequestId());
         setIsCachedWithNoPersistence(true);
-        setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING);
+        setUserAuthorization(cibaRequest.getUserAuthorization());
+        setClientNotificationToken(cibaRequest.getClientNotificationToken());
     }
 
     public CIBAAuthenticationRequestId getCIBAAuthenticationRequestId() {
