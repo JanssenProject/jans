@@ -134,7 +134,7 @@ class PropertiesUtils(SetupUtils):
         out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
 
         for digest in ('sha256', 'md5'):
-            cmd = [paths.opensslCommand, 'enc', '-md', digest, '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
+            cmd = [paths.cmd_openssl, 'enc', '-md', digest, '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
             self.logIt('Running: ' + ' '.join(cmd))
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
@@ -281,7 +281,7 @@ class PropertiesUtils(SetupUtils):
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties', 'opensslCommand'):
+                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties'):
                     continue
                 if key.startswith('cmd_'):
                     continue
@@ -295,7 +295,7 @@ class PropertiesUtils(SetupUtils):
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
             
-            self.run([Config.opensslCommand, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
+            self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
             
             Config.post_messages.append(
                 "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
