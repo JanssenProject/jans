@@ -7,11 +7,11 @@
 package org.gluu.oxauth.service;
 
 import org.apache.commons.lang.time.DateUtils;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.CIBARequestStatus;
+import org.gluu.oxauth.model.common.CibaCacheRequest;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
-import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
@@ -22,8 +22,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Service used to access to the database for CibaRequest ObjectClass.
@@ -69,7 +67,7 @@ public class CibaRequestService {
         cibaRequest.setClientId(request.getClient().getClientId());
         cibaRequest.setExpirationDate(expirationDate);
         cibaRequest.setCreationDate(new Date());
-        cibaRequest.setStatus(CIBAGrantUserAuthorization.AUTHORIZATION_PENDING.getValue());
+        cibaRequest.setStatus(CIBARequestStatus.AUTHORIZATION_PENDING.getValue());
         cibaRequest.setUserId(request.getUser().getUserId());
         entryManager.persist(cibaRequest);
     }
@@ -92,7 +90,7 @@ public class CibaRequestService {
      * @param authorizationStatus Status used to filter entries.
      * @param maxRequestsToGet Limit of requests that would be returned.
      */
-    public List<CIBARequest> loadExpiredByStatus(CIBAGrantUserAuthorization authorizationStatus,
+    public List<CIBARequest> loadExpiredByStatus(CIBARequestStatus authorizationStatus,
                                                  int maxRequestsToGet) {
         try {
             Date now = new Date();
@@ -111,7 +109,7 @@ public class CibaRequestService {
      * @param cibaRequest Entry containing information of the CIBA request.
      * @param authorizationStatus New status.
      */
-    public void updateStatus(CIBARequest cibaRequest, CIBAGrantUserAuthorization authorizationStatus) {
+    public void updateStatus(CIBARequest cibaRequest, CIBARequestStatus authorizationStatus) {
         try {
             cibaRequest.setStatus(authorizationStatus.getValue());
             entryManager.merge(cibaRequest);
@@ -162,7 +160,7 @@ public class CibaRequestService {
         if (cachedObject == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedObject = cacheService.get(authReqId);
-            log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authReqId);
+            log.trace("Failed to fetch CIBA request from cache, authenticationRequestId: " + authReqId);
         }
         return cachedObject instanceof CibaCacheRequest ? (CibaCacheRequest) cachedObject : null;
     }
