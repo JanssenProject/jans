@@ -46,6 +46,7 @@ from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.saml import SamlInstaller
 from setup_app.installers.radius import RadiusInstaller
+from setup_app.installers.casa import CasaInstaller
 
 
 thread_queue = None
@@ -137,7 +138,7 @@ fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
 radiusInstaller = RadiusInstaller()
-
+casaInstaller = CasaInstaller()
 print()
 print(gluuInstaller)
 
@@ -216,6 +217,9 @@ if proceed:
 
     if Config.installOxd:
         oxdInstaller.start_installation()
+
+    if Config.installCasa:
+        casaInstaller.start_installation()
 
     if Config.installPassport:
         passportInstaller.start_installation()
