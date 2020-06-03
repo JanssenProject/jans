@@ -24,9 +24,6 @@ class OxtrustInstaller(JettyInstaller):
         self.enable()
 
 
-
-
-
     def generate_api_configuration(self):
         Config.api_rs_client_jks_pass_encoded = self.obscure(Config.api_rs_client_jks_pass)
         Config.api_rs_client_jwks = self.gen_openid_jwks_jks_keys(Config.api_rs_client_jks_fn, Config.api_rs_client_jks_pass)

@@ -112,7 +112,7 @@ class CasaInstaller(JettyInstaller):
         ldif_files = (self.ldif, self.ldif_scripts)
 
         if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.import_ldif(ldif_files)
+            self.dbUtils.import_ldif(ldif_files)
         else:
             #TODO: implement for couchbase ???
             self.import_ldif_couchebase(ldif_files)

@@ -134,8 +134,8 @@ class PassportInstaller(NodeInstaller):
         ldif_files = (self.ldif_scripts_fn, self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients)
 
         if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.import_ldif(ldif_files)
-            self.ldapUtils.enable_service('gluuPassportEnabled')
+            self.dbUtils.import_ldif(ldif_files)
+            self.dbUtils.enable_service('gluuPassportEnabled')
         else:
             #TODO: implement for couchbase ???
             self.import_ldif_couchebase(ldif_files)
@@ -195,31 +195,31 @@ class PassportInstaller(NodeInstaller):
         Config.non_setup_properties.update(self.__dict__)
 
     def check_clients_resources(self):
-        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1501.*)'):
-            Config.passport_rs_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1501.*)'):
+            Config.passport_rs_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
             self.logIt("passport_rs_client_id was found in ldap as {}".format(Config.passport_rs_client_id))
 
-        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1502.*)'):
-            Config.passport_rp_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1502.*)'):
+            Config.passport_rp_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
             self.logIt("passport_rp_client_id was found in ldap as {}".format(Config.passport_rp_client_id))
             
-        if self.ldapUtils.search('ou=clients,o=gluu', '(inum=1503.*)'):
-            Config.passport_rp_ii_client_id = self.ldapUtils.ldap_conn.response[0]['attributes']['inum'][0]
+        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1503.*)'):
+            Config.passport_rp_ii_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
             self.logIt("passport_rp_ii_client_id was found in ldap as {}".format(Config.passport_rp_ii_client_id))
             
-        if self.ldapUtils.search('ou=resources,ou=uma,o=gluu', '(oxId=1504.*)'):
-            Config.passport_resource_id = self.ldapUtils.ldap_conn.response[0]['attributes']['oxId'][0]
+        if self.dbUtils.search('ou=resources,ou=uma,o=gluu', '(oxId=1504.*)'):
+            Config.passport_resource_id = self.dbUtils.ldap_conn.response[0]['attributes']['oxId'][0]
             self.logIt("passport_resource_id was found in ldap as {}".format(Config.passport_resource_id))
 
 
     def update_ldap(self):
 
         for inum in ['2FDB-CF02', 'D40C-1CA4', '2DAF-F9A5']:
-            self.ldapUtils.enable_script(inum)
+            self.dbUtils.enable_script(inum)
 
         passport_oxtrust_config = base.readJsonFile(self.passport_oxtrust_config_fn)
 
-        self.ldapUtils.set_oxTrustConfApplication(passport_oxtrust_config)
-        self.ldapUtils.set_configuration('gluuPassportEnabled', 'true')
-        self.ldapUtils.add_client2script('2DAF-F9A5', Config.passport_rp_client_id)
-        self.ldapUtils.add_client2script('2DAF-F995', Config.passport_rp_client_id)
+        self.dbUtils.set_oxTrustConfApplication(passport_oxtrust_config)
+        self.dbUtils.set_configuration('gluuPassportEnabled', 'true')
+        self.dbUtils.add_client2script('2DAF-F9A5', Config.passport_rp_client_id)
+        self.dbUtils.add_client2script('2DAF-F995', Config.passport_rp_client_id)
