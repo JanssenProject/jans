@@ -18,10 +18,10 @@ import java.util.List;
  * @author Milton BO
  * @version June 2, 2020
  */
-public class CibaCacheRequest implements Serializable {
+public class CibaRequestCacheControl implements Serializable {
 
-    private CIBAAuthenticationRequestId cibaAuthenticationRequestId;
-    private String authorizationRequestId;
+    private CibaAuthReqId cibaAuthReqId;
+    private String authReqId;
     private User user;
     private Client client;
     private List<String> scopes;
@@ -30,23 +30,23 @@ public class CibaCacheRequest implements Serializable {
     private String clientNotificationToken;
     private String bindingMessage;
     private Long lastAccessControl;
-    private CIBARequestStatus requestStatus;
+    private CibaRequestStatus status;
     private boolean tokensDelivered;
     private String acrValues;
 
-    public CibaCacheRequest() {
+    public CibaRequestCacheControl() {
     }
 
-    public CibaCacheRequest(User user, Client client, int expiresIn, List<String> scopeList,
-                            String clientNotificationToken, String bindingMessage, Long lastAccessControl,
-                            String acrValues) {
-        CIBAAuthenticationRequestId authenticationRequestId = new CIBAAuthenticationRequestId(expiresIn);
+    public CibaRequestCacheControl(User user, Client client, int expiresIn, List<String> scopeList,
+                                   String clientNotificationToken, String bindingMessage, Long lastAccessControl,
+                                   String acrValues) {
+        CibaAuthReqId cibaAuthReqId = new CibaAuthReqId(expiresIn);
         this.user = user;
         this.client = client;
         this.scopes = scopeList;
-        this.cibaAuthenticationRequestId = authenticationRequestId;
-        this.requestStatus = CIBARequestStatus.AUTHORIZATION_PENDING;
-        this.authorizationRequestId = authenticationRequestId.getCode();
+        this.cibaAuthReqId = cibaAuthReqId;
+        this.status = CibaRequestStatus.PENDING;
+        this.authReqId = cibaAuthReqId.getCode();
         this.expiresIn = expiresIn;
         this.clientNotificationToken = clientNotificationToken;
         this.bindingMessage = bindingMessage;
@@ -56,14 +56,7 @@ public class CibaCacheRequest implements Serializable {
     }
 
     public String cacheKey() {
-        return authorizationRequestId;
-    }
-
-    public static String cacheKey(String authorizationRequestId, String grantId) {
-        if (StringUtils.isBlank(authorizationRequestId)) {
-            return grantId;
-        }
-        return authorizationRequestId;
+        return authReqId;
     }
 
     public String getScopesAsString() {
@@ -78,12 +71,12 @@ public class CibaCacheRequest implements Serializable {
         return expiresIn;
     }
 
-    public String getAuthorizationRequestId() {
-        return authorizationRequestId;
+    public String getAuthReqId() {
+        return authReqId;
     }
 
-    public void setAuthorizationRequestId(String authorizationRequestId) {
-        this.authorizationRequestId = authorizationRequestId;
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
     }
 
     public User getUser() {
@@ -138,12 +131,12 @@ public class CibaCacheRequest implements Serializable {
         this.lastAccessControl = lastAccessControl;
     }
 
-    public CIBARequestStatus getRequestStatus() {
-        return requestStatus;
+    public CibaRequestStatus getStatus() {
+        return status;
     }
 
-    public void setRequestStatus(CIBARequestStatus requestStatus) {
-        this.requestStatus = requestStatus;
+    public void setStatus(CibaRequestStatus status) {
+        this.status = status;
     }
 
     public boolean isTokensDelivered() {
@@ -154,12 +147,12 @@ public class CibaCacheRequest implements Serializable {
         this.tokensDelivered = tokensDelivered;
     }
 
-    public CIBAAuthenticationRequestId getCibaAuthenticationRequestId() {
-        return cibaAuthenticationRequestId;
+    public CibaAuthReqId getCibaAuthReqId() {
+        return cibaAuthReqId;
     }
 
-    public void setCibaAuthenticationRequestId(CIBAAuthenticationRequestId cibaAuthenticationRequestId) {
-        this.cibaAuthenticationRequestId = cibaAuthenticationRequestId;
+    public void setCibaAuthReqId(CibaAuthReqId cibaAuthReqId) {
+        this.cibaAuthReqId = cibaAuthReqId;
     }
 
     public String getAcrValues() {
@@ -172,9 +165,9 @@ public class CibaCacheRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "CibaCacheRequest{" +
-                "cibaAuthenticationRequestId=" + cibaAuthenticationRequestId +
-                ", authorizationRequestId='" + authorizationRequestId + '\'' +
+        return "CibaRequestCacheControl{" +
+                "cibaAuthReqId=" + cibaAuthReqId +
+                ", authReqId='" + authReqId + '\'' +
                 ", user=" + user +
                 ", client=" + client +
                 ", scopes=" + scopes +
@@ -182,7 +175,7 @@ public class CibaCacheRequest implements Serializable {
                 ", clientNotificationToken='" + clientNotificationToken + '\'' +
                 ", bindingMessage='" + bindingMessage + '\'' +
                 ", lastAccessControl=" + lastAccessControl +
-                ", userAuthorization=" + requestStatus +
+                ", userAuthorization=" + status +
                 ", tokensDelivered=" + tokensDelivered +
                 ", acrValues='" + acrValues + '\'' +
                 '}';

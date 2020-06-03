@@ -837,10 +837,10 @@ public class AuthorizeAction {
         String bindingMessage = null;
 
         if (Strings.isNotBlank(getAuthReqId())) {
-            final CibaCacheRequest cibaCacheRequest = cibaRequestService.getCibaRequest(authReqId);
+            final CibaRequestCacheControl cibaRequestCacheControl = cibaRequestService.getCibaRequest(authReqId);
 
-            if (cibaCacheRequest != null) {
-                bindingMessage = cibaCacheRequest.getBindingMessage();
+            if (cibaRequestCacheControl != null) {
+                bindingMessage = cibaRequestCacheControl.getBindingMessage();
             }
         }
 
