@@ -73,7 +73,7 @@ class OxauthInstaller(JettyInstaller):
 
         #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
-            self.ldapUtils.import_ldif([self.ldif_config, self.ldif_clients])
+            self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
         else:
             pass
             #self.import_ldif_couchebase([self.ldif_config])
