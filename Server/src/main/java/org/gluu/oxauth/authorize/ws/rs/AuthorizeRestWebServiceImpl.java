@@ -628,7 +628,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         CibaCacheRequest cibaRequest = cibaRequestService.getCibaRequest(authReqId);
 
-        if (cibaRequest == null || cibaRequest.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+        if (cibaRequest == null || cibaRequest.getRequestStatus() == CIBARequestStatus.AUTHORIZATION_EXPIRED) {
             log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaRequest);
             return;
         }
@@ -646,7 +646,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 null, null, accessToken, refreshToken,
                 null, cibaGrant, false, null);
 
-        cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
         cibaGrant.setTokensDelivered(true);
         cibaGrant.save();
 
@@ -654,7 +653,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaPushTokenDeliveryProxy.pushTokenDelivery(
                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken(),
+                    cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
                     refreshToken.getCode(),
                     idToken.getCode(),
@@ -667,10 +666,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaPingCallbackProxy.pingCallback(
                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken()
+                    cibaRequest.getClientNotificationToken()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }

@@ -9,7 +9,9 @@ package org.gluu.oxauth.service;
 import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
 import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
+import org.gluu.oxauth.model.common.CIBARequestStatus;
+import org.gluu.oxauth.model.common.CibaCacheRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
 import org.gluu.oxauth.util.ServerUtil;
@@ -130,9 +132,9 @@ public class CibaRequestsProcessorJob {
                     CHUNK_SIZE : appConfiguration.getBackchannelRequestsProcessorJobChunkSize();
 
             List<CIBARequest> expiredRequests = cibaRequestService.loadExpiredByStatus(
-                    CIBAGrantUserAuthorization.AUTHORIZATION_PENDING, chunkSize);
+                    CIBARequestStatus.AUTHORIZATION_PENDING, chunkSize);
             expiredRequests.forEach(cibaRequest -> cibaRequestService.updateStatus(cibaRequest,
-                    CIBAGrantUserAuthorization.AUTHORIZATION_IN_PROCESS));
+                    CIBARequestStatus.AUTHORIZATION_IN_PROCESS));
 
             for (CIBARequest expiredRequest : expiredRequests) {
                 CibaCacheRequest cibaRequest = cibaRequestService.getCibaRequest(expiredRequest.getAuthReqId());
@@ -155,8 +157,8 @@ public class CibaRequestsProcessorJob {
      * @param authReqId Authentication request id.
      */
     private void processExpiredRequest(CibaCacheRequest cibaRequest, String authReqId) {
-        if (cibaRequest.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_PENDING
-                && cibaRequest.getUserAuthorization() != CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+        if (cibaRequest.getRequestStatus() != CIBARequestStatus.AUTHORIZATION_PENDING
+                && cibaRequest.getRequestStatus() != CIBARequestStatus.AUTHORIZATION_EXPIRED) {
             return;
         }
         log.info("Authentication request id {} has expired", authReqId);
