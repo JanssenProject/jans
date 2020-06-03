@@ -25,13 +25,7 @@ import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.AttributeService;
-import org.gluu.oxauth.service.AuthenticationFilterService;
-import org.gluu.oxauth.service.AuthenticationService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.UserService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
@@ -106,6 +100,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private CibaRequestService cibaRequestService;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -400,16 +397,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (cibaGrant != null) {
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                        long currentTime = new Date().getTime();
-                        Long lastAccess = cibaGrant.getLastAccessControl();
-                        if (lastAccess == null) {
-                            lastAccess = currentTime;
-                        }
-                        cibaGrant.setLastAccessControl(currentTime);
-                        cibaGrant.save();
-
-                        if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED
-                                && !cibaGrant.isTokensDelivered()) {
+                        if (!cibaGrant.isTokensDelivered()) {
                             RefreshToken refToken = cibaGrant.createRefreshToken();
                             log.debug("Issuing refresh token: {}", refToken.getCode());
 
@@ -440,7 +428,24 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     idToken));
 
                             oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
-                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_PENDING) {
+                        }
+                    } else {
+                        log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
+                        builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
+                    }
+                } else {
+                    final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
+                    log.trace("Ciba request : '{}'", cibaRequest);
+                    if (cibaRequest != null) {
+                        long currentTime = new Date().getTime();
+                        Long lastAccess = cibaRequest.getLastAccessControl();
+                        if (lastAccess == null) {
+                            lastAccess = currentTime;
+                        }
+                        cibaRequest.setLastAccessControl(currentTime);
+                        cibaRequestService.update(cibaRequest);
+
+                        if (cibaRequest.getStatus() == CibaRequestStatus.PENDING) {
                             int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
                             long timeFromLastAccess = currentTime - lastAccess;
 
@@ -451,20 +456,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                 log.debug("Slow down protection authReqId: '{}'", authReqId);
                                 builder = error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token.");
                             }
-                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_DENIED) {
+                        } else if (cibaRequest.getStatus() == CibaRequestStatus.DENIED) {
                             log.debug("The end-user denied the authorization request for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request.");
-                        } else if (cibaGrant.getUserAuthorization() == CIBAGrantUserAuthorization.AUTHORIZATION_EXPIRED) {
+                        } else if (cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
                             log.debug("The authentication request has expired for authReqId: '{}'", authReqId);
                             builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired");
                         }
                     } else {
-                        log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
-                        builder = error(400, TokenErrorResponseType.UNAUTHORIZED_CLIENT, "The client is not authorized as it is configured in Push Mode");
+                        log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
+                        builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                     }
-                } else {
-                    log.debug("AuthorizationGrant is empty by authReqId: '{}'", authReqId);
-                    builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                 }
             }
         } catch (WebApplicationException e) {

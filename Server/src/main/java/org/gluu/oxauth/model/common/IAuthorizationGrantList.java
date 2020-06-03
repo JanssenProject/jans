@@ -30,7 +30,7 @@ public interface IAuthorizationGrantList {
 
     ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
-    CIBAGrant createCIBAGrant(User user, Client client, int expiresIn);
+    CIBAGrant createCIBAGrant(CibaRequestCacheControl request);
 
     AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode);
 
@@ -42,6 +42,6 @@ public interface IAuthorizationGrantList {
 
     AuthorizationGrant getAuthorizationGrantByIdToken(String idToken);
 
-    CIBAGrant getCIBAGrant(String authenticationRequestId);
+    CIBAGrant getCIBAGrant(String authReqId);
 
 }
