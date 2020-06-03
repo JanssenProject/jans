@@ -126,6 +126,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         if (jsonObj.has(REVOCATION_ENDPOINT)) {
             response.setRevocationEndpoint(jsonObj.getString(REVOCATION_ENDPOINT));
         }
+        if (jsonObj.has(SESSION_REVOCATION_ENDPOINT)) {
+            response.setSessionRevocationEndpoint(jsonObj.getString(SESSION_REVOCATION_ENDPOINT));
+        }
         if (jsonObj.has(USER_INFO_ENDPOINT)) {
             response.setUserInfoEndpoint(jsonObj.getString(USER_INFO_ENDPOINT));
         }
