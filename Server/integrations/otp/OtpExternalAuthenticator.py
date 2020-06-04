@@ -88,7 +88,20 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-        
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        print "getNextStep Invoked"
+        # If user not pass current step change step to previous
+        identity = CdiUtil.bean(Identity)
+        retry_current_step = identity.getWorkingParameter("retry_current_step")
+        if retry_current_step:
+            print "OTP. Get next step. Retrying current step %s" % step
+            # Remove old QR code
+            #identity.setWorkingParameter("super_gluu_request", "timeout")
+            resultStep = step
+            return resultStep
+        return -1
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -143,10 +156,17 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Restore state from session
+            identity.setWorkingParameter("retry_current_step", False)
             otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             if otp_auth_method == 'enroll':
                 auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
                 if not StringHelper.isEmpty(auth_result):
+                    # defect fix #1225  - Retry the step, show QR code again
+                    if auth_result == 'timeout':
+						print "OTP. QR-code timeout. Authenticate for step %s. Reinitializing current step" % step
+						identity.setWorkingParameter("retry_current_step", True)
+						return True
+
                     print "OTP. Authenticate for step 2. User not enrolled OTP"
                     return False
 
@@ -240,7 +260,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList("otp_auth_method", "otp_count_login_steps", "otp_secret_key", "otp_enrollment_request")
+        return Arrays.asList("otp_auth_method", "otp_count_login_steps", "otp_secret_key", "otp_enrollment_request","retry_current_step")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
@@ -266,8 +286,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return ""
 
-    def getNextStep(self, configurationAttributes, requestParameters, step):
-        return -1
 
     def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
         print "Get external logout URL call"
@@ -471,6 +489,7 @@ class PersonAuthentication(PersonAuthenticationType):
             elif self.otpType == "totp":
                 for user_enrollment in user_enrollments:
                     otp_secret_key = self.fromBase64Url(user_enrollment)
+
                     # Validate TOTP
                     validation_result = self.validateTotpKey(otp_secret_key, otpCode, user_name)
                     if (validation_result != None) and validation_result["result"]:
@@ -593,3 +612,5 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def fromBase64Url(self, chars):
         return BaseEncoding.base64Url().decode(chars)
+
+
