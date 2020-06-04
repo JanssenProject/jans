@@ -329,7 +329,8 @@ public class OpenIdConfiguration extends HttpServlet {
 
 		try {
 			for (Scope scope : scopeService.getAllScopesList()) {
-			    if (scope.getScopeType() == ScopeType.SPONTANEOUS && scope.isDeletable()) {
+			    if ((scope.getScopeType() == ScopeType.SPONTANEOUS && scope.isDeletable())
+                        || scope.getNotShowInDiscovery()) {
 			        continue;
                 }
 
