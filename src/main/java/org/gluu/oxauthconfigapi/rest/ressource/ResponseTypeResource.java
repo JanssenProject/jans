@@ -76,24 +76,19 @@ public class ResponseTypeResource {
 		}
 	}
 	
-	
-	@Path("/testing")
-	//@PUT
-	@GET
+	@PUT
 	@Operation(summary = "Update oxAuth supported response types")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	//public Response updateSupportedResponseTypes(@Valid Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> responseTypeSet) {
-	public Response updateSupportedResponseTypes() {
+	public Response updateSupportedResponseTypes(@Valid Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> responseTypeSet) {
 		Set<Set<ResponseType>> responseTypesSupportedSet = Sets.newHashSet();
 		Set<ResponseType> responseTypes = null;
 		try {
-			Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> typeSet = getResponseTypeSet(); //For testing
 			log.info("ResponseTypeResource::updateSupportedResponseTypes() - Update oxAuth supported response types");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
-			for (Set<org.gluu.oxauthconfigapi.rest.model.ResponseType> types : typeSet) {
+			for (Set<org.gluu.oxauthconfigapi.rest.model.ResponseType> types : responseTypeSet) {
 				responseTypes = new HashSet();
 				for(org.gluu.oxauthconfigapi.rest.model.ResponseType type : types) {
 					ResponseType responseType = ResponseType.fromString(type.getCode());
@@ -101,43 +96,18 @@ public class ResponseTypeResource {
 				}
 	
 				responseTypesSupportedSet.add(responseTypes);
-			
-				//Save
+				
+				//Update
 				appConfiguration.setResponseTypesSupported(responseTypesSupportedSet);
 				this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 			}
-
-			return Response.ok(responseTypesSupportedSet).build();
+			
+			return Response.ok(ResponseStatus.SUCCESS).build();
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth supported response types", ex);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
-	
-	private Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> getResponseTypeSet(){
-		Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> responseTypesSupportedSet = Sets.newHashSet();
-		Set<org.gluu.oxauthconfigapi.rest.model.ResponseType> responseTypes = Sets.newHashSet();
-		log.info("ResponseTypeResource::getResponseTypeSet() - Entry");
-			
-		try {
-		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		
-		for (Set<ResponseType> typeSet : appConfiguration.getResponseTypesSupported()) {
-			responseTypes = new HashSet();
-			for(ResponseType responseType : typeSet) {
-				org.gluu.oxauthconfigapi.rest.model.ResponseType type = new org.gluu.oxauthconfigapi.rest.model.ResponseType();
-				type.setCode(responseType.getValue());
-				responseTypes.add(type);				
-           	}
-			responseTypesSupportedSet.add(responseTypes);
-		}
-		log.info("ResponseTypeResource::getResponseTypeSet() - responseTypesSupportedSet = "+responseTypesSupportedSet);
-		
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return responseTypesSupportedSet;
-	}
 	
 }
