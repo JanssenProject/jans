@@ -266,8 +266,13 @@ public class CouchbaseConnectionProvider {
             
             if (result) {
             	result = queryResult.info().resultCount() == 0;
-            } else if (LOG.isDebugEnabled()) {
-        		LOG.debug("There are indexes which not online");
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug("There are indexes which not online");
+            	}
+            } else {
+            	if (LOG.isDebugEnabled()) {
+            		LOG.debug("Faield to check indexes status");
+            	}
             }
         }
 
