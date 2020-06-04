@@ -3,6 +3,7 @@ import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from requests.auth import HTTPBasicAuth
+from setup_app.utils.base import logIt
 
 try:
     requests.packages.urllib3.disable_warnings()
@@ -38,25 +39,28 @@ class CBM:
         except Exception as e:
             result = FakeResult()
             result.reason = 'Connection failed. Reason: ' + str(e)
-
+        self.logIfError(result)
         return result
 
     def _delete(self, endpoint):
         api = os.path.join(self.api_root, endpoint)
         result = requests.delete(api, auth=self.auth, verify=False)
+        self.logIfError(result)
         return result
 
 
     def _post(self, endpoint, data):
         url = os.path.join(self.api_root, endpoint)
         result = requests.post(url, data=data, auth=self.auth, verify=False)
+        self.logIfError(result)
         return result
     
     def _put(self,  endpoint, data):
         url = os.path.join(self.api_root, endpoint)
         result = requests.put(url, data=data, auth=self.auth, verify=False)
+        self.logIfError(result)
         return result
-    
+
     def get_system_info(self):
         result = self._get('pools/default')
         if result.ok:
@@ -82,7 +86,7 @@ class CBM:
                 }
         
         return self._post('pools/default/buckets', data)
-        
+
     def get_certificate(self):
 
         result = self._get('pools/default/certificate')
@@ -90,12 +94,13 @@ class CBM:
             return result.text
 
         return ''
-        
+
 
     def exec_query(self, query):
+        logIt("Executing n1ql {}".format(query))
         data = {'statement': query}
         result = requests.post(self.n1ql_api, data=data, auth=self.auth, verify=False)
-
+        self.logIfError(result)
         return result
 
     def test_connection(self):
@@ -167,6 +172,15 @@ class CBM:
         result = self._get('whoami')
         return result.json()
 
+    def logIfError(self, result):
+        try:
+            js = result.json()
+            if 'errors' in js:
+                msg = "Error executing query: {}".format(', '.join([err['msg'] for err in js['errors']]))
+                logIt(msg)
+                logIt(msg, True)
+        except:
+            pass
 if __name__ == '__main__':
     hostname = raw_input('hostname: ')
     admin = raw_input('admin: ')

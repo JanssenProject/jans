@@ -333,27 +333,8 @@ class Config:
         self.oxtrust_requesting_party_client_id = None
         self.oxtrust_resource_server_client_id = None
 
-
-        #definitions for couchbase
-        self.couchebaseInstallDir = '/opt/couchbase/'
-        self.couchebaseClusterAdmin = 'admin'
-        self.isCouchbaseUserAdmin = False
-        self.couchbasePackageFolder = os.path.join(self.distFolder, 'couchbase')
-        self.couchbaseTrustStoreFn = os.path.join(self.certFolder, 'couchbase.pkcs12')
-        self.couchbaseTrustStorePass = 'newsecret'
-        self.n1qlOutputFolder = os.path.join(self.outputFolder,'n1ql')
-        self.couchbaseIndexJson = os.path.join(self.install_dir, 'static/couchbase/index.json')
-        self.couchbaseInitScript = os.path.join(self.install_dir, 'static/system/initd/couchbase-server')
-        self.couchebaseCert = os.path.join(self.certFolder, 'couchbase.pem')
-        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
-        self.couchbaseBuckets = []
-        self.cbm = None
-        self.cb_query_node = 0
-        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
-                            'query_update', 'query_insert',
-                            'query_manage_index']
         self.post_messages = []
-        self.couchbase_bucket_prefix = 'gluu'
+
 
         #oxd install options
         self.installOxd = False
