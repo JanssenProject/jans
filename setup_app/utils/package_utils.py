@@ -1,11 +1,14 @@
 
+from setup_app import paths
 from setup_app.config import Config
+from setup_app.utils import base
 from setup_app.utils.setup_utils import SetupUtils
 
-class PackageUtils(SetupUtils)
+class PackageUtils(SetupUtils):
 
+    #TODO: get commands from paths
     def get_install_commands(self):
-        if self.os_type in ('ubuntu', 'debian'):
+        if base.clone_type == 'deb':
             install_command = 'DEBIAN_FRONTEND=noninteractive apt-get install -y {0}'
             update_command = 'DEBIAN_FRONTEND=noninteractive apt-get update -y'
             query_command = 'dpkg-query -W -f=\'${{Status}}\' {} 2>/dev/null | grep -c "ok installed"'
@@ -90,9 +93,9 @@ class PackageUtils(SetupUtils)
 
 
     def installPackage(self, packageName):
-        if self.os_type in ['debian', 'ubuntu']:
-            output = self.run([self.cmd_dpkg, '--install', packageName])
+        if base.clone_type == 'deb':
+            output = self.run([paths.cmd_dpkg, '--install', packageName])
         else:
-            output = self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+            output = self.run([paths.cmd_rpm, '--install', '--verbose', '--hash', packageName])
 
         return output

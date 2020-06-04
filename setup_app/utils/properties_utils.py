@@ -83,13 +83,19 @@ class PropertiesUtils(SetupUtils):
         if not Config.ldapPass:
             Config.ldapPass = Config.oxtrust_admin_password
 
+        if Config.cb_install and not Config.get('cb_password'):
+            Config.cb_password = Config.oxtrust_admin_password
+
+        if Config.cb_install and not Config.wrends_install:
+            Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
+
+        self.set_persistence_type()
+
         if not Config.opendj_p12_pass:
             Config.opendj_p12_pass = self.getPW()
 
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
-
-
 
         if not Config.idp_client_id:
             Config.idp_client_id = '1101.'+ str(uuid.uuid4())
@@ -317,7 +323,7 @@ class PropertiesUtils(SetupUtils):
 
 
     def test_cb_servers(self, couchbase_hostname):
-        cb_hosts = re_split_host.findall(couchbase_hostname)
+        cb_hosts = base.re_split_host.findall(couchbase_hostname)
 
         cb_query_node = None
         retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
@@ -422,18 +428,6 @@ class PropertiesUtils(SetupUtils):
         if ssl_subjects['CN'] != oxd_hostname:
             return ssl_subjects
 
-    def add_couchbase_post_messages(self):
-        self.post_messages.append( 
-                "Please note that you have to update your firewall configuration to\n"
-                "allow connections to the following ports on Couchbase Server:\n"
-                "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
-                "11214, 11215, 18091 to 18093, and from 21100 to 21299."
-            )
-        (w, e) = ('', '') if Config.thread_queue else (gluu_utils.colors.WARNING, gluu_utils.colors.ENDC)
-        self.post_messages.append(
-            w+"By using Couchbase Server you agree to the End User License Agreement.\n"
-            "See /opt/couchbase/LICENSE.txt"+e
-            )
 
     def promptForBackendMappings(self):
 
@@ -507,6 +501,15 @@ class PropertiesUtils(SetupUtils):
                     else:
                         Config.oxd_server_https = oxd_server_https
                         break
+
+    def set_persistence_type(self):
+        if Config.wrends_install and not  Config.cb_install:
+            Config.persistence_type = 'ldap'
+        elif not Config.wrends_install and Config.cb_install:
+            Config.persistence_type = 'couchbase'
+        elif Config.wrends_install and Config.cb_install:
+            Config.persistence_type = 'hybrid'
+
 
     def promptForProperties(self):
 
@@ -587,7 +590,7 @@ class PropertiesUtils(SetupUtils):
             if promptForLDAP[0] == 'y':
                 Config.wrends_install = InstallTypes.LOCAL
             else:
-                Config.wrends_install = NONE
+                Config.wrends_install = InstallTypes.NONE
 
         if Config.wrends_install == InstallTypes.LOCAL:
 
@@ -622,8 +625,8 @@ class PropertiesUtils(SetupUtils):
         elif 'couchbase' in available_backends:
             promptForCB = self.getPrompt("Install Local Couchbase Server?", "Yes")[0].lower()
             if promptForCB[0] == 'y':
-                self.cb_install = InstallTypes.LOCAL
-                self.isCouchbaseUserAdmin = True
+                Config.cb_install = InstallTypes.LOCAL
+                Config.isCouchbaseUserAdmin = True
 
                 while True:
                     cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), Config.oxtrust_admin_password)
@@ -641,15 +644,13 @@ class PropertiesUtils(SetupUtils):
 
         if Config.cb_install:
             Config.cache_provider_type = 'NATIVE_PERSISTENCE'
-            self.add_couchbase_post_messages()
 
         if not Config.wrends_install and Config.cb_install:
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-            Config.persistence_type = 'couchbase'
-
         elif Config.wrends_install and Config.cb_install:
             Config.promptForBackendMappings()
-            Config.persistence_type = 'hybrid'
+
+        self.set_persistence_type()
 
         if Config.allowPreReleasedFeatures:
             while True:

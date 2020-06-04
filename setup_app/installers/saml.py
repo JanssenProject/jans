@@ -160,6 +160,25 @@ class SamlInstaller(JettyInstaller):
 
 
     def saml_couchbase_settings(self):
+
+
+        #TODO: revise after couchbase install
+
+        """
+        shib_user = 'couchbaseShibUser'
+        shib_user_password = Config.couchbaseShibUserPassword
+        shib_user_roles = 'query_select[*]'
+        if self.isCouchbaseUserAdmin:
+            self.logIt("Creating couchbase readonly user for shib")
+            self.dbUtils.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
+        else:
+            self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+            self.post_messages.append('Username: {}'.format(shib_user))
+            self.post_messages.append('Password: {}'.format(shib_user_password))
+            self.post_messages.append('Roles: {}'.format(shib_user_roles))
+        """
+        
+        
         # Add couchbase bean to global.xml
         couchbase_bean_xml_fn = os.path.join(Config.staticFolder, 'couchbase/couchbase_bean.xml')
         global_xml_fn = os.path.join(self.idp3ConfFolder, 'global.xml')

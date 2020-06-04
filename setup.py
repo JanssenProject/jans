@@ -31,8 +31,9 @@ from setup_app.utils.properties_utils import PropertiesUtils
 from setup_app.utils.setup_utils import SetupUtils
 
 from setup_app.installers.gluu import GluuInstaller
-from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.httpd import HttpdInstaller
+from setup_app.installers.opendj import OpenDjInstaller
+from setup_app.installers.couchbase import CouchbaseInstaller
 from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
@@ -41,10 +42,10 @@ from setup_app.installers.oxauth import OxauthInstaller
 from setup_app.installers.oxtrust import OxtrustInstaller
 from setup_app.installers.scim import ScimInstaller
 from setup_app.installers.passport import PassportInstaller
-from setup_app.installers.opendj import OpenDjInstaller
 from setup_app.installers.fido import FidoInstaller
 from setup_app.installers.saml import SamlInstaller
 from setup_app.installers.radius import RadiusInstaller
+from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.casa import CasaInstaller
 
 
@@ -128,11 +129,13 @@ jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 nodeInstaller = NodeInstaller()
+openDjInstaller = OpenDjInstaller()
+couchbaseInstaller = CouchbaseInstaller()
+
 oxauthInstaller = OxauthInstaller()
 passportInstaller = PassportInstaller()
 oxtrustInstaller = OxtrustInstaller()
 scimInstaller = ScimInstaller()
-openDjInstaller = OpenDjInstaller()
 fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
@@ -187,6 +190,9 @@ if proceed:
 
     if Config.wrends_install:
         openDjInstaller.start_installation()
+
+    if Config.cb_install:
+        couchbaseInstaller.start_installation()
 
     if Config.installHttpd:
         httpdinstaller = HttpdInstaller()

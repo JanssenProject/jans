@@ -87,6 +87,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         if Config.mappingLocations['default'] == 'ldap':
             schema_ldif = os.path.join(self.source_dir, 'schema/98-radius.ldif')
             self.dbUtils.import_schema(schema_ldif)
+            self.dbUtils.ldap_conn.rebind()
             self.dbUtils.import_ldif([ldif_file_server])
         else:
             pass
