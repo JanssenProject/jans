@@ -73,6 +73,11 @@
 				<artifactId>oxauth-model</artifactId>
 				<version>${gluu.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.gluu</groupId>
+				<artifactId>fido2-model</artifactId>
+				<version>${gluu.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
