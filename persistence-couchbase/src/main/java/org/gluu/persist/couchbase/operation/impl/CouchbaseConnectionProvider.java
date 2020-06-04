@@ -235,7 +235,11 @@ public class CouchbaseConnectionProvider {
             try {
                 Bucket bucket = bucketMapping.getBucket();
                 if (bucket.isClosed() || !isConnected(bucketMapping)) {
-                    LOG.error("Bucket '{}' is invalid", bucketMapping.getBucketName());
+                    if (bucket.isClosed()) {
+                        LOG.debug("Bucket '{}' is closed", bucketMapping.getBucketName());
+                    }
+
+                    LOG.error("Bucket '{}' is in invalid state", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
                 }
@@ -262,6 +266,8 @@ public class CouchbaseConnectionProvider {
             
             if (result) {
             	result = queryResult.info().resultCount() == 0;
+            } else if (LOG.isDebugEnabled()) {
+        		LOG.debug("There are indexes which not online");
             }
         }
 
@@ -269,6 +275,7 @@ public class CouchbaseConnectionProvider {
 	    	PingReport pingReport = bucket.ping();
 	    	for (PingServiceHealth pingServiceHealth : pingReport.services()) {
 	    		if (PingState.OK != pingServiceHealth.state()) {
+	        		LOG.debug("Ping returns that service typ {} is not online", pingServiceHealth.type());
 	    			result = false;
 	    			break;
 	    		}
