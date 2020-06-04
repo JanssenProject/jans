@@ -1,24 +1,58 @@
 import os
 import glob
+import time
+import sys
+import json
+import uuid
 
 from setup_app import paths
+from setup_app.static import InstallTypes, colors
 from setup_app.config import Config
-from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils import base
+from setup_app.utils.cbm import CBM
+from setup_app.utils.package_utils import PackageUtils
 from setup_app.installers.base import BaseInstaller
 
 
-class CouchbaseInstaller(SetupUtils, BaseInstaller):
+class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def __init__(self):
-        self.service_name = 'couchbase'
+        self.service_name = 'couchbase-server'
         self.pbar_text = "Installing Couchbase"
+
+        if not Config.get('couchebaseClusterAdmin'):
+            Config.couchebaseClusterAdmin = 'admin'
+            
+        if not Config.get('isCouchbaseUserAdmin'):
+            Config.isCouchbaseUserAdmin = False
+
+        if not Config.get('couchbaseTrustStorePass'):
+            Config.couchbaseTrustStorePass = 'secret'
+            Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
+
+        if not Config.get('cb_query_node'):
+            Config.cb_query_node = 0
+
+        if not Config.get('couchbase_bucket_prefix'):
+            Config.couchbase_bucket_prefix = 'gluu'
+
+        self.couchebaseInstallDir = '/opt/couchbase/'
+        self.couchbasePackageFolder = os.path.join(Config.distFolder, 'couchbase')
+        self.couchbaseTrustStoreFn = os.path.join(Config.certFolder, 'couchbase.pkcs12')
+        self.couchbaseIndexJson = os.path.join(Config.install_dir, 'static/couchbase/index.json')
+        self.couchbaseInitScript = os.path.join(Config.install_dir, 'static/system/initd/couchbase-server')
+        self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
+        self.gluuCouchebaseProperties = os.path.join(Config.configFolder, 'gluu-couchbase.properties')
+        self.couchbaseBuckets = []
+        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
+                            'query_update', 'query_insert',
+                            'query_manage_index']
+
 
     def install(self):
 
-        if not self.cbm:
-             self.cbm = CBM(self.couchbase_hostname, self.couchebaseClusterAdmin, self.cb_password)
-
-        if self.cb_install == LOCAL:
+        if Config.cb_install == InstallTypes.LOCAL:
+            self.add_couchbase_post_messages()
             self.couchbaseInstall()
             self.checkIfGluuBucketReady()
             self.couchebaseCreateCluster()
@@ -27,105 +61,98 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
 
         self.create_couchbase_buckets()
 
+        Config.pbar.progress(self.service_name, "Importing documents into Couchbase", incr=False)
+
         couchbase_mappings = self.getMappingType('couchbase')
 
-        if self.mappingLocations['default'] == 'couchbase':
-            self.import_ldif_couchebase(self.couchbaseBucketDict['default']['ldif'], self.couchbase_bucket_prefix)
+        if Config.mappingLocations['default'] == 'couchbase':
+            self.dbUtils.import_ldif(Config.couchbaseBucketDict['default']['ldif'], Config.couchbase_bucket_prefix)
 
         for group in couchbase_mappings:
-            bucket = '{}_{}'.format(self.couchbase_bucket_prefix, group)
-            if self.couchbaseBucketDict[group]['ldif']:
-                self.import_ldif_couchebase(self.couchbaseBucketDict[group]['ldif'], bucket)
+            bucket = '{}_{}'.format(Config.couchbase_bucket_prefix, group)
+            if Config.couchbaseBucketDict[group]['ldif']:
+                self.dbUtils.import_ldif(Config.couchbaseBucketDict[group]['ldif'], bucket)
 
         self.couchbaseProperties()
 
 
     def couchbaseInstall(self):
         coucbase_package = None
-        
-        tmp = []
 
-        for f in os.listdir(self.couchbasePackageFolder):
-            if f.startswith('couchbase-server-enterprise'):
-                tmp.append(f)
+        cb_package_list = glob.glob(os.path.join(self.couchbasePackageFolder, 'couchbase-server-enterprise*'))
 
-        if not tmp:
+        if not cb_package_list:
             err_msg = "Couchbase package not found at %s. Exiting with error..." % (self.couchbasePackageFolder)
-            self.logIt(err_msg, True)
-            sys.exit(2)
+            self.logIt(err_msg, True, True)
 
-        packageName = os.path.join(self.couchbasePackageFolder, max(tmp))
+        packageName = max(cb_package_list)
         self.logIt("Found package '%s' for install" % packageName)
         installOutput = self.installPackage(packageName)
-        self.post_messages.append(installOutput)
+        Config.post_messages.append(installOutput)
 
-        if self.os_type == 'ubuntu' and self.os_version == '16':
+        if base.os_name == 'ubuntu16':
             script_name = os.path.basename(self.couchbaseInitScript)
             target_file = os.path.join('/etc/init.d', script_name)
             self.copyFile(self.couchbaseInitScript, target_file)
-            self.run([self.cmd_chmod, '+x', target_file])
-            self.run(["/usr/sbin/update-rc.d", script_name, 'defaults'])
-            self.run(["/usr/sbin/update-rc.d", script_name, 'enable'])
-            self.run_service_command('couchbase-server', 'start')
+            self.run([paths.cmd_chmod, '+x', target_file])
+            self.reload_daemon()
+            self.enable()
+            self.start()
 
     def couchebaseCreateCluster(self):
         
         self.logIt("Initializing Couchbase Node")
-        result = self.cbm.initialize_node()
+        result = self.dbUtils.cbm.initialize_node()
         if result.ok:
             self.logIt("Couchbase Node was initialized")
         else:
             self.logIt("Failed to initilize Couchbase Node, reason: "+ result.text, errorLog=True)
-        
+
         #wait a while for node initialization completed
-        time.sleep(2)
-        
+        time.sleep(4)
+
         self.logIt("Renaming Couchbase Node")
-        result = self.cbm.rename_node()
+        result = self.dbUtils.cbm.rename_node()
         if not result.ok:
-            time.sleep(2)
-            result = self.cbm.rename_node()
+            time.sleep(4)
+            result = self.dbUtils.cbm.rename_node()
 
         if result.ok:
             self.logIt("Couchbase Node was renamed")
         else:
             self.logIt("Failed to rename Couchbase Node, reason: "+ result.text, errorLog=True)
 
-
         self.logIt("Setting Couchbase index storage mode")
-        result = self.cbm.set_index_storage_mode()
+        result = self.dbUtils.cbm.set_index_storage_mode()
         if result.ok:
             self.logIt("Couchbase index storage mode was set")
         else:
             self.logIt("Failed to set Couchbase index storage mode, reason: "+ result.text, errorLog=True)
 
-
         self.logIt("Setting Couchbase indexer memory quota to 1GB")
-        result = self.cbm.set_index_memory_quta()
+        result = self.dbUtils.cbm.set_index_memory_quta()
         if result.ok:
             self.logIt("Couchbase indexer memory quota was set to 1GB")
         else:
             self.logIt("Failed to set Couchbase indexer memory quota, reason: "+ result.text, errorLog=True)
 
-
         self.logIt("Setting up Couchbase Services")
-        result = self.cbm.setup_services()
+        result = self.dbUtils.cbm.setup_services()
         if result.ok:
             self.logIt("Couchbase services were set up")
         else:
             self.logIt("Failed to setup Couchbase services, reason: "+ result.text, errorLog=True)
 
-
         self.logIt("Setting Couchbase Admin password")
-        result = self.cbm.set_admin_password()
+        result = self.dbUtils.cbm.set_admin_password()
         if result.ok:
             self.logIt("Couchbase admin password  was set")
         else:
             self.logIt("Failed to set Couchbase admin password, reason: "+ result.text, errorLog=True)
-            
+
 
     def couchebaseCreateBucket(self, bucketName, bucketType='couchbase', bucketRamsize=1024):
-        result = self.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
+        result = self.dbUtils.cbm.add_bucket(bucketName, bucketRamsize, bucketType)
         self.logIt("Creating bucket {0} with type {1} and ramsize {2}".format(bucketName, bucketType, bucketRamsize))
         if result.ok:
             self.logIt("Bucket {} successfully created".format(bucketName))
@@ -135,7 +162,7 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
         time.sleep(1)
 
     def exec_n1ql_query(self, query):
-        result = self.cbm.exec_query(query)
+        result = self.dbUtils.cbm.exec_query(query)
         if result.ok:
             self.logIt("Query execution was successful: {}".format(query))
         else:
@@ -188,33 +215,27 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
         
         self.couchbaseBuckets.append(bucket)
         couchbase_index_str = self.readFile(self.couchbaseIndexJson)
-        couchbase_index_str = couchbase_index_str.replace('!bucket_prefix!', self.couchbase_bucket_prefix)
+        couchbase_index_str = couchbase_index_str.replace('!bucket_prefix!', Config.couchbase_bucket_prefix)
         couchbase_index = json.loads(couchbase_index_str)
 
         self.logIt("Running Couchbase index creation for " + bucket + " bucket")
 
-        if not os.path.exists(self.n1qlOutputFolder):
-            os.mkdir(self.n1qlOutputFolder)
-        
-        tmp_file = os.path.join(self.n1qlOutputFolder, 'index_%s.n1ql' % bucket)
 
-        with open(tmp_file, 'w') as W:
-            index_list = couchbase_index.get(bucket,{})
+        index_list = couchbase_index.get(bucket,{})
 
-            index_names = []
-            for ind in index_list['attributes']:
-                cmd, index_name = self.couchbaseMakeIndex(bucket, ind)
-                W.write(cmd+';\n')
-                index_names.append(index_name)
+        index_names = []
+        for ind in index_list['attributes']:
+            n1ql, index_name = self.couchbaseMakeIndex(bucket, ind)
+            self.exec_n1ql_query(n1ql)
+            index_names.append(index_name)
 
-            for ind in index_list['static']:
-                cmd, index_name = self.couchbaseMakeIndex(bucket, ind)
-                W.write(cmd+';\n')
+        for ind in index_list['static']:
+            n1ql, index_name = self.couchbaseMakeIndex(bucket, ind)
+            self.exec_n1ql_query(n1ql)
 
-            if index_names:
-                W.write('BUILD INDEX ON `%s` (%s) USING GSI;\n' % (bucket, ', '.join(index_names)))
-
-        self.couchbaseExecQuery(tmp_file)
+        if index_names:
+            n1ql = 'BUILD INDEX ON `%s` (%s) USING GSI' % (bucket, ', '.join(index_names))
+            self.exec_n1ql_query(n1ql)
 
 
     def checkIfAttributeExists(self, key, atribute,  documents):
@@ -237,7 +258,7 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
         return retVal
 
     def checkCBRoles(self, buckets=[]):
-        result = self.cbm.whoami()
+        result = self.dbUtils.cbm.whoami()
         bc = buckets[:]
         bucket_roles = {}
         if 'roles' in result:
@@ -264,62 +285,12 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
 
         return True, None
 
-    def import_ldif_couchebase(self, ldif_file_list=[], bucket=None):
-        
-        self.processedKeys = []
-
-        key_prefixes = {}
-        for cb in self.couchbaseBucketDict:
-            for prefix in self.couchbaseBucketDict[cb]['document_key_prefix']:
-                key_prefixes[prefix] = cb
-
-        if not ldif_file_list:
-            ldif_file_list = self.ldif_files[:]
-        
-        for ldif in ldif_file_list:
-            self.logIt("Importing ldif file %s to Couchebase bucket %s" % (ldif, bucket))
-            documents = gluu_utils.get_documents_from_ldif(ldif)
-
-            ldif_base_name = os.path.basename(ldif)
-            name, ext = os.path.splitext(ldif_base_name)
-
-            if not os.path.exists(self.n1qlOutputFolder):
-                os.mkdir(self.n1qlOutputFolder)
-
-            tmp_file = os.path.join(self.n1qlOutputFolder, name+'.n1ql')
-            
-            with open(tmp_file, 'w') as o:
-                for e in documents:
-                    if bucket:
-                        cur_bucket = bucket
-                    else:
-                        n_ = e[0].find('_')
-                        document_key_prefix = e[0][:n_+1]
-                        cur_bucket = self.couchbase_bucket_prefix + '_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
-
-                    query = ''
-
-                    if 'changetype' in e[1]:
-                        if 'replace' in e[1]:
-                            query = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
-                        elif 'add' in e[1]:
-                            for m in e[1][e[1]['add']]:
-                                if self.checkIfAttributeExists(e[0], e[1]['add'],  documents):
-                                    query += 'UPDATE `%s` USE KEYS "%s" SET %s=["%s"];\n' % (cur_bucket, e[0], e[1]['add'], m)
-                                else:
-                                    query += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
-                    else:
-                        query = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
-
-                    o.write(query)
-
-            self.couchbaseExecQuery(tmp_file)
 
     def checkIfGluuBucketReady(self):
 
         for i in range(12):
             self.logIt("Checking if gluu bucket is ready for N1QL query. Try %d ..." % (i+1))
-            cbm_result = self.cbm.test_connection()
+            cbm_result = self.dbUtils.cbm.test_connection()
             if cbm_result.ok:
                 return True
             else:
@@ -330,48 +301,47 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
         
-        for cb_host in re_split_host.findall(self.couchbase_hostname):
+        for cb_host in base.re_split_host.findall(Config.couchbase_hostname):
 
-            cbm_ = CBM(cb_host.strip(), self.couchebaseClusterAdmin, self.cb_password)
+            cbm_ = CBM(cb_host.strip(), Config.couchebaseClusterAdmin, Config.cb_password)
             cert = cbm_.get_certificate()
-            with open(self.couchebaseCert, 'w') as w:
-                w.write(cert)
+            self.writeFile(self.couchebaseCert, cert)
 
-            cmd_args = [self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % cb_host, \
+            cmd_args = [Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_couchbase" % cb_host, \
                       "-file", self.couchebaseCert, "-keystore", self.couchbaseTrustStoreFn, \
-                      "-storepass", self.couchbaseTrustStorePass, "-noprompt"]
+                      "-storepass", Config.couchbaseTrustStorePass, "-noprompt"]
 
             self.run(cmd_args)
 
     def couchbaseDict(self):
         prop_dict = {
-                    'hostname': ','.join(re_split_host.findall(self.couchbase_hostname)),
-                    'couchbase_server_user': self.couchebaseClusterAdmin,
-                    'encoded_couchbase_server_pw': self.encoded_cb_password,
+                    'hostname': ','.join(base.re_split_host.findall(Config.couchbase_hostname)),
+                    'couchbase_server_user': Config.couchebaseClusterAdmin,
+                    'encoded_couchbase_server_pw': Config.encoded_cb_password,
                     'couchbase_buckets': ', '.join(self.couchbaseBuckets),
-                    'default_bucket': self.couchbase_bucket_prefix,
+                    'default_bucket': Config.couchbase_bucket_prefix,
                     'encryption_method': 'SSHA-256',
                     'ssl_enabled': 'true',
                     'couchbaseTrustStoreFn': self.couchbaseTrustStoreFn,
-                    'encoded_couchbaseTrustStorePass': self.encoded_couchbaseTrustStorePass,
-                    'certFolder': self.certFolder,
-                    'gluuOptPythonFolder': self.gluuOptPythonFolder
+                    'encoded_couchbaseTrustStorePass': Config.encoded_couchbaseTrustStorePass,
+                    'certFolder': Config.certFolder,
+                    'gluuOptPythonFolder': Config.gluuOptPythonFolder
                     }
 
         couchbase_mappings = []
 
-        for group in list(self.couchbaseBucketDict.keys())[1:]:
-            bucket = self.couchbase_bucket_prefix if group == 'default' else self.couchbase_bucket_prefix + '_' + group
+        for group in list(Config.couchbaseBucketDict.keys())[1:]:
+            bucket = Config.couchbase_bucket_prefix if group == 'default' else Config.couchbase_bucket_prefix + '_' + group
             if bucket in self.couchbaseBuckets:
                 cb_key = 'couchbase_{}_mapping'.format(group)
-                if self.mappingLocations[group] == 'couchbase':
-                    if self.couchbaseBucketDict[group]['mapping']:
-                        couchbase_mappings.append('bucket.{}_{}.mapping: {}'.format(self.couchbase_bucket_prefix, group, self.couchbaseBucketDict[group]['mapping']))
-                        self.templateRenderingDict[cb_key] = self.couchbaseBucketDict[group]['mapping']
+                if Config.mappingLocations[group] == 'couchbase':
+                    if Config.couchbaseBucketDict[group]['mapping']:
+                        couchbase_mappings.append('bucket.{}_{}.mapping: {}'.format(Config.couchbase_bucket_prefix, group, Config.couchbaseBucketDict[group]['mapping']))
+                        Config.templateRenderingDict[cb_key] = Config.couchbaseBucketDict[group]['mapping']
                     else:
-                         self.templateRenderingDict[cb_key] = ''
+                         Config.templateRenderingDict[cb_key] = ''
                 else:
-                    self.templateRenderingDict[cb_key] = ''
+                    Config.templateRenderingDict[cb_key] = ''
 
         prop_dict['couchbase_mappings'] = '\n'.join(couchbase_mappings)
         couchbase_test_mappings = [ 'config.' + mapping for mapping in couchbase_mappings ]
@@ -381,20 +351,16 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
         
     def couchbaseProperties(self):
         prop_file = os.path.basename(self.gluuCouchebaseProperties)
-        prop = open(os.path.join(self.templateFolder, prop_file)).read()
-
+        prop = open(os.path.join(Config.templateFolder, prop_file)).read()
         prop_dict = self.couchbaseDict()
-
         prop = prop % prop_dict
-        
-        out_file = os.path.join(self.outputFolder, prop_file)
+        out_file = os.path.join(Config.outputFolder, prop_file)
         self.writeFile(out_file, prop)
         self.writeFile(self.gluuCouchebaseProperties, prop)
 
-
     def create_couchbase_buckets(self):
         #Determine ram_size for buckets
-        system_info = self.cbm.get_system_info()
+        system_info = self.dbUtils.cbm.get_system_info()
         couchbaseClusterRamsize = (system_info['storageTotals']['ram']['quotaTotal'] - system_info['storageTotals']['ram']['quotaUsed']) / (1024*1024)
 
         couchbase_mappings = self.getMappingType('couchbase')
@@ -402,9 +368,9 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
         min_cb_ram = 0
         
         for group in couchbase_mappings:
-             min_cb_ram += self.couchbaseBucketDict[group]['memory_allocation']
+             min_cb_ram += Config.couchbaseBucketDict[group]['memory_allocation']
         
-        min_cb_ram += self.couchbaseBucketDict['default']['memory_allocation']
+        min_cb_ram += Config.couchbaseBucketDict['default']['memory_allocation']
 
         if couchbaseClusterRamsize < min_cb_ram:
             print("Available quota on couchbase server is less than {} MB. Exiting installation".format(min_cb_ram))
@@ -412,48 +378,45 @@ class CouchbaseInstaller(SetupUtils, BaseInstaller):
 
         self.logIt("Ram size for Couchbase buckets was determined as {0} MB".format(couchbaseClusterRamsize))
 
-        min_cb_ram *= 1.0
+        min_cb_ram = float(min_cb_ram)
 
         existing_buckets = []
-        r = self.cbm.get_buckets()
+        r = self.dbUtils.cbm.get_buckets()
 
         if r.ok:
             b_ = r.json()
             existing_buckets = [ bucket['name'] for bucket in b_ ]
 
-        if not self.couchbase_bucket_prefix in existing_buckets:
+        if not Config.couchbase_bucket_prefix in existing_buckets:
 
-            if self.mappingLocations['default'] != 'couchbase':
-                self.couchebaseCreateBucket(self.couchbase_bucket_prefix, bucketRamsize=100)
+            if Config.mappingLocations['default'] != 'couchbase':
+                self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=100)
             else:
-                bucketRamsize = int((self.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
-                self.couchebaseCreateBucket(self.couchbase_bucket_prefix, bucketRamsize=bucketRamsize)
+                bucketRamsize = int((Config.couchbaseBucketDict['default']['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                self.couchebaseCreateBucket(Config.couchbase_bucket_prefix, bucketRamsize=bucketRamsize)
 
-        if self.mappingLocations['default'] == 'couchbase':
-            self.couchebaseCreateIndexes(self.couchbase_bucket_prefix)
-
+        if Config.mappingLocations['default'] == 'couchbase':
+            self.couchebaseCreateIndexes(Config.couchbase_bucket_prefix)
 
         for group in couchbase_mappings:
-            bucket = '{}_{}'.format(self.couchbase_bucket_prefix, group)
+            bucket = '{}_{}'.format(Config.couchbase_bucket_prefix, group)
             if not bucket in existing_buckets:
-                bucketRamsize = int((self.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
+                bucketRamsize = int((Config.couchbaseBucketDict[group]['memory_allocation']/min_cb_ram)*couchbaseClusterRamsize)
                 self.couchebaseCreateBucket(bucket, bucketRamsize=bucketRamsize)
             else:
                 self.logIt("Bucket {} already exists, not creating".format(bucket))
 
             self.couchebaseCreateIndexes(bucket)
 
-        if self.installSaml:
-            
-            shib_user = 'couchbaseShibUser'
-            shib_user_password = self.couchbaseShibUserPassword
-            shib_user_roles = 'query_select[*]'
-            if self.isCouchbaseUserAdmin:
-                self.logIt("Creating couchbase readonly user for shib")
-                self.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
-            else:
-                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
-                self.post_messages.append('Username: {}'.format(shib_user))
-                self.post_messages.append('Password: {}'.format(shib_user_password))
-                self.post_messages.append('Roles: {}'.format(shib_user_roles))
-
+    def add_couchbase_post_messages(self):
+        Config.post_messages.append( 
+                "Please note that you have to update your firewall configuration to\n"
+                "allow connections to the following ports on Couchbase Server:\n"
+                "4369, 28091 to 28094, 9100 to 9105, 9998, 9999, 11207, 11209 to 11211,\n"
+                "11214, 11215, 18091 to 18093, and from 21100 to 21299."
+            )
+        (w, e) = ('', '') if Config.thread_queue else (colors.WARNING, colors.ENDC)
+        Config.post_messages.append(
+            w+"By using Couchbase Server you agree to the End User License Agreement.\n"
+            "See /opt/couchbase/LICENSE.txt"+e
+            )

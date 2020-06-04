@@ -14,17 +14,21 @@ import traceback
 import re
 import shutil
 import multiprocessing
+from ldap3.utils import dn as dnutils
 
 from setup_app import paths
 from setup_app import static
+from setup_app.config import Config
 from setup_app.pylib.jproperties import Properties
-from setup_app.pylib.ldif3.ldif3 import LDIFParser
+from setup_app.pylib.ldif4.ldif import LDIFParser
 from setup_app.utils.attribute_data_types import ATTRUBUTEDATATYPES
 
 # Note!!! This module should be imported after paths
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
+
+re_split_host = re.compile(r'[^,\s,;]+')
 
 # Determine initdaemon
 with open('/proc/1/status', 'r') as f:
@@ -111,14 +115,9 @@ def check_resources():
             sys.exit()
 
 
-
-
-
-
 attribDataTypes = ATTRUBUTEDATATYPES()
 
 listAttrib = ['member']
-
 
 
 class myLdifParser(LDIFParser):
@@ -157,7 +156,7 @@ def check_os_supported():
     return os_type + ' '+ os_version in get_os_package_list()
 
 def prepare_multivalued_list():
-    gluu_schema_fn = os.path.join(ces_dir, 'schema/gluu_schema.json')
+    gluu_schema_fn = os.path.join(Config.install_dir, 'schema/gluu_schema.json')
     gluu_schema = json.load(open(gluu_schema_fn))
 
     for obj_type in ['objectClasses', 'attributeTypes']:
@@ -353,52 +352,59 @@ def get_key_from(dn):
     return key
 
 
+def get_document_from_entry(dn, entry):
+    if not hasattr(attribDataTypes, 'attribTypes'):
+        attribDataTypes.startup(Config.install_dir)
+        prepare_multivalued_list()
+
+    document = copy.deepcopy(entry)
+
+    if len(document) > 2:
+        key = get_key_from(dn)
+        document['dn'] = dn
+        for k in document:
+            if len(document[k]) == 1:
+                if not k in listAttrib:
+                    document[k] = document[k][0]
+
+        for k in document:
+            dtype = attribDataTypes.getAttribDataType(k)
+            if dtype != 'string':
+                if type(document[k]) == type([]):
+                    for i in range(len(document[k])):
+                        document[k][i] = getTypedValue(dtype, document[k][i])
+                        if document[k][i] == 'true':
+                            document[k][i] = True
+                        elif document[k][i] == 'false':
+                            document[k][i] = False
+                else:
+                    document[k] = getTypedValue(dtype, document[k])
+
+            if k == 'objectClass':
+                document[k].remove('top')
+                oc_list = document[k]
+
+                for oc in oc_list[:]:
+                    if 'Custom' in oc and len(oc_list) > 1:
+                        oc_list.remove(oc)
+
+                    if not 'gluu' in oc.lower() and len(oc_list) > 1:
+                        oc_list.remove(oc)
+
+                document[k] = oc_list[0]
+
+        return key, document
+
 def get_documents_from_ldif(ldif_file):
     parser = myLdifParser(ldif_file)
     parser.parse()
     documents = []
 
-    if not hasattr(attribDataTypes, 'attribTypes'):
-        attribDataTypes.startup(ces_dir)
-        prepare_multivalued_list()
-
     for dn, entry in parser.entries:
-        if len(entry) > 2:
-            key = get_key_from(dn)
-            entry['dn'] = dn
-            for k in copy.deepcopy(entry):
-                if len(entry[k]) == 1:
-                    if not k in listAttrib:
-                        entry[k] = entry[k][0]
+        key, document = get_document_from_entry(dn, entry)
 
-            for k in entry:
-                dtype = attribDataTypes.getAttribDataType(k)
-                if dtype != 'string':
-                    if type(entry[k]) == type([]):
-                        for i in range(len(entry[k])):
-                            entry[k][i] = getTypedValue(dtype, entry[k][i])
-                            if entry[k][i] == 'true':
-                                entry[k][i] = True
-                            elif entry[k][i] == 'false':
-                                entry[k][i] = False
-                    else:
-                        entry[k] = getTypedValue(dtype, entry[k])
-
-                if k == 'objectClass':
-                    entry[k].remove('top')
-                    oc_list = entry[k]
-
-                    for oc in oc_list[:]:
-                        if 'Custom' in oc and len(oc_list) > 1:
-                            oc_list.remove(oc)
-
-                        if not 'gluu' in oc.lower() and len(oc_list) > 1:
-                            oc_list.remove(oc)
-
-                    entry[k] = oc_list[0]
-
-            #mapped_entry = get_mapped_entry(entry)
-            documents.append((key, entry))
+        #mapped_entry = get_mapped_entry(entry)
+        documents.append((key, document))
 
     return documents
 
@@ -421,9 +427,29 @@ def find_script_names(ldif_file):
                 
     return name_list
 
-
 def determine_package(glob_pattern):
     logIt("Determining package for pattern: {}".format(glob_pattern))
     package_list = glob.glob(glob_pattern)
     if package_list:
         return max(package_list)
+
+def get_backend_location_for_dn(dn):
+    key = get_key_from(dn)
+    n = key.find('_')
+    key_prefix = key[:n+1]
+
+    for grp in Config.couchbaseBucketDict:
+        if key_prefix in Config.couchbaseBucketDict[grp]['document_key_prefix']:
+            group = grp
+            bucket = grp
+            break
+    else:
+        group = 'default'
+        bucket = Config.couchbase_bucket_prefix
+
+    if Config.mappingLocations[group] == 'ldap':
+        backend_location = static.BackendTypes.LDAP
+    if Config.mappingLocations[group] == 'couchbase':
+        backend_location = static.BackendTypes.COUCHBASE
+    
+    return bucket, backend_location

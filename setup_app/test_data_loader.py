@@ -1,3 +1,5 @@
+from setup_app.utils import base
+
 class TestDataLoader:
 
     def create_test_client_keystore(self):
@@ -44,7 +46,7 @@ class TestDataLoader:
         ldif_files = [ox_auth_test_ldif, scim_test_ldif]
         ldif_user_files = [ox_auth_test_user_ldif, scim_test_user_ldif]
 
-        cb_hosts = re_split_host.findall(self.couchbase_hostname)
+        cb_hosts = base.re_split_host.findall(self.couchbase_hostname)
 
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
