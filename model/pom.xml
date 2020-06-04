@@ -17,18 +17,25 @@
 	</parent>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.unboundid</groupId>
-            <artifactId>unboundid-ldapsdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxcore-model</artifactId>
-        </dependency>
+			<!-- Gluu -->
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-persistence-annotation</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-persistence-model</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxauth-model</artifactId>
+            </dependency>
+
+			<!-- Jackson -->
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+			</dependency>
 	</dependencies>
 	
 </project>
