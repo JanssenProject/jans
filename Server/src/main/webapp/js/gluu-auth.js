@@ -171,8 +171,15 @@ var gluu_auth = {
 					}
 				},
 				error: function(xhr, status, error) {
-					// Stop status checker on error
-					callCallback(callback, 'error');
+					if(status == 'timeout')
+					{
+						callCallback(callback, 'timeout');
+					}
+					else
+					{
+						// Stop status checker on error
+						callCallback(callback, 'error');
+					}
 				},
 				complete: function(xhr, status) {
 					if (gluu_auth.endTime < (new Date()).getTime()) {
