@@ -1,21 +1,18 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Gluu
  */
+
 package org.gluu.fido.model.entry;
 
 import java.io.Serializable;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.Expiration;
@@ -101,18 +98,6 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.creationDate = creationDate;
 
         updateExpirationDate();
-	}
-
-	public DeviceRegistration(String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
-		this.keyHandle = keyHandle;
-		try {
-			String attestationCertDecoded = Base64Util.base64urlencode(attestationCert.getEncoded());
-			this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(publicKey, attestationCertDecoded);
-		} catch (CertificateEncodingException e) {
-			throw new BadInputException("Malformed attestation certificate", e);
-		}
-
-		this.counter = counter;
 	}
 
 	public String getId() {
