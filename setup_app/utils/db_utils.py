@@ -3,23 +3,22 @@ import ldap3
 
 from setup_app.config import Config
 from setup_app.utils import base
+from setup_app.static import InstallTypes, BackendTypes
 from setup_app.utils.cbm import CBM
 
 
-# db types
-LDAP  = 1
-COUCH = 2
-
 class DBUtils:
-    ready = False
-    processedKeys = []
 
+    processedKeys = []
 
     def bind(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
 
         if Config.mappingLocations['default'] == 'ldap':
-            self.moddb = LDAP
+            self.moddb = BackendTypes.LDAP
+        else:
+            self.moddb = BackendTypes.COUCHBASE
 
+        if Config.wrends_install and not (hasattr(self, 'ldap_conn')  and self.ldap_conn.bound):
 
             if not ldap_hostname:
                 ldap_hostname = Config.ldap_hostname
@@ -41,16 +40,13 @@ class DBUtils:
                         )
             base.logIt("Making LDAP Connection to host {}:{} with user {}".format(ldap_hostname, port, ldap_binddn))
             self.ldap_conn.bind()
-        else:
-            self.moddb = COUCH
-            self.cbm = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
-            self.default_bucket = Config.couchbase_bucket_prefix
 
-        self.ready = True
+        self.cbm = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
+        self.default_bucket = Config.couchbase_bucket_prefix
 
 
     def get_oxAuthConfDynamic(self):
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
                         search_base='o=gluu', 
                         search_scope=ldap3.SUBTREE,
@@ -60,7 +56,7 @@ class DBUtils:
 
             dn = self.ldap_conn.response[0]['dn']
             oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['oxAuthConfDynamic'][0])
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_oxauth"'.format(self.default_bucket)
             result = cbm.exec_query(n1ql)
             js = result.json()
@@ -71,7 +67,7 @@ class DBUtils:
 
 
     def get_oxTrustConfApplication(self):
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
                         search_base='o=gluu',
                         search_scope=ldap3.SUBTREE,
@@ -80,7 +76,7 @@ class DBUtils:
                         )
             dn = self.ldap_conn.response[0]['dn']
             oxTrustConfApplication = json.loads(self.ldap_conn.response[0]['attributes']['oxTrustConfApplication'][0])
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_oxtrust"'.format(self.default_bucket)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
@@ -91,7 +87,7 @@ class DBUtils:
 
 
     def set_oxAuthConfDynamic(self, entries):
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
             oxAuthConfDynamic.update(entries)
 
@@ -99,7 +95,7 @@ class DBUtils:
                     dn,
                     {"oxAuthConfDynamic": [ldap3.MODIFY_REPLACE, json.dumps(oxAuthConfDynamic, indent=2)]}
                     )
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
                 n1ql = 'UPDATE `{}` USE KEYS "configuration_oxauth" SET {}={}'.format(self.default_bucket, k, entries[k])
                 self.cbm.exec_query(n1ql)
@@ -109,45 +105,45 @@ class DBUtils:
         dn, oxTrustConfApplication = self.get_oxTrustConfApplication()
         oxTrustConfApplication.update(entries)
 
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                     dn,
                     {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, json.dumps(oxTrustConfApplication, indent=2)]}
                     )
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
                 n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET {}={}'.format(self.default_bucket, k, entries[k])
                 self.cbm.exec_query(n1ql)
 
     def enable_script(self, inum):
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                     'inum={},ou=scripts,o=gluu'.format(inum),
                     {"oxEnabled": [ldap3.MODIFY_REPLACE, 'true']}
                     )
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxEnabled=true'.format(self.default_bucket, inum)
             self.cbm.exec_query(n1ql)
 
     def enable_service(self, service):
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                 'ou=configuration,o=gluu',
                 {service: [ldap3.MODIFY_REPLACE, 'true']}
                 )
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
         
     def set_configuration(self, component, value):
         
-        if self.moddb == LDAP:
+        if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                 'ou=configuration,o=gluu',
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
 
-        elif self.moddb == COUCH:
+        elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
             self.cbm.exec_query(n1ql)
 
@@ -167,8 +163,10 @@ class DBUtils:
         return  ', '.join(value2)
     
     def add_client2script(self, script_inum, client_id):
-        if self.moddb == LDAP:
-            dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
+        dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
+        bucket, backend_location = base.get_backend_location_for_dn(dn)
+
+        if backend_location == BackendTypes.LDAP:
             if self.dn_exists(dn):
                 for e in self.ldap_conn.response[0]['attributes'].get('oxConfigurationProperty', []):
                     try:
@@ -187,8 +185,8 @@ class DBUtils:
                                 dn,
                                 {'oxConfigurationProperty': [ldap3.MODIFY_ADD, oxConfigurationProperty_js]}
                                 )
-        elif self.moddb == COUCH:
-            n1ql = 'SELECT oxConfigurationProperty FROM `{}` USE KEYS "scripts_{}"'.format(self.default_bucket, script_inum)
+        elif backend_location == BackendTypes.COUCHBASE:
+            n1ql = 'SELECT oxConfigurationProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
 
@@ -196,7 +194,7 @@ class DBUtils:
             for oxconfigprop in oxConfigurationProperties:
                 if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                     oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                    n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxConfigurationProperty={}'.format(self.default_bucket, script_inum, oxConfigurationProperties)
+                    n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxConfigurationProperty={}'.format(bucket, script_inum, oxConfigurationProperties)
                     self.cbm.exec_query(n1ql)
                     break
 
@@ -220,67 +218,59 @@ class DBUtils:
         return retVal
 
     def import_ldif(self, ldif_files, bucket=None):
-        if self.moddb == LDAP:
-            for ldif_fn in ldif_files:
-                parser = base.myLdifParser(ldif_fn)
-                parser.parse()
-                for dn, entry in parser.entries:
+
+        for ldif_fn in ldif_files:
+            parser = base.myLdifParser(ldif_fn)
+            parser.parse()
+
+            for dn, entry in parser.entries:
+                dbucket, backend_location = base.get_backend_location_for_dn(dn)
+                if backend_location == BackendTypes.LDAP:
                     if not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
                         self.ldap_conn.add(dn, attributes=entry)
-        
-        elif self.moddb == COUCH:
 
-            key_prefixes = {}
-            for cb in Config.couchbaseBucketDict:
-                for prefix in Config.couchbaseBucketDict[cb]['document_key_prefix']:
-                    key_prefixes[prefix] = cb
-            
-            for ldif in ldif_file_list:
-                base.logIt("Importing ldif file %s to Couchebase bucket %s" % (ldif, bucket))
-                documents = base.get_documents_from_ldif(ldif)
-
-                for e in documents:
-                    if bucket:
-                        cur_bucket = bucket
-                    else:
-                        n_ = e[0].find('_')
-                        document_key_prefix = e[0][:n_+1]
-                        cur_bucket = Config.couchbase_bucket_prefix + '_' + key_prefixes[document_key_prefix] if document_key_prefix in key_prefixes else 'gluu'
+                elif backend_location == BackendTypes.COUCHBASE:
+                    if len(entry) < 3:
+                        continue
+                    key, document = base.get_document_from_entry(dn, entry)
+                    cur_bucket = bucket if bucket else dbucket 
+                    base.logIt("Addnig document {} to Couchebase bucket {}".format(key, cur_bucket))
 
                     n1ql = ''
 
-                    if 'changetype' in e[1]:
-                        if 'replace' in e[1]:
-                            n1ql = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, e[0], e[1]['replace'], e[1][e[1]['replace']])
-                        elif 'add' in e[1]:
-                            for m in e[1][e[1]['add']]:
+                    if 'changetype' in document:
+                        #TODO: IMPORTANT !!!! Implement later
+                        if 'replace' in document:
+                            n1ql = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, key, document['replace'], document[document['replace']])
+                        elif 'add' in document:
+                            for m in document[document['add']]:
                                 if self.checkIfAttributeExists(e[0], e[1]['add'],  documents):
                                     n1ql += 'UPDATE `%s` USE KEYS "%s" SET %s=["%s"];\n' % (cur_bucket, e[0], e[1]['add'], m)
                                 else:
                                     n1ql += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
                     else:
-                        n1ql = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, e[0], json.dumps(e[1]))
+                        n1ql = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, key, json.dumps(document))
 
                     self.cbm.exec_query(n1ql)
 
     def import_schema(self, schema_file):
-        base.logIt("Importing schema {}".format(schema_file))
-        parser = base.myLdifParser(schema_file)
-        parser.parse()
-        for dn, entry in parser.entries:
-            if 'changetype' in entry:
-                entry.pop('changetype')
-            if 'add' in entry:
-                entry.pop('add')
-            for entry_type in entry:
-                for e in entry[entry_type]:
-                    base.logIt("Adding to schema, type: {}  value: {}".format(entry_type, e))
-                    self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
+        if self.moddb == BackendTypes.LDAP:
+            base.logIt("Importing schema {}".format(schema_file))
+            parser = base.myLdifParser(schema_file)
+            parser.parse()
+            for dn, entry in parser.entries:
+                if 'changetype' in entry:
+                    entry.pop('changetype')
+                if 'add' in entry:
+                    entry.pop('add')
+                for entry_type in entry:
+                    for e in entry[entry_type]:
+                        base.logIt("Adding to schema, type: {}  value: {}".format(entry_type, e))
+                        self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
 
-        #we need unbind and re-bind after schema operations
-        self.ldap_conn.unbind()
-        self.ldap_conn.bind()
+            #we need re-bind after schema operations
+            self.ldap_conn.rebind()
 
     def __del__(self):
         try:

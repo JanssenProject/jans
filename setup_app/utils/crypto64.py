@@ -333,8 +333,6 @@ class Crypto64:
 
             Config.idpClient_pw = self.getPW()
             Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)
-
-            Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
         except:
             self.logIt("Error encoding passwords", True, True)
 
