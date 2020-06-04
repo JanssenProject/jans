@@ -67,22 +67,16 @@ class OxauthInstaller(JettyInstaller):
         Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
         Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
         Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
-        
+
         self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.ldif_clients, self.templates_folder, self.output_folder)
 
-        #TODO: couchbase
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
-        else:
-            pass
-            #self.import_ldif_couchebase([self.ldif_config])
-            
-        
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_clients])
+
 
     def install_oxauth_rp(self):
         Config.pbar.progress("oxauthrp", "Installing OxAuthRP", False)
-        
+
         distOxAuthRpPath = os.path.join(Config.distGluuFolder, self.oxAuthRPWar)
 
         self.logIt("Copying oxauth-rp.war into jetty webapps folder...")

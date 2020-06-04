@@ -8,11 +8,8 @@ class BaseInstaller:
     def start_installation(self):
         self.dbUtils = dbUtils
         self.logIt(self.pbar_text, pbar=self.service_name)
-        if self.needdb and not self.dbUtils.ready:
-            try:
-                self.dbUtils.bind()
-            except:
-                pass
+        if self.needdb:
+            self.dbUtils.bind()
 
         # execute for each installer
         if Config.downloadWars:
