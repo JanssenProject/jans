@@ -237,6 +237,7 @@
     "authenticationFiltersEnabled":false,
     "invalidateSessionCookiesAfterAuthorizationFlow":false,
     "clientAuthenticationFiltersEnabled":false,
+    "clientRegDefaultToCodeFlowWithRefresh": true,
     "authenticationFilters":[
         {
             "filter":"(&(mail=*{0}*)(inum={1}))",
