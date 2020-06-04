@@ -396,19 +396,21 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> grantTypeSet = new HashSet<>();
         grantTypeSet.addAll(requestObject.getGrantTypes());
 
-        if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
-            responseTypeSet.add(ResponseType.CODE);
-        }
-        if (responseTypeSet.contains(ResponseType.CODE)) {
-            grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
-            grantTypeSet.add(GrantType.REFRESH_TOKEN);
+        if(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
+            if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
+                responseTypeSet.add(ResponseType.CODE);
+            }
+            if (responseTypeSet.contains(ResponseType.CODE)) {
+                grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
+                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            }
+            if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
+                responseTypeSet.add(ResponseType.CODE);
+                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            }
         }
         if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
             grantTypeSet.add(GrantType.IMPLICIT);
-        }
-        if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
-            responseTypeSet.add(ResponseType.CODE);
-            grantTypeSet.add(GrantType.REFRESH_TOKEN);
         }
         if (grantTypeSet.contains(GrantType.IMPLICIT)) {
             responseTypeSet.add(ResponseType.TOKEN);
