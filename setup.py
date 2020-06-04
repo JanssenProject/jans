@@ -5184,11 +5184,12 @@ class Setup(object):
 
             oxd_yaml['storage_configuration']['baseDn'] = 'o=gluu'
             oxd_yaml['storage_configuration']['type'] = self.gluu_properties_fn
-            
-            
-            oxd_yaml['storage_configuration']['connection'] = self.ox_ldap_properties \
-                if self.mappingLocations['default'] == 'ldap' else self.gluuCouchebaseProperties
-            
+
+            if self.persistence_type in ('ldap', 'hybrid'):
+                oxd_yaml['storage_configuration']['connection'] = self.ox_ldap_properties
+            else:
+                oxd_yaml['storage_configuration']['connection'] = self.gluuCouchebaseProperties
+
             oxd_yaml['storage_configuration']['salt'] = os.path.join(self.configFolder, "salt")
 
             yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
