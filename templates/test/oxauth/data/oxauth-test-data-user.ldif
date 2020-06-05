@@ -99,6 +99,7 @@ zoneinfo: America/Chicago
 memberOf: inum=7890,ou=groups,o=gluu
 memberOf: inum=7891,ou=groups,o=gluu
 memberOf: inum=60B7,ou=groups,o=gluu
+
 ######################################
 # Groups
 ######################################

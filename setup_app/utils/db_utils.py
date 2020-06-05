@@ -6,7 +6,9 @@ from setup_app.config import Config
 from setup_app.static import InstallTypes, BackendTypes
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
-from setup_app.utils import ldif_utils 
+from setup_app.utils import ldif_utils
+from setup_app.utils.attributes import attribDataTypes
+ 
 
 
 class DBUtils:
@@ -166,7 +168,8 @@ class DBUtils:
     
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
-        bucket, backend_location = self.get_backend_location_for_dn(dn)
+
+        backend_location = self.get_backend_location_for_dn(dn)
 
         if backend_location == BackendTypes.LDAP:
             if self.dn_exists(dn):
@@ -188,6 +191,7 @@ class DBUtils:
                                 {'oxConfigurationProperty': [ldap3.MODIFY_ADD, oxConfigurationProperty_js]}
                                 )
         elif backend_location == BackendTypes.COUCHBASE:
+            bucket = self.get_bucket_for_dn(dn)
             n1ql = 'SELECT oxConfigurationProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
@@ -200,25 +204,20 @@ class DBUtils:
                     self.cbm.exec_query(n1ql)
                     break
 
-    def checkIfAttributeExists(self, key, atribute,  documents):
-        ka = key + '::' + atribute
-        retVal = False
+    def get_key_prefix(self, key):
+        n = key.find('_')
+        return key[:n+1]
 
-        if ka in self.processedKeys:
-            return True
-         
-        for d in documents:
-            if d[0] == key:
-                if 'changetype' in d[1]:
-                    continue
-                if atribute in d[1]:
-                    retVal = True
-                else:
-                    self.processedKeys.append(ka)
-                    return True
-                
-        return retVal
-
+    def check_attribute_exists(self, key, attribute):
+        bucket = self.get_bucket_for_key(key)
+        n1ql = 'SELECT `{}` FROM `{}` USE KEYS "{}"'.format(attribute, bucket, key)
+        result = self.cbm.exec_query(n1ql)
+        if result.ok:
+            data = result.json()
+            r = data.get('results', [])
+            if r and r[0].get(attribute):
+                return r[0][attribute]
+            
     def import_ldif(self, ldif_files, bucket=None):
 
         for ldif_fn in ldif_files:
@@ -226,7 +225,7 @@ class DBUtils:
             parser.parse()
 
             for dn, entry in parser.entries:
-                dbucket, backend_location = self.get_backend_location_for_dn(dn)
+                backend_location = self.get_backend_location_for_dn(dn)
                 if backend_location == BackendTypes.LDAP:
                     if not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
@@ -236,25 +235,34 @@ class DBUtils:
                     if len(entry) < 3:
                         continue
                     key, document = ldif_utils.get_document_from_entry(dn, entry)
-                    cur_bucket = bucket if bucket else dbucket 
+                    cur_bucket = bucket if bucket else self.get_bucket_for_dn(dn)
                     base.logIt("Addnig document {} to Couchebase bucket {}".format(key, cur_bucket))
 
-                    n1ql = ''
+                    n1ql_list = []
 
                     if 'changetype' in document:
-                        #TODO: IMPORTANT !!!! Implement later
                         if 'replace' in document:
-                            n1ql = 'UPDATE `%s` USE KEYS "%s" SET %s="%s";\n' % (cur_bucket, key, document['replace'], document[document['replace']])
+                            attribute = document['replace']
+                            n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=%s' % (cur_bucket, key, attribute, json.dumps(document[attribute])))
                         elif 'add' in document:
-                            for m in document[document['add']]:
-                                if self.checkIfAttributeExists(e[0], e[1]['add'],  documents):
-                                    n1ql += 'UPDATE `%s` USE KEYS "%s" SET %s=["%s"];\n' % (cur_bucket, e[0], e[1]['add'], m)
+                            attribute = document['add']
+                            result = self.check_attribute_exists(key, attribute)
+                            data = document[attribute]
+                            if result:
+                                if isinstance(data, list):
+                                    for d in data:
+                                        n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=ARRAY_APPEND(`%s`, %s)' % (cur_bucket, key, attribute, attribute, json.dumps(d)))
                                 else:
-                                    n1ql += 'UPDATE `%s` USE KEYS "%s" SET %s=ARRAY_APPEND(%s, "%s");\n' % (cur_bucket, e[0], e[1]['add'], e[1]['add'], m)
+                                    n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=ARRAY_APPEND(`%s`, %s)' % (cur_bucket, key, attribute, attribute, json.dumps(data)))
+                            else:
+                                if attribute in attribDataTypes.listAttributes and not isinstance(data, list):
+                                    data = [data]
+                                n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=%s' % (cur_bucket, key, attribute, json.dumps(data)))
                     else:
-                        n1ql = 'UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s);\n' % (cur_bucket, key, json.dumps(document))
+                        n1ql_list.append('UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (cur_bucket, key, json.dumps(document)))
 
-                    self.cbm.exec_query(n1ql)
+                    for q in n1ql_list:
+                        self.cbm.exec_query(q)
 
     def import_schema(self, schema_file):
         if self.moddb == BackendTypes.LDAP:
@@ -274,26 +282,36 @@ class DBUtils:
             #we need re-bind after schema operations
             self.ldap_conn.rebind()
 
-    def get_backend_location_for_dn(self, dn):
-        key = ldif_utils.get_key_from(dn)
-        n = key.find('_')
-        key_prefix = key[:n+1]
-
-        for grp in Config.couchbaseBucketDict:
-            if key_prefix in Config.couchbaseBucketDict[grp]['document_key_prefix']:
-                group = grp
-                bucket = grp
+    def get_group_for_key(self, key):
+        key_prefix = self.get_key_prefix(key)
+        for group in Config.couchbaseBucketDict:
+            if key_prefix in Config.couchbaseBucketDict[group]['document_key_prefix']:
                 break
         else:
             group = 'default'
-            bucket = Config.couchbase_bucket_prefix
 
+        return group
+
+    def get_bucket_for_key(self, key):
+        group = self.get_group_for_key(key)
+        if group == 'default':
+            return Config.couchbase_bucket_prefix
+
+        return Config.couchbase_bucket_prefix + '_' + group
+
+    def get_bucket_for_dn(self, dn):
+        key = ldif_utils.get_key_from(dn)
+        return self.get_bucket_for_key(key)
+
+    def get_backend_location_for_dn(self, dn):
+        key = ldif_utils.get_key_from(dn)
+        group = self.get_group_for_key(key)
+    
         if Config.mappingLocations[group] == 'ldap':
-            backend_location = static.BackendTypes.LDAP
+            return static.BackendTypes.LDAP
+
         if Config.mappingLocations[group] == 'couchbase':
-            backend_location = static.BackendTypes.COUCHBASE
-        
-        return bucket, backend_location
+            return static.BackendTypes.COUCHBASE
 
 
     def __del__(self):
