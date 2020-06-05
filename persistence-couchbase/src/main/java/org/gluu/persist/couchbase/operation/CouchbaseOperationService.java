@@ -35,12 +35,12 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  */
 public interface CouchbaseOperationService extends PersistenceOperationService {
 
-    String DN = "dn";
-    String UID = "uid";
-    String USER_PASSWORD = "userPassword";
-    String OBJECT_CLASS = "objectClass";
+    static String DN = "dn";
+    static String UID = "uid";
+    static String USER_PASSWORD = "userPassword";
+    static String OBJECT_CLASS = "objectClass";
 
-    String META_DOC_ID = "meta_doc_id";
+    static String META_DOC_ID = "meta_doc_id";
 
     CouchbaseConnectionProvider getConnectionProvider();
 

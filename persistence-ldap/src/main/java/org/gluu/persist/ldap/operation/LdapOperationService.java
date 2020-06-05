@@ -26,6 +26,12 @@ import com.unboundid.ldif.LDIFChangeRecord;
 
 public interface LdapOperationService extends PersistenceOperationService {
 
+    static final String DN = "dn";
+    static final String UID = "uid";
+    static final String SUCCESS = "success";
+    static final String USER_PASSWORD = "userPassword";
+    static final String OBJECT_CLASS = "objectClass";
+
     LdapConnectionProvider getConnectionProvider();
 
     void setConnectionProvider(LdapConnectionProvider connectionProvider);
