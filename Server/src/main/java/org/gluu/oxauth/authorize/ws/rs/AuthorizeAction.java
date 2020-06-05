@@ -373,8 +373,7 @@ public class AuthorizeAction {
 
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
-                    client.getClientId(),
-                    client.getPersistClientAuthorizations());
+                    client.getClientId());
             if (clientAuthorization != null && clientAuthorization.getScopes() != null &&
                     Arrays.asList(clientAuthorization.getScopes()).containsAll(
                             org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {

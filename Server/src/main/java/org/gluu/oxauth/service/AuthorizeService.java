@@ -147,9 +147,9 @@ public class AuthorizeService {
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
             boolean persistDuringImplicitFlow = ServerUtil.isFalse(appConfiguration.getUseCacheForAllImplicitFlowObjects()) || !ResponseType.isImplicitFlow(responseType);
-            if (!client.getTrustedClient() && persistDuringImplicitFlow) {
+            if (!client.getTrustedClient() && persistDuringImplicitFlow && client.getPersistClientAuthorizations()) {
                 final Set<String> scopes = Sets.newHashSet(org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
-                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes, client.getPersistClientAuthorizations());
+                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
             }
             session.addPermission(clientId, true);
             sessionIdService.updateSessionId(session);

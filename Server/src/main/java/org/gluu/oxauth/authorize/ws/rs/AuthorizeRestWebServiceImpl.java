@@ -431,8 +431,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
-                    client.getClientId(),
-                    client.getPersistClientAuthorizations());
+                    client.getClientId());
             if (scopes.size() > 0) {
                 if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
