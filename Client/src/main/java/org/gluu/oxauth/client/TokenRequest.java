@@ -6,15 +6,13 @@
 
 package org.gluu.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.uma.UmaScopeType;
+import org.gluu.oxauth.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -270,56 +268,23 @@ public class TokenRequest extends ClientAuthnRequest {
      */
     @Override
     public String getQueryString() {
-        StringBuilder queryStringBuilder = new StringBuilder();
+        QueryBuilder builder = QueryBuilder.instance();
 
-        try {
-            if (grantType != null) {
-                queryStringBuilder.append("grant_type=").append(grantType.toString());
-            }
-            if (code != null && !code.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("code=").append(code);
-            }
-            if (redirectUri != null && !redirectUri.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("redirect_uri=").append(
-                        URLEncoder.encode(redirectUri, "UTF-8"));
-            }
-            if (scope != null && !scope.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("scope=").append(
-                        URLEncoder.encode(scope, "UTF-8"));
-            }
-            if (username != null && !username.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("username=").append(username);
-            }
-            if (password != null && !password.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("password=").append(password);
-            }
-            if (assertion != null && !assertion.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("assertion=").append(assertion);
-            }
-            if (refreshToken != null && !refreshToken.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("refresh_token=").append(refreshToken);
-            }
-            if ( StringUtils.isNotBlank(authReqId)) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("auth_req_id=").append(authReqId);
-            }
-            appendClientAuthnToQuery(queryStringBuilder);
-            for (String key : getCustomParameters().keySet()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        builder.appendIfNotNull("grant_type", grantType);
+        builder.append("code", code);
+        builder.append("redirect_uri", redirectUri);
+        builder.append("scope", scope);
+        builder.append("username", username);
+        builder.append("password", password);
+        builder.append("assertion", assertion);
+        builder.append("refreshToken", refreshToken);
+        builder.append("authReqId", authReqId);
+        appendClientAuthnToQuery(builder);
+        for (String key : getCustomParameters().keySet()) {
+            builder.append(key, getCustomParameters().get(key));
         }
 
-        return queryStringBuilder.toString();
+        return builder.toString();
     }
 
     /**
