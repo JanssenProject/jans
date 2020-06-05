@@ -228,7 +228,7 @@ if proceed:
     # this will install only base
     radiusInstaller.start_installation()
 
-    if Config.installRadius:
+    if Config.installGluuRadius:
         radiusInstaller.install_gluu_radius()
 
 
