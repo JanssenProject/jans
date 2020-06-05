@@ -14,14 +14,11 @@ import traceback
 import re
 import shutil
 import multiprocessing
-from ldap3.utils import dn as dnutils
 
 from setup_app import paths
 from setup_app import static
 from setup_app.config import Config
 from setup_app.pylib.jproperties import Properties
-from setup_app.pylib.ldif4.ldif import LDIFParser
-from setup_app.utils.attribute_data_types import ATTRUBUTEDATATYPES
 
 # Note!!! This module should be imported after paths
 
@@ -115,26 +112,6 @@ def check_resources():
             sys.exit()
 
 
-attribDataTypes = ATTRUBUTEDATATYPES()
-
-listAttrib = ['member']
-
-
-class myLdifParser(LDIFParser):
-    def __init__(self, ldif_file):
-        self.ldif_file = ldif_file
-        self.entries = []
-
-    def parse(self):
-        with open(self.ldif_file, 'rb') as f:
-            parser = LDIFParser(f)
-            for dn, entry in parser.parse():
-                for e in entry:
-                    for i, v in enumerate(entry[e][:]):
-                        if isinstance(v, bytes):
-                            entry[e][i] = v.decode('utf-8')
-                self.entries.append((dn, entry))
-
 def determineApacheVersion(full=False):
     httpd_cmd = shutil.which(httpd_name)
     cmd = httpd_name + " -v | egrep '^Server version'"
@@ -154,16 +131,6 @@ def get_os_package_list():
 
 def check_os_supported():
     return os_type + ' '+ os_version in get_os_package_list()
-
-def prepare_multivalued_list():
-    gluu_schema_fn = os.path.join(Config.install_dir, 'schema/gluu_schema.json')
-    gluu_schema = json.load(open(gluu_schema_fn))
-
-    for obj_type in ['objectClasses', 'attributeTypes']:
-        for obj in gluu_schema[obj_type]:
-            if obj.get('multivalued'):
-                for name in obj['names']:
-                    listAttrib.append(name)
 
 
 def logIt(msg, errorLog=False, fatal=False):
@@ -253,167 +220,17 @@ def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
     return output
 
 
-
-def get_key_shortcuter_rules():
-    ox_auth_war_file = '/opt/dist/gluu/oxauth.war'
-    oxauth_zf = zipfile.ZipFile(ox_auth_war_file)
-
-    for file_info in oxauth_zf.infolist():
-        if 'oxcore-persistence-core' in file_info.filename:
-            oxcore_persistence_core_path = file_info.filename
-            break
-
-    oxcore_persistence_core_content = oxauth_zf.read(oxcore_persistence_core_path)
-    oxcore_persistence_core_io = io.StringIO(oxcore_persistence_core_content)
-    oxcore_persistence_core_zf = zipfile.ZipFile(oxcore_persistence_core_io)
-    key_shortcuter_rules_str = oxcore_persistence_core_zf.read('key-shortcuter-rules.json')
-    key_shortcuter_rules = json.loads(key_shortcuter_rules_str)
-
-    return key_shortcuter_rules
-
-def get_mapped_entry(entry):
-    rEntry = copy.deepcopy(entry)
-    
-    for key in list(rEntry.keys()):
-        mapped_key = key
-        if key in key_shortcuter_rules['exclusions']:
-            mapped_key = key_shortcuter_rules['exclusions'][key]
-        else:
-            for map_key in key_shortcuter_rules['replaces']:
-                if map_key in mapped_key:
-                    mapped_key = mapped_key.replace(map_key, key_shortcuter_rules['replaces'][map_key])
-                
-        if mapped_key != key:
-            mapped_key = mapped_key[0].lower() + mapped_key[1:]
-            rEntry[mapped_key] = rEntry.pop(key)
-
-    for key in list(rEntry.keys()):
-        if key in key_shortcuter_rules['exclusions']:
-            continue
-        for prefix in key_shortcuter_rules['prefixes']:
-            if key.startswith(prefix):
-                mapped_key = key.replace(prefix, '',1)
-                mapped_key = mapped_key[0].lower() + mapped_key[1:]
-                rEntry[mapped_key] = rEntry.pop(key)
-                break
-
-
-    return rEntry
-
-def getTypedValue(dtype, val):
-    retVal = val
-    
-    if dtype == 'json':
-        try:
-            retVal = json.loads(val)
-        except Exception as e:
-            pass
-
-    if dtype == 'integer':
-        try:
-            retVal = int(retVal)
-        except:
-            pass
-    elif dtype == 'datetime':
-        if '.' in val:
-            date_format = '%Y%m%d%H%M%S.%fZ'
-        else:
-            date_format = '%Y%m%d%H%M%SZ'
-        
-        if not val.lower().endswith('z'):
-            val += 'Z'
-
-        dt = datetime.datetime.strptime(val, date_format)
-        retVal = dt.isoformat()
-
-    elif dtype == 'boolean':
-        if retVal.lower() in ('true', 'yes', '1', 'on'):
-            retVal = True
-        else:
-            retVal = False
-
-    return retVal
-
-
-def get_key_from(dn):
-    dns = []
-    for rd in dnutils.parse_dn(dn):
-
-        if rd[0] == 'o' and rd[1] == 'gluu':
-            continue
-        dns.append(rd[1])
-
-    dns.reverse()
-    key = '_'.join(dns)
-
-    if not key:
-        key = '_'
-
-    return key
-
-
-def get_document_from_entry(dn, entry):
-    if not hasattr(attribDataTypes, 'attribTypes'):
-        attribDataTypes.startup(Config.install_dir)
-        prepare_multivalued_list()
-
-    document = copy.deepcopy(entry)
-
-    if len(document) > 2:
-        key = get_key_from(dn)
-        document['dn'] = dn
-        for k in document:
-            if len(document[k]) == 1:
-                if not k in listAttrib:
-                    document[k] = document[k][0]
-
-        for k in document:
-            dtype = attribDataTypes.getAttribDataType(k)
-            if dtype != 'string':
-                if type(document[k]) == type([]):
-                    for i in range(len(document[k])):
-                        document[k][i] = getTypedValue(dtype, document[k][i])
-                        if document[k][i] == 'true':
-                            document[k][i] = True
-                        elif document[k][i] == 'false':
-                            document[k][i] = False
-                else:
-                    document[k] = getTypedValue(dtype, document[k])
-
-            if k == 'objectClass':
-                document[k].remove('top')
-                oc_list = document[k]
-
-                for oc in oc_list[:]:
-                    if 'Custom' in oc and len(oc_list) > 1:
-                        oc_list.remove(oc)
-
-                    if not 'gluu' in oc.lower() and len(oc_list) > 1:
-                        oc_list.remove(oc)
-
-                document[k] = oc_list[0]
-
-        return key, document
-
-def get_documents_from_ldif(ldif_file):
-    parser = myLdifParser(ldif_file)
-    parser.parse()
-    documents = []
-
-    for dn, entry in parser.entries:
-        key, document = get_document_from_entry(dn, entry)
-
-        #mapped_entry = get_mapped_entry(entry)
-        documents.append((key, document))
-
-    return documents
+def determine_package(glob_pattern):
+    logIt("Determining package for pattern: {}".format(glob_pattern))
+    package_list = glob.glob(glob_pattern)
+    if package_list:
+        return max(package_list)
 
 
 def readJsonFile(jsonFile):
     if os.path.exists(jsonFile):
         with open(jsonFile) as f:
             return json.load(f)
-
 
 def find_script_names(ldif_file):
     name_list = []
@@ -426,30 +243,3 @@ def find_script_names(ldif_file):
                     name_list.append(result.groups()[0])
                 
     return name_list
-
-def determine_package(glob_pattern):
-    logIt("Determining package for pattern: {}".format(glob_pattern))
-    package_list = glob.glob(glob_pattern)
-    if package_list:
-        return max(package_list)
-
-def get_backend_location_for_dn(dn):
-    key = get_key_from(dn)
-    n = key.find('_')
-    key_prefix = key[:n+1]
-
-    for grp in Config.couchbaseBucketDict:
-        if key_prefix in Config.couchbaseBucketDict[grp]['document_key_prefix']:
-            group = grp
-            bucket = grp
-            break
-    else:
-        group = 'default'
-        bucket = Config.couchbase_bucket_prefix
-
-    if Config.mappingLocations[group] == 'ldap':
-        backend_location = static.BackendTypes.LDAP
-    if Config.mappingLocations[group] == 'couchbase':
-        backend_location = static.BackendTypes.COUCHBASE
-    
-    return bucket, backend_location
