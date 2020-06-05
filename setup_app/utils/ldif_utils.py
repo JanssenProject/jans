@@ -2,10 +2,9 @@ import copy
 
 from ldap3.utils import dn as dnutils
 from setup_app.pylib.ldif4.ldif import LDIFParser
-from setup_app.utils.attributes import AttribDataTypes
+from setup_app.utils.attributes import attribDataTypes
 from setup_app.config import Config
 
-attribDataTypes = AttribDataTypes()
 
 class myLdifParser(LDIFParser):
     def __init__(self, ldif_file):
