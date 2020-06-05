@@ -109,14 +109,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.scim_resource_oxid:
             Config.scim_resource_oxid = '1203.' + str(uuid.uuid4())
 
-        if not Config.oxtrust_resource_server_client_id:
-            Config.oxtrust_resource_server_client_id = '1401.'  + str(uuid.uuid4())
-
-        if not Config.oxtrust_requesting_party_client_id:
-            Config.oxtrust_requesting_party_client_id = '1402.'  + str(uuid.uuid4())
-
-        if not Config.oxtrust_resource_id:
-            Config.oxtrust_resource_id = '1403.'  + str(uuid.uuid4())
 
         if not Config.admin_inum:
             Config.admin_inum = str(uuid.uuid4())

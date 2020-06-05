@@ -44,8 +44,6 @@
     "photoRepositoryCountLeveles":3,
     "photoRepositoryCountFoldersPerLevel":20,
 
-    "shibboleth3FederationRootDir":"/opt/shibboleth-federation",
-
     "spMetadataPath":"",
 
     "logoLocation":"/var/gluu/photos",
@@ -54,12 +52,8 @@
 
     ],
 
-    "configGeneration":%(oxTrustConfigGeneration)s,
+    "configGeneration":false,
     "ignoreValidation":false,
-
-    "idpSecurityCert":"/etc/certs/shibIDP.crt",
-    "idpSecurityKey":"/etc/certs/shibIDP.key",
-    "gluuSpCert":"/etc/certs/shibIDP.crt",
 
     "idpBindDn":"cn=Directory Manager",
     "idpBindPassword":"%(encoded_ox_ldap_pw)s",
@@ -116,9 +110,8 @@
     "rptConnectionPoolValidateAfterInactivity":10,
     "rptConnectionPoolCustomKeepAliveTimeout":5,
 
+
     "organizationName":"%(orgName)s",
-    "idp3SigningCert":"/etc/certs/idp-signing.crt",
-    "idp3EncryptionCert":"/etc/certs/idp-encryption.crt",
 
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
