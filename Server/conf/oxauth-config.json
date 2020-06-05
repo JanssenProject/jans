@@ -221,6 +221,7 @@
     "personCustomObjectClassList":["gluuCustomPerson"],
     "authenticationFiltersEnabled":true,
     "clientAuthenticationFiltersEnabled":true,
+    "clientRegDefaultToCodeFlowWithRefresh":true,
     "authenticationFilters":[
         {
             "filter":"(&(mail=*{0}*)(inum={1}))",

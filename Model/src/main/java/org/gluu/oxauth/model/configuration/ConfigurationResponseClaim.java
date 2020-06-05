@@ -18,6 +18,7 @@ public interface ConfigurationResponseClaim {
     @Deprecated // remove in 5.x version
     String TOKEN_REVOCATION_ENDPOINT = "token_revocation_endpoint";
     String REVOCATION_ENDPOINT = "revocation_endpoint";
+    String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
     String USER_INFO_ENDPOINT = "userinfo_endpoint";
     String CLIENT_INFO_ENDPOINT = "clientinfo_endpoint";
     String CHECK_SESSION_IFRAME = "check_session_iframe";
