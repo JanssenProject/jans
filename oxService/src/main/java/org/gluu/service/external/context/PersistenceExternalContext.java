@@ -6,9 +6,6 @@
 
 package org.gluu.service.external.context;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 /**
  * Holds object required in persistence scope custom scripts 
  * 
@@ -17,12 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 
 public class PersistenceExternalContext extends ExternalScriptContext {
 
-    public PersistenceExternalContext(HttpServletRequest httpRequest) {
-		super(httpRequest, null);
-	}
-
-	public PersistenceExternalContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-		super(httpRequest, httpResponse);
+    public PersistenceExternalContext() {
+		super(null, null);
 	}
 
 }
