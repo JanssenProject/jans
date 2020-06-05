@@ -8,9 +8,8 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.token.ClientAssertionType;
+import org.gluu.oxauth.model.util.QueryBuilder;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -69,24 +68,14 @@ public abstract class ClientAuthnRequest extends BaseRequest {
         this.audience = audience;
     }
 
-    public void appendClientAuthnToQuery(StringBuilder queryStringBuilder) throws UnsupportedEncodingException {
+    public void appendClientAuthnToQuery(QueryBuilder builder) {
         if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
-            if (getAuthUsername() != null && !getAuthUsername().isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("client_id=").append(
-                        URLEncoder.encode(getAuthUsername(), "UTF-8"));
-            }
-            if (getAuthPassword() != null && !getAuthPassword().isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("client_secret=").append(
-                        URLEncoder.encode(getAuthPassword(), "UTF-8"));
-            }
+            builder.append("client_id", getAuthUsername());
+            builder.append("client_secret", getAuthPassword());
         } else if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
                 getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
-            queryStringBuilder.append("&client_assertion_type=").append(
-                    URLEncoder.encode(ClientAssertionType.JWT_BEARER.toString(), "UTF-8"));
-            queryStringBuilder.append("&");
-            queryStringBuilder.append("client_assertion=").append(getClientAssertion());
+            builder.append("client_assertion_type", ClientAssertionType.JWT_BEARER.toString());
+            builder.append("client_assertion", getClientAssertion());
         }
     }
 
