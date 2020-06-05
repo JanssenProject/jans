@@ -26,7 +26,6 @@ import org.gluu.persist.couchbase.model.ConvertedExpression;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
-import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryDeleteException;
@@ -79,10 +78,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     private final CouchbaseFilterConverter FILTER_CONVERTER;
     private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter();
 
-    private CouchbaseOperationsServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
 
-    protected CouchbaseEntryManager(CouchbaseOperationsServiceImpl operationService) {
+    protected CouchbaseEntryManager(CouchbaseOperationService operationService) {
         this.operationService = operationService;
         this.FILTER_CONVERTER = new CouchbaseFilterConverter(this);
         subscribers = new LinkedList<DeleteNotifier>();
@@ -94,11 +92,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             return true;
         }
 
-        return this.operationService.destroy();
+        return ((CouchbaseOperationService) this.operationService).destroy();
     }
 
-    public CouchbaseOperationsServiceImpl getOperationService() {
-        return operationService;
+    public CouchbaseOperationService getOperationService() {
+        return (CouchbaseOperationService) operationService;
     }
 
     @Override
@@ -187,7 +185,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
             	// Process userPassword 
                 if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, attributeName)) {
-                    realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
+                    realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
                 }
 
                 escapeValues(realValues);
@@ -203,7 +201,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         // Persist entry
         try {
-            boolean result = operationService.addEntry(toCouchbaseKey(dn).getKey(), jsonObject, expiration);
+            boolean result = getOperationService().addEntry(toCouchbaseKey(dn).getKey(), jsonObject, expiration);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
             }
@@ -254,7 +252,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             }
 
             if (modifications.size() > 0) {
-                boolean result = operationService.updateEntry(toCouchbaseKey(dn).getKey(), modifications, expirationValue);
+                boolean result = getOperationService().updateEntry(toCouchbaseKey(dn).getKey(), modifications, expirationValue);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
                 }
@@ -271,7 +269,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            operationService.delete(toCouchbaseKey(dn).getKey());
+            getOperationService().delete(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -286,7 +284,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            operationService.deleteRecursively(toCouchbaseKey(dn).getKey());
+            getOperationService().deleteRecursively(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -339,7 +337,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		}
         
         try {
-        	int processed = operationService.delete(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), count);
+        	int processed = getOperationService().delete(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), count);
         	
         	return processed;
         } catch (Exception ex) {
@@ -353,7 +351,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
             ScanConsistency scanConsistency = getScanConsistency(keyWithInum.getName(), propertiesAnnotationsMap);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey(), scanConsistency, toInternalAttributes(ldapReturnAttributes));
+            JsonObject entry = getOperationService().lookup(keyWithInum.getKey(), scanConsistency, toInternalAttributes(ldapReturnAttributes));
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -520,7 +518,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	private <O> PagedResult<JsonObject> searchImpl(String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
-		return operationService.search(key, scanConsistency, expression, scope, toInternalAttributes(attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+		return getOperationService().search(key, scanConsistency, expression, scope, toInternalAttributes(attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 	}
 
     protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<JsonObject> searchResult) {
@@ -541,7 +539,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         for (int i = 0; i < searchResultEntries.length; i++) {
             count++;
             JsonObject entry = searchResultEntries[i];
-            // String key = entry.getString(CouchbaseOperationService.META_DOC_ID);
+            // String key = entry.getString(CouchbasegetOperationService().META_DOC_ID);
             String dn = entry.getString(fromInternalAttribute(CouchbaseOperationService.DN));
             entriesAttributes.put(dn, getAttributeDataList(entry));
 
@@ -664,7 +662,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(toCouchbaseKey(bindDn).getKey(), escapeValue(password));
+            return getOperationService().authenticate(toCouchbaseKey(bindDn).getKey(), escapeValue(password));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
@@ -721,7 +719,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         Object[] realValues = attributeValues;
         if (StringHelper.equals(CouchbaseOperationService.USER_PASSWORD, realAttributeName)) {
-            realValues = operationService.createStoragePassword(StringHelper.toStringArray(attributeValues));
+            realValues = getOperationService().createStoragePassword(StringHelper.toStringArray(attributeValues));
         }
 
         escapeValues(realValues);
@@ -765,7 +763,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            JsonObject entry = operationService.lookup(keyWithInum.getKey(), null);
+            JsonObject entry = getOperationService().lookup(keyWithInum.getKey(), null);
 
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
@@ -972,7 +970,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	public String toInternalAttribute(String attributeName) {
 		return attributeName;
-//		if (operationService.isDisableAttributeMapping()) {
+//		if (getOperationService().isDisableAttributeMapping()) {
 //			return attributeName;
 //		}
 //
@@ -981,7 +979,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	public String[] toInternalAttributes(String[] attributeNames) {
 		return attributeNames;
-//		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
+//		if (getOperationService().isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
 //			return attributeNames;
 //		}
 //		
@@ -996,7 +994,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	public String fromInternalAttribute(String internalAttributeName) {
 		return internalAttributeName;
-//		if (operationService.isDisableAttributeMapping()) {
+//		if (getOperationService().isDisableAttributeMapping()) {
 //			return internalAttributeName;
 //		}
 //
@@ -1005,7 +1003,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
 	public String[] fromInternalAttributes(String[] internalAttributeNames) {
 		return internalAttributeNames;
-//		if (operationService.isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
+//		if (getOperationService().isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
 //			return internalAttributeNames;
 //		}
 //		

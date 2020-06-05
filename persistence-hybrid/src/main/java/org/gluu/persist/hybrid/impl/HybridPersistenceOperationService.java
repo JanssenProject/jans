@@ -2,6 +2,7 @@ package org.gluu.persist.hybrid.impl;
 
 import java.util.List;
 
+import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.operation.PersistenceOperationService;
 
 /**
@@ -30,6 +31,13 @@ public class HybridPersistenceOperationService implements PersistenceOperationSe
 
 	public List<PersistenceOperationService> getPersistenceOperationServices() {
 		return persistenceOperationServices;
+	}
+
+	@Override
+	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
+		for(PersistenceOperationService persistenceOperationService : persistenceOperationServices) {
+			persistenceOperationService.setPersistenceExtension(persistenceExtension);
+		}
 	}
 
 }

@@ -39,6 +39,7 @@ import org.gluu.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
 import org.gluu.model.custom.script.type.uma.UmaDummyRptPolicyType;
 import org.gluu.model.custom.script.type.uma.UmaRptPolicyType;
+import org.gluu.model.custom.script.type.persistence.*;
 import org.gluu.model.custom.script.type.user.*;
 import org.gluu.persist.annotation.AttributeEnum;
 
@@ -80,7 +81,8 @@ public enum CustomScriptType implements AttributeEnum {
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
-            CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType());
+            CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
+    PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyDynamicPeristenceType());
 
     private String value;
     private String displayName;

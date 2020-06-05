@@ -6,6 +6,8 @@
 
 package org.gluu.persist.operation;
 
+import org.gluu.persist.exception.extension.PersistenceExtension;
+
 /**
  * Base interface for Operation Service
  *
@@ -14,5 +16,7 @@ package org.gluu.persist.operation;
 public interface PersistenceOperationService {
 
     boolean isConnected();
+
+	public void setPersistenceExtension(PersistenceExtension persistenceExtension);
 
 }
