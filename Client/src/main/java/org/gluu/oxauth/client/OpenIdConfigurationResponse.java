@@ -29,6 +29,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String authorizationEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
+    private String sessionRevocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -217,6 +218,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
+    }
+
+    public String getSessionRevocationEndpoint() {
+        return sessionRevocationEndpoint;
+    }
+
+    public void setSessionRevocationEndpoint(String sessionRevocationEndpoint) {
+        this.sessionRevocationEndpoint = sessionRevocationEndpoint;
     }
 
     /**
