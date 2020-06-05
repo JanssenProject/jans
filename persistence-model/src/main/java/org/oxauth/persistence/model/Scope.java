@@ -62,6 +62,9 @@ public class Scope extends DeletableEntity implements Serializable {
     @JsonObject
     private ScopeAttributes attributes;
 
+    @AttributeName(name = "notShowInDiscovery")
+    private boolean notShowInDiscovery;
+
     public ScopeAttributes getAttributes() {
         if (attributes == null) {
             attributes = new ScopeAttributes();
@@ -181,6 +184,14 @@ public class Scope extends DeletableEntity implements Serializable {
         return scopeType != null && ScopeType.UMA.getValue().equalsIgnoreCase(scopeType.getValue());
     }
 
+    public boolean getNotShowInDiscovery() {
+        return notShowInDiscovery;
+    }
+
+    public void setNotShowInDiscovery(boolean notShowInDiscovery) {
+        this.notShowInDiscovery = notShowInDiscovery;
+    }
+
     @Override
     public String toString() {
         return "Scope{" +
@@ -199,6 +210,7 @@ public class Scope extends DeletableEntity implements Serializable {
                 ", deletable=" + isDeletable() +
                 ", expirationDate=" + getExpirationDate() +
                 ", attributes=" + attributes +
+                ", notShowInDiscovery=" + notShowInDiscovery +
                 '}';
     }
 }
