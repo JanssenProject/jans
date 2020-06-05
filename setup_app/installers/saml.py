@@ -39,6 +39,11 @@ class SamlInstaller(JettyInstaller):
         self.idp3CredentialsFolder = os.path.join(self.idp3Folder, 'credentials')
         self.idp3WebappFolder = os.path.join(self.idp3Folder, 'webapp')
 
+        self.shib_key_file = os.path.join(Config.certFolder, 'shibIDP.key')
+        self.shib_crt_file = os.path.join(Config.certFolder, 'shibIDP.crt')
+        self.idp_encryption_crt_file = os.path.join(Config.certFolder, 'idp-encryption.crt')
+        self.idp_signing_crt_file = os.path.join(Config.certFolder, 'idp-signing.crt')
+
     def install(self):
         self.logIt("Install SAML Shibboleth IDP v3...")
 
@@ -49,19 +54,16 @@ class SamlInstaller(JettyInstaller):
         if not Config.get('couchbaseShibUserPassword'):
             Config.couchbaseShibUserPassword = self.getPW()
 
-
         # generate crypto
         self.gen_cert('shibIDP', Config.shibJksPass, 'jetty')
         self.gen_cert('idp-encryption', Config.shibJksPass, 'jetty')
         self.gen_cert('idp-signing', Config.shibJksPass, 'jetty')
 
-        key_file = os.path.join(Config.certFolder, 'shibIDP.key')
-        crt_file = os.path.join(Config.certFolder, 'shibIDP.crt')
         self.gen_keystore('shibIDP',
                               self.shibJksFn,
                               Config.shibJksPass,
-                              key_file,
-                              crt_file
+                              self.shib_key_file,
+                              self.shib_crt_file
                               )
 
         # Put latest SAML templates
@@ -86,8 +88,8 @@ class SamlInstaller(JettyInstaller):
                         )
 
         # load certificates to update metadata
-        Config.templateRenderingDict['idp3EncryptionCertificateText'] = self.load_certificate_text(os.path.join(Config.certFolder, 'idp-encryption.crt'))
-        Config.templateRenderingDict['idp3SigningCertificateText'] = self.load_certificate_text(os.path.join(Config.certFolder, 'idp-signing.crt'))
+        Config.templateRenderingDict['idp3EncryptionCertificateText'] = self.load_certificate_text(self.idp_encryption_crt_file)
+        Config.templateRenderingDict['idp3SigningCertificateText'] = self.load_certificate_text(self.idp_signing_crt_file)
         # update IDP3 metadata
         self.renderTemplateInOut(self.idp3_metadata, self.staticIDP3FolderMetadata, self.idp3MetadataFolder)
 
@@ -128,13 +130,19 @@ class SamlInstaller(JettyInstaller):
             'shibbolethVersion': self.shibboleth_version,
             'shibboleth3IdpRootDir': self.idp3Folder,
             'shibboleth3SpConfDir': os.path.join(self.idp3Folder, 'sp'),
-            "idpSecurityKeyPassword": Config.encoded_shib_jks_pw,
+            'idpSecurityCert': self.shib_crt_file,
+            'idpSecurityKey': self.shib_key_file,
+            'gluuSpCert': self.shib_crt_file,
+            'idpSecurityKeyPassword': Config.encoded_shib_jks_pw,
+            'oxTrustConfigGeneration': True,
+            'shibboleth3FederationRootDir': '/opt/shibboleth-federation',
+            'idp3SigningCert': self.idp_signing_crt_file,
+            'idp3EncryptionCert': self.idp_encryption_crt_file,
             }
 
-        #TODO: implement for couchbase ???
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.enable_service('gluuSamlEnabled')
-            self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
+        
+        self.dbUtils.enable_service('gluuSamlEnabled')
+        self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
 
         self.enable()
 

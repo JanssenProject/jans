@@ -116,11 +116,6 @@ class GluuInstaller(SetupUtils):
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
 
-        if Config.installOxTrust | Config.installOxAuth:
-            for folder in (Config.oxPhotosFolder, Config.oxTrustRemovedFolder, Config.oxTrustCacheRefreshFolder):
-                self.run([paths.cmd_mkdir, '-m', '775', '-p', folder])
-                self.run([paths.cmd_chown, '-R', 'root:gluu', folder])
-
         self.run([paths.cmd_chown, '-R', 'root:gluu', Config.certFolder])
         self.run([paths.cmd_chmod, '551', Config.certFolder])
         
