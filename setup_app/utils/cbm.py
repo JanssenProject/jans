@@ -179,6 +179,8 @@ class CBM:
                 msg = "Error executing query: {}".format(', '.join([err['msg'] for err in js['errors']]))
                 logIt(msg)
                 logIt(msg, True)
+            else:
+                logIt("Query Result: {}".format(str(js)))
         except:
             pass
 if __name__ == '__main__':

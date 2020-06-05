@@ -100,3 +100,4 @@ class AttribDataTypes:
 
         return retVal
 
+attribDataTypes = AttribDataTypes()
