@@ -8,9 +8,7 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.token.ClientAssertionType;
 
 import javax.ws.rs.HttpMethod;
 
@@ -218,10 +216,8 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
     public TokenResponse exec() {
         // Prepare request parameters
         initClientRequest();
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC
-                && request.hasCredentials()) {
-            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-        }
+        new ClientAuthnEnabler(clientRequest).exec(request);
+
         clientRequest.header("Content-Type", request.getContentType());
         clientRequest.setHttpMethod(getHttpMethod());
 
@@ -252,23 +248,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         if (StringUtils.isNotBlank(getRequest().getRefreshToken())) {
             clientRequest.formParameter("refresh_token", getRequest().getRefreshToken());
         }
-        if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
-            if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
-                clientRequest.formParameter("client_id", getRequest().getAuthUsername());
-            }
-            if (getRequest().getAuthPassword() != null && !getRequest().getAuthPassword().isEmpty()) {
-                clientRequest.formParameter("client_secret", getRequest().getAuthPassword());
-            }
-        } else if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
-                getRequest().getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
-            clientRequest.formParameter("client_assertion_type", ClientAssertionType.JWT_BEARER);
-            if (getRequest().getClientAssertion() != null) {
-            	clientRequest.formParameter("client_assertion", getRequest().getClientAssertion());
-            }
-            if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {
-                clientRequest.formParameter("client_id", getRequest().getAuthUsername());
-            }
-        }
+
         for (String key : getRequest().getCustomParameters().keySet()) {
             clientRequest.formParameter(key, getRequest().getCustomParameters().get(key));
         }
