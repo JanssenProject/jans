@@ -6,20 +6,6 @@
 
 package org.gluu.oxauth.auth;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
@@ -37,14 +23,23 @@ import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.AuthenticationService;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.ErrorHandlerService;
-import org.gluu.oxauth.service.RequestParameterService;
-import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Authenticator component
@@ -196,6 +191,7 @@ public class Authenticator {
                     && servletRequest != null
                     && (servletRequest.getRequestURI().endsWith("/token")
                     || servletRequest.getRequestURI().endsWith("/revoke")
+                    || servletRequest.getRequestURI().endsWith("/revoke_session")
                     || servletRequest.getRequestURI().endsWith("/userinfo")
                     || servletRequest.getRequestURI().endsWith("/bc-authorize")))) {
                 boolean authenticated = clientAuthentication(credentials, interactive, skipPassword);
