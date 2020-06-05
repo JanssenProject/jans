@@ -79,12 +79,6 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LdapOperationServiceImpl.class);
 
-    public static final String DN = "dn";
-    public static final String UID = "uid";
-    public static final String SUCCESS = "success";
-    public static final String USER_PASSWORD = "userPassword";
-    public static final String OBJECT_CLASS = "objectClass";
-
     private LdapConnectionProvider connectionProvider;
     private LdapConnectionProvider bindConnectionProvider;
 
@@ -720,7 +714,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     private boolean addEntryImpl(String dn, Collection<Attribute> attributes) throws DuplicateEntryException {
         try {
             LDAPResult result = getConnectionPool().add(dn, attributes);
-            if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationServiceImpl.SUCCESS)) {
+            if (result.getResultCode().getName().equalsIgnoreCase(SUCCESS)) {
                 return true;
             }
         } catch (final LDAPException ex) {
@@ -757,9 +751,9 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         for (Attribute attribute : attrs) {
             String attributeName = attribute.getName();
             String attributeValue = attribute.getValue();
-            if (attributeName.equalsIgnoreCase(LdapOperationServiceImpl.OBJECT_CLASS)
-                    || attributeName.equalsIgnoreCase(LdapOperationServiceImpl.DN)
-                    || attributeName.equalsIgnoreCase(LdapOperationServiceImpl.USER_PASSWORD)) {
+            if (attributeName.equalsIgnoreCase(OBJECT_CLASS)
+                    || attributeName.equalsIgnoreCase(DN)
+                    || attributeName.equalsIgnoreCase(USER_PASSWORD)) {
                 continue;
             } else {
                 if (attributeValue != null) {

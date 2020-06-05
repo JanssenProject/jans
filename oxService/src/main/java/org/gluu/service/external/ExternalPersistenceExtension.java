@@ -67,4 +67,16 @@ public class ExternalPersistenceExtension extends ExternalScriptService {
 		}
 	}
 
+	public void executeExternalOnAfterDestroyMethod(CustomScriptConfiguration customScriptConfiguration, PersistenceExternalContext context) {
+		try {
+			log.debug("Executing python 'onAfterDestroy' method");
+			PersistenceType persistenceType = (PersistenceType) customScriptConfiguration.getExternalType();
+			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+			persistenceType.onAfterDestroy(context, configurationAttributes);
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+		}
+	}
+
 }
