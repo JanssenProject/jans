@@ -1,5 +1,5 @@
 /**
- * Endpoint to configure Response Mode values that this OP supports.
+ * Service to configure Response Mode values that the OP supports.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
@@ -50,14 +50,14 @@ public class ResponseModeResource {
 	JsonConfigurationService jsonConfigurationService;
 	
 	@GET
-	@Operation(summary = "Retrieve oxAuth supported response types")
+	@Operation(summary = "Retrieve oxAuth supported response modes")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = org.gluu.oxauthconfigapi.rest.model.ResponseMode.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	public Response getSupportedResponseMode() {
 		Set<String> responseModesSupported = Sets.newHashSet();
 		try {
-			log.info("ResponseTypeResource::getSupportedResponseTypes() - Retrieve oxAuth supported response modes");
+			log.info("ResponseTypeResource::getSupportedResponseMode() - Retrieve oxAuth supported response modes");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		
 			for(ResponseMode responseMode : appConfiguration.getResponseModesSupported())
@@ -71,14 +71,13 @@ public class ResponseModeResource {
 		}
 	}
 	
-	@Path("/updateTest")
-	@GET
-	@Operation(summary = "Update oxAuth supported response types")
+	@PUT
+	@Operation(summary = "Update oxAuth supported response modes")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response updateSupportedResponseMode() {
-		Set<org.gluu.oxauthconfigapi.rest.model.ResponseMode> responseModes = getResponseModeSet();
+	public Response updateSupportedResponseMode(@Valid Set<org.gluu.oxauthconfigapi.rest.model.ResponseMode> responseModes) {
+		
 		try {
 			log.info("ResponseTypeResource::updateSupportedResponseMode() - Update oxAuth supported response modes");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
@@ -87,7 +86,6 @@ public class ResponseModeResource {
 				ResponseMode responseMode = ResponseMode.getByValue(mode.getValue());
 				responseModesSupported.add(responseMode);
 			}
-			System.out.println("ResponseTypeResource::updateSupportedResponseMode() - Updating responseModesSupported = "+responseModesSupported);
 			
 			//Update
 			appConfiguration.setResponseModesSupported(responseModesSupported);
@@ -101,27 +99,5 @@ public class ResponseModeResource {
 		}
 	}
 	
-	private Set<org.gluu.oxauthconfigapi.rest.model.ResponseMode> getResponseModeSet() {
-		Set<org.gluu.oxauthconfigapi.rest.model.ResponseMode> responseModesSupported = Sets.newHashSet();
-		org.gluu.oxauthconfigapi.rest.model.ResponseMode responseMode = null;
-		try {
-			System.out.println("ResponseTypeResource::getResponseModeSet() - Get new response modes");
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		
-			for(ResponseMode mode : appConfiguration.getResponseModesSupported()) {
-				responseMode = new org.gluu.oxauthconfigapi.rest.model.ResponseMode();
-				responseMode.setValue(mode.getValue());
-				responseModesSupported.add(responseMode);		
-			}
-			responseMode = new org.gluu.oxauthconfigapi.rest.model.ResponseMode();
-			responseMode.setValue("XYZ");
-			responseModesSupported.add(responseMode);
-			System.out.println("ResponseTypeResource::getResponseModeSet() - responseModesSupported = "+responseModesSupported);
-			
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return responseModesSupported;
-	}
-
+	
 }
