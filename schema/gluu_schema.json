@@ -4672,6 +4672,16 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Defines whether a scope will be shown or not in openid-configuration endpoint.", 
+            "equality": "booleanMatch", 
+            "names": [
+                "notShowInDiscovery"
+            ], 
+            "oid": "oxAttribute", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
         }
     ], 
     "objectClasses": [
@@ -5358,7 +5368,8 @@
                 "oxUmaPolicyScriptDn",
                 "oxAttributes",
                 "exp",
-                "del"
+                "del",
+                "notShowInDiscovery"
             ],
             "must": [
                 "objectclass"
