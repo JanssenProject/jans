@@ -37,10 +37,12 @@ import org.gluu.persist.annotation.SchemaEntry;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.InvalidArgumentException;
 import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.persist.reflect.property.Getter;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.property.Setter;
@@ -94,6 +96,9 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	protected static final Comparator<String> LINE_LENGHT_COMPARATOR = new LineLenghtComparator<String>(false);
 
 	protected static final int DEFAULT_PAGINATION_SIZE = 100;
+	
+	protected PersistenceOperationService operationService = null;
+	protected PersistenceExtension persistenceExtension = null;
 
 	@Override
 	public void persist(Object entry) {
@@ -1967,6 +1972,14 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	protected abstract Date decodeTime(String date);
 
 	protected abstract String encodeTime(Date date);
+
+	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
+		this.persistenceExtension = persistenceExtension;
+
+		if (this.operationService != null) {
+			this.operationService.setPersistenceExtension(persistenceExtension);
+		}
+	}
 
 	protected static final class PropertyComparator<T> implements Comparator<T>, Serializable {
 

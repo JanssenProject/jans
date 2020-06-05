@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
@@ -74,9 +75,9 @@ import com.unboundid.ldif.LDIFChangeRecord;
  * @author Pankaj
  * @author Yuriy Movchan
  */
-public class LdapOperationsServiceImpl implements LdapOperationService {
+public class LdapOperationServiceImpl implements LdapOperationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LdapOperationsServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LdapOperationServiceImpl.class);
 
     public static final String DN = "dn";
     public static final String UID = "uid";
@@ -86,6 +87,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
     private LdapConnectionProvider connectionProvider;
     private LdapConnectionProvider bindConnectionProvider;
+
+	private PersistenceExtension persistenceExtension;
 
     private static Map<String, Class<?>> ATTRIBUTE_DATA_TYPES = new HashMap<String, Class<?>>();
     private static final Map<String, Class<?>> OID_SYNTAX_CLASS_MAPPING;
@@ -109,15 +112,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     }
 
     @SuppressWarnings("unused")
-    private LdapOperationsServiceImpl() {
+    private LdapOperationServiceImpl() {
     }
 
-    public LdapOperationsServiceImpl(LdapConnectionProvider connectionProvider) {
+    public LdapOperationServiceImpl(LdapConnectionProvider connectionProvider) {
         this(connectionProvider, null);
         populateAttributeDataTypesMapping(getSubschemaSubentry());
     }
 
-    public LdapOperationsServiceImpl(LdapConnectionProvider connectionProvider, LdapConnectionProvider bindConnectionProvider) {
+    public LdapOperationServiceImpl(LdapConnectionProvider connectionProvider, LdapConnectionProvider bindConnectionProvider) {
         this.connectionProvider = connectionProvider;
         this.bindConnectionProvider = bindConnectionProvider;
         populateAttributeDataTypesMapping(getSubschemaSubentry());
@@ -717,7 +720,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     private boolean addEntryImpl(String dn, Collection<Attribute> attributes) throws DuplicateEntryException {
         try {
             LDAPResult result = getConnectionPool().add(dn, attributes);
-            if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationsServiceImpl.SUCCESS)) {
+            if (result.getResultCode().getName().equalsIgnoreCase(LdapOperationServiceImpl.SUCCESS)) {
                 return true;
             }
         } catch (final LDAPException ex) {
@@ -754,9 +757,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
         for (Attribute attribute : attrs) {
             String attributeName = attribute.getName();
             String attributeValue = attribute.getValue();
-            if (attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.OBJECT_CLASS)
-                    || attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.DN)
-                    || attributeName.equalsIgnoreCase(LdapOperationsServiceImpl.USER_PASSWORD)) {
+            if (attributeName.equalsIgnoreCase(LdapOperationServiceImpl.OBJECT_CLASS)
+                    || attributeName.equalsIgnoreCase(LdapOperationServiceImpl.DN)
+                    || attributeName.equalsIgnoreCase(LdapOperationServiceImpl.USER_PASSWORD)) {
                 continue;
             } else {
                 if (attributeValue != null) {
@@ -1169,7 +1172,12 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
     public boolean isConnected() {
         return connectionProvider.isConnected();
     }
-    
+
+	@Override
+	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
+		this.persistenceExtension = persistenceExtension;
+	}
+
     private class SimplePagedResponse {
 
 		private ASN1OctetString cookie;

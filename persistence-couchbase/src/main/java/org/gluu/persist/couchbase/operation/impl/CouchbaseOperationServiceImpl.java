@@ -22,6 +22,7 @@ import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.watch.OperationDurationUtil;
+import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.exception.operation.DeleteException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.EntryNotFoundException;
@@ -66,7 +67,7 @@ import com.couchbase.client.java.subdoc.MutationSpec;
  *
  * @author Yuriy Movchan Date: 05/10/2018
  */
-public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService {
+public class CouchbaseOperationServiceImpl implements CouchbaseOperationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseConnectionProvider.class);
 
@@ -80,12 +81,14 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	private boolean enableScopeSupport = false;
 	private boolean disableAttributeMapping = false;
 
+	private PersistenceExtension persistenceExtension;
+
 
     @SuppressWarnings("unused")
-    private CouchbaseOperationsServiceImpl() {
+    private CouchbaseOperationServiceImpl() {
     }
 
-    public CouchbaseOperationsServiceImpl(Properties props, CouchbaseConnectionProvider connectionProvider) {
+    public CouchbaseOperationServiceImpl(Properties props, CouchbaseConnectionProvider connectionProvider) {
         this.props = props;
         this.connectionProvider = connectionProvider;
         init();
@@ -145,7 +148,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 	        }
 	
 	        if (userPassword != null) {
-	        	result = PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
+	        	if (persistenceExtension == null) {
+		        	result = PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
+	        	} else {
+	        		result = persistenceExtension.compareHashedPasswords(password, userPassword);
+	        	}
 	        }
         }
 
@@ -656,7 +663,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-            results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
+			if (persistenceExtension == null) {
+				results[i] = PasswordEncryptionHelper.createStoragePassword(passwords[i], connectionProvider.getPasswordEncryptionMethod());
+			} else {
+				results[i] = persistenceExtension.createHashedPassword(passwords[i]);
+			}
         }
 
         return results;
@@ -729,6 +740,11 @@ public class CouchbaseOperationsServiceImpl implements CouchbaseOperationService
         }
 
         return attemptInfo;
+	}
+
+	@Override
+	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
+		this.persistenceExtension = persistenceExtension;
 	}
 
 }

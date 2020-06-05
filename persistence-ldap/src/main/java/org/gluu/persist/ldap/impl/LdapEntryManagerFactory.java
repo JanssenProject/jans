@@ -9,7 +9,7 @@ import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.ldap.operation.impl.LdapAuthConnectionProvider;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
-import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
+import org.gluu.persist.ldap.operation.impl.LdapOperationServiceImpl;
 import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
         }
         LOG.debug("Created bindConnectionProvider '{}' with code '{}'", bindConnectionProvider, bindConnectionProvider.getCreationResultCode());
 
-        LdapEntryManager ldapEntryManager = new LdapEntryManager(new LdapOperationsServiceImpl(connectionProvider, bindConnectionProvider));
+        LdapEntryManager ldapEntryManager = new LdapEntryManager(new LdapOperationServiceImpl(connectionProvider, bindConnectionProvider));
         LOG.info("Created LdapEntryManager: {}", ldapEntryManager.getOperationService());
 
         return ldapEntryManager;

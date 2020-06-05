@@ -15,7 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.couchbase.operation.impl.CouchbaseConnectionProvider;
-import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationsServiceImpl;
+import org.gluu.persist.couchbase.operation.impl.CouchbaseOperationServiceImpl;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.service.BaseFactoryService;
 import org.gluu.util.PropertiesHelper;
@@ -131,7 +131,7 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
         }
         LOG.debug("Created connectionProvider '{}' with code '{}'", connectionProvider, connectionProvider.getCreationResultCode());
 
-        CouchbaseEntryManager couchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationsServiceImpl(entryManagerConf, connectionProvider));
+        CouchbaseEntryManager couchbaseEntryManager = new CouchbaseEntryManager(new CouchbaseOperationServiceImpl(entryManagerConf, connectionProvider));
         LOG.info("Created CouchbaseEntryManager: {}", couchbaseEntryManager.getOperationService());
 
         return couchbaseEntryManager;

@@ -32,7 +32,7 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
+import org.gluu.persist.ldap.operation.impl.LdapOperationServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
@@ -71,15 +71,15 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     private static final LdapFilterConverter LDAP_FILTER_CONVERTER = new LdapFilterConverter();
     private static final LdapSearchScopeConverter LDAP_SEARCH_SCOPE_CONVERTER = new LdapSearchScopeConverter();
 
-    private LdapOperationsServiceImpl operationService;
+    private LdapOperationServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
 
     public LdapEntryManager() {
     }
 
-    public LdapEntryManager(LdapOperationsServiceImpl operationService) {
+    public LdapEntryManager(LdapOperationServiceImpl operationService) {
         this.operationService = operationService;
-        subscribers = new LinkedList<DeleteNotifier>();
+        this.subscribers = new LinkedList<DeleteNotifier>();
     }
 
     @Override
@@ -91,7 +91,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         return this.operationService.destroy();
     }
 
-    public LdapOperationsServiceImpl getOperationService() {
+    public LdapOperationServiceImpl getOperationService() {
         return operationService;
     }
 
@@ -337,7 +337,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
             searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
-                    0, 100, count, null, LdapOperationsServiceImpl.DN);
+                    0, 100, count, null, LdapOperationServiceImpl.DN);
 
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -713,7 +713,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         String[] objectClasses = getTypeObjectClasses(entryClass);
 
         // Find entries
-        Filter searchFilter = Filter.createEqualityFilter(LdapOperationsServiceImpl.UID, userName);
+        Filter searchFilter = Filter.createEqualityFilter(LdapOperationServiceImpl.UID, userName);
         if (objectClasses.length > 0) {
             searchFilter = addObjectClassFilter(searchFilter, objectClasses);
         }
