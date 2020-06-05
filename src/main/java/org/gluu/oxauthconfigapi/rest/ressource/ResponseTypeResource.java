@@ -63,8 +63,10 @@ public class ResponseTypeResource {
 		
 			for (Set<ResponseType> typeSet : appConfiguration.getResponseTypesSupported()) {
 				 responseTypes = Sets.newHashSet();
-				for(ResponseType responseType : typeSet)
-					  	responseTypes.add(responseType.name());				
+				for(ResponseType type : typeSet) {
+					if(type != null)
+					  	responseTypes.add(type.name());
+				}
 	           	
 				responseTypesSupportedSet.add(responseTypes);
 			}

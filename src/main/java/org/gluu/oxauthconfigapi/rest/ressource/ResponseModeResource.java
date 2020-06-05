@@ -60,8 +60,10 @@ public class ResponseModeResource {
 			log.info("ResponseTypeResource::getSupportedResponseMode() - Retrieve oxAuth supported response modes");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		
-			for(ResponseMode responseMode : appConfiguration.getResponseModesSupported())
-				responseModesSupported.add(responseMode.name());				
+			for(ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
+				if(responseMode != null)
+					responseModesSupported.add(responseMode.name());
+			}
 				
 			return Response.ok(responseModesSupported).build();
 			
