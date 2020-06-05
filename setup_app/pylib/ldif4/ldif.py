@@ -328,8 +328,8 @@ class LDIFParser:
 
     def _check_dn(self, dn, attr_value):
         """Check dn attribute for issues."""
-        #if dn is not None:
-        #    self._error("Two lines starting with dn: in one record.")
+        if dn is not None:
+            self._error("Two lines starting with dn: in one record.")
         if not is_dn(attr_value):
             self._error(
                 "No valid string-representation of "

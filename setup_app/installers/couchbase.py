@@ -238,25 +238,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             self.exec_n1ql_query(n1ql)
 
 
-    def checkIfAttributeExists(self, key, atribute,  documents):
-        ka = key + '::' + atribute
-        retVal = False
-
-        if ka in self.processedKeys:
-            return True
-         
-        for d in documents:
-            if d[0] == key:
-                if 'changetype' in d[1]:
-                    continue
-                if atribute in d[1]:
-                    retVal = True
-                else:
-                    self.processedKeys.append(ka)
-                    return True
-                
-        return retVal
-
     def checkCBRoles(self, buckets=[]):
         result = self.dbUtils.cbm.whoami()
         bc = buckets[:]
