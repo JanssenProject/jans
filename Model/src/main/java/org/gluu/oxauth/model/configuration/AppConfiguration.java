@@ -127,6 +127,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
+    private Boolean clientRegDefaultToCodeFlowWithRefresh;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
     private List<CorsConfigurationFilter> corsConfigurationFilters;
@@ -1808,5 +1809,13 @@ public class AppConfiguration implements Configuration {
 
     public void setBackchannelRequestsProcessorJobChunkSize(int backchannelRequestsProcessorJobChunkSize) {
         this.backchannelRequestsProcessorJobChunkSize = backchannelRequestsProcessorJobChunkSize;
+    }
+
+    public Boolean getClientRegDefaultToCodeFlowWithRefresh() {
+        return clientRegDefaultToCodeFlowWithRefresh;
+    }
+
+    public void setClientRegDefaultToCodeFlowWithRefresh(Boolean clientRegDefaultToCodeFlowWithRefresh) {
+        this.clientRegDefaultToCodeFlowWithRefresh = clientRegDefaultToCodeFlowWithRefresh;
     }
 }

@@ -27,6 +27,7 @@ import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
@@ -231,7 +232,15 @@ public class AuthenticationService {
 			}
 
 			// Use local LDAP server for user authentication
-			boolean authenticated = ldapEntryManager.authenticate(user.getDn(), password);
+			boolean authenticated = false;
+			try {
+				authenticated = ldapEntryManager.authenticate(user.getDn(), password);
+			} catch (AuthenticationException ex) {
+				log.error("Authentication failed: " + ex.getMessage());
+				if (log.isDebugEnabled()) {
+					log.debug("Authentication failed:", ex);
+				}
+			}
 			if (authenticated) {
 				configureAuthenticatedUser(user);
 				updateLastLogonUserTime(user);
