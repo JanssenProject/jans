@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
@@ -27,17 +28,17 @@
 				</includes>
 			</resource>
 		</resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.xml</include>
-                    <include>**/services/*</include>
-                    <include>**/*.properties</include>
-                </includes>
-            </testResource>
-        </testResources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/services/*</include>
+					<include>**/*.properties</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
 
 	<dependencies>
@@ -60,30 +61,34 @@
 			<artifactId>javax.inject</artifactId>
 		</dependency>
 
-	    <!-- Jackrabbit content repository --> 
-	    <dependency> 
-	        <groupId>javax.jcr</groupId> 
-	        <artifactId>jcr</artifactId> 
-	    </dependency> 
-	    <dependency>
-	        <groupId>org.apache.jackrabbit</groupId>
-	        <artifactId>jackrabbit-core</artifactId>
-	    </dependency>
+		<!-- Jackrabbit content repository -->
 		<dependency>
-		    <groupId>org.apache.jackrabbit</groupId>
-		    <artifactId>jackrabbit-jcr-rmi</artifactId>
+			<groupId>javax.jcr</groupId>
+			<artifactId>jcr</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jackrabbit</groupId>
+			<artifactId>jackrabbit-jcr-rmi</artifactId>
 		</dependency>
 
 		<!-- Jackson -->
 		<dependency>
-		    <groupId>com.fasterxml.jackson.core</groupId>
-		    <artifactId>jackson-annotations</artifactId>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
 		</dependency>
 
 		<!-- Tests -->
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 	</dependencies>
 
