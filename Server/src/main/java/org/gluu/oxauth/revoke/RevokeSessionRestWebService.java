@@ -9,6 +9,7 @@ import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.UserService;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,9 @@ public class RevokeSessionRestWebService {
 
     @Inject
     private Identity identity;
+
+    @Inject
+    private ScopeService scopeService;
 
     @POST
     @Path("/revoke_session")
@@ -88,7 +93,7 @@ public class RevokeSessionRestWebService {
 
     private void validateAccess() {
         SessionClient sessionClient = identity.getSessionClient();
-        if (sessionClient == null || sessionClient.getClient() == null) {
+        if (sessionClient == null || sessionClient.getClient() == null || ArrayUtils.isEmpty(sessionClient.getClient().getScopes())) {
             log.debug("Client failed to authenticate.");
             throw new WebApplicationException(
                     Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
@@ -96,7 +101,9 @@ public class RevokeSessionRestWebService {
                             .build());
         }
 
-        if (!ArrayUtils.contains(sessionClient.getClient().getScopes(), Constants.REVOKE_SESSION_SCOPE)) {
+        List<String> scopesAllowedIds = scopeService.getScopeIdsByDns(Arrays.asList(sessionClient.getClient().getScopes()));
+
+        if (!scopesAllowedIds.contains(Constants.REVOKE_SESSION_SCOPE)) {
             log.debug("Client does not have required revoke_session scope.");
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED.getStatusCode())
                     .entity(errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_REQUEST))
