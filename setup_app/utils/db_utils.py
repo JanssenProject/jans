@@ -1,10 +1,12 @@
 import json
 import ldap3
 
+from setup_app import static
 from setup_app.config import Config
-from setup_app.utils import base
 from setup_app.static import InstallTypes, BackendTypes
+from setup_app.utils import base
 from setup_app.utils.cbm import CBM
+from setup_app.utils import ldif_utils 
 
 
 class DBUtils:
@@ -164,7 +166,7 @@ class DBUtils:
     
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
-        bucket, backend_location = base.get_backend_location_for_dn(dn)
+        bucket, backend_location = self.get_backend_location_for_dn(dn)
 
         if backend_location == BackendTypes.LDAP:
             if self.dn_exists(dn):
@@ -220,11 +222,11 @@ class DBUtils:
     def import_ldif(self, ldif_files, bucket=None):
 
         for ldif_fn in ldif_files:
-            parser = base.myLdifParser(ldif_fn)
+            parser = ldif_utils.myLdifParser(ldif_fn)
             parser.parse()
 
             for dn, entry in parser.entries:
-                dbucket, backend_location = base.get_backend_location_for_dn(dn)
+                dbucket, backend_location = self.get_backend_location_for_dn(dn)
                 if backend_location == BackendTypes.LDAP:
                     if not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
@@ -233,7 +235,7 @@ class DBUtils:
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:
                         continue
-                    key, document = base.get_document_from_entry(dn, entry)
+                    key, document = ldif_utils.get_document_from_entry(dn, entry)
                     cur_bucket = bucket if bucket else dbucket 
                     base.logIt("Addnig document {} to Couchebase bucket {}".format(key, cur_bucket))
 
@@ -257,7 +259,7 @@ class DBUtils:
     def import_schema(self, schema_file):
         if self.moddb == BackendTypes.LDAP:
             base.logIt("Importing schema {}".format(schema_file))
-            parser = base.myLdifParser(schema_file)
+            parser = ldif_utils.myLdifParser(schema_file)
             parser.parse()
             for dn, entry in parser.entries:
                 if 'changetype' in entry:
@@ -271,6 +273,28 @@ class DBUtils:
 
             #we need re-bind after schema operations
             self.ldap_conn.rebind()
+
+    def get_backend_location_for_dn(self, dn):
+        key = ldif_utils.get_key_from(dn)
+        n = key.find('_')
+        key_prefix = key[:n+1]
+
+        for grp in Config.couchbaseBucketDict:
+            if key_prefix in Config.couchbaseBucketDict[grp]['document_key_prefix']:
+                group = grp
+                bucket = grp
+                break
+        else:
+            group = 'default'
+            bucket = Config.couchbase_bucket_prefix
+
+        if Config.mappingLocations[group] == 'ldap':
+            backend_location = static.BackendTypes.LDAP
+        if Config.mappingLocations[group] == 'couchbase':
+            backend_location = static.BackendTypes.COUCHBASE
+        
+        return bucket, backend_location
+
 
     def __del__(self):
         try:
