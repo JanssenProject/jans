@@ -131,15 +131,15 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
     def create_folders(self):
         self.createDirs(self.conf_dir)
 
-
     def get_client_id_ro_password(self):
 
         if not Config.get('gluu_radius_client_id'):
-            if self.dbUtils.search('ou=clients,o=gluu', '(inum=1701.*)'):
-                Config.gluu_radius_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
+            result = self.dbUtils.search('ou=clients,o=gluu', '(inum=1701.*)')
+            if result:
+                Config.gluu_radius_client_id = result['inum']
                 self.logIt("gluu_radius_client_id was found in ldap as {}".format(Config.gluu_radius_client_id))
 
-                Config.gluu_ro_encoded_pw = self.dbUtils.ldap_conn.response[0]['attributes']['oxAuthClientSecret'][0]
+                Config.gluu_ro_encoded_pw = result['oxAuthClientSecret']
                 self.logIt("gluu_ro_encoded_pw was found in ldap as {}".format(Config.gluu_ro_encoded_pw))
         
         if not Config.get('gluu_radius_client_id'):
