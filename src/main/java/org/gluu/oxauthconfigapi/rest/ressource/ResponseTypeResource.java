@@ -1,5 +1,5 @@
 /**
- * This endpoint is used by client to configure the desired response_type values with authorization server.
+ * Endpoint to configure the desired response_type values with authorization server.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
@@ -24,15 +24,15 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import org.slf4j.Logger;
 
+import com.google.common.collect.Sets;
+
+import com.couchbase.client.core.message.ResponseStatus;
+
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxtrust.service.JsonConfigurationService;
-import org.python.google.common.collect.Sets;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
-import org.gluu.oxauthconfigapi.rest.model.Metrics;
 //import org.gluu.oxauthconfigapi.rest.model.ResponseType;
-
-import com.couchbase.client.core.message.ResponseStatus;
 
 /**
  * @author Puja Sharma

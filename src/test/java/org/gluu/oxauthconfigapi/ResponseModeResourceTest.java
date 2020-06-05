@@ -11,32 +11,30 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 
-import org.gluu.oxauthconfigapi.rest.model.ResponseType;
-/**
- * @author Puja Sharma
- *
- */
+import org.gluu.oxauthconfigapi.rest.model.ResponseMode;
+
 @QuarkusTest
 @Tag("integration")
-public class ResponseTypeResourceTest {
-
-	private static final String API_V1_OXAUTH_RESPONSES_TYPES = "/api/v1/oxauth/responses_types";
+public class ResponseModeResourceTest {
+	
+	private static final String API_V1_OXAUTH_RESPONSES_MODES = "/api/v1/oxauth/responses_modes";
 	
 	@Test
-	public void getSupportedResponseTypes() {
+	public void getSupportedResponseMode() {
 		given().log().all()
 		.when()
-		.get(API_V1_OXAUTH_RESPONSES_TYPES).then().statusCode(OK.getStatusCode());
+		.get(API_V1_OXAUTH_RESPONSES_MODES).then().statusCode(OK.getStatusCode());
 	}
 	
 	@Test
-	public void updateSupportedResponseTypes() {
-		ResponseType responseType = new ResponseType();
+	public void updateSupportedResponseMode() {
+		ResponseMode responseMode = new ResponseMode();
 		given().log().all()
-		.body(responseType)
+		.body(responseMode)
 		.header(ACCEPT,APPLICATION_JSON)
 		.header(CONTENT_TYPE,APPLICATION_JSON)
 		.when()
-		.put(API_V1_OXAUTH_RESPONSES_TYPES).then().statusCode(OK.getStatusCode());
+		.put(API_V1_OXAUTH_RESPONSES_MODES).then().statusCode(OK.getStatusCode());
 	}
+
 }

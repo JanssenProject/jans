@@ -10,5 +10,6 @@ public class ApiConstants {
 	public static final String METRICS = "/metrics";
 	public static final String BACKCHANNEL = "/backchannel";
 	public static final String RESPONSES_TYPES = "/responses_types";
+	public static final String RESPONSES_MODES = "/responses_modes";
 
 }

@@ -2,7 +2,6 @@ package org.gluu.oxauthconfigapi.rest.model;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 /**
  * @author Puja Sharma
@@ -12,7 +11,6 @@ public class ResponseType implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Min(value=1)
 	@NotEmpty
 	private String code;
 	private String displayName;
