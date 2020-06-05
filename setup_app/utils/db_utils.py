@@ -1,5 +1,6 @@
 import json
 import ldap3
+from ldap3.utils import dn as dnutils
 
 from setup_app import static
 from setup_app.config import Config
@@ -15,35 +16,29 @@ class DBUtils:
 
     processedKeys = []
 
-    def bind(self, ldap_hostname=None, port=None, ldap_binddn=None, ldapPass=None, use_ssl=True):
+    def bind(self, use_ssl=True):
 
         if Config.mappingLocations['default'] == 'ldap':
             self.moddb = BackendTypes.LDAP
         else:
             self.moddb = BackendTypes.COUCHBASE
 
-        if Config.wrends_install and not (hasattr(self, 'ldap_conn')  and self.ldap_conn.bound):
 
-            if not ldap_hostname:
-                ldap_hostname = Config.ldap_hostname
+        if not hasattr(self, 'ldap_conn'):
+            for group in Config.mappingLocations:
+                if Config.mappingLocations[group] == 'ldap':
 
-            if not port:
-                port = int(Config.ldaps_port)
+                    ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
+                    self.ldap_conn = ldap3.Connection(
+                                ldap_server,
+                                user=Config.ldap_binddn,
+                                password=Config.ldapPass,
+                                )
 
-            if not ldap_binddn:
-                ldap_binddn = Config.ldap_binddn
-            
-            if not ldapPass:
-                ldapPass = Config.ldapPass
+                    base.logIt("Making LDAP Connection to host {}:{} with user {}".format(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn))
+                    self.ldap_conn.bind()
 
-            ldap_server = ldap3.Server(ldap_hostname, port=port, use_ssl=use_ssl)
-            self.ldap_conn = ldap3.Connection(
-                        ldap_server,
-                        user=ldap_binddn,
-                        password=ldapPass,
-                        )
-            base.logIt("Making LDAP Connection to host {}:{} with user {}".format(ldap_hostname, port, ldap_binddn))
-            self.ldap_conn.bind()
+                    break
 
         self.cbm = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
         self.default_bucket = Config.couchbase_bucket_prefix
@@ -157,8 +152,37 @@ class DBUtils:
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
     def search(self, search_base, search_filter, search_scope=ldap3.LEVEL):
-        return self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*'])
+        
+        backend_location = self.get_backend_location_for_dn(search_base)
+        
+        if backend_location == BackendTypes.LDAP:
+            if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
+                key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
+                return document
 
+        if backend_location == BackendTypes.COUCHBASE:
+            key = ldif_utils.get_key_from(search_base)
+            bucket = self.get_bucket_for_key(key)
+
+            if search_scope == ldap3.BASE:
+                n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
+            else:
+                parsed_dn = dnutils.parse_dn(search_filter.strip('(').strip(')'))
+                attr = parsed_dn[0][0]
+                val = parsed_dn[0][1]
+                if '*' in val:
+                    search_clause = 'LIKE "{}"'.format(val.replace('*', '%'))
+                else:
+                    search_clause = '="{}"'.format(val.replace('*', '%'))
+                
+                n1ql = 'SELECT * FROM `{}` WHERE `{}` {}'.format(bucket, attr, search_clause)
+                
+            result = self.cbm.exec_query(n1ql)
+            if result.ok:
+                data = result.json()
+                if data.get('results'):
+                    return data['results'][0][bucket]
+            
 
     def add2strlist(self, client_id, strlist):
         value2 = strlist.split(',')
