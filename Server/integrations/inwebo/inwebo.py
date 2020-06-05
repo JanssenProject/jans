@@ -6,7 +6,7 @@ from org.gluu.util import StringHelper,ArrayHelper
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.oxauth.service import UserService, AuthenticationService,SessionIdService
 from org.gluu.oxauth.service.net import HttpService
-from org.gluu.oxauth.service import EncryptionService 
+from org.gluu.oxauth.service.common import EncryptionService 
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
 from org.gluu.jsf2.service import FacesService
