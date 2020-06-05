@@ -123,9 +123,6 @@ class Config:
         self.gluu_hybrid_roperties = os.path.join(self.configFolder, 'gluu-hybrid.properties')
 
         self.oxBaseDataFolder = '/var/gluu'
-        self.oxPhotosFolder = '/var/gluu/photos'
-        self.oxTrustRemovedFolder = '/var/gluu/identity/removed'
-        self.oxTrustCacheRefreshFolder = '/var/gluu/identity/cr-snapshots'
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
         self.etc_hosts = '/etc/hosts'
@@ -189,8 +186,6 @@ class Config:
         self.idp_client_id = None
         self.idpClient_pw = None
         self.idpClient_encoded_pw = None
-
-        self.oxTrustConfigGeneration = None
 
         self.outputFolder = os.path.join(self.install_dir, 'output')
         self.templateFolder = os.path.join(self.install_dir, 'templates')
@@ -261,14 +256,10 @@ class Config:
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         
-        self.oxtrust_config_json = os.path.join(self.outputFolder, 'oxtrust-config.json')
-        self.oxtrust_cache_refresh_json = os.path.join(self.outputFolder, 'oxtrust-cache-refresh.json')
-        self.oxtrust_import_person_json = os.path.join(self.outputFolder, 'oxtrust-import-person.json')
         self.oxidp_config_json = os.path.join(self.outputFolder, 'oxidp-config.json')
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
         
-        self.oxTrust_log_rotation_configuration = os.path.join(self.gluuBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
         self.apache2_conf = os.path.join(self.outputFolder, 'httpd.conf')
         self.apache2_ssl_conf = os.path.join(self.outputFolder, 'https_gluu.conf')
         self.apache2_24_conf = os.path.join(self.outputFolder, 'httpd_2.4.conf')
@@ -287,8 +278,6 @@ class Config:
         self.ldif_scim = os.path.join(self.outputFolder, 'scim.ldif')
         self.ldif_scim_clients = os.path.join(self.outputFolder, 'scim_clients.ldif')
 
-        self.lidf_oxtrust_api = os.path.join(self.outputFolder, 'oxtrust_api.ldif')
-        self.ldif_oxtrust_api_clients = os.path.join(self.outputFolder, 'oxtrust_api_clients.ldif')
 
         self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
         self.network = '/etc/sysconfig/network'
@@ -299,9 +288,6 @@ class Config:
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
         self.ldap_setup_properties = os.path.join(self.templateFolder, 'opendj-setup.properties')
 
-        # oxAuth/oxTrust Base64 configuration files
-        self.pairwiseCalculationKey = None
-        self.pairwiseCalculationSalt = None
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
@@ -321,17 +307,6 @@ class Config:
         self.scim_rp_client_jks_pass = 'secret'
         self.scim_resource_oxid = None
 
-        # oxTrust Api configuration
-        self.api_rs_client_jks_fn = os.path.join(self.certFolder, 'api-rs.jks')
-        self.api_rs_client_jks_pass = 'secret'
-        self.api_rs_client_jwks = None
-        self.api_rp_client_jks_fn = os.path.join(self.certFolder, 'api-rp.jks')
-        self.api_rp_client_jks_pass = 'secret'
-        self.api_rp_client_jwks = None
-
-        self.oxtrust_resource_id = None
-        self.oxtrust_requesting_party_client_id = None
-        self.oxtrust_resource_server_client_id = None
 
         self.post_messages = []
 
@@ -358,19 +333,13 @@ class Config:
                            self.ldif_scim,
                            self.ldif_scim_clients,
                            self.ldif_idp,
-                           self.lidf_oxtrust_api,
-                           self.ldif_oxtrust_api_clients,
                            ]
 
 
         self.ce_templates = {
                              self.gluu_python_readme: True,
-                             self.oxtrust_config_json: False,
-                             self.oxtrust_cache_refresh_json: False,
-                             self.oxtrust_import_person_json: False,
                              self.oxidp_config_json: False,
                              self.ox_ldap_properties: True,
-                             self.oxTrust_log_rotation_configuration: True,
                              self.ldap_setup_properties: False,
                              self.apache2_conf: False,
                              self.apache2_ssl_conf: False,
@@ -388,8 +357,6 @@ class Config:
                              self.ldif_scim_clients: False,
                              self.ldif_idp: False,
                              self.network: False,
-                             self.lidf_oxtrust_api: False,
-                             self.ldif_oxtrust_api_clients: False,
                              self.gluu_properties_fn: True,
                              }
 
@@ -408,9 +375,9 @@ class Config:
                         }
 
         self.install_time_ldap = None
-        
-        
-        self.couchbaseBucketDict = OrderedDict((   
+
+
+        self.couchbaseBucketDict = OrderedDict((
                         ('default', { 'ldif':[
                                             self.ldif_base, 
                                             self.ldif_attributes,
@@ -419,9 +386,7 @@ class Config:
                                             self.ldif_configuration,
                                             self.ldif_scim,
                                             self.ldif_idp,
-                                            self.lidf_oxtrust_api,
                                             self.ldif_clients,
-                                            self.ldif_oxtrust_api_clients,
                                             self.ldif_scim_clients,
                                             self.ldif_metric,
                                             ],

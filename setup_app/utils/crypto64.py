@@ -142,11 +142,6 @@ class Crypto64:
 
     def generate_base64_configuration(self):
         self.logIt("Generating base64 configuration", pbar='gluu')
-        #TODO: explore possibility of moving these to oxauth, oxtrust, passport ... installers
-
-        Config.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(Config.oxtrust_config_json);
-        Config.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(Config.oxtrust_cache_refresh_json)
-        Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(Config.oxtrust_import_person_json)
         
         Config.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(Config.oxidp_config_json)
 
@@ -324,7 +319,6 @@ class Crypto64:
         self.logIt("Encoding passwords", pbar='gluu')
         
         try:
-            Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
             if Config.ldapPass:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
             if Config.cb_password:
