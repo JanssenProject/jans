@@ -193,6 +193,7 @@ oxAuthGrantType: implicit
 oxAuthGrantType: refresh_token
 oxAuthGrantType: client_credentials
 oxAuthScope: inum=6D99,ou=scopes,o=gluu
+oxAuthScope: inum=7D90,ou=scopes,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthTrustedClient: true
 
