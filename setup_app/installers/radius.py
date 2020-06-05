@@ -137,10 +137,10 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
             result = self.dbUtils.search('ou=clients,o=gluu', '(inum=1701.*)')
             if result:
                 Config.gluu_radius_client_id = result['inum']
-                self.logIt("gluu_radius_client_id was found in ldap as {}".format(Config.gluu_radius_client_id))
+                self.logIt("gluu_radius_client_id was found in backend as {}".format(Config.gluu_radius_client_id))
 
                 Config.gluu_ro_encoded_pw = result['oxAuthClientSecret']
-                self.logIt("gluu_ro_encoded_pw was found in ldap as {}".format(Config.gluu_ro_encoded_pw))
+                self.logIt("gluu_ro_encoded_pw was found in backend as {}".format(Config.gluu_ro_encoded_pw))
         
         if not Config.get('gluu_radius_client_id'):
             Config.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
