@@ -93,7 +93,7 @@ class SamlInstaller(JettyInstaller):
         # update IDP3 metadata
         self.renderTemplateInOut(self.idp3_metadata, self.staticIDP3FolderMetadata, self.idp3MetadataFolder)
 
-        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
+        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'idp.war')
         self.copyFile(src_war, jettyServiceWebapps)

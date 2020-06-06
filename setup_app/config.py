@@ -26,7 +26,8 @@ class Config:
     jython_home = '/opt/jython'
     ldapBaseFolder = '/opt/opendj'
     network = '/etc/sysconfig/network'
-
+    jetty_home = '/opt/jetty'
+    jetty_base = os.path.join(gluuOptFolder, 'jetty')
 
     @classmethod
     def get(self, attr, default=None):
@@ -244,7 +245,6 @@ class Config:
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
-        self.ldif_scripts = os.path.join(self.outputFolder, 'scripts.ldif')
         self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
         self.ldif_scim = os.path.join(self.outputFolder, 'scim.ldif')
         self.ldif_scim_clients = os.path.join(self.outputFolder, 'scim_clients.ldif')
@@ -296,7 +296,6 @@ class Config:
                            self.ldif_clients,
                            self.ldif_site,
                            self.ldif_metric,
-                           self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
                            self.ldif_scim_clients,
@@ -318,7 +317,6 @@ class Config:
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.ldif_clients: False,
-                             self.ldif_scripts: False,
                              self.ldif_scim: False,
                              self.ldif_scim_clients: False,
                              self.ldif_idp: False,
@@ -348,7 +346,6 @@ class Config:
                                             self.ldif_base, 
                                             self.ldif_attributes,
                                             self.ldif_scopes,
-                                            self.ldif_scripts,
                                             self.ldif_configuration,
                                             self.ldif_scim,
                                             self.ldif_idp,
