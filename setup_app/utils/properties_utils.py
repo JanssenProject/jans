@@ -100,14 +100,7 @@ class PropertiesUtils(SetupUtils):
         if not Config.idp_client_id:
             Config.idp_client_id = '1101.'+ str(uuid.uuid4())
 
-        if not Config.scim_rs_client_id:
-            Config.scim_rs_client_id = '1201.' + str(uuid.uuid4())
 
-        if not Config.scim_rp_client_id:
-            Config.scim_rp_client_id = '1202.' + str(uuid.uuid4())
-
-        if not Config.scim_resource_oxid:
-            Config.scim_resource_oxid = '1203.' + str(uuid.uuid4())
 
 
         if not Config.admin_inum:
