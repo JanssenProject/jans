@@ -20,5 +20,5 @@ public interface CIBAAuthorizeParamsValidatorInterceptionInterface {
     DefaultErrorResponse validateParams(
             List<String> scopeList, String clientNotificationToken, BackchannelTokenDeliveryMode tokenDeliveryMode,
             String loginHintToken, String idTokenHint, String loginHint, String bindingMessage,
-            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode);
+            Boolean backchannelUserCodeParameter, String userCodeParam, String userCode, Integer requestedExpirity);
 }
