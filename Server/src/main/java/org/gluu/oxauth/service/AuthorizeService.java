@@ -103,6 +103,9 @@ public class AuthorizeService {
     @Inject
     private CIBAPushErrorProxy cibaPushErrorProxy;
 
+    @Inject
+    private CibaRequestService cibaRequestService;
+
     public SessionId getSession() {
         return getSession(null);
     }
@@ -198,26 +201,30 @@ public class AuthorizeService {
         // CIBA
         Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
         if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
-            CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID));
+            String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
+            CibaRequestCacheControl request = cibaRequestService.getCibaRequest(authReqId);
 
-            if (cibaGrant != null  && cibaGrant.getClient() != null) {
-                switch (cibaGrant.getClient().getBackchannelTokenDeliveryMode()) {
+            if (request != null  && request.getClient() != null) {
+                if (request.getStatus() == CibaRequestStatus.PENDING) {
+                    cibaRequestService.removeCibaRequest(authReqId);
+                }
+                switch (request.getClient().getBackchannelTokenDeliveryMode()) {
                     case PING:
-                        cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_DENIED);
-                        cibaGrant.setTokensDelivered(false);
-                        cibaGrant.save();
+                        request.setStatus(CibaRequestStatus.DENIED);
+                        request.setTokensDelivered(false);
+                        cibaRequestService.update(request);
 
                         cibaPingCallbackProxy.pingCallback(
-                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                cibaGrant.getClientNotificationToken()
+                                request.getCibaAuthReqId().getCode(),
+                                request.getClient().getBackchannelClientNotificationEndpoint(),
+                                request.getClientNotificationToken()
                         );
                         break;
                     case PUSH:
                         cibaPushErrorProxy.pushError(
-                                cibaGrant.getCIBAAuthenticationRequestId().getCode(),
-                                cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                                cibaGrant.getClientNotificationToken(),
+                                request.getCibaAuthReqId().getCode(),
+                                request.getClient().getBackchannelClientNotificationEndpoint(),
+                                request.getClientNotificationToken(),
                                 PushErrorResponseType.ACCESS_DENIED,
                                 "The end-user denied the authorization request.");
                         break;
