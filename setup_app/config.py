@@ -241,9 +241,7 @@ class Config:
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
         self.ldif_clients = os.path.join(self.outputFolder, 'clients.ldif')
-        self.ldif_people = os.path.join(self.outputFolder, 'people.ldif')
-        self.ldif_groups = os.path.join(self.outputFolder, 'groups.ldif')
-        
+
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
         self.ldif_scripts = os.path.join(self.outputFolder, 'scripts.ldif')
@@ -296,8 +294,6 @@ class Config:
                            self.ldif_attributes,
                            self.ldif_scopes,
                            self.ldif_clients,
-                           self.ldif_people,
-                           self.ldif_groups,
                            self.ldif_site,
                            self.ldif_metric,
                            self.ldif_scripts,
@@ -322,8 +318,6 @@ class Config:
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.ldif_clients: False,
-                             self.ldif_people: False,
-                             self.ldif_groups: False,
                              self.ldif_scripts: False,
                              self.ldif_scim: False,
                              self.ldif_scim_clients: False,
@@ -367,10 +361,7 @@ class Config:
                                       'document_key_prefix': []
                                     }),
 
-                        ('user',     {   'ldif': [
-                                            self.ldif_people, 
-                                            self.ldif_groups
-                                            ],
+                        ('user',     {   'ldif': [],
                                         'memory_allocation': 300,
                                         'mapping': 'people, groups, authorizations',
                                         'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
