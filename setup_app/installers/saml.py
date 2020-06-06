@@ -94,7 +94,7 @@ class SamlInstaller(JettyInstaller):
         self.renderTemplateInOut(self.idp3_metadata, self.staticIDP3FolderMetadata, self.idp3MetadataFolder)
 
         self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
-        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name,  'webapps')
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'idp.war')
         self.copyFile(src_war, jettyServiceWebapps)
 
@@ -218,8 +218,8 @@ class SamlInstaller(JettyInstaller):
 
     def create_folders(self):
         self.createDirs(os.path.join(Config.gluuBaseFolder, 'conf/shibboleth3'))
-        self.createDirs(os.path.join(Config.jetty_base, 'identity/conf/shibboleth3/idp'))
-        self.createDirs(os.path.join(Config.jetty_base, 'identity/conf/shibboleth3/sp'))
+        self.createDirs(os.path.join(self.jetty_base, 'identity/conf/shibboleth3/idp'))
+        self.createDirs(os.path.join(self.jetty_base, 'identity/conf/shibboleth3/sp'))
         
         for folder in (self.idp3Folder, self.idp3MetadataFolder, self.idp3MetadataCredentialsFolder,
                         self.idp3LogsFolder, self.idp3LibFolder, self.idp3ConfFolder, 

@@ -43,7 +43,7 @@ class FidoInstaller(JettyInstaller):
 
         self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
 
-        jettyServiceWebapps = os.path.join(Config.jetty_base, self.service_name, 'webapps')
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
 
         self.enable()

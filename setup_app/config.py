@@ -4,12 +4,29 @@ import json
 
 from collections import OrderedDict
 
-from setup_app.paths import DATA_DIR, INSTALL_DIR
+from setup_app.paths import INSTALL_DIR
 from setup_app.static import InstallTypes
 from setup_app.utils.printVersion import get_war_info
 from setup_app.utils import base
 
 class Config:
+
+    # we define statics here so that is is acessible without construction
+    gluuOptFolder = '/opt/gluu'
+    distFolder = '/opt/dist'
+    jre_home = '/opt/jre'
+    gluuBaseFolder = '/etc/gluu'
+    certFolder = '/etc/certs'
+    oxBaseDataFolder = '/var/gluu'
+    etc_hosts = '/etc/hosts'
+    etc_hostname = '/etc/hostname'
+    osDefault = '/etc/default'
+    sysemProfile = '/etc/profile'
+    node_home = '/opt/node'
+    jython_home = '/opt/jython'
+    ldapBaseFolder = '/opt/opendj'
+    network = '/etc/sysconfig/network'
+
 
     @classmethod
     def get(self, attr, default=None):
@@ -30,8 +47,9 @@ class Config:
 
         self.install_dir = install_dir
         self.thread_queue = None
-
-        #create dummy progress bar in case not defined
+        
+        #create dummy progress bar that logs to file in case not defined
+        progress_log_file = os.path.join(self.install_dir, 'logs', 'progress-bar.log')
         class DummyProgressBar:
             def __init__(self, *args):
                  pass
@@ -40,14 +58,14 @@ class Config:
                 pass
 
             def progress(self, *args):
-                pass
+                with open(progress_log_file, 'a') as w:
+                    w.write(time.ctime() + ' ' + str(args) + '\n')
 
         self.pbar = DummyProgressBar()
 
         self.properties_password = None
         self.noPrompt = False
 
-        self.distFolder = '/opt/dist'
         self.distAppFolder = os.path.join(self.distFolder, 'app')
         self.distGluuFolder = os.path.join(self.distFolder, 'gluu')
         self.distTmpFolder = os.path.join(self.distFolder, 'tmp')
@@ -62,7 +80,6 @@ class Config:
                                      }
 
         # java commands
-        self.jre_home = '/opt/jre'
         self.cmd_java = os.path.join(self.jre_home, 'bin/java')
         self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
@@ -111,63 +128,19 @@ class Config:
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
 
-        self.gluuOptFolder = '/opt/gluu'
+        
         self.gluuOptBinFolder = os.path.join(self.gluuOptFolder, 'bin')
         self.gluuOptSystemFolder = os.path.join(self.gluuOptFolder, 'system')
         self.gluuOptPythonFolder = os.path.join(self.gluuOptFolder, 'python')
-        self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = os.path.join(self.gluuBaseFolder, 'conf') 
-        self.certFolder = '/etc/certs'
+        
         
         self.gluu_properties_fn = os.path.join(self.configFolder,'gluu.properties')
         self.gluu_hybrid_roperties = os.path.join(self.configFolder, 'gluu-hybrid.properties')
 
-        self.oxBaseDataFolder = '/var/gluu'
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
-        self.etc_hosts = '/etc/hosts'
-        self.etc_hostname = '/etc/hostname'
-        # OS /etc/default folder
-        self.osDefault = '/etc/default'
-        self.sysemProfile = '/etc/profile'
-        self.node_home = '/opt/node'
-        self.jython_home = '/opt/jython'
-
         self.java_type = 'jre'
-
-        self.jetty_home = '/opt/jetty'
-        self.jetty_base = os.path.join(self.gluuOptFolder, 'jetty')
-        self.jetty_user_home = '/home/jetty'
-        self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
-
-        with open(os.path.join(DATA_DIR, 'jetty_app_configuration.json')) as f:
-            self.jetty_app_configuration = json.load(f, object_pairs_hook=OrderedDict)
-
-        self.app_custom_changes = {
-            'jetty' : {
-                'name' : 'jetty',
-                'files' : [
-                    {
-                        'path' : os.path.join(self.jetty_home, 'etc/webdefault.xml'),
-                        'replace' : [
-                            {
-                                'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
-                                'update' : r'\1\2\3false\4'
-                            }
-                        ]
-                    },
-                    {
-                        'path' : os.path.join(self.jetty_home, 'etc/jetty.xml'),
-                        'replace' : [
-                            {
-                                'pattern' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
-                                'update' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>'
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
 
         self.hostname = None
         self.ip = None
@@ -214,7 +187,7 @@ class Config:
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
-        self.ldapBaseFolder = '/opt/opendj'
+        
 
         self.ldapSetupCommand = os.path.join(self.ldapBaseFolder, 'setup')
         self.ldapDsconfigCommand = os.path.join(self.ldapBaseFolder, 'bin/dsconfig')
@@ -280,7 +253,6 @@ class Config:
 
 
         self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
-        self.network = '/etc/sysconfig/network'
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
         self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
 
