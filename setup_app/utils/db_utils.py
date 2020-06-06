@@ -80,7 +80,7 @@ class DBUtils:
             result = self.cbm.exec_query(n1ql)
             js = result.json()
             dn = js['results'][0][self.default_bucket]['dn']
-            oxAuthConfDynamic = js['results'][0][self.default_bucket]['oxTrustConfApplication']
+            oxTrustConfApplication = json.loads(js['results'][0][self.default_bucket]['oxTrustConfApplication'])
 
         return dn, oxTrustConfApplication
 
@@ -103,16 +103,16 @@ class DBUtils:
     def set_oxTrustConfApplication(self, entries):
         dn, oxTrustConfApplication = self.get_oxTrustConfApplication()
         oxTrustConfApplication.update(entries)
+        oxTrustConfApplication_js = json.dumps(oxTrustConfApplication, indent=2)
 
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.modify(
                     dn,
-                    {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, json.dumps(oxTrustConfApplication, indent=2)]}
+                    {"oxTrustConfApplication": [ldap3.MODIFY_REPLACE, oxTrustConfApplication_js]}
                     )
         elif self.moddb == BackendTypes.COUCHBASE:
-            for k in entries:
-                n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET {}={}'.format(self.default_bucket, k, entries[k])
-                self.cbm.exec_query(n1ql)
+            n1ql = 'UPDATE `{}` USE KEYS "configuration_oxtrust" SET `oxTrustConfApplication`={}'.format(self.default_bucket, json.dumps(oxTrustConfApplication_js))
+            self.cbm.exec_query(n1ql)
 
     def enable_script(self, inum):
         if self.moddb == BackendTypes.LDAP:
@@ -221,12 +221,17 @@ class DBUtils:
             js = result.json()
 
             oxConfigurationProperties = js['results'][0]['oxConfigurationProperty']
-            for oxconfigprop in oxConfigurationProperties:
+            for i, oxconfigprop_str in enumerate(oxConfigurationProperties):
+                oxconfigprop = json.loads(oxconfigprop_str)
                 if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                     oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                    n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxConfigurationProperty={}'.format(bucket, script_inum, oxConfigurationProperties)
-                    self.cbm.exec_query(n1ql)
+                    oxConfigurationProperties[i] = json.dumps(oxconfigprop)
                     break
+            else:
+                return
+
+            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `oxConfigurationProperty`={}'.format(bucket, script_inum, oxConfigurationProperties)
+            self.cbm.exec_query(n1ql)            
 
     def get_key_prefix(self, key):
         n = key.find('_')
