@@ -20,6 +20,9 @@ public class ScopeAttributes implements Serializable {
     @JsonProperty("spontaneousClientScopes")
     private List<String> spontaneousClientScopes;
 
+    @JsonProperty("notShowInDiscovery")
+    private boolean notShowInDiscovery;
+
     public String getSpontaneousClientId() {
         return spontaneousClientId;
     }
@@ -36,11 +39,20 @@ public class ScopeAttributes implements Serializable {
         this.spontaneousClientScopes = spontaneousClientScopes;
     }
 
+    public boolean isNotShowInDiscovery() {
+        return notShowInDiscovery;
+    }
+
+    public void setNotShowInDiscovery(boolean notShowInDiscovery) {
+        this.notShowInDiscovery = notShowInDiscovery;
+    }
+
     @Override
     public String toString() {
         return "ScopeAttributes{" +
                 "spontaneousClientId='" + spontaneousClientId + '\'' +
                 "spontaneousClientScopes='" + spontaneousClientScopes + '\'' +
+                "notShowInDiscovery='" + notShowInDiscovery + '\'' +
                 '}';
     }
 }
