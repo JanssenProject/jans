@@ -116,7 +116,7 @@ description: Sample UMA RPT Policy
 displayName: uma_rpt_policy
 oxEnabled: false
 inum: 2DAF-F995
-oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s","description":""}
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"","description":""}
 oxLevel: 100
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -131,7 +131,7 @@ description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
 oxEnabled: false
 inum: 2DAF-F9A5
-oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s","description":""}
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"","description":""}
 oxLevel: 100
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
