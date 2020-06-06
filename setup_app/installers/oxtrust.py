@@ -27,6 +27,7 @@ class OxtrustInstaller(JettyInstaller):
         self.lidf_oxtrust_api = os.path.join(self.output_folder, 'oxtrust_api.ldif')
         self.ldif_oxtrust_api_clients = os.path.join(self.output_folder, 'oxtrust_api_clients.ldif')
 
+        self.ldif_scripts = os.path.join(Config.outputFolder, 'scripts.ldif')
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
 
@@ -47,7 +48,7 @@ class OxtrustInstaller(JettyInstaller):
     def install(self):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
-        self.installJettyService(Config.jetty_app_configuration[self.service_name], True)
+        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'identity.war')
@@ -123,9 +124,21 @@ class OxtrustInstaller(JettyInstaller):
         Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
         
         # TODO: Question: Should we do import lidf_oxtrust_api and ldif_oxtrust_api_clients in oxtrust_api installtion?
-        ldif_files = [self.ldif_config, self.lidf_oxtrust_api, self.ldif_oxtrust_api_clients, self.ldif_people, self.ldif_groups]
+        ldif_files = [
+                self.ldif_config,
+                self.lidf_oxtrust_api,
+                self.ldif_oxtrust_api_clients,
+                self.ldif_people,
+                self.ldif_groups
+                ]
+
         for tmp in ldif_files:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
+        
+        # TODO: Question: Should we leave general scripts to oxtrustinstaller and move others to their own installers?
+        self.prepare_base64_extension_scripts()
+        self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.outputFolder)
+        ldif_files.append(self.ldif_scripts)
 
         self.dbUtils.import_ldif(ldif_files)
 
