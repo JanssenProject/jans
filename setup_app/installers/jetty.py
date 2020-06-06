@@ -2,17 +2,55 @@ import os
 import glob
 import re
 
+
 from setup_app import paths
 from setup_app.config import Config
+from setup_app.utils import base
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
 class JettyInstaller(BaseInstaller, SetupUtils):
 
+    jetty_home = '/opt/jetty'
+    jetty_base = os.path.join(Config.gluuOptFolder, 'jetty')
+
     def __init__(self):
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"
         self.needdb = False # we don't need backend connection in this class
+
+        self.jetty_user_home = '/home/jetty'
+        self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
+
+        data_file = os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json')
+        self.jetty_app_configuration = base.readJsonFile(data_file, ordered=True)
+
+        self.app_custom_changes = {
+            'jetty' : {
+                'name' : 'jetty',
+                'files' : [
+                    {
+                        'path' : os.path.join(self.jetty_home, 'etc/webdefault.xml'),
+                        'replace' : [
+                            {
+                                'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
+                                'update' : r'\1\2\3false\4'
+                            }
+                        ]
+                    },
+                    {
+                        'path' : os.path.join(self.jetty_home, 'etc/jetty.xml'),
+                        'replace' : [
+                            {
+                                'pattern' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
+                                'update' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>'
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+
 
     def install(self):
 
@@ -30,16 +68,16 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         jettyDestinationPath = max(glob.glob(os.path.join(jetty_dist, 'jetty-distribution-*')))
 
-        self.run([paths.cmd_ln, '-sf', jettyDestinationPath, Config.jetty_home])
+        self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
 
-        self.applyChangesInFiles(Config.app_custom_changes['jetty'])
+        self.applyChangesInFiles(self.app_custom_changes['jetty'])
 
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyDestinationPath])
-        self.run([paths.cmd_chown, '-h', 'jetty:jetty', Config.jetty_home])
+        self.run([paths.cmd_chown, '-h', 'jetty:jetty', self.jetty_home])
 
-        self.run([paths.cmd_mkdir, '-p', Config.jetty_base])
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', Config.jetty_base])
+        self.run([paths.cmd_mkdir, '-p', self.jetty_base])
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
         jettyRunFolder = '/var/run/jetty'
         self.run([paths.cmd_mkdir, '-p', jettyRunFolder])
@@ -47,9 +85,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chgrp, '-R', 'jetty', jettyRunFolder])
 
         self.run(['rm', '-rf', '/opt/jetty/bin/jetty.sh'])
-        self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, "%s/bin/jetty.sh" % Config.jetty_home)
-        self.run([paths.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % Config.jetty_home])
-        self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % Config.jetty_home])
+        self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, "%s/bin/jetty.sh" % self.jetty_home)
+        self.run([paths.cmd_chown, '-R', 'jetty:jetty', "%s/bin/jetty.sh" % self.jetty_home])
+        self.run([paths.cmd_chmod, '-R', '755', "%s/bin/jetty.sh" % self.jetty_home])
 
     def get_jetty_info(self):
         jetty_archive_list = glob.glob(os.path.join(Config.distAppFolder, 'jetty-distribution-*.tar.gz'))
@@ -71,16 +109,16 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         return jettyArchive, jetty_dist
 
     def create_user(self):
-        self.createUser('jetty', Config.jetty_user_home)
+        self.createUser('jetty', self.jetty_user_home)
         self.addUserToGroup('gluu', 'jetty')
 
     def create_folders(self):
-        self.run([paths.cmd_mkdir, '-p', Config.jetty_user_home_lib])
+        self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
-        jettyServiceBase = '%s/%s' % (Config.jetty_base, serviceName)
+        jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
 
@@ -109,8 +147,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % Config.jre_home + jettyEnv['PATH']
 
-        self.run([Config.cmd_java, '-jar', '%s/start.jar' % Config.jetty_home, 'jetty.home=%s' % Config.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
+        self.run([Config.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
+
+        # make variables of this class accesible from Config
+        Config.templateRenderingDict.update(self.__dict__)
 
         try:
             self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
@@ -126,7 +167,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             web_resources = '%s_web_resources.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_resources)):
                 self.renderTemplateInOut(web_resources, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
-                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_resources), "%s/%s/webapps" % (Config.jetty_base, serviceName))
+                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_resources), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
 
@@ -135,11 +176,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             web_context = '%s.xml' % serviceName
             if os.path.exists('%s/jetty/%s' % (Config.templateFolder, web_context)):
                 self.renderTemplateInOut(web_context, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)
-                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_context), "%s/%s/webapps" % (Config.jetty_base, serviceName))
+                self.copyFile('%s/jetty/%s' % (Config.outputFolder, web_context), "%s/%s/webapps" % (self.jetty_base, serviceName))
         except:
             self.logIt("Error rendering service '%s' context xml" % serviceName, True)
 
-        initscript_fn = os.path.join(Config.jetty_home, 'bin/jetty.sh')
+        initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
         self.fix_init_scripts(serviceName, initscript_fn)
 
         tmpfiles_base = '/usr/lib/tmpfiles.d'
@@ -160,7 +201,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         self.logIt("Seeting jetty parameter {0}={1} for service {2}".format(jetty_param, jetty_val, jettyServiceName))
 
-        service_fn = os.path.join(Config.jetty_base, jettyServiceName, 'start.ini')
+        service_fn = os.path.join(self.jetty_base, jettyServiceName, 'start.ini')
         start_ini = self.readFile(service_fn)
         start_ini_list = start_ini.splitlines()
         param_ln = jetty_param + '=' + jetty_val
@@ -176,3 +217,61 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             start_ini_list.append(param_ln)
 
         self.writeFile(service_fn, '\n'.join(start_ini_list))
+
+    def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
+        self.logIt("Calculating memory setting for applications")
+
+        allowedApplicationsMemory = {}
+
+        usedRatio = 0.001
+        for installedComponent in installedComponents:
+            usedRatio += installedComponent['memory']['ratio']
+
+        ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
+
+        for installedComponent in installedComponents:
+            allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
+            allowedMemory = int(round(allowedRatio * int(application_max_ram)))
+
+            if allowedMemory > installedComponent['memory']['max_allowed_mb']:
+                allowedMemory = installedComponent['memory']['max_allowed_mb']
+
+            allowedApplicationsMemory[installedComponent['name']] = allowedMemory
+
+        # Iterate through all components into order to prepare all keys
+        for applicationName, applicationConfiguration in jetty_app_configuration.items():
+            if applicationName in allowedApplicationsMemory:
+                applicationMemory = allowedApplicationsMemory.get(applicationName)
+            else:
+                # We uses this dummy value to render template properly of not installed application
+                applicationMemory = 256
+
+            Config.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+
+            if 'jvm_heap_ration' in applicationConfiguration['memory']:
+                jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
+
+                minHeapMem = 256
+                maxHeapMem = int(applicationMemory * jvmHeapRation)
+                if maxHeapMem < minHeapMem:
+                    minHeapMem = maxHeapMem
+
+                Config.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                Config.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+
+                Config.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - Config.templateRenderingDict["%s_max_heap_mem" % applicationName]
+
+    def calculate_selected_aplications_memory(self):
+        Config.pbar.progress("gluu", "Calculating application memory")
+
+        installedComponents = []
+
+        # Jetty apps
+        for config_var, service in (
+                    ('installOxAuth', 'oxauth'), ('installOxTrust', 'identity'),
+                    ('installSaml', 'idp'), ('installOxAuthRP', 'oxauth-rp'),
+                    ('installCasa', 'casa'), ('installPassport', 'passport')):
+            if Config.get(config_var):
+                installedComponents.append(self.jetty_app_configuration[service])
+
+        self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
