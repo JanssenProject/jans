@@ -27,6 +27,9 @@ class OxtrustInstaller(JettyInstaller):
         self.lidf_oxtrust_api = os.path.join(self.output_folder, 'oxtrust_api.ldif')
         self.ldif_oxtrust_api_clients = os.path.join(self.output_folder, 'oxtrust_api_clients.ldif')
 
+        self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
+        self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
+
         # oxAuth/oxTrust Base64 configuration files
         self.pairwiseCalculationKey = None
         self.pairwiseCalculationSalt = None
@@ -120,7 +123,7 @@ class OxtrustInstaller(JettyInstaller):
         Config.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
         
         # TODO: Question: Should we do import lidf_oxtrust_api and ldif_oxtrust_api_clients in oxtrust_api installtion?
-        ldif_files = [self.ldif_config, self.lidf_oxtrust_api, self.ldif_oxtrust_api_clients]
+        ldif_files = [self.ldif_config, self.lidf_oxtrust_api, self.ldif_oxtrust_api_clients, self.ldif_people, self.ldif_groups]
         for tmp in ldif_files:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
 
