@@ -154,8 +154,7 @@ if not Config.noPrompt:
 if proceed:
 
     gluuInstaller.configureSystem()
-    gluuInstaller.calculate_selected_aplications_memory()
-
+    jettyInstaller.calculate_selected_aplications_memory()
     jreInstaller.start_installation()
     jettyInstaller.start_installation()
     jythonInstaller.start_installation()
@@ -164,6 +163,7 @@ if proceed:
     oxauthInstaller.make_oxauth_salt()
     gluuInstaller.copy_scripts()
     gluuInstaller.encode_passwords()
+
     if Config.loadTestData:
         gluuInstaller.encode_test_passwords()
 
