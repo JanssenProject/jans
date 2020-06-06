@@ -799,7 +799,7 @@
 									<h:outputLabel id="cibaPingStatusComponent" value="#{backchannelAuthenticationAction.requestStatus}"/>
 									<h:inputTextarea styleClass="width100" readonly="true"
 													 rendered="#{backchannelAuthenticationAction.responsePingFlow != null and backchannelAuthenticationAction.responsePingFlow.length() > 0}"
-													 value="#{backchannelAuthenticationAction.responsePingFlow}" rows="12"/>
+													 value="#{backchannelAuthenticationAction.responsePingFlow}" rows="3"/>
 									<h:commandButton id="cibaPingStatusButton" action="#{backchannelAuthenticationAction.getRequestStatus()}" value="Update" style="visibility: hidden" >
 										<f:ajax execute="@form" render="cibaPingDeliveryPanelGroup" onevent="updatePingStatusProcessor" />
 									</h:commandButton>

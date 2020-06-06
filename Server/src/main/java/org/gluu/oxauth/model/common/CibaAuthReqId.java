@@ -17,9 +17,9 @@ import java.util.UUID;
  * @author Javier Rojas Blum
  * @version August 20, 2019
  */
-public class CIBAAuthenticationRequestId extends AbstractToken {
+public class CibaAuthReqId extends AbstractToken {
 
-    public CIBAAuthenticationRequestId(int lifeTime) {
+    public CibaAuthReqId(int lifeTime) {
         super(lifeTime);
 
         // Generate SHA-1 (160 bits)

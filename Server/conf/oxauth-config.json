@@ -314,6 +314,9 @@
     "backchannelBindingMessagePattern": "^[a-zA-Z0-9]{4,8}$",
     "backchannelAuthenticationResponseExpiresIn": 3600,
     "backchannelAuthenticationResponseInterval": 2,
+    "backchannelRequestsProcessorJobIntervalSec": 5,
+    "cibaGrantLifeExtraTimeSec": 180,
+    "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
     "cibaEndUserNotificationConfig": {
         "apiKey": "AIzaSyDwJtxZV-ApPlApt7HdXkleEZhseURgzHI",
