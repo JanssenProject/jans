@@ -224,6 +224,10 @@ public class AppConfiguration implements Configuration {
     private int backchannelAuthenticationResponseInterval;
     private List<String> backchannelLoginHintClaims;
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+    private int backchannelRequestsProcessorJobIntervalSec;
+    private int backchannelRequestsProcessorJobChunkSize;
+    private int cibaGrantLifeExtraTimeSec;
+    private int cibaMaxExpirationTimeAllowedSec;
 
     public Boolean getRejectJwtWithNoneAlg() {
         if (rejectJwtWithNoneAlg == null) rejectJwtWithNoneAlg = true;
@@ -1773,6 +1777,38 @@ public class AppConfiguration implements Configuration {
      */
     public void setDynamicRegistrationPasswordGrantTypeEnabled(Boolean dynamicRegistrationPasswordGrantTypeEnabled) {
         this.dynamicRegistrationPasswordGrantTypeEnabled = dynamicRegistrationPasswordGrantTypeEnabled;
+    }
+
+    public int getBackchannelRequestsProcessorJobIntervalSec() {
+        return backchannelRequestsProcessorJobIntervalSec;
+    }
+
+    public void setBackchannelRequestsProcessorJobIntervalSec(int backchannelRequestsProcessorJobIntervalSec) {
+        this.backchannelRequestsProcessorJobIntervalSec = backchannelRequestsProcessorJobIntervalSec;
+    }
+
+    public int getCibaGrantLifeExtraTimeSec() {
+        return cibaGrantLifeExtraTimeSec;
+    }
+
+    public void setCibaGrantLifeExtraTimeSec(int cibaGrantLifeExtraTimeSec) {
+        this.cibaGrantLifeExtraTimeSec = cibaGrantLifeExtraTimeSec;
+    }
+
+    public int getCibaMaxExpirationTimeAllowedSec() {
+        return cibaMaxExpirationTimeAllowedSec;
+    }
+
+    public void setCibaMaxExpirationTimeAllowedSec(int cibaMaxExpirationTimeAllowedSec) {
+        this.cibaMaxExpirationTimeAllowedSec = cibaMaxExpirationTimeAllowedSec;
+    }
+
+    public int getBackchannelRequestsProcessorJobChunkSize() {
+        return backchannelRequestsProcessorJobChunkSize;
+    }
+
+    public void setBackchannelRequestsProcessorJobChunkSize(int backchannelRequestsProcessorJobChunkSize) {
+        this.backchannelRequestsProcessorJobChunkSize = backchannelRequestsProcessorJobChunkSize;
     }
 
     public Boolean getClientRegDefaultToCodeFlowWithRefresh() {
