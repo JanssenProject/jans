@@ -26,6 +26,9 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         if not node_archieve_list:
             self.logIt("Can't find node archive", True, True)
 
+        self.createUser('node', self.node_user_home)
+        self.addUserToGroup('gluu', 'node')
+
         nodeArchive = max(node_archieve_list)
 
         try:
@@ -73,7 +76,3 @@ class NodeInstaller(BaseInstaller, SetupUtils):
             self.fix_init_scripts(serviceName, initscript_fn)
         else:
             self.run([paths.cmd_ln, '-sf', '%s/node' % Config.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
-
-    def create_user(self):
-        self.createUser('node', self.node_user_home)
-        self.addUserToGroup('gluu', 'node')
