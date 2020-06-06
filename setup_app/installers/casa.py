@@ -31,7 +31,7 @@ class CasaInstaller(JettyInstaller):
 
         self.run([paths.cmd_chmod , 'g+w', self.pylib_folder])
         self.logIt("Copying casa.war into jetty webapps folder...")
-        self.installJettyService(Config.jetty_app_configuration['casa'])
+        self.installJettyService(self.jetty_app_configuration['casa'])
 
         jettyServiceWebapps = os.path.join(self.casa_jetty_dir, 'webapps')
 

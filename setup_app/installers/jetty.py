@@ -11,9 +11,11 @@ from setup_app.installers.base import BaseInstaller
 
 class JettyInstaller(BaseInstaller, SetupUtils):
 
-    jetty_home = '/opt/jetty'
-    jetty_base = os.path.join(Config.gluuOptFolder, 'jetty')
-
+    # let's borrow these variables from Config
+    jetty_home = Config.jetty_home
+    jetty_base = Config.jetty_base
+    jetty_app_configuration = base.readJsonFile(os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json'), ordered=True)
+    
     def __init__(self):
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"
@@ -21,9 +23,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
-
-        data_file = os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json')
-        self.jetty_app_configuration = base.readJsonFile(data_file, ordered=True)
 
         self.app_custom_changes = {
             'jetty' : {
@@ -53,6 +52,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
 
     def install(self):
+
+        self.createUser('jetty', self.jetty_user_home)
+        self.addUserToGroup('gluu', 'jetty')
+        self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
         jettyArchive, jetty_dist = self.get_jetty_info()
 
@@ -108,12 +111,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         return jettyArchive, jetty_dist
 
-    def create_user(self):
-        self.createUser('jetty', self.jetty_user_home)
-        self.addUserToGroup('gluu', 'jetty')
-
-    def create_folders(self):
-        self.run([paths.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
