@@ -87,13 +87,6 @@
 
     "umaIssuer":"https://%(hostname)s",
 
-    "scimUmaClientId":"%(scim_rs_client_id)s",
-    "scimUmaClientKeyId":"",
-    "scimUmaResourceId":"%(scim_resource_oxid)s",
-    "scimUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/scim_access",
-    "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
-    "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
-
     "apiUmaClientId":"%(oxtrust_resource_server_client_id)s",
     "apiUmaClientKeyId":"",
     "apiUmaResourceId":"%(oxtrust_resource_id)s",
@@ -116,7 +109,6 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
 
-    "scimTestMode": %(scimTestMode)s,
     "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200

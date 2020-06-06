@@ -113,10 +113,6 @@ class Config:
         self.installScimServer = False
         self.installFido2 = False
 
-        self.scimTestMode = 'false'
-
-        self.enable_scim_access_policy = 'false'
-        
         self.allowPreReleasedFeatures = False
 
         # backward compatibility
@@ -246,9 +242,6 @@ class Config:
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
         self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
-        self.ldif_scim = os.path.join(self.outputFolder, 'scim.ldif')
-        self.ldif_scim_clients = os.path.join(self.outputFolder, 'scim_clients.ldif')
-
 
         self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
@@ -263,20 +256,6 @@ class Config:
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
         self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         self.default_key_expiration = 365
-
-        # oxTrust SCIM configuration
-        self.scim_rs_client_id = None
-        self.scim_rs_client_jwks = None
-        self.scim_rs_client_jks_fn = os.path.join(self.certFolder, 'scim-rs.jks')
-        self.scim_rs_client_jks_pass = None
-        self.scim_rs_client_jks_pass_encoded = None
-
-        self.scim_rp_client_id = None
-        self.scim_rp_client_jwks = None
-        self.scim_rp_client_jks_fn = os.path.join(self.outputFolder, 'scim-rp.jks')
-        self.scim_rp_client_jks_pass = 'secret'
-        self.scim_resource_oxid = None
-
 
         self.post_messages = []
 
@@ -297,8 +276,6 @@ class Config:
                            self.ldif_site,
                            self.ldif_metric,
                            self.ldif_configuration,
-                           self.ldif_scim,
-                           self.ldif_scim_clients,
                            self.ldif_idp,
                            ]
 
@@ -317,8 +294,6 @@ class Config:
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.ldif_clients: False,
-                             self.ldif_scim: False,
-                             self.ldif_scim_clients: False,
                              self.ldif_idp: False,
                              self.network: False,
                              self.gluu_properties_fn: True,
@@ -347,10 +322,8 @@ class Config:
                                             self.ldif_attributes,
                                             self.ldif_scopes,
                                             self.ldif_configuration,
-                                            self.ldif_scim,
                                             self.ldif_idp,
                                             self.ldif_clients,
-                                            self.ldif_scim_clients,
                                             self.ldif_metric,
                                             ],
                                       'memory_allocation': 100,
