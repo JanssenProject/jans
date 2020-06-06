@@ -53,6 +53,8 @@ public class BaseDnConfiguration {
     private String metric;
     @XmlElement(name = "sectorIdentifiers")
     private String sectorIdentifiers;
+    @XmlElement(name = "ciba")
+    private String ciba;
 
     public String getAuthorizations() {
         return authorizations;
@@ -172,5 +174,13 @@ public class BaseDnConfiguration {
 
     public void setSectorIdentifiers(String sectorIdentifiers) {
         this.sectorIdentifiers = sectorIdentifiers;
+    }
+
+    public String getCiba() {
+        return ciba;
+    }
+
+    public void setCiba(String ciba) {
+        this.ciba = ciba;
     }
 }
