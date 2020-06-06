@@ -15,6 +15,8 @@ import re
 import shutil
 import multiprocessing
 
+from collections import OrderedDict
+
 from setup_app import paths
 from setup_app import static
 from setup_app.config import Config
@@ -227,10 +229,12 @@ def determine_package(glob_pattern):
         return max(package_list)
 
 
-def readJsonFile(jsonFile):
+def readJsonFile(jsonFile, ordered=False):
+    object_pairs_hook = OrderedDict if ordered else None
     if os.path.exists(jsonFile):
         with open(jsonFile) as f:
-            return json.load(f)
+            return json.load(f, object_pairs_hook=object_pairs_hook)
+
 
 def find_script_names(ldif_file):
     name_list = []

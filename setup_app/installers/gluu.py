@@ -255,63 +255,6 @@ class GluuInstaller(SetupUtils):
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
 
-    def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
-        self.logIt("Calculating memory setting for applications")
-
-        allowedApplicationsMemory = {}
-
-        usedRatio = 0.001
-        for installedComponent in installedComponents:
-            usedRatio += installedComponent['memory']['ratio']
-
-        ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
-
-        for installedComponent in installedComponents:
-            allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            allowedMemory = int(round(allowedRatio * int(application_max_ram)))
-
-            if allowedMemory > installedComponent['memory']['max_allowed_mb']:
-                allowedMemory = installedComponent['memory']['max_allowed_mb']
-
-            allowedApplicationsMemory[installedComponent['name']] = allowedMemory
-
-        # Iterate through all components into order to prepare all keys
-        for applicationName, applicationConfiguration in jetty_app_configuration.items():
-            if applicationName in allowedApplicationsMemory:
-                applicationMemory = allowedApplicationsMemory.get(applicationName)
-            else:
-                # We uses this dummy value to render template properly of not installed application
-                applicationMemory = 256
-
-            Config.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
-
-            if 'jvm_heap_ration' in applicationConfiguration['memory']:
-                jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
-
-                minHeapMem = 256
-                maxHeapMem = int(applicationMemory * jvmHeapRation)
-                if maxHeapMem < minHeapMem:
-                    minHeapMem = maxHeapMem
-
-                Config.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
-                Config.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
-
-                Config.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - Config.templateRenderingDict["%s_max_heap_mem" % applicationName]
-
-    def calculate_selected_aplications_memory(self):
-        Config.pbar.progress("gluu", "Calculating application memory")
-
-        installedComponents = []
-
-        # Jetty apps
-        for config_var, service in (
-                    ('installOxAuth', 'oxauth'), ('installOxTrust', 'identity'),
-                    ('installSaml', 'idp'), ('installOxAuthRP', 'oxauth-rp'),
-                    ('installCasa', 'casa'), ('installPassport', 'passport')):
-            if Config.get(config_var):
-                installedComponents.append(Config.jetty_app_configuration[service])
-
-        self.calculate_aplications_memory(Config.application_max_ram, Config.jetty_app_configuration, installedComponents)
 
     def copy_scripts(self):
         self.logIt("Copying script files", pbar='gluu')

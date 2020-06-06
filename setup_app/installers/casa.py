@@ -23,7 +23,7 @@ class CasaInstaller(JettyInstaller):
         self.ldif = os.path.join(Config.outputFolder, 'casa/casa.ldif')
         self.ldif_scripts = os.path.join(Config.outputFolder, 'casa/scripts.ldif')
         self.pylib_folder = os.path.join(Config.gluuOptPythonFolder, 'libs')
-        self.casa_jetty_dir = os.path.join(Config.jetty_base, 'casa')
+        self.casa_jetty_dir = os.path.join(self.jetty_base, 'casa')
 
     def install(self):
 
@@ -40,7 +40,7 @@ class CasaInstaller(JettyInstaller):
                     jettyServiceWebapps
                     )
 
-        jettyServiceOxAuthCustomLibsPath = os.path.join(Config.jetty_base,
+        jettyServiceOxAuthCustomLibsPath = os.path.join(self.jetty_base,
                                                         "oxauth", 
                                                         "custom/libs"
                                                         )
@@ -54,7 +54,7 @@ class CasaInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceOxAuthCustomLibsPath])
 
         #Adding twilio jar path to oxauth.xml
-        oxauth_xml_fn = os.path.join(Config.jetty_base,  'oxauth/webapps/oxauth.xml')
+        oxauth_xml_fn = os.path.join(self.jetty_base,  'oxauth/webapps/oxauth.xml')
         if os.path.exists(oxauth_xml_fn):
             
             class CommentedTreeBuilder(ElementTree.TreeBuilder):
