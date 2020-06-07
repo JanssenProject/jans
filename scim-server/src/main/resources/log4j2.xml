@@ -47,7 +47,7 @@
 
     <Loggers>
         <Logger name="org.gluu.oxtrust" level="${log4j.default.log.level}">
-            <AppenderRef ref="LOG_FILE" />
+            <AppenderRef ref="FILE" />
         </Logger>
 
 		<logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
