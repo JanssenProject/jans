@@ -73,9 +73,7 @@ public class AppInitializer {
         }
 
         try {
-            StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-
-            return stringEncrypter;
+            return StringEncrypter.instance(encodeSalt);
         } catch (StringEncrypter.EncryptionException ex) {
             throw new ConfigurationException("Failed to create StringEncrypter instance");
         }
