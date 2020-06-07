@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2017, Gluu
- */
 package org.gluu.oxtrust.service.antlr.scimFilter.util;
 
 import java.util.Map;
@@ -106,11 +101,6 @@ public class FilterUtil {
         return String.format("Attribute %s is of type '%s' but compare value supplied is of type '%s'", attrname, type1, type2);
     }
 
-    /**
-     *
-     * @param filther Non-empty string
-     * @return
-     */
     public static String preprocess(String filther, Class<? extends BaseScimResource> clazz) throws Exception{
 
         filther = filther.replaceAll(ScimResourceUtil.getDefaultSchemaUrn(clazz) + ":", "");

@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2014, Gluu
- */
 package org.gluu.oxtrust.service.scim2;
 
 import java.io.Serializable;
@@ -458,7 +453,8 @@ public class Scim2UserService implements Serializable {
 	 * 
 	 * @param user
 	 *            A UserResource object with all info as received by the web service
-	 * @throws Exception
+	 * @param url Base URL associated to user resources in SCIM (eg. .../scim/v2/Users)
+	 * @throws Exception In case of unexpected error
 	 */
 	public void createUser(UserResource user, String url) throws Exception {
 

@@ -103,9 +103,9 @@ public class UserPersistenceHelper {
      * One-way sync from "oxTrustEmail" to "mail". Ultimately this is persisted so
      * "mail" will be updated by values from "oxTrustEmail".
      *
-     * @param customPerson
-     * @return
-     * @throws Exception
+     * @param customPerson Represents the user object to be modified 
+     * @return Modified user object
+     * @throws Exception If (json) values in oxTrustEmail cannot be parsed 
      */
     public ScimCustomPerson syncEmailForward(ScimCustomPerson customPerson) throws Exception {
 

@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2017, Gluu
- */
 package org.gluu.oxtrust.service.scim2;
 
 import static org.gluu.oxtrust.model.scim2.Constants.USER_EXT_SCHEMA_DESCRIPTION;
@@ -134,7 +129,7 @@ public class ExtensionService {
      * asociated to the field: for STRING the value is left as is; for DATE the
      * value is converted to a String following the ISO date format; for NUMERIC an
      * Integer/Double is created from the value supplied.
-     *
+     * @param ldapBackend Whether the underlying database is an ldap directory
      * @param field
      *            An ExtensionField
      * @param strValues
