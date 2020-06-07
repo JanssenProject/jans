@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2014, Gluu
- */
 package org.gluu.oxtrust.service.scim2;
 
 import java.io.Serializable;
@@ -175,7 +170,9 @@ public class Scim2GroupService implements Serializable {
 	 * @param group
 	 *            A GroupResource object with all info as received by the web
 	 *            service
-	 * @throws Exception
+	 * @param groupsUrl Base URL associated to group resources in SCIM (eg. .../scim/v2/Groups)
+	 * @param usersUrl Base URL associated to user resources in SCIM (eg. .../scim/v2/Users)
+	 * @throws Exception In case of unexpected error
 	 */
 	public void createGroup(GroupResource group, String groupsUrl, String usersUrl) throws Exception {
 
