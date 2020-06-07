@@ -4,20 +4,93 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
-        <RollingFile name="LOG_FILE" fileName="${sys:log.base}/logs/scim.log" filePattern="${sys:log.base}/logs/scim-%d{yyyy-MM-dd}-%i.log">
+        
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/scim.log" filePattern="${sys:log.base}/logs/scim-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
             <Policies>
-                <SizeBasedTriggeringPolicy size="2 MB" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
             </Policies>
-            <DefaultRolloverStrategy max="10" />
+            <DefaultRolloverStrategy max="30" />
         </RollingFile>
+
+		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/scim_persistence.log" filePattern="${sys:log.base}/logs/scim_persistence-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<RollingFile name="OX_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/scim_persistence_duration.log" filePattern="${sys:log.base}/logs/scim_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<RollingFile name="OX_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/scim_script.log" filePattern="${sys:log.base}/logs/scim_script-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="5 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
     </Appenders>
 
     <Loggers>
-        <Logger name="org.gluu.oxtrust" level="INFO">
+        <Logger name="org.gluu.oxtrust" level="${log4j.default.log.level}">
             <AppenderRef ref="LOG_FILE" />
         </Logger>
+
+		<logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		</logger>
+
+		<Logger name="org.gluu.persist" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		</Logger>
+
+		<Logger name="org.gluu.persist.ldap.operation.watch" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+		</Logger>
+
+		<Logger name="org.gluu.persist.couchbase.operation.watch" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+		</Logger>
+
+		<Logger name="org.gluu.persist.watch" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_DURATION_FILE" />
+		</Logger>
+
+		<logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		</logger>
+		<logger name="com.couchbase.client" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_PERSISTENCE_FILE" />
+		</logger>
+
+		<logger name="org.gluu.service.PythonService" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+		</logger>
+
+		<logger name="org.gluu.service.custom.script" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+		</logger>
+
+		<logger name="org.gluu.oxtrust.service.custom" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
+		</logger>
+
         <Root level="ERROR">
+			<AppenderRef ref="FILE" />
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>
