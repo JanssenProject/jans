@@ -174,19 +174,33 @@ public class CoseService {
         return publicKey;
     }
     
-   	public JsonNode convertECKeyToUncompressedPoint(byte[] encodedPublicKey) {
-           X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
-           org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
+	public JsonNode convertECKeyToUncompressedPoint(byte[] encodedPublicKey) {
+		X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
+		org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
+		int keySizeBytes = (curve.getN().bitLength() + Byte.SIZE - 1) / Byte.SIZE;
 
-           ObjectNode uncompressedECPointNode = dataMapperService.createObjectNode();
-           uncompressedECPointNode.put("1", 2);
-           uncompressedECPointNode.put("3", -7);
-           uncompressedECPointNode.put("-1", 1);
-           uncompressedECPointNode.put("-2", point.getAffineXCoord().toBigInteger().toByteArray());
-           uncompressedECPointNode.put("-3", point.getAffineYCoord().toBigInteger().toByteArray());
+		ObjectNode uncompressedECPointNode = dataMapperService.createObjectNode();
+		uncompressedECPointNode.put("1", 2);
+		uncompressedECPointNode.put("3", -7);
+		uncompressedECPointNode.put("-1", 1);
+		uncompressedECPointNode.put("-2", toUncompressedCoord(point.getAffineXCoord().toBigInteger().toByteArray(), keySizeBytes));
+		uncompressedECPointNode.put("-3", toUncompressedCoord(point.getAffineYCoord().toBigInteger().toByteArray(), keySizeBytes));
 
-           return uncompressedECPointNode;
-   }
+		return uncompressedECPointNode;
+	}
+
+	public static byte[] toUncompressedCoord(final byte[] coord, int keySizeBytes) {
+		final byte[] uncompressedPoint = new byte[keySizeBytes];
+
+		if (coord.length <= keySizeBytes) {
+			return coord;
+		} else if ((coord.length == keySizeBytes + 1) && (coord[0] == 0)) {
+			System.arraycopy(coord, 1, uncompressedPoint, 0, keySizeBytes);
+			return uncompressedPoint;
+		} else {
+			throw new IllegalStateException("coord value is too large");
+		}
+	}
 
    	public PublicKey decodePublicKey(byte[] encodedPublicKey) throws SignatureException {
         X9ECParameters curve = SECNamedCurves.getByName("secp256r1");
