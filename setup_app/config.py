@@ -125,13 +125,11 @@ class Config:
         self.setup_properties_fn = os.path.join(self.install_dir, 'setup.properties')
         self.savedProperties = os.path.join(self.install_dir, 'setup.properties.last')
 
-        
         self.gluuOptBinFolder = os.path.join(self.gluuOptFolder, 'bin')
         self.gluuOptSystemFolder = os.path.join(self.gluuOptFolder, 'system')
         self.gluuOptPythonFolder = os.path.join(self.gluuOptFolder, 'python')
         self.configFolder = os.path.join(self.gluuBaseFolder, 'conf') 
-        
-        
+
         self.gluu_properties_fn = os.path.join(self.configFolder,'gluu.properties')
         self.gluu_hybrid_roperties = os.path.join(self.configFolder, 'gluu-hybrid.properties')
 
@@ -164,7 +162,7 @@ class Config:
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
-        
+
         self.opendj_p12_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
@@ -173,7 +171,6 @@ class Config:
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
-        
 
         self.ldapSetupCommand = os.path.join(self.ldapBaseFolder, 'setup')
         self.ldapDsconfigCommand = os.path.join(self.ldapBaseFolder, 'bin/dsconfig')
@@ -232,7 +229,6 @@ class Config:
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
         self.ldap_setup_properties = os.path.join(self.templateFolder, 'opendj-setup.properties')
-
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'

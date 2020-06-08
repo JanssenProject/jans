@@ -46,7 +46,7 @@ class OxauthInstaller(JettyInstaller):
         if not Config.get('oxauthClient_pw'):
             Config.oxauthClient_pw = self.getPW()
             Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
-            
+
         self.logIt("Generating oxauth openid keys", pbar='gluu')
         sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP'
@@ -96,7 +96,6 @@ class OxauthInstaller(JettyInstaller):
         if not oxauth_rp:
             Config.pbar.progress('oxauth', "Downloading oxAuth war file")
             self.run([paths.cmd_wget, self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'oxauth.war')])
-        
         if Config.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = os.path.join(Config.distGluuFolder, 'oxauth-rp.war')
