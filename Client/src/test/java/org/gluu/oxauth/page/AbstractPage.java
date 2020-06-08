@@ -68,9 +68,7 @@ public class AbstractPage implements Page {
     public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
         Holder<String> currentUrl = new Holder<>();
         WebDriverWait wait = new WebDriverWait(currentDriver, PageConfig.WAIT_OPERATION_TIMEOUT);
-        wait.until(d -> {
-            //System.out.println("Previous url: " + previousURL);
-            //System.out.println("Current url: " + d.getCurrentUrl());
+        wait.until((WebDriver d) -> {
             currentUrl.setT(d.getCurrentUrl());
             return !currentUrl.getT().equals(previousURL);
         });
