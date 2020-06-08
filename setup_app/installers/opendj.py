@@ -69,6 +69,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
                 # Now bind ldap and import ldif files
                 self.dbUtils.bind()
+                Config.pbar.progress("opendj", "OpenDJ: importing ldif files", False)
                 self.dbUtils.import_ldif(ldif_files)
 
                 Config.pbar.progress("opendj", "OpenDJ: post installation", False)
