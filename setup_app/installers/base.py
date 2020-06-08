@@ -67,7 +67,9 @@ class BaseInstaller:
                     setattr(Config, client_var_name, result['inum'])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result['inum']))
                 else:
-                    setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
+                    client_id = client_id_prefix + str(uuid.uuid4())
+                    self.logIt("{} is created as {}".format(client_var_name, client_id))
+                    setattr(Config, client_var_name, client_id)
 
     def run_service_command(self, operation, service):
         if not service:
