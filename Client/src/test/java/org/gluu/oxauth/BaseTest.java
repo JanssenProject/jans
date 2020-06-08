@@ -67,7 +67,6 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
 import static org.testng.Assert.*;
 
@@ -397,13 +396,7 @@ public abstract class BaseTest {
 					.pollingEvery(Duration.ofMillis(500))
                     .ignoring(NoSuchElementException.class);
 
-			WebElement allowButton = wait.until(new Function<WebDriver, WebElement>() {
-				public WebElement apply(WebDriver d) {
-                    //System.out.println(d.getCurrentUrl());
-                    //System.out.println(d.getPageSource());
-					return currentDriver.findElement(By.id(authorizeFormAllowButton));
-				}
-			});
+            WebElement allowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormAllowButton)));
 
 			// We have to use JavaScript because target is link with onclick
 			JavascriptExecutor jse = (JavascriptExecutor) currentDriver;
@@ -593,11 +586,7 @@ public abstract class BaseTest {
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
         WebDriverWait wait = new WebDriverWait(driver, 1);
-        wait.until(new Function<WebDriver, Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return (d.getCurrentUrl() != previousURL);
-            }
-        });
+        wait.until((WebDriver d) -> (d.getCurrentUrl() != previousURL));
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
@@ -655,7 +644,8 @@ public abstract class BaseTest {
 
             navigateToAuhorizationUrl(driver, driver.getCurrentUrl());
 
-            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT).until(d -> !d.getCurrentUrl().contains("/authorize"));
+            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT)
+                    .until(webDriver ->!webDriver.getCurrentUrl().contains("/authorize"));
         }
 
         String authorizationResponseStr = driver.getCurrentUrl();
