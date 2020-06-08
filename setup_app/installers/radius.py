@@ -30,13 +30,8 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
                         }
         self.dbUtils.set_oxAuthConfDynamic(oxauth_updates)
 
-        #TODO: couchbase
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.import_ldif([ldif_file_base, ldif_file_clients])
-            self.dbUtils.enable_service('gluuRadiusEnabled')
-        else:
-            pass
-            #self.import_ldif_couchebase([ldif_file_base, ldif_file_clients])
+        self.dbUtils.import_ldif([ldif_file_base, ldif_file_clients])
+        self.dbUtils.enable_service('gluuRadiusEnabled')
 
 
     def render_import_templates(self):
