@@ -30,8 +30,6 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
                         }
         self.dbUtils.set_oxAuthConfDynamic(oxauth_updates)
 
-        self.dbUtils.import_ldif([ldif_file_base, ldif_file_clients])
-        self.dbUtils.enable_service('gluuRadiusEnabled')
 
 
     def render_import_templates(self):
@@ -57,6 +55,10 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         ldif_file_base = os.path.join(self.output_folder, 'gluu_radius_base.ldif')
         ldif_file_clients = os.path.join(self.output_folder, 'gluu_radius_clients.ldif')
 
+        self.dbUtils.import_ldif([ldif_file_base, ldif_file_clients])
+
+    def update_backend(self):
+        self.dbUtils.enable_service('gluuRadiusEnabled')
 
     def install_gluu_radius(self):
 
