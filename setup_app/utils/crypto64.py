@@ -146,10 +146,7 @@ class Crypto64:
         Config.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(Config.oxidp_config_json)
 
     def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
-        
-        #TODO: chown later, users are not ready at this time, see TODO 2 below
-        
-        
+
         self.logIt("Creating keystore %s" % suffix)
         # Convert key to pkcs12
         pkcs_fn = '%s/%s.pkcs12' % (Config.certFolder, suffix)
@@ -186,13 +183,6 @@ class Crypto64:
                   'RSA',
                   '-noprompt'
                   ])
-                  
-        # TODO 2: chwon after users are ready
-        #self.run([paths.cmd_chown, '%s:%s' % (user, user), pkcs_fn])
-        #self.run([paths.cmd_chmod, '700', pkcs_fn])
-        #self.run([paths.cmd_chown, '%s:%s' % (user, user), keystoreFN])
-        #self.run([paths.cmd_chmod, '700', keystoreFN])
-
 
 
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
