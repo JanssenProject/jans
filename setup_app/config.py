@@ -171,10 +171,6 @@ class Config:
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
 
-        self.importLdifCommand = os.path.join(self.ldapBaseFolder, 'bin/import-ldif')
-        self.ldapModifyCommand = os.path.join(self.ldapBaseFolder, 'bin/ldapmodify')
-        self.loadLdifCommand = self.ldapModifyCommand
-
         self.ldap_user_home = '/home/ldap'
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
