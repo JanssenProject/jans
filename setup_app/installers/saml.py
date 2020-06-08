@@ -4,6 +4,7 @@ import shutil
 
 from setup_app import paths
 from setup_app.config import Config
+from setup_app.utils import base
 from setup_app.installers.jetty import JettyInstaller
 
 class SamlInstaller(JettyInstaller):
@@ -16,12 +17,17 @@ class SamlInstaller(JettyInstaller):
         self.idp3_dist_jar = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (Config.oxVersion, Config.oxVersion)
         self.idp3_cml_keygenerator = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (Config.oxVersion, Config.oxVersion)
 
+
+        self.templates_folder = os.path.join(Config.templateFolder, 'idp')
+        self.output_folder = os.path.join(Config.outputFolder, 'idp')
+
         self.shibJksFn = os.path.join(Config.certFolder, 'shibIDP.jks')
         self.shibboleth_version = 'v3'
 
-        self.data_source_properties = 'datasource.properties'
+        self.data_source_properties = os.path.join(self.output_folder, 'datasource.properties')
         self.staticIDP3FolderConf = os.path.join(Config.install_dir, 'static/idp3/conf')
         self.staticIDP3FolderMetadata = os.path.join(Config.install_dir, 'static/idp3/metadata')
+        self.oxtrust_conf_fn = os.path.join(self.output_folder, 'oxtrust_conf.json')
         self.idp3_configuration_properties = 'idp.properties'
         self.idp3_configuration_ldap_properties = 'ldap.properties'
         self.idp3_configuration_saml_nameid = 'saml-nameid.properties'
@@ -51,9 +57,6 @@ class SamlInstaller(JettyInstaller):
             Config.shibJksPass = self.getPW()
             Config.encoded_shib_jks_pw = self.obscure(Config.shibJksPass)
 
-        if not Config.get('couchbaseShibUserPassword'):
-            Config.couchbaseShibUserPassword = self.getPW()
-
         # generate crypto
         self.gen_cert('shibIDP', Config.shibJksPass, 'jetty')
         self.gen_cert('idp-encryption', Config.shibJksPass, 'jetty')
@@ -74,7 +77,7 @@ class SamlInstaller(JettyInstaller):
         self.removeDirs('/opt/META-INF')
 
         if Config.mappingLocations['user'] == 'couchbase':
-            self.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
+            Config.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
 
         # Process templates
         self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
@@ -118,33 +121,22 @@ class SamlInstaller(JettyInstaller):
 
 
         if Config.persistence_type == 'couchbase':
-            Config.saml_couchbase_settings()
+            self.saml_couchbase_settings()
         elif Config.persistence_type == 'hybrid':
             couchbase_mappings = Config.getMappingType('couchbase')
             if 'user' in couchbase_mappings:
                 self.saml_couchbase_settings()
 
-        oxtrust_conf = {
-            'keystorePath': self.shibJksFn,
-            'keystorePassword': Config.shibJksPass,
-            'shibbolethVersion': self.shibboleth_version,
-            'shibboleth3IdpRootDir': self.idp3Folder,
-            'shibboleth3SpConfDir': os.path.join(self.idp3Folder, 'sp'),
-            'idpSecurityCert': self.shib_crt_file,
-            'idpSecurityKey': self.shib_key_file,
-            'gluuSpCert': self.shib_crt_file,
-            'idpSecurityKeyPassword': Config.encoded_shib_jks_pw,
-            'oxTrustConfigGeneration': True,
-            'shibboleth3FederationRootDir': '/opt/shibboleth-federation',
-            'idp3SigningCert': self.idp_signing_crt_file,
-            'idp3EncryptionCert': self.idp_encryption_crt_file,
-            }
+        self.enable()
 
-        
+    def render_import_templates(self):
+        self.renderTemplateInOut(self.oxtrust_conf_fn, self.templates_folder, self.output_folder)
+
+    def update_backend(self):
         self.dbUtils.enable_service('gluuSamlEnabled')
+        oxtrust_conf = base.readJsonFile(self.oxtrust_conf_fn)
         self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
 
-        self.enable()
 
     def install_saml_libraries(self):
         # Unpack oxauth.war to get bcprov-jdk16.jar
@@ -169,24 +161,20 @@ class SamlInstaller(JettyInstaller):
 
     def saml_couchbase_settings(self):
 
+        if not Config.get('couchbaseShibUserPassword'):
+            Config.couchbaseShibUserPassword = self.getPW()
 
-        #TODO: revise after couchbase install
-
-        """
         shib_user = 'couchbaseShibUser'
-        shib_user_password = Config.couchbaseShibUserPassword
         shib_user_roles = 'query_select[*]'
-        if self.isCouchbaseUserAdmin:
+        if Config.get('isCouchbaseUserAdmin'):
             self.logIt("Creating couchbase readonly user for shib")
-            self.dbUtils.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
+            self.dbUtils.cbm.create_user(shib_user, Config.couchbaseShibUserPassword, 'Shibboleth IDP', shib_user_roles)
         else:
-            self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
-            self.post_messages.append('Username: {}'.format(shib_user))
-            self.post_messages.append('Password: {}'.format(shib_user_password))
-            self.post_messages.append('Roles: {}'.format(shib_user_roles))
-        """
-        
-        
+            Config.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+            Config.post_messages.append('Username: {}'.format(shib_user))
+            Config.post_messages.append('Password: {}'.format(Config.couchbaseShibUserPassword))
+            Config.post_messages.append('Roles: {}'.format(shib_user_roles))
+
         # Add couchbase bean to global.xml
         couchbase_bean_xml_fn = os.path.join(Config.staticFolder, 'couchbase/couchbase_bean.xml')
         global_xml_fn = os.path.join(self.idp3ConfFolder, 'global.xml')
@@ -208,13 +196,9 @@ class SamlInstaller(JettyInstaller):
         new_idp3_props = ''.join(idp3_properties)
         self.writeFile(idp3_configuration_properties_fn, new_idp3_props)
 
-        data_source_properties = os.path.join(Config.outputFolder, 'idp', self.data_source_properties)
-        self.renderTemplateInOut(
-                    data_source_properties, 
-                    os.path.join(Config.templateFolder, 'idp'),
-                    os.path.dirname(data_source_properties)
-                    )
-        self.copyFile(data_source_properties, self.idp3ConfFolder)
+        self.renderTemplateInOut(self.data_source_properties, self.templates_folder, self.output_folder)
+
+        self.copyFile(self.data_source_properties, self.idp3ConfFolder)
 
     def create_folders(self):
         self.createDirs(os.path.join(Config.gluuBaseFolder, 'conf/shibboleth3'))
