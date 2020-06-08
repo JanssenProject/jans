@@ -94,12 +94,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
-        if not Config.idp_client_id:
-            Config.idp_client_id = '1101.'+ str(uuid.uuid4())
-
-
-
-
         if not Config.admin_inum:
             Config.admin_inum = str(uuid.uuid4())
 

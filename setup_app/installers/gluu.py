@@ -165,22 +165,6 @@ class GluuInstaller(SetupUtils):
             except:
                 self.logIt("Error writing template %s" % fullPath, True)
 
-    def render_custom_templates(self, fullPath):
-        output_dir = fullPath + '.output'
-
-        self.logIt("Rendering custom templates")
-        self.logIt("Rendering custom templates from %s to %s" % (fullPath, output_dir))
-
-        try:
-            self.run([paths.cmd_mkdir, '-p', output_dir])
-        except:
-            self.logIt("Error creating output directory %s" % output_dir, True)
-
-        try:
-            for filename in self.get_filepaths(fullPath):
-                self.renderTemplateInOut(filename, fullPath, output_dir)
-        except:
-            self.logIt("Error writing template %s" % fullPath, True)
 
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates", pbar='gluu')

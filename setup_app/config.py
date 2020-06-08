@@ -153,15 +153,9 @@ class Config:
 
         self.ldapBaseFolderldapPass = None
 
-        self.idp_client_id = None
-        self.idpClient_pw = None
-        self.idpClient_encoded_pw = None
-
         self.outputFolder = os.path.join(self.install_dir, 'output')
         self.templateFolder = os.path.join(self.install_dir, 'templates')
         self.staticFolder = os.path.join(self.install_dir, 'static')
-
-        self.ldif_idp = os.path.join(self.outputFolder, 'oxidp.ldif')
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
 
@@ -219,7 +213,6 @@ class Config:
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         
-        self.oxidp_config_json = os.path.join(self.outputFolder, 'oxidp-config.json')
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
 
@@ -265,13 +258,11 @@ class Config:
                            self.ldif_site,
                            self.ldif_metric,
                            self.ldif_configuration,
-                           self.ldif_idp,
                            ]
 
 
         self.ce_templates = {
                              self.gluu_python_readme: True,
-                             self.oxidp_config_json: False,
                              self.ox_ldap_properties: True,
                              self.ldap_setup_properties: False,
                              self.etc_hostname: False,
@@ -279,7 +270,6 @@ class Config:
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
                              self.ldif_clients: False,
-                             self.ldif_idp: False,
                              self.network: False,
                              self.gluu_properties_fn: True,
                              }
@@ -307,7 +297,6 @@ class Config:
                                             self.ldif_attributes,
                                             self.ldif_scopes,
                                             self.ldif_configuration,
-                                            self.ldif_idp,
                                             self.ldif_clients,
                                             self.ldif_metric,
                                             ],
