@@ -1,3 +1,6 @@
+import uuid
+import inspect
+
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
@@ -20,7 +23,51 @@ class BaseInstaller:
 
         self.install()
         self.copy_static()
+        self.generate_configuration()
+        
+        # before rendering templates, let's push variables of this class to Config.templateRenderingDict
+        self.update_rendering_dict()
+
         self.render_import_templates()
+        self.update_backend()
+
+    def update_rendering_dict(self):
+        mydict = {}
+        for obj_name, obj in inspect.getmembers(self):
+            if obj_name in ('dbUtils',):
+                continue
+            if not obj_name.startswith('__') and (not callable(obj)):
+                mydict[obj_name] = obj
+
+        Config.templateRenderingDict.update(mydict)
+
+
+    def check_clients(self, client_var_id_list, resource=False):
+        if resource:
+            field_name = 'inum'
+            ou = 'clients'
+        else:
+            field_name = 'oxId'
+            ou = 'resources'
+
+        for client_var_name, client_id_prefix in client_var_id_list:
+            if not Config.get(client_var_name):
+                result = self.dbUtils.search('ou={},o=gluu'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
+                if result:
+                    setattr(Config, client_var_name, result[field_name])
+                    self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
+                else:
+                    setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
+
+    def check_resources(self, client_var_id_list):
+        for client_var_name, client_id_prefix in client_var_id_list:
+            if not Config.get(client_var_name):
+                result = self.dbUtils.search('ou=clients,o=gluu', '(inum={}*)'.format(client_id_prefix))
+                if result:
+                    setattr(Config, client_var_name, result['inum'])
+                    self.logIt("{} was found in backend as {}".format(client_var_name, result['inum']))
+                else:
+                    setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
 
     def run_service_command(self, operation, service):
         if not service:
@@ -32,10 +79,6 @@ class BaseInstaller:
                 self.run([base.service_path, service, operation], None, None, True)
         except:
             self.logIt("Error running operation {} for service {}".format(operation, service), True)
-
-    def render_import_templates(self):
-        pass
-
 
     def enable(self, service=None):
         self.run_service_command('enable', service)
@@ -53,6 +96,15 @@ class BaseInstaller:
             self.run([base.service_path, 'daemon-reload'])
         elif base.os_name == 'ubuntu16':
             self.run([paths.cmd_update_rc, service, 'defaults'])
+
+    def generate_configuration(self):
+        pass
+
+    def render_import_templates(self):
+        pass
+
+    def update_backend(self):
+        pass
 
     def download_files(self):
         pass

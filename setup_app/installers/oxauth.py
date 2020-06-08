@@ -2,7 +2,6 @@ import os
 import glob
 import random
 import string
-import uuid
 
 from setup_app import paths
 from setup_app.config import Config
@@ -36,16 +35,13 @@ class OxauthInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'oxauth.war')
         self.copyFile(src_war, jettyServiceWebapps)
-        self.generate_configuration()
-        self.render_import_templates()
         self.enable()
 
     def generate_configuration(self):
         if not Config.get('oxauth_openid_jks_pass'):
             Config.oxauth_openid_jks_pass = self.getPW()
-        
-        if not Config.get('oxauth_client_id'):
-            Config.oxauth_client_id = '1001.'+ str(uuid.uuid4())
+
+        self.check_clients([('oxauth_client_id', '1001.')])
         
         if not Config.get('oxauthClient_pw'):
             Config.oxauthClient_pw = self.getPW()
@@ -57,10 +53,7 @@ class OxauthInstaller(JettyInstaller):
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
-    def render_import_templates(self):
-        # make variables of this class accesible from Config
-        Config.templateRenderingDict.update(self.__dict__)
-        
+    def render_import_templates(self):        
         self.renderTemplateInOut(self.oxauth_config_json, self.templates_folder, self.output_folder)
 
         Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
