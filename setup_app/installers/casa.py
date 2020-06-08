@@ -141,7 +141,7 @@ class CasaInstaller(JettyInstaller):
 
         except:
             self.logIt("Error importing oxd server certificate", True)
-            
+
     def create_folders(self):
         for path_name in ('static', 'plugins'):
             path = os.path.join(self.casa_jetty_dir, path_name)
