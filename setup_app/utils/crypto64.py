@@ -140,11 +140,6 @@ class Crypto64:
     def generate_base64_ldap_file(self, fn):
         return self.generate_base64_file(fn, 1)
 
-    def generate_base64_configuration(self):
-        self.logIt("Generating base64 configuration", pbar='gluu')
-        
-        Config.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(Config.oxidp_config_json)
-
     def gen_keystore(self, suffix, keystoreFN, keystorePW, inKey, inCert):
 
         self.logIt("Creating keystore %s" % suffix)
@@ -307,7 +302,7 @@ class Crypto64:
 
     def encode_passwords(self):
         self.logIt("Encoding passwords", pbar='gluu')
-        
+
         try:
             if Config.ldapPass:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)

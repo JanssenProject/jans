@@ -19,6 +19,15 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.pbar_text = "Installing OpenDj"
         self.needdb = False # we don't need backend connection in this class
 
+        self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
+        self.openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema')
+        self.openDjschemaFiles = glob.glob(os.path.join(Config.install_dir, 'static/opendj/*.ldif'))
+
+        self.opendj_service_centos7 = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
+        self.ldapDsconfigCommand = os.path.join(Config.ldapBaseFolder, 'bin/dsconfig')
+        self.ldapDsCreateRcCommand = os.path.join(Config.ldapBaseFolder, 'bin/create-rc-script')
+
+
     def install(self):
         self.logIt("Running OpenDJ Setup")
 
@@ -167,7 +176,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         for changes in config_changes:
             cwd = os.path.join(Config.ldapBaseFolder, 'bin')
             dsconfigCmd = " ".join([
-                                    Config.ldapDsconfigCommand,
+                                    self.ldapDsconfigCommand,
                                     '--trustAll',
                                     '--no-prompt',
                                     '--hostname',
@@ -302,7 +311,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             # This json file contains a mapping of the required indexes.
             # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
 
-            with open(Config.openDjIndexJson) as f:
+            with open(self.openDjIndexJson) as f:
                 index_json = json.load(f)
 
             for attrDict in index_json:
@@ -314,7 +323,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                         if (backend_name == backend):
                             self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
                             indexCmd = " ".join([
-                                                 Config.ldapDsconfigCommand,
+                                                 self.ldapDsconfigCommand,
                                                  index_command,
                                                  '--backend-name',
                                                  backend,
@@ -352,8 +361,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def prepare_opendj_schema(self):
         self.logIt("Copying OpenDJ schema")
-        for schemaFile in Config.openDjschemaFiles:
-            self.copyFile(schemaFile, Config.openDjSchemaFolder)
+        for schemaFile in self.openDjschemaFiles:
+            self.copyFile(schemaFile, self.openDjSchemaFolder)
 
         self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
@@ -367,16 +376,16 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         init_script_fn = '/etc/init.d/opendj'
         if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
             remove_init_script = True
-            opendj_script_name = os.path.basename(Config.opendj_service_centos7)
+            opendj_script_name = os.path.basename(self.opendj_service_centos7)
             opendj_dest_folder = "/etc/systemd/system"
             try:
-                self.copyFile(Config.opendj_service_centos7, opendj_dest_folder)
+                self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
             except:
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
             if os.path.exists(init_script_fn):
                 self.run(['rm', '-f', init_script_fn])
         else:
-            self.run([Config.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+            self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
             # Make the generated script LSB compliant
             lsb_str=(
                     '### BEGIN INIT INFO\n'
