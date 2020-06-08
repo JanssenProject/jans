@@ -12,7 +12,6 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
 
-
 class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
@@ -240,7 +239,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                         ]
 
         importCmd = " ".join(importParams)
-        
+
         # Check if there is no .pw file
         createPwFile = not os.path.exists(Config.ldapPassFn)
         if createPwFile:
@@ -259,7 +258,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         #We won't load data to secondary cluster nodes
         if not Config.loadData:
             return
-        
+
         if not ldif_file_list:
             self.logIt("Importing userRoot LDIF data")
         else:
@@ -267,7 +266,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         if not ldif_file_list:
             ldif_file_list = Config.ldif_files
-        
+
         for ldif_file_fn in ldif_file_list:
             ldif_file_fullpath = os.path.realpath(ldif_file_fn)
             cwd = os.path.join(Config.ldapBaseFolder, 'bin')
@@ -364,7 +363,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.start()
 
     def setup_opendj_service(self):
-        
+
         init_script_fn = '/etc/init.d/opendj'
         if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
             remove_init_script = True

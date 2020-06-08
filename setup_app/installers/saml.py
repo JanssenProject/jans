@@ -17,7 +17,6 @@ class SamlInstaller(JettyInstaller):
         self.idp3_dist_jar = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (Config.oxVersion, Config.oxVersion)
         self.idp3_cml_keygenerator = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (Config.oxVersion, Config.oxVersion)
 
-
         self.templates_folder = os.path.join(Config.templateFolder, 'idp')
         self.output_folder = os.path.join(Config.outputFolder, 'idp')
 
