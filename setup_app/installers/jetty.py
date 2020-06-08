@@ -15,7 +15,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     jetty_home = Config.jetty_home
     jetty_base = Config.jetty_base
     jetty_app_configuration = base.readJsonFile(os.path.join(paths.DATA_DIR, 'jetty_app_configuration.json'), ordered=True)
-    
+
     def __init__(self):
         self.service_name = 'jetty'
         self.pbar_text = "Installing Jetty"

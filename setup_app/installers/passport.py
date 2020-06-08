@@ -19,15 +19,14 @@ class PassportInstaller(NodeInstaller):
         self.passport_config = os.path.join(Config.configFolder, 'passport-config.json')
 
         self.passport_templates_folder = os.path.join(Config.templateFolder, 'passport')
-        
-        
+
         self.ldif_scripts_fn = os.path.join(Config.outputFolder, 'passport/scripts.ldif')
         self.passport_oxtrust_config_fn = os.path.join(Config.outputFolder, 'passport/passport_oxtrust_config.son')
         self.passport_central_config_json = os.path.join(Config.outputFolder, 'passport/passport-central-config.json')
         self.ldif_passport_config = os.path.join(Config.outputFolder, 'passport/oxpassport-config.ldif')
         self.ldif_passport = os.path.join(Config.outputFolder, 'passport/passport.ldif')
         self.ldif_passport_clients = os.path.join(Config.outputFolder, 'passport/passport_clients.ldif')
-        
+
         self.passport_rs_client_jks_fn = os.path.join(Config.certFolder, 'passport-rs.jks')
         self.passport_rp_client_jks_fn = os.path.join(Config.certFolder, 'passport-rp.jks')
         self.passport_rp_client_cert_fn = os.path.join(Config.certFolder, 'passport-rp.pem')
@@ -49,7 +48,7 @@ class PassportInstaller(NodeInstaller):
             self.run([paths.cmd_tar, '--strip', '1', '-xzf', os.path.join(Config.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive {}".format(passportArchive))
-        
+
         passport_modules_archive = os.path.join(Config.distGluuFolder, 'passport-{}-node_modules.tar.gz'.format(Config.githubBranchName))
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
         self.run([paths.cmd_mkdir, '-p', modules_target_dir])
@@ -108,17 +107,15 @@ class PassportInstaller(NodeInstaller):
 
         self.check_clients(client_var_id_list)
         self.check_clients([('passport_resource_id', '1504.')], resource=True)
-        
-        
-        
+
         # backup existing files
         for f in glob.glob(os.path.join(Config.certFolder, 'passport-*')):
             if not f.endswith('~'):
                 self.backupFile(f, move=True)
-        
+
         # create certificates
         self.gen_cert('passport-sp', Config.passportSpKeyPass, 'ldap', Config.ldap_hostname)
-        
+
         # set owner and mode of certificate files
         cert_files = glob.glob(os.path.join(Config.certFolder, 'passport*'))
         for fn in cert_files:
@@ -141,9 +138,6 @@ class PassportInstaller(NodeInstaller):
                 break
 
         self.export_openid_key(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass, Config.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
-
-        
-
 
 
     def render_import_templates(self):
