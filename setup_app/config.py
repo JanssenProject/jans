@@ -157,7 +157,6 @@ class Config:
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
 
-        self.ldapTrustStoreFn = None
         self.encoded_ldapTrustStorePass = None
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
@@ -172,10 +171,6 @@ class Config:
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
 
-        self.ldapSetupCommand = os.path.join(self.ldapBaseFolder, 'setup')
-        self.ldapDsconfigCommand = os.path.join(self.ldapBaseFolder, 'bin/dsconfig')
-        self.ldapDsCreateRcCommand = os.path.join(self.ldapBaseFolder, 'bin/create-rc-script')
-        self.ldapDsJavaPropCommand = os.path.join(self.ldapBaseFolder, 'bin/dsjavaproperties')
         self.importLdifCommand = os.path.join(self.ldapBaseFolder, 'bin/import-ldif')
         self.ldapModifyCommand = os.path.join(self.ldapBaseFolder, 'bin/ldapmodify')
         self.loadLdifCommand = self.ldapModifyCommand
@@ -188,17 +183,6 @@ class Config:
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
                             os.path.join(self.install_dir, 'static/scripts/testBind.py')
                             ]
-
-        self.openDjIndexJson = os.path.join(self.install_dir, 'static/opendj/index.json')
-        self.openDjSchemaFolder = os.path.join(self.ldapBaseFolder, 'config/schema')
-        self.openDjschemaFiles = [
-                            os.path.join(self.install_dir, 'static/opendj/96-eduperson.ldif'),
-                            os.path.join(self.install_dir, 'static/opendj/101-ox.ldif'),
-                            os.path.join(self.install_dir, 'static/opendj/77-customAttributes.ldif')
-                            ]
-
-        self.opendj_init_file = os.path.join(self.install_dir, 'static/opendj/opendj')
-        self.opendj_service_centos7 = os.path.join(self.install_dir, 'static/opendj/systemd/opendj.service')
 
         self.redhat_services = ['httpd', 'rsyslog']
         self.debian_services = ['apache2', 'rsyslog']
@@ -216,7 +200,6 @@ class Config:
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
-        self.ldif_clients = os.path.join(self.outputFolder, 'clients.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
@@ -250,7 +233,6 @@ class Config:
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
                            self.ldif_scopes,
-                           self.ldif_clients,
                            self.ldif_site,
                            self.ldif_metric,
                            self.ldif_configuration,
@@ -265,7 +247,6 @@ class Config:
                              self.ldif_base: False,
                              self.ldif_attributes: False,
                              self.ldif_scopes: False,
-                             self.ldif_clients: False,
                              self.network: False,
                              self.gluu_properties_fn: True,
                              }
@@ -293,7 +274,6 @@ class Config:
                                             self.ldif_attributes,
                                             self.ldif_scopes,
                                             self.ldif_configuration,
-                                            self.ldif_clients,
                                             self.ldif_metric,
                                             ],
                                       'memory_allocation': 100,
@@ -317,7 +297,6 @@ class Config:
                                         'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
                                         'document_key_prefix': ['site_', 'cache-refresh_'],
-                                        
                                     }),
 
                         ('token',   { 'ldif': [],
