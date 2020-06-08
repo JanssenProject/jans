@@ -1,7 +1,3 @@
-#########################
-# OX Clients Definition
-#########################
-
 dn: inum=%(idp_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
