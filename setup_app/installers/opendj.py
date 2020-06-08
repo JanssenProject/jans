@@ -67,7 +67,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 if not Config.ldif_base in ldif_files:
                     ldif_files.insert(0, Config.ldif_base)
 
-                self.import_ldif_opendj(ldif_files)
+                # Now bind ldap and import ldif files
+                self.dbUtils.bind()
+                self.dbUtils.import_ldif(ldif_files)
 
                 Config.pbar.progress("opendj", "OpenDJ: post installation", False)
                 if Config.wrends_install == InstallTypes.LOCAL:
@@ -224,84 +226,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                   "-file", Config.opendj_cert_fn, "-keystore", Config.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
-    def import_ldif_template_opendj(self, ldif):
-        self.logIt("Importing LDIF file '%s' into OpenDJ" % ldif)
-        realInstallDir = os.path.realpath(self.outputFolder)
-
-        ldif_file_fullpath = os.path.realpath(ldif)
-        cwd = os.path.join(Config.ldapBaseFolder, 'bin')
-        importParams = [
-                          Config.loadLdifCommand,
-                          '--hostname',
-                          self.ldap_hostname,
-                          '--port',
-                          Config.ldap_admin_port,
-                          '--bindDN',
-                          '"%s"' % self.ldap_binddn,
-                          '-j',
-                          Config.ldapPassFn,
-                          '--trustAll',
-                          '--useSSL',
-                          '--continueOnError',
-                          '--filename',
-                          ldif_file_fullpath,
-                        ]
-
-        importCmd = " ".join(importParams)
-
-        # Check if there is no .pw file
-        createPwFile = not os.path.exists(Config.ldapPassFn)
-        if createPwFile:
-            self.createLdapPw()
-        
-        self.run(['/bin/su',
-                  'ldap',
-                  '-c',
-                  '%s' % importCmd], cwd=cwd)
-
-        if createPwFile:
-            Config.deleteLdapPw()
-
-    def import_ldif_opendj(self, ldif_file_list=[]):
-
-        #We won't load data to secondary cluster nodes
-        if not Config.loadData:
-            return
-
-        if not ldif_file_list:
-            self.logIt("Importing userRoot LDIF data")
-        else:
-            self.logIt("Importing LDIF File(s): " + ' '.join(ldif_file_list))
-
-        if not ldif_file_list:
-            ldif_file_list = Config.ldif_files
-
-        for ldif_file_fn in ldif_file_list:
-            ldif_file_fullpath = os.path.realpath(ldif_file_fn)
-            cwd = os.path.join(Config.ldapBaseFolder, 'bin')
-            importParams = [
-                              Config.loadLdifCommand,
-                              '--hostname',
-                              Config.ldap_hostname,
-                              '--port',
-                              Config.ldap_admin_port,
-                              '--bindDN',
-                              '"%s"' % Config.ldap_binddn,
-                              '-j',
-                              Config.ldapPassFn,
-                              '--trustAll',
-                              '--useSSL',
-                              '--continueOnError',
-                              '--filename',
-                              ldif_file_fullpath,
-                            ]
-
-            importCmd = " ".join(importParams)
-
-            self.run(['/bin/su',
-                      'ldap',
-                      '-c',
-                      '%s' % importCmd], cwd=cwd)
 
     def index_opendj_backend(self, backend):
         index_command = 'create-backend-index'
