@@ -165,11 +165,6 @@ class Config:
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
 
-
-        self.httpdKeyPass = None
-        self.httpdKeyFn = os.path.join(self.certFolder, 'httpd.key')
-        self.httpdCertFn = os.path.join(self.certFolder, 'httpd.crt')
-
         self.ldapTrustStoreFn = None
         self.encoded_ldapTrustStorePass = None
 
@@ -217,8 +212,6 @@ class Config:
         self.redhat_services = ['httpd', 'rsyslog']
         self.debian_services = ['apache2', 'rsyslog']
 
-        self.apache_start_script = '/etc/init.d/httpd'
-
         self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
         self.defaultTrustStorePW = 'changeit'
 
@@ -229,11 +222,7 @@ class Config:
         self.oxidp_config_json = os.path.join(self.outputFolder, 'oxidp-config.json')
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
-        
-        self.apache2_conf = os.path.join(self.outputFolder, 'httpd.conf')
-        self.apache2_ssl_conf = os.path.join(self.outputFolder, 'https_gluu.conf')
-        self.apache2_24_conf = os.path.join(self.outputFolder, 'httpd_2.4.conf')
-        self.apache2_ssl_24_conf = os.path.join(self.outputFolder, 'https_gluu.conf')
+
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')
@@ -285,10 +274,6 @@ class Config:
                              self.oxidp_config_json: False,
                              self.ox_ldap_properties: True,
                              self.ldap_setup_properties: False,
-                             self.apache2_conf: False,
-                             self.apache2_ssl_conf: False,
-                             self.apache2_24_conf: False,
-                             self.apache2_ssl_24_conf: False,
                              self.etc_hostname: False,
                              self.ldif_base: False,
                              self.ldif_attributes: False,
