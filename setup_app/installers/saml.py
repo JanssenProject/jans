@@ -21,6 +21,11 @@ class SamlInstaller(JettyInstaller):
         self.templates_folder = os.path.join(Config.templateFolder, 'idp')
         self.output_folder = os.path.join(Config.outputFolder, 'idp')
 
+        self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
+        self.ldif_clients = os.path.join(self.output_folder, 'clients.ldif')
+        self.ldif_oxidp = os.path.join(self.output_folder, 'oxidp.ldif')
+        self.oxidp_config_json = os.path.join(self.output_folder, 'oxidp-config.json')
+
         self.shibJksFn = os.path.join(Config.certFolder, 'shibIDP.jks')
         self.shibboleth_version = 'v3'
 
@@ -129,8 +134,23 @@ class SamlInstaller(JettyInstaller):
 
         self.enable()
 
+
+    def generate_configuration(self):
+        self.check_clients([('idp_client_id', '1101.')])
+
+        if not Config.get('idpClient_pw'):
+            Config.idpClient_pw = self.getPW()
+            Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)
+
     def render_import_templates(self):
-        self.renderTemplateInOut(self.oxtrust_conf_fn, self.templates_folder, self.output_folder)
+
+        self.renderTemplateInOut(self.oxidp_config_json, self.templates_folder, self.output_folder)
+        Config.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
+
+        for tmp in (self.ldif_config, self.ldif_oxidp, self.oxtrust_conf_fn, self.ldif_clients):
+            self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
+
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_oxidp, self.ldif_clients])
 
     def update_backend(self):
         self.dbUtils.enable_service('gluuSamlEnabled')
