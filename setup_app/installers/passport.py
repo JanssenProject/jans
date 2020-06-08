@@ -1,6 +1,5 @@
 import os
 import glob
-import uuid
 import json
 
 from setup_app import paths
@@ -12,7 +11,6 @@ from setup_app.installers.node import NodeInstaller
 class PassportInstaller(NodeInstaller):
 
     def __init__(self):
-        super().__init__()
         self.service_name = 'passport'
         self.pbar_text = "Installing Passport"
 
@@ -40,23 +38,6 @@ class PassportInstaller(NodeInstaller):
 
 
     def install(self):
-
-        self.generate_configuration()
-
-        # backup existing files
-        for f in glob.glob(os.path.join(Config.certFolder, 'passport-*')):
-            if not f.endswith('~'):
-                self.backupFile(f, move=True)
-
-        # create certificates
-        self.gen_cert('passport-sp', Config.passportSpKeyPass, 'ldap', Config.ldap_hostname)
-
-        Config.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, Config.passport_rs_client_jks_pass)
-        Config.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(Config.passport_rs_client_jwks, 1)
-
-        Config.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass)
-        Config.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(Config.passport_rp_client_jwks, 1)
-
 
         self.logIt("Preparing passport service base folders")
         self.run([paths.cmd_mkdir, '-p', self.gluu_passport_base])
@@ -88,15 +69,67 @@ class PassportInstaller(NodeInstaller):
             except:
                 self.logIt("Error encountered running npm install in {}".format(self.gluu_passport_base))
 
-        # Create logs folder
-        self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])
-        
-        #create empty log file unless exists
-        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
-        if not os.path.exists(log_file):
-            self.writeFile(log_file, '')
+        # Copy init.d script
+        self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
+        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
+
+        # Install passport system service script
+        self.installNodeService('passport')
 
         self.run([paths.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
+
+        # enable service at startup
+        self.enable()
+
+    def generate_configuration(self):
+
+        self.logIt("Generating Passport configuration")
+        if not(hasattr(Config, 'passportSpKeyPass') and getattr(Config, 'passportSpKeyPass')):
+            Config.passportSpKeyPass = self.getPW()
+            Config.passportSpJksPass = self.getPW()
+
+        if not(hasattr(Config, 'passport_rp_client_cert_alg') and getattr(Config, 'passport_rp_client_cert_alg')):
+            Config.passport_rp_client_cert_alg = 'RS512'
+        
+        if not(hasattr(Config, 'passport_rp_client_jks_pass') and getattr(Config, 'passport_rp_client_jks_pass')):
+            Config.passport_rp_client_jks_pass = 'secret'
+
+        if not(hasattr(Config, 'passport_rs_client_jks_pass') and getattr(Config, 'passport_rs_client_jks_pass')):
+            Config.passport_rs_client_jks_pass = self.getPW()
+
+        if not(hasattr(Config, 'passport_rs_client_jks_pass_encoded') and  getattr(Config, 'passport_rs_client_jks_pass_encoded')):
+            Config.passport_rs_client_jks_pass_encoded = self.obscure(Config.passport_rs_client_jks_pass)
+
+        client_var_id_list = (
+                    ('passport_rs_client_id', '1501.'),
+                    ('passport_rp_client_id', '1502.'),
+                    ('passport_rp_ii_client_id', '1503.'),
+                    )
+
+        self.check_clients(client_var_id_list)
+        self.check_clients([('passport_resource_id', '1504.')], resource=True)
+        
+        
+        
+        # backup existing files
+        for f in glob.glob(os.path.join(Config.certFolder, 'passport-*')):
+            if not f.endswith('~'):
+                self.backupFile(f, move=True)
+        
+        # create certificates
+        self.gen_cert('passport-sp', Config.passportSpKeyPass, 'ldap', Config.ldap_hostname)
+        
+        # set owner and mode of certificate files
+        cert_files = glob.glob(os.path.join(Config.certFolder, 'passport*'))
+        for fn in cert_files:
+            self.run([paths.cmd_chmod, '500', fn])
+            self.run([paths.cmd_chown, 'root:gluu', fn])
+
+        Config.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, Config.passport_rs_client_jks_pass)
+        Config.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(Config.passport_rs_client_jwks, 1)
+
+        Config.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass)
+        Config.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(Config.passport_rp_client_jwks, 1)
 
         self.logIt("Preparing Passport OpenID RP certificate...")
 
@@ -107,8 +140,13 @@ class PassportInstaller(NodeInstaller):
                 Config.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
-
         self.export_openid_key(self.passport_rp_client_jks_fn, Config.passport_rp_client_jks_pass, Config.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
+
+        
+
+
+
+    def render_import_templates(self):
 
         self.logIt("Rendering Passport templates")
         output_folder = os.path.join(Config.outputFolder,'passport')
@@ -133,86 +171,12 @@ class PassportInstaller(NodeInstaller):
 
         ldif_files = (self.ldif_scripts_fn, self.ldif_passport, self.ldif_passport_config, self.ldif_passport_clients)
 
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.import_ldif(ldif_files)
-            self.dbUtils.enable_service('gluuPassportEnabled')
-        else:
-            #TODO: implement for couchbase ???
-            self.import_ldif_couchebase(ldif_files)
-
-        self.update_ldap()
-
-        # Copy init.d script
-        self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
-        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
-
-        # Install passport system service script
-        self.installNodeService('passport')
-
-        # set owner and mode of certificate files
-        cert_files = glob.glob(os.path.join(Config.certFolder, 'passport*'))
-        for fn in cert_files:
-            self.run([paths.cmd_chmod, '500', fn])
-            self.run([paths.cmd_chown, 'root:gluu', fn])
-
-        # enable service at startup
-        self.enable()
-
-    def generate_configuration(self):
-        # check ldap server if clients and resources exist
-        self.check_clients_resources()
-        
-        self.logIt("Generating Passport configuration")
-        
-        if not(hasattr(Config, 'passportSpKeyPass') and getattr(Config, 'passportSpKeyPass')):
-            Config.passportSpKeyPass = self.getPW()
-            Config.passportSpJksPass = self.getPW()
-
-        if not(hasattr(Config, 'passport_rp_client_cert_alg') and getattr(Config, 'passport_rp_client_cert_alg')):
-            Config.passport_rp_client_cert_alg = 'RS512'
-        
-        if not(hasattr(Config, 'passport_rp_client_jks_pass') and getattr(Config, 'passport_rp_client_jks_pass')):
-            Config.passport_rp_client_jks_pass = 'secret'
-
-        if not(hasattr(Config, 'passport_rs_client_jks_pass') and getattr(Config, 'passport_rs_client_jks_pass')):
-            Config.passport_rs_client_jks_pass = self.getPW()
-
-        if not(hasattr(Config, 'passport_rs_client_jks_pass_encoded') and  getattr(Config, 'passport_rs_client_jks_pass_encoded')):
-            Config.passport_rs_client_jks_pass_encoded = self.obscure(Config.passport_rs_client_jks_pass)
-
-        if not(hasattr(Config, 'passport_rs_client_id') and getattr(Config, 'passport_rs_client_id')):
-            Config.passport_rs_client_id = '1501.{}'.format(uuid.uuid4())
-
-        if not(hasattr(Config, 'passport_rp_client_id') and getattr(Config, 'passport_rp_client_id')):
-            Config.passport_rp_client_id = '1502.{}'.format(uuid.uuid4())
-
-        if not(hasattr(Config, 'passport_rp_ii_client_id') and getattr(Config, 'passport_rp_ii_client_id')):
-            Config.passport_rp_ii_client_id = '1503.{}'.format(uuid.uuid4())
-
-        if not(hasattr(Config, 'passport_resource_id') and getattr(Config, 'passport_resource_id')):
-            Config.passport_resource_id = '1504.{}'.format(uuid.uuid4())
-
-        Config.non_setup_properties.update(self.__dict__)
-
-    def check_clients_resources(self):
-        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1501.*)'):
-            Config.passport_rs_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
-            self.logIt("passport_rs_client_id was found in ldap as {}".format(Config.passport_rs_client_id))
-
-        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1502.*)'):
-            Config.passport_rp_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
-            self.logIt("passport_rp_client_id was found in ldap as {}".format(Config.passport_rp_client_id))
-            
-        if self.dbUtils.search('ou=clients,o=gluu', '(inum=1503.*)'):
-            Config.passport_rp_ii_client_id = self.dbUtils.ldap_conn.response[0]['attributes']['inum'][0]
-            self.logIt("passport_rp_ii_client_id was found in ldap as {}".format(Config.passport_rp_ii_client_id))
-            
-        if self.dbUtils.search('ou=resources,ou=uma,o=gluu', '(oxId=1504.*)'):
-            Config.passport_resource_id = self.dbUtils.ldap_conn.response[0]['attributes']['oxId'][0]
-            self.logIt("passport_resource_id was found in ldap as {}".format(Config.passport_resource_id))
+        self.dbUtils.import_ldif(ldif_files)
 
 
-    def update_ldap(self):
+    def update_backend(self):
+
+        self.dbUtils.enable_service('gluuPassportEnabled')
 
         for inum in ['2FDB-CF02', 'D40C-1CA4', '2DAF-F9A5']:
             self.dbUtils.enable_script(inum)
@@ -223,3 +187,13 @@ class PassportInstaller(NodeInstaller):
         self.dbUtils.set_configuration('gluuPassportEnabled', 'true')
         self.dbUtils.add_client2script('2DAF-F9A5', Config.passport_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.passport_rp_client_id)
+
+
+    def create_folders(self):
+        # Create logs folder
+        self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])
+        
+        #create empty log file unless exists
+        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
+        if not os.path.exists(log_file):
+            self.writeFile(log_file, '')
