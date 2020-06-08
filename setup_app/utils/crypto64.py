@@ -314,9 +314,6 @@ class Crypto64:
             if Config.cb_password:
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
             Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
-
-            Config.idpClient_pw = self.getPW()
-            Config.idpClient_encoded_pw = self.obscure(Config.idpClient_pw)
         except:
             self.logIt("Error encoding passwords", True, True)
 
