@@ -94,10 +94,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(Config.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % Config.outputFolder, setupPropsFN)
-        
-        #TODO: Why we require this?
-        #self.set_ownership()
-        
+
         self.run([paths.cmd_chown, 'ldap:ldap', setupPropsFN])
 
         try:

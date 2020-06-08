@@ -27,8 +27,6 @@ class CasaInstaller(JettyInstaller):
 
     def install(self):
 
-        #TODO: load casa.ldif
-
         self.run([paths.cmd_chmod , 'g+w', self.pylib_folder])
         self.logIt("Copying casa.war into jetty webapps folder...")
         self.installJettyService(self.jetty_app_configuration['casa'])
@@ -101,21 +99,12 @@ class CasaInstaller(JettyInstaller):
         scripts_template = os.path.join(self.templates_folder, os.path.basename(self.ldif_scripts))
         extensions = base.find_script_names(scripts_template)
         self.prepare_base64_extension_scripts(extensions=extensions)
-
-        for tmp in (
-                    self.ldif,
-                    self.ldif_scripts,
-                    ):
         
+        ldif_files = (self.ldif, self.ldif_scripts)
+        for tmp in ldif_files:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
 
-        ldif_files = (self.ldif, self.ldif_scripts)
-
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.import_ldif(ldif_files)
-        else:
-            #TODO: implement for couchbase ???
-            self.import_ldif_couchebase(ldif_files)
+        self.dbUtils.import_ldif(ldif_files)
 
 
     def import_oxd_certificate(self):
