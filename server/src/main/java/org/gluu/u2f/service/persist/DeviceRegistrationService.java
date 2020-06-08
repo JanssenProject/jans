@@ -1,6 +1,7 @@
 package org.gluu.u2f.service.persist;
 
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -119,6 +120,15 @@ public class DeviceRegistrationService {
 			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData);
 			fido2RegistrationEntry.setPublicKeyId(fido2RegistrationData.getPublicKeyId());
 			persistenceEntryManager.persist(fido2RegistrationEntry);
+
+//			Testing code
+//			JsonNode uncompressedECPointNode;
+//			try {
+//				uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(fido2RegistrationData.getUncompressedECPoint()));
+//	            PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 	        
 	        // Mark Fido registration entry as migrated
 	        fidoRegistration.setStatus(DeviceRegistrationStatus.MIGRATED);
