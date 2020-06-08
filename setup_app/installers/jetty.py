@@ -148,7 +148,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
         # make variables of this class accesible from Config
-        Config.templateRenderingDict.update(self.__dict__)
+        self.update_rendering_dict()
 
         try:
             self.renderTemplateInOut(serviceName, '%s/jetty' % Config.templateFolder, '%s/jetty' % Config.outputFolder)

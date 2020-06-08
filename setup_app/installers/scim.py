@@ -1,7 +1,6 @@
 import os
 import glob
 import shutil
-import uuid
 
 from setup_app.utils import base
 from setup_app.config import Config
@@ -33,24 +32,17 @@ class ScimInstaller(JettyInstaller):
         self.scim_rs_client_jks_fn = os.path.join(Config.certFolder, 'scim-rs.jks')
         self.scim_rp_client_jks_fn = os.path.join(Config.certFolder, 'scim-rp.jks')
 
-        self.generate_configuration()
-        self.render_import_templates()
-        self.update_backend()
-
         self.enable()
 
     def generate_configuration(self):
-        
-        #TODO: better to check backend also
-        if not Config.get('scim_rs_client_id'):
-            Config.scim_rs_client_id = '1201.' + str(uuid.uuid4())
+        self.logIt("Generating {} configuration".format(self.service_name))
+        client_var_id_list = (
+                    ('scim_rs_client_id', '1201.'),
+                    ('scim_rp_client_id', '1202.'),
+                    )
+        self.check_clients(client_var_id_list)
+        self.check_clients([('scim_resource_oxid', '1203.')], resource=True)
 
-        if not Config.get('scim_rp_client_id'):
-            Config.scim_rp_client_id = '1202.' + str(uuid.uuid4())
-
-        if not Config.get('scim_resource_oxid'):
-            Config.scim_resource_oxid = '1203.' + str(uuid.uuid4())
-            
         if not Config.get('scim_rs_client_jks_pass'):
             Config.scim_rs_client_jks_pass = self.getPW()
             Config.scim_rs_client_jks_pass_encoded = self.obscure(Config.scim_rs_client_jks_pass)
@@ -73,9 +65,6 @@ class ScimInstaller(JettyInstaller):
         Config.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(Config.scim_rp_client_jwks, 1)
 
     def render_import_templates(self):
-        # make variables of this class accesible from Config
-        Config.templateRenderingDict.update(self.__dict__)
-
         self.renderTemplateInOut(self.ldif_config, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.ldif_clients, self.templates_folder, self.output_folder)
         self.renderTemplateInOut(self.oxtrust_config_fn, self.templates_folder, self.output_folder)

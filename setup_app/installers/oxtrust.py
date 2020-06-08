@@ -1,6 +1,5 @@
 import os
 import glob
-import uuid
 
 from setup_app import paths
 from setup_app.config import Config
@@ -54,8 +53,6 @@ class OxtrustInstaller(JettyInstaller):
         src_war = os.path.join(Config.distGluuFolder, 'identity.war')
         self.copyFile(src_war, jettyServiceWebapps)
 
-        self.generate_configuration()
-
         self.enable()
 
     def generate_api_configuration(self):
@@ -81,19 +78,10 @@ class OxtrustInstaller(JettyInstaller):
         client_var_id_list = (
                     ('oxtrust_resource_server_client_id', '1401.'),
                     ('oxtrust_requesting_party_client_id', '1402.'),
-                    ('oxtrust_resource_id', '1403.'),
                     )
 
-        for client_var_name, client_id_prefix in client_var_id_list:
-            if not Config.get(client_var_name):
-                result = self.dbUtils.search('ou=clients,o=gluu', '(inum={}*)'.format(client_id_prefix))
-                if result:
-                    setattr(Config, client_var_name, result['inum'])
-                    self.logIt("{} was found in backend as {}".format(client_var_name, result['inum']))
-
-        for client_var_name, client_id_prefix in client_var_id_list:
-            if not Config.get(client_var_name):
-                setattr(Config, client_var_name, '1401.'  + str(uuid.uuid4()))
+        self.check_clients(client_var_id_list)
+        self.check_clients([('oxtrust_resource_id', '1402.')], resource=True)
 
         Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
 
@@ -112,9 +100,6 @@ class OxtrustInstaller(JettyInstaller):
 
 
     def render_import_templates(self):
-
-        # make variables of this class accesible from Config
-        Config.templateRenderingDict.update(self.__dict__)
 
         for tmp in (self.oxtrust_config_json, self.oxtrust_cache_refresh_json, self.oxtrust_import_person_json):
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
