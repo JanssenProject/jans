@@ -23,8 +23,17 @@ class FidoInstaller(JettyInstaller):
     def install(self):
         self.logIt("Copying fido.war into jetty webapps folder...")
 
-        # make variables of this class accesible from Config
-        Config.templateRenderingDict.update(self.__dict__)
+
+        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
+
+        self.enable()
+
+
+    def update_rendering_dict(self):
+
         self.renderTemplateInOut(self.fido2_dynamic_conf_json, self.template_folder, self.output_folder)
         self.renderTemplateInOut(self.fido2_static_conf_json, self.template_folder, self.output_folder)
 
@@ -33,20 +42,9 @@ class FidoInstaller(JettyInstaller):
         
         self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)
 
-        ldif_files = (self.ldif_fido2,)
+        ldif_files = [self.ldif_fido2]
+        self.dbUtils.import_ldif(ldif_files)
 
-        if Config.mappingLocations['default'] == 'ldap':
-            self.dbUtils.import_ldif(ldif_files)
-        else:
-            #TODO: implement for couchbase ???
-            self.import_ldif_couchebase(ldif_files)
-
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-
-        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
-
-        self.enable()
 
     def create_folders(self):
         for d in ('authenticator_cert', 'mds/cert', 'mds/toc', 'server_metadata'):
