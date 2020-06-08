@@ -71,9 +71,6 @@ class PropertiesUtils(SetupUtils):
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
-        if not Config.httpdKeyPass:
-            Config.httpdKeyPass = self.getPW()
-
         if not Config.oxtrust_admin_password and Config.ldapPass:
             Config.oxtrust_admin_password = Config.ldapPass
         
