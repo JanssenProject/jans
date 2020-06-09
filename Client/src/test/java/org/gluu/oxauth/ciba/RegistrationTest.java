@@ -311,7 +311,6 @@ public class RegistrationTest extends BaseTest {
     }
 
     @Parameters({"clientJwksUri"})
-    @Test
     public void backchannelTokenDeliveryModePoll5(final String clientJwksUri) {
         showTitle("backchannelTokenDeliveryModePoll5");
 
@@ -694,7 +693,6 @@ public class RegistrationTest extends BaseTest {
     }
 
     @Parameters({"clientJwksUri", "backchannelClientNotificationEndpoint"})
-    @Test
     public void backchannelTokenDeliveryModePing5(final String clientJwksUri,
                                                   final String backchannelClientNotificationEndpoint) {
         showTitle("backchannelTokenDeliveryModePing5");
