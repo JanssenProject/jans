@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
+import org.gluu.oxauth.model.authorize.JwtCibaAuthorizationRequest;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -30,6 +31,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
+
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -163,6 +166,46 @@ public class AuthorizeRestWebServiceValidator {
         if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
             log.error("Request object does not have redirect_uri claim.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+    }
+
+    /**
+     * Validates expiration, audience and scopes in the JWT request.
+     * @param jwtRequest Object to be validated.
+     */
+    public void validateRequestObject(JwtCibaAuthorizationRequest jwtRequest) {
+        Response.ResponseBuilder builder;
+        if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
+            log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+
+        if (!appConfiguration.getFapiCompatibility()) {
+            return;
+        }
+
+        // FAPI related validation
+        if (jwtRequest.getExp() == null) {
+            log.error("The exp claim is not set");
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        final long expInMillis = jwtRequest.getExp() * 1000L;
+        final long now = new Date().getTime();
+        if (expInMillis < now) {
+            log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
+            log.error("Request object does not have scope claim.");
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
         }
     }
 
