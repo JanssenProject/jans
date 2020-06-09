@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
-import javax.validation.constraints.Size;
+
 /**
  * @author Puja Sharma
  *
@@ -17,27 +17,20 @@ public class Backchannel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Min(value=0)
 	private String backchannelClientId;
 	
-	@Min(value=0)
 	private String backchannelRedirectUri;
 	
-	@Min(value=0)
 	private String backchannelAuthenticationEndpoint;
 	
-	@Min(value=0)
 	private String backchannelDeviceRegistrationEndpoint;
 	
-	@Size(min=1)
 	private List<String> backchannelTokenDeliveryModesSupported;
 	
-	@Size(min=1)
 	private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
 	
 	private Boolean backchannelUserCodeParameterSupported;
 	
-	@Min(value=0)
 	private String backchannelBindingMessagePattern;
 	
 	@Min(value = 1, message = "Backchannel Authentication Response Expires In should not be less than 1")
@@ -48,7 +41,6 @@ public class Backchannel implements Serializable {
 	@Max(value = 2147483647, message = "Backchannel Authentication Interval Expires In should not be greater than 2147483647")
 	private int backchannelAuthenticationResponseInterval;
 	
-	@Min(value=0)
 	private List<String> backchannelLoginHintClaims;
 	
 	

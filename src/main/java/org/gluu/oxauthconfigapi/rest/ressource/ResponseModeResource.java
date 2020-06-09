@@ -1,5 +1,5 @@
 /**
- * Service to configure Response Mode values that the OP supports.
+ * Endpoint to configure Response Mode values that the OP supports.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 

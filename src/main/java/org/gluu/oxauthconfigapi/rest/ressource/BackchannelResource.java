@@ -1,5 +1,5 @@
 /**
- * 
+ * Endpoint to configure oxAuth global back-channel configuration.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 

@@ -1,5 +1,5 @@
 /**
- * Metrics configuration  - This endpoint should be used to configure oxauth metrics.
+ * Endpoint to configure metrics configuration.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
