@@ -83,6 +83,10 @@ class OxtrustInstaller(JettyInstaller):
         self.check_clients(client_var_id_list)
         self.check_clients([('oxtrust_resource_id', '1402.')], resource=True)
 
+        if not Config.get('admin_inum'):
+            Config.admin_inum = str(uuid.uuid4())
+
+
         Config.encoded_oxtrust_admin_password = self.ldap_encode(Config.oxtrust_admin_password)
 
         # We need oxauth cleint id and encoded password
