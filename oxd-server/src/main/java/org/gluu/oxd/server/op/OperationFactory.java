@@ -74,6 +74,9 @@ public class OperationFactory {
                     return new GetJwksOperation(command, injector);
                 case GET_DISCOVERY:
                     return new GetDiscoveryOperation(command, injector);
+                case ISSUER_DISCOVERY:
+                    return new GetIssuerOperation(command, injector);
+
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
