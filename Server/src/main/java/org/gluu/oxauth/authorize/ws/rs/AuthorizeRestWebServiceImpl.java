@@ -138,6 +138,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private ExternalPostAuthnService externalPostAuthnService;
 
+    @Inject
+    private CibaRequestService cibaRequestService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -622,48 +625,49 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+        CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
 
-        if (cibaGrant == null) {
+        if (cibaRequest == null || cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
+            log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaRequest);
             return;
         }
 
-        if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-            RefreshToken refreshToken = cibaGrant.createRefreshToken();
-            log.debug("Issuing refresh token: {}", refreshToken.getCode());
+        cibaRequestService.removeCibaRequest(authReqId);
+        CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-            AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-            log.debug("Issuing access token: {}", accessToken.getCode());
+        RefreshToken refreshToken = cibaGrant.createRefreshToken();
+        log.debug("Issuing refresh token: {}", refreshToken.getCode());
 
-            IdToken idToken = cibaGrant.createIdToken(
-                    null, null, accessToken, refreshToken,
-                    null, cibaGrant, false, null);
+        AccessToken accessToken = cibaGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
+        log.debug("Issuing access token: {}", accessToken.getCode());
 
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
-            cibaGrant.setTokensDelivered(true);
-            cibaGrant.save();
+        IdToken idToken = cibaGrant.createIdToken(
+                null, null, accessToken, refreshToken,
+                null, cibaGrant, false, null);
 
+        cibaGrant.setTokensDelivered(true);
+        cibaGrant.save();
+
+        if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushTokenDeliveryProxy.pushTokenDelivery(
                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken(),
+                    cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
                     refreshToken.getCode(),
                     idToken.getCode(),
                     accessToken.getExpiresIn()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 
             cibaPingCallbackProxy.pingCallback(
                     cibaGrant.getCIBAAuthenticationRequestId().getCode(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
-                    cibaGrant.getClientNotificationToken()
+                    cibaRequest.getClientNotificationToken()
             );
         } else if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-            cibaGrant.setUserAuthorization(CIBAGrantUserAuthorization.AUTHORIZATION_GRANTED);
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
         }
