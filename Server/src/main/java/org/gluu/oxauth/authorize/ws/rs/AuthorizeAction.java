@@ -481,7 +481,7 @@ public class AuthorizeAction {
                         }
                     }
                 }
-            } catch (EntryPersistenceException | InvalidJwtException | InvalidJweException e) {
+            } catch (EntryPersistenceException | InvalidJwtException e) {
                 log.error(e.getMessage(), e);
             }
         }
