@@ -94,13 +94,10 @@ class PropertiesUtils(SetupUtils):
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
-        if not Config.admin_inum:
-            Config.admin_inum = str(uuid.uuid4())
-
         if not Config.application_max_ram:
             Config.application_max_ram = 3072
 
-        if Config.oxd_server_https:
+        if Config.get('oxd_server_https'):
             Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
             if not Config.templateRenderingDict['oxd_port']: 
                 Config.templateRenderingDict['oxd_port'] = 8443

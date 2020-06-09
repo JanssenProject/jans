@@ -112,6 +112,8 @@ class Config:
         self.installGluuRadius = False
         self.installScimServer = False
         self.installFido2 = False
+        self.installCasa = False
+        self.installOxd = False
 
         self.allowPreReleasedFeatures = False
 
@@ -161,6 +163,8 @@ class Config:
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
+
+        self.oxd_package = base.determine_package(os.path.join(Config.distGluuFolder, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
@@ -215,16 +219,6 @@ class Config:
         self.default_key_expiration = 365
 
         self.post_messages = []
-
-
-        #oxd install options
-        self.installOxd = False
-        self.oxd_server_https = ''
-        self.oxd_package = base.determine_package(os.path.join(Config.distGluuFolder, 'oxd-server*.tgz'))
-        self.oxd_use_gluu_storage = False
-        self.generateOxdCertificate = False
-
-        self.installCasa = False
 
         self.ldif_files = [self.ldif_base,
                            self.ldif_attributes,
