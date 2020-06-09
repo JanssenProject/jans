@@ -47,6 +47,11 @@
             <class name="org.gluu.oxd.server.HealthCheckTest"></class>
         </classes>
     </test>
+    <test name="Get Issuer" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetIssuerTest"></class>
+        </classes>
+    </test>
     <test name="Get OpDiscovery" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.GetDiscoveryTest"></class>
@@ -207,6 +212,12 @@
     <test name="Get OpDiscovery swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.GetDiscoveryTest"></class>
+        </classes>
+    </test>
+
+    <test name="Get Issuer swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetIssuerTest"></class>
         </classes>
     </test>
 
