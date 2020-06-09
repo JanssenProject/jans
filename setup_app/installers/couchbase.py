@@ -6,7 +6,7 @@ import json
 import uuid
 
 from setup_app import paths
-from setup_app.static import InstallTypes, colors
+from setup_app.static import InstallTypes, BackendTypes, colors
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
@@ -23,7 +23,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         if not Config.get('couchebaseClusterAdmin'):
             Config.couchebaseClusterAdmin = 'admin'
             
-        if not Config.get('isCouchbaseUserAdmin'):
+        if Config.cb_install == InstallTypes.LOCAL:
             Config.isCouchbaseUserAdmin = False
 
         if not Config.get('couchbaseTrustStorePass'):
@@ -31,7 +31,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             Config.encoded_couchbaseTrustStorePass = self.obscure(Config.couchbaseTrustStorePass)
 
         if not Config.get('cb_query_node'):
-            Config.cb_query_node = 0
+            Config.cb_query_node = Config.couchbase_hostname
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'gluu'
@@ -44,9 +44,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
         self.gluuCouchebaseProperties = os.path.join(Config.configFolder, 'gluu-couchbase.properties')
         self.couchbaseBuckets = []
-        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
-                            'query_update', 'query_insert',
-                            'query_manage_index']
 
 
     def install(self):
@@ -67,6 +64,8 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if Config.mappingLocations['default'] == 'couchbase':
             self.dbUtils.import_ldif(Config.couchbaseBucketDict['default']['ldif'], Config.couchbase_bucket_prefix)
+        else:
+            self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.COUCHBASE)
 
         for group in couchbase_mappings:
             bucket = '{}_{}'.format(Config.couchbase_bucket_prefix, group)
@@ -236,35 +235,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         if index_names:
             n1ql = 'BUILD INDEX ON `%s` (%s) USING GSI' % (bucket, ', '.join(index_names))
             self.exec_n1ql_query(n1ql)
-
-
-    def checkCBRoles(self, buckets=[]):
-        result = self.dbUtils.cbm.whoami()
-        bc = buckets[:]
-        bucket_roles = {}
-        if 'roles' in result:
-            
-            for role in result['roles']:
-                if role['role'] == 'admin':
-                    self.isCouchbaseUserAdmin = True
-                    return True, None
-
-                if not role['bucket_name'] in bucket_roles:
-                    bucket_roles[role['bucket_name']] = []
-
-                bucket_roles[role['bucket_name']].append(role['role'])
-
-        for b_ in bc[:]:
-            for r_ in self.cb_bucket_roles:
-                if not r_ in bucket_roles[b_]:
-                    break
-            else:
-                bc.remove(b_)
-
-        if bc:
-            return False, bc
-
-        return True, None
 
 
     def checkIfGluuBucketReady(self):
