@@ -140,10 +140,15 @@ class CBM:
         return result
 
 
+
     def setup_services(self, services=['kv','n1ql','index']):
         data = {'services': ','.join(services)}
         result = self._post('node/controller/setupServices', data)
 
+        return result
+
+    def get_services(self):
+        result = self._get('pools/default/nodeServices')
         return result
 
     def set_admin_password(self):

@@ -11,7 +11,7 @@ class ScimInstaller(JettyInstaller):
     def __init__(self):
         self.service_name = 'scim'
         self.pbar_text = "Installing Scim"
-
+        self.needdb = True
 
     def install(self):
         self.logIt("Copying scim.war into jetty webapps folder...")

@@ -1,5 +1,6 @@
 import os
 import glob
+import uuid
 
 from setup_app import paths
 from setup_app.config import Config
