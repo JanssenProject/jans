@@ -224,6 +224,14 @@ public class RestResource {
         return process(CommandType.GET_DISCOVERY, params, GetDiscoveryParams.class, null, null, uriInfo);
     }
 
+    @POST
+    @Path("/get-issuer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getIssuer(String params) {
+        return process(CommandType.ISSUER_DISCOVERY, params, GetIssuerParams.class, null, null, uriInfo);
+    }
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return Jackson2.createJsonMapper().readValue(params, clazz);
