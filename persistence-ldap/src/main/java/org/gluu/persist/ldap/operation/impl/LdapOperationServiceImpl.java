@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -219,19 +220,24 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
-        if (!additionalPasswordMethods.isEmpty()) {
-
+        if ((persistenceExtension != null) || !additionalPasswordMethods.isEmpty()) {
             SearchResultEntry searchResult = lookup(bindDn, USER_PASSWORD);
             if (searchResult == null) {
                 throw new ConnectionException("Failed to find use by dn");
             }
 
-            String storedUserPassword = searchResult.getAttribute(USER_PASSWORD).getValue();
-            PasswordEncryptionMethod storedPasswordMethod = PasswordEncryptionHelper.findAlgorithm(storedUserPassword);
-            if (additionalPasswordMethods.contains(storedPasswordMethod)) {
-                LOG.debug("Authenticating '{}' using internal authentication mechanism '{}'", bindDn, storedPasswordMethod);
-                result = PasswordEncryptionHelper.compareCredentials(password, storedUserPassword);
-            }
+			String userPassword = searchResult.getAttribute(USER_PASSWORD).getValue();
+	        if (userPassword != null) {
+				if (persistenceExtension != null) {
+					result = persistenceExtension.compareHashedPasswords(password, userPassword);
+				} else {
+					PasswordEncryptionMethod storedPasswordMethod = PasswordEncryptionHelper.findAlgorithm(userPassword);
+					if (additionalPasswordMethods.contains(storedPasswordMethod)) {
+						LOG.debug("Authenticating '{}' using internal authentication mechanism '{}'", bindDn, storedPasswordMethod);
+						result = PasswordEncryptionHelper.compareCredentials(password, userPassword);
+					}
+				}
+	        }
         } else {
 	        if (this.bindConnectionProvider == null) {
 	            result = authenticateConnectionPoolImpl(bindDn, password);
@@ -712,7 +718,11 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     private boolean addEntryImpl(String dn, Collection<Attribute> attributes) throws DuplicateEntryException {
-        try {
+    	if (this.persistenceExtension != null) {
+    		updateUserPasswordAttribute(attributes);
+    	}
+
+    	try {
             LDAPResult result = getConnectionPool().add(dn, attributes);
             if (result.getResultCode().getName().equalsIgnoreCase(SUCCESS)) {
                 return true;
@@ -784,7 +794,11 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     private boolean updateEntryImpl(String dn, List<Modification> modifications) throws DuplicateEntryException {
-        ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
+    	if (this.persistenceExtension != null) {
+    		updateUserPasswordModification(modifications);
+    	}
+
+    	ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
         return modifyEntry(modifyRequest);
     }
 
@@ -976,6 +990,48 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     @Override
     public String getCertificateAttributeName(String attributeName) {
         return this.connectionProvider.getCertificateAttributeName(attributeName);
+    }
+
+    private void updateUserPasswordAttribute(Collection<Attribute> attributes) {
+		for (Iterator<Attribute> it = attributes.iterator(); it.hasNext();) {
+			Attribute attribute = (Attribute) it.next();
+		    if (StringHelper.equals(LdapOperationService.USER_PASSWORD, attribute.getName())) {
+		    	it.remove();
+		    	Attribute newAttribute = new Attribute(attribute.getName(),
+		    			createStoragePassword(attribute.getValues()));
+		    	attributes.add(newAttribute);
+		    	break;
+		    }
+		}
+    }
+
+	private void updateUserPasswordModification(List<Modification> modifications) {
+		for (Iterator<Modification> it = modifications.iterator(); it.hasNext();) {
+			Modification modification = (Modification) it.next();
+		    if (StringHelper.equals(LdapOperationService.USER_PASSWORD, modification.getAttributeName())) {
+		    	it.remove();
+		    	Modification newModification = new Modification(modification.getModificationType(),
+		    			modification.getAttributeName(),
+		    			createStoragePassword(modification.getValues()));
+		    	modifications.add(newModification);
+		    	break;
+		    }
+		}
+	}
+
+    public String[] createStoragePassword(String[] passwords) {
+        if (ArrayHelper.isEmpty(passwords)) {
+            return passwords;
+        }
+
+        String[] results = new String[passwords.length];
+        for (int i = 0; i < passwords.length; i++) {
+			if (persistenceExtension != null) {
+				results[i] = persistenceExtension.createHashedPassword(passwords[i]);
+			}
+        }
+
+        return results;
     }
 
     @Override
