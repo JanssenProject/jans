@@ -16,8 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-
 /**
  * JWT request used for CIBA requests.
  *
@@ -32,7 +30,7 @@ public class JwtCibaAuthorizationRequest extends JwtSignedRequest {
     private Integer nbf;
     private String jti;
     private String clientNotificationToken;
-    private List<String> acrValues;
+    private String acrValues;
     private String loginHintToken;
     private String idTokenHint;
     private String loginHint;
@@ -97,16 +95,7 @@ public class JwtCibaAuthorizationRequest extends JwtSignedRequest {
             clientNotificationToken = jsonPayload.getString("client_notification_token");
         }
         if (jsonPayload.has("acr_values")) {
-            JSONArray scopesJsonArray = jsonPayload.optJSONArray("acr_values");
-            if (scopesJsonArray != null) {
-                for (int i = 0; i < scopesJsonArray.length(); i++) {
-                    String scope = scopesJsonArray.getString(i);
-                    acrValues.add(scope);
-                }
-            } else {
-                String scopeStringList = jsonPayload.getString("acr_values");
-                acrValues.addAll(Util.splittedStringAsList(scopeStringList, " "));
-            }
+            acrValues = jsonPayload.getString("acr_values");
         }
         if (jsonPayload.has("login_hint_token")) {
             loginHintToken = jsonPayload.getString("login_hint_token");
@@ -141,11 +130,11 @@ public class JwtCibaAuthorizationRequest extends JwtSignedRequest {
         this.clientNotificationToken = clientNotificationToken;
     }
 
-    public List<String> getAcrValues() {
+    public String getAcrValues() {
         return acrValues;
     }
 
-    public void setAcrValues(List<String> acrValues) {
+    public void setAcrValues(String acrValues) {
         this.acrValues = acrValues;
     }
 
