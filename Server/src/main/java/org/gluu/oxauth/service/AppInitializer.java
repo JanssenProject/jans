@@ -33,13 +33,11 @@ import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.EncryptionService;
-import org.gluu.oxauth.service.external.ExtendedExternalPersistenceExtensionService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
@@ -58,6 +56,7 @@ import org.gluu.service.cdi.event.Scheduled;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.service.custom.lib.CustomLibrariesLoader;
 import org.gluu.service.custom.script.CustomScriptManager;
+import org.gluu.service.external.ExternalPersistenceExtensionService;
 import org.gluu.service.external.context.PersistenceExternalContext;
 import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.timer.QuartzSchedulerManager;
@@ -138,7 +137,7 @@ public class AppInitializer {
 	private CustomScriptManager customScriptManager;
 	
 	@Inject
-	private ExtendedExternalPersistenceExtensionService extendedExternalPersistenceExtensionService;
+	private ExternalPersistenceExtensionService externalPersistenceExtensionService;
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
@@ -166,12 +165,6 @@ public class AppInitializer {
 	
 	@Inject
 	private ExternalAuthenticationService externalAuthenticationService;
-
-	@Inject
-	private AppConfiguration appConfiguration;
-
-	@Inject
-	private CibaRequestsProcessorJob cibaRequestsProcessorJob;
 
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
@@ -220,7 +213,6 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
 		initTimer();
-		initCibaRequestsProcessor();
 
 		// Set default authentication method after 
 		setDefaultAuthenticationMethod(newConfiguration);
@@ -678,21 +670,6 @@ public class AppInitializer {
 		closePersistenceEntryManagers(persistenceAuthEntryManagers);
 	}
 
-	/**
-	 * Method to initialize CIBA requests processor job according to a json property which
-	 * should be more than 0 seconds of interval
-	 */
-	private void initCibaRequestsProcessor() {
-		if (appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
-			if (cibaRequestsProcessorJob != null) {
-				cibaRequestsProcessorJob.initTimer();
-			}
-		} else {
-			log.warn("Didn't start ciba requests processor job because the interval is not valid to run, value: {}",
-					appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
-		}
-	}
-
 	public long getLastFinishedTime() {
 		return lastFinishedTime;
 	}
@@ -702,21 +679,23 @@ public class AppInitializer {
 	}
 
 	private void executePersistenceExtensionAfterCreate(Properties connectionProperties, PersistenceEntryManager persistenceEntryManager) {
-		if (extendedExternalPersistenceExtensionService.isEnabled()) {
+		if (externalPersistenceExtensionService.isEnabled()) {
 			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
 			persistenceExternalContext.setConnectionProperties(connectionProperties);
 			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
 			
-			extendedExternalPersistenceExtensionService.executeExternalOnAfterCreateMethod(persistenceExternalContext);
+			externalPersistenceExtensionService.executeExternalOnAfterCreateMethod(persistenceExternalContext);
+
+			externalPersistenceExtensionService.setPersistenceExtension(persistenceEntryManager);
 		}
 	}
 
 	private void executePersistenceExtensionAfterDestroy(PersistenceEntryManager persistenceEntryManager) {
-		if (extendedExternalPersistenceExtensionService.isEnabled()) {
+		if (externalPersistenceExtensionService.isEnabled()) {
 			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
 			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
 			
-			extendedExternalPersistenceExtensionService.executeExternalOnAfterDestroyMethod(persistenceExternalContext);
+			externalPersistenceExtensionService.executeExternalOnAfterDestroyMethod(persistenceExternalContext);
 		}
 	}
 
