@@ -7,6 +7,7 @@
 package org.gluu.service.external;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -33,7 +34,10 @@ public class ExternalPersistenceExtensionService extends ExternalScriptService {
 	private static final long serialVersionUID = 5466361778036208685L;
 
 	@Inject
-	private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
+	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+
+	@Inject
+	private Instance<List<PersistenceEntryManager>> persistenceEntryManagerListInstance;
 
 	public ExternalPersistenceExtensionService() {
 		super(CustomScriptType.PERSISTENCE_EXTENSION);
@@ -46,9 +50,16 @@ public class ExternalPersistenceExtensionService extends ExternalScriptService {
 			persistenceExtension = (PersistenceExtension) this.defaultExternalCustomScript.getExternalType();
 		}
 		
-		for (Iterator<PersistenceEntryManager> it = persistenceMetricEntryManagerInstance.iterator(); it.hasNext();) {
+		for (Iterator<PersistenceEntryManager> it = persistenceEntryManagerInstance.iterator(); it.hasNext();) {
 			PersistenceEntryManager persistenceEntryManager = it.next();
 			persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+		}
+
+		for (Iterator<List<PersistenceEntryManager>> it = persistenceEntryManagerListInstance.iterator(); it.hasNext();) {
+			List<PersistenceEntryManager> persistenceEntryManagerList = it.next();
+			for (PersistenceEntryManager persistenceEntryManager: persistenceEntryManagerList) {
+				persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+			}
 		}
     }
 
