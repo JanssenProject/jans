@@ -6,24 +6,15 @@
 
 package org.gluu.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.gluu.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.uma.UmaScopeType;
+import org.gluu.oxauth.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a token request to send to the authorization server.
@@ -31,9 +22,7 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version June 28, 2017
  */
-public class TokenRequest extends BaseRequest {
-
-    private static final Logger LOG = Logger.getLogger(TokenRequest.class);
+public class TokenRequest extends ClientAuthnRequest {
 
     public static class Builder {
 
@@ -75,16 +64,8 @@ public class TokenRequest extends BaseRequest {
     private String scope;
     private String assertion;
     private String refreshToken;
-    private String audience;
     private String codeVerifier;
     private String authReqId;
-
-    private SignatureAlgorithm algorithm;
-    private String sharedKey;
-    private RSAPrivateKey rsaPrivateKey;
-    private ECDSAPrivateKey ecPrivateKey;
-    private AbstractCryptoProvider cryptoProvider;
-    private String keyId;
 
     /**
      * Constructs a token request.
@@ -271,93 +252,12 @@ public class TokenRequest extends BaseRequest {
         this.refreshToken = refreshToken;
     }
 
-    public void setAudience(String audience) {
-        this.audience = audience;
-    }
-
-    public void setAlgorithm(SignatureAlgorithm algorithm) {
-        this.algorithm = algorithm;
-    }
-
-    public void setSharedKey(String sharedKey) {
-        this.sharedKey = sharedKey;
-    }
-
-    @Deprecated
-    public void setRsaPrivateKey(RSAPrivateKey rsaPrivateKey) {
-        this.rsaPrivateKey = rsaPrivateKey;
-    }
-
-    @Deprecated
-    public void setEcPrivateKey(ECDSAPrivateKey ecPrivateKey) {
-        this.ecPrivateKey = ecPrivateKey;
-    }
-
-    public void setCryptoProvider(AbstractCryptoProvider cryptoProvider) {
-        this.cryptoProvider = cryptoProvider;
-    }
-
-    public String getKeyId() {
-        return keyId;
-    }
-
-    public void setKeyId(String keyId) {
-        this.keyId = keyId;
-    }
-
     public String getAuthReqId() {
         return authReqId;
     }
 
     public void setAuthReqId(String authReqId) {
         this.authReqId = authReqId;
-    }
-
-    public String getClientAssertion() {
-        if (cryptoProvider == null) {
-            LOG.error("Crypto provider is not specified");
-        	return null;
-        }
-
-        Jwt clientAssertion = new Jwt();
-
-        if (algorithm == null) {
-            algorithm = SignatureAlgorithm.HS256;
-        }
-        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        Date issuedAt = calendar.getTime();
-        calendar.add(Calendar.MINUTE, 5);
-        Date expirationTime = calendar.getTime();
-
-        // Header
-        clientAssertion.getHeader().setType(JwtType.JWT);
-        clientAssertion.getHeader().setAlgorithm(algorithm);
-        if (StringUtils.isNotBlank(keyId)) {
-            clientAssertion.getHeader().setKeyId(keyId);
-        }
-
-        // Claims
-        clientAssertion.getClaims().setIssuer(getAuthUsername());
-        clientAssertion.getClaims().setSubjectIdentifier(getAuthUsername());
-        clientAssertion.getClaims().setAudience(audience);
-        clientAssertion.getClaims().setJwtId(UUID.randomUUID());
-        clientAssertion.getClaims().setExpirationTime(expirationTime);
-        clientAssertion.getClaims().setIssuedAt(issuedAt);
-
-        // Signature
-        try {
-            if (sharedKey == null) {
-                sharedKey = getAuthPassword();
-            }
-            String signature = cryptoProvider.sign(clientAssertion.getSigningInput(), keyId, sharedKey, algorithm);
-            clientAssertion.setEncodedSignature(signature);
-        } catch (InvalidJwtException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        return clientAssertion.toString();
     }
 
     /**
@@ -368,73 +268,23 @@ public class TokenRequest extends BaseRequest {
      */
     @Override
     public String getQueryString() {
-        StringBuilder queryStringBuilder = new StringBuilder();
+        QueryBuilder builder = QueryBuilder.instance();
 
-        try {
-            if (grantType != null) {
-                queryStringBuilder.append("grant_type=").append(grantType.toString());
-            }
-            if (code != null && !code.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("code=").append(code);
-            }
-            if (redirectUri != null && !redirectUri.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("redirect_uri=").append(
-                        URLEncoder.encode(redirectUri, "UTF-8"));
-            }
-            if (scope != null && !scope.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("scope=").append(
-                        URLEncoder.encode(scope, "UTF-8"));
-            }
-            if (username != null && !username.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("username=").append(username);
-            }
-            if (password != null && !password.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("password=").append(password);
-            }
-            if (assertion != null && !assertion.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("assertion=").append(assertion);
-            }
-            if (refreshToken != null && !refreshToken.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("refresh_token=").append(refreshToken);
-            }
-            if ( StringUtils.isNotBlank(authReqId)) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("auth_req_id=").append(authReqId);
-            }
-            if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
-                if (getAuthUsername() != null && !getAuthUsername().isEmpty()) {
-                    queryStringBuilder.append("&");
-                    queryStringBuilder.append("client_id=").append(
-                            URLEncoder.encode(getAuthUsername(), "UTF-8"));
-                }
-                if (getAuthPassword() != null && !getAuthPassword().isEmpty()) {
-                    queryStringBuilder.append("&");
-                    queryStringBuilder.append("client_secret=").append(
-                            URLEncoder.encode(getAuthPassword(), "UTF-8"));
-                }
-            } else if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
-                    getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
-                queryStringBuilder.append("&client_assertion_type=").append(
-                        URLEncoder.encode(ClientAssertionType.JWT_BEARER.toString(), "UTF-8"));
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("client_assertion=").append(getClientAssertion());
-            }
-            for (String key : getCustomParameters().keySet()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        builder.appendIfNotNull("grant_type", grantType);
+        builder.append("code", code);
+        builder.append("redirect_uri", redirectUri);
+        builder.append("scope", scope);
+        builder.append("username", username);
+        builder.append("password", password);
+        builder.append("assertion", assertion);
+        builder.append("refreshToken", refreshToken);
+        builder.append("authReqId", authReqId);
+        appendClientAuthnToQuery(builder);
+        for (String key : getCustomParameters().keySet()) {
+            builder.append(key, getCustomParameters().get(key));
         }
 
-        return queryStringBuilder.toString();
+        return builder.toString();
     }
 
     /**
