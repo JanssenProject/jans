@@ -71,17 +71,16 @@ public class JanssenPKCSResource {
 	}
 
 	
-	@Path("/updateTest")
-	@GET
+	@PUT
 	@Operation(summary = "Update oxAuth PKCS #11 configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response updateJanssenPKCSConfiguration() {
+	public Response updateJanssenPKCSConfiguration(@Valid JanssenPKCS janssenPKCS) {
 		
 		try {
 			log.info("JanssenPKCSResource::updateJanssenPKCSConfiguration() - Update oxAuth JanssenPKCS configuration");
-			JanssenPKCS janssenPKCS = updateJanssenPKCS(); //For testing only
+			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
 			appConfiguration.setOxElevenGenerateKeyEndpoint(janssenPKCS.getJanssenPKCSGenerateKeyEndpoint());
@@ -89,12 +88,9 @@ public class JanssenPKCSResource {
 			appConfiguration.setOxElevenVerifySignatureEndpoint(janssenPKCS.getJanssenPKCSVerifySignatureEndpoint());
 			appConfiguration.setOxElevenDeleteKeyEndpoint(janssenPKCS.getJanssenPKCSDeleteKeyEndpoint());
 			appConfiguration.setOxElevenTestModeToken(janssenPKCS.getJanssenPKCSTestModeToken());
-			log.info("JanssenPKCSResource::updateJanssenPKCSConfiguration() - Update oxAuth JanssenPKCS configuration");
-			
+						
 			//Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			
-			log.info("JanssenPKCSResource::updateJanssenPKCSConfiguration() - Update oxAuth JanssenPKCS configuration");
 			
 			return Response.ok(ResponseStatus.SUCCESS).build();
 			
@@ -106,33 +102,4 @@ public class JanssenPKCSResource {
 		
 	}
 	
-	
-	private JanssenPKCS getJanssenPKCS() throws Exception{	
-		
-		JanssenPKCS janssenPKCS = new JanssenPKCS();
-		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		
-		janssenPKCS.setJanssenPKCSGenerateKeyEndpoint(appConfiguration.getOxElevenGenerateKeyEndpoint());
-		janssenPKCS.setJanssenPKCSSignEndpoint(appConfiguration.getOxElevenSignEndpoint());
-		janssenPKCS.setJanssenPKCSVerifySignatureEndpoint(appConfiguration.getOxElevenVerifySignatureEndpoint());
-		janssenPKCS.setJanssenPKCSDeleteKeyEndpoint(appConfiguration.getOxElevenDeleteKeyEndpoint());
-		janssenPKCS.setJanssenPKCSTestModeToken(appConfiguration.getOxElevenTestModeToken());	
-		
-		return janssenPKCS;
-	}
-	
-	private JanssenPKCS updateJanssenPKCS() throws Exception{
-		JanssenPKCS janssenPKCS = new JanssenPKCS();
-				
-		janssenPKCS.setJanssenPKCSGenerateKeyEndpoint("https://pujavs2.infinity.com/oxeleven/rest/oxeleven/generateKey");
-		janssenPKCS.setJanssenPKCSSignEndpoint("https://pujavs2.infinity.com/oxeleven/rest/oxeleven/sign");
-		janssenPKCS.setJanssenPKCSVerifySignatureEndpoint("https://pujavs2.infinity.com/oxeleven/rest/oxeleven/verifySignature");
-		janssenPKCS.setJanssenPKCSDeleteKeyEndpoint("https://pujavs2.infinity.com/oxeleven/rest/oxeleven/deleteKey");
-		
-		return janssenPKCS;
-	}
-	
-	
-	
-
 }
