@@ -508,8 +508,12 @@ public class CustomScriptManager implements Serializable {
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurationsByScriptType(
 			CustomScriptType customScriptType) {
-		return new ArrayList<CustomScriptConfiguration>(
-				this.customScriptConfigurationsByScriptType.get(customScriptType));
+		List<CustomScriptConfiguration> tmpCustomScriptConfigurationsByScriptType = this.customScriptConfigurationsByScriptType
+				.get(customScriptType);
+		if (tmpCustomScriptConfigurationsByScriptType == null) {
+			tmpCustomScriptConfigurationsByScriptType = new ArrayList<CustomScriptConfiguration>(0);
+		}
+		return new ArrayList<CustomScriptConfiguration>(tmpCustomScriptConfigurationsByScriptType);
 	}
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurations() {

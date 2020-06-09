@@ -6,14 +6,19 @@
 
 package org.gluu.service.external;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.persistence.PersistenceType;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.service.custom.script.ExternalScriptService;
 import org.gluu.service.external.context.PersistenceExternalContext;
 
@@ -23,24 +28,41 @@ import org.gluu.service.external.context.PersistenceExternalContext;
  * @author Yuriy Movchan Date: 06/04/2020
  */
 @ApplicationScoped
-public class ExternalPersistenceExtension extends ExternalScriptService {
+public class ExternalPersistenceExtensionService extends ExternalScriptService {
 
 	private static final long serialVersionUID = 5466361778036208685L;
 
-	public ExternalPersistenceExtension() {
+	@Inject
+	private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
+
+	public ExternalPersistenceExtensionService() {
 		super(CustomScriptType.PERSISTENCE_EXTENSION);
 	}
 
-	public void executeExternalOnBeforeCreateMethod(CustomScriptConfiguration customScriptConfiguration, PersistenceExternalContext context) {
-		try {
-			log.debug("Executing python 'onBeforeCreate' method");
-			PersistenceType persistenceType = (PersistenceType) customScriptConfiguration.getExternalType();
-			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-			persistenceType.onBeforeCreate(context, configurationAttributes);
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
+	@Override
+	protected void reloadExternal() {
+		PersistenceExtension persistenceExtension = null;
+		if (isEnabled()) {
+			persistenceExtension = (PersistenceExtension) this.defaultExternalCustomScript.getExternalType();
 		}
+		
+		for (Iterator<PersistenceEntryManager> it = persistenceMetricEntryManagerInstance.iterator(); it.hasNext();) {
+			PersistenceEntryManager persistenceEntryManager = it.next();
+			persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+		}
+    }
+
+	public void setPersistenceExtension(PersistenceEntryManager persistenceEntryManager) {
+		PersistenceExtension persistenceExtension = null;
+		if (isEnabled()) {
+			persistenceExtension = (PersistenceExtension) this.defaultExternalCustomScript.getExternalType();
+		}
+
+		persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+	}
+
+	public void executeExternalOnAfterCreateMethod(PersistenceExternalContext context) {
+		executeExternalOnAfterCreateMethod(this.defaultExternalCustomScript, context);
 	}
 
 	public void executeExternalOnAfterCreateMethod(CustomScriptConfiguration customScriptConfiguration, PersistenceExternalContext context) {
@@ -55,16 +77,8 @@ public class ExternalPersistenceExtension extends ExternalScriptService {
 		}
 	}
 
-	public void executeExternalOnBeforeDestroyMethod(CustomScriptConfiguration customScriptConfiguration, PersistenceExternalContext context) {
-		try {
-			log.debug("Executing python 'onBeforeDestroy' method");
-			PersistenceType persistenceType = (PersistenceType) customScriptConfiguration.getExternalType();
-			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-			persistenceType.onBeforeDestroy(context, configurationAttributes);
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-            saveScriptError(customScriptConfiguration.getCustomScript(), ex);
-		}
+	public void executeExternalOnAfterDestroyMethod(PersistenceExternalContext context) {
+		executeExternalOnAfterDestroyMethod(this.defaultExternalCustomScript, context);
 	}
 
 	public void executeExternalOnAfterDestroyMethod(CustomScriptConfiguration customScriptConfiguration, PersistenceExternalContext context) {

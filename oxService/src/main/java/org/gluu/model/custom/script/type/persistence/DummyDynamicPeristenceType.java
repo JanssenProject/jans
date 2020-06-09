@@ -36,15 +36,7 @@ public class DummyDynamicPeristenceType implements PersistenceType {
 	}
 
 	@Override
-	public void onBeforeCreate(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
-	}
-
-	@Override
 	public void onAfterCreate(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
-	}
-
-	@Override
-	public void onBeforeDestroy(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
 	}
 
 	@Override
