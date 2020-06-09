@@ -19,9 +19,7 @@ import org.gluu.persist.exception.extension.PersistenceExtension;
  */
 public interface PersistenceType extends BaseExternalType, PersistenceExtension {
 
-	void onBeforeCreate(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
 	void onAfterCreate(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
-	void onBeforeDestroy(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
 	void onAfterDestroy(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

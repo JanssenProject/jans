@@ -149,7 +149,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	
 	        if (userPassword != null) {
 	        	if (persistenceExtension == null) {
-		        	result = PasswordEncryptionHelper.compareCredentials(password.getBytes(), userPassword.getBytes());
+		        	result = PasswordEncryptionHelper.compareCredentials(password, userPassword);
 	        	} else {
 	        		result = persistenceExtension.compareHashedPasswords(password, userPassword);
 	        	}

@@ -72,7 +72,6 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     private static final LdapFilterConverter LDAP_FILTER_CONVERTER = new LdapFilterConverter();
     private static final LdapSearchScopeConverter LDAP_SEARCH_SCOPE_CONVERTER = new LdapSearchScopeConverter();
 
-    private LdapOperationServiceImpl operationService;
     private List<DeleteNotifier> subscribers;
 
     public LdapEntryManager() {
@@ -89,11 +88,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return true;
         }
 
-        return this.operationService.destroy();
+        return getOperationService().destroy();
     }
 
     public LdapOperationServiceImpl getOperationService() {
-        return operationService;
+        return (LdapOperationServiceImpl) operationService;
     }
 
     @Override
@@ -171,7 +170,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             String[] attributeValues = attribute.getStringValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
-                if (operationService.isCertificateAttribute(attributeName)) {
+                if (getOperationService().isCertificateAttribute(attributeName)) {
                     byte[][] binaryValues = toBinaryValues(attributeValues);
 
                     ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
@@ -183,7 +182,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
         // Persist entry
         try {
-            boolean result = this.operationService.addEntry(dn, ldapAttributes);
+            boolean result = getOperationService().addEntry(dn, ldapAttributes);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
             }
@@ -285,7 +284,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             }
 
             if (modifications.size() > 0) {
-                boolean result = this.operationService.updateEntry(dn, modifications);
+                boolean result = getOperationService().updateEntry(dn, modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
                 }
@@ -304,7 +303,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            this.operationService.delete(dn);
+            getOperationService().delete(dn);
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -337,7 +336,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
+            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
                     0, 100, count, null, LdapOperationService.DN);
 
         } catch (Exception ex) {
@@ -354,11 +353,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 	@Override
     public void removeRecursively(String dn) {
         try {
-            if (this.operationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
+            if (getOperationService().getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
                 for (DeleteNotifier subscriber : subscribers) {
                     subscriber.onBeforeRemove(dn);
                 }
-                this.operationService.deleteRecursively(dn);
+                getOperationService().deleteRecursively(dn);
                 for (DeleteNotifier subscriber : subscribers) {
                     subscriber.onAfterRemove(dn);
                 }
@@ -375,7 +374,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     	SearchResult searchResult = null;
         try {
-            searchResult = this.operationService.search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), toLdapSearchScope(scope), null, 0, 0, 0, null, "dn");
+            searchResult = getOperationService().search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), toLdapSearchScope(scope), null, 0, 0, 0, null, "dn");
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
             }
@@ -401,7 +400,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     protected List<AttributeData> find(String dn, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
-            SearchResultEntry entry = this.operationService.lookup(dn, ldapReturnAttributes);
+            SearchResultEntry entry = getOperationService().lookup(dn, ldapReturnAttributes);
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -440,7 +439,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
+            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
                     start, chunkSize, count, null, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -490,7 +489,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         List<SearchResultEntry> searchResultEntries;
         PagedResult<T> vlvResponse = new PagedResult<T>();
         try {
-            searchResultEntries = this.operationService.searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
+            searchResultEntries = getOperationService().searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
                     toLdapSearchScope(SearchScope.SUB), start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
@@ -534,7 +533,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         SearchResult searchResult = null;
         try {
 
-            searchResult = this.operationService.searchVirtualListView(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
+            searchResult = getOperationService().searchVirtualListView(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
                     start, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
             if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
@@ -573,7 +572,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
         SearchResult searchResult = null;
         try {
-            searchResult = this.operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, ldapReturnAttributes);
+            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, ldapReturnAttributes);
             if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
             }
@@ -669,14 +668,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             if (LOG.isTraceEnabled()) {
                 if (attribute.needsBase64Encoding()) {
                     LOG.trace("Found binary attribute: " + attributeName + ". Is defined in LDAP config: "
-                            + operationService.isBinaryAttribute(attributeName));
+                            + getOperationService().isBinaryAttribute(attributeName));
                 }
             }
 
             attributeValueStrings = attribute.getValues();
             if (attribute.needsBase64Encoding()) {
-                boolean binaryAttribute = operationService.isBinaryAttribute(attributeName);
-                boolean certificateAttribute = operationService.isCertificateAttribute(attributeName);
+                boolean binaryAttribute = getOperationService().isBinaryAttribute(attributeName);
+                boolean certificateAttribute = getOperationService().isCertificateAttribute(attributeName);
 
                 if (binaryAttribute || certificateAttribute) {
                     byte[][] attributeValues = attribute.getValueByteArrays();
@@ -691,7 +690,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     }
                 }
                 if (certificateAttribute) {
-                    attributeName = operationService.getCertificateAttributeName(attributeName);
+                    attributeName = getOperationService().getCertificateAttributeName(attributeName);
                 }
             }
 
@@ -721,14 +720,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
     	SearchScope scope = SearchScope.SUB;
         try {
-            SearchResult searchResult = operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, (String[]) null);
+            SearchResult searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, (String[]) null);
             if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
                 return false;
             }
 
             String bindDn = searchResult.getSearchEntries().get(0).getDN();
 
-            return operationService.authenticate(bindDn, password);
+            return getOperationService().authenticate(bindDn, password);
         } catch (ConnectionException ex) {
             throw new AuthenticationException(String.format("Failed to authenticate user: %s", userName), ex);
         } catch (SearchScopeException ex) {
@@ -741,7 +740,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     @Override
     public boolean authenticate(String bindDn, String password) {
         try {
-            return operationService.authenticate(bindDn, password);
+            return getOperationService().authenticate(bindDn, password);
         } catch (ConnectionException ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
         }
@@ -791,7 +790,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             if (batchOperation != null) {
                 batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
             }
-            searchResult = operationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(searchScope), batchOperationWraper, 0, 100, 0, null,
+            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(searchScope), batchOperationWraper, 0, 100, 0, null,
                     ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -851,7 +850,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     public boolean loadLdifFileContent(String ldifFileContent) {
         LDAPConnection connection = null;
         try {
-            connection = operationService.getConnection();
+            connection = getOperationService().getConnection();
             ResultCode result = LdifDataUtility.instance().importLdifFileContent(connection, ldifFileContent);
             return ResultCode.SUCCESS.equals(result);
         } catch (Exception ex) {
@@ -859,7 +858,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
             return false;
         } finally {
             if (connection != null) {
-                operationService.releaseConnection(connection);
+            	getOperationService().releaseConnection(connection);
             }
         }
     }
@@ -867,7 +866,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     @Override
     public List<AttributeData> exportEntry(String dn) {
         try {
-        	SearchResultEntry searchResultEntry = this.operationService.lookup(dn, (String[]) null);
+        	SearchResultEntry searchResultEntry = getOperationService().lookup(dn, (String[]) null);
 
             List<AttributeData> result = getAttributeDataList(searchResultEntry);
             if (result != null) {
@@ -886,12 +885,12 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     public int getSupportedLDAPVersion() {
-        return this.operationService.getSupportedLDAPVersion();
+        return getOperationService().getSupportedLDAPVersion();
     }
 
     private Modification createModification(final ModificationType modificationType, final String attributeName, final String... attributeValues) {
         String realAttributeName = attributeName;
-        if (operationService.isCertificateAttribute(realAttributeName)) {
+        if (getOperationService().isCertificateAttribute(realAttributeName)) {
             realAttributeName += ";binary";
             byte[][] binaryValues = toBinaryValues(attributeValues);
 
