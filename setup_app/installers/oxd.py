@@ -44,7 +44,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
             self.run([paths.cmd_chmod, '+x', fn])
 
-        if Config.oxd_use_gluu_storage:
+        if Config.get('oxd_use_gluu_storage'):
             oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
             yml_str = self.readFile(oxd_server_yml_fn)
             oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
