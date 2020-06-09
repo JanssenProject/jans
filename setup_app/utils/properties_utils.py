@@ -6,14 +6,16 @@ import uuid
 import glob
 import urllib
 import ssl
+import re
 
 from setup_app import paths
 from setup_app.utils import base
+from setup_app.utils.cbm import CBM
 from setup_app.static import InstallTypes, colors
 
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
-
+from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
 class PropertiesUtils(SetupUtils):
@@ -256,7 +258,7 @@ class PropertiesUtils(SetupUtils):
             keys.sort()
             for key in keys:
                 key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'cb_bucket_roles', 'properties_password', 'non_setup_properties'):
+                if key in ('couchbaseInstallOutput', 'post_messages', 'properties_password', 'non_setup_properties'):
                     continue
                 if key.startswith('cmd_'):
                     continue
@@ -298,8 +300,7 @@ class PropertiesUtils(SetupUtils):
     def test_cb_servers(self, couchbase_hostname):
         cb_hosts = base.re_split_host.findall(couchbase_hostname)
 
-        cb_query_node = None
-        retval = {'result': True, 'query_node': cb_query_node, 'reason': ''}
+        retval = {'result': True, 'reason': ''}
 
         for i, cb_host in enumerate(cb_hosts):
 
@@ -316,37 +317,39 @@ class PropertiesUtils(SetupUtils):
                     retval['reason'] = cb_host + ': ' + cbm_result.reason
                     return retval
                 try:
-                    qr = cbm_.exec_query('select * from system:indexes limit 1')
-                    if qr.ok:
-                        cb_query_node = i
+                    result = cbm_.get_services()
+                    if result.ok:
+                        data = result.json()
+                        for node in data.get('nodesExt', []):
+                            if node.get('thisNode'):
+                                if 'n1qlSSL' in node.get('services', []):
+                                    Config.cb_query_node = cb_host
+                                    retval['result'] = True
+                                    if not Config.thread_queue:
+                                        print("    Successfully connected to Couchbase server")
+                                    return retval
                 except:
                     pass
-        else:
 
-            if cbm_result.ok and cb_query_node != None:
-                if not Config.thread_queue:
-                    print("    Successfully connected to Couchbase server")
-                cb_host_ = cb_hosts[self.cb_query_node]
-                return retval
-            if cb_query_node == None:
-                if not Config.thread_queue:
-                    print("Can't find any query node")
-                retval['result'] = False
-                retval['reason'] = "Can't find any query node"
+
+        if not Config.thread_queue:
+            print("Can't find any query node")
+
+        retval['result'] = False
+        retval['reason'] = "Can't find any query node"
 
         return retval
 
     def prompt_remote_couchbase(self):
     
         while True:
-            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts")
-            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User")
-            Config.cb_password =self.getPrompt("    Couchbase Password")
+            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts", Config.couchbase_hostname)
+            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User", Config.couchebaseClusterAdmin)
+            Config.cb_password =self.getPrompt("    Couchbase Password", Config.cb_password)
 
             result = self.test_cb_servers(Config.couchbase_hostname)
 
             if result['result']:
-                self.cb_query_node = result['query_node']
                 break
 
     def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
@@ -407,7 +410,7 @@ class PropertiesUtils(SetupUtils):
         options = []
         options_text = []
         
-        bucket_list = list(self.couchbaseBucketDict.keys())
+        bucket_list = list(Config.couchbaseBucketDict.keys())
 
         for i, m in enumerate(bucket_list):
             options_text.append('({0}) {1}'.format(i+1,m))
@@ -415,7 +418,7 @@ class PropertiesUtils(SetupUtils):
 
         options_text = 'Use WrenDS to store {}'.format(' '.join(options_text))
 
-        re_pattern = '^[1-{0}]+$'.format(len(self.couchbaseBucketDict))
+        re_pattern = '^[1-{0}]+$'.format(len(Config.couchbaseBucketDict))
 
         while True:
             prompt = self.getPrompt(options_text)
@@ -431,7 +434,7 @@ class PropertiesUtils(SetupUtils):
             couchbase_mappings.remove(m)
 
         for m in couchbase_mappings:
-            self.mappingLocations[m] = 'couchbase'
+            Config.mappingLocations[m] = 'couchbase'
 
 
     def promptForCasaInstallation(self, promptForCasa='n'):
@@ -621,7 +624,7 @@ class PropertiesUtils(SetupUtils):
         if not Config.wrends_install and Config.cb_install:
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
         elif Config.wrends_install and Config.cb_install:
-            Config.promptForBackendMappings()
+            self.promptForBackendMappings()
 
         self.set_persistence_type()
 
@@ -658,8 +661,8 @@ class PropertiesUtils(SetupUtils):
         buckets_.append('gluu')
 
         if Config.cb_install == InstallTypes.REMOTE:
-
-            isCBRoleOK = self.checkCBRoles(buckets_)
+            dbUtils.set_cbm()
+            isCBRoleOK = dbUtils.checkCBRoles(buckets_)
 
             if not isCBRoleOK[0]:
                 print("{}Please check user {} has roles {} on bucket(s) {}{}".format(
@@ -724,7 +727,7 @@ class PropertiesUtils(SetupUtils):
 
         if Config.installOxd:
             promptForOxdGluuStorage = self.getPrompt("  Use Gluu Storage for Oxd?",
-                                                self.getDefaultOption(Config.oxd_use_gluu_storage)
+                                                self.getDefaultOption(Config.get('oxd_use_gluu_storage'))
                                                 )[0].lower()
             Config.oxd_use_gluu_storage = True if promptForOxdGluuStorage == 'y' else False
 

@@ -40,9 +40,11 @@ class DBUtils:
 
                     break
 
-        self.cbm = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
+        self.set_cbm()
         self.default_bucket = Config.couchbase_bucket_prefix
 
+    def set_cbm(self):
+        self.cbm = CBM(Config.cb_query_node, Config.couchebaseClusterAdmin, Config.cb_password)
 
     def get_oxAuthConfDynamic(self):
         if self.moddb == BackendTypes.LDAP:
@@ -247,14 +249,14 @@ class DBUtils:
             if r and r[0].get(attribute):
                 return r[0][attribute]
             
-    def import_ldif(self, ldif_files, bucket=None):
+    def import_ldif(self, ldif_files, bucket=None, force=None):
 
         for ldif_fn in ldif_files:
             parser = ldif_utils.myLdifParser(ldif_fn)
             parser.parse()
 
             for dn, entry in parser.entries:
-                backend_location = self.get_backend_location_for_dn(dn)
+                backend_location = force if force else self.get_backend_location_for_dn(dn)
                 if backend_location == BackendTypes.LDAP:
                     if not self.dn_exists(dn):
                         base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
@@ -341,6 +343,40 @@ class DBUtils:
 
         if Config.mappingLocations[group] == 'couchbase':
             return static.BackendTypes.COUCHBASE
+
+
+    def checkCBRoles(self, buckets=[]):
+        
+        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
+                            'query_update', 'query_insert',
+                            'query_manage_index']
+        
+        result = self.cbm.whoami()
+        bc = buckets[:]
+        bucket_roles = {}
+        if 'roles' in result:
+            
+            for role in result['roles']:
+                if role['role'] == 'admin':
+                    Config.isCouchbaseUserAdmin = True
+                    return True, None
+
+                if not role['bucket_name'] in bucket_roles:
+                    bucket_roles[role['bucket_name']] = []
+
+                bucket_roles[role['bucket_name']].append(role['role'])
+
+        for b_ in bc[:]:
+            for r_ in self.cb_bucket_roles:
+                if not r_ in bucket_roles[b_]:
+                    break
+            else:
+                bc.remove(b_)
+
+        if bc:
+            return False, bc
+
+        return True, None
 
 
     def __del__(self):

@@ -186,12 +186,12 @@ class GluuInstaller(SetupUtils):
         ldap_mappings = self.getMappingType('ldap')
         couchbase_mappings = self.getMappingType('couchbase')
         
-        for group in self.mappingLocations:
+        for group in Config.mappingLocations:
             if group == 'default':
-                default_mapping = self.mappingLocations[group]
+                default_mapping = Config.mappingLocations[group]
                 break
 
-        storages = set(self.mappingLocations.values())
+        storages = set(Config.mappingLocations.values())
         
         gluu_hybrid_roperties = [
                         'storages: {0}'.format(', '.join(storages)),
@@ -203,20 +203,20 @@ class GluuInstaller(SetupUtils):
             ldap_map_list = []
             for m in ldap_mappings:
                 if m != 'default':
-                    ldap_map_list.append(self.couchbaseBucketDict[m]['mapping'])
+                    ldap_map_list.append(Config.couchbaseBucketDict[m]['mapping'])
             gluu_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_map_list)))
 
         if couchbase_mappings:
             cb_map_list = []
             for m in couchbase_mappings:
                 if m != 'default':
-                    cb_map_list.append(self.couchbaseBucketDict[m]['mapping'])
+                    cb_map_list.append(Config.couchbaseBucketDict[m]['mapping'])
             cb_map_str = ', '.join(cb_map_list)
             gluu_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(cb_map_str))
 
-        self.gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
+        gluu_hybrid_roperties_content = '\n'.join(gluu_hybrid_roperties)
 
-        self.writeFile(self.gluu_hybrid_roperties, self.gluu_hybrid_roperties_content)
+        self.writeFile(Config.gluu_hybrid_roperties_fn, gluu_hybrid_roperties_content)
 
 
     def setup_init_scripts(self):
