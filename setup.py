@@ -168,7 +168,6 @@ if proceed:
         gluuInstaller.encode_test_passwords()
 
     oxtrustInstaller.generate_api_configuration()
-    scimInstaller.generate_configuration()
 
     Config.ldapCertFn = Config.opendj_cert_fn
     Config.ldapTrustStoreFn = Config.opendj_p12_fn
@@ -177,8 +176,6 @@ if proceed:
 
     gluuInstaller.prepare_base64_extension_scripts()
     gluuInstaller.render_templates()
-
-    gluuInstaller.generate_base64_configuration()
     gluuInstaller.render_configuration_template()
     gluuInstaller.update_hostname()
 

@@ -7,7 +7,7 @@ import json
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.utils import base
-from setup_app.static import InstallTypes
+from setup_app.static import InstallTypes, BackendTypes
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
@@ -64,12 +64,12 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 for group in ldap_mappings:
                     ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
   
-                if not Config.ldif_base in ldif_files:
-                    ldif_files.insert(0, Config.ldif_base)
-
                 # Now bind ldap and import ldif files
                 self.dbUtils.bind()
                 Config.pbar.progress("opendj", "OpenDJ: importing ldif files", False)
+                if not Config.ldif_base in ldif_files:
+                    self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.LDAP)
+
                 self.dbUtils.import_ldif(ldif_files)
 
                 Config.pbar.progress("opendj", "OpenDJ: post installation", False)
