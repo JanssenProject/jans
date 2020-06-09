@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gluu.oxauth.model.ciba.CibaCallback;
 import org.gluu.oxauth.model.ciba.CibaRequestSession;
-import org.gluu.oxauth.model.ciba.PingCibaCallback;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.service.CibaService;
 import org.gluu.oxauth.service.CibaSessions;
@@ -58,8 +57,7 @@ public class CibaClientNotificationEndpointImpl implements CibaClientNotificatio
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
             if (session.getTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
-                PingCibaCallback pingCibaCallback = objectMapper.readValue(requestParams, PingCibaCallback.class);
-                cibaService.processPingCallback(callback.getAuthReqId(), pingCibaCallback, session);
+                cibaService.processPingCallback(requestParams, session);
             } else if (session.getTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
                 cibaService.processPushCallback(requestParams, session);
             }
