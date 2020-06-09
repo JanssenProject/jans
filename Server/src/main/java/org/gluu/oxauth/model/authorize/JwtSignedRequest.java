@@ -38,7 +38,7 @@ public abstract class JwtSignedRequest {
     protected String keyId;
 
     // Payload
-    protected List<String> scopes;
+    protected List<String> scopes = Lists.newArrayList();
     protected List<String> aud = Lists.newArrayList();
     protected Integer exp;
 
