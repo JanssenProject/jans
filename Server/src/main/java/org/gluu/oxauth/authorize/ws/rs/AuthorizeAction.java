@@ -150,6 +150,9 @@ public class AuthorizeAction {
     @Inject
     private ExternalPostAuthnService externalPostAuthnService;
 
+    @Inject
+    private CibaRequestService cibaRequestService;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -833,10 +836,10 @@ public class AuthorizeAction {
         String bindingMessage = null;
 
         if (Strings.isNotBlank(getAuthReqId())) {
-            final CIBAGrant cibaGrant = authorizationGrantList.getCIBAGrant(authReqId);
+            final CibaRequestCacheControl cibaRequestCacheControl = cibaRequestService.getCibaRequest(authReqId);
 
-            if (cibaGrant != null) {
-                bindingMessage = cibaGrant.getBindingMessage();
+            if (cibaRequestCacheControl != null) {
+                bindingMessage = cibaRequestCacheControl.getBindingMessage();
             }
         }
 

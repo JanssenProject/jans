@@ -9,10 +9,7 @@ package org.gluu.oxauth.service;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.CacheGrant;
-import org.gluu.oxauth.model.common.ClientTokens;
-import org.gluu.oxauth.model.common.SessionTokens;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.TokenLdap;
@@ -355,4 +352,5 @@ public class GrantService {
     public void removeAllByGrantId(String p_grantId) {
         removeSilently(getGrantsByGrantId(p_grantId));
     }
+
 }

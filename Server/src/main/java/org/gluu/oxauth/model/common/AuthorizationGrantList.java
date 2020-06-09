@@ -116,25 +116,24 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public CIBAGrant createCIBAGrant(User user, Client client, int expiresIn) {
+    public CIBAGrant createCIBAGrant(CibaRequestCacheControl request) {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
-        grant.init(user, client, expiresIn);
-
-        CIBACacheGrant memcachedGrant = new CIBACacheGrant(grant, appConfiguration);
-        cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(), memcachedGrant.cacheKey(), memcachedGrant);
-        log.trace("Put CIBA grant in cache, authReqId: " + grant.getCIBAAuthenticationRequestId().getCode() + ", clientId: " + grant.getClientId());
+        grant.init(request);
+        cacheService.put(grant.getCIBAAuthenticationRequestId().getExpiresIn(),
+                grant.getCIBAAuthenticationRequestId().getCode(), grant);
+        log.trace("Ciba grant saved in cache, authReqId: {}, grantId: {}", grant.getCIBAAuthenticationRequestId().getCode(), grant.getGrantId());
         return grant;
     }
 
     @Override
-    public CIBAGrant getCIBAGrant(String authenticationRequestId) {
-        Object cachedGrant = cacheService.get(CIBACacheGrant.cacheKey(authenticationRequestId, null));
+    public CIBAGrant getCIBAGrant(String authReqId) {
+        Object cachedGrant = cacheService.get(authReqId);
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(CIBACacheGrant.cacheKey(authenticationRequestId, null));
-            log.trace("Failed to fetch CIBA grant from cache, authenticationRequestId: " + authenticationRequestId);
+            cachedGrant = cacheService.get(authReqId);
+            log.trace("Failed to fetch CIBA grant from cache, authReqId: {}", authReqId);
         }
-        return cachedGrant instanceof CIBACacheGrant ? ((CIBACacheGrant) cachedGrant).asCIBAGrant(grantInstance) : null;
+        return cachedGrant instanceof CIBAGrant ? ((CIBAGrant) cachedGrant) : null;
     }
 
     @Override

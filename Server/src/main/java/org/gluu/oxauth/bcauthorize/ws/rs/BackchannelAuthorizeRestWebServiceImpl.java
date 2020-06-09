@@ -31,6 +31,7 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.CibaRequestService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
@@ -94,6 +95,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
     @Inject
     private CIBAEndUserNotificationProxy cibaEndUserNotificationProxy;
+
+    @Inject
+    private CibaRequestService cibaRequestService;
 
     @Override
     public Response requestBackchannelAuthorizationPost(
@@ -213,7 +217,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
                     scopeList, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
                     loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
-                    userCodeParam, userCode);
+                    userCodeParam, userCode, requestedExpiry);
             if (cibaAuthorizeParamsValidation != null) {
                 builder = Response.status(cibaAuthorizeParamsValidation.getStatus());
                 builder.entity(errorResponseFactory.errorAsJson(
@@ -233,23 +237,17 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     null : appConfiguration.getBackchannelAuthenticationResponseInterval();
             long currentTime = new Date().getTime();
 
-            CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(
-                    user,
-                    client,
-                    expiresIn);
-            cibaGrant.setScopes(scopeList);
-            cibaGrant.setClientNotificationToken(clientNotificationToken);
-            cibaGrant.setBindingMessage(bindingMessage);
-            cibaGrant.setLastAccessControl(currentTime);
-            cibaGrant.setAcrValues(acrValues);
-            cibaGrant.save(); // call save after object modification!!!
+            CibaRequestCacheControl cibaRequestCacheControl = new CibaRequestCacheControl(user, client, expiresIn, scopeList,
+                    clientNotificationToken, bindingMessage, currentTime, acrValues);
 
-            String authReqId = cibaGrant.getCIBAAuthenticationRequestId().getCode();
+            cibaRequestService.save(cibaRequestCacheControl, expiresIn);
+
+            String authReqId = cibaRequestCacheControl.getCibaAuthReqId().getCode();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
-                    cibaGrant.getScopesAsString(),
-                    cibaGrant.getAcrValues(),
+                    cibaRequestCacheControl.getScopesAsString(),
+                    cibaRequestCacheControl.getAcrValues(),
                     authReqId,
                     deviceRegistrationToken);
 
