@@ -133,7 +133,7 @@ class Config:
         self.configFolder = os.path.join(self.gluuBaseFolder, 'conf') 
 
         self.gluu_properties_fn = os.path.join(self.configFolder,'gluu.properties')
-        self.gluu_hybrid_roperties = os.path.join(self.configFolder, 'gluu-hybrid.properties')
+        self.gluu_hybrid_roperties_fn = os.path.join(self.configFolder, 'gluu-hybrid.properties')
 
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
