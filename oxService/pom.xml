@@ -25,17 +25,17 @@
 				</includes>
 			</resource>
 		</resources>
-        <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.xml</include>
-                    <include>**/services/*</include>
-                    <include>**/*.properties</include>
-                </includes>
-            </testResource>
-        </testResources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.xml</include>
+					<include>**/services/*</include>
+					<include>**/*.properties</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
 
 	<dependencies>
@@ -48,14 +48,14 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>oxcore-persistence-ldap</artifactId>
 		</dependency>
-	        <dependency>
-        	    <groupId>${project.groupId}</groupId>
-	            <artifactId>oxcore-persistence-couchbase</artifactId>
-	        </dependency>
-	        <dependency>
-        	    <groupId>${project.groupId}</groupId>
-	            <artifactId>oxcore-persistence-hybrid</artifactId>
-	        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>oxcore-persistence-couchbase</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>oxcore-persistence-hybrid</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>oxcore-util</artifactId>
@@ -81,13 +81,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.jboss.spec.javax.annotation</groupId>
-		    <artifactId>jboss-annotations-api_1.2_spec</artifactId>
+			<groupId>org.jboss.spec.javax.annotation</groupId>
+			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.jboss.spec.javax.interceptor</groupId>
-		    <artifactId>jboss-interceptors-api_1.2_spec</artifactId>
+			<groupId>org.jboss.spec.javax.interceptor</groupId>
+			<artifactId>jboss-interceptors-api_1.2_spec</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -148,10 +148,10 @@
 		</dependency>
 
 		<!-- Google Guava -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 
 		<!-- Tests -->
 		<dependency>
@@ -163,6 +163,16 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>javax.activation-api</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
 
