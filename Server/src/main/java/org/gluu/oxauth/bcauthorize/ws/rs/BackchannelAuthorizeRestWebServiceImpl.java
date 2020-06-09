@@ -171,12 +171,6 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                         .build());
             }
             if (!jwtRequest.getScopes().isEmpty()) {
-                if (!scopes.contains("openid")) { // spec: Even if a scope parameter is present in the Request Object value, a scope parameter MUST always be passed using the OAuth 2.0 request syntax containing the openid scope value
-                    throw new WebApplicationException(Response
-                            .status(Response.Status.BAD_REQUEST)
-                            .entity(errorResponseFactory.getErrorAsJson(INVALID_SCOPE))
-                            .build());
-                }
                 scopes.addAll(scopeChecker.checkScopesPolicy(client, jwtRequest.getScopes()));
             }
             if (StringUtils.isNotBlank(jwtRequest.getClientNotificationToken())) {
