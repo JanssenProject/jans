@@ -154,7 +154,6 @@ def get_setup_options():
     setupOptions['installScimServer'] = argsp.install_scim
     setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
-    setupOptions['generateOxdCertificate'] = argsp.generate_oxd_certificate
 
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = InstallTypes.REMOTE
