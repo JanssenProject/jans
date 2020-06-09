@@ -96,6 +96,7 @@ public abstract class BaseTest {
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
     protected String backchannelAuthenticationEndpoint;
+    protected String revokeSessionEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
@@ -227,6 +228,14 @@ public abstract class BaseTest {
 
     public void setBackchannelAuthenticationEndpoint(String backchannelAuthenticationEndpoint) {
         this.backchannelAuthenticationEndpoint = backchannelAuthenticationEndpoint;
+    }
+
+    public String getRevokeSessionEndpoint() {
+        return revokeSessionEndpoint;
+    }
+
+    public void setRevokeSessionEndpoint(String revokeSessionEndpoint) {
+        this.revokeSessionEndpoint = revokeSessionEndpoint;
     }
 
     public Map<String, List<String>> getScopeToClaimsMapping() {
@@ -801,6 +810,7 @@ public abstract class BaseTest {
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
+            revokeSessionEndpoint = response.getSessionRevocationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
         } else {
@@ -819,6 +829,7 @@ public abstract class BaseTest {
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
+            revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
         }
 
@@ -977,6 +988,17 @@ public abstract class BaseTest {
 	protected RegisterClient newRegisterClient(RegisterRequest request) {
         try {
             final RegisterClient client = new RegisterClient(registrationEndpoint);
+            client.setRequest(request);
+            client.setExecutor(getClientExecutor());
+            return client;
+        } catch (Exception e) {
+            throw new AssertionError("Failed to create register client");
+        }
+    }
+
+    protected RevokeSessionClient newRevokeSessionClient(RevokeSessionRequest request) {
+        try {
+            final RevokeSessionClient client = new RevokeSessionClient(revokeSessionEndpoint);
             client.setRequest(request);
             client.setExecutor(getClientExecutor());
             return client;
