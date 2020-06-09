@@ -8,7 +8,7 @@ package org.gluu.oxtrust.service.external;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
+import javax.annotation.PostConstruct;
 
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
@@ -27,6 +27,15 @@ public class ExternalScimService extends ExternalScriptService {
 
     public ExternalScimService() {
         super(CustomScriptType.SCIM);
+        //TODO: remove
+        System.out.println("CONSTRUCTOR");
+    }
+    
+    @PostConstruct
+    public void init() {
+    	customScriptType = CustomScriptType.SCIM;
+    	//TODO: remove
+    	System.out.println("INIT");
     }
 
     private boolean executeScimCreateUserMethod(ScimCustomPerson user, CustomScriptConfiguration customScriptConfiguration) {

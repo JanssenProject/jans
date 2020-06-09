@@ -90,7 +90,6 @@
 		</logger>
 
         <Root level="ERROR">
-			<AppenderRef ref="FILE" />
             <AppenderRef ref="Console" />
         </Root>
     </Loggers>

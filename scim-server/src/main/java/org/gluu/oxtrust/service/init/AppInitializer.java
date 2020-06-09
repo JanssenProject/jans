@@ -1,5 +1,6 @@
 package org.gluu.oxtrust.service.init;
 
+import java.util.Collections;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,10 +14,14 @@ import org.gluu.exception.ConfigurationException;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxtrust.service.ApplicationFactory;
 import org.gluu.oxtrust.service.logger.LoggerService;
+import org.gluu.oxtrust.service.external.ExternalScimService;
+import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
+import org.gluu.service.custom.script.CustomScriptManager;
+import org.gluu.service.PythonService;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
@@ -46,19 +51,31 @@ public class AppInitializer {
     @Inject
     private ConfigurationFactory configurationFactory;
 
+	@Inject
+	private CustomScriptManager customScriptManager;
+
+	@Inject
+	private PythonService pythonService;
+
     @Inject
     private LoggerService loggerService;
+    
+    //@Inject
+    //private ExternalScimService externalScimService;
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
         logger.info("SCIM service initializing");
         SecurityProviderUtility.installBCProvider();
 
+        //externalScimService.init();
         configurationFactory.create();
+		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
         quartzSchedulerManager.start();
+		
         configurationFactory.initTimer();
-
         loggerService.initTimer();
+        //customScriptManager.initTimer(Collections.singletonList(CustomScriptType.SCIM));
         logger.info("Initialized!");
 
     }

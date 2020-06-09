@@ -5,7 +5,6 @@
  */
 package org.gluu.oxtrust.model.scim2;
 
-import org.apache.logging.log4j.LogManager;
 import org.gluu.oxtrust.model.scim2.annotations.*;
 import org.gluu.oxtrust.model.scim2.fido.Fido2DeviceResource;
 import org.gluu.oxtrust.model.scim2.fido.FidoDeviceResource;
