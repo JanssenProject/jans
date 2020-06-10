@@ -47,10 +47,10 @@
 	</scm>
 
 	<modules>
-		<!--module>scim-client</module-->
 		<module>scim-model</module>
 		<module>scim-rest</module>
 		<module>scim-server</module>
+		<module>scim-client</module>
 	</modules>
 	
 	<dependencyManagement>
