@@ -215,14 +215,14 @@ public class AuthorizeService {
                         cibaRequestService.update(request);
 
                         cibaPingCallbackProxy.pingCallback(
-                                request.getCibaAuthReqId().getCode(),
+                                request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken()
                         );
                         break;
                     case PUSH:
                         cibaPushErrorProxy.pushError(
-                                request.getCibaAuthReqId().getCode(),
+                                request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken(),
                                 PushErrorResponseType.ACCESS_DENIED,
