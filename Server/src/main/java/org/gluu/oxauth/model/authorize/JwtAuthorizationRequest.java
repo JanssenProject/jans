@@ -17,7 +17,6 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.exception.InvalidJweException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwe.Jwe;
 import org.gluu.oxauth.model.jwe.JweDecrypterImpl;
@@ -28,12 +27,21 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.RedirectUriResponse;
 import org.gluu.service.cdi.util.CdiUtil;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
@@ -45,6 +53,8 @@ import java.util.List;
  * @version November 20, 2018
  */
 public class JwtAuthorizationRequest {
+
+    private final static Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
 
     // Header
     private String type;
@@ -65,18 +75,30 @@ public class JwtAuthorizationRequest {
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
     private Integer exp;
+    private String iss;
+    private Integer iat;
+    private Integer nbf;
+    private String jti;
+    private String clientNotificationToken;
+    private String acrValues;
+    private String loginHintToken;
+    private String idTokenHint;
+    private String loginHint;
+    private String bindingMessage;
+    private String userCode;
+    private Integer requestedExpiry;
 
     private String encodedJwt;
     private String payload;
 
     private AppConfiguration appConfiguration;
 
-    public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
+    public JwtAuthorizationRequest(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String encodedJwt, Client client) throws InvalidJwtException {
         try {
             this.appConfiguration = appConfiguration;
-            this.responseTypes = new ArrayList<ResponseType>();
-            this.scopes = new ArrayList<String>();
-            this.prompts = new ArrayList<Prompt>();
+            this.responseTypes = new ArrayList<>();
+            this.scopes = new ArrayList<>();
+            this.prompts = new ArrayList<>();
             this.encodedJwt = encodedJwt;
 
             if (StringUtils.isEmpty(encodedJwt)) {
@@ -170,6 +192,8 @@ public class JwtAuthorizationRequest {
     }
 
     private void loadPayload(String payload) throws JSONException, UnsupportedEncodingException {
+        this.payload = payload;
+
         JSONObject jsonPayload = new JSONObject(payload);
 
         if (jsonPayload.has("response_type")) {
@@ -196,9 +220,7 @@ public class JwtAuthorizationRequest {
                 this.aud.addAll(Util.asList(audArray));
             }
         }
-        if (jsonPayload.has("client_id")) {
-            clientId = jsonPayload.getString("client_id");
-        }
+        clientId = jsonPayload.optString("client_id", null);
         if (jsonPayload.has("scope")) {
             JSONArray scopesJsonArray = jsonPayload.optJSONArray("scope");
             if (scopesJsonArray != null) {
@@ -214,12 +236,8 @@ public class JwtAuthorizationRequest {
         if (jsonPayload.has("redirect_uri")) {
             redirectUri = URLDecoder.decode(jsonPayload.getString("redirect_uri"), "UTF-8");
         }
-        if (jsonPayload.has("nonce")) {
-            nonce = jsonPayload.getString("nonce");
-        }
-        if (jsonPayload.has("state")) {
-            state = jsonPayload.getString("state");
-        }
+        nonce = jsonPayload.optString("nonce", null);
+        state = jsonPayload.optString("state", null);
         if (jsonPayload.has("display")) {
             display = Display.fromString(jsonPayload.getString("display"));
         }
@@ -244,7 +262,33 @@ public class JwtAuthorizationRequest {
                 idTokenMember = new IdTokenMember(claimsJsonObject.getJSONObject("id_token"));
             }
         }
-        this.payload = payload;
+        iss = jsonPayload.optString("iss", null);
+        if (jsonPayload.has("exp")) {
+            exp = jsonPayload.getInt("exp");
+        }
+        if (jsonPayload.has("iat")) {
+            iat = jsonPayload.getInt("iat");
+        }
+        if (jsonPayload.has("nbf")) {
+            nbf = jsonPayload.getInt("nbf");
+        }
+        jti = jsonPayload.optString("jti", null);
+        clientNotificationToken = jsonPayload.optString("client_notification_token", null);
+        acrValues = jsonPayload.optString("acr_values", null);
+        loginHintToken = jsonPayload.optString("login_hint_token", null);
+        idTokenHint = jsonPayload.optString("id_token_hint", null);
+        loginHint = jsonPayload.optString("login_hint", null);
+        bindingMessage = jsonPayload.optString("binding_message", null);
+        userCode = jsonPayload.optString("user_code", null);
+
+        if (jsonPayload.has("requested_expiry")) {
+            // requested_expirity is an exception, it could be String or Number.
+            if (jsonPayload.get("requested_expiry") instanceof Number) {
+                requestedExpiry = jsonPayload.getInt("requested_expiry");
+            } else {
+                requestedExpiry = Integer.parseInt(jsonPayload.getString("requested_expiry"));
+            }
+        }
     }
 
     private boolean validateSignature(AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
@@ -256,6 +300,10 @@ public class JwtAuthorizationRequest {
         return cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
     }
 
+    public String getEncryptionAlgorithm() {
+        return encryptionAlgorithm;
+    }
+
     public String getKeyId() {
         return keyId;
     }
@@ -264,96 +312,48 @@ public class JwtAuthorizationRequest {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getAlgorithm() {
         return algorithm;
-    }
-
-    public void setAlgorithm(String algorithm) {
-        this.algorithm = algorithm;
     }
 
     public List<ResponseType> getResponseTypes() {
         return responseTypes;
     }
 
-    public void setResponseTypes(List<ResponseType> responseTypes) {
-        this.responseTypes = responseTypes;
-    }
-
     public String getClientId() {
         return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
     }
 
     public List<String> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
-    }
-
     public String getRedirectUri() {
         return redirectUri;
-    }
-
-    public void setRedirectUri(String redirectUri) {
-        this.redirectUri = redirectUri;
     }
 
     public String getNonce() {
         return nonce;
     }
 
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
-    }
-
     public String getState() {
         return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
     }
 
     public Display getDisplay() {
         return display;
     }
 
-    public void setDisplay(Display display) {
-        this.display = display;
-    }
-
     public List<Prompt> getPrompts() {
         return prompts;
-    }
-
-    public void setPrompts(List<Prompt> prompts) {
-        this.prompts = prompts;
     }
 
     public UserInfoMember getUserInfoMember() {
         return userInfoMember;
     }
 
-    public void setUserInfoMember(UserInfoMember userInfoMember) {
-        this.userInfoMember = userInfoMember;
-    }
-
     public IdTokenMember getIdTokenMember() {
         return idTokenMember;
-    }
-
-    public void setIdTokenMember(IdTokenMember idTokenMember) {
-        this.idTokenMember = idTokenMember;
     }
 
     public Integer getExp() {
@@ -365,15 +365,116 @@ public class JwtAuthorizationRequest {
         return aud;
     }
 
-    public void setAud(List<String> aud) {
-        this.aud = aud;
-    }
-
     public String getPayload() {
         return payload;
     }
 
-    public void setPayload(String payload) {
-        this.payload = payload;
+    public String getIss() {
+        return iss;
+    }
+
+    public Integer getIat() {
+        return iat;
+    }
+
+    public Integer getNbf() {
+        return nbf;
+    }
+
+    public String getJti() {
+        return jti;
+    }
+
+    public String getClientNotificationToken() {
+        return clientNotificationToken;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public String getLoginHintToken() {
+        return loginHintToken;
+    }
+
+    public String getIdTokenHint() {
+        return idTokenHint;
+    }
+
+    public String getLoginHint() {
+        return loginHint;
+    }
+
+    public String getBindingMessage() {
+        return bindingMessage;
+    }
+
+    public String getUserCode() {
+        return userCode;
+    }
+
+    public Integer getRequestedExpiry() {
+        return requestedExpiry;
+    }
+
+    @Nullable
+    private static String queryRequest(@Nullable String requestUri, @Nullable RedirectUriResponse redirectUriResponse) {
+        if (StringUtils.isBlank(requestUri)) {
+            return null;
+        }
+        boolean validRequestUri = false;
+        try {
+            URI reqUri = new URI(requestUri);
+            String reqUriHash = reqUri.getFragment();
+            String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
+
+            ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
+            clientRequest.setHttpMethod(HttpMethod.GET);
+
+            ClientResponse<String> clientResponse = clientRequest.get(String.class);
+            int status = clientResponse.getStatus();
+
+            String request = null;
+            if (status == 200) {
+                request = clientResponse.getEntity(String.class);
+
+                if (StringUtils.isBlank(reqUriHash)) {
+                    validRequestUri = true;
+                } else {
+                    String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                    validRequestUri = StringUtils.equals(reqUriHash, hash);
+                }
+            }
+
+            if (!validRequestUri && redirectUriResponse != null) {
+                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_URI, "Invalid request uri.");
+            }
+            return request;
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public static JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse, AbstractCryptoProvider cryptoProvider, AppConfiguration appConfiguration) {
+        final String requestFromClient = queryRequest(requestUri, redirectUriResponse);
+        if (StringUtils.isNotBlank(requestFromClient)) {
+            request = requestFromClient;
+        }
+
+        if (StringUtils.isBlank(request)) {
+            return null;
+        }
+
+        try {
+            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Invalid JWT authorization request. " + e.getMessage(), e);
+        }
+        return null;
     }
 }
