@@ -83,20 +83,18 @@ class PassportInstaller(NodeInstaller):
     def generate_configuration(self):
 
         self.logIt("Generating Passport configuration")
-        if not(hasattr(Config, 'passportSpKeyPass') and getattr(Config, 'passportSpKeyPass')):
+        if not Config.get('passportSpKeyPass'):
             Config.passportSpKeyPass = self.getPW()
             Config.passportSpJksPass = self.getPW()
 
-        if not(hasattr(Config, 'passport_rp_client_cert_alg') and getattr(Config, 'passport_rp_client_cert_alg')):
+        if not Config.get('passport_rp_client_cert_alg'):
             Config.passport_rp_client_cert_alg = 'RS512'
         
-        if not(hasattr(Config, 'passport_rp_client_jks_pass') and getattr(Config, 'passport_rp_client_jks_pass')):
+        if not Config.get('passport_rp_client_jks_pass'):
             Config.passport_rp_client_jks_pass = 'secret'
 
-        if not(hasattr(Config, 'passport_rs_client_jks_pass') and getattr(Config, 'passport_rs_client_jks_pass')):
+        if not Config.get('passport_rs_client_jks_pass'):
             Config.passport_rs_client_jks_pass = self.getPW()
-
-        if not(hasattr(Config, 'passport_rs_client_jks_pass_encoded') and  getattr(Config, 'passport_rs_client_jks_pass_encoded')):
             Config.passport_rs_client_jks_pass_encoded = self.obscure(Config.passport_rs_client_jks_pass)
 
         client_var_id_list = (
