@@ -9,7 +9,6 @@ package org.gluu.oxauth.model.common;
 import org.gluu.service.CacheService;
 
 import javax.inject.Inject;
-import java.io.Serializable;
 
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
