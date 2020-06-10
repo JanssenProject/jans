@@ -6,25 +6,7 @@
 
 package org.gluu.oxauth.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Lists;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
@@ -33,6 +15,7 @@ import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
@@ -72,7 +55,23 @@ import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Lists;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -166,6 +165,12 @@ public class AppInitializer {
 	@Inject
 	private ExternalAuthenticationService externalAuthenticationService;
 
+	@Inject
+	private AppConfiguration appConfiguration;
+
+	@Inject
+	private CibaRequestsProcessorJob cibaRequestsProcessorJob;
+
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
 	private AuthenticationMode authenticationMode;
@@ -213,6 +218,7 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
 		initTimer();
+		initCibaRequestsProcessor();
 
 		// Set default authentication method after 
 		setDefaultAuthenticationMethod(newConfiguration);
@@ -696,6 +702,21 @@ public class AppInitializer {
 			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
 			
 			externalPersistenceExtensionService.executeExternalOnAfterDestroyMethod(persistenceExternalContext);
+		}
+	}
+
+	/**
+	 * Method to initialize CIBA requests processor job according to a json property which
+	 * should be more than 0 seconds of interval
+	 */
+	private void initCibaRequestsProcessor() {
+		if (appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+			if (cibaRequestsProcessorJob != null) {
+				cibaRequestsProcessorJob.initTimer();
+			}
+		} else {
+			log.warn("Didn't start ciba requests processor job because the interval is not valid to run, value: {}",
+					appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
 		}
 	}
 
