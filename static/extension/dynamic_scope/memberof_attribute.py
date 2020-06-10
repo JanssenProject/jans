@@ -5,7 +5,7 @@
 #
 
 from org.gluu.model.custom.script.type.scope import DynamicScopeType
-from org.gluu.oxauth.service import UserService
+from org.gluu.oxauth.service.common import UserService
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.service.cdi.util import CdiUtil
