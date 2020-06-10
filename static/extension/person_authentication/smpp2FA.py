@@ -13,7 +13,8 @@ from java.lang import Enum
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.oxauth.service import AuthenticationService
+from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.util import StringHelper, ArrayHelper
 from javax.faces.application import FacesMessage
