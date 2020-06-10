@@ -57,8 +57,8 @@ public class AppInitializer {
     @Inject
     private LoggerService loggerService;
 
-	//@Inject
-	//private CustomScriptManager customScriptManager;
+	@Inject
+	private CustomScriptManager customScriptManager;
     
     //@Inject
     //private ExternalScimService externalScimService;
