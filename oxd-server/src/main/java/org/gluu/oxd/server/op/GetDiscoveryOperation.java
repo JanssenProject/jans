@@ -1,17 +1,17 @@
 package org.gluu.oxd.server.op;
 
+import com.google.inject.Injector;
 import org.apache.commons.beanutils.BeanUtils;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.params.GetDiscoveryParams;
 import org.gluu.oxd.common.response.GetDiscoveryResponse;
+import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.inject.Injector;
-import org.gluu.oxd.common.Command;
-import org.gluu.oxd.common.response.IOpResponse;
-import java.io.IOException;
+
 import java.lang.reflect.InvocationTargetException;
 
 /**
