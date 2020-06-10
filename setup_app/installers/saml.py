@@ -123,13 +123,9 @@ class SamlInstaller(JettyInstaller):
         # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', jettyServiceWebapps], '/opt')
 
-
-        if Config.persistence_type == 'couchbase':
+        couchbase_mappings = self.getMappingType('couchbase')
+        if 'user' in couchbase_mappings:
             self.saml_couchbase_settings()
-        elif Config.persistence_type == 'hybrid':
-            couchbase_mappings = Config.getMappingType('couchbase')
-            if 'user' in couchbase_mappings:
-                self.saml_couchbase_settings()
 
         self.enable()
 
