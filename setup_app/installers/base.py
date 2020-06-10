@@ -7,9 +7,9 @@ from setup_app.utils.db_utils import dbUtils
 
 class BaseInstaller:
     needdb = True
+    dbUtils = dbUtils
 
     def start_installation(self):
-        self.dbUtils = dbUtils
         self.logIt(self.pbar_text, pbar=self.service_name)
         if self.needdb:
             self.dbUtils.bind()
