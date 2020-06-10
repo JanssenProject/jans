@@ -64,6 +64,16 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
 
         Config.pbar.progress("radius", "Installing Radius Server", False)
 
+        self.dbUtils.bind()
+
+        result = self.dbUtils.search('ou=clients,o=gluu', '(inum=1701.*)')
+
+        if result:
+            Config.gluu_radius_client_id = result['inum']
+            Config.gluu_ro_encoded_pw = result['oxAuthClientSecret']
+        else:
+            selg.logIt("Can't find gluu_radius_client_id in database", True, True)
+
         radius_libs = os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip')
         radius_jar = os.path.join(Config.distGluuFolder, 'super-gluu-radius-server.jar')
         ldif_file_server = os.path.join(self.output_folder, 'gluu_radius_server.ldif')
@@ -78,15 +88,12 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.run(['unzip', '-n', '-q', radius_libs, '-d', self.radius_dir ])
         self.copyFile(radius_jar, self.radius_dir)
 
-        #TODO: couchbase
         if Config.mappingLocations['default'] == 'ldap':
             schema_ldif = os.path.join(self.source_dir, 'schema/98-radius.ldif')
             self.dbUtils.import_schema(schema_ldif)
             self.dbUtils.ldap_conn.rebind()
-            self.dbUtils.import_ldif([ldif_file_server])
-        else:
-            pass
-            #self.import_ldif_couchebase([ldif_file_server])
+            
+        self.dbUtils.import_ldif([ldif_file_server])
         
         self.copyFile(os.path.join(self.source_dir, 'etc/default/gluu-radius'), Config.osDefault)
         self.copyFile(os.path.join(self.source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), self.conf_dir)
