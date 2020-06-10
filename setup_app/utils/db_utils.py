@@ -230,12 +230,12 @@ class DBUtils:
                 oxconfigprop = json.loads(oxconfigprop_str)
                 if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                     oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                    oxConfigurationProperties[i] = json.dumps(json.dumps(oxconfigprop))
+                    oxConfigurationProperties[i] = json.dumps(oxconfigprop)
                     break
             else:
                 return
 
-            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `oxConfigurationProperty`={}'.format(bucket, script_inum, oxConfigurationProperties)
+            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `oxConfigurationProperty`={}'.format(bucket, script_inum, json.dumps(oxConfigurationProperties))
             self.cbm.exec_query(n1ql)            
 
     def get_key_prefix(self, key):
