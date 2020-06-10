@@ -187,10 +187,13 @@ class DBUtils:
             
 
     def add2strlist(self, client_id, strlist):
-        value2 = strlist.split(',')
-        value2 = [v.strip() for v in value2]
+        value2 = []
+        for v in strlist.split(','):
+            if v.strip():
+                value2.append(v.strip())
         value2.append(client_id)
-        return  ', '.join(value2)
+
+        return  ','.join(value2)
     
     def add_client2script(self, script_inum, client_id):
         dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
@@ -227,7 +230,7 @@ class DBUtils:
                 oxconfigprop = json.loads(oxconfigprop_str)
                 if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
                     oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                    oxConfigurationProperties[i] = json.dumps(oxconfigprop)
+                    oxConfigurationProperties[i] = json.dumps(json.dumps(oxconfigprop))
                     break
             else:
                 return
