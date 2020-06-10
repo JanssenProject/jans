@@ -86,6 +86,7 @@ public enum ErrorResponseCode {
     FAILED_TO_REMOVE_SITE(500, "remove_site_failed", "Failed to remove site."),
     REDIRECT_URI_IS_NOT_REGISTERED(400, "redirect_uri_is_not_registered", "The authorization redirect uri is not registered."),
     FAILED_TO_GET_DISCOVERY(500, "failed_to_get_discovery", "Failed to get OP discovery configuration."),
+    FAILED_TO_GET_ISSUER(500, "failed_to_get_issuer", "Failed to get OP Issuer. Please check 1) if correct `resource` parameter is passed to this command. 2) oxd log file for error details (oxd-server.log)."),
     SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
