@@ -47,6 +47,7 @@ public class ListResponseProvider implements MessageBodyReader<ListResponse> {
     private ObjectMapper mapper=new ObjectMapper();
 
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    	//logger.info("ListResponseProvider in use.");
         return type.equals(ListResponse.class);
     }
 
