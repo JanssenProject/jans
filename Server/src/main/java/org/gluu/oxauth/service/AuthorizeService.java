@@ -209,6 +209,11 @@ public class AuthorizeService {
                     cibaRequestService.removeCibaRequest(authReqId);
                 }
                 switch (request.getClient().getBackchannelTokenDeliveryMode()) {
+                    case POLL:
+                        request.setStatus(CibaRequestStatus.DENIED);
+                        request.setTokensDelivered(false);
+                        cibaRequestService.update(request);
+                        break;
                     case PING:
                         request.setStatus(CibaRequestStatus.DENIED);
                         request.setTokensDelivered(false);
