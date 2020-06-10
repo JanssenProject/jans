@@ -301,7 +301,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
             cibaRequestService.save(cibaRequestCacheControl, expiresIn);
 
-            String authReqId = cibaRequestCacheControl.getCibaAuthReqId().getCode();
+            String authReqId = cibaRequestCacheControl.getAuthReqId();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(

@@ -644,7 +644,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
@@ -657,7 +657,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaGrant.save();
 
             cibaPingCallbackProxy.pingCallback(
-                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken()
             );
