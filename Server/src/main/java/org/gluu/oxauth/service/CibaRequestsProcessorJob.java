@@ -166,14 +166,14 @@ public class CibaRequestsProcessorJob {
         cibaRequestService.removeCibaCacheRequest(cibaRequest.cacheKey());
 
         if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-            cibaPushErrorProxy.pushError(cibaRequest.getCibaAuthReqId().getCode(),
+            cibaPushErrorProxy.pushError(cibaRequest.getAuthReqId(),
                     cibaRequest.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     PushErrorResponseType.EXPIRED_TOKEN,
                     "Request has expired and there was no answer from the end user.");
         } else if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING) {
             cibaPingCallbackProxy.pingCallback(
-                    cibaRequest.getCibaAuthReqId().getCode(),
+                    cibaRequest.getAuthReqId(),
                     cibaRequest.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken()
             );

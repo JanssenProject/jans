@@ -40,6 +40,11 @@ public class CacheGrant implements Serializable {
     private String sessionDn;
     private int expiresIn = 1;
 
+    // CIBA
+    private String authReqId;
+    private boolean tokensDelivered;
+
+
     public CacheGrant() {
     }
 
@@ -63,6 +68,31 @@ public class CacheGrant implements Serializable {
         codeChallengeMethod = grant.getCodeChallengeMethod();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
+    }
+
+    public CacheGrant(CIBAGrant grant, AppConfiguration appConfiguration) {
+        if (grant.getAuthorizationCode() != null) {
+            authorizationCodeString = grant.getAuthorizationCode().getCode();
+            authorizationCodeCreationDate = grant.getAuthorizationCode().getCreationDate();
+            authorizationCodeExpirationDate = grant.getAuthorizationCode().getExpirationDate();
+        }
+        initExpiresIn(grant, appConfiguration);
+
+        user = grant.getUser();
+        client = grant.getClient();
+        authenticationTime = grant.getAuthenticationTime();
+        scopes = grant.getScopes();
+        tokenBindingHash = grant.getTokenBindingHash();
+        grantId = grant.getGrantId();
+        nonce = grant.getNonce();
+        acrValues = grant.getAcrValues();
+        codeChallenge = grant.getCodeChallenge();
+        codeChallengeMethod = grant.getCodeChallengeMethod();
+        claims = grant.getClaims();
+        sessionDn = grant.getSessionDn();
+
+        authReqId = grant.getAuthReqId();
+        tokensDelivered = grant.isTokensDelivered();
     }
 
     private void initExpiresIn(AuthorizationGrant grant, AppConfiguration appConfiguration) {
@@ -198,6 +228,23 @@ public class CacheGrant implements Serializable {
         return grant;
     }
 
+    public CIBAGrant asCibaGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
+        CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
+        grant.init(user, AuthorizationGrantType.CIBA,  client, authenticationTime);
+        grant.setScopes(scopes);
+        grant.setGrantId(grantId);
+        grant.setSessionDn(sessionDn);
+        grant.setCodeChallenge(codeChallenge);
+        grant.setCodeChallengeMethod(codeChallengeMethod);
+        grant.setAcrValues(acrValues);
+        grant.setNonce(nonce);
+        grant.setClaims(claims);
+        grant.setAuthReqId(authReqId);
+        grant.setTokensDelivered(tokensDelivered);
+
+        return grant;
+    }
+
     public String cacheKey() {
         return cacheKey(authorizationCodeString, grantId);
     }
@@ -207,6 +254,22 @@ public class CacheGrant implements Serializable {
             return grantId;
         }
         return code;
+    }
+
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
+    }
+
+    public boolean isTokensDelivered() {
+        return tokensDelivered;
+    }
+
+    public void setTokensDelivered(boolean tokensDelivered) {
+        this.tokensDelivered = tokensDelivered;
     }
 
     @Override
