@@ -60,7 +60,7 @@ public class CibaRequestService {
     public void persistRequest(CibaRequestCacheControl request, int expiresIn) {
         Date expirationDate = DateUtils.addSeconds(new Date(), expiresIn);
 
-        String authReqId = request.getCibaAuthReqId().getCode();
+        String authReqId = request.getAuthReqId();
         CIBARequest cibaRequest = new CIBARequest();
         cibaRequest.setDn("authReqId=" + authReqId + "," + this.cibaBaseDn());
         cibaRequest.setAuthReqId(authReqId);
@@ -156,7 +156,7 @@ public class CibaRequestService {
 
         cacheService.put(expiresInCache, request.cacheKey(), request);
         this.persistRequest(request, expiresIn);
-        log.trace("Ciba request saved in cache, authReqId: {} clientId: {}", request.getCibaAuthReqId().getCode(), request.getClient().getClientId());
+        log.trace("Ciba request saved in cache, authReqId: {} clientId: {}", request.getAuthReqId(), request.getClient().getClientId());
     }
 
     /**
