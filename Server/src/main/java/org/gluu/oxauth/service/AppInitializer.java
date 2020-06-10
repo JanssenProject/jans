@@ -6,7 +6,25 @@
 
 package org.gluu.oxauth.service;
 
-import com.google.common.collect.Lists;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
@@ -29,7 +47,6 @@ import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.service.JsonService;
 import org.gluu.service.PythonService;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.ApplicationInitialized;
@@ -40,7 +57,6 @@ import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.service.custom.lib.CustomLibrariesLoader;
 import org.gluu.service.custom.script.CustomScriptManager;
 import org.gluu.service.external.ExternalPersistenceExtensionService;
-import org.gluu.service.external.context.PersistenceExternalContext;
 import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.service.timer.event.TimerEvent;
@@ -55,23 +71,7 @@ import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.google.common.collect.Lists;
 
 /**
  * @author Javier Rojas Blum
@@ -158,9 +158,6 @@ public class AppInitializer {
 
 	@Inject
 	private LoggerService loggerService;
-
-	@Inject
-	private JsonService jsonService;
 	
 	@Inject
 	private ExternalAuthenticationService externalAuthenticationService;
@@ -315,7 +312,7 @@ public class AppInitializer {
 				persistenceEntryManagerFactory.createEntryManager(persistenceConnectionProperties);
 		log.debug("Created custom authentication PersistenceEntryManager: {}", persistenceAuthEntryManager);
 
-		executePersistenceExtensionAfterCreate(persistenceConnectionProperties, persistenceAuthEntryManager);
+		externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(persistenceConnectionProperties, persistenceAuthEntryManager);
 
 		return persistenceAuthEntryManager;
 	}
@@ -364,7 +361,7 @@ public class AppInitializer {
 				new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager,
 						persistenceEntryManager.getOperationService() });
 
-		executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
+		externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
 
 		return persistenceEntryManager;
 	}
@@ -383,7 +380,7 @@ public class AppInitializer {
 				new Object[] { ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, persistenceEntryManager,
 						persistenceEntryManager.getOperationService() });
 
-		executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
+		externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(connectionProperties, persistenceEntryManager);
 
 		return persistenceEntryManager;
 	}
@@ -417,7 +414,7 @@ public class AppInitializer {
 
 			persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
 
-			executePersistenceExtensionAfterCreate(persistenceAuthProperties.get(i), persistenceAuthEntryManager);
+			externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(persistenceAuthProperties.get(i), persistenceAuthEntryManager);
 		}
 
 		return persistenceAuthEntryManagers;
@@ -457,7 +454,7 @@ public class AppInitializer {
 			log.debug("Destroyed {}:{} with operation service: {}", persistenceEntryManagerName,
 					oldPersistenceEntryManager, oldPersistenceEntryManager.getOperationService());
 
-			executePersistenceExtensionAfterDestroy(oldPersistenceEntryManager);
+			externalPersistenceExtensionService.executePersistenceExtensionAfterDestroy(oldPersistenceEntryManager);
 		}
 	}
 
@@ -470,7 +467,7 @@ public class AppInitializer {
 			log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
 					oldPersistenceEntryManager);
 
-			executePersistenceExtensionAfterDestroy(oldPersistenceEntryManager);
+			externalPersistenceExtensionService.executePersistenceExtensionAfterDestroy(oldPersistenceEntryManager);
 		}
 	}
 
@@ -494,7 +491,7 @@ public class AppInitializer {
 			log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
 					oldPersistenceAuthEntryManager);
 
-			executePersistenceExtensionAfterDestroy(oldPersistenceAuthEntryManager);
+			externalPersistenceExtensionService.executePersistenceExtensionAfterDestroy(oldPersistenceAuthEntryManager);
 		}
 
 		// Force to create new Ldap auth entry managers bean
@@ -682,27 +679,6 @@ public class AppInitializer {
 
 	public void setLastFinishedTime(long lastFinishedTime) {
 		this.lastFinishedTime = lastFinishedTime;
-	}
-
-	private void executePersistenceExtensionAfterCreate(Properties connectionProperties, PersistenceEntryManager persistenceEntryManager) {
-		if (externalPersistenceExtensionService.isEnabled()) {
-			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
-			persistenceExternalContext.setConnectionProperties(connectionProperties);
-			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
-			
-			externalPersistenceExtensionService.executeExternalOnAfterCreateMethod(persistenceExternalContext);
-
-			externalPersistenceExtensionService.setPersistenceExtension(persistenceEntryManager);
-		}
-	}
-
-	private void executePersistenceExtensionAfterDestroy(PersistenceEntryManager persistenceEntryManager) {
-		if (externalPersistenceExtensionService.isEnabled()) {
-			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
-			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
-			
-			externalPersistenceExtensionService.executeExternalOnAfterDestroyMethod(persistenceExternalContext);
-		}
 	}
 
 	/**
