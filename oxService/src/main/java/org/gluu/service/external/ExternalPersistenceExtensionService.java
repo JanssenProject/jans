@@ -9,6 +9,7 @@ package org.gluu.service.external;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
@@ -45,23 +46,39 @@ public class ExternalPersistenceExtensionService extends ExternalScriptService {
 
 	@Override
 	protected void reloadExternal() {
-		PersistenceExtension persistenceExtension = null;
-		if (isEnabled()) {
-			persistenceExtension = (PersistenceExtension) this.defaultExternalCustomScript.getExternalType();
-		}
-		
 		for (Iterator<PersistenceEntryManager> it = persistenceEntryManagerInstance.iterator(); it.hasNext();) {
 			PersistenceEntryManager persistenceEntryManager = it.next();
-			persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+			executePersistenceExtensionAfterCreate(null, persistenceEntryManager);
 		}
 
 		for (Iterator<List<PersistenceEntryManager>> it = persistenceEntryManagerListInstance.iterator(); it.hasNext();) {
 			List<PersistenceEntryManager> persistenceEntryManagerList = it.next();
-			for (PersistenceEntryManager persistenceEntryManager: persistenceEntryManagerList) {
-				persistenceEntryManager.setPersistenceExtension(persistenceExtension);
+			for (PersistenceEntryManager persistenceEntryManager : persistenceEntryManagerList) {
+				executePersistenceExtensionAfterCreate(null, persistenceEntryManager);
 			}
 		}
     }
+
+	public void executePersistenceExtensionAfterCreate(Properties connectionProperties, PersistenceEntryManager persistenceEntryManager) {
+		if (isEnabled()) {
+			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
+			persistenceExternalContext.setConnectionProperties(connectionProperties);
+			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
+			
+			executeExternalOnAfterCreateMethod(persistenceExternalContext);
+
+			setPersistenceExtension(persistenceEntryManager);
+		}
+	}
+
+	public void executePersistenceExtensionAfterDestroy(PersistenceEntryManager persistenceEntryManager) {
+		if (isEnabled()) {
+			PersistenceExternalContext persistenceExternalContext = new PersistenceExternalContext();
+			persistenceExternalContext.setPersistenceEntryManager(persistenceEntryManager);
+			
+			executeExternalOnAfterDestroyMethod(persistenceExternalContext);
+		}
+	}
 
 	public void setPersistenceExtension(PersistenceEntryManager persistenceEntryManager) {
 		PersistenceExtension persistenceExtension = null;
