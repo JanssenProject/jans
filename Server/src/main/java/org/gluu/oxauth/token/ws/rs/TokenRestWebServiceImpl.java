@@ -428,6 +428,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     idToken));
 
                             oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
+                        } else {
+                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available.");
                         }
                     } else {
                         log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
