@@ -1,10 +1,6 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2014, Gluu
- */
 package org.gluu.oxtrust.service.external;
 
+import java.util.Collections;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -24,19 +20,32 @@ import org.gluu.service.custom.script.ExternalScriptService;
  */
 @ApplicationScoped
 public class ExternalScimService extends ExternalScriptService {
+	
+	private static final long serialVersionUID = 1767751544454591666L;
 
     public ExternalScimService() {
         super(CustomScriptType.SCIM);
         //TODO: remove
-        System.out.println("CONSTRUCTOR");
+        System.out.println("CONSTRUCTOR.");
+    }
+    
+    //TODO: is this needed?
+    /*
+    public void init() {
     }
     
     @PostConstruct
-    public void init() {
+    private void initialize() {
     	customScriptType = CustomScriptType.SCIM;
-    	//TODO: remove
     	System.out.println("INIT");
-    }
+        try {
+        	customScriptManager.initTimer(Collections.singletonList(customScriptType));
+        	System.out.println("DONE");
+        } catch(Exception e) {
+        	log.error(e.getMessage(), e);
+        }
+    	
+    }*/
 
     private boolean executeScimCreateUserMethod(ScimCustomPerson user, CustomScriptConfiguration customScriptConfiguration) {
 
