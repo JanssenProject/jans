@@ -75,7 +75,7 @@ public class AppInitializer {
         configurationFactory.initTimer();
         loggerService.initTimer();
         //externalScimService.init();
-        customScriptManager.initTimer(Collections.singletonList(customScriptType));
+        customScriptManager.initTimer(Collections.singletonList(CustomScriptType.SCIM));
         logger.info("Initialized!");
 
     }
