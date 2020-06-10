@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.util.Util;
 
-import java.util.UUID;
+import java.security.SecureRandom;
 
 /**
  * It is the unique identifier to identify the CIBA authentication request
@@ -22,7 +22,8 @@ public class CibaAuthReqId extends AbstractToken {
     public CibaAuthReqId(int lifeTime) {
         super(lifeTime);
 
-        // Generate SHA-1 (160 bits)
-        setCode(Util.toSHA1HexString(UUID.randomUUID().toString()));
+        byte[] nonce = new byte[24];
+        new SecureRandom().nextBytes(nonce);
+        setCode(Util.byteArrayToHexString(nonce));
     }
 }

@@ -16,7 +16,7 @@ import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.authorize.JwtCibaAuthorizationRequest;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -114,7 +114,8 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     public Response requestBackchannelAuthorizationPost(
             String clientId, String scope, String clientNotificationToken, String acrValues, String loginHintToken,
             String idTokenHint, String loginHint, String bindingMessage, String userCodeParam, Integer requestedExpiry,
-            String request, HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
+            String request, String requestUri, HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.BACKCHANNEL_AUTHENTICATION);
@@ -160,8 +161,15 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             scopes.addAll(grantedScopes);
         }
 
-        if (StringUtils.isNotBlank(request)) {
-            JwtCibaAuthorizationRequest jwtRequest = createJwtRequest(request, client);
+        if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
+            JwtAuthorizationRequest jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri,
+                    client, null, cryptoProvider, appConfiguration);
+            if (jwtRequest == null) {
+                log.error("The JWT couldn't be processed");
+                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+                builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+                throw new WebApplicationException(builder.build());
+            }
             authorizeRestWebServiceValidator.validateRequestObject(jwtRequest);
             // JWT wins
             if (StringUtils.isBlank(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
@@ -336,22 +344,4 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         return responseJsonObject;
     }
 
-    /**
-     * Returns a JwtCibaAuthorizationRequest object with all data gotten from request String.
-     * @param request Plain JWT used to get all data.
-     * @param client Client in process.
-     */
-    private JwtCibaAuthorizationRequest createJwtRequest(String request, Client client) throws WebApplicationException {
-        if (StringUtils.isBlank(request)) {
-            throw new WebApplicationException();
-        }
-        try {
-            return new JwtCibaAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Invalid JWT authorization request. " + e.getMessage(), e);
-            throw new WebApplicationException();
-        }
-    }
 }
