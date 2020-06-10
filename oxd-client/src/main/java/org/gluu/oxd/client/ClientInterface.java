@@ -156,4 +156,10 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     GetDiscoveryResponse getDiscovery(GetDiscoveryParams params);
+
+    @POST
+    @Path("/get-issuer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    GetIssuerResponse getIssuer(GetIssuerParams params);
 }
