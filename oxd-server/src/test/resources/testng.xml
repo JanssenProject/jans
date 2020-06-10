@@ -6,6 +6,9 @@
     <parameter name="opHost" value="https://${test.server.name}"/>
     <parameter name="authServer" value="https://ce-dev6.gluu.org"/>
     <parameter name="opDiscoveryPath" value=""/>
+    <parameter name="emailWebfingerInput" value="${swd.resource}"/>
+    <parameter name="urlWebfingerInput" value="https://${test.server.name}/admin"/>
+    <parameter name="hostnameWebfingerInput" value="${test.server.name}"/>
     <parameter name="opConfigurationEndpoint" value="https://${test.server.name}/.well-known/openid-configuration"/>
     <parameter name="redirectUrls" value="https://client.example.com/cb/home1 https://client.example.com/cb/home2"/>
     <parameter name="paramRedirectUrl" value="https://client.example.com/cb/home2"/>
@@ -45,6 +48,11 @@
     <test name="HealthCheckTest" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.HealthCheckTest"></class>
+        </classes>
+    </test>
+    <test name="Get Issuer" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetIssuerTest"></class>
         </classes>
     </test>
     <test name="Get OpDiscovery" enabled="true">
@@ -207,6 +215,12 @@
     <test name="Get OpDiscovery swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.GetDiscoveryTest"></class>
+        </classes>
+    </test>
+
+    <test name="Get Issuer swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetIssuerTest"></class>
         </classes>
     </test>
 
