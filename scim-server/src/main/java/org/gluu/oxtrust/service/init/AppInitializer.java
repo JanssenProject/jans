@@ -52,30 +52,30 @@ public class AppInitializer {
     private ConfigurationFactory configurationFactory;
 
 	@Inject
-	private CustomScriptManager customScriptManager;
-
-	@Inject
 	private PythonService pythonService;
 
     @Inject
     private LoggerService loggerService;
+
+	//@Inject
+	//private CustomScriptManager customScriptManager;
     
     //@Inject
     //private ExternalScimService externalScimService;
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
-        logger.info("SCIM service initializing");
+        logger.info("SCIM service initializing...");
         SecurityProviderUtility.installBCProvider();
 
-        //externalScimService.init();
         configurationFactory.create();
 		pythonService.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
         quartzSchedulerManager.start();
 		
         configurationFactory.initTimer();
         loggerService.initTimer();
-        //customScriptManager.initTimer(Collections.singletonList(CustomScriptType.SCIM));
+        //externalScimService.init();
+        customScriptManager.initTimer(Collections.singletonList(customScriptType));
         logger.info("Initialized!");
 
     }
