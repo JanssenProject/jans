@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
+import org.gluu.service.CacheService;
+
+import javax.inject.Inject;
 import java.io.Serializable;
 
 /**
@@ -19,13 +22,23 @@ public class CIBAGrant extends AuthorizationGrant {
     private String authReqId;
     private boolean tokensDelivered;
 
+    @Inject
+    private CacheService cacheService;
+
     public CIBAGrant() {
     }
 
     public void init(CibaRequestCacheControl cibaRequest) {
         super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
         setAuthReqId(cibaRequest.getAuthReqId());
+        setAcrValues(cibaRequest.getAcrValues());
         setIsCachedWithNoPersistence(true);
+    }
+
+    @Override
+    public void save() {
+        CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.getAuthReqId(), cachedGrant);
     }
 
     public String getAuthReqId() {
