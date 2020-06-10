@@ -823,7 +823,7 @@
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationPushMode"></class>
         </classes>
     </test>
-    <test name="CIBA Expired Requests" enabled="true">
+    <test name="CIBA Expired Requests" enabled="false">
         <classes>
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationExpiredRequestsTests"></class>
         </classes>
