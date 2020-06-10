@@ -454,7 +454,6 @@ public class SessionIdService {
             jwt.getClaims().setClaim("last_used_at", sessionId.getLastUsedAt());
             jwt.getClaims().setClaim("permission_granted", sessionId.getPermissionGranted());
             jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionId.getPermissionGrantedMap().getPermissionGranted()));
-            jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionId.getInvolvedClients().getPermissionGranted()));
 
             // sign
             return jwtSigner.sign();
