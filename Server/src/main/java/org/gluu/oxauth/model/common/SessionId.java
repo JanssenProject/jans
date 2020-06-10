@@ -66,10 +66,6 @@ public class SessionId implements Deletable, Serializable {
     private SessionIdAccessMap permissionGrantedMap;
 
     @JsonObject
-    @AttributeName(name = "oxInvolvedClients")
-    private SessionIdAccessMap involvedClients;
-
-    @JsonObject
     @AttributeName(name = "oxAuthSessionAttribute")
     private Map<String, String> sessionAttributes;
 
@@ -124,17 +120,6 @@ public class SessionId implements Deletable, Serializable {
 
     public void setIsJwt(Boolean isJwt) {
         this.isJwt = isJwt;
-    }
-
-    public SessionIdAccessMap getInvolvedClients() {
-        if (involvedClients == null) {
-            involvedClients = new SessionIdAccessMap();
-        }
-        return involvedClients;
-    }
-
-    public void setInvolvedClients(SessionIdAccessMap involvedClients) {
-        this.involvedClients = involvedClients;
     }
 
     public SessionIdState getState() {
@@ -301,7 +286,6 @@ public class SessionId implements Deletable, Serializable {
         sb.append(", isJwt=").append(isJwt);
         sb.append(", jwt=").append(jwt);
         sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
-        sb.append(", involvedClients=").append(involvedClients);
         sb.append(", sessionAttributes=").append(sessionAttributes);
         sb.append(", persisted=").append(persisted);
         sb.append("}");
