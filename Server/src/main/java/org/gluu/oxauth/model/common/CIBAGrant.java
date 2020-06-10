@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.model.common;
 
+import java.io.Serializable;
+
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
@@ -14,7 +16,7 @@ package org.gluu.oxauth.model.common;
  */
 public class CIBAGrant extends AuthorizationGrant {
 
-    private CibaAuthReqId cibaAuthReqId;
+    private String authReqId;
     private boolean tokensDelivered;
 
     public CIBAGrant() {
@@ -22,16 +24,16 @@ public class CIBAGrant extends AuthorizationGrant {
 
     public void init(CibaRequestCacheControl cibaRequest) {
         super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
-        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthReqId());
+        setAuthReqId(cibaRequest.getAuthReqId());
         setIsCachedWithNoPersistence(true);
     }
 
-    public CibaAuthReqId getCIBAAuthenticationRequestId() {
-        return cibaAuthReqId;
+    public String getAuthReqId() {
+        return authReqId;
     }
 
-    public void setCIBAAuthenticationRequestId(CibaAuthReqId cibaAuthReqId) {
-        this.cibaAuthReqId = cibaAuthReqId;
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
     }
 
     public boolean isTokensDelivered() {
