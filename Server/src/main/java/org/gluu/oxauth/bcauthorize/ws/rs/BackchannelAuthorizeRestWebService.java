@@ -38,6 +38,7 @@ public interface BackchannelAuthorizeRestWebService {
             @FormParam("user_code") String userCode,
             @FormParam("requested_expiry") Integer requestedExpiry,
             @FormParam("request") String request,
+            @FormParam("request_uri") String requestUri,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext

@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.authorize.JwtCibaAuthorizationRequest;
 import org.gluu.oxauth.model.common.Prompt;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -173,7 +172,7 @@ public class AuthorizeRestWebServiceValidator {
      * Validates expiration, audience and scopes in the JWT request.
      * @param jwtRequest Object to be validated.
      */
-    public void validateRequestObject(JwtCibaAuthorizationRequest jwtRequest) {
+    public void validateRequestObject(JwtAuthorizationRequest jwtRequest) {
         Response.ResponseBuilder builder;
         if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());

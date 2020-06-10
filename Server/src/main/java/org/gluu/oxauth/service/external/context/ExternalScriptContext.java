@@ -6,6 +6,9 @@
 
 package org.gluu.oxauth.service.external.context;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.util.ServerUtil;
@@ -15,67 +18,29 @@ import org.gluu.persist.model.base.CustomEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Holds object required in custom scripts
  *
  * @author Yuriy Movchan  Date: 07/01/2015
  */
 
-public class ExternalScriptContext {
+public class ExternalScriptContext extends org.gluu.service.external.context.ExternalScriptContext {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
     private final PersistenceEntryManager ldapEntryManager;
-    private final Map<String, Object> contextVariables = new HashMap<>();
-
-    protected HttpServletRequest httpRequest;
-    protected final HttpServletResponse httpResponse;
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
         this(httpRequest, null);
     }
 
     public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    	super(httpRequest, httpResponse);
         this.ldapEntryManager = ServerUtil.getLdapManager();
-        this.httpRequest = httpRequest;
-        this.httpResponse = httpResponse;
-
-        if (this.httpRequest == null) {
-            FacesContext facesContext = FacesContext.getCurrentInstance();
-            if (facesContext != null) {
-                ExternalContext extCtx = facesContext.getExternalContext();
-                if (extCtx != null) {
-                    this.httpRequest = (HttpServletRequest) extCtx.getRequest();
-                }
-            }
-        }
-    }
-
-    public Logger getLog() {
-        return log;
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {
         return ldapEntryManager;
-    }
-
-    public HttpServletRequest getHttpRequest() {
-        return httpRequest;
-    }
-
-    public HttpServletResponse getHttpResponse() {
-        return httpResponse;
-    }
-
-    public String getIpAddress() {
-        return httpRequest != null ? httpRequest.getRemoteAddr() : "";
     }
 
     public boolean isInNetwork(String cidrNotation) {
@@ -105,9 +70,5 @@ public class ExternalScriptContext {
         }
 
         return "";
-    }
-
-    public Map<String, Object> getContextVariables() {
-        return contextVariables;
     }
 }

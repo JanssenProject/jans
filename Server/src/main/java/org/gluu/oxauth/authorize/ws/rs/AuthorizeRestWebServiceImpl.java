@@ -26,15 +26,11 @@ import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
-import org.gluu.oxauth.model.exception.InvalidJweException;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.exception.InvalidSessionStateException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JwrService;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
@@ -46,8 +42,6 @@ import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.util.StringHelper;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -231,7 +225,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             JwtAuthorizationRequest jwtRequest = null;
             if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
                 try {
-                    jwtRequest = createJwtRequest(request, requestUri, client, redirectUriResponse);
+                    jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri, client, redirectUriResponse, cryptoProvider, appConfiguration);
 
                     if (jwtRequest == null) {
                         throw createInvalidJwtRequestException(redirectUriResponse, "Failed to parse jwt.");
@@ -679,57 +673,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
         }
         return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
-    }
-
-    private JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse) throws InvalidJwtException, InvalidJweException {
-
-        if (StringUtils.isNotBlank(requestUri)) {
-            boolean validRequestUri = false;
-            try {
-                URI reqUri = new URI(requestUri);
-                String reqUriHash = reqUri.getFragment();
-                String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
-
-                ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
-                clientRequest.setHttpMethod(HttpMethod.GET);
-
-                ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                int status = clientResponse.getStatus();
-
-                if (status == 200) {
-                    request = clientResponse.getEntity(String.class);
-
-                    if (StringUtils.isBlank(reqUriHash)) {
-                        validRequestUri = true;
-                    } else {
-                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-                        validRequestUri = StringUtils.equals(reqUriHash, hash);
-                    }
-                }
-
-                if (!validRequestUri) {
-                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_URI, "Invalid request uri.");
-                }
-            } catch (WebApplicationException e) {
-                throw e;
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                return null;
-            }
-        }
-
-        if (StringUtils.isBlank(request)) {
-            return null;
-        }
-
-        try {
-            return new JwtAuthorizationRequest(appConfiguration, cryptoProvider, request, client);
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Invalid JWT authorization request. " + e.getMessage(), e);
-        }
-        return null;
     }
 
     private void updateSessionForROPC(HttpServletRequest httpRequest, SessionId sessionUser) {
