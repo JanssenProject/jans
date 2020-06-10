@@ -22,7 +22,6 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
-import org.gluu.oxauth.model.exception.InvalidJweException;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
@@ -134,9 +133,6 @@ public class AuthorizeAction {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
-
-    @Inject
-    private AuthorizationGrantList authorizationGrantList;
 
     @Inject
     private CookieService cookieService;
@@ -258,7 +254,6 @@ public class AuthorizeAction {
 
             String redirectTo = "/login.xhtml";
 
-            CustomScriptConfiguration customScriptConfiguration = null;
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
                 List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
@@ -266,7 +261,7 @@ public class AuthorizeAction {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
 
-                customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
+                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
@@ -486,7 +481,7 @@ public class AuthorizeAction {
             }
         }
 
-        return new ArrayList<String>(result);
+        return new ArrayList<>(result);
     }
 
     /**
