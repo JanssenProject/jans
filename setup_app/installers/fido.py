@@ -31,14 +31,14 @@ class FidoInstaller(JettyInstaller):
 
         self.enable()
 
-
-    def update_rendering_dict(self):
+    def render_import_templates(self):
 
         self.renderTemplateInOut(self.fido2_dynamic_conf_json, self.template_folder, self.output_folder)
         self.renderTemplateInOut(self.fido2_static_conf_json, self.template_folder, self.output_folder)
 
         Config.templateRenderingDict['fido2_dynamic_conf_base64'] = self.generate_base64_file(self.fido2_dynamic_conf_json, 1)
         Config.templateRenderingDict['fido2_static_conf_base64'] = self.generate_base64_file(self.fido2_static_conf_json, 1)
+
         
         self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)
 
