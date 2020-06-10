@@ -46,7 +46,8 @@ public enum CommandType {
     GET_CLIENT_TOKEN("get_client_token", false),
     GET_RP("get_rp", false),
     GET_JWKS("get_jwks", false),
-    GET_DISCOVERY("get_discovery", false);
+    GET_DISCOVERY("get_discovery", false),
+    ISSUER_DISCOVERY("issuer_discovery", false);
 
     private final String value;
     private final boolean authorizationRequired;
