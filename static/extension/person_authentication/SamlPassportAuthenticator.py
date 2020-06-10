@@ -13,7 +13,8 @@ from org.gluu.oxauth.model.configuration import AppConfiguration
 from org.gluu.oxauth.model.crypto import CryptoProviderFactory
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
 from org.gluu.oxauth.model.util import Base64Util
-from org.gluu.oxauth.service import AppInitializer, AuthenticationService, UserService, EncryptionService
+from org.gluu.oxauth.service import AppInitializer, AuthenticationService
+from org.gluu.oxauth.service.common import UserService, EncryptionService
 from org.gluu.oxauth.model.authorize import AuthorizeRequestParam
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.security import Identity
