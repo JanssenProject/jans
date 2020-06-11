@@ -395,6 +395,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 log.trace("AuthorizationGrant : '{}'", cibaGrant);
 
                 if (cibaGrant != null) {
+                    if (!cibaGrant.getClientId().equals(clientId)) {
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
+                        return response(builder, oAuth2AuditLog);
+                    }
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
                         if (!cibaGrant.isTokensDelivered()) {
@@ -439,6 +443,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
                     log.trace("Ciba request : '{}'", cibaRequest);
                     if (cibaRequest != null) {
+                        if (!cibaRequest.getClient().getClientId().equals(clientId)) {
+                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
+                            return response(builder, oAuth2AuditLog);
+                        }
                         long currentTime = new Date().getTime();
                         Long lastAccess = cibaRequest.getLastAccessControl();
                         if (lastAccess == null) {
