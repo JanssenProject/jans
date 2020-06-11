@@ -89,7 +89,7 @@ class PassportInstaller(NodeInstaller):
 
         if not Config.get('passport_rp_client_cert_alg'):
             Config.passport_rp_client_cert_alg = 'RS512'
-        
+
         if not Config.get('passport_rp_client_jks_pass'):
             Config.passport_rp_client_jks_pass = 'secret'
 
@@ -129,7 +129,7 @@ class PassportInstaller(NodeInstaller):
         self.logIt("Preparing Passport OpenID RP certificate...")
 
         passport_rp_client_jwks_json = json.loads(''.join(Config.passport_rp_client_jwks))
-        
+
         for jwks_key in passport_rp_client_jwks_json["keys"]:
             if jwks_key["alg"]  == Config.passport_rp_client_cert_alg:
                 Config.passport_rp_client_cert_alias = jwks_key["kid"]
@@ -144,7 +144,7 @@ class PassportInstaller(NodeInstaller):
         output_folder = os.path.join(Config.outputFolder,'passport')
         self.renderTemplateInOut(self.passport_config, self.passport_templates_folder, Config.configFolder)
         self.renderTemplateInOut(self.passport_central_config_json, self.passport_templates_folder, output_folder)
-        
+
         Config.templateRenderingDict['passport_central_config_base64'] = self.generate_base64_ldap_file(self.passport_central_config_json)
 
         scripts_template = os.path.join(self.passport_templates_folder, os.path.basename(self.ldif_scripts_fn))
@@ -184,7 +184,7 @@ class PassportInstaller(NodeInstaller):
     def create_folders(self):
         # Create logs folder
         self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])
-        
+
         #create empty log file unless exists
         log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
         if not os.path.exists(log_file):
