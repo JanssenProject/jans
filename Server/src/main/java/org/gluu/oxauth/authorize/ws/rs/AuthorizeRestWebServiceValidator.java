@@ -172,9 +172,9 @@ public class AuthorizeRestWebServiceValidator {
      * Validates expiration, audience and scopes in the JWT request.
      * @param jwtRequest Object to be validated.
      */
-    public void validateRequestObject(JwtAuthorizationRequest jwtRequest) {
+    public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
         Response.ResponseBuilder builder;
-        if (!jwtRequest.getAud().isEmpty() && !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
+        if (jwtRequest.getAud().isEmpty() || !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
@@ -202,6 +202,41 @@ public class AuthorizeRestWebServiceValidator {
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
             log.error("Request object does not have scope claim.");
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        if (StringUtils.isEmpty(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
+            log.error("Request object has a wrong iss claim, iss: " + jwtRequest.getIss());
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        if (jwtRequest.getIat() == null || jwtRequest.getIat() == 0) {
+            log.error("Request object has a wrong iat claim, iat: " + jwtRequest.getIat());
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        int nowInSeconds = Math.toIntExact(System.currentTimeMillis() / 1000);
+        if (jwtRequest.getNbf() == null || jwtRequest.getNbf() >  nowInSeconds
+                || jwtRequest.getNbf() < nowInSeconds - appConfiguration.getCibaMaxExpirationTimeAllowedSec()) {
+            log.error("Request object has a wrong nbf claim, nbf: " + jwtRequest.getNbf());
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        if (StringUtils.isEmpty(jwtRequest.getJti())) {
+            log.error("Request object has a wrong jti claim, jti: " + jwtRequest.getJti());
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            throw new WebApplicationException(builder.build());
+        }
+        int result = (StringUtils.isNotBlank(jwtRequest.getLoginHint()) ? 1 : 0)
+                + (StringUtils.isNotBlank(jwtRequest.getLoginHintToken()) ? 1 : 0)
+                + (StringUtils.isNotBlank(jwtRequest.getIdTokenHint()) ? 1 : 0);
+        if (result != 1) {
+            log.error("Request object has too many hints or doesnt have any");
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
             throw new WebApplicationException(builder.build());
