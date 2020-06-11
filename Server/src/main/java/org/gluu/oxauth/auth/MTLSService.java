@@ -74,7 +74,7 @@ public class MTLSService {
         final String cn = CertUtils.getCN(cert);
         if (!cn.equals(client.getClientId())) {
             log.error("Client certificate CN does not match clientId. Reject call, CN: " + cn + ", clientId: " + client.getClientId());
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
+            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT, httpRequest.getParameter("state"), "")).build());
         }
 
         if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
