@@ -9,6 +9,9 @@ import org.gluu.oxtrust.ws.rs.scim2.IUserWebService;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.ws.rs.core.Response;
 
 import static javax.ws.rs.core.Response.Status.OK;
@@ -48,13 +51,15 @@ public class SampleTest extends BaseTest {
         IUserWebService myclient = ScimClientFactory.getTestClient(IUserWebService.class, domain, url);
 
         SearchRequest sr=new SearchRequest();
-        sr.setFilter("pairwiseIdentitifers pr");
+        sr.setFilter("pairwiseIdentifiers pr");
         sr.setSortBy("meta.lastModified");
 
         Response response = myclient.searchUsersPost(sr);
         assertEquals(response.getStatus(), OK.getStatusCode());
-
-        logger.debug("There are {} users with PPIDs associated", response.readEntity(ListResponse.class).getResources().size());
+        
+		int size = Optional.ofNullable(response.readEntity(ListResponse.class)
+						.getResources()).map(List::size).orElse(0);
+        logger.debug("There are {} users with PPIDs associated", size);
 
     }
 
