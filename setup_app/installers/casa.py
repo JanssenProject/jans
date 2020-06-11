@@ -113,6 +113,11 @@ class CasaInstaller(JettyInstaller):
         # import_oxd_certificate2javatruststore:
         self.logIt("Importing oxd certificate")
 
+        # restart oxd-server
+
+        self.stop('oxd-server')
+        self.start('oxd-server')
+
         # check oxd status for 25 seconds:
         propertiesUtils = PropertiesUtils()
         for i in range(5):
@@ -122,7 +127,7 @@ class CasaInstaller(JettyInstaller):
                 break
             time.sleep(5)
         else:
-            self.logIt("oxd server at  {} did not repond in 15 seconds".format(self.oxd_server_https), True)
+            self.logIt("oxd server at  {} did not repond in 15 seconds".format(Config.oxd_server_https), True)
 
         try:
 

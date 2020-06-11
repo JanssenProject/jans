@@ -7,6 +7,7 @@ import glob
 import urllib
 import ssl
 import re
+import inspect
 
 from setup_app import paths
 from setup_app.utils import base
@@ -97,7 +98,7 @@ class PropertiesUtils(SetupUtils):
             Config.encode_salt = self.getPW() + self.getPW()
 
         if not Config.application_max_ram:
-            Config.application_max_ram = 3072
+            Config.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
         if Config.get('oxd_server_https'):
             Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
@@ -127,7 +128,7 @@ class PropertiesUtils(SetupUtils):
     def load_properties(self, prop_file, no_update=[]):
         self.logIt('Loading Properties %s' % prop_file)
 
-        no_update += ['jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
+        no_update += ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
         cb_install = False
         map_db = []
@@ -225,7 +226,7 @@ class PropertiesUtils(SetupUtils):
                         ('gluuRadiusEnabled', 'gluuRadiusEnabled'),
                         ('installSaml', 'gluuSamlEnabled'),
                         ):
-            if getattr(Config, si):
+            if Config.get(si):
                 setattr(Config, se, 'true')
 
         if not 'oxtrust_admin_password' in p:
@@ -246,7 +247,7 @@ class PropertiesUtils(SetupUtils):
         
         def getString(value):
             if isinstance(value, str):
-                return value.strip()
+                return str(value).strip()
             elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
                 return str(value)
             else:
@@ -254,23 +255,29 @@ class PropertiesUtils(SetupUtils):
 
         try:
             p = Properties()
-            keys = list(Config.__dict__.keys())
-            keys.sort()
-            for key in keys:
-                key = str(key)
-                if key in ('couchbaseInstallOutput', 'post_messages', 'properties_password', 'non_setup_properties'):
+            for obj_name, obj in inspect.getmembers(Config):
+                obj_name = str(obj_name)
+                if obj_name in ('couchbaseInstallOutput', 'post_messages', 'properties_password', 'non_setup_properties'):
                     continue
-                if key.startswith('cmd_'):
+
+                if obj_name.startswith('cmd_'):
                     continue
-                if key == 'mappingLocations':
-                    p[key] = json.dumps(Config.__dict__[key])
-                else:
-                    value = getString(Config.__dict__[key])
-                    if value != '':
-                        p[key] = value
+
+                
+                if not obj_name.startswith('__') and (not callable(obj)):
+
+                    if obj_name == 'mappingLocations':
+                        p[obj_name] = json.dumps(obj)
+                    else:
+                        value = getString(obj)
+                        if value != '':
+                            p[obj_name] = value                
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
+
+            # TODO: uncomment later
+            return
             
             self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.oxtrust_admin_password])
             
@@ -343,11 +350,11 @@ class PropertiesUtils(SetupUtils):
     def prompt_remote_couchbase(self):
     
         while True:
-            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts", Config.couchbase_hostname)
-            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User", Config.couchebaseClusterAdmin)
-            Config.cb_password =self.getPrompt("    Couchbase Password", Config.cb_password)
+            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts", Config.get('couchbase_hostname'))
+            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User", Config.get('couchebaseClusterAdmin'))
+            Config.cb_password =self.getPrompt("    Couchbase Password", Config.get('cb_password'))
 
-            result = self.test_cb_servers(Config.couchbase_hostname)
+            result = self.test_cb_servers(Config.get('couchbase_hostname'))
 
             if result['result']:
                 break
