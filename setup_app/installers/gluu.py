@@ -72,12 +72,11 @@ class GluuInstaller(SetupUtils):
             print("Please ensure that you are running this script inside Gluu container.")
             sys.exit(1)
 
-        #TODO: uncomment later
         #Download oxauth-client-jar-with-dependencies
-        #if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-        #    oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/oxauth-client/{0}/oxauth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
-        #    self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-        #    self.run(['wget', '-nv', oxauth_client_jar_url, '-O', Config.non_setup_properties['oxauth_client_jar_fn']])
+        if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
+            oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/oxauth-client/{0}/oxauth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
+            self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
+            self.run(['wget', '-nv', oxauth_client_jar_url, '-O', Config.non_setup_properties['oxauth_client_jar_fn']])
 
         self.logIt("Determining key generator path")
         oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])
@@ -157,8 +156,7 @@ class GluuInstaller(SetupUtils):
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
             self.writeFile(salt_fn, salt_text)
         except:
-            self.logIt("Error writing salt", True)
-            sys.exit()
+            self.logIt("Error writing salt", True, True)
 
     def render_templates(self, templates=None):
         self.logIt("Rendering templates", pbar='gluu')
