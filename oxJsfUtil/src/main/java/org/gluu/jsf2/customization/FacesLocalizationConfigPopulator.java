@@ -92,7 +92,7 @@ public abstract class FacesLocalizationConfigPopulator extends ApplicationConfig
 				localeNames.add(localeName);
 			}
 		}
-		log.debug("Adding languages '{}' from dir folder: {}", localeNames, path);
+		log.info("Adding languages '{}' from dir folder: {}", localeNames, path);
 
 		updateDocument(toPopulate, localeNames);
 		
