@@ -161,8 +161,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             scopes.addAll(grantedScopes);
         }
 
+        JwtAuthorizationRequest jwtRequest = null;
         if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
-            JwtAuthorizationRequest jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri,
+            jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri,
                     client, null, cryptoProvider, appConfiguration);
             if (jwtRequest == null) {
                 log.error("The JWT couldn't be processed");
@@ -170,14 +171,8 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
                 throw new WebApplicationException(builder.build());
             }
-            authorizeRestWebServiceValidator.validateRequestObject(jwtRequest);
+            authorizeRestWebServiceValidator.validateCibaRequestObject(jwtRequest, clientId);
             // JWT wins
-            if (StringUtils.isBlank(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
-                throw new WebApplicationException(Response
-                        .status(Response.Status.UNAUTHORIZED)
-                        .entity(errorResponseFactory.getErrorAsJson(INVALID_CLIENT))
-                        .build());
-            }
             if (!jwtRequest.getScopes().isEmpty()) {
                 scopes.addAll(scopeChecker.checkScopesPolicy(client, jwtRequest.getScopes()));
             }
@@ -204,9 +199,15 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             }
             if (jwtRequest.getRequestedExpiry() != null) {
                 requestedExpiry = jwtRequest.getRequestedExpiry();
+            } else if (jwtRequest.getExp() != null) {
+                requestedExpiry = Math.toIntExact(jwtRequest.getExp() - System.currentTimeMillis() / 1000);
             }
         }
-
+        if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            return builder.build();
+        }
         User user = null;
         try {
             if (Strings.isNotBlank(loginHint)) { // login_hint
