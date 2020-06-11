@@ -10,6 +10,7 @@ import org.gluu.util.StringHelper;
 public final class Utils {
     private static final String SERVER_BASE_PATH = "server.base";
     private static final String CUSTOM_PAGES_PATH = "/custom/pages";
+    private static final String CUSTOM_LOCALIZATION_PATH = "/custom/i18n";
 
     private Utils() { }
 
@@ -25,10 +26,31 @@ public final class Utils {
         }
     }
 
+    public static boolean isCustomLocalizationDirExists() {
+        String externalResourceBase = getCustomLocalizationPath();
+        if (StringHelper.isNotEmpty(externalResourceBase)) {
+            File folder = new File(externalResourceBase);
+            boolean result = folder.exists() && folder.isDirectory();
+
+            return result;
+        } else {
+            return false;
+        }
+    }
+
     public static String getCustomPagesPath() {
         String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
         if (StringHelper.isNotEmpty(externalResourceBase)) {
             externalResourceBase += CUSTOM_PAGES_PATH;
+        }
+
+        return externalResourceBase;
+    }
+
+    public static String getCustomLocalizationPath() {
+        String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
+        if (StringHelper.isNotEmpty(externalResourceBase)) {
+            externalResourceBase += CUSTOM_LOCALIZATION_PATH;
         }
 
         return externalResourceBase;
