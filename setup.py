@@ -118,10 +118,23 @@ print("Detected init   :  {}".format(base.os_initdaemon))
 print("Detected Apache :  {}".format(base.determineApacheVersion()))
 print()
 
-
-# initialize util classes
 propertiesUtils = PropertiesUtils()
-propertiesUtils.promptForProperties()
+
+setup_loaded = {}
+
+if setupOptions['setup_properties']:
+    base.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
+    setup_loaded = propertiesUtils.load_properties(setupOptions['setup_properties'])
+elif os.path.isfile(Config.setup_properties_fn):
+    base.logIt('%s Properties found!\n' % Config.setup_properties_fn)
+    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn)
+elif os.path.isfile(Config.setup_properties_fn+'.enc'):
+    base.logIt('%s Properties found!\n' % Config.setup_properties_fn+'.enc')
+    setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn+'.enc')
+
+if not Config.noPrompt:
+    propertiesUtils.promptForProperties()
+
 propertiesUtils.check_properties()
 
 # initialize installers
