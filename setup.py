@@ -103,14 +103,11 @@ suggested_free_disk_space = 40 #in GB
 
 re_split_host = re.compile(r'[^,\s,;]+')
 
-istty = False
 thread_queue = None
-try:
-    tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
-    istty = True
-except:
-    tty_rows = 60
-    tty_columns = 120
+
+terminal_size = shutil.get_terminal_size()
+tty_rows=terminal_size.lines 
+tty_columns = terminal_size.columns
 
 try:
     from pylib.cbm import CBM
@@ -5687,7 +5684,7 @@ if __name__ == '__main__':
 
     argsp = parser.parse_args()
 
-    if (not argsp.c) and istty and (int(tty_rows) > 24) and (int(tty_columns) > 79):
+    if (not argsp.c) and sys.stdout.isatty() and (int(tty_rows) > 24) and (int(tty_columns) > 79):
         try:
             import npyscreen
         except:
