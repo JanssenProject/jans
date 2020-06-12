@@ -36,6 +36,8 @@ import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
+import org.gluu.oxauth.service.external.session.SessionEvent;
+import org.gluu.oxauth.service.external.session.SessionEventType;
 import org.gluu.oxauth.util.QueryStringDecoder;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
@@ -707,6 +709,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     sessionUser.setState(SessionIdState.UNAUTHENTICATED);
                     sessionUser.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
                     sessionIdService.persistSessionId(sessionUser);
+                    sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, sessionUser));
                 }
             } else {
                 throw e;
@@ -866,17 +869,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             sessionId = cookieService.getSessionIdFromCookie(httpRequest);
         }
 
-        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
-        if (ldapSessionId == null) {
+        SessionId persistenceSessionId = sessionIdService.getSessionId(sessionId);
+        if (persistenceSessionId == null) {
             log.error("Failed to load session from LDAP by session_id: '{}'", sessionId);
             return;
         }
 
-        ldapSessionId.setState(SessionIdState.UNAUTHENTICATED);
-        ldapSessionId.setUserDn(null);
-        ldapSessionId.setUser(null);
-        ldapSessionId.setAuthenticationTime(null);
-        boolean result = sessionIdService.updateSessionId(ldapSessionId);
+        persistenceSessionId.setState(SessionIdState.UNAUTHENTICATED);
+        persistenceSessionId.setUserDn(null);
+        persistenceSessionId.setUser(null);
+        persistenceSessionId.setAuthenticationTime(null);
+        boolean result = sessionIdService.updateSessionId(persistenceSessionId);
+        sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, persistenceSessionId).setHttpRequest(httpRequest));
         if (!result) {
             log.error("Failed to update session_id '{}'", sessionId);
         }
