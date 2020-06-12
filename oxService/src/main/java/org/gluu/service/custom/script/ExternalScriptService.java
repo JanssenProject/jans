@@ -48,6 +48,10 @@ public abstract class ExternalScriptService implements Serializable {
     }
 
     public void reload(@Observes @ReloadScript String event) {
+    	// Skip reload if global script is not enabled for this application
+    	if (!customScriptManager.isSupportedType(customScriptType)) {
+    		return;
+    	}
         // Get actual list of external configurations
         List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager
                 .getCustomScriptConfigurationsByScriptType(customScriptType);

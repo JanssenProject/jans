@@ -524,4 +524,8 @@ public class CustomScriptManager implements Serializable {
 		return supportedCustomScriptTypes;
 	}
 
+	public boolean isSupportedType(CustomScriptType customScriptType) {
+		return supportedCustomScriptTypes.contains(customScriptType);
+	}
+
 }
