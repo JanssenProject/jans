@@ -2,6 +2,7 @@ import os
 import glob
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -12,8 +13,11 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'node'
-        self.pbar_text = "Installing Node"
         self.needdb = False # we don't need backend connection in this class
+
+        self.app_type = AppType.APPLICATION
+        self.install_type = InstallOption.MONDATORY
+        self.register_progess()
 
         self.node_initd_script = os.path.join(Config.install_dir, 'static/system/initd/node')
         self.node_user_home = '/home/node'

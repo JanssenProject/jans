@@ -3,6 +3,7 @@ import glob
 import shutil
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.installers.jetty import JettyInstaller
@@ -11,7 +12,11 @@ class SamlInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'idp'
-        self.pbar_text = "Installing Saml"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installSaml'
+        self.register_progess()
+        
         self.needdb = True
         self.idp3_war = 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.idp3_dist_jar = 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (Config.oxVersion, Config.oxVersion)
@@ -229,9 +234,9 @@ class SamlInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
 
     def download_files(self):
-        Config.pbar.progress('saml', "Downloading Shibboleth IDP v3 war file", False)
+        Config.pbar.progress(self.service_name, "Downloading Shibboleth IDP v3 war file", False)
         self.run([paths.cmd_wget, self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'idp.war')])
-        Config.pbar.progress('saml', "Downloading Shibboleth IDP v3 keygenerator", False)
+        Config.pbar.progress(self.service_name, "Downloading Shibboleth IDP v3 keygenerator", False)
         self.run([paths.cmd_wget, self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'idp3_cml_keygenerator.jar')])
-        Config.pbar.progress('saml', "Downloading Shibboleth IDP v3 binary distributive file", False)
+        Config.pbar.progress(self.service_name, "Downloading Shibboleth IDP v3 binary distributive file", False)
         self.run([paths.cmd_wget, self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'shibboleth-idp.jar')])

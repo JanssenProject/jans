@@ -18,6 +18,14 @@ class BackendTypes:
     LDAP      = 1
     COUCHBASE = 2
 
+class AppType:
+    APPLICATION = 1
+    SERVICE     = 2
+
+class InstallOption:
+    MONDATORY = 1
+    OPTONAL   = 2
+
 COMPLETED = -99
 ERROR = -101
 

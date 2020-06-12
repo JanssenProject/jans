@@ -6,6 +6,7 @@ from setup_app.utils.base import httpd_name, clone_type, \
     os_initdaemon, os_type, determineApacheVersion
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -14,8 +15,11 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = httpd_name
-        self.pbar_text = "Configuring Apache"
-        self.logIt(self.pbar_text, pbar=self.service_name)
+        self.pbar_text = "Configuring"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installHttpd'
+        self.register_progess()
         
         self.needdb = False # we don't need backend connection in this class
 
@@ -34,7 +38,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
 
     def configure(self):
-
+        self.logIt(self.pbar_text, pbar=self.service_name)
         self.stop()
 
         self.update_rendering_dict()
