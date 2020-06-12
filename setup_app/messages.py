@@ -35,7 +35,7 @@ class msg:
     installPassport_label = "Install Passport" 
     installGluuRadius_label = "Install Radius"
     wrends_storages_label = "Store on WrenDS"
-    installing_label = "Installing"
+    installing_label = "Current"
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
     installScimServer_label = "Install Scim"

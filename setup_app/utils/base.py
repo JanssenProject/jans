@@ -58,16 +58,16 @@ else:
     httpd_name = 'apache2'
 
 # resources
-file_max = int(open("/proc/sys/fs/file-max").read().strip())
+current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
 current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 disk_st = os.statvfs('/')
-available_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
+current_free_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
 
 def check_resources():
 
-    if file_max < static.file_max:
+    if current_file_max < static.file_max:
         print(("{0}Maximum number of files that can be opened on this computer is "
                   "less than 64000. Please increase number of file-max on the "
                   "host system and re-run setup.py{1}".format(static.colors.DANGER,
@@ -101,7 +101,7 @@ def check_resources():
 
 
 
-    if available_disk_space < static.suggested_free_disk_space:
+    if current_free_disk_space < static.suggested_free_disk_space:
         print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         static.colors.WARNING,

@@ -1,12 +1,9 @@
 import sys
 import time
 
-from setup_app.static import InstallOption, AppType
+from setup_app import static
 from setup_app.config import Config
 from threading import Thread
-from queue import Queue
-
-queue = Queue()
 
 # credit https://github.com/verigak/progress/blob/master/progress/spinner.py
 phases = ['◑', '◒', '◐', '◓']
@@ -63,8 +60,8 @@ class ShowProgress(Thread):
                     elif not data['current'] in self.service_names:
                         self.services.insert(last_completed + 1, {
                                 'name': data['current'],
-                                'app_type': AppType.APPLICATION,
-                                'install_type': InstallOption.OPTONAL,
+                                'app_type': static.AppType.APPLICATION,
+                                'install_type': static.InstallOption.OPTONAL,
                                 'msg': data.get('msg','')
                                 })
                         number_of_services += 1
@@ -94,12 +91,13 @@ class ShowProgress(Thread):
 
 
 class GluuProgress:
-    
+
     services = []
+    queue = None
     
     def register(self, installer):
 
-        if installer.install_type == InstallOption.MONDATORY or Config.get(installer.install_var):
+        if installer.install_type == static.InstallOption.MONDATORY or Config.get(installer.install_var):
 
             progress_entry = {
                         'name': installer.service_name,
@@ -110,13 +108,13 @@ class GluuProgress:
 
             self.services.append(progress_entry)
 
-
     def start(self):
-        th = ShowProgress(self.services, queue)
+        self.queue = queue
+        th = ShowProgress(self.services, self.queue)
         th.setDaemon(True)
         th.start()
 
-    def progress(self, service_name, msg, incr=False):
-        queue.put({'current': service_name, 'msg': msg})
+    def progress(self, service_name, msg='', incr=False):
+        self.queue.put({'current': service_name, 'msg': msg})
         
 gluuProgress = GluuProgress()
