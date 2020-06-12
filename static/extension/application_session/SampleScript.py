@@ -14,6 +14,7 @@ from org.gluu.jsf2.message import FacesMessages
 from org.gluu.util import StringHelper, ArrayHelper
 from org.gluu.oxauth.model.config import Constants
 from java.util import Arrays, ArrayList
+from org.gluu.oxauth.service.external.session import SessionEventType
 
 import java
 
@@ -41,7 +42,7 @@ class ApplicationSession(ApplicationSessionType):
 
     # Called each time specific session event occurs
     # event is org.gluu.oxauth.service.external.session.SessionEvent
-    def onEvent(self, Object event):
+    def onEvent(self, event):
         if event.getType() == SessionEventType.AUTHENTICATED:
             print "Session is authenticated, session: " + event.getSessionId()
         return
