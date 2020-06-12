@@ -10,6 +10,7 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.scim.ScimType;
+import org.gluu.persist.model.PagedResult;
 import org.gluu.oxtrust.model.GluuGroup;
 import org.gluu.oxtrust.model.scim.ScimCustomPerson;
 import org.gluu.service.custom.script.ExternalScriptService;
@@ -28,24 +29,6 @@ public class ExternalScimService extends ExternalScriptService {
         //TODO: remove
         System.out.println("CONSTRUCTOR.");
     }
-    
-    //TODO: is this needed?
-    /*
-    public void init() {
-    }
-    
-    @PostConstruct
-    private void initialize() {
-    	customScriptType = CustomScriptType.SCIM;
-    	System.out.println("INIT");
-        try {
-        	customScriptManager.initTimer(Collections.singletonList(customScriptType));
-        	System.out.println("DONE");
-        } catch(Exception e) {
-        	log.error(e.getMessage(), e);
-        }
-    	
-    }*/
 
     private boolean executeScimCreateUserMethod(ScimCustomPerson user, CustomScriptConfiguration customScriptConfiguration) {
 
@@ -337,6 +320,50 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
+    private boolean executeScimPostSearchUsersMethod(PagedResult<ScimCustomPerson> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
+
+        try {
+        	if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
+                return true;
+            
+            log.debug("Executing python 'SCIM Search Users' method");
+            ScimType externalType = (ScimType) customScriptConfiguration.getExternalType();
+            Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+            
+            boolean result = externalType.postSearchUsers(pagedResult, configurationAttributes);
+            log.debug("executeScimPostSearchUsersMethod result = " + result);
+            return result;
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            saveScriptError(customScriptConfiguration.getCustomScript(), e);
+        }
+        return false;
+        
+    }
+    
+    private boolean executeScimPostSearchGroupsMethod(PagedResult<GluuGroup> pagedResult, CustomScriptConfiguration customScriptConfiguration) {
+
+        try {
+        	if (executeExternalGetApiVersion(customScriptConfiguration) < 4)
+                return true;
+            
+            log.debug("Executing python 'SCIM Search Groups' method");
+            ScimType externalType = (ScimType) customScriptConfiguration.getExternalType();
+            Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+            
+            boolean result = externalType.postSearchGroups(pagedResult, configurationAttributes);
+            log.debug("executeScimPostSearchGroupsMethod result = " + result);
+            return result;
+            
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            saveScriptError(customScriptConfiguration.getCustomScript(), e);
+        }
+        return false;
+        
+    }
+    
     public boolean executeScimCreateUserMethods(ScimCustomPerson user) {
 
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
@@ -491,4 +518,24 @@ public class ExternalScimService extends ExternalScriptService {
 
     }
 
+    public boolean executeScimPostSearchUsersMethods(PagedResult<ScimCustomPerson> result) {
+
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            if (!executeScimPostSearchUsersMethod(result, customScriptConfiguration)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public boolean executeScimPostSearchGroupsMethods(PagedResult<GluuGroup> result) {
+
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            if (!executeScimPostSearchGroupsMethod(result, customScriptConfiguration)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
 }
