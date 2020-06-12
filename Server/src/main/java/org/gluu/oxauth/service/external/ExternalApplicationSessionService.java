@@ -99,7 +99,7 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
 
     private void executeExternalOnEventMethod(CustomScriptConfiguration scriptConfiguration, SessionEvent event) {
         try {
-            log.debug("Executing python 'onEvent' method of script: " + scriptConfiguration.getName() + ", event: " + event);
+            log.trace("Executing python 'onEvent' method of script: " + scriptConfiguration.getName() + ", event: " + event);
             event.setScriptConfiguration(scriptConfiguration);
             ApplicationSessionType applicationSessionType = (ApplicationSessionType) scriptConfiguration.getExternalType();
             applicationSessionType.onEvent(event);
