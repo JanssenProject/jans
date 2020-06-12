@@ -13,7 +13,8 @@ from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.client.fido.u2f import FidoU2fClientFactory
 from org.gluu.oxauth.model.config import Constants
 from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
+from org.gluu.oxauth.service import AuthenticationService, SessionIdService
+from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
