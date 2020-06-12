@@ -44,7 +44,7 @@ class ApplicationSession(ApplicationSessionType):
     # event is org.gluu.oxauth.service.external.session.SessionEvent
     def onEvent(self, event):
         if event.getType() == SessionEventType.AUTHENTICATED:
-            print "Session is authenticated, session: " + event.getSessionId()
+            print "Session is authenticated, session: " + event.getSessionId().getId()
         return
 
     # Application calls it at start session request to allow notify 3rd part systems
