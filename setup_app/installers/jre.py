@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -13,10 +14,13 @@ class JreInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'jre'
-        self.pbar_text = "Installing JRE"
         self.needdb = False # we don't need backend connection in this class
+        self.app_type = AppType.APPLICATION
+        self.install_type = InstallOption.MONDATORY
+        self.register_progess()
 
         self.open_jdk_archive_link = 'https://github.com/AdoptOpenJDK/openjdk11-binaries/releases/download/jdk-11.0.4%2B11/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11.tar.gz'
+
 
     def install(self):
 

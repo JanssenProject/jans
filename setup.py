@@ -20,7 +20,7 @@ from setup_app import static
 from setup_app.utils import base
 
 from setup_app.config import Config
-from setup_app.utils.progress_bar import ProgressBar
+from setup_app.utils.progress import gluuProgress
 
 
 from setup_app.setup_options import get_setup_options
@@ -84,7 +84,7 @@ if not argsp.n and not thread_queue:
         
 
 # initilize progress bar and pass to Config object
-Config.pbar = ProgressBar(cols=tty_columns, queue=thread_queue)
+Config.pbar = gluuProgress
 
 
 for key in setupOptions:
@@ -137,23 +137,23 @@ if not Config.noPrompt:
 
 propertiesUtils.check_properties()
 
-# initialize installers
+# initialize installers, order is important!
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
 nodeInstaller = NodeInstaller()
 openDjInstaller = OpenDjInstaller()
 couchbaseInstaller = CouchbaseInstaller()
-
+httpdinstaller = HttpdInstaller()
 oxauthInstaller = OxauthInstaller()
-passportInstaller = PassportInstaller()
 oxtrustInstaller = OxtrustInstaller()
+passportInstaller = PassportInstaller()
 scimInstaller = ScimInstaller()
 fidoInstaller = FidoInstaller()
 samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
-radiusInstaller = RadiusInstaller()
 casaInstaller = CasaInstaller()
+radiusInstaller = RadiusInstaller()
 print()
 print(gluuInstaller)
 
@@ -164,16 +164,27 @@ if not Config.noPrompt:
         proceed = False
 
 
-if proceed:
+#register post setup progress
+class PostSetup:
+        service_name = 'post-setup'
+        app_type = static.AppType.APPLICATION
+        install_type = static.InstallOption.MONDATORY
 
+gluuProgress.register(PostSetup)
+
+
+if proceed:
+    gluuProgress.start()
     gluuInstaller.configureSystem()
+    gluuInstaller.make_salt()
+    oxauthInstaller.make_oxauth_salt()
+    
     jettyInstaller.calculate_selected_aplications_memory()
     jreInstaller.start_installation()
     jettyInstaller.start_installation()
     jythonInstaller.start_installation()
     nodeInstaller.start_installation()
-    gluuInstaller.make_salt()
-    oxauthInstaller.make_oxauth_salt()
+
     gluuInstaller.copy_scripts()
     gluuInstaller.encode_passwords()
 
@@ -205,7 +216,6 @@ if proceed:
         couchbaseInstaller.start_installation()
 
     if Config.installHttpd:
-        httpdinstaller = HttpdInstaller()
         httpdinstaller.configure()
 
     if Config.installOxAuth:
@@ -241,30 +251,20 @@ if proceed:
     if Config.installGluuRadius:
         radiusInstaller.install_gluu_radius()
 
-
+    gluuProgress.progress(PostSetup.service_name, "Saving properties")
     propertiesUtils.save_properties()
 
+    for service in gluuProgress.services:
+        if 'object' in service and service['app_type'] == static.AppType.SERVICE:
+            gluuProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].title()))
+            service['object'].stop()
+            service['object'].start()
+            if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
+                gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
+                service['object'].start('oxauth-rp')
 
-    """
-    self.pbar.progress("gluu", "Installing Gluu components")
-    self.install_gluu_components()
-    self.pbar.progress("gluu", "Rendering test templates")
-    self.render_test_templates()
-    self.pbar.progress("gluu", "Copying static")
-    self.copy_static()
-    self.fix_systemd_script()
-    self.pbar.progress("gluu", "Setting ownerships")
-    self.set_ownership()
-    self.pbar.progress("gluu", "Setting permissions")
-    self.set_permissions()
-    self.pbar.progress("gluu", "Starting services")
-    self.start_services()
-    self.pbar.progress("gluu", "Saving properties")
-    self.save_properties()
-    """
-
-
-
+# we need this for progress write last line
+time.sleep(2)
 
 
     

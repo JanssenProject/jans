@@ -51,18 +51,22 @@ class Config:
         
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(self.install_dir, 'logs', 'progress-bar.log')
-        class DummyProgressBar:
-            def __init__(self, *args):
-                 pass
+        class DummyProgress:
 
-            def complete(self, *args):
+            services = []
+            
+            def register(self, installer):
                 pass
 
-            def progress(self, *args):
-                with open(progress_log_file, 'a') as w:
-                    w.write(time.ctime() + ' ' + str(args) + '\n')
 
-        self.pbar = DummyProgressBar()
+            def start(self):
+                pass
+
+            def progress(self, service_name, msg, incr=False):
+                with open(progress_log_file, 'a') as w:
+                    w.write("{}: {}\n".format(service_name, msg))
+
+        self.pbar = DummyProgress()
 
         self.properties_password = None
         self.noPrompt = False

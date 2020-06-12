@@ -3,6 +3,7 @@ import glob
 import re
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -11,7 +12,10 @@ class JythonInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'jython'
-        self.pbar_text = "Installing Jython"
+        self.app_type = AppType.APPLICATION
+        self.install_type = InstallOption.MONDATORY
+        self.register_progess()
+
         self.needdb = False # we don't need backend connection in this class
 
     def install(self):

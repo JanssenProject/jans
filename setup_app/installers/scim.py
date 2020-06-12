@@ -3,6 +3,7 @@ import glob
 import shutil
 
 from setup_app.utils import base
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
@@ -10,8 +11,11 @@ class ScimInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'scim'
-        self.pbar_text = "Installing Scim"
         self.needdb = True
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installScimServer'
+        self.register_progess()
 
     def install(self):
         self.logIt("Copying scim.war into jetty webapps folder...")

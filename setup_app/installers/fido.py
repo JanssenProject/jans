@@ -3,6 +3,7 @@ import glob
 import shutil
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
@@ -10,8 +11,11 @@ class FidoInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'fido2'
-        self.pbar_text = "Installing fido2"
         self.needdb = True
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installFido2'
+        self.register_progess()
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
         self.output_folder = os.path.join(Config.outputFolder, 'fido2')

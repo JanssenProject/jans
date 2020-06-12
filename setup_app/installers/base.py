@@ -4,13 +4,21 @@ import inspect
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
+from setup_app.utils.progress import gluuProgress
 
 class BaseInstaller:
     needdb = True
     dbUtils = dbUtils
 
+    def register_progess(self):
+        gluuProgress.register(self)
+
     def start_installation(self):
-        self.logIt(self.pbar_text, pbar=self.service_name)
+        if not hasattr(self, 'pbar_text'):
+            pbar_text = "Installing"
+        else:
+            pbar_text = self.pbar_text
+        self.logIt(pbar_text, pbar=self.service_name)
         if self.needdb:
             self.dbUtils.bind()
 

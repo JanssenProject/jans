@@ -93,10 +93,11 @@ class AttribDataTypes:
             retVal = dt.isoformat()
 
         elif dtype == 'boolean':
-            if retVal.lower() in ('true', 'yes', '1', 'on'):
-                retVal = True
-            else:
-                retVal = False
+            if not isinstance(retVal, bool):
+                if retVal.lower() in ('true', 'yes', '1', 'on'):
+                    retVal = True
+                else:
+                    retVal = False
 
         return retVal
 
