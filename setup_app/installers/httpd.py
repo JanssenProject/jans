@@ -15,7 +15,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = httpd_name
-        self.pbar_text = "Configuring"
+        self.pbar_text = "Configuring " + httpd_name
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installHttpd'

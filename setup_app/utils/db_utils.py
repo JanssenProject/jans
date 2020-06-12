@@ -44,7 +44,7 @@ class DBUtils:
         self.default_bucket = Config.couchbase_bucket_prefix
 
     def set_cbm(self):
-        self.cbm = CBM(Config.cb_query_node, Config.couchebaseClusterAdmin, Config.cb_password)
+        self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
 
     def get_oxAuthConfDynamic(self):
         if self.moddb == BackendTypes.LDAP:
