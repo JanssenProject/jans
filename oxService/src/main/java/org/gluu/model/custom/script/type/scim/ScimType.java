@@ -38,8 +38,8 @@ public interface ScimType extends BaseExternalType {
 
     boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    boolean postSearchUsers(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
     
-    boolean postSearchGroups(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
+    boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
     
 }

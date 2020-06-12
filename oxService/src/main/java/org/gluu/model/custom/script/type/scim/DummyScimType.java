@@ -101,12 +101,12 @@ public class DummyScimType implements ScimType {
     }
     
     @Override
-    public boolean postSearchUsers(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
     
     @Override
-    public boolean postSearchGroups(Object group, Map<String, SimpleCustomProperty> configurationAttributes) {
+    public boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
