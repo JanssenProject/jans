@@ -3,6 +3,7 @@ import glob
 import ruamel.yaml
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
@@ -12,12 +13,15 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
     def __init__(self):
         self.service_name = 'oxd-server'
-        self.pbar_text = "Installing Oxd Server"
         self.oxd_root = '/opt/oxd-server/'
         self.needdb = False # we don't need backend connection in this class
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installOxd'
+        self.register_progess()
 
     def install(self):
-        
+
         oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
         
         self.run(['tar', '-zxf', Config.oxd_package, '-C', '/opt'])

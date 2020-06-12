@@ -3,6 +3,7 @@ import glob
 import uuid
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
@@ -10,7 +11,11 @@ class OxtrustInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'identity'
-        self.pbar_text = "Installing Oxtrust"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installOxTrust'
+        self.register_progess()
+
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
 
         self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust')
@@ -134,7 +139,7 @@ class OxtrustInstaller(JettyInstaller):
 
 
     def download_files(self):
-        self.pbar.progress('oxauth', "Downloading oxTrust war file", False)
+        self.pbar.progress(self.service_name, "Downloading oxTrust war file", False)
         self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
     def create_folders(self):

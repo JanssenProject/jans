@@ -6,12 +6,17 @@ import string
 from setup_app import paths
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
+from setup_app.static import AppType, InstallOption
 
 class OxauthInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'oxauth'
-        self.pbar_text = "Installing oxauth"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installOxAuth'
+        self.register_progess()
+
         self.oxauth_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion)
         self.oxAuthRPWar = 'oxauth-rp.war'
@@ -26,6 +31,7 @@ class OxauthInstaller(JettyInstaller):
         self.oxauth_error_json = os.path.join(self.templates_folder, 'oxauth-errors.json')
         self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'oxauth-keys.json')
         self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'oxauth-keys.jks')
+
 
     def install(self):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
@@ -47,7 +53,7 @@ class OxauthInstaller(JettyInstaller):
             Config.oxauthClient_pw = self.getPW()
             Config.oxauthClient_encoded_pw = self.obscure(Config.oxauthClient_pw)
 
-        self.logIt("Generating oxauth openid keys", pbar='gluu')
+        self.logIt("Generating oxauth openid keys", pbar=self.service_name)
         sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP'
         jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
@@ -68,7 +74,7 @@ class OxauthInstaller(JettyInstaller):
 
 
     def install_oxauth_rp(self):
-        Config.pbar.progress("oxauthrp", "Installing OxAuthRP", False)
+        Config.pbar.progress(self.service_name, "Installing OxAuthRP", False)
 
         distOxAuthRpPath = os.path.join(Config.distGluuFolder, self.oxAuthRPWar)
 
@@ -87,20 +93,19 @@ class OxauthInstaller(JettyInstaller):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
-    def make_oxauth_salt(self):
-        Config.pbar.progress("gluu", "Making oxauth salt")
+    def make_salt(self):
         Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
         Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def download_files(self, oxauth_rp=False):
         if not oxauth_rp:
-            Config.pbar.progress('oxauth', "Downloading oxAuth war file")
+            Config.pbar.progress(self.service_name, "Downloading oxAuth war file")
             self.run([paths.cmd_wget, self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'oxauth.war')])
         if Config.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = os.path.join(Config.distGluuFolder, 'oxauth-rp.war')
             if not os.path.exists(distOxAuthRpPath):
-                Config.pbar.progress('oxauth', "Downloading oxAuth RP war file", False)
+                Config.pbar.progress(self.service_name, "Downloading oxAuth RP war file", False)
                 self.run([paths.cmd_wget, self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder,  'oxauth-rp.war')])
 
     def copy_static(self):

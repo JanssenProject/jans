@@ -5,6 +5,7 @@ import ssl
 import json
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.static import InstallTypes, BackendTypes
@@ -16,8 +17,11 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'opendj'
-        self.pbar_text = "Installing OpenDj"
         self.needdb = False # we don't need backend connection in this class
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'wrends_install'
+        self.register_progess()
 
         self.openDjIndexJson = os.path.join(Config.install_dir, 'static/opendj/index.json')
         self.openDjSchemaFolder = os.path.join(Config.ldapBaseFolder, 'config/schema')
@@ -31,29 +35,28 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def install(self):
         self.logIt("Running OpenDJ Setup")
 
-        Config.pbar.progress("opendj", "Extracting OpenDJ", False)
+        Config.pbar.progress(self.service_name, "Extracting OpenDJ", False)
         self.extractOpenDJ()
 
         self.createLdapPw()
         
         try:
-            Config.pbar.progress("opendj", "OpenDJ: installing", False)
+            Config.pbar.progress(self.service_name, "Installing", False)
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.install_opendj()
-                Config.pbar.progress("opendj", "OpenDJ: setting up service", False)
+                Config.pbar.progress(self.service_name, "Setting up service", False)
                 self.setup_opendj_service()
-                Config.pbar.progress("opendj", "OpenDJ: preparing schema", False)
+                Config.pbar.progress(self.service_name, "Preparing schema", False)
                 self.prepare_opendj_schema()
 
             if Config.wrends_install:
-                Config.pbar.progress("opendj", "OpenDJ: configuring", False)
+                Config.pbar.progress(self.service_name, "Configuring", False)
                 self.configure_opendj()
-                Config.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
+                Config.pbar.progress(self.service_name, "Exporting certificate", False)
                 self.export_opendj_public_cert()
-                Config.pbar.progress("opendj", "OpenDJ: creating indexes", False)
+                Config.pbar.progress(self.service_name, "Creating indexes", False)
                 self.index_opendj()
-                Config.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
-                
+
                 ldif_files = []
 
                 if Config.mappingLocations['default'] == 'ldap':
@@ -66,13 +69,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
   
                 # Now bind ldap and import ldif files
                 self.dbUtils.bind()
-                Config.pbar.progress("opendj", "OpenDJ: importing ldif files", False)
+                Config.pbar.progress(self.service_name, "Importing ldif files", False)
                 if not Config.ldif_base in ldif_files:
                     self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.LDAP)
 
                 self.dbUtils.import_ldif(ldif_files)
 
-                Config.pbar.progress("opendj", "OpenDJ: post installation", False)
+                Config.pbar.progress(self.service_name, "Post installation", False)
                 if Config.wrends_install == InstallTypes.LOCAL:
                     self.post_install_opendj()
         except:

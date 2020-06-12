@@ -10,8 +10,10 @@ from pathlib import Path
 
 from setup_app import paths
 from setup_app import static
+from setup_app.static import InstallTypes, AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils.progress import gluuProgress
 from setup_app.utils import base
 
 class GluuInstaller(SetupUtils):
@@ -32,12 +34,12 @@ class GluuInstaller(SetupUtils):
             bc = []
             if Config.wrends_install:
                 t_ = 'wrends'
-                if Config.wrends_install == static.InstallTypes.REMOTE:
+                if Config.wrends_install == InstallTypes.REMOTE:
                     t_ += '[R]'
                 bc.append(t_)
             if Config.cb_install:
                 t_ = 'couchbase'
-                if Config.cb_install == static.InstallTypes.REMOTE:
+                if Config.cb_install == InstallTypes.REMOTE:
                     t_ += '[R]'
                 bc.append(t_)
 
@@ -67,6 +69,12 @@ class GluuInstaller(SetupUtils):
 
 
     def initialize(self):
+        self.service_name = 'gluu'
+        self.app_type = AppType.APPLICATION
+        self.install_type = InstallOption.MONDATORY
+        gluuProgress.register(self)
+        
+        
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
         if not os.path.exists(Config.distFolder):
             print("Please ensure that you are running this script inside Gluu container.")
@@ -141,7 +149,7 @@ class GluuInstaller(SetupUtils):
         self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self, load_existing=True):
-        self.logIt("Making salt", pbar='gluu')
+        self.logIt("Making salt")
         salt_fn = os.path.join(Config.configFolder,'salt')
         if load_existing:
             if os.path.exists(salt_fn):
@@ -159,7 +167,7 @@ class GluuInstaller(SetupUtils):
             self.logIt("Error writing salt", True, True)
 
     def render_templates(self, templates=None):
-        self.logIt("Rendering templates", pbar='gluu')
+        self.logIt("Rendering templates")
 
         if not templates:
             templates = Config.ce_templates
@@ -175,7 +183,7 @@ class GluuInstaller(SetupUtils):
 
 
     def render_configuration_template(self):
-        self.logIt("Rendering configuration templates", pbar='gluu')
+        self.logIt("Rendering configuration templates")
 
         try:
             self.renderTemplate(Config.ldif_configuration)
@@ -228,7 +236,7 @@ class GluuInstaller(SetupUtils):
 
 
     def setup_init_scripts(self):
-        self.logIt("Setting up init scripts", pbar='gluu')
+        self.logIt("Setting up init scripts")
         if base.os_initdaemon == 'initd':
             for init_file in Config.init_files:
                 try:
@@ -249,7 +257,7 @@ class GluuInstaller(SetupUtils):
 
 
     def copy_scripts(self):
-        self.logIt("Copying script files", pbar='gluu')
+        self.logIt("Copying script files")
 
         for script in Config.gluuScriptFiles:
             self.copyFile(script, Config.gluuOptBinFolder)

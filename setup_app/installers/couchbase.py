@@ -6,7 +6,7 @@ import json
 import uuid
 
 from setup_app import paths
-from setup_app.static import InstallTypes, BackendTypes, colors
+from setup_app.static import InstallTypes, AppType, InstallOption, BackendTypes, colors
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
@@ -18,7 +18,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def __init__(self):
         self.service_name = 'couchbase-server'
-        self.pbar_text = "Installing Couchbase"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'cb_install'
+        self.register_progess()
 
         if not Config.get('couchebaseClusterAdmin'):
             Config.couchebaseClusterAdmin = 'admin'

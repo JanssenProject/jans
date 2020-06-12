@@ -7,6 +7,7 @@ import time
 from xml.etree import ElementTree
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.properties_utils import PropertiesUtils
@@ -17,7 +18,10 @@ class CasaInstaller(JettyInstaller):
 
     def __init__(self):
         self.service_name = 'casa'
-        self.pbar_text = "Installing Casa"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installCasa'
+        self.register_progess()
         
         self.templates_folder = os.path.join(Config.templateFolder, 'casa')
         self.output_folder = os.path.join(Config.outputFolder, 'casa')
