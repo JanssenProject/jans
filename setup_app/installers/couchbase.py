@@ -23,6 +23,18 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         self.install_var = 'cb_install'
         self.register_progess()
 
+        self.couchebaseInstallDir = '/opt/couchbase/'
+        self.couchbasePackageFolder = os.path.join(Config.distFolder, 'couchbase')
+        self.couchbaseTrustStoreFn = os.path.join(Config.certFolder, 'couchbase.pkcs12')
+        self.couchbaseIndexJson = os.path.join(Config.install_dir, 'static/couchbase/index.json')
+        self.couchbaseInitScript = os.path.join(Config.install_dir, 'static/system/initd/couchbase-server')
+        self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
+        self.gluuCouchebaseProperties = os.path.join(Config.configFolder, 'gluu-couchbase.properties')
+        self.couchbaseBuckets = []
+
+
+    def install(self):
+
         if not Config.get('couchebaseClusterAdmin'):
             Config.couchebaseClusterAdmin = 'admin'
             
@@ -38,18 +50,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'gluu'
-
-        self.couchebaseInstallDir = '/opt/couchbase/'
-        self.couchbasePackageFolder = os.path.join(Config.distFolder, 'couchbase')
-        self.couchbaseTrustStoreFn = os.path.join(Config.certFolder, 'couchbase.pkcs12')
-        self.couchbaseIndexJson = os.path.join(Config.install_dir, 'static/couchbase/index.json')
-        self.couchbaseInitScript = os.path.join(Config.install_dir, 'static/system/initd/couchbase-server')
-        self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
-        self.gluuCouchebaseProperties = os.path.join(Config.configFolder, 'gluu-couchbase.properties')
-        self.couchbaseBuckets = []
-
-
-    def install(self):
 
         if Config.cb_install == InstallTypes.LOCAL:
             self.add_couchbase_post_messages()

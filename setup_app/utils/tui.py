@@ -12,20 +12,15 @@ import string
 import inspect
 import threading
 import math
-from queue import Queue
-from .messages import msg
+
+from setup_app.messages import msg
+from setup_app.config import Config
+from setup_app import static
+from setup_app.utils import base
+from setup_app.utils.properties_utils import propertiesUtils
+from setup_app.utils.progress import gluuProgress
 
 import npyscreen
-
-queue = Queue()
-
-#install types
-NONE = 0
-LOCAL = '1'
-REMOTE = '2'
-
-COMPLETED = -99
-ERROR = -101
 
 random_marketing_strings = [
     'Having trouble? Open a ticket: https://support.gluu.org',
@@ -51,10 +46,11 @@ def getClassName(c):
         return ''
 
 class GluuSetupApp(npyscreen.StandardApp):
-    installObject = None
+    do_installation = None
     exit_reason = str()
     my_counter = 0
     do_notify = True
+    queue = None
 
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
@@ -129,14 +125,15 @@ class MAIN(GluuSetupForm):
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
         self.description_label.autowrap = True
 
-        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=msg.os_type + ' ' + msg.os_version, editable=False)
-        self.init_type = self.add(npyscreen.TitleFixedText, name=msg.init_type_label, begin_entry_at=18, value=msg.os_initdaemon, editable=False)
-        self.httpd_type = self.add(npyscreen.TitleFixedText, name=msg.httpd_type_label, begin_entry_at=18, value=msg.apache_version, field_width=40, editable=False)
+        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=base.os_name, editable=False)
+        self.init_type = self.add(npyscreen.TitleFixedText, name=msg.init_type_label, begin_entry_at=18, value=base.os_initdaemon, editable=False)
+        self.httpd_type = self.add(npyscreen.TitleFixedText, name=msg.httpd_type_label, begin_entry_at=18, value=base.httpd_name, field_width=40, editable=False)
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
         self.warning_text = self.add(npyscreen.MultiLineEdit, value=msg.setup_properties_warning, max_height=4, editable=False)
 
+
         for sys_req in ('file_max', 'mem_size', 'number_of_cpu', 'free_disk_space'):
-            cur_val = getattr(msg, 'current_' + sys_req)
+            cur_val = getattr(base, 'current_' + sys_req)
             req_val = getattr(msg, 'suggested_' + sys_req)
             if cur_val < req_val:
                 warning_text = getattr(msg, 'insufficient_' + sys_req).format(cur_val, req_val)
@@ -206,11 +203,11 @@ class HostForm(GluuSetupForm):
             npyscreen.notify_confirm(msg.enter_hostname_local, title="Info")
             return
 
-        if not self.parentApp.installObject.check_email(self.admin_email.value):
+        if not propertiesUtils.check_email(self.admin_email.value):
             npyscreen.notify_confirm(msg.enter_valid_email, title="Info")
             return
         
-        if not self.parentApp.installObject.isIP(self.ip.value):
+        if not propertiesUtils.isIP(self.ip.value):
             npyscreen.notify_confirm(msg.enter_valid_ip, title="Info")
             return
 
@@ -230,18 +227,18 @@ class HostForm(GluuSetupForm):
 
         for k in self.myfields_:
             f = getattr(self, k)
-            setattr(self.parentApp.installObject, k, f.value)
+            setattr(Config, k, f.value)
 
-        self.parentApp.installObject.application_max_ram = int(self.application_max_ram.value)
+        Config.application_max_ram = int(self.application_max_ram.value)
         self.parentApp.switchForm('ServicesForm')
 
     def do_beforeEditing(self):
-        if not self.parentApp.installObject.hostname:
-            self.parentApp.installObject.hostname = self.parentApp.installObject.detect_hostname()
+        if not Config.hostname:
+            Config.hostname = self.parentApp.detect_hostname()
 
         for k in self.myfields_:
             f = getattr(self, k)
-            v = getattr(self.parentApp.installObject, k)
+            v = Config.get(k,'')
             if v:
                 f.value = str(v)
                 f.update()
@@ -268,7 +265,7 @@ class ServicesForm(GluuSetupForm):
 
     def do_beforeEditing(self):
         for service in self.services:
-            if getattr(self.parentApp.installObject, service):
+            if Config.get(service):
                 cb = getattr(self, service)
                 cb.value = True
                 cb.update()
@@ -276,7 +273,7 @@ class ServicesForm(GluuSetupForm):
     def nextButtonPressed(self):
         for service in self.services:
             cb_val = getattr(self, service).value
-            setattr(self.parentApp.installObject, service, cb_val)
+            setattr(Config, service, cb_val)
 
         if self.installCasa.value:
             if not self.installOxd.value and not self.oxd_url.value:
@@ -287,7 +284,7 @@ class ServicesForm(GluuSetupForm):
         
                 oxd_server_https = self.oxd_url.value
         
-                oxd_connection_result = self.parentApp.installObject.check_oxd_server(oxd_server_https)
+                oxd_connection_result = propertiesUtils.check_oxd_server(oxd_server_https)
         
                 if oxd_connection_result != True:
                     npyscreen.notify_confirm(
@@ -296,8 +293,8 @@ class ServicesForm(GluuSetupForm):
                             )
                     return
 
-                oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(oxd_server_https)
-                oxd_ssl_result = self.parentApp.installObject.check_oxd_ssl_cert(oxd_hostname, oxd_port)
+                oxd_hostname, oxd_port = self.parentApp.parse_url(oxd_server_https)
+                oxd_ssl_result = propertiesUtils.check_oxd_ssl_cert(oxd_hostname, oxd_port)
                 if oxd_ssl_result :
 
                     npyscreen.notify_confirm(
@@ -305,19 +302,14 @@ class ServicesForm(GluuSetupForm):
                             title="Warning")
                     return
         
-                self.parentApp.installObject.oxd_server_https = oxd_server_https
+                Config.oxd_server_https = oxd_server_https
 
-        oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(self.parentApp.installObject.oxd_server_https)
-        if not oxd_port: 
-            oxd_port=8443
-
-        self.parentApp.installObject.templateRenderingDict['oxd_hostname'] = oxd_hostname
-        self.parentApp.installObject.templateRenderingDict['oxd_port'] = str(oxd_port)
+        propertiesUtils.check_oxd_server_https()
 
         if self.installOxd.value:
             result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
             if result:
-                self.parentApp.installObject.oxd_use_gluu_storage = True
+                Config.oxd_use_gluu_storage = True
 
         self.parentApp.switchForm('DBBackendForm')
 
@@ -367,47 +359,47 @@ class DBBackendForm(GluuSetupForm):
         self.cb_option_changed(self.ask_cb)
 
     def do_beforeEditing(self):
-        self.ask_wrends.value = [int(self.parentApp.installObject.wrends_install)]
+        self.ask_wrends.value = [int(Config.wrends_install)]
 
-        if self.parentApp.installObject.wrends_install == REMOTE:
+        if Config.wrends_install == static.InstallTypes.REMOTE:
             self.wrends_hosts.hidden = False
         else:
             self.wrends_hosts.hidden = True
 
-        if not self.parentApp.installObject.wrends_install:
+        if not Config.wrends_install:
             self.wrends_password.hidden = True
         else:
             self.wrends_password.hidden = False
 
-        if self.parentApp.installObject.wrends_install == LOCAL:
-            if not self.parentApp.installObject.ldapPass:
-                self.wrends_password.value = self.parentApp.installObject.oxtrust_admin_password
+        if Config.wrends_install == static.InstallTypes.LOCAL:
+            if not Config.ldapPass:
+                self.wrends_password.value = Config.oxtrust_admin_password
 
-        self.wrends_hosts.value = self.parentApp.installObject.ldap_hostname        
+        self.wrends_hosts.value = Config.ldap_hostname
 
-        self.ask_cb.value = [int(self.parentApp.installObject.cb_install)]
+        self.ask_cb.value = [int(Config.cb_install)]
 
-        if not self.parentApp.installObject.cb_install:
+        if not Config.cb_install:
             self.cb_admin.hidden = True
         else:
             self.cb_admin.hidden = False
 
-        if self.parentApp.installObject.cb_install == REMOTE:
+        if Config.cb_install == static.InstallTypes.REMOTE:
             self.cb_hosts.hidden = False
         else:
             self.cb_hosts.hidden = True
 
-        if not self.parentApp.installObject.cb_install:
+        if not Config.cb_install:
             self.cb_password.hidden = True
         else:
             self.cb_password.hidden = False
 
-        if self.parentApp.installObject.cb_install == LOCAL:
-            if not self.parentApp.installObject.cb_password:
-                self.cb_password.value = self.parentApp.installObject.oxtrust_admin_password
+        if Config.cb_install == static.InstallTypes.LOCAL:
+            if not Config.cb_password:
+                self.cb_password.value = Config.oxtrust_admin_password
 
-        self.cb_hosts.value = self.parentApp.installObject.couchbase_hostname
-        self.cb_admin.value = self.parentApp.installObject.couchebaseClusterAdmin
+        self.cb_hosts.value = Config.get('couchbase_hostname', '')
+        self.cb_admin.value = Config.get('couchebaseClusterAdmin','')
 
         self.wrends_hosts.update()
         self.ask_wrends.update()
@@ -424,18 +416,18 @@ class DBBackendForm(GluuSetupForm):
 
         msg.backend_types = []
 
-        self.parentApp.installObject.wrends_install = str(self.ask_wrends.value[0]) if self.ask_wrends.value[0] else 0
+        Config.wrends_install = str(self.ask_wrends.value[0]) if self.ask_wrends.value[0] else 0
 
-        if self.parentApp.installObject.wrends_install == LOCAL:
-            self.parentApp.installObject.ldap_hostname = 'localhost'
-            self.parentApp.installObject.ldapPass = self.wrends_password.value
-        elif self.parentApp.installObject.wrends_install == REMOTE:
-            self.parentApp.installObject.ldap_hostname = self.wrends_hosts.value
-            self.parentApp.installObject.ldapPass = self.wrends_password.value
+        if Config.wrends_install == static.InstallTypes.LOCAL:
+            Config.ldap_hostname = 'localhost'
+            Config.ldapPass = self.wrends_password.value
+        elif Config.wrends_install == static.InstallTypes.REMOTE:
+            Config.ldap_hostname = self.wrends_hosts.value
+            Config.ldapPass = self.wrends_password.value
 
-            result = self.parentApp.installObject.check_remote_ldap(
+            result = propertiesUtils.check_remote_ldap(
                         self.wrends_hosts.value, 
-                        self.parentApp.installObject.ldap_binddn, 
+                        Config.ldap_binddn, 
                         self.wrends_password.value
                         )
 
@@ -443,47 +435,43 @@ class DBBackendForm(GluuSetupForm):
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
-        self.parentApp.installObject.cb_install =  str(self.ask_cb.value[0]) if self.ask_cb.value[0] else 0
+        Config.cb_install =  str(self.ask_cb.value[0]) if self.ask_cb.value[0] else 0
 
-        if self.parentApp.installObject.cb_install == LOCAL:
-            self.parentApp.installObject.couchbase_hostname = 'localhost'
-            self.parentApp.installObject.cb_password = self.cb_password.value
-        elif self.parentApp.installObject.cb_install == REMOTE:
-            self.parentApp.installObject.couchbase_hostname =  self.cb_hosts.value
-            self.parentApp.installObject.couchebaseClusterAdmin = self.cb_admin.value
-            self.parentApp.installObject.cb_password = self.cb_password.value
-            result = self.parentApp.installObject.test_cb_servers(self.cb_hosts.value)
+        if Config.cb_install == static.InstallTypes.LOCAL:
+            Config.couchbase_hostname = 'localhost'
+            Config.cb_password = self.cb_password.value
+        elif Config.cb_install == static.InstallTypes.REMOTE:
+            Config.couchbase_hostname =  self.cb_hosts.value
+            Config.couchebaseClusterAdmin = self.cb_admin.value
+            Config.cb_password = self.cb_password.value
+            result = propertiesUtils.test_cb_servers(self.cb_hosts.value)
             if not result['result']:
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
-        if self.parentApp.installObject.cb_install:
-            self.parentApp.installObject.cache_provider_type = 'NATIVE_PERSISTENCE'
-            self.parentApp.installObject.add_couchbase_post_messages()
-
-        if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
+        if Config.wrends_install and not propertiesUtils.checkPassword(Config.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if self.parentApp.installObject.cb_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
+        if Config.cb_install and not propertiesUtils.checkPassword(Config.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
-        if self.parentApp.installObject.wrends_install or self.parentApp.installObject.cb_install:
-            if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
-                self.parentApp.installObject.persistence_type = 'hybrid'
+        if Config.wrends_install or Config.cb_install:
+            if Config.wrends_install and Config.cb_install:
+                Config.persistence_type = 'hybrid'
                 self.parentApp.switchForm('StorageSelectionForm')
             else:
-                storage_list = list(self.parentApp.installObject.couchbaseBucketDict.keys())
+                storage_list = list(Config.couchbaseBucketDict.keys())
                 storage = 'ldap'
 
-                if self.parentApp.installObject.cb_install:
+                if Config.cb_install:
                     storage = 'couchbase'
 
                 for s in storage_list:
-                    self.parentApp.installObject.mappingLocations[s] = storage
+                    Config.mappingLocations[s] = storage
                 
-                self.parentApp.installObject.persistence_type = storage
+                Config.persistence_type = storage
 
                 self.parentApp.switchForm('DisplaySummaryForm')
         else:
@@ -495,10 +483,10 @@ class DBBackendForm(GluuSetupForm):
             if not self.ask_wrends.value[0]:
                 self.wrends_password.hidden = True
                 self.wrends_hosts.hidden = True
-            elif str(self.ask_wrends.value[0]) == LOCAL:
+            elif str(self.ask_wrends.value[0]) == static.InstallTypes.LOCAL:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = True
-            elif str(self.ask_wrends.value[0]) == REMOTE:
+            elif str(self.ask_wrends.value[0]) == static.InstallTypes.REMOTE:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = False
                 
@@ -511,12 +499,12 @@ class DBBackendForm(GluuSetupForm):
                 self.cb_admin.hidden = True
                 self.cb_password.hidden = True
                 self.cb_hosts.hidden = True
-            elif str(self.ask_cb.value[0]) == LOCAL:
+            elif str(self.ask_cb.value[0]) == static.InstallTypes.LOCAL:
                 self.cb_admin.hidden = False
                 self.cb_hosts.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = True
-            elif str(self.ask_cb.value[0]) == REMOTE:
+            elif str(self.ask_cb.value[0]) == static.InstallTypes.REMOTE:
                 self.cb_admin.hidden = False
                 self.cb_password.hidden = False
                 self.cb_hosts.hidden = False
@@ -532,33 +520,33 @@ class DBBackendForm(GluuSetupForm):
 class StorageSelectionForm(GluuSetupForm):
     def create(self):
 
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(msg.storages), 
-            values=msg.storages, name=msg.DBBackendForm_label, scroll_exit=True)
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(Config.couchbaseBucketDict), 
+            values=list(Config.couchbaseBucketDict.keys()), name=msg.DBBackendForm_label, scroll_exit=True)
         
-        self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storages)+4, editable=False, color='STANDOUT')
+        self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(Config.couchbaseBucketDict)+4, editable=False, color='STANDOUT')
 
     def backButtonPressed(self):
         self.parentApp.switchForm('DBBackendForm')
 
     def do_beforeEditing(self):
-        self.wrends_storage.values = list(self.parentApp.installObject.couchbaseBucketDict.keys())
+        self.wrends_storage.values = list(Config.couchbaseBucketDict.keys())
 
         value = []
-        for i, s in enumerate(self.parentApp.installObject.couchbaseBucketDict.keys()):
-            if self.parentApp.installObject.mappingLocations[s] == 'ldap':
+        for i, s in enumerate(Config.couchbaseBucketDict.keys()):
+            if Config.mappingLocations[s] == 'ldap':
                 value.append(i)
         self.wrends_storage.value = value
         
         self.wrends_storage.update()
 
     def nextButtonPressed(self):
-        storage_list = list(self.parentApp.installObject.couchbaseBucketDict.keys())
+        storage_list = list(Config.couchbaseBucketDict.keys())
 
         for i, s in enumerate(storage_list):
             if i in self.wrends_storage.value:
-                self.parentApp.installObject.mappingLocations[s] = 'ldap'
+                Config.mappingLocations[s] = 'ldap'
             else:
-                self.parentApp.installObject.mappingLocations[s] = 'couchbase'
+                Config.mappingLocations[s] = 'couchbase'
 
         self.parentApp.switchForm('DisplaySummaryForm')
 
@@ -621,34 +609,34 @@ class DisplaySummaryForm(GluuSetupForm):
             if getClassName(w) == 'TitleFixedText':
                 if wn == 'backend_types':
                     bt_ = []
-                    if self.parentApp.installObject.wrends_install == LOCAL:
+                    if Config.wrends_install == static.InstallTypes.LOCAL:
                         bt_.append('wrends')
-                    elif self.parentApp.installObject.wrends_install == REMOTE:
+                    elif Config.wrends_install == static.InstallTypes.REMOTE:
                         bt_.append('wrends[R]')
 
-                    if self.parentApp.installObject.cb_install == LOCAL:
+                    if Config.cb_install == static.InstallTypes.LOCAL:
                         bt_.append('couchbase')
-                    elif self.parentApp.installObject.cb_install == REMOTE:
+                    elif Config.cb_install == static.InstallTypes.REMOTE:
                         bt_.append('couchbase[R]')
                     w.value = ', '.join(bt_)
                 elif wn == 'wrends_storages':
-                    if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
+                    if Config.wrends_install and Config.cb_install:
                         wds_ = []
-                        for k in self.parentApp.installObject.mappingLocations:
-                            if self.parentApp.installObject.mappingLocations[k] == 'ldap':
+                        for k in Config.mappingLocations:
+                            if sConfig.mappingLocations[k] == 'ldap':
                                 wds_.append(k)
                         w.hidden = False
                         w.value = ', '.join(wds_)
                     else:
                         w.hidden = True
                 else:
-                    val = getattr(self.parentApp.installObject, wn)
+                    val = Config.get(wn, 'NA')
                     w.value = str(val)
 
             w.update()
 
     def backButtonPressed(self):
-        if self.parentApp.installObject.wrends_install and self.parentApp.installObject.cb_install:
+        if self.Config.wrends_install and Config.cb_install:
             self.parentApp.switchForm('StorageSelectionForm')
         else:
             self.parentApp.switchForm('DBBackendForm')
@@ -656,59 +644,69 @@ class DisplaySummaryForm(GluuSetupForm):
 
     def nextButtonPressed(self):
         # Validate Properties
-        self.parentApp.installObject.check_properties()
+        propertiesUtils.check_properties()
 
         self.parentApp.switchForm('InstallStepsForm')
 
 class InputBox(npyscreen.BoxTitle):
     _contained_widget = npyscreen.MultiLineEdit
 
+class MySlider(npyscreen.SliderPercent):
+    pass
+
 class InstallStepsForm(GluuSetupForm):
     
     desc_value = None
-    
+    current_stage = 0
+
     def create(self):
-        self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number+1, rely=4, editable=False, name="Progress")
-        self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)
+        self.progress_percantage = self.add(MySlider, rely=4, editable=False, name="Progress")
+        self.installing = self.add(npyscreen.TitleFixedText, accuracy=0, name=msg.installing_label, value="", editable=False)        
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
 
 
     def do_beforeEditing(self):
-        t=threading.Thread(target=self.parentApp.installObject.do_installation, args=(queue,))
+        self.progress_percantage.out_of = len(gluuProgress.services) + 2
+        self.progress_percantage.update()
+
+        t=threading.Thread(target=self.parentApp.do_installation, args=())
         t.daemon = True
         t.start()
 
 
     def do_while_waiting(self):
 
-        if not queue.empty():
-            data = queue.get()
-            if data[0] == COMPLETED:
-                if self.parentApp.installObject.post_messages:
-                    npyscreen.notify_confirm('\n'.join(self.parentApp.installObject.post_messages), title="Post Install Messages", wide=True)
-                npyscreen.notify_confirm(msg.installation_completed.format(self.parentApp.installObject.hostname), title="Completed")
+        if not self.parentApp.queue.empty():
+            data = self.parentApp.queue.get()
+            current = data.get('current')
+            current_message = data.get('msg','')
+            if  current == static.COMPLETED:
+                if Config.post_messages:
+                    npyscreen.notify_confirm('\n'.join(Config.post_messages), title="Post Install Messages", wide=True)
+                npyscreen.notify_confirm(msg.installation_completed.format(Config.hostname), title="Completed")
                 self.parentApp.do_notify = False
                 self.parentApp.switchForm(None)
-            elif data[0] == ERROR:
-                npyscreen.notify_confirm(msg.installation_error +"\n"+data[2], title="ERROR")
+            elif current == static.ERROR:
+                npyscreen.notify_confirm(msg.installation_error +"\n"+current_message, title="ERROR")
                 self.parentApp.do_notify = False
                 self.parentApp.switchForm(None)
-                
-            self.prgress_percantage.value = data[0]
-            self.prgress_percantage.update()
-            self.installing.value = data[2]
+
+            self.progress_percantage.value = self.current_stage
+            self.progress_percantage.update()
+            self.installing.value = current_message
             self.installing.update()
 
-            if self.desc_value != data[1]:
+            if self.desc_value != current:
+                self.current_stage += 1
 
-                if hasattr(msg, 'installation_description_' + data[1]):
-                    desc = getattr(msg, 'installation_description_' + data[1])
-                    
+                if hasattr(msg, 'installation_description_' + str(current)):
+                    desc = getattr(msg, 'installation_description_' + current)
                 else:
                     desc = msg.installation_description_gluu
+
                 self.description.value = '\n'.join(textwrap.wrap(desc, self.columns - 10))
                 self.description.update()
-                self.desc_value = data[1]
+                self.desc_value = current
                 
 
     def backButtonPressed(self):
@@ -716,3 +714,5 @@ class InstallStepsForm(GluuSetupForm):
 
     def nextButtonPressed(self):
         pass
+
+GSA = GluuSetupApp()
