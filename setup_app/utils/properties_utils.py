@@ -100,6 +100,10 @@ class PropertiesUtils(SetupUtils):
         if not Config.application_max_ram:
             Config.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
+        self.check_oxd_server_https()
+
+    def check_oxd_server_https(self):
+
         if Config.get('oxd_server_https'):
             Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
             if not Config.templateRenderingDict['oxd_port']: 
@@ -743,3 +747,6 @@ class PropertiesUtils(SetupUtils):
                                             self.getDefaultOption(Config.installGluuRadius)
                                             )[0].lower()
         Config.installGluuRadius = True if promptForGluuRadius == 'y' else False
+
+
+propertiesUtils = PropertiesUtils()
