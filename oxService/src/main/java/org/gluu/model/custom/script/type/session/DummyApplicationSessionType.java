@@ -4,10 +4,10 @@
  * Copyright (c) 2014, Gluu
  */
 package org.gluu.model.custom.script.type.session;
-import org.gluu.model.custom.script.model.CustomScript;
-import java.util.Map;
-
 import org.gluu.model.SimpleCustomProperty;
+import org.gluu.model.custom.script.model.CustomScript;
+
+import java.util.Map;
 
 /**
  * Dummy implementation of interface ApplicationSessionType
@@ -44,4 +44,7 @@ public class DummyApplicationSessionType implements ApplicationSessionType {
         return false;
     }
 
+    @Override
+    public void onEvent(Object event) {
+    }
 }
