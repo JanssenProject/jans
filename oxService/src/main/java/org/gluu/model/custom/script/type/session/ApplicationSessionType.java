@@ -5,10 +5,10 @@
  */
 package org.gluu.model.custom.script.type.session;
 
-import java.util.Map;
-
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.type.BaseExternalType;
+
+import java.util.Map;
 
 /**
  * Base interface for external application session python script
@@ -18,6 +18,8 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 public interface ApplicationSessionType extends BaseExternalType {
 
     boolean startSession(Object httpRequest, Object sessionState, Map<String, SimpleCustomProperty> configurationAttributes);
+
     boolean endSession(Object httpRequest, Object sessionState, Map<String, SimpleCustomProperty> configurationAttributes);
 
+    void onEvent(Object event);
 }
