@@ -3,6 +3,7 @@ import glob
 import json
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.installers.node import NodeInstaller
@@ -12,7 +13,11 @@ class PassportInstaller(NodeInstaller):
 
     def __init__(self):
         self.service_name = 'passport'
-        self.pbar_text = "Installing Passport"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.OPTONAL
+        self.install_var = 'installPassport'
+        self.register_progess()
+
 
         self.gluu_passport_base = os.path.join(self.node_base, 'passport')
         self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')

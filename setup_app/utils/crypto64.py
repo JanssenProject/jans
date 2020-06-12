@@ -96,8 +96,7 @@ class Crypto64:
                   "-storepass", "changeit", "-noprompt"])
 
     def prepare_base64_extension_scripts(self, extensions=[]):
-        pbar = None if extensions else 'gluu'
-        self.logIt("Preparing scripts", pbar=pbar)
+        self.logIt("Preparing scripts")
         try:
             if not os.path.exists(Config.extensionFolder):
                 return None
@@ -301,7 +300,7 @@ class Crypto64:
         return plain_b64encoded_text
 
     def encode_passwords(self):
-        self.logIt("Encoding passwords", pbar='gluu')
+        self.logIt("Encoding passwords")
 
         try:
             if Config.ldapPass:
@@ -313,7 +312,7 @@ class Crypto64:
             self.logIt("Error encoding passwords", True, True)
 
     def encode_test_passwords(self):
-        self.logIt("Encoding test passwords", pbar='gluu')
+        self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
         try:
             Config.templateRenderingDict['oxauthClient_2_pw'] = Config.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname

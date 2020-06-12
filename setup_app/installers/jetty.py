@@ -4,6 +4,7 @@ import re
 
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
 from setup_app.utils.setup_utils import SetupUtils
@@ -18,9 +19,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'jetty'
-        self.pbar_text = "Installing Jetty"
         self.needdb = False # we don't need backend connection in this class
-
+        self.app_type = AppType.APPLICATION
+        self.install_type = InstallOption.MONDATORY
+        self.register_progess()
+        
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 

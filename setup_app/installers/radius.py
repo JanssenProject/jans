@@ -4,6 +4,7 @@ import json
 import base64
 
 from setup_app import paths
+from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
@@ -14,6 +15,9 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = 'gluu-radius'
         self.pbar_text = "Installing Radius Base"
+        self.app_type = AppType.SERVICE
+        self.install_type = InstallOption.MONDATORY
+        self.register_progess()
 
         self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
         self.source_dir = os.path.join(Config.staticFolder, 'radius')
@@ -62,7 +66,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
 
     def install_gluu_radius(self):
 
-        Config.pbar.progress("radius", "Installing Radius Server", False)
+        Config.pbar.progress(self.service_name, "Installing Radius Server", False)
 
         self.dbUtils.bind()
 
