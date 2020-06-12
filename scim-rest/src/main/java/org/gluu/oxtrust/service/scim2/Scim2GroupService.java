@@ -287,6 +287,10 @@ public class Scim2GroupService implements Serializable {
 				GluuGroup.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, maxCount);
 		List<BaseScimResource> resources = new ArrayList<>();
 
+		if (externalScimService.isEnabled() && !externalScimService.executeScimPostSearchGroupsMethods(list)) {
+			throw new WebApplicationException("Failed to execute SCIM script successfully", Status.PRECONDITION_FAILED);
+		}
+
 		for (GluuGroup group : list.getEntries()) {
 			GroupResource scimGroup = new GroupResource();
 			transferAttributesToGroupResource(group, scimGroup, groupsUrl, usersUrl);

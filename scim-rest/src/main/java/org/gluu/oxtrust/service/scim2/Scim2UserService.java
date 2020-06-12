@@ -570,6 +570,10 @@ public class Scim2UserService implements Serializable {
 		PagedResult<ScimCustomPerson> list = ldapEntryManager.findPagedEntries(personService.getDnForPerson(null),
 				ScimCustomPerson.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, maxCount);
 		List<BaseScimResource> resources = new ArrayList<>();
+		
+		if (externalScimService.isEnabled() && !externalScimService.executeScimPostSearchUsersMethods(list)) {
+			throw new WebApplicationException("Failed to execute SCIM script successfully", Status.PRECONDITION_FAILED);
+		}
 
 		for (ScimCustomPerson person : list.getEntries()) {
 			UserResource scimUsr = new UserResource();
