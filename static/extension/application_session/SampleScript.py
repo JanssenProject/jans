@@ -39,6 +39,13 @@ class ApplicationSession(ApplicationSessionType):
     def getApiVersion(self):
         return 11
 
+    # Called each time specific session event occurs
+    # event is org.gluu.oxauth.service.external.session.SessionEvent
+    def onEvent(self, Object event):
+        if event.getType() == SessionEventType.AUTHENTICATED:
+            print "Session is authenticated, session: " + event.getSessionId()
+        return
+
     # Application calls it at start session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
     #   sessionId is org.gluu.oxauth.model.common.SessionId
