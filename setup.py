@@ -104,10 +104,7 @@ suggested_free_disk_space = 40 #in GB
 re_split_host = re.compile(r'[^,\s,;]+')
 
 thread_queue = None
-
 terminal_size = shutil.get_terminal_size()
-tty_rows=terminal_size.lines 
-tty_columns = terminal_size.columns
 
 try:
     from pylib.cbm import CBM
@@ -121,7 +118,7 @@ class ProgressBar:
         self.n = 0
         self.queue = queue
         self.max_steps = max_steps
-        self.tty_columns = int(tty_columns)
+        self.tty_columns = int(terminal_size.columns)
 
     def complete(self, msg):
         self.n = self.max_steps
@@ -5460,7 +5457,7 @@ class Setup(object):
     def do_installation(self, queue=None):
         try:
             self.thread_queue = queue
-            self.pbar = ProgressBar(cols=tty_columns, queue=self.thread_queue)
+            self.pbar = ProgressBar(cols=terminal_size.columns, queue=self.thread_queue)
             self.pbar.progress("gluu", "Configuring system")
             self.configureSystem()
             self.pbar.progress("download", "Downloading War files")
@@ -5684,7 +5681,7 @@ if __name__ == '__main__':
 
     argsp = parser.parse_args()
 
-    if (not argsp.c) and sys.stdout.isatty() and (int(tty_rows) > 24) and (int(tty_columns) > 79):
+    if (not argsp.c) and sys.stdout.isatty() and (int(terminal_size.lines) > 24) and (int(terminal_size.columns) > 79):
         try:
             import npyscreen
         except:
