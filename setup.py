@@ -118,7 +118,7 @@ class ProgressBar:
         self.n = 0
         self.queue = queue
         self.max_steps = max_steps
-        self.tty_columns = int(terminal_size.columns)
+        self.tty_columns = int(cols)
 
     def complete(self, msg):
         self.n = self.max_steps
