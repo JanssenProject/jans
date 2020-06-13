@@ -314,3 +314,22 @@ class GluuInstaller(SetupUtils):
             self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
         except:
             self.logIt("Could not set limits.")
+
+
+    def copy_output(self):
+        self.logIt("Copying rendered templates to final destination")
+
+        for dest_fn in list(Config.ce_templates.keys()):
+            if Config.ce_templates[dest_fn]:
+                fn = os.path.split(dest_fn)[-1]
+                output_fn = os.path.join(Config.outputFolder, fn)
+                try:
+                    self.logIt("Copying %s to %s" % (output_fn, dest_fn))
+                    dest_dir = os.path.dirname(dest_fn)
+                    if not os.path.exists(dest_dir):
+                        self.logIt("Created destination folder %s" % dest_dir)
+                        os.makedirs(dest_dir)
+                    self.backupFile(output_fn, dest_fn)
+                    shutil.copyfile(output_fn, dest_fn)
+                except:
+                    self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
