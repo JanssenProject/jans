@@ -99,6 +99,10 @@ class BaseInstaller:
     def start(self, service=None):
         self.run_service_command('start', service)
 
+    def restart(self, service=None):
+        self.stop(service)
+        self.start(service)
+
     def reload_daemon(self, service=None):
         if not service:
             service = self.service_name
