@@ -59,7 +59,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     def load_test_data(self):
 
-        
         if not self.scimInstaller.installed():
             self.logIt("Scim was not installed. Installing")
             Config.installScimServer = True
@@ -70,7 +69,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.logIt("Rendering test templates")
 
         self.render_templates_folder(template_folder)
-        
+
         self.logIt("Loading test ldif files")
 
         if not self.passportInstaller.installed():
