@@ -29,7 +29,7 @@ from setup_app.utils.progress import gluuProgress
 from setup_app.setup_options import get_setup_options
 from setup_app.utils import printVersion
 
-
+from setup_app.test_data_loader import TestDataLoader
 from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.setup_utils import SetupUtils
 
@@ -156,6 +156,31 @@ oxdInstaller = OxdInstaller()
 casaInstaller = CasaInstaller()
 radiusInstaller = RadiusInstaller()
 
+if argsp.t or argsp.x:
+    testDataLoader = TestDataLoader()
+    testDataLoader.passportInstaller = passportInstaller
+    testDataLoader.scimInstaller = scimInstaller
+
+if argsp.x:
+
+    print("Loading test data")
+    prop_file = os.path.join(Config.install_dir, 'setup.properties.last')
+
+    if not os.path.exists(prop_file):
+        prop_file += '.enc'
+        if not os.path.exists(prop_file):
+            print("setup.properties.last or setup.properties.last.enc were not found, exiting.")
+            sys.exit(1)
+
+    propertiesUtils.load_properties(prop_file)
+    testDataLoader.dbUtils.bind()
+    testDataLoader.createLdapPw()
+    testDataLoader.load_test_data()
+    testDataLoader.deleteLdapPw()
+    print("Test data loaded. Exiting ...")
+    sys.exit()
+
+
 if not GSA:
     print()
     print(gluuInstaller)
@@ -193,9 +218,6 @@ def do_installation():
 
         gluuInstaller.copy_scripts()
         gluuInstaller.encode_passwords()
-
-        if Config.loadTestData:
-            gluuInstaller.encode_test_passwords()
 
         oxtrustInstaller.generate_api_configuration()
 
@@ -268,6 +290,8 @@ def do_installation():
                 if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
                     gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
                     service['object'].start('oxauth-rp')
+
+
 
         gluuProgress.progress(static.COMPLETED)
 

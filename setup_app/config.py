@@ -118,7 +118,7 @@ class Config:
         self.installFido2 = False
         self.installCasa = False
         self.installOxd = False
-
+        self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
         # backward compatibility
