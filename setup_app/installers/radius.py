@@ -22,8 +22,9 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
         self.source_dir = os.path.join(Config.staticFolder, 'radius')
         self.conf_dir = os.path.join(Config.gluuBaseFolder, 'conf/radius/')
-        self.templates_folder = os.path.join(self.source_dir, 'templates')
+        self.templates_folder = os.path.join(Config.templateFolder, 'radius')
         self.output_folder = os.path.join(Config.outputFolder, 'radius')
+
         self.config_generated = False
 
     def install(self):
