@@ -28,7 +28,8 @@ This is the directory where documentation is kept, for example this doc
 Log files wil be written to this directory
 
 ### `schema`
-This directory contains schema utilities for OpenDj Server
+This directory contains schema utilities for OpenDj Server. OpenDj schema files are created with json files. Please
+refer to own [documentation](/schema/)
 
 ### `setup_app`
 All related files related to SetupApp are saved under this directory and subdirectories.
