@@ -85,6 +85,9 @@ class PassportInstaller(NodeInstaller):
         # enable service at startup
         self.enable()
 
+    def installed(self):
+        return self.dbUtils.search('ou=clients,o=gluu', '(inum=1501.*)')
+
     def generate_configuration(self):
 
         self.logIt("Generating Passport configuration")

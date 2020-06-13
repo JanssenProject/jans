@@ -115,6 +115,9 @@ class GluuProgress:
         th.start()
 
     def progress(self, service_name, msg='', incr=False):
-        self.queue.put({'current': service_name, 'msg': msg})
+        if self.queue:
+            self.queue.put({'current': service_name, 'msg': msg})
+        else:
+            print("Process {}:{}".format(service_name, msg))
         
 gluuProgress = GluuProgress()
