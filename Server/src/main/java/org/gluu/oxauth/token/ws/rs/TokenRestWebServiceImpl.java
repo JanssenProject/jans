@@ -395,7 +395,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 log.trace("AuthorizationGrant : '{}'", cibaGrant);
 
                 if (cibaGrant != null) {
-                    if (!cibaGrant.getClientId().equals(clientId)) {
+                    if (!cibaGrant.getClientId().equals(client.getClientId())) {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
                         return response(builder, oAuth2AuditLog);
                     }
@@ -443,7 +443,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
                     log.trace("Ciba request : '{}'", cibaRequest);
                     if (cibaRequest != null) {
-                        if (!cibaRequest.getClient().getClientId().equals(clientId)) {
+                        if (!cibaRequest.getClient().getClientId().equals(client.getClientId())) {
                             builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
                             return response(builder, oAuth2AuditLog);
                         }

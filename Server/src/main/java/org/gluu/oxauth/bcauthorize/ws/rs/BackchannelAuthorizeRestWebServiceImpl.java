@@ -171,7 +171,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
                 throw new WebApplicationException(builder.build());
             }
-            authorizeRestWebServiceValidator.validateCibaRequestObject(jwtRequest, clientId);
+            authorizeRestWebServiceValidator.validateCibaRequestObject(jwtRequest, client.getClientId());
             // JWT wins
             if (!jwtRequest.getScopes().isEmpty()) {
                 scopes.addAll(scopeChecker.checkScopesPolicy(client, jwtRequest.getScopes()));
