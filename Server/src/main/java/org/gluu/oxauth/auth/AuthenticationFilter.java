@@ -45,7 +45,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Javier Rojas Blum
@@ -168,8 +168,8 @@ public class AuthenticationFilter implements Filter {
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {
                     processBasicAuth(httpRequest, httpResponse, filterChain);
                 } else {
-                    String entity = errorResponseFactory.getErrorAsJson(INVALID_CLIENT);
-                    httpResponse.setStatus(HttpStatus.SC_UNAUTHORIZED);
+                    String entity = errorResponseFactory.getErrorAsJson(INVALID_REQUEST);
+                    httpResponse.setStatus(HttpStatus.SC_BAD_REQUEST);
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
                     httpResponse.setContentType(ContentType.APPLICATION_JSON.toString());
                     httpResponse.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(entity.length()));
