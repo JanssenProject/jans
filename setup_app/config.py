@@ -1,6 +1,7 @@
 import re
 import os
-
+import pprint
+import inspect
 from collections import OrderedDict
 
 from setup_app.paths import INSTALL_DIR
@@ -41,6 +42,17 @@ class Config:
         self.githubBranchName = oxauth_info['branch']
 
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
+
+    @classmethod
+    def dump(self):
+        myDict = {}
+        for obj_name, obj in inspect.getmembers(self):
+            obj_name = str(obj_name)
+            if not obj_name.startswith('__') and (not callable(obj)):
+                myDict[obj_name] = obj
+                
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(myDict)
 
     @classmethod
     def init(self, install_dir=INSTALL_DIR):
