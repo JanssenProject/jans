@@ -1,4 +1,5 @@
 import os
+import re
 import base64
 import json
 
@@ -14,7 +15,7 @@ class Crypto64:
 
     def get_ssl_subject(self, ssl_fn):
         retDict = {}
-        cmd = paths.opensslCommand + ' x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
+        cmd = paths.cmd_openssl + ' x509  -noout -subject -nameopt RFC2253 -in {}'.format(ssl_fn)
         s = self.run(cmd, shell=True)
         s = s.strip() + ','
 
@@ -26,11 +27,16 @@ class Crypto64:
 
     def obscure(self, data=""):
         engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
-        data = data.encode('ascii')
+        data = data.encode('utf-8')
         en_data = engine.encrypt(data)
         encoded_pw = base64.b64encode(en_data)
         return encoded_pw.decode('utf-8')
 
+    def unobscure(self, data=""):
+        engine = triple_des(Config.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
+        cipher = triple_des(Config.encode_salt)
+        decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
+        return decrypted.decode('utf-8')
 
     def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)

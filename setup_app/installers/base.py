@@ -51,12 +51,7 @@ class BaseInstaller:
 
 
     def check_clients(self, client_var_id_list, resource=False):
-        if resource:
-            field_name = 'inum'
-            ou = 'clients'
-        else:
-            field_name = 'oxId'
-            ou = 'resources'
+        field_name, ou = ('oxId', 'resources') if resource else ('inum', 'clients')
 
         for client_var_name, client_id_prefix in client_var_id_list:
             if not Config.get(client_var_name):

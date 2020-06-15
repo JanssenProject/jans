@@ -1,6 +1,5 @@
 import re
 import os
-import json
 
 from collections import OrderedDict
 
@@ -200,7 +199,8 @@ class Config:
         
         self.gluu_python_readme = os.path.join(self.gluuOptPythonFolder, 'libs/python.txt')
         self.ox_ldap_properties = os.path.join(self.configFolder, 'gluu-ldap.properties')
-
+        self.gluuCouchebaseProperties = os.path.join(self.configFolder, 'gluu-couchbase.properties')
+        
         self.ldif_base = os.path.join(self.outputFolder, 'base.ldif')
         self.ldif_attributes = os.path.join(self.outputFolder, 'attributes.ldif')
         self.ldif_scopes = os.path.join(self.outputFolder, 'scopes.ldif')

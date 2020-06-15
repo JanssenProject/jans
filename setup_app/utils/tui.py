@@ -51,6 +51,7 @@ class GluuSetupApp(npyscreen.StandardApp):
     my_counter = 0
     do_notify = True
     queue = None
+    gluuInstaller = None
 
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
@@ -234,7 +235,7 @@ class HostForm(GluuSetupForm):
 
     def do_beforeEditing(self):
         if not Config.hostname:
-            Config.hostname = self.parentApp.detect_hostname()
+            Config.hostname = self.parentApp.gluuInstaller.detect_hostname()
 
         for k in self.myfields_:
             f = getattr(self, k)
@@ -293,7 +294,7 @@ class ServicesForm(GluuSetupForm):
                             )
                     return
 
-                oxd_hostname, oxd_port = self.parentApp.parse_url(oxd_server_https)
+                oxd_hostname, oxd_port = self.parentApp.gluuInstaller.parse_url(oxd_server_https)
                 oxd_ssl_result = propertiesUtils.check_oxd_ssl_cert(oxd_hostname, oxd_port)
                 if oxd_ssl_result :
 
@@ -660,8 +661,8 @@ class InstallStepsForm(GluuSetupForm):
     current_stage = 0
 
     def create(self):
-        self.progress_percantage = self.add(MySlider, rely=4, editable=False, name="Progress")
-        self.installing = self.add(npyscreen.TitleFixedText, accuracy=0, name=msg.installing_label, value="", editable=False)        
+        self.progress_percantage = self.add(MySlider, rely=4, accuracy=0, editable=False, name="Progress")
+        self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)        
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
 
 
