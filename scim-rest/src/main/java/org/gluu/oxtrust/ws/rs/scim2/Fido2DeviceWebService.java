@@ -304,8 +304,8 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
                                                         int count, String url) throws Exception {
 
         Filter ldapFilter=scimFilterParserService.createFilter(filter, Filter.createPresenceFilter("oxId"), Fido2DeviceResource.class);
-        log.info("Executing search for fido devices using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}'",
-                ldapFilter.toString(), sortBy, sortOrder.getValue(), startIndex, count);
+        log.info("Executing search for fido devices using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}', userId '{}'",
+                ldapFilter.toString(), sortBy, sortOrder.getValue(), startIndex, count, userId);
 
         //workaround for https://github.com/GluuFederation/scim/issues/1: 
         //Currently, searching with SUB scope in Couchbase requires some help (beyond use of baseDN) 
