@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2017, Gluu
- */
 package org.gluu.oxtrust.model.scim2.fido;
 
 import org.gluu.oxtrust.model.scim2.AttributeDefinition;
@@ -26,6 +21,7 @@ public class FidoDeviceResource extends BaseScimResource {
     @Attribute(description = "Username of device owner",
             isRequired = true,
             mutability = AttributeDefinition.Mutability.IMMUTABLE)
+    @StoreReference(ref = "personInum")
     private String userId;
 
     @Attribute(description = "Date of enrollment",
