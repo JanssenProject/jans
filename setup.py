@@ -1394,7 +1394,7 @@ class Setup(object):
 
     def obscure(self, data=""):
         engine = triple_des(self.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
-        data = data.encode('ascii')
+        data = data.encode('utf-8')
         en_data = engine.encrypt(data)
         encoded_pw = base64.b64encode(en_data)
         return encoded_pw.decode('utf-8')
