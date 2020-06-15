@@ -134,8 +134,75 @@ desciribng base installers
 Chose either `JettyInstaller` or `NodeInstaller` depending on your application to setup. Let's give example for a jetty application.
 Start with creating class and variables defined in `__init__()`
 
+For this example let say we need to update/add these variables  `ThisApplicationKeystorePath`, `ThisApplicationKeystorePassword`,
+`ThisApplicationApiBase` and `ThisApplicationTestMode` on **oxTrustConfApplication**. Prepare a json file 
+`templates/sample-app/oxtrust_config.json` having the follwoing content:
 
 ```
+{
+    "ThisApplicationKeystorePath": "%(app_client_jks_fn)s",
+    "ThisApplicationKeystorePassword": "%(app_client_jks_pass)s",
+    "ThisApplicationApiBase": "http://%(hostname)s/identity/%(service_name)s",
+    "ThisApplicationTestMode" : true
+}
+```
+
+Please refer to variables defined in the `SampleInstaller` below. `hostname` will come from `Config`.
+And I have a configuration ldif file `templates/sample-app/config.ldif` as follows:
+
+```
+dn: ou=sampleapplication,ou=configuration,o=gluu
+objectClass: top
+objectClass: oxApplicationConfiguration
+ou: oxpassport
+gluuPassportConfiguration:: {"name": "%(service_name)s", "some_variable": "same value"}
+
+# Application Client
+dn: inum=%(app_client_id)s,ou=clients,o=gluu
+objectClass: oxAuthClient
+objectClass: top
+inum: %(app_client_id)s
+displayName: Sample Sapplication Client
+oxAuthAppType: native
+oxAuthGrantType: client_credentials
+oxAuthIdTokenSignedResponseAlg: HS256
+oxAuthScope: inum=ABCD-DEF0,ou=scopes,o=gluu
+oxAuthJwks:: %(app_client_base64_jwks)s
+oxAuthTokenEndpointAuthMethod: private_key_jwt
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: false
+oxAuthRequireAuthTime: false
+
+# Scope
+dn: inum=ABCD-DEF0,ou=scopes,o=gluu
+objectClass: oxAuthCustomScope
+objectClass: top
+displayName: Sample Apllication Access
+inum: ABCD-DEF0
+oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/sample_app_access
+oxUmaPolicyScriptDn: inum=2DAF-F9A5,ou=scripts,o=gluu
+oxScopeType: uma
+
+
+# Resource
+dn: oxId=%(application_resource_id)s,ou=resources,ou=uma,o=gluu
+objectClass: oxUmaResource
+objectClass: top
+displayName: Sample Application Resource
+owner: inum=%(admin_inum)s,ou=people,o=gluu
+oxFaviconImage: http://www.gluu.org/img/sample_app_logo.png
+oxAssociatedClient: inum=%(app_client_id)s,ou=clients,o=gluu
+oxAuthUmaScope: inum=ABCD-DEF0,ou=scopes,o=gluu
+oxId: %(application_resource_id)s
+oxResource: https://%(hostname)s/identity/restv1/sample_app/v2
+oxRevision: 1
+
+```
+
+We can write installer as follows
+
+```
+from setup_app.utils import base
 from setup_app import static
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
@@ -146,7 +213,7 @@ class SampleInstaller(JettyInstaller):
         self.needdb = True # If you need database operations, set this to True so that database connection is done
                            # automatically and self.dbutils functions are ready for use
 
-        self.service_name = 'application' # This variable is used in various places, so chose right name for this service
+        self.service_name = 'sample-application' # This variable is used in various places, so chose right name for this service
                                           # This should match linux service name, since it is used for starting and stopping
                                           # services, for example, systemctl start application
 
@@ -160,10 +227,11 @@ class SampleInstaller(JettyInstaller):
         # You need to implement `download_files()` function inside the class. It will be called automatically.
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         
-        self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust') # folder where themplates of this application exists
-        self.output_folder = os.path.join(Config.outputFolder, 'oxtrust') # folder where rendered templates to be written
+        self.templates_folder = os.path.join(Config.templateFolder, 'sample-app') # folder where themplates of this application exists
+        self.output_folder = os.path.join(Config.outputFolder, 'sample-app') # folder where rendered templates to be written
 
-        self.api_client_jks_fn = os.path.join(Config.certFolder, 'api.jks')
+
+        self.app_client_jks_fn = os.path.join(Config.certFolder, 'sample-app.jks')
         # Define templates in output_folder, rather than to templates_folder
         # This is confusing, but template rendering function was written in this way
         self.oxtrust_config_fn = os.path.join(self.output_folder, 'oxtrust_config.json')
@@ -175,7 +243,7 @@ class SampleInstaller(JettyInstaller):
         # deploy jetty application
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        src_war = os.path.join(Config.distGluuFolder, 'identity.war')
+        src_war = os.path.join(Config.distGluuFolder, 'app.war')
         self.copyFile(src_war, jettyServiceWebapps)
 
         # enable linux ssystem service
@@ -187,7 +255,7 @@ class SampleInstaller(JettyInstaller):
     
     def generate_configuration(self):
 
-        # This is configıration generation fucntion
+        # This is configuration generation fucntion
         # Config and check_properties() (in properties_utils.py) don't provide default configuration valus.
         # So you need to check and create them under this function. If a value is going to be written to 
         # setup.properties, set it an attrbiute of Config, otherwise just define them as an attrbiute of
@@ -199,11 +267,13 @@ class SampleInstaller(JettyInstaller):
                                                          # if it finds database it assigns to Config.app_client_id
                                                          # Otherwise it creates new one and assigns to Config.app_client_id
 
-        if not Config.get('api_client_jks_pass'):
-            Config.api_client_jks_pass = self.getPw()
-            Config.api_client_jks_pass_encoded = self.obscure(Config.api_client_jks_pass)
-        self.api_client_jwks = self.gen_openid_jwks_jks_keys(self.api_client_jks_fn, Config.api_client_jks_pass)
-        Config.templateRenderingDict['api_rs_client_base64_jwks'] = self.generate_base64_string(self.api_rs_client_jwks, 1)
+        self.check_clients([('application_resource_id', '1905.')], resource=True) # Does the same thing for resource
+
+        if not Config.get('ap_client_jks_pass'):
+            Config.app_client_jks_pass = self.getPw()
+            Config.app_client_jks_pass_encoded = self.obscure(Config.app_client_jks_pass)
+        self.app_client_jwks = self.gen_openid_jwks_jks_keys(self.app_client_jks_fn, Config.app_client_jks_pass)
+        Config.templateRenderingDict['app_client_base64_jwks'] = self.generate_base64_string(self.app_client_jwks, 1)
 
     def render_import_templates(self):
         # we need to render and templates here. This fucntion is called after configuration generation fucntion
