@@ -81,16 +81,19 @@ class AttribDataTypes:
             except:
                 pass
         elif dtype == 'datetime':
-            if '.' in val:
-                date_format = '%Y%m%d%H%M%S.%fZ'
-            else:
-                date_format = '%Y%m%d%H%M%SZ'
-            
-            if not val.lower().endswith('z'):
-                val += 'Z'
+            if not isinstance(val, datetime.datetime):
 
-            dt = datetime.datetime.strptime(val, date_format)
-            retVal = dt.isoformat()
+                if '.' in val:
+                    date_format = '%Y%m%d%H%M%S.%fZ'
+                else:
+                    date_format = '%Y%m%d%H%M%SZ'
+
+                if not val.lower().endswith('z'):
+                    val += 'Z'
+                
+                val = datetime.datetime.strptime(val, date_format)
+
+            retVal = val.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
         elif dtype == 'boolean':
             if not isinstance(retVal, bool):
