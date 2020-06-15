@@ -83,13 +83,13 @@ Collection of utilities used by SetupApp.
    `mappingLocations` defined in `Config` and populated during install time (or later from `setup.properties`).
    Some most commanly functions are:
    
-   `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
-   (ldap or couchbase) and which bucket to import according to `dn`
-   `set_oxAuthConfDynamic(entries)`: takes entries as dctionary and updates `oxAuthConfDynamic` in database
-   `set_oxAuthConfDynamic(entries)`: the same for `oxAuthConfDynamic`
-   `enable_script(inum)`: enables script
-   `enable_service(service)`: enables gluu service in oxtrust ui
-   `add_client2script(inum)`: adds client to script's allowed client property
+   - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
+     (ldap or couchbase) and which bucket to import according to `dn`
+   - `set_oxAuthConfDynamic(entries)`: takes entries as dctionary and updates `oxAuthConfDynamic` in database
+   - `set_oxAuthConfDynamic(entries)`: the same for `oxAuthConfDynamic`
+   - `enable_script(inum)`: enables script
+   - `enable_service(service)`: enables gluu service in oxtrust ui
+   - `add_client2script(inum)`: adds client to script's allowed client property
    
 - `crypto64.py` Cryptographic and base64 utilities are included in this module. Since this module is inherited by `SetupUtils`
   class, all methods are available in installers.
@@ -110,16 +110,16 @@ base installaers
   binds to related database and provides through `self.dbutils` property. `start_installation()` method will call the follwoing
   methods/fucntions automatically:
  
-  `download_files()`: if war files to be installed, it is called automatically,
-  `create_user()`: if defined user creation function is called,
-  `create_folders()`: if defined directory creation function is called,
-  `install()`: write actual installation codes in this fucntion,
-  `copy_static()`: if you need to copy some static files, write here,
-  `generate_configuration()`: many installers needs configuration generations, such as client_id's, password before rendering templates. 
-   So include these code here,
-   `render_import_templates()`: template renderings are done under this function, then imported to database
-   `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script, 
-   updating oxauth and/or oxtrust configurations etc.
+   - `download_files()`: if war files to be installed, it is called automatically,
+   - `create_user()`: if defined user creation function is called,
+   - `create_folders()`: if defined directory creation function is called,
+   - `install()`: write actual installation codes in this fucntion,
+   - `copy_static()`: if you need to copy some static files, write here,
+   - `generate_configuration()`: many installers needs configuration generations, such as client_id's, password before rendering templates. 
+      So include these code here,
+   - `render_import_templates()`: template renderings are done under this function, then imported to database
+   - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script, 
+      updating oxauth and/or oxtrust configurations etc.
    
    This module also contains start/stop/restart/enable linux services.
    
