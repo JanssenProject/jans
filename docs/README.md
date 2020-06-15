@@ -143,6 +143,9 @@ from setup_app.installers.jetty import JettyInstaller
 class SampleInstaller(JettyInstaller):
 
     def __init__(self):
+        self.needdb = True # If you need database operations, set this to True so that database connection is done
+                           # automatically and self.dbutils functions are ready for use
+
         self.service_name = 'application' # This variable is used in various places, so chose right name for this service
                                           # This should match linux service name, since it is used for starting and stopping
                                           # services, for example, systemctl start application
@@ -154,9 +157,78 @@ class SampleInstaller(JettyInstaller):
         
         # We need to define files to be downloaded if Config.downloadWars was set to True.
         # You can spicify multiple download files in list. For example self.oxtrust_war = ['ftp://server/app.zip', 'http://piblic/myapp.war']
+        # You need to implement `download_files()` function inside the class. It will be called automatically.
         self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
         
         self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust') # folder where themplates of this application exists
         self.output_folder = os.path.join(Config.outputFolder, 'oxtrust') # folder where rendered templates to be written
+
+        self.api_client_jks_fn = os.path.join(Config.certFolder, 'api.jks')
+        # Define templates in output_folder, rather than to templates_folder
+        # This is confusing, but template rendering function was written in this way
+        self.oxtrust_config_fn = os.path.join(self.output_folder, 'oxtrust_config.json')
+        self.config_ldif = os.path.join(self.output_folder, 'config.ldif')
+
+    def install(self):
+        # this is the first function called automatically after binding database
+        
+        # deploy jetty application
+        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
+        src_war = os.path.join(Config.distGluuFolder, 'identity.war')
+        self.copyFile(src_war, jettyServiceWebapps)
+
+        # enable linux ssystem service
+        self.enable()
+    
+    def create_folders(self):
+        # create folders here before installing anything
+        self.createDirs(os.path.join(Config.gluuBaseFolder, 'conf/app'))
+    
+    def generate_configuration(self):
+
+        # This is configıration generation fucntion
+        # Config and check_properties() (in properties_utils.py) don't provide default configuration valus.
+        # So you need to check and create them under this function. If a value is going to be written to 
+        # setup.properties, set it an attrbiute of Config, otherwise just define them as an attrbiute of
+        # this class. Attrbiutes of this class will be available for template rendering cunctions
+        
+        self.check_clients([('app_client_id', '1901.')]) # This function takes list of cients in (client_var, client_prefix) format.
+                                                         # For this example, the function first looks if client is defined in Config.app_client_id
+                                                         # If not defined, looks database if there is a client with inum 1901.*
+                                                         # if it finds database it assigns to Config.app_client_id
+                                                         # Otherwise it creates new one and assigns to Config.app_client_id
+
+        if not Config.get('api_client_jks_pass'):
+            Config.api_client_jks_pass = self.getPw()
+            Config.api_client_jks_pass_encoded = self.obscure(Config.api_client_jks_pass)
+        self.api_client_jwks = self.gen_openid_jwks_jks_keys(self.api_client_jks_fn, Config.api_client_jks_pass)
+        Config.templateRenderingDict['api_rs_client_base64_jwks'] = self.generate_base64_string(self.api_rs_client_jwks, 1)
+
+    def render_import_templates(self):
+        # we need to render and templates here. This fucntion is called after configuration generation fucntion
+        # and all attributes of this class is available fot template rendering fucntion, since update_rendering_dict()
+        # of base installer is called. You can call function update_rendering_dict() at any time if you change/set  value
+        # of an attrbiute either locally or in Config
+        
+        
+        # For this sample, lets say we have some update for oxTrustConfApplication and needs to be rendered
+        self.renderTemplateInOut(self.oxtrust_config_fn, self.templates_folder, self.output_folder)
+        
+        # This is configuration ldap for this application
+        self.renderTemplateInOut(self.config_ldif, self.templates_folder, self.output_folder)
+
+
+        # Import (load) ldif to database
+        ldif_files = [self.config_ldif]
+        self.dbUtils.import_ldif(ldif_files) #accept only list of ldif files in case multiple files
+
+    def update_backend(self):
+        # After importing tamplates, we may need some tweaks in database.
+        # Do them here
+
+        self.dbUtils.enable_service('gluuAppEnabled') # enable this app in oxtrust ui
+        oxtrust_conf = base.readJsonFile(self.oxtrust_config_fn)
+        self.dbUtils.set_oxTrustConfApplication(oxtrust_conf)
 
 ```
