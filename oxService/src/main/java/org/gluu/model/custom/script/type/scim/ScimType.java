@@ -1,8 +1,3 @@
-/*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2014, Gluu
- */
 package org.gluu.model.custom.script.type.scim;
 
 import org.gluu.model.SimpleCustomProperty;
@@ -11,7 +6,7 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 import java.util.Map;
 
 /**
- * @author Val Pecaoco
+ * @author jgomer2001
  */
 public interface ScimType extends BaseExternalType {
 
@@ -43,4 +38,8 @@ public interface ScimType extends BaseExternalType {
 
     boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes);
 
+    boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
+    
+    boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes);
+    
 }
