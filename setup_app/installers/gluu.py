@@ -148,18 +148,13 @@ class GluuInstaller(SetupUtils):
         # Fix new file permissions
         self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
-    def make_salt(self, load_existing=True):
+    def make_salt(self):
+        if not Config.encode_salt:
+            Config.encode_salt= self.getPW() + self.getPW()
+
         self.logIt("Making salt")
         salt_fn = os.path.join(Config.configFolder,'salt')
-        if load_existing:
-            if os.path.exists(salt_fn):
-                self.logIt("Salt file {} found. Reading from file".format(salt_fn))
-                content = self.readFile(salt_fn).strip()
-                n = content.find('=')
-                if n > -1:
-                    Config.encode_salt = content[n+1:].strip()
-                    self.logIt("Salt is loaded from file")
-                    return
+
         try:
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
             self.writeFile(salt_fn, salt_text)

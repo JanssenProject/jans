@@ -24,7 +24,8 @@ class OxtrustInstaller(JettyInstaller):
         self.oxPhotosFolder = '/var/gluu/photos'
         self.oxTrustRemovedFolder = '/var/gluu/identity/removed'
         self.oxTrustCacheRefreshFolder = '/var/gluu/identity/cr-snapshots'
-        self.oxtrust_config_json = os.path.join(self.output_folder, 'oxtrust-config.json')
+        self.oxtrus
+        t_config_json = os.path.join(self.output_folder, 'oxtrust-config.json')
         self.oxtrust_cache_refresh_json = os.path.join(self.output_folder, 'oxtrust-cache-refresh.json')
         self.oxtrust_import_person_json = os.path.join(self.output_folder, 'oxtrust-import-person.json')
         self.oxTrust_log_rotation_configuration = os.path.join(Config.gluuBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
@@ -40,6 +41,7 @@ class OxtrustInstaller(JettyInstaller):
         self.pairwiseCalculationKey = None
         self.pairwiseCalculationSalt = None
 
+        # TODO: oxtrust-api installation
         # oxTrust Api configuration
         self.api_rs_client_jks_fn = os.path.join(Config.certFolder, 'api-rs.jks')
         self.api_rs_client_jwks = None

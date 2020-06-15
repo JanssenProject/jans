@@ -153,8 +153,8 @@ class DBUtils:
         base.logIt("Querying LDAP for dn {}".format(dn))
         return self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
 
-    def search(self, search_base, search_filter, search_scope=ldap3.LEVEL):
-        
+    def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL):
+        base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
         backend_location = self.get_backend_location_for_dn(search_base)
         
         if backend_location == BackendTypes.LDAP:

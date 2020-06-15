@@ -32,6 +32,7 @@ from setup_app.utils import printVersion
 from setup_app.test_data_loader import TestDataLoader
 from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils.collect_properties import CollectProperties
 
 from setup_app.installers.gluu import GluuInstaller
 from setup_app.installers.httpd import HttpdInstaller
@@ -94,7 +95,7 @@ for key in setupOptions:
 gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
 
-
+"""
 Config.hostname = 'c2.gluu.org'
 Config.ip = '159.89.43.71'
 Config.oxtrust_admin_password = 'Top!Secret-20'
@@ -109,6 +110,7 @@ Config.installScimServer = True
 Config.installSaml = True
 Config.installOxd = True
 Config.installPassport = True
+"""
 
 if not GSA:
     print()
@@ -138,6 +140,9 @@ if not Config.noPrompt and not GSA:
 if not GSA:
     propertiesUtils.check_properties()
 
+
+collectProperties = CollectProperties()
+
 # initialize installers, order is important!
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
@@ -155,6 +160,14 @@ samlInstaller = SamlInstaller()
 oxdInstaller = OxdInstaller()
 casaInstaller = CasaInstaller()
 radiusInstaller = RadiusInstaller()
+
+if os.path.exists(Config.gluu_properties_fn):
+    collectProperties.collect()
+
+if argsp.csx:
+    collectProperties.save()
+    sys.exit()
+
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
@@ -313,6 +326,7 @@ if not GSA and proceed:
 else:
     GSA.do_installation = do_installation
     GSA.queue = queue
+    GSA.gluuInstaller = gluuInstaller
     GSA.run()
 
 # we need this for progress write last line
