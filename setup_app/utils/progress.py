@@ -44,7 +44,7 @@ class ShowProgress(Thread):
                 print("Timed out. Ending up process.")
                 break
             if not self.queue.empty():
-                data = queue.get()
+                data = self.queue.get()
 
             if data.get('current'):
                 for si, s in enumerate(self.services):
@@ -54,7 +54,7 @@ class ShowProgress(Thread):
                         last_completed = si
                         break
                 else:
-                    if data['current'] == '__COMPLETED__':
+                    if data['current'] == static.COMPLETED:
                         current_service = 99
                     # this means service was not registered before, do it now
                     elif not data['current'] in self.service_names:
@@ -109,7 +109,6 @@ class GluuProgress:
             self.services.append(progress_entry)
 
     def start(self):
-        self.queue = queue
         th = ShowProgress(self.services, self.queue)
         th.setDaemon(True)
         th.start()

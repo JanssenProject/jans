@@ -476,7 +476,7 @@ class SetupUtils(Crypto64):
 
         tp = Path(templatesFolder)
         for te in tp.rglob('*'):
-            if te.is_file():
+            if te.is_file() and not te.name.endswith('.nrnd'):
                 self.logIt("Rendering template {}".format(te))
                 rp = te.relative_to(Config.templateFolder)
                 output_dir = rp.parent

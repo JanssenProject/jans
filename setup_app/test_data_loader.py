@@ -27,6 +27,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_var = 'loadTestData'
         self.register_progess()
 
+        self.template_base = os.path.join(Config.templateFolder, 'test')
 
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.jks")
@@ -68,7 +69,28 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.logIt("Rendering test templates")
 
-        self.render_templates_folder(template_folder)
+        Config.templateRenderingDict['config_oxauth_test_ldap'] = '# Not available'
+        Config.templateRenderingDict['config_oxauth_test_couchbase'] = '# Not available'
+
+        if self.getMappingType('ldap'):
+            template_text = self.readFile(os.path.join(self.template_base, 'oxauth/server/config-oxauth-test-ldap.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            Config.templateRenderingDict['config_oxauth_test_ldap'] = rendered_text
+
+        if self.getMappingType('couchbase'):
+            template_text = self.readFile(os.path.join(self.template_base, 'oxauth/server/config-oxauth-test-couchbase.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            Config.templateRenderingDict['config_oxauth_test_couchbase'] = rendered_text
+
+        client_var_id_list = (
+                    ('scim_rs_client_id', '1201.'),
+                    ('scim_rp_client_id', '1202.'),
+                    )
+        self.check_clients(client_var_id_list)
+        
+        print(Config.scim_rs_client_id)
+
+        self.render_templates_folder(self.template_base)
 
         self.logIt("Loading test ldif files")
 
