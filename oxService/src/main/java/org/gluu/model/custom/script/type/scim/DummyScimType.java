@@ -1,8 +1,3 @@
-/*
- * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2014, Gluu
- */
 package org.gluu.model.custom.script.type.scim;
 
 import java.util.Map;
@@ -11,7 +6,7 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.model.CustomScript;
 
 /**
- * @author Val Pecaoco
+ * @author jgomer2001
  */
 public class DummyScimType implements ScimType {
 
@@ -19,10 +14,12 @@ public class DummyScimType implements ScimType {
     public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
+
     @Override
     public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
     }
+
     @Override
     public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
         return true;
@@ -100,6 +97,16 @@ public class DummyScimType implements ScimType {
 
     @Override
     public boolean getGroup(Object group, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+    
+    @Override
+    public boolean postSearchUsers(Object results, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+    
+    @Override
+    public boolean postSearchGroups(Object results, Map<String, SimpleCustomProperty> configurationAttributes) {
         return false;
     }
 
