@@ -29,7 +29,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         self.couchbaseIndexJson = os.path.join(Config.install_dir, 'static/couchbase/index.json')
         self.couchbaseInitScript = os.path.join(Config.install_dir, 'static/system/initd/couchbase-server')
         self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
-        self.gluuCouchebaseProperties = os.path.join(Config.configFolder, 'gluu-couchbase.properties')
+        
         self.couchbaseBuckets = []
 
 
@@ -304,13 +304,13 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         return prop_dict
         
     def couchbaseProperties(self):
-        prop_file = os.path.basename(self.gluuCouchebaseProperties)
+        prop_file = os.path.basename(Config.gluuCouchebaseProperties)
         prop = open(os.path.join(Config.templateFolder, prop_file)).read()
         prop_dict = self.couchbaseDict()
         prop = prop % prop_dict
         out_file = os.path.join(Config.outputFolder, prop_file)
         self.writeFile(out_file, prop)
-        self.writeFile(self.gluuCouchebaseProperties, prop)
+        self.writeFile(Config.gluuCouchebaseProperties, prop)
 
     def create_couchbase_buckets(self):
         #Determine ram_size for buckets

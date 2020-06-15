@@ -41,7 +41,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.createLdapPw()
         
         try:
-            Config.pbar.progress(self.service_name, "Installing", False)
+            Config.pbar.progress(self.service_name, "Installing OpenDJ", False)
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.install_opendj()
                 Config.pbar.progress(self.service_name, "Setting up service", False)
@@ -50,7 +50,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.prepare_opendj_schema()
 
             if Config.wrends_install:
-                Config.pbar.progress(self.service_name, "Configuring", False)
+                Config.pbar.progress(self.service_name, "Configuring OpenDJ", False)
                 self.configure_opendj()
                 Config.pbar.progress(self.service_name, "Exporting certificate", False)
                 self.export_opendj_public_cert()
