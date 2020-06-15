@@ -101,7 +101,7 @@ public class SeleniumTestUtils {
             Actions actions = new Actions(driver);
             actions.click(allowButton).perform();
 
-            waitForPageSwitch(driver, previousURL);
+//            waitForPageSwitch(driver, previousURL);
 
             authorizationResponseStr = driver.getCurrentUrl();
             authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
