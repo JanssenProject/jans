@@ -3,12 +3,19 @@ package org.gluu.oxauthconfigapi.rest.model;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
 public class UserInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	@Size(min=1)
 	private List<String> userInfoSigningAlgValuesSupported;
+	
+	@Size(min=1)
     private List<String> userInfoEncryptionAlgValuesSupported;
+	
+	@Size(min=1)
     private List<String> userInfoEncryptionEncValuesSupported;
     
 	public List<String> getUserInfoSigningAlgValuesSupported() {
