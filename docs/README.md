@@ -103,7 +103,7 @@ Collection of utilities used by SetupApp.
 In this directory we have installer modules for SetupApp, acutal installations are done in these modules. We try to keep
 each installer seperate from others, so that we can install Gluu CE components any time we want (except, basic setup: jre, node,
 jetty, jython etc). Rather then explaining each module, a brief description for how to write and installer will be given, after
-base installaers
+desciribng base installers
 
 - `base.py` This module contains `BaseInstaller` class which is inherited by all pther installers. It provides a skeleton and 
   auto-called functions. An installer will be inititated to install by calling it's `start_installation()` method. It automatically
@@ -123,9 +123,40 @@ base installaers
    
    This module also contains start/stop/restart/enable linux services.
    
-- `jetty.py` Gluu CE components either jetty or node services. So `jetty.py` provides installers for jetty services as well as
+- `jetty.py` Provides `JettyInstaller`. Gluu CE components either jetty or node services. So `jetty.py` provides installers for jetty services as well as
    installing jetty itself.
 
-- `node.py` Acts as both node installer and Gluu node component installers.
+- `node.py` Provides `NodeInstaller` Acts as both node installer and Gluu node component installers.
 
 
+#### Writing an Installer Module
+
+Chose either `JettyInstaller` or `NodeInstaller` depending on your application to setup. Let's give example for a jetty application.
+Start with creating class and variables defined in `__init__()`
+
+
+```
+from setup_app import static
+from setup_app.config import Config
+from setup_app.installers.jetty import JettyInstaller
+
+class SampleInstaller(JettyInstaller):
+
+    def __init__(self):
+        self.service_name = 'application' # This variable is used in various places, so chose right name for this service
+                                          # This should match linux service name, since it is used for starting and stopping
+                                          # services, for example, systemctl start application
+
+        self.app_type = static.AppType.SERVICE   # enumartiation for application type, etiher APPLICATION or SERVICE
+        self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MONDATORY or OPTONAL
+        self.install_var = 'installApplication' # variale defined in Config to determine if thi application is going to be installed or not
+        self.register_progess() # we need to register to progress indicator so that it will shows status of installation during installation process
+        
+        # We need to define files to be downloaded if Config.downloadWars was set to True.
+        # You can spicify multiple download files in list. For example self.oxtrust_war = ['ftp://server/app.zip', 'http://piblic/myapp.war']
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
+        
+        self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust') # folder where themplates of this application exists
+        self.output_folder = os.path.join(Config.outputFolder, 'oxtrust') # folder where rendered templates to be written
+
+```
