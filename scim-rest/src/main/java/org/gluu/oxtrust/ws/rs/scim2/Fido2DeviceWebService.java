@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2015, Gluu
- */
 package org.gluu.oxtrust.ws.rs.scim2;
 
 import static org.gluu.oxtrust.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -38,6 +33,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import org.apache.commons.lang.StringUtils;
 
 import org.gluu.oxtrust.model.exception.SCIMException;
 import org.gluu.oxtrust.model.GluuFido2Device;
@@ -309,6 +306,12 @@ public class Fido2DeviceWebService extends BaseScimWebService implements IFido2D
         Filter ldapFilter=scimFilterParserService.createFilter(filter, Filter.createPresenceFilter("oxId"), Fido2DeviceResource.class);
         log.info("Executing search for fido devices using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}'",
                 ldapFilter.toString(), sortBy, sortOrder.getValue(), startIndex, count);
+
+        //workaround for https://github.com/GluuFederation/scim/issues/1: 
+        //Currently, searching with SUB scope in Couchbase requires some help (beyond use of baseDN) 
+        if (StringUtils.isNotEmpty(userId)) {
+        	ldapFilter=Filter.createANDFilter(ldapFilter, Filter.createEqualityFilter("personInum", userId));
+        }
 
         PagedResult<GluuFido2Device> list;
         try {
