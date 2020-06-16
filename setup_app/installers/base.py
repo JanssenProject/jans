@@ -126,3 +126,6 @@ class BaseInstaller:
     
     def copy_static(self):
         pass
+
+    def installed(self):
+        return None

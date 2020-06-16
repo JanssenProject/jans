@@ -240,3 +240,6 @@ class SamlInstaller(JettyInstaller):
         self.run([paths.cmd_wget, self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'idp3_cml_keygenerator.jar')])
         Config.pbar.progress(self.service_name, "Downloading Shibboleth IDP v3 binary distributive file", False)
         self.run([paths.cmd_wget, self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', os.path.join(Config.distGluuFolder, 'shibboleth-idp.jar')])
+
+    def installed(self):
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))

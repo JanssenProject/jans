@@ -86,7 +86,7 @@ class PassportInstaller(NodeInstaller):
         self.enable()
 
     def installed(self):
-        return self.dbUtils.search('ou=clients,o=gluu', '(inum=1501.*)')
+        return os.path.exists(self.gluu_passport_base)
 
     def generate_configuration(self):
 
