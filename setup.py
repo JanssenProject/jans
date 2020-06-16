@@ -163,6 +163,12 @@ radiusInstaller = RadiusInstaller()
 
 if os.path.exists(Config.gluu_properties_fn):
     collectProperties.collect()
+    for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
+                        oxauthInstaller, passportInstaller, scimInstaller, 
+                        fidoInstaller, samlInstaller, oxdInstaller, 
+                        casaInstaller, radiusInstaller):
+        
+        setattr(Config, installer.install_var, installer.installed())
 
 if argsp.csx:
     collectProperties.save()
@@ -303,8 +309,6 @@ def do_installation():
                 if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
                     gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
                     service['object'].start('oxauth-rp')
-
-
 
         gluuProgress.progress(static.COMPLETED)
 

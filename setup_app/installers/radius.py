@@ -16,6 +16,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.service_name = 'gluu-radius'
         self.pbar_text = "Installing Radius Base"
         self.app_type = AppType.SERVICE
+        self.install_var = 'installGluuRadius'
         self.install_type = InstallOption.MONDATORY
         self.register_progess()
 
@@ -165,4 +166,5 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
                 Config.templateRenderingDict['radius_jwt_keyId'] = k['kid']
         
 
-       
+    def installed(self):
+        return os.path.exists(self.radius_dir)

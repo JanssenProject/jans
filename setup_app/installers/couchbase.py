@@ -374,3 +374,14 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             w+"By using Couchbase Server you agree to the End User License Agreement.\n"
             "See /opt/couchbase/LICENSE.txt"+e
             )
+
+    def installed(self):
+        
+        if os.path.exists(self.couchebaseInstallDir):
+            cb_install = InstallTypes.LOCAL
+        elif os.path.exists(self.couchbaseTrustStoreFn):
+            cb_install = InstallTypes.REMOTE
+        else:
+            cb_install = 0
+
+        return cb_install

@@ -24,8 +24,7 @@ class OxtrustInstaller(JettyInstaller):
         self.oxPhotosFolder = '/var/gluu/photos'
         self.oxTrustRemovedFolder = '/var/gluu/identity/removed'
         self.oxTrustCacheRefreshFolder = '/var/gluu/identity/cr-snapshots'
-        self.oxtrus
-        t_config_json = os.path.join(self.output_folder, 'oxtrust-config.json')
+        self.oxtrust_config_json = os.path.join(self.output_folder, 'oxtrust-config.json')
         self.oxtrust_cache_refresh_json = os.path.join(self.output_folder, 'oxtrust-cache-refresh.json')
         self.oxtrust_import_person_json = os.path.join(self.output_folder, 'oxtrust-import-person.json')
         self.oxTrust_log_rotation_configuration = os.path.join(Config.gluuBaseFolder, 'conf/oxTrustLogRotationConfiguration.xml')
@@ -149,3 +148,6 @@ class OxtrustInstaller(JettyInstaller):
         for folder in (self.oxPhotosFolder, self.oxTrustRemovedFolder, self.oxTrustCacheRefreshFolder):
             self.run([paths.cmd_mkdir, '-m', '775', '-p', folder])
             self.run([paths.cmd_chown, '-R', 'root:gluu', folder])
+
+    def installed(self):
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))

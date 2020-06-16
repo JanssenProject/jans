@@ -334,3 +334,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.fix_init_scripts('opendj', init_script_fn)
 
         self.reload_daemon()
+
+    def installed(self):
+        if os.path.exists(self.openDjSchemaFolder):
+            wrends_install = InstallTypes.LOCAL
+        elif os.path.exists(Config.opendj_p12_fn):
+            wrends_install = InstallTypes.REMOTE
+        else:
+            wrends_install = 0
+
+        return wrends_install
