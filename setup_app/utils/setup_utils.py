@@ -107,6 +107,9 @@ class SetupUtils(Crypto64):
         return detectedIP
 
     def get_ip(self):
+        if Config.installed_instance:
+            return Config.ip
+
         testIP = None
         detectedIP = Config.ip if Config.ip else self.detect_ip()
 

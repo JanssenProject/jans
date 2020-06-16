@@ -15,7 +15,7 @@ class BaseInstaller:
 
     def start_installation(self):
         if not hasattr(self, 'pbar_text'):
-            pbar_text = "Installing" + self.service_name.title()
+            pbar_text = "Installing " + self.service_name.title()
         else:
             pbar_text = self.pbar_text
         self.logIt(pbar_text, pbar=self.service_name)

@@ -19,45 +19,51 @@ from setup_app.utils import base
 class GluuInstaller(SetupUtils):
 
     def __repr__(self):
+        txt = ''
+        if 1:
+        #try:
+            if not Config.installed_instance:
+                txt += 'hostname'.ljust(30) + Config.hostname.rjust(35) + "\n"
+                txt += 'orgName'.ljust(30) + Config.orgName.rjust(35) + "\n"
+                txt += 'os'.ljust(30) + Config.os_type.rjust(35) + "\n"
+                txt += 'city'.ljust(30) + Config.city.rjust(35) + "\n"
+                txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
+                txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
+                txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
+                
+                txt += 'Install oxAuth'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
+                txt += 'Install oxTrust'.ljust(30) + repr(Config.installOxTrust).rjust(35) + "\n"
 
-        try:
-            txt = 'hostname'.ljust(30) + Config.hostname.rjust(35) + "\n"
-            txt += 'orgName'.ljust(30) + Config.orgName.rjust(35) + "\n"
-            txt += 'os'.ljust(30) + Config.os_type.rjust(35) + "\n"
-            txt += 'city'.ljust(30) + Config.city.rjust(35) + "\n"
-            txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
-            txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
-            txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
-            txt += 'Install oxAuth'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
-            txt += 'Install oxTrust'.ljust(30) + repr(Config.installOxTrust).rjust(35) + "\n"
+                bc = []
+                if Config.wrends_install:
+                    t_ = 'wrends'
+                    if Config.wrends_install == InstallTypes.REMOTE:
+                        t_ += '[R]'
+                    bc.append(t_)
+                if Config.cb_install:
+                    t_ = 'couchbase'
+                    if Config.cb_install == InstallTypes.REMOTE:
+                        t_ += '[R]'
+                    bc.append(t_)
 
-            bc = []
-            if Config.wrends_install:
-                t_ = 'wrends'
-                if Config.wrends_install == InstallTypes.REMOTE:
-                    t_ += '[R]'
-                bc.append(t_)
-            if Config.cb_install:
-                t_ = 'couchbase'
-                if Config.cb_install == InstallTypes.REMOTE:
-                    t_ += '[R]'
-                bc.append(t_)
+                if bc:
+                    bct = ', '.join(bc)
+                    txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
 
-            if bc:
-                bct = ', '.join(bc)
-                txt += 'Backends'.ljust(30) + bct.rjust(35) + "\n"
+                txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
-            txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
-            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + "\n"
-            txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + "\n"
-            txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + "\n"
-            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(Config.installSaml).rjust(35) + "\n"
-            txt += 'Install oxAuth RP'.ljust(30) + repr(Config.installOxAuthRP).rjust(35) + "\n"
-            txt += 'Install Passport '.ljust(30) + repr(Config.installPassport).rjust(35) + "\n"
-            txt += 'Install Casa '.ljust(30) + repr(Config.installCasa).rjust(35) + "\n"
-            txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + "\n"
-            txt += 'Install Gluu Radius '.ljust(30) + repr(Config.installGluuRadius).rjust(35) + "\n"
+            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(Config.installSaml).rjust(35) + (' *' if 'installSaml' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install oxAuth RP'.ljust(30) + repr(Config.installOxAuthRP).rjust(35) + (' *' if 'installOxAuthRP' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Passport '.ljust(30) + repr(Config.installPassport).rjust(35) + (' *' if 'installPassport' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Casa '.ljust(30) + repr(Config.installCasa).rjust(35) + (' *' if 'installCasa' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Gluu Radius '.ljust(30) + repr(Config.installGluuRadius).rjust(35) + (' *' if 'installGluuRadius' in Config.addPostSetupService else '') + "\n"
             return txt
+        
+        """
         except:
             s = ""
             for key in list(Config.__dict__):
@@ -66,7 +72,7 @@ class GluuInstaller(SetupUtils):
                     if not inspect.ismethod(val):
                         s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
-
+        """
 
     def initialize(self):
         self.service_name = 'gluu'
