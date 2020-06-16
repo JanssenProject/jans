@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 
-import org.checkerframework.checker.units.qual.A;
 import org.gluu.oxauthconfigapi.rest.model.RequestObject;
 
 @QuarkusTest

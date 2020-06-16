@@ -1,5 +1,5 @@
 /**
- * 
+ *  Request object supported endpoint.
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
@@ -14,7 +14,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.Components;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -51,7 +50,7 @@ public class RequestObjectResource {
 			@APIResponse(responseCode = "500", description = "Server error") })
 	public Response getRequestObjectConfiguration() {
 		try {
-			log.info("RequestObjectResource::getRequestObjectConfiguration() - Retrieve request object settings");
+			log.debug("RequestObjectResource::getRequestObjectConfiguration() - Retrieve request object settings");
 			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			RequestObject requestObject = new RequestObject();
@@ -67,16 +66,14 @@ public class RequestObjectResource {
 		}
 	}
 	
-	@Path("/updateTest")
-	@GET
+	@PUT
 	@Operation(summary = "Update request object configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response updateRequestObjectConfiguration() {
+	public Response updateRequestObjectConfiguration(@Valid RequestObject requestObject) {
 		try {
-			log.info("RequestObjectResource::updateRequestObjectConfiguration() - Update request object settings");
-			RequestObject requestObject = getRequestObject();
+			log.debug("RequestObjectResource::updateRequestObjectConfiguration() - Update request object settings");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
 			appConfiguration.setRequestObjectSigningAlgValuesSupported(requestObject.getRequestObjectSigningAlgValuesSupported());
@@ -85,25 +82,11 @@ public class RequestObjectResource {
 
 			//Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(requestObject).build();
+			return Response.ok(ResponseStatus.SUCCESS).build();
 			
 		}catch(Exception ex) {
 			log.error("Failed to update request object settings", ex);
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
 		}
-	}
-	
-	
-	private RequestObject getRequestObject() throws Exception{
-		RequestObject requestObject = new RequestObject();
-		String[] signingAlgValuesSupported = {"none","HS256","HS384","HS512","RS256","RS384","RS512","ES256","ES384","ES512"};
-		String[] encryptionAlgValuesSupported = {"RSA1_5","RSA-OAEP","A128KW","A256KW"};
-		String[] encryptionEncValuesSupported = {"A128CBC+HS256","A256CBC+HS512","A128GCM","A256GCM"};
-				
-		requestObject.setRequestObjectSigningAlgValuesSupported(java.util.Arrays.asList(signingAlgValuesSupported));
-		requestObject.setRequestObjectEncryptionAlgValuesSupported(java.util.Arrays.asList(encryptionAlgValuesSupported));
-		requestObject.setRequestObjectEncryptionEncValuesSupported(java.util.Arrays.asList(encryptionEncValuesSupported));
-		
-		return requestObject;
 	}
 }
