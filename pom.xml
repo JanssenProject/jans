@@ -407,11 +407,6 @@
 
 			<!-- Google -->
 			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>19.0</version>
-			</dependency>
-			<dependency>
 			    <groupId>com.google.http-client</groupId>
 			    <artifactId>google-http-client-jackson2</artifactId>
 			    <version>1.26.0</version>
