@@ -14,5 +14,6 @@ public class ApiConstants {
 	public static final String JANSSENPKCS = "/janssenpkcs";
 	public static final String USER_INFO = "/user_info";
 	public static final String IDTOKEN = "/idtoken";
+	public static final String REQUEST_OBJECT = "/request_object";
 
 }
