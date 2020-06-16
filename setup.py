@@ -122,8 +122,6 @@ if not GSA:
     print()
 
 
-setup_loaded = {}
-
 if setupOptions['setup_properties']:
     base.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
     setup_loaded = propertiesUtils.load_properties(setupOptions['setup_properties'])
@@ -134,14 +132,23 @@ elif os.path.isfile(Config.setup_properties_fn+'.enc'):
     base.logIt('%s Properties found!\n' % Config.setup_properties_fn+'.enc')
     setup_loaded = propertiesUtils.load_properties(Config.setup_properties_fn+'.enc')
 
-if not Config.noPrompt and not GSA:
+
+collectProperties = CollectProperties()
+if os.path.exists(Config.gluu_properties_fn):
+    collectProperties.collect()
+    Config.installed_instance = True
+
+    if argsp.csx:
+        print("Saving collected properties")
+        collectProperties.save()
+        sys.exit()
+
+
+if not Config.noPrompt and not GSA and not Config.installed_instance:
     propertiesUtils.promptForProperties()
 
 if not GSA:
     propertiesUtils.check_properties()
-
-
-collectProperties = CollectProperties()
 
 # initialize installers, order is important!
 jreInstaller = JreInstaller()
@@ -161,19 +168,15 @@ oxdInstaller = OxdInstaller()
 casaInstaller = CasaInstaller()
 radiusInstaller = RadiusInstaller()
 
-if os.path.exists(Config.gluu_properties_fn):
-    collectProperties.collect()
+if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
                         oxauthInstaller, passportInstaller, scimInstaller, 
                         fidoInstaller, samlInstaller, oxdInstaller, 
                         casaInstaller, radiusInstaller):
         
         setattr(Config, installer.install_var, installer.installed())
-
-if argsp.csx:
-    collectProperties.save()
-    sys.exit()
-
+    
+    propertiesUtils.promptForProperties()
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
@@ -316,10 +319,10 @@ def do_installation():
 if not GSA and proceed:
     do_installation()
     print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % Config.hostname)
-
 else:
     GSA.do_installation = do_installation
     GSA.queue = queue
+    GSA.installed_instance = installed_instance
     GSA.gluuInstaller = gluuInstaller
     GSA.run()
 
