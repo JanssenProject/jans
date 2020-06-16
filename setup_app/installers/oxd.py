@@ -20,10 +20,10 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.install_var = 'installOxd'
         self.register_progess()
 
+        self.oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
+
     def install(self):
 
-        oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
-        
         self.run(['tar', '-zxf', Config.oxd_package, '-C', '/opt'])
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
         
@@ -49,8 +49,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
             self.run([paths.cmd_chmod, '+x', fn])
 
         if Config.get('oxd_use_gluu_storage'):
-            oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
-            yml_str = self.readFile(oxd_server_yml_fn)
+            yml_str = self.readFile(self.oxd_server_yml_fn)
             oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
 
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
@@ -62,7 +61,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
             yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
 
-            self.writeFile(oxd_server_yml_fn, yml_str)
+            self.writeFile(self.oxd_server_yml_fn, yml_str)
 
         self.generate_keystore()
 
@@ -108,3 +107,5 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         for f in ('/tmp/oxd.crt', '/tmp/oxd.key', '/tmp/oxd.p12', '/tmp/oxd.keystore'):
             self.run([paths.cmd_rm, '-f', f])
 
+    def installed(self):
+        return os.path.exists(self.oxd_server_yml_fn)

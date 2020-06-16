@@ -119,3 +119,6 @@ class OxauthInstaller(JettyInstaller):
             
             src_fn = os.path.join(Config.install_dir, 'static/auth/conf', conf_fn)
             self.copyFile(src_fn, Config.certFolder)
+    
+    def installed(self):
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
