@@ -7,8 +7,7 @@ from javax.ws.rs.core import Response
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.fido2.client import Fido2ClientFactory
 from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
-from org.gluu.fido2.service.persist import RegistrationPersistenceService
+from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
@@ -153,15 +152,12 @@ class PersonAuthentication(PersonAuthenticationType):
             userName = user.getUserId()
 
             metaDataConfiguration = self.getMetaDataConfiguration()
-
-            # Check if user have registered devices
-            registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
-            
             assertionResponse = None
             attestationResponse = None
 
-            userFido2Devices = registrationPersistenceService.findAllRegisteredByUsername(userName)
-            if (userFido2Devices.size() > 0):
+            # Check if user have registered devices
+            count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName)
+            if (count > 0):
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 
                 try:
@@ -251,7 +247,4 @@ class PersonAuthentication(PersonAuthenticationType):
     # Added for Casa compliance
 
     def hasEnrollments(self, configurationAttributes, user):
-
-        registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
-        userFido2Devices = registrationPersistenceService.findAllRegisteredByUsername(user.getUserId())
-        return userFido2Devices.size() > 0
+        return CdiUtil.bean(UserService).countFido2RegisteredDevices(user.getUserId()) > 0
