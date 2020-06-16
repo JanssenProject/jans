@@ -5011,7 +5011,6 @@ class Setup(object):
                 '--bindDN "{}" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop '
                 '--handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'
                     ).format(
-                        self.ldapBaseFolder, 
                         self.ldapDsconfigCommand, 
                         self.ldap_hostname, 
                         self.ldap_admin_port,
