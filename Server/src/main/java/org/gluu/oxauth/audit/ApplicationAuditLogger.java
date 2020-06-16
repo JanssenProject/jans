@@ -29,6 +29,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.ConfigurationUpdate;
+import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.google.common.base.Objects;
@@ -40,6 +41,9 @@ public class ApplicationAuditLogger {
 
 	@Inject
 	private Logger log;
+
+	@Inject
+	private AppConfiguration appConfiguration;
 
 	private final String BROKER_URL_PREFIX = "failover:(";
 	private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
@@ -53,47 +57,55 @@ public class ApplicationAuditLogger {
 	private String jmsUserName;
 	private String jmsPassword;
 
-	@Inject
-	private AppConfiguration appConfiguration;
-
 	private final ReentrantLock lock = new ReentrantLock();
 
-	private boolean updateState;
-	private Boolean enabledOAuthAuditnLogging;
+	private boolean enabled;
+	private boolean sendAuditJms;
 
-	public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
-		this.updateState = true;
+	@PostConstruct
+	public void init() {
+		updateConfiguration(appConfiguration);
 	}
 
-    @PostConstruct
-	public void init() {
-		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
-			return;
-		}
+	public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
+		this.enabled = BooleanUtils.isTrue(appConfiguration.getEnabledOAuthAuditLogging());
+		this.sendAuditJms = StringHelper.isNotEmpty(appConfiguration.getJmsUserName())
+				&& StringHelper.isNotEmpty(appConfiguration.getJmsPassword())
+				&& CollectionUtils.isNotEmpty(appConfiguration.getJmsBrokerURISet());
 
-		tryToEstablishJMSConnection();
+		boolean configChanged = !Objects.equal(this.jmsUserName, appConfiguration.getJmsUserName())
+				|| !Objects.equal(this.jmsPassword, appConfiguration.getJmsPassword())
+				|| !Objects.equal(this.jmsBrokerURISet, appConfiguration.getJmsBrokerURISet());
+
+		if (configChanged) {
+			destroy();
+		}
 	}
 
 	@Asynchronous
 	public void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
-		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
+		if (!enabled) {
 			return;
 		}
 
-		if ((this.pooledConnectionFactory == null) || isJmsConfigChanged()) {
-			if (tryToEstablishJMSConnection())
-				loggingThroughJMS(oAuth2AuditLog);
-			else
-				loggingThroughFile(oAuth2AuditLog);
-		} else {
-			loggingThroughJMS(oAuth2AuditLog);
+		boolean messageDelivered = false;
+		if (sendAuditJms) {
+			if (tryToEstablishJMSConnection()) {
+				messageDelivered = loggingThroughJMS(oAuth2AuditLog);
+			}
+		}
+
+		if (!messageDelivered) {
+			loggingThroughFile(oAuth2AuditLog);
 		}
 	}
 
 	@PreDestroy
 	public void destroy() {
-		if (this.pooledConnectionFactory == null)
+		if (this.pooledConnectionFactory == null) {
 			return;
+		}
+
 		this.pooledConnectionFactory.clear();
 		this.pooledConnectionFactory = null;
 	}
@@ -101,27 +113,26 @@ public class ApplicationAuditLogger {
 	private boolean tryToEstablishJMSConnection() {
 		lock.lock();
 		try {
-			// Check if another thread init JMS pool already
-			if ((this.pooledConnectionFactory == null) || isJmsConfigChanged()) {
+			// Check if another thread initialized JMS pool already
+			if (this.pooledConnectionFactory == null) {
 				return tryToEstablishJMSConnectionImpl();
 			}
 
-	        return true;
+			return true;
 		} finally {
 			lock.unlock();
 		}
 	}
 
 	private boolean tryToEstablishJMSConnectionImpl() {
-		destroy();
-
-		Set<String> jmsBrokerURISet = getJmsBrokerURISet();
-		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(jmsBrokerURISet))
+		Set<String> jmsBrokerURISet = appConfiguration.getJmsBrokerURISet();
+		if (!enabled || CollectionUtils.isEmpty(jmsBrokerURISet)) {
 			return false;
+		}
 
 		this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
-		this.jmsUserName = getJmsUserName();
-		this.jmsPassword = getJmsPassword();
+		this.jmsUserName = appConfiguration.getJmsUserName();
+		this.jmsPassword = appConfiguration.getJmsPassword();
 
 		Iterator<String> jmsBrokerURIIterator = jmsBrokerURISet.iterator();
 
@@ -130,14 +141,14 @@ public class ApplicationAuditLogger {
 			String jmsBrokerURI = jmsBrokerURIIterator.next();
 			uriBuilder.append("tcp://");
 			uriBuilder.append(jmsBrokerURI);
-			if (jmsBrokerURIIterator.hasNext())
+			if (jmsBrokerURIIterator.hasNext()) {
 				uriBuilder.append(",");
+			}
 		}
 
 		String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
 
-		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(this.jmsUserName, this.jmsPassword,
-				brokerUrl);
+		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(this.jmsUserName, this.jmsPassword, brokerUrl);
 		this.pooledConnectionFactory = new PooledConnectionFactory(connectionFactory);
 
 		pooledConnectionFactory.setIdleTimeout(5000);
@@ -147,7 +158,7 @@ public class ApplicationAuditLogger {
 		return true;
 	}
 
-	private void loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
+	private boolean loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
 		QueueConnection connection = null;
 		try {
 			connection = pooledConnectionFactory.createQueueConnection();
@@ -159,6 +170,8 @@ public class ApplicationAuditLogger {
 			TextMessage txtMessage = session.createTextMessage();
 			txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
 			producer.send(txtMessage);
+			
+			return true;
 		} catch (JMSException e) {
 			log.error("Can't send message", e);
 		} catch (IOException e) {
@@ -166,14 +179,18 @@ public class ApplicationAuditLogger {
 		} catch (Exception e) {
 			log.error("Can't send message, please check your activeMQ configuration.", e);
 		} finally {
-			if (connection == null)
-				return;
+			if (connection == null) {
+				return false;
+			}
+
 			try {
 				connection.close();
 			} catch (JMSException e) {
 				log.error("Can't close connection.");
 			}
 		}
+		
+		return false;
 	}
 
 	private void loggingThroughFile(OAuth2AuditLog oAuth2AuditLog) {
@@ -184,28 +201,4 @@ public class ApplicationAuditLogger {
 		}
 	}
 
-	private boolean isJmsConfigChanged() {
-		return !Objects.equal(this.jmsUserName, getJmsUserName()) || !Objects.equal(this.jmsPassword, getJmsPassword())
-				|| !Objects.equal(this.jmsBrokerURISet, getJmsBrokerURISet());
-	}
-
-	private Boolean isEnabledOAuthAuditnLogging() {
-		if (this.updateState) {
-			this.enabledOAuthAuditnLogging = appConfiguration.getEnabledOAuthAuditLogging();
-		}
-
-		return this.enabledOAuthAuditnLogging;
-	}
-
-	private Set<String> getJmsBrokerURISet() {
-		return appConfiguration.getJmsBrokerURISet();
-	}
-
-	private String getJmsUserName() {
-		return appConfiguration.getJmsUserName();
-	}
-
-	private String getJmsPassword() {
-		return appConfiguration.getJmsPassword();
-	}
 }
