@@ -1,5 +1,7 @@
 import os
 import glob
+import time
+import json
 import ldap3
 
 from setup_app import paths
@@ -82,14 +84,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             Config.templateRenderingDict['config_oxauth_test_couchbase'] = rendered_text
 
-        client_var_id_list = (
-                    ('scim_rs_client_id', '1201.'),
-                    ('scim_rp_client_id', '1202.'),
-                    )
-        self.check_clients(client_var_id_list)
-        
-        print(Config.scim_rs_client_id)
-
         self.render_templates_folder(self.template_base)
 
         self.logIt("Loading test ldif files")
@@ -128,8 +122,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     }
 
         custom_scripts = ('2DAF-F995', '2DAF-F996', '4BBE-C6A8')
-        config_servers = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
-        
 
         self.dbUtils.set_oxAuthConfDynamic(oxAuthConfDynamic_changes)
         
@@ -147,7 +139,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
             schema_fn = os.path.join(openDjSchemaFolder, '77-customAttributes.ldif')
 
-            obcl_parser = gluu_utils.myLdifParser(schema_fn)
+            obcl_parser = myLdifParser(schema_fn)
             obcl_parser.parse()
 
             for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
@@ -174,7 +166,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 '--bindDN "{}" --bindPasswordFile /home/ldap/.pw set-connection-handler-prop '
                 '--handler-name "LDAPS Connection Handler" --set listen-address:0.0.0.0'
                     ).format(
-                        Config.ldapBaseFolder, 
                         os.path.join(Config.ldapBaseFolder, 'bin/dsconfig'), 
                         Config.ldap_hostname, 
                         Config.ldap_admin_port,
@@ -183,10 +174,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             
             self.run(['/bin/su', 'ldap', '-c', dsconfigCmd], cwd=cwd)
 
-            self.dbUtils.unbind()
+            self.dbUtils.ldap_conn.unbind()
 
             self.restart('opendj')
-
+            #wait 10 seconds to start opendj
+            time.sleep(10)
 
             for atr in ('myCustomAttr1', 'myCustomAttr2'):
                 cmd = (
@@ -201,7 +193,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                         Config.ldap_binddn
                     )
 
-                dsconfigCmd = '{1} {2}'.format(self.ldapBaseFolder, self.ldapDsconfigCommand, cmd)
+                dsconfigCmd = '{1} {2}'.format(Config.ldapBaseFolder, os.path.join(cwd, 'dsconfig'), cmd)
                 self.run(['/bin/su', 'ldap', '-c', dsconfigCmd], cwd=cwd)
 
         else:
@@ -209,11 +201,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             self.dbUtils.cbm.exec_query('CREATE INDEX def_gluu_myCustomAttr2 ON `gluu`(myCustomAttr2) USING GSI WITH {"defer_build":true}')
             self.dbUtils.cbm.exec_query('BUILD INDEX ON `gluu` (def_gluu_myCustomAttr1, def_gluu_myCustomAttr2)')
 
-        result = self.dbUtils.search(dn, search_filter='(objectclass=*)', search_scope=ldap3.LEVEL)
-        oxIDPAuthentication = result['oxIDPAuthentication']
-        oxIDPAuthentication['config']['servers'] = config_servers
+        self.dbUtils.ldap_conn.bind()
+
+        result = self.dbUtils.search('ou=configuration,o=gluu', search_filter='(oxIDPAuthentication=*)', search_scope=ldap3.BASE)
+
+        oxIDPAuthentication = json.loads(result['oxIDPAuthentication'])
+        oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
         oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-        set_configuration(self, oxIDPAuthentication, oxIDPAuthentication_js)
+        self.dbUtils.set_configuration('oxIDPAuthentication', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
 
