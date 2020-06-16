@@ -1,5 +1,6 @@
 import re
 import os
+import time
 import pprint
 import inspect
 from collections import OrderedDict
@@ -45,15 +46,20 @@ class Config:
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
     @classmethod
-    def dump(self):
+    def dump(self, dumpFile=False):
         myDict = {}
         for obj_name, obj in inspect.getmembers(self):
             obj_name = str(obj_name)
             if not obj_name.startswith('__') and (not callable(obj)):
                 myDict[obj_name] = obj
-                
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(myDict)
+
+        if dumpFile:
+            with open('config-'+time.ctime().replace(' ', '-'),'w') as w:
+                w.write(pprint.pformat(myDict, indent=2))
+        else:
+            pp = pprint.PrettyPrinter(indent=2)
+            pp.pprint(myDict)
+
 
     @classmethod
     def init(self, install_dir=INSTALL_DIR):

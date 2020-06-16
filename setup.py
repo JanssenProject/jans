@@ -173,10 +173,11 @@ if Config.installed_instance:
                         oxauthInstaller, passportInstaller, scimInstaller, 
                         fidoInstaller, samlInstaller, oxdInstaller, 
                         casaInstaller, radiusInstaller):
-        
+
         setattr(Config, installer.install_var, installer.installed())
-    
+
     propertiesUtils.promptForProperties()
+
     if not Config.addPostSetupService:
         print("Nothing was selected for installation. Exiting ...")
         sys.exit()
@@ -224,7 +225,7 @@ def do_installation():
         gluuInstaller.configureSystem()
         gluuInstaller.make_salt()
         oxauthInstaller.make_salt()
-        
+
         jettyInstaller.calculate_selected_aplications_memory()
         jreInstaller.start_installation()
         jettyInstaller.start_installation()
