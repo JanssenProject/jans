@@ -479,9 +479,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
         </dependency>
-
-
-
+        <!-- selenium dependencies-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
