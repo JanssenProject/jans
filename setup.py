@@ -181,17 +181,7 @@ if argsp.t or argsp.x:
     testDataLoader.scimInstaller = scimInstaller
 
 if argsp.x:
-
     print("Loading test data")
-    prop_file = os.path.join(Config.install_dir, 'setup.properties.last')
-
-    if not os.path.exists(prop_file):
-        prop_file += '.enc'
-        if not os.path.exists(prop_file):
-            print("setup.properties.last or setup.properties.last.enc were not found, exiting.")
-            sys.exit(1)
-
-    propertiesUtils.load_properties(prop_file)
     testDataLoader.dbUtils.bind()
     testDataLoader.createLdapPw()
     testDataLoader.load_test_data()
