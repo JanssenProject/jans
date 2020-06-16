@@ -93,8 +93,8 @@ public class RawRegistrationService {
 		return encoded.toByteArray();
 	}
 
-	public DeviceRegistration createDevice(RawRegisterResponse rawRegisterResponse) throws BadInputException {
-		return new DeviceRegistration(Base64Util.base64urlencode(rawRegisterResponse.getKeyHandle()), Base64Util.base64urlencode(rawRegisterResponse
+	public DeviceRegistration createDevice(String userInum, RawRegisterResponse rawRegisterResponse) throws BadInputException {
+		return new DeviceRegistration(userInum, Base64Util.base64urlencode(rawRegisterResponse.getKeyHandle()), Base64Util.base64urlencode(rawRegisterResponse
 				.getUserPublicKey()), rawRegisterResponse.getAttestationCertificate(), INITIAL_DEVICE_COUNTER_VALUE);
 	}
 
