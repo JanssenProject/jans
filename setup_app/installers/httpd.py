@@ -35,7 +35,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.apache2_ssl_conf = os.path.join(self.output_folder, 'https_gluu.conf')
         self.apache2_24_conf = os.path.join(self.output_folder, 'httpd_2.4.conf')
         self.apache2_ssl_24_conf = os.path.join(self.output_folder, 'https_gluu.conf')
-
+        self.https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if clone_type == 'rpm' else '/etc/apache2/sites-available/https_gluu.conf'
 
     def configure(self):
         self.logIt(self.pbar_text, pbar=self.service_name)
@@ -52,11 +52,11 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         if clone_type == 'rpm' and os_initdaemon == 'init':
             self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
+            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
 
         if clone_type == 'deb':
-            self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
-            self.run([paths.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
+            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+            self.run([paths.cmd_ln, '-s', self.https_gluu_fn,
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
         self.writeFile('/var/www/html/index.html', 'OK')
@@ -124,3 +124,5 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.enable()
         self.start()
 
+    def installed(self):
+        return os.path.exists(self.https_gluu_fn)
