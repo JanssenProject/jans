@@ -19,6 +19,9 @@ parser.add_argument("-addpassport", help="Install Passport", action="store_true"
 parser.add_argument("-addoxd", help="Install Oxd Server", action="store_true")
 parser.add_argument("-addcasa", help="Install Gluu Casa", action="store_true")
 parser.add_argument("-addradius", help="Install Gluu Radius Server", action="store_true")
+parser.add_argument("-addscim", help="Install Scim Server", action="store_true")
+parser.add_argument("-addfido2", help="Install Fido2 Server", action="store_true")
+
 
 
 args = parser.parse_args()
@@ -61,16 +64,21 @@ if os.path.exists(ces_dir):
     os.system('mv {0} {0}.back'.format(ces_dir))
 
 ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/version_{}.zip'.format(gluu_version)
+ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
 
 
 print("Downloading Community Edition Setup {}".format(gluu_version))
 
-os.system('wget -nv {} -O {}/version_{}.zip'.format(ces_url, cur_dir, gluu_version))
-print("Extracting package")
-os.system('unzip -o -qq {}/version_{}.zip'.format(cur_dir, gluu_version))
-os.system('mv {}/community-edition-setup-version_{} {}/ces_current'.format(cur_dir, gluu_version, cur_dir))
+ces_fn = os.path.basename(ces_url)
+ces_path = os.path.join(cur_dir, ces_fn)
 
-os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/generate_properties.py -O {}'.format(os.path.join(ces_dir, 'pylib', 'generate_properties.py')))
+os.system('wget -nv {} -O {}'.format(ces_url, ces_path))
+
+ces_zip = zipfile.ZipFile(ces_path)
+ces_folder = ces_zip.namelist()[0]
+print("Extracting package")
+os.system('unzip -o -qq {}'.format(ces_path))
+os.system('mv {}/{} {}/ces_current'.format(cur_dir, ces_folder, cur_dir))
 
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
 
@@ -492,6 +500,16 @@ def installRadius():
             )
 
 
+def installScim():
+    print("Installing Scim Server")
+    setupObj.install_scim_server()
+
+def installFido():
+    print("Installing Fido2")
+    setupObj.install_fido2()
+
+
+
 if args.addshib:
     installSaml()
 
@@ -506,6 +524,12 @@ if args.addcasa:
 
 if args.addradius:
     installRadius()
+
+if args.addscim:
+    installScim()
+
+if args.addfido2:
+    installFido()
 
 if persistence_type == 'ldap':
     setupObj.deleteLdapPw()
