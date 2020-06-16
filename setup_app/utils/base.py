@@ -145,6 +145,7 @@ def logIt(msg, errorLog=False, fatal=False):
     if fatal:
         print("FATAL:", errorLog)
         print(traceback.format_exc())
+        Config.dump(True)
         sys.exit(1)
 
 def logOSChanges(text):
