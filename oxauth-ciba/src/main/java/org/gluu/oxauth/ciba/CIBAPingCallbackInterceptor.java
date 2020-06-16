@@ -64,7 +64,7 @@ public class CIBAPingCallbackInterceptor implements CIBAPingCallbackInterception
         pingCallbackRequest.setClientNotificationToken(clientNotificationToken);
         pingCallbackRequest.setAuthReqId(authReqId);
 
-        PingCallbackClient pingCallbackClient = new PingCallbackClient(clientNotificationEndpoint);
+        PingCallbackClient pingCallbackClient = new PingCallbackClient(clientNotificationEndpoint, appConfiguration.getFapiCompatibility());
         pingCallbackClient.setRequest(pingCallbackRequest);
         PingCallbackResponse pingCallbackResponse = pingCallbackClient.exec();
 

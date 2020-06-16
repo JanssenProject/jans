@@ -209,20 +209,25 @@ public class AuthorizeService {
                     cibaRequestService.removeCibaRequest(authReqId);
                 }
                 switch (request.getClient().getBackchannelTokenDeliveryMode()) {
+                    case POLL:
+                        request.setStatus(CibaRequestStatus.DENIED);
+                        request.setTokensDelivered(false);
+                        cibaRequestService.update(request);
+                        break;
                     case PING:
                         request.setStatus(CibaRequestStatus.DENIED);
                         request.setTokensDelivered(false);
                         cibaRequestService.update(request);
 
                         cibaPingCallbackProxy.pingCallback(
-                                request.getCibaAuthReqId().getCode(),
+                                request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken()
                         );
                         break;
                     case PUSH:
                         cibaPushErrorProxy.pushError(
-                                request.getCibaAuthReqId().getCode(),
+                                request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken(),
                                 PushErrorResponseType.ACCESS_DENIED,

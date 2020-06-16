@@ -6,17 +6,21 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
+import org.gluu.oxauth.authorize.ws.rs.AuthorizeRestWebServiceValidator;
 import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorProxy;
 import org.gluu.oxauth.ciba.CIBAEndUserNotificationProxy;
 import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
+import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
@@ -43,6 +47,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -99,11 +104,18 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     @Inject
     private CibaRequestService cibaRequestService;
 
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
+
     @Override
     public Response requestBackchannelAuthorizationPost(
             String clientId, String scope, String clientNotificationToken, String acrValues, String loginHintToken,
             String idTokenHint, String loginHint, String bindingMessage, String userCodeParam, Integer requestedExpiry,
-            HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
+            String request, String requestUri, HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.BACKCHANNEL_AUTHENTICATION);
@@ -114,9 +126,10 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request backchannel authorization: "
                         + "clientId = {}, scope = {}, clientNotificationToken = {}, acrValues = {}, loginHintToken = {}, "
-                        + "idTokenHint = {}, loginHint = {}, bindingMessage = {}, userCodeParam = {}, requestedExpiry = {}",
+                        + "idTokenHint = {}, loginHint = {}, bindingMessage = {}, userCodeParam = {}, requestedExpiry = {}, "
+                        + "request= {}",
                 clientId, scope, clientNotificationToken, acrValues, loginHintToken,
-                idTokenHint, loginHint, bindingMessage, userCodeParam, requestedExpiry);
+                idTokenHint, loginHint, bindingMessage, userCodeParam, requestedExpiry, request);
         log.debug("Attempting to request backchannel authorization: "
                 + "isSecure = {}", securityContext.isSecure());
 
@@ -142,6 +155,59 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             return builder.build();
         }
 
+        List<String> scopes = new ArrayList<>();
+        if (StringHelper.isNotEmpty(scope)) {
+            Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+            scopes.addAll(grantedScopes);
+        }
+
+        JwtAuthorizationRequest jwtRequest = null;
+        if (StringUtils.isNotBlank(request) || StringUtils.isNotBlank(requestUri)) {
+            jwtRequest = JwtAuthorizationRequest.createJwtRequest(request, requestUri,
+                    client, null, cryptoProvider, appConfiguration);
+            if (jwtRequest == null) {
+                log.error("The JWT couldn't be processed");
+                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+                builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+                throw new WebApplicationException(builder.build());
+            }
+            authorizeRestWebServiceValidator.validateCibaRequestObject(jwtRequest, client.getClientId());
+            // JWT wins
+            if (!jwtRequest.getScopes().isEmpty()) {
+                scopes.addAll(scopeChecker.checkScopesPolicy(client, jwtRequest.getScopes()));
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getClientNotificationToken())) {
+                clientNotificationToken = jwtRequest.getClientNotificationToken();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getAcrValues())) {
+                acrValues = jwtRequest.getAcrValues();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getLoginHintToken())) {
+                loginHintToken = jwtRequest.getLoginHintToken();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getIdTokenHint())) {
+                idTokenHint = jwtRequest.getIdTokenHint();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getLoginHint())) {
+                loginHint = jwtRequest.getLoginHint();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getBindingMessage())) {
+                bindingMessage = jwtRequest.getBindingMessage();
+            }
+            if (StringUtils.isNotBlank(jwtRequest.getUserCode())) {
+                userCodeParam = jwtRequest.getUserCode();
+            }
+            if (jwtRequest.getRequestedExpiry() != null) {
+                requestedExpiry = jwtRequest.getRequestedExpiry();
+            } else if (jwtRequest.getExp() != null) {
+                requestedExpiry = Math.toIntExact(jwtRequest.getExp() - System.currentTimeMillis() / 1000);
+            }
+        }
+        if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            return builder.build();
+        }
         User user = null;
         try {
             if (Strings.isNotBlank(loginHint)) { // login_hint
@@ -206,16 +272,10 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             return builder.build();
         }
 
-        List<String> scopeList = new ArrayList<String>();
-        if (StringHelper.isNotEmpty(scope)) {
-            Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-            scopeList.addAll(grantedScopes);
-        }
-
         try {
             String userCode = (String) user.getAttribute("oxAuthBackchannelUserCode", true, false);
             DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
-                    scopeList, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
+                    scopes, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
                     loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
                     userCodeParam, userCode, requestedExpiry);
             if (cibaAuthorizeParamsValidation != null) {
@@ -237,12 +297,12 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                     null : appConfiguration.getBackchannelAuthenticationResponseInterval();
             long currentTime = new Date().getTime();
 
-            CibaRequestCacheControl cibaRequestCacheControl = new CibaRequestCacheControl(user, client, expiresIn, scopeList,
+            CibaRequestCacheControl cibaRequestCacheControl = new CibaRequestCacheControl(user, client, expiresIn, scopes,
                     clientNotificationToken, bindingMessage, currentTime, acrValues);
 
             cibaRequestService.save(cibaRequestCacheControl, expiresIn);
 
-            String authReqId = cibaRequestCacheControl.getCibaAuthReqId().getCode();
+            String authReqId = cibaRequestCacheControl.getAuthReqId();
 
             // Notify End-User to obtain Consent/Authorization
             cibaEndUserNotificationProxy.notifyEndUser(
@@ -284,4 +344,5 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
         return responseJsonObject;
     }
+
 }

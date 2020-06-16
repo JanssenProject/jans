@@ -228,7 +228,7 @@ public class IdTokenFactory {
         jwr.setClaim(JwtClaimName.REFRESH_TOKEN_HASH, refreshTokenHash);
 
         CIBAGrant cibaGrant = (CIBAGrant) authorizationGrant;
-        jwr.setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getCIBAAuthenticationRequestId().getCode());
+        jwr.setClaim(JwtClaimName.AUTH_REQ_ID, cibaGrant.getAuthReqId());
     }
 
     private void setClaimsFromJwtAuthorizationRequest(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, Set<String> scopes) throws InvalidClaimException {
