@@ -72,7 +72,6 @@ class CollectProperties(SetupUtils):
 
         result = dbUtils.search('ou=oxradius,ou=configuration,o=gluu', search_scope=ldap3.BASE)
         if result:
-            Config.installGluuRadius = True
             Config.gluu_radius_client_id = result['oxRadiusOpenidUsername']
             Config.gluu_ro_pw = self.unobscure(result['oxRadiusOpenidPassword'])
 
@@ -194,9 +193,6 @@ class CollectProperties(SetupUtils):
         for s in ('gluuPassportEnabled', 'gluuRadiusEnabled', 'gluuSamlEnabled', 'gluuScimEnabled'):
             setattr(Config, s, oxConfiguration.get(s, False))
 
-        if os.path.exists('/opt/gluu/node/passport/server'):
-            Config.installPassport = True
-
         application_max_ram = 3072
 
         default_dir = '/etc/default'
@@ -227,12 +223,6 @@ class CollectProperties(SetupUtils):
 
         Config.os_type = base.os_type
         Config.os_version = base.os_version
-
-        https_gluu_fn = '/etc/httpd/conf.d/https_gluu.conf' if base.clone_type == 'rpm'  else '/etc/apache2/sites-available/https_gluu.conf'
-        Config.installHTTPD = os.path.exists(https_gluu_fn)
-
-
-
 
     def save(self):
         propertiesUtils.save_properties()

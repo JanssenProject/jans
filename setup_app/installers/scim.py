@@ -39,7 +39,7 @@ class ScimInstaller(JettyInstaller):
         self.enable()
 
     def installed(self):
-        return self.dbUtils.search('ou=clients,o=gluu', '(inum=1201.*)')
+        return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini'))
 
     def generate_configuration(self):
         self.logIt("Generating {} configuration".format(self.service_name))
