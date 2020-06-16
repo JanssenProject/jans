@@ -102,7 +102,7 @@ public class ApplicationAuditLogger {
 		lock.lock();
 		try {
 			// Check if another thread init JMS pool already
-			if ((this.pooledConnectionFactory != null) && !isJmsConfigChanged()) {
+			if ((this.pooledConnectionFactory == null) || isJmsConfigChanged()) {
 				return tryToEstablishJMSConnectionImpl();
 			}
 
