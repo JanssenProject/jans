@@ -55,6 +55,8 @@ for l in menifest.splitlines():
 
         gluu_version = '.'.join(gluu_version_list)
 
+gluu_version = '4.2.0'
+
 print("Current Gluu Version", gluu_version)
 
 if os.path.exists(ces_dir + '.back'):
@@ -106,7 +108,10 @@ setupObj.os_type, setupObj.os_version = setupObj.detect_os_type()
 setupObj.os_initdaemon = setupObj.detect_initd()
 
 for setup_key in setup_porperties:
-    setattr(setupObj, setup_key, setup_porperties[setup_key])
+    val = setup_porperties[setup_key]
+    if isinstance(val, bytes):
+        val = val.decode()
+    setattr(setupObj, setup_key, val)
 
 setupObj.log = os.path.join(setupObj.install_dir, 'post_setup.log')
 setupObj.logError = os.path.join(setupObj.install_dir, 'post_setup_error.log')
@@ -129,7 +134,7 @@ if persistence_type == 'couchbase':
     setupObj.cbm = get_cbm_conn()
 else:
     setupObj.createLdapPw()
-    ldap_conn = get_ldap_conn
+    ldap_conn = get_ldap_conn()
 
 def get_oxAuthConfiguration_ldap():
 
