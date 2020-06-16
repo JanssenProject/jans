@@ -28,6 +28,7 @@ class Config:
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     jetty_base = os.path.join(gluuOptFolder, 'jetty')
+    installed_instance = False
 
     @classmethod
     def get(self, attr, default=None):
@@ -317,3 +318,4 @@ class Config:
         self.non_setup_properties = {
             'oxauth_client_jar_fn': os.path.join(self.distGluuFolder, 'oxauth-client-jar-with-dependencies.jar')
                 }
+        Config.addPostSetupService = []

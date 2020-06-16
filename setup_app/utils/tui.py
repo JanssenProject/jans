@@ -52,6 +52,7 @@ class GluuSetupApp(npyscreen.StandardApp):
     do_notify = True
     queue = None
     gluuInstaller = None
+    installed_instance = None
 
     def onStart(self):
         self.addForm("MAIN", MAIN, name=msg.MAIN_label)
