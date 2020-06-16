@@ -9,6 +9,8 @@ package org.gluu.oxauth.client.ping;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.client.BaseClient;
+import org.gluu.oxauth.util.ClientUtil;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
@@ -22,8 +24,11 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
 
     private static final Logger LOG = Logger.getLogger(PingCallbackClient.class);
 
-    public PingCallbackClient(String url) {
+    private final boolean fapiCompatibility;
+
+    public PingCallbackClient(String url, boolean fapiCompatibility) {
         super(url);
+        this.fapiCompatibility = fapiCompatibility;
     }
 
     @Override
@@ -32,6 +37,9 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
     }
 
     public PingCallbackResponse exec() {
+        if (this.fapiCompatibility) {
+            setExecutor(getApacheHttpClient4ExecutorForMTLS());
+        }
         initClientRequest();
         return _exec();
     }
@@ -61,4 +69,14 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
 
         return getResponse();
     }
+
+    /**
+     * Creates an executor responsible to process rest calls using special SSL context defined in FAPI-CIBA specs.
+     */
+    private ApacheHttpClient4Executor getApacheHttpClient4ExecutorForMTLS() {
+        // Ciphers accepted by FAPI-CIBA specs and OpenJDK.
+        String[] ciphers = new String[] { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" };
+        return new ApacheHttpClient4Executor(ClientUtil.createHttpClient("TLSv1.2", ciphers));
+    }
+
 }

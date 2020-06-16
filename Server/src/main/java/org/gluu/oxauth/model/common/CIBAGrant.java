@@ -6,6 +6,10 @@
 
 package org.gluu.oxauth.model.common;
 
+import org.gluu.service.CacheService;
+
+import javax.inject.Inject;
+
 /**
  * An extension grant with the grant type value: urn:openid:params:grant-type:ciba
  *
@@ -14,24 +18,34 @@ package org.gluu.oxauth.model.common;
  */
 public class CIBAGrant extends AuthorizationGrant {
 
-    private CibaAuthReqId cibaAuthReqId;
+    private String authReqId;
     private boolean tokensDelivered;
+
+    @Inject
+    private CacheService cacheService;
 
     public CIBAGrant() {
     }
 
     public void init(CibaRequestCacheControl cibaRequest) {
         super.init(cibaRequest.getUser(), AuthorizationGrantType.CIBA, cibaRequest.getClient(), null);
-        setCIBAAuthenticationRequestId(cibaRequest.getCibaAuthReqId());
+        setAuthReqId(cibaRequest.getAuthReqId());
+        setAcrValues(cibaRequest.getAcrValues());
         setIsCachedWithNoPersistence(true);
     }
 
-    public CibaAuthReqId getCIBAAuthenticationRequestId() {
-        return cibaAuthReqId;
+    @Override
+    public void save() {
+        CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.getAuthReqId(), cachedGrant);
     }
 
-    public void setCIBAAuthenticationRequestId(CibaAuthReqId cibaAuthReqId) {
-        this.cibaAuthReqId = cibaAuthReqId;
+    public String getAuthReqId() {
+        return authReqId;
+    }
+
+    public void setAuthReqId(String authReqId) {
+        this.authReqId = authReqId;
     }
 
     public boolean isTokensDelivered() {
