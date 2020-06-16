@@ -173,12 +173,12 @@ public class AuthorizeRestWebServiceValidator {
      * @param jwtRequest Object to be validated.
      */
     public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
-        Response.ResponseBuilder builder;
         if (jwtRequest.getAud().isEmpty() || !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
             log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
 
         if (!appConfiguration.getFapiCompatibility()) {
@@ -188,58 +188,66 @@ public class AuthorizeRestWebServiceValidator {
         // FAPI related validation
         if (jwtRequest.getExp() == null) {
             log.error("The exp claim is not set");
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         final long expInMillis = jwtRequest.getExp() * 1000L;
         final long now = new Date().getTime();
         if (expInMillis < now) {
             log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
             log.error("Request object does not have scope claim.");
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         if (StringUtils.isEmpty(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
             log.error("Request object has a wrong iss claim, iss: " + jwtRequest.getIss());
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         if (jwtRequest.getIat() == null || jwtRequest.getIat() == 0) {
             log.error("Request object has a wrong iat claim, iat: " + jwtRequest.getIat());
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         int nowInSeconds = Math.toIntExact(System.currentTimeMillis() / 1000);
         if (jwtRequest.getNbf() == null || jwtRequest.getNbf() >  nowInSeconds
                 || jwtRequest.getNbf() < nowInSeconds - appConfiguration.getCibaMaxExpirationTimeAllowedSec()) {
             log.error("Request object has a wrong nbf claim, nbf: " + jwtRequest.getNbf());
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         if (StringUtils.isEmpty(jwtRequest.getJti())) {
             log.error("Request object has a wrong jti claim, jti: " + jwtRequest.getJti());
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
         int result = (StringUtils.isNotBlank(jwtRequest.getLoginHint()) ? 1 : 0)
                 + (StringUtils.isNotBlank(jwtRequest.getLoginHintToken()) ? 1 : 0)
                 + (StringUtils.isNotBlank(jwtRequest.getIdTokenHint()) ? 1 : 0);
         if (result != 1) {
             log.error("Request object has too many hints or doesnt have any");
-            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
-            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
-            throw new WebApplicationException(builder.build());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
     }
 
