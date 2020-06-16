@@ -28,7 +28,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         pass
 
     def collect(self):
-
+        print("Please wait while collectiong properties...")
+        self.logIt("Previously installed instance. Collecting properties")
         salt_fn = os.path.join(Config.configFolder,'salt')
         if os.path.exists(salt_fn):
             salt_prop = base.read_properties_file(salt_fn)
@@ -101,7 +102,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'gluuIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['gluuIpAddress']
 
-
         oxCacheConfiguration = json.loads(oxConfiguration['oxCacheConfiguration'])
         Config.cache_provider_type = str(oxCacheConfiguration['cacheProviderType'])
 
@@ -114,6 +114,10 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.idpClient_pw =  self.unobscure(oxConfApplication['openIdClientPassword'])
             Config.idp_client_id =  oxConfApplication['openIdClientId']
 
+            if 'openIdClientPassword' in oxConfApplication:
+                Config.idpClient_pw =  self.unobscure(oxConfApplication['openIdClientPassword'])
+            if 'openIdClientId' in oxConfApplication:
+                Config.idp_client_id =  oxConfApplication['openIdClientId']
 
         dn_oxauth, oxAuthConfDynamic = dbUtils.get_oxAuthConfDynamic()
         dn_oxtrust, oxTrustConfApplication = dbUtils.get_oxTrustConfApplication()
@@ -157,11 +161,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'scimUmaClientKeyStorePassword' in oxTrustConfApplication:
             Config.scim_rs_client_jks_pass = self.unobscure(oxTrustConfApplication['scimUmaClientKeyStorePassword'])
             Config.scim_rs_client_jks_fn = str(oxTrustConfApplication['scimUmaClientKeyStoreFile'])
-
-        if 'openIdClientPassword' in oxConfApplication:
-            Config.idpClient_pw =  self.unobscure(oxConfApplication['openIdClientPassword'])
-        if 'openIdClientId' in oxConfApplication:
-            Config.idp_client_id =  oxConfApplication['openIdClientId']
 
         # Other clients
         client_var_id_list = (
@@ -231,13 +230,14 @@ class CollectProperties(SetupUtils, BaseInstaller):
             allowedRatio = jetty_services['oxauth']['memory']['ratio'] * ratioMultiplier
             application_max_ram = int(round(applicationMemory / allowedRatio))
 
-
-
         if Config.get('gluuRadiusEnabled'):
             Config.oxauth_openidScopeBackwardCompatibility = True
 
         Config.os_type = base.os_type
         Config.os_version = base.os_version
+
+        if not Config.get('ip'):
+            Config.ip = self.detect_ip()
 
     def save(self):
         propertiesUtils.save_properties()
