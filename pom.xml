@@ -35,7 +35,6 @@
 		<weld.version>3.1.2.Final</weld.version>
 
 		<jsf-api.version>2.2.16</jsf-api.version>
-		<jsf-impl.version>2.2.16</jsf-impl.version>
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
@@ -293,11 +292,6 @@
 				<version>${uel-impl.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.glassfish</groupId>
-			    <artifactId>javax.faces</artifactId>
-				<version>${jsf-impl.version}</version>
-			</dependency>
-			<dependency>
 			    <groupId>org.hibernate</groupId>
 			    <artifactId>hibernate-validator-cdi</artifactId>
 			    <version>5.4.1.Final</version>
@@ -311,11 +305,6 @@
 			</dependency>
 
 			<!-- Commons libs -->
-			<dependency>
-				<groupId>commons-beanutils</groupId>
-				<artifactId>commons-beanutils</artifactId>
-				<version>1.9.3</version>
-			</dependency>
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
@@ -412,11 +401,6 @@
 			</dependency>
 
 			<!-- Google -->
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>19.0</version>
-			</dependency>
 			<dependency>
 			    <groupId>com.google.http-client</groupId>
 			    <artifactId>google-http-client-jackson2</artifactId>

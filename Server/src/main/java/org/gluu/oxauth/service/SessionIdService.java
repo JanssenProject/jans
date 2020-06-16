@@ -36,6 +36,8 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
+import org.gluu.oxauth.service.external.session.SessionEvent;
+import org.gluu.oxauth.service.external.session.SessionEventType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
@@ -236,6 +238,7 @@ public class SessionIdService {
             if (force) {
             	// Reset state to unauthenticated
             	session.setState(SessionIdState.UNAUTHENTICATED);
+                externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, session));
             }
 
             boolean updateResult = updateSessionId(session, true, true, true);
@@ -334,6 +337,8 @@ public class SessionIdService {
             	reinitLogin(sessionId, true);
             	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
             }
+
+            externalEvent(new SessionEvent(SessionEventType.AUTHENTICATED, sessionId).setHttpRequest(httpRequest));
         }
 
         return sessionId;
@@ -501,6 +506,7 @@ public class SessionIdService {
             	reinitLogin(sessionId, true);
             	throw new InvalidSessionStateException("Session creation is prohibited by external session script!");
             }
+            externalEvent(new SessionEvent(SessionEventType.AUTHENTICATED, sessionId).setHttpRequest(httpRequest).setHttpResponse(httpResponse));
         }
 
         return sessionId;
@@ -638,6 +644,7 @@ public class SessionIdService {
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
                 persistenceEntryManager.merge(sessionId);
+                externalEvent(new SessionEvent(SessionEventType.UPDATED, sessionId));
                 return;
             } catch (EntryPersistenceException ex) {
                 lastException = ex;
@@ -866,5 +873,12 @@ public class SessionIdService {
     public List<SessionId> findByUser(String userDn) {
         Filter filter = Filter.createEqualityFilter("oxAuthUserDN", userDn);
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
+    }
+
+    public void externalEvent(SessionEvent event) {
+        if (!externalApplicationSessionService.isEnabled()) {
+            return;
+        }
+        externalApplicationSessionService.executeExternalOnEventMethod(event);
     }
 }

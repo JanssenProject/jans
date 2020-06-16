@@ -7,8 +7,8 @@ from org.apache.http.params import CoreConnectionPNames
 
 from org.oxauth.persistence.model.configuration import GluuConfiguration
 from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import AuthenticationService
-from org.gluu.oxauth.service.common import EncryptionService, UserService
+from org.gluu.oxauth.service import AuthenticationService, UserService
+from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.oxauth.service.custom import CustomScriptService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
@@ -89,8 +89,10 @@ class PersonAuthentication(PersonAuthenticationType):
     def getApiVersion(self):
         return 11
 
-    def getAuthenticationMethodClaims(self, requestParameters):
+
+    def getAuthenticationMethodClaims(self, configurationAttributes):
         return None
+
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         print "Casa. isValidAuthenticationMethod called"
@@ -354,6 +356,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     methods.add(method)
             except:
                 print "Casa. getAvailMethodsUser. hasEnrollments call could not be issued for %s module" % method
+                print "Exception: ", sys.exc_info()[1]
 
         try:
             if skip != None:
