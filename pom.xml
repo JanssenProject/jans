@@ -21,7 +21,7 @@
         <guice.version>3.0</guice.version>
         <guava.version>20.0</guava.version>
         <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
-        <selenium.version>3.141.59</selenium.version>
+        <selenium.version>2.53.1</selenium.version>
     </properties>
 
     <prerequisites>
@@ -222,9 +222,14 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>net.sourceforge.htmlunit</groupId>
-                <artifactId>htmlunit</artifactId>
-                <version>2.37.0</version>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-remote-driver</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-support</artifactId>
+                <version>3.141.59</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -235,8 +240,15 @@
             </dependency>
             <dependency>
                 <groupId>org.seleniumhq.selenium</groupId>
-                <artifactId>htmlunit-driver</artifactId>
-                <version>2.35.1</version>
+                <artifactId>selenium-htmlunit-driver</artifactId>
+                <version>2.52.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.sourceforge.htmlunit</groupId>
+                <artifactId>htmlunit-cssparser</artifactId>
+                <version>1.5.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
