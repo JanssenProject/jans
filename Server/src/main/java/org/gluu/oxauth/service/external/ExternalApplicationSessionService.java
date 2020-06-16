@@ -6,19 +6,19 @@
 
 package org.gluu.oxauth.service.external;
 
-import java.util.Map;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.session.ApplicationSessionType;
 import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.service.external.session.SessionEvent;
 import org.gluu.service.custom.script.ExternalScriptService;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external application session extension
@@ -89,6 +89,24 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
         }
 
         return result;
+    }
+
+    public void executeExternalOnEventMethod(SessionEvent event) {
+        for (CustomScriptConfiguration scriptConfiguration : this.customScriptConfigurations) {
+            executeExternalOnEventMethod(scriptConfiguration, event);
+        }
+    }
+
+    private void executeExternalOnEventMethod(CustomScriptConfiguration scriptConfiguration, SessionEvent event) {
+        try {
+            log.trace("Executing python 'onEvent' method of script: " + scriptConfiguration.getName() + ", event: " + event);
+            event.setScriptConfiguration(scriptConfiguration);
+            ApplicationSessionType applicationSessionType = (ApplicationSessionType) scriptConfiguration.getExternalType();
+            applicationSessionType.onEvent(event);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(scriptConfiguration.getCustomScript(), ex);
+        }
     }
 
 }
