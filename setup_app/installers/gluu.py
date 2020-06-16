@@ -20,8 +20,7 @@ class GluuInstaller(SetupUtils):
 
     def __repr__(self):
         txt = ''
-        if 1:
-        #try:
+        try:
             if not Config.installed_instance:
                 txt += 'hostname'.ljust(30) + Config.hostname.rjust(35) + "\n"
                 txt += 'orgName'.ljust(30) + Config.orgName.rjust(35) + "\n"
@@ -63,7 +62,6 @@ class GluuInstaller(SetupUtils):
             txt += 'Install Gluu Radius '.ljust(30) + repr(Config.installGluuRadius).rjust(35) + (' *' if 'installGluuRadius' in Config.addPostSetupService else '') + "\n"
             return txt
         
-        """
         except:
             s = ""
             for key in list(Config.__dict__):
@@ -72,7 +70,7 @@ class GluuInstaller(SetupUtils):
                     if not inspect.ismethod(val):
                         s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
-        """
+
 
     def initialize(self):
         self.service_name = 'gluu'
