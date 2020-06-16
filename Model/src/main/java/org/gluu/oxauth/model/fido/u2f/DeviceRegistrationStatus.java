@@ -17,9 +17,10 @@ import org.gluu.persist.annotation.AttributeEnum;
  * @author Yuriy Movchan Date: 06/02/2015
  */
 public enum DeviceRegistrationStatus implements AttributeEnum {
-
+	//TODO: remove this class and reuse the one found in fido2-model
     ACTIVE("active", "Active device registration"),
-	COMPROMISED("compromised", "Compromised device registration");
+	COMPROMISED("compromised", "Compromised device registration"),
+	MIGRATED("migrated", "Migrated to Fido2");
 
     private final String value;
 	private final String displayName;
