@@ -177,6 +177,9 @@ if Config.installed_instance:
         setattr(Config, installer.install_var, installer.installed())
     
     propertiesUtils.promptForProperties()
+    if not Config.addPostSetupService:
+        print("Nothing was selected for installation. Exiting ...")
+        sys.exit()
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
