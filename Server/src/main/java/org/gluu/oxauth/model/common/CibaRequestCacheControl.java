@@ -8,8 +8,10 @@ package org.gluu.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.model.util.Util;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.List;
 
 /**
@@ -20,7 +22,6 @@ import java.util.List;
  */
 public class CibaRequestCacheControl implements Serializable {
 
-    private CibaAuthReqId cibaAuthReqId;
     private String authReqId;
     private User user;
     private Client client;
@@ -40,13 +41,13 @@ public class CibaRequestCacheControl implements Serializable {
     public CibaRequestCacheControl(User user, Client client, int expiresIn, List<String> scopeList,
                                    String clientNotificationToken, String bindingMessage, Long lastAccessControl,
                                    String acrValues) {
-        CibaAuthReqId cibaAuthReqId = new CibaAuthReqId(expiresIn);
+        byte[] nonce = new byte[24];
+        new SecureRandom().nextBytes(nonce);
+        this.authReqId = Util.byteArrayToHexString(nonce);
         this.user = user;
         this.client = client;
         this.scopes = scopeList;
-        this.cibaAuthReqId = cibaAuthReqId;
         this.status = CibaRequestStatus.PENDING;
-        this.authReqId = cibaAuthReqId.getCode();
         this.expiresIn = expiresIn;
         this.clientNotificationToken = clientNotificationToken;
         this.bindingMessage = bindingMessage;
@@ -147,14 +148,6 @@ public class CibaRequestCacheControl implements Serializable {
         this.tokensDelivered = tokensDelivered;
     }
 
-    public CibaAuthReqId getCibaAuthReqId() {
-        return cibaAuthReqId;
-    }
-
-    public void setCibaAuthReqId(CibaAuthReqId cibaAuthReqId) {
-        this.cibaAuthReqId = cibaAuthReqId;
-    }
-
     public String getAcrValues() {
         return acrValues;
     }
@@ -166,7 +159,6 @@ public class CibaRequestCacheControl implements Serializable {
     @Override
     public String toString() {
         return "CibaRequestCacheControl{" +
-                "cibaAuthReqId=" + cibaAuthReqId +
                 ", authReqId='" + authReqId + '\'' +
                 ", user=" + user +
                 ", client=" + client +
