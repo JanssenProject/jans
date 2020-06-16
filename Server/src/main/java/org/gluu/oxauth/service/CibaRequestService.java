@@ -7,11 +7,14 @@
 package org.gluu.oxauth.service;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.model.common.CibaRequestCacheControl;
 import org.gluu.oxauth.model.common.CibaRequestStatus;
+import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.CacheService;
@@ -48,6 +51,9 @@ public class CibaRequestService {
     @Inject
     private CacheService cacheService;
 
+    @Inject
+    private CIBASupportProxy cibaSupportProxy;
+
     private String cibaBaseDn() {
         return staticConfiguration.getBaseDn().getCiba();  // ou=ciba,o=gluu
     }
@@ -60,7 +66,7 @@ public class CibaRequestService {
     public void persistRequest(CibaRequestCacheControl request, int expiresIn) {
         Date expirationDate = DateUtils.addSeconds(new Date(), expiresIn);
 
-        String authReqId = request.getCibaAuthReqId().getCode();
+        String authReqId = request.getAuthReqId();
         CIBARequest cibaRequest = new CIBARequest();
         cibaRequest.setDn("authReqId=" + authReqId + "," + this.cibaBaseDn());
         cibaRequest.setAuthReqId(authReqId);
@@ -156,7 +162,7 @@ public class CibaRequestService {
 
         cacheService.put(expiresInCache, request.cacheKey(), request);
         this.persistRequest(request, expiresIn);
-        log.trace("Ciba request saved in cache, authReqId: {} clientId: {}", request.getCibaAuthReqId().getCode(), request.getClient().getClientId());
+        log.trace("Ciba request saved in cache, authReqId: {} clientId: {}", request.getAuthReqId(), request.getClient().getClientId());
     }
 
     /**
@@ -196,5 +202,25 @@ public class CibaRequestService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Verifies whether a specific client has CIBA compatibility.
+     *
+     * @param client Client to check.
+     */
+    public boolean hasCibaCompatibility(Client client) {
+        if (!cibaSupportProxy.isCIBASupported()) {
+            return false;
+        }
+        if (client.getBackchannelTokenDeliveryMode() == null) {
+            return false;
+        }
+        for (GrantType gt : client.getGrantTypes()) {
+            if (gt.getValue().equals(GrantType.CIBA.getValue())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

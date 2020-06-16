@@ -309,11 +309,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     throw createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
             }
-            if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
-                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            if (!cibaRequestService.hasCibaCompatibility(client)) {
+                if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+                }
+                authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             }
-
-            authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
 
             if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
@@ -646,7 +647,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
             cibaPushTokenDeliveryProxy.pushTokenDelivery(
-                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
                     accessToken.getCode(),
@@ -659,7 +660,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaGrant.save();
 
             cibaPingCallbackProxy.pingCallback(
-                    cibaGrant.getCIBAAuthenticationRequestId().getCode(),
+                    cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken()
             );

@@ -31,6 +31,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
@@ -163,6 +165,89 @@ public class AuthorizeRestWebServiceValidator {
         if (StringUtils.isBlank(jwtRequest.getRedirectUri())) {
             log.error("Request object does not have redirect_uri claim.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
+        }
+    }
+
+    /**
+     * Validates expiration, audience and scopes in the JWT request.
+     * @param jwtRequest Object to be validated.
+     */
+    public void validateCibaRequestObject(JwtAuthorizationRequest jwtRequest, String clientId) {
+        if (jwtRequest.getAud().isEmpty() || !jwtRequest.getAud().contains(appConfiguration.getIssuer())) {
+            log.error("Failed to match aud to AS, aud: " + jwtRequest.getAud());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+
+        if (!appConfiguration.getFapiCompatibility()) {
+            return;
+        }
+
+        // FAPI related validation
+        if (jwtRequest.getExp() == null) {
+            log.error("The exp claim is not set");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        final long expInMillis = jwtRequest.getExp() * 1000L;
+        final long now = new Date().getTime();
+        if (expInMillis < now) {
+            log.error("Request object expired. Exp:" + expInMillis + ", now: " + now);
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        if (jwtRequest.getScopes() == null || jwtRequest.getScopes().isEmpty()) {
+            log.error("Request object does not have scope claim.");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        if (StringUtils.isEmpty(jwtRequest.getIss()) || !jwtRequest.getIss().equals(clientId)) {
+            log.error("Request object has a wrong iss claim, iss: " + jwtRequest.getIss());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        if (jwtRequest.getIat() == null || jwtRequest.getIat() == 0) {
+            log.error("Request object has a wrong iat claim, iat: " + jwtRequest.getIat());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        int nowInSeconds = Math.toIntExact(System.currentTimeMillis() / 1000);
+        if (jwtRequest.getNbf() == null || jwtRequest.getNbf() >  nowInSeconds
+                || jwtRequest.getNbf() < nowInSeconds - appConfiguration.getCibaMaxExpirationTimeAllowedSec()) {
+            log.error("Request object has a wrong nbf claim, nbf: " + jwtRequest.getNbf());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        if (StringUtils.isEmpty(jwtRequest.getJti())) {
+            log.error("Request object has a wrong jti claim, jti: " + jwtRequest.getJti());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
+        }
+        int result = (StringUtils.isNotBlank(jwtRequest.getLoginHint()) ? 1 : 0)
+                + (StringUtils.isNotBlank(jwtRequest.getLoginHintToken()) ? 1 : 0)
+                + (StringUtils.isNotBlank(jwtRequest.getIdTokenHint()) ? 1 : 0);
+        if (result != 1) {
+            log.error("Request object has too many hints or doesnt have any");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST))
+                    .build());
         }
     }
 
