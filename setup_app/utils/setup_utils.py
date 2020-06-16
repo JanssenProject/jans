@@ -336,8 +336,8 @@ class SetupUtils(Crypto64):
             self.logIt("Error writing temporary LDAP password.")
 
     def deleteLdapPw(self):
-        if os.path.isfile(self.ldapPassFn):
-            os.remove(self.ldapPassFn)
+        if os.path.isfile(Config.ldapPassFn):
+            os.remove(Config.ldapPassFn)
 
     def getMappingType(self, mtype):
         location = []

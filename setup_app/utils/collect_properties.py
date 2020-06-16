@@ -19,8 +19,9 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.pylib.jproperties import Properties
 from setup_app.installers.jetty import JettyInstaller
+from setup_app.installers.base import BaseInstaller
 
-class CollectProperties(SetupUtils):
+class CollectProperties(SetupUtils, BaseInstaller):
 
 
     def __init__(self):
@@ -137,9 +138,13 @@ class CollectProperties(SetupUtils):
 
         Config.oxauth_client_id = oxTrustConfApplication['oxAuthClientId']
         Config.oxauthClient_pw = self.unobscure(oxTrustConfApplication['oxAuthClientPassword'])
+        Config.oxauthClient_encoded_pw = oxTrustConfApplication['oxAuthClientPassword']
+
+        Config.scim_rp_client_jks_pass = 'secret' # this is static
 
         if 'scimUmaClientId' in oxTrustConfApplication:
             Config.scim_rs_client_id =  oxTrustConfApplication['scimUmaClientId']
+
         if 'scimUmaClientId' in oxTrustConfApplication:
             Config.scim_resource_oxid =  oxTrustConfApplication['scimUmaResourceId']
         if 'scimTestMode' in oxTrustConfApplication:
@@ -158,6 +163,16 @@ class CollectProperties(SetupUtils):
         if 'openIdClientId' in oxConfApplication:
             Config.idp_client_id =  oxConfApplication['openIdClientId']
 
+        # Other clients
+        client_var_id_list = (
+                    ('scim_rp_client_id', '1202.'),
+                    ('passport_rs_client_id', '1501.'),
+                    ('passport_rp_client_id', '1502.'),
+                    ('passport_rp_ii_client_id', '1503.'),
+                    ('gluu_radius_client_id', '1701.'),
+                    )
+        self.check_clients(client_var_id_list)
+        self.check_clients([('passport_resource_id', '1504.')])
 
         o_issuer = urlparse(oxAuthConfDynamic['issuer'])
         Config.hostname = str(o_issuer.netloc)
