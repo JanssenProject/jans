@@ -80,7 +80,8 @@ public class ClientAssertion {
 
                     // Validate audience
                     String tokenUrl = appConfiguration.getTokenEndpoint();
-                    if (audience != null && audience.contains(tokenUrl)) {
+                    String cibaAuthUrl = appConfiguration.getBackchannelAuthenticationEndpoint();
+                    if (audience != null && (audience.contains(appConfiguration.getIssuer()) || audience.contains(tokenUrl) || audience.contains(cibaAuthUrl))) {
 
                         // Validate expiration
                         if (expirationTime.after(new Date())) {
@@ -130,7 +131,7 @@ public class ClientAssertion {
                             throw new InvalidJwtException("JWT has expired");
                         }
                     } else {
-                        throw new InvalidJwtException("Invalid audience: " + audience + ", tokenUrl: " + tokenUrl);
+                        throw new InvalidJwtException("Invalid audience: " + audience);
                     }
                 } else {
                     throw new InvalidJwtException("Invalid clientId");

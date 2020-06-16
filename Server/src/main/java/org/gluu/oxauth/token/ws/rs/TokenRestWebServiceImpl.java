@@ -395,6 +395,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 log.trace("AuthorizationGrant : '{}'", cibaGrant);
 
                 if (cibaGrant != null) {
+                    if (!cibaGrant.getClientId().equals(client.getClientId())) {
+                        builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
+                        return response(builder, oAuth2AuditLog);
+                    }
                     if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                             cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
                         if (!cibaGrant.isTokensDelivered()) {
@@ -428,6 +432,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                     idToken));
 
                             oAuth2AuditLog.updateOAuth2AuditLog(cibaGrant, true);
+                        } else {
+                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available.");
                         }
                     } else {
                         log.debug("Client is not using Poll flow authReqId: '{}'", authReqId);
@@ -437,6 +443,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     final CibaRequestCacheControl cibaRequest = cibaRequestService.getCibaRequest(authReqId);
                     log.trace("Ciba request : '{}'", cibaRequest);
                     if (cibaRequest != null) {
+                        if (!cibaRequest.getClient().getClientId().equals(client.getClientId())) {
+                            builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
+                            return response(builder, oAuth2AuditLog);
+                        }
                         long currentTime = new Date().getTime();
                         Long lastAccess = cibaRequest.getLastAccessControl();
                         if (lastAccess == null) {
