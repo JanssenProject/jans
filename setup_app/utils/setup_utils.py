@@ -487,7 +487,7 @@ class SetupUtils(Crypto64):
 
                 fullOutputDir = Path(Config.outputFolder, output_dir)
                 fullOutputFile = Path(Config.outputFolder, rp)
-                
+
                 if not fullOutputDir.exists():
                     fullOutputDir.mkdir(parents=True, exist_ok=True)
 
