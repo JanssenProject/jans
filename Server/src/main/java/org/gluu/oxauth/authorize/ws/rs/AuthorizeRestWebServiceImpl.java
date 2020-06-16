@@ -307,11 +307,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     throw createInvalidJwtRequestException(redirectUriResponse, "Invalid JWT authorization request");
                 }
             }
-            if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
-                throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+            if (!cibaRequestService.hasCibaCompatibility(client)) {
+                if (appConfiguration.getFapiCompatibility() && jwtRequest == null) {
+                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
+                }
+                authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             }
-
-            authorizeRestWebServiceValidator.validateRequestJwt(request, requestUri, redirectUriResponse);
             authorizeRestWebServiceValidator.validate(responseTypes, prompts, nonce, state, redirectUri, httpRequest, client, responseMode);
 
             if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
