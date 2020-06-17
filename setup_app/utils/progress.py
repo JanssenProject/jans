@@ -97,18 +97,21 @@ class GluuProgress:
     
     def register(self, installer):
 
-        if installer.install_type == static.InstallOption.MONDATORY or Config.get(installer.install_var):
+        progress_entry = {
+                    'name': installer.service_name,
+                    'app_type': installer.app_type,
+                    'install_type': installer.install_type,
+                    'object': installer,
+                    'install_var': installer.install_var,
+                    }
 
-            progress_entry = {
-                        'name': installer.service_name,
-                        'app_type': installer.app_type,
-                        'install_type': installer.install_type,
-                        'object': installer
-                        }
-
-            self.services.append(progress_entry)
+        self.services.append(progress_entry)
 
     def start(self):
+        if Config.installed_instance:
+            for service in self.services[:]:
+                if not service['install_var'] in Config.addPostSetupService:
+                    self.services.remove(service)
         th = ShowProgress(self.services, self.queue)
         th.setDaemon(True)
         th.start()

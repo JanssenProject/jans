@@ -462,40 +462,39 @@ class PropertiesUtils(SetupUtils):
             print ("Please enter URL of oxd-server if you have one, for example: https://oxd.mygluu.org:8443")
             if Config.oxd_package:
                 print ("Else leave blank to install oxd server locally.")
+                while True:
+                    oxd_server_https = input("oxd Server URL: ").lower()
 
-            while True:
-                oxd_server_https = input("oxd Server URL: ").lower()
-                
-                if (not oxd_server_https) and Config.oxd_package:
-                    Config.installOxd = True
-                    break
-
-                print ("Checking oxd server ...")
-                if self.check_oxd_server(oxd_server_https):
-                    oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
-                    oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-                    oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
-                    self.writeFile(oxd_crt_fn, oxd_cert)
-                    ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-                    
-                    if not ssl_subjects['CN'] == oxd_hostname:
-                        print (('Hostname of oxd ssl certificate is {0}{1}{2} '
-                                'which does not match {0}{3}{2}, \ncasa won\'t start '
-                                'properly').format(
-                                        colors.DANGER,
-                                        ssl_subjects['CN'],
-                                        colors.ENDC,
-                                        oxd_hostname
-                                        ))
-                    else:
-                        Config.oxd_server_https = oxd_server_https
+                    if not oxd_server_https:
+                        Config.installOxd = True
+                        if Config.installed_instance:
+                            Config.addPostSetupService.append('installOxd')
                         break
+
+                    print ("Checking oxd server ...")
+                    if self.check_oxd_server(oxd_server_https):
+                        oxd_hostname, oxd_port = self.parse_url(oxd_server_https)
+                        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
+                        oxd_crt_fn = '/tmp/oxd_{}.crt'.format(str(uuid.uuid4()))
+                        self.writeFile(oxd_crt_fn, oxd_cert)
+                        ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
+                        
+                        if not ssl_subjects['CN'] == oxd_hostname:
+                            print (('Hostname of oxd ssl certificate is {0}{1}{2} '
+                                    'which does not match {0}{3}{2}, \ncasa won\'t start '
+                                    'properly').format(
+                                            colors.DANGER,
+                                            ssl_subjects['CN'],
+                                            colors.ENDC,
+                                            oxd_hostname
+                                            ))
+                        else:
+                            Config.oxd_server_https = oxd_server_https
+                            break
 
         if Config.installed_instance and Config.installCasa:
             Config.addPostSetupService.append('installCasa')
 
-        if Config.installed_instance and Config.installOxd:
-            Config.addPostSetupService.append('installOxd')
 
     def set_persistence_type(self):
         if Config.wrends_install and not  Config.cb_install:
@@ -597,7 +596,6 @@ class PropertiesUtils(SetupUtils):
 
         if Config.installed_instance and Config.installOxd:
             Config.addPostSetupService.append('installOxd')
-
 
 
     def promptForOxAuthRP(self):
