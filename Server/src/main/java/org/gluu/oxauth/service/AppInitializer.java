@@ -6,25 +6,7 @@
 
 package org.gluu.oxauth.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Lists;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.model.AuthenticationScriptUsageType;
 import org.gluu.model.SimpleProperty;
@@ -39,6 +21,7 @@ import org.gluu.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.EncryptionService;
+import org.gluu.oxauth.service.expiration.ExpirationNotificatorTimer;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.logger.LoggerService;
 import org.gluu.oxauth.service.status.ldap.LdapStatusTimer;
@@ -71,7 +54,23 @@ import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Lists;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -148,6 +147,9 @@ public class AppInitializer {
 	private KeyGeneratorTimer keyGeneratorTimer;
 
 	@Inject
+    private ExpirationNotificatorTimer expirationNotificatorTimer;
+
+	@Inject
 	private CustomLibrariesLoader customLibrariesLoader;
 
 	@Inject
@@ -214,6 +216,7 @@ public class AppInitializer {
 		cleanerTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		keyGeneratorTimer.initTimer();
+		expirationNotificatorTimer.initTimer();
 		initTimer();
 		initCibaRequestsProcessor();
 
