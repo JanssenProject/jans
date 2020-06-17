@@ -619,7 +619,6 @@ class Setup(object):
         self.installOxd = False
         self.oxd_package = ''
         self.oxd_use_gluu_storage = False
-        self.generateOxdCertificate = False
 
         #casa install options
         self.installCasa = False
@@ -5796,7 +5795,6 @@ if __name__ == '__main__':
     setupOptions['installScimServer'] = argsp.install_scim
     setupOptions['installFido2'] = argsp.install_fido2
     setupOptions['couchbase_bucket_prefix'] = argsp.couchbase_bucket_prefix
-    setupOptions['generateOxdCertificate'] = argsp.generate_oxd_certificate
 
     if argsp.remote_ldap:
         setupOptions['wrends_install'] = REMOTE
