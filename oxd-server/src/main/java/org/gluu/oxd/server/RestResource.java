@@ -40,7 +40,7 @@ public class RestResource {
     @Path("/health-check")
     @Produces(MediaType.APPLICATION_JSON)
     public String healthCheck() {
-        isCallerIpAddressAllowed(httpRequest.getRemoteAddr());
+        validateIpAddressAllowed(httpRequest.getRemoteAddr());
         return "{\"status\":\"running\"}";
     }
 
@@ -252,7 +252,7 @@ public class RestResource {
             TracingUtil.log("Request parameters: " + paramsAsString);
             TracingUtil.log("CommandType: " + commandType);
 
-            isCallerIpAddressAllowed(httpRequest.getRemoteAddr());
+            validateIpAddressAllowed(httpRequest.getRemoteAddr());
             Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, authorizationOxdId);
             final String json = Jackson2.asJsonSilently(forJsonConversion);
             TracingUtil.log("Send back response: " + json);
@@ -261,7 +261,7 @@ public class RestResource {
         }
     }
 
-    private static void isCallerIpAddressAllowed(String callerIpAddress) {
+    private static void validateIpAddressAllowed(String callerIpAddress) {
         LOG.trace("Checking if caller ipAddress : {} is allowed to make request to oxd.", callerIpAddress);
         final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         List<String> bindIpAddresses = conf.getBindIpAddresses();
