@@ -20,6 +20,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         self.service_name = 'jetty'
         self.needdb = False # we don't need backend connection in this class
+        self.install_var = 'installJetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MONDATORY
         self.register_progess()
