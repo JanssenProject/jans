@@ -125,6 +125,11 @@ class Config:
 
         # Gluu components installation status
         self.loadData = True
+        self.installGluu = True
+        self.installJre = True
+        self.installJetty = True
+        self.installNode = True
+        self.installJython = True
         self.installOxAuth = True
         self.installOxTrust = True
         self.installHttpd = True
