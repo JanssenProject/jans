@@ -67,6 +67,17 @@ public class JwtAuthorizationRequest {
     private List<String> acrValues;
     private String registration;
     private boolean requestUniqueId;
+    private String aud;
+    private Integer exp;
+    private String iss;
+    private Integer iat;
+    private Integer nbf;
+    private String jti;
+    private String clientNotificationToken;
+    private String loginHintToken;
+    private String bindingMessage;
+    private String userCode;
+    private Integer requestedExpiry;
 
     private UserInfoMember userInfoMember;
     private IdTokenMember idTokenMember;
@@ -327,6 +338,94 @@ public class JwtAuthorizationRequest {
         idTokenMember.getClaims().add(claim);
     }
 
+    public String getAud() {
+        return aud;
+    }
+
+    public void setAud(String aud) {
+        this.aud = aud;
+    }
+
+    public Integer getExp() {
+        return exp;
+    }
+
+    public void setExp(Integer exp) {
+        this.exp = exp;
+    }
+
+    public String getIss() {
+        return iss;
+    }
+
+    public void setIss(String iss) {
+        this.iss = iss;
+    }
+
+    public Integer getIat() {
+        return iat;
+    }
+
+    public void setIat(Integer iat) {
+        this.iat = iat;
+    }
+
+    public Integer getNbf() {
+        return nbf;
+    }
+
+    public void setNbf(Integer nbf) {
+        this.nbf = nbf;
+    }
+
+    public String getJti() {
+        return jti;
+    }
+
+    public void setJti(String jti) {
+        this.jti = jti;
+    }
+
+    public String getClientNotificationToken() {
+        return clientNotificationToken;
+    }
+
+    public void setClientNotificationToken(String clientNotificationToken) {
+        this.clientNotificationToken = clientNotificationToken;
+    }
+
+    public String getLoginHintToken() {
+        return loginHintToken;
+    }
+
+    public void setLoginHintToken(String loginHintToken) {
+        this.loginHintToken = loginHintToken;
+    }
+
+    public String getBindingMessage() {
+        return bindingMessage;
+    }
+
+    public void setBindingMessage(String bindingMessage) {
+        this.bindingMessage = bindingMessage;
+    }
+
+    public String getUserCode() {
+        return userCode;
+    }
+
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
+
+    public Integer getRequestedExpiry() {
+        return requestedExpiry;
+    }
+
+    public void setRequestedExpiry(Integer requestedExpiry) {
+        this.requestedExpiry = requestedExpiry;
+    }
+
     public String getEncodedJwt(JSONObject jwks) throws Exception {
         String encodedJwt = null;
 
@@ -489,6 +588,39 @@ public class JwtAuthorizationRequest {
                 }
 
                 obj.put("claims", claimsObj);
+            }
+            if (StringUtils.isNotBlank(aud)) {
+                obj.put("aud", aud);
+            }
+            if (exp != null && exp > 0) {
+                obj.put("exp", exp);
+            }
+            if (StringUtils.isNotBlank(iss)) {
+                obj.put("iss", iss);
+            }
+            if (iat != null && iat > 0) {
+                obj.put("iat", iat);
+            }
+            if (nbf != null && nbf > 0) {
+                obj.put("nbf", nbf);
+            }
+            if (StringUtils.isNotBlank(jti)) {
+                obj.put("jti", jti);
+            }
+            if (StringUtils.isNotBlank(clientNotificationToken)) {
+                obj.put("client_notification_token", clientNotificationToken);
+            }
+            if (StringUtils.isNotBlank(loginHintToken)) {
+                obj.put("login_hint_token", loginHintToken);
+            }
+            if (StringUtils.isNotBlank(bindingMessage)) {
+                obj.put("binding_message", bindingMessage);
+            }
+            if (StringUtils.isNotBlank(userCode)) {
+                obj.put("user_code", userCode);
+            }
+            if (requestedExpiry != null && requestedExpiry > 0) {
+                obj.put("requested_expirity", requestedExpiry);
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
