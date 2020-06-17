@@ -80,7 +80,7 @@ public class OxdServerConfiguration extends Configuration {
     @JsonProperty(value = "persistence_manager_remove_count")
     private int persistenceManagerRemoveCount = 1000;
     @JsonProperty(value = "bind_ip_addresses")
-    private List<String> bindIpAddresses = Lists.newArrayList("127.0.0.1");
+    private List<String> bindIpAddresses;
 
     public Boolean getEnableTracing() {
         return enableTracing;
