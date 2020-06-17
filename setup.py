@@ -209,9 +209,10 @@ if not GSA:
 
 #register post setup progress
 class PostSetup:
-        service_name = 'post-setup'
-        app_type = static.AppType.APPLICATION
-        install_type = static.InstallOption.MONDATORY
+    service_name = 'post-setup'
+    install_var = 'installPostSetup'
+    app_type = static.AppType.APPLICATION
+    install_type = static.InstallOption.MONDATORY
 
 gluuProgress.register(PostSetup)
 gluuProgress.queue = queue
@@ -222,85 +223,90 @@ def do_installation():
         gluuProgress.start()
 
     try:
-        gluuInstaller.configureSystem()
-        gluuInstaller.make_salt()
-        oxauthInstaller.make_salt()
+        if not Config.installed_instance:
+            gluuInstaller.configureSystem()
+            gluuInstaller.make_salt()
+            oxauthInstaller.make_salt()
 
-        jettyInstaller.calculate_selected_aplications_memory()
-        jreInstaller.start_installation()
-        jettyInstaller.start_installation()
-        jythonInstaller.start_installation()
-        nodeInstaller.start_installation()
+            jettyInstaller.calculate_selected_aplications_memory()
+            jreInstaller.start_installation()
+            jettyInstaller.start_installation()
+            jythonInstaller.start_installation()
+            nodeInstaller.start_installation()
 
-        gluuInstaller.copy_scripts()
-        gluuInstaller.encode_passwords()
+            gluuInstaller.copy_scripts()
+            gluuInstaller.encode_passwords()
 
-        oxtrustInstaller.generate_api_configuration()
+            oxtrustInstaller.generate_api_configuration()
 
-        Config.ldapCertFn = Config.opendj_cert_fn
-        Config.ldapTrustStoreFn = Config.opendj_p12_fn
-        Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
-        Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
+            Config.ldapCertFn = Config.opendj_cert_fn
+            Config.ldapTrustStoreFn = Config.opendj_p12_fn
+            Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
+            Config.oxTrustConfigGeneration = 'true' if Config.installSaml else 'false'
 
-        gluuInstaller.prepare_base64_extension_scripts()
-        gluuInstaller.render_templates()
-        gluuInstaller.render_configuration_template()
-        gluuInstaller.update_hostname()
+            gluuInstaller.prepare_base64_extension_scripts()
+            gluuInstaller.render_templates()
+            gluuInstaller.render_configuration_template()
+            gluuInstaller.update_hostname()
 
-        gluuInstaller.set_ulimits()
-        gluuInstaller.copy_output()
-        gluuInstaller.setup_init_scripts()
+            gluuInstaller.set_ulimits()
+            gluuInstaller.copy_output()
+            gluuInstaller.setup_init_scripts()
 
-        # Installing gluu components
+            # Installing gluu components
 
-        if Config.wrends_install:
-            openDjInstaller.start_installation()
+            if Config.wrends_install:
+                openDjInstaller.start_installation()
 
-        if Config.cb_install:
-            couchbaseInstaller.start_installation()
+            if Config.cb_install:
+                couchbaseInstaller.start_installation()
 
-        if Config.installHttpd:
+
+        if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installHttpd):
             httpdinstaller.configure()
 
-        if Config.installOxAuth:
+        if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuth):
             oxauthInstaller.start_installation()
 
-        if Config.installOxAuthRP:
+        if (Config.installed_instance and 'installOxAuthRP' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxAuthRP):
             oxauthInstaller.install_oxauth_rp()
 
-        if Config.installFido2:
-            fidoInstaller.start_installation()
-
-        if Config.installOxTrust:
+        if (Config.installed_instance and 'installOxTrust' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxTrust):
             oxtrustInstaller.start_installation()
 
-        if Config.installScimServer:
+        if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (not Config.installed_instance and Config.installFido2):
+            fidoInstaller.start_installation()
+
+        if (Config.installed_instance and 'installScimServer' in Config.addPostSetupService) or (not Config.installed_instance and Config.installScimServer):
             scimInstaller.start_installation()
 
-        if Config.installSaml:
+        if (Config.installed_instance and 'installSaml' in Config.addPostSetupService) or (not Config.installed_instance and Config.installSaml):
             samlInstaller.start_installation()
 
-        if Config.installOxd:
+        if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             oxdInstaller.start_installation()
 
-        if Config.installCasa:
+        if (Config.installed_instance and 'installCasa' in Config.addPostSetupService) or (not Config.installed_instance and Config.installCasa):
             casaInstaller.start_installation()
 
-        if Config.installPassport:
+        if (Config.installed_instance and 'installPassport' in Config.addPostSetupService) or (not Config.installed_instance and Config.installPassport):
             passportInstaller.start_installation()
 
-        # this will install only base
-        radiusInstaller.start_installation()
+        if not Config.installed_instance:
+            # this will install only base
+            radiusInstaller.start_installation()
 
-        if Config.installGluuRadius:
+        if (Config.installed_instance and 'installGluuRadius' in Config.addPostSetupService) or (not Config.installed_instance and Config.installGluuRadius):
             radiusInstaller.install_gluu_radius()
 
         gluuProgress.progress(PostSetup.service_name, "Saving properties")
         propertiesUtils.save_properties()
+        time.sleep(2)
 
         for service in gluuProgress.services:
-            if 'object' in service and service['app_type'] == static.AppType.SERVICE:
+            if service['app_type'] == static.AppType.SERVICE:
                 gluuProgress.progress(PostSetup.service_name, "Starting {}".format(service['name'].title()))
+                time.sleep(2)
                 service['object'].stop()
                 service['object'].start()
                 if service['name'] == 'oxauth' and Config.get('installOxAuthRP'):
@@ -326,7 +332,6 @@ if not GSA and proceed:
 else:
     GSA.do_installation = do_installation
     GSA.queue = queue
-    GSA.installed_instance = installed_instance
     GSA.gluuInstaller = gluuInstaller
     GSA.run()
 

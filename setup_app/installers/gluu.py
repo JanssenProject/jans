@@ -18,6 +18,8 @@ from setup_app.utils import base
 
 class GluuInstaller(SetupUtils):
 
+    install_var = 'installGluu'
+
     def __repr__(self):
         txt = ''
         try:
