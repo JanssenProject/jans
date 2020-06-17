@@ -79,7 +79,8 @@ public class OxdServerConfiguration extends Configuration {
     private List<String> protectCommandsWithOxdId;
     @JsonProperty(value = "persistence_manager_remove_count")
     private int persistenceManagerRemoveCount = 1000;
-
+    @JsonProperty(value = "bind_ip_addresses")
+    private List<String> bindIpAddresses;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -353,6 +354,14 @@ public class OxdServerConfiguration extends Configuration {
         this.persistenceManagerRemoveCount = persistenceManagerRemoveCount;
     }
 
+    public List<String> getBindIpAddresses() {
+        return bindIpAddresses;
+    }
+
+    public void setBindIpAddresses(List<String> bindIpAddresses) {
+        this.bindIpAddresses = bindIpAddresses;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -386,6 +395,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", validateUserInfoWithIdToken=" + validateUserInfoWithIdToken + '\'' +
                 ", protectCommandsWithOxdId=" + protectCommandsWithOxdId + '\'' +
                 ", persistenceManagerRemoveCount=" + persistenceManagerRemoveCount + '\'' +
+                ", bindIpAddresses=" + bindIpAddresses + '\'' +
                 '}';
     }
 }
