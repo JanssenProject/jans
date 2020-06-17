@@ -100,6 +100,15 @@ public class BackchannelAuthenticationClient extends BaseClient<BackchannelAuthe
         if (getRequest().getRequestedExpiry() != null) {
             clientRequest.formParameter(REQUESTED_EXPIRY, getRequest().getRequestedExpiry());
         }
+        if (StringUtils.isNotBlank(getRequest().getClientId())) {
+            clientRequest.formParameter(CLIENT_ID, getRequest().getClientId());
+        }
+        if (StringUtils.isNotBlank(getRequest().getRequest())) {
+            clientRequest.formParameter(REQUEST, getRequest().getRequest());
+        }
+        if (StringUtils.isNotBlank(getRequest().getRequestUri())) {
+            clientRequest.formParameter(REQUEST_URI, getRequest().getRequestUri());
+        }
         new ClientAuthnEnabler(clientRequest).exec(getRequest());
 
         // Call REST Service and handle response
