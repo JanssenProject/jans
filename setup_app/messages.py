@@ -129,3 +129,4 @@ class msg:
     
     
     installation_error = "The following error was occurred while installing Gluu Server:"
+    exit_post_setup = "No service was selected to install. Exit now?"
