@@ -106,7 +106,7 @@ setupObj.setup = setupObj
 
 setupObj.os_type, setupObj.os_version = setupObj.detect_os_type()
 setupObj.os_initdaemon = setupObj.detect_initd()
-
+setupObj.templateRenderingDict['jetty_dist'] = max(glob.glob('/opt/jetty-*'))
 for setup_key in setup_porperties:
     val = setup_porperties[setup_key]
     if isinstance(val, bytes):
@@ -506,14 +506,38 @@ def installRadius():
 
 
 def installScim():
+    if os.path.exists(os.path.join(setupObj.jetty_base, 'scim')):
+        print("Scim Server is already installed on this system")
+        return
+
+    setupObj.installScimServer = True
+    setupObj.calculate_selected_aplications_memory()
+
     print("Installing Scim Server")
     setupObj.install_scim_server()
+    
+    setupObj.renderTemplateInOut(
+                os.path.join(ces_dir, 'templates/jetty/scim'),
+                os.path.join(ces_dir, 'templates/jetty'),
+                setupObj.osDefault,
+                )
 
 def installFido():
+    if os.path.exists(os.path.join(setupObj.jetty_base, 'fido2')):
+        print("Fido2 Server is already installed on this system")
+        return
+
+    setupObj.installFido2 = True
+    setupObj.calculate_selected_aplications_memory()
+
     print("Installing Fido2")
     setupObj.install_fido2()
 
-
+    setupObj.renderTemplateInOut(
+                os.path.join(ces_dir, 'templates/jetty/fido2'),
+                os.path.join(ces_dir, 'templates/jetty'),
+                setupObj.osDefault,
+                )
 
 if args.addshib:
     installSaml()
