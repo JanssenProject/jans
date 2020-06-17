@@ -278,7 +278,7 @@ public class RestResource {
         if (bindIpAddresses.contains(callerIpAddress)) {
             return;
         }
-        LOG.debug("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `oxd-server.yml`.");
+        LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `oxd-server.yml`.");
         throw new HttpException(ErrorResponseCode.OXD_ACCESS_DENIED);
 
     }
