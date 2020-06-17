@@ -107,11 +107,13 @@ class GluuProgress:
 
         self.services.append(progress_entry)
 
-    def start(self):
+    def before_start(self):
         if Config.installed_instance:
             for service in self.services[:]:
                 if not service['install_var'] in Config.addPostSetupService:
                     self.services.remove(service)
+
+    def start(self):
         th = ShowProgress(self.services, self.queue)
         th.setDaemon(True)
         th.start()

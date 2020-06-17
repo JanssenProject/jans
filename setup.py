@@ -176,11 +176,12 @@ if Config.installed_instance:
 
         setattr(Config, installer.install_var, installer.installed())
 
-    propertiesUtils.promptForProperties()
+    if not GSA:
+        propertiesUtils.promptForProperties()
 
-    if not Config.addPostSetupService:
-        print("Nothing was selected for installation. Exiting ...")
-        sys.exit()
+        if not Config.addPostSetupService:
+            print("No service was selected to install. Exiting ...")
+            sys.exit()
 
 if argsp.t or argsp.x:
     testDataLoader = TestDataLoader()
@@ -220,6 +221,7 @@ gluuProgress.queue = queue
 def do_installation():
 
     if not GSA:
+        gluuProgress.before_start()
         gluuProgress.start()
 
     try:
