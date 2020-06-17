@@ -55,17 +55,20 @@ class GluuSetupApp(npyscreen.StandardApp):
     installed_instance = None
 
     def onStart(self):
-        self.addForm("MAIN", MAIN, name=msg.MAIN_label)
+
+        if Config.installed_instance: 
+            self.addForm('MAIN', ServicesForm, name=msg.MAIN_label)
+        else:
+            self.addForm('MAIN', MAIN, name=msg.ServicesForm_label)
+            self.addForm('ServicesForm', ServicesForm, name=msg.ServicesForm_label)
 
         for obj in list(globals().items()):
-            if not obj[0]=='GluuSetupForm' and obj[0].endswith('Form') and inspect.isclass(obj[1]):
-                print("Adding form", obj[0])
+            if not obj[0] in ('MAIN', 'GluuSetupForm', 'ServicesForm') and obj[0].endswith('Form') and inspect.isclass(obj[1]):
                 self.addForm(obj[0], obj[1], name=getattr(msg, obj[0]+'_label'))
 
     def onCleanExit(self):
         if self.do_notify:
             npyscreen.notify_wait("setup.py will exit in a moment. " + self.exit_reason, title="Warning!")
-
 
 class GluuSetupForm(npyscreen.FormBaseNew):
 
@@ -81,7 +84,7 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
         if form_name != 'InstallStepsForm':
 
-            next_x = 20 if  form_name == 'MAIN' else 28
+            next_x = 20 if  form_name == 'MAIN' or (Config.installed_instance and form_name == 'ServicesForm') else 28
             self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed, rely=self.lines-5, relx=self.columns - next_x)
             
             if next_x == 28:
@@ -249,7 +252,7 @@ class HostForm(GluuSetupForm):
         self.parentApp.switchForm('MAIN')
 
 class ServicesForm(GluuSetupForm):
-
+    services_before_this_form = []
     services = ('installHttpd', 'installSaml', 'installOxAuthRP', 
                 'installPassport', 'installGluuRadius', 'installOxd', 
                 'installCasa', 'installScimServer', 'installFido2',
@@ -270,12 +273,33 @@ class ServicesForm(GluuSetupForm):
             if Config.get(service):
                 cb = getattr(self, service)
                 cb.value = True
+                if Config.installed_instance:
+                    cb.editable = False
+                    self.services_before_this_form.append(service)
                 cb.update()
+        
+        if Config.installed_instance and 'installCasa' in self.services_before_this_form:
+            self.oxd_url.hidden = True
+            self.oxd_url.update()
+
 
     def nextButtonPressed(self):
         for service in self.services:
             cb_val = getattr(self, service).value
             setattr(Config, service, cb_val)
+
+            if cb_val and (service not in self.services_before_this_form):
+                Config.addPostSetupService.append(service)
+
+        if Config.installed_instance and not Config.addPostSetupService:
+                exit_result = npyscreen.notify_yes_no(
+                    msg.exit_post_setup,
+                    title="Warning"
+                    )
+                if exit_result:
+                    sys.exit(False)
+                else:
+                    return
 
         if self.installCasa.value:
             if not self.installOxd.value and not self.oxd_url.value:
@@ -308,12 +332,15 @@ class ServicesForm(GluuSetupForm):
 
         propertiesUtils.check_oxd_server_https()
 
-        if self.installOxd.value:
+        if self.installOxd.value and not 'installOxd' in self.services_before_this_form:
             result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
             if result:
                 Config.oxd_use_gluu_storage = True
 
-        self.parentApp.switchForm('DBBackendForm')
+        if Config.installed_instance:
+            self.parentApp.switchForm('DisplaySummaryForm')
+        else:
+            self.parentApp.switchForm('DBBackendForm')
 
 
     def casa_oxd_option_changed(self, widget):
@@ -638,7 +665,9 @@ class DisplaySummaryForm(GluuSetupForm):
             w.update()
 
     def backButtonPressed(self):
-        if self.Config.wrends_install and Config.cb_install:
+        if Config.installed_instance:
+            self.parentApp.switchForm('MAIN')
+        elif Config.wrends_install and Config.cb_install:
             self.parentApp.switchForm('StorageSelectionForm')
         else:
             self.parentApp.switchForm('DBBackendForm')
@@ -666,15 +695,14 @@ class InstallStepsForm(GluuSetupForm):
         self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)        
         self.description = self.add(InputBox, name="", max_height=6, rely=8)
 
-
     def do_beforeEditing(self):
-        self.progress_percantage.out_of = len(gluuProgress.services) + 2
+        gluuProgress.before_start()
+        self.progress_percantage.out_of = len(gluuProgress.services) + 1
         self.progress_percantage.update()
 
         t=threading.Thread(target=self.parentApp.do_installation, args=())
         t.daemon = True
         t.start()
-
 
     def do_while_waiting(self):
 
@@ -699,8 +727,10 @@ class InstallStepsForm(GluuSetupForm):
             self.installing.update()
 
             if self.desc_value != current:
-                self.current_stage += 1
 
+                if self.current_stage < self.progress_percantage.out_of:
+                    self.current_stage += 1
+                
                 if hasattr(msg, 'installation_description_' + str(current)):
                     desc = getattr(msg, 'installation_description_' + current)
                 else:
