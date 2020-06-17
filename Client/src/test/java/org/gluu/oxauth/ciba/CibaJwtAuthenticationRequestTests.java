@@ -34,7 +34,7 @@ public class CibaJwtAuthenticationRequestTests extends BaseTest {
     public void pollFlowPS256HappyFlow1(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
                                         final String clientJwksUri) throws Exception {
-        showTitle("pollFlowPS256HappyFlow");
+        showTitle("pollFlowPS256HappyFlow1");
         registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
 
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
@@ -43,6 +43,146 @@ public class CibaJwtAuthenticationRequestTests extends BaseTest {
         int now = (int)(System.currentTimeMillis() / 1000);
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 null, SignatureAlgorithm.PS256, cryptoProvider);
+        jwtAuthorizationRequest.setAud(issuer);
+        jwtAuthorizationRequest.setLoginHint(userId);
+        jwtAuthorizationRequest.setNbf(now);
+        jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
+        jwtAuthorizationRequest.setIss(clientId);
+        jwtAuthorizationRequest.setBindingMessage("1234");
+        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setIat(now);
+        jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
+        jwtAuthorizationRequest.setKeyId(keyId);
+
+        processCibaAuthorizationEndpointSuccessfulCall(jwtAuthorizationRequest.getEncodedJwt(), clientId, registerResponse.getClientSecret());
+    }
+
+    @Parameters({"PS384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Test
+    public void pollFlowPS384HappyFlow1(final String keyId, final String userId, final String dnName,
+                                        final String keyStoreFile, final String keyStoreSecret,
+                                        final String clientJwksUri) throws Exception {
+        showTitle("pollFlowPS384HappyFlow1");
+        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS384);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        String clientId = registerResponse.getClientId();
+
+        int now = (int)(System.currentTimeMillis() / 1000);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                null, SignatureAlgorithm.PS384, cryptoProvider);
+        jwtAuthorizationRequest.setAud(issuer);
+        jwtAuthorizationRequest.setLoginHint(userId);
+        jwtAuthorizationRequest.setNbf(now);
+        jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
+        jwtAuthorizationRequest.setIss(clientId);
+        jwtAuthorizationRequest.setBindingMessage("1234");
+        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setIat(now);
+        jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
+        jwtAuthorizationRequest.setKeyId(keyId);
+
+        processCibaAuthorizationEndpointSuccessfulCall(jwtAuthorizationRequest.getEncodedJwt(), clientId, registerResponse.getClientSecret());
+    }
+
+    @Parameters({"PS512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Test
+    public void pollFlowPS512HappyFlow1(final String keyId, final String userId, final String dnName,
+                                        final String keyStoreFile, final String keyStoreSecret,
+                                        final String clientJwksUri) throws Exception {
+        showTitle("pollFlowPS512HappyFlow1");
+        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS512);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        String clientId = registerResponse.getClientId();
+
+        int now = (int)(System.currentTimeMillis() / 1000);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                null, SignatureAlgorithm.PS512, cryptoProvider);
+        jwtAuthorizationRequest.setAud(issuer);
+        jwtAuthorizationRequest.setLoginHint(userId);
+        jwtAuthorizationRequest.setNbf(now);
+        jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
+        jwtAuthorizationRequest.setIss(clientId);
+        jwtAuthorizationRequest.setBindingMessage("1234");
+        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setIat(now);
+        jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
+        jwtAuthorizationRequest.setKeyId(keyId);
+
+        processCibaAuthorizationEndpointSuccessfulCall(jwtAuthorizationRequest.getEncodedJwt(), clientId, registerResponse.getClientSecret());
+    }
+
+    @Parameters({"ES256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Test
+    public void pollFlowES256HappyFlow1(final String keyId, final String userId, final String dnName,
+                                        final String keyStoreFile, final String keyStoreSecret,
+                                        final String clientJwksUri) throws Exception {
+        showTitle("pollFlowES256HappyFlow1");
+        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES256);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        String clientId = registerResponse.getClientId();
+
+        int now = (int)(System.currentTimeMillis() / 1000);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                null, SignatureAlgorithm.ES256, cryptoProvider);
+        jwtAuthorizationRequest.setAud(issuer);
+        jwtAuthorizationRequest.setLoginHint(userId);
+        jwtAuthorizationRequest.setNbf(now);
+        jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
+        jwtAuthorizationRequest.setIss(clientId);
+        jwtAuthorizationRequest.setBindingMessage("1234");
+        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setIat(now);
+        jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
+        jwtAuthorizationRequest.setKeyId(keyId);
+
+        processCibaAuthorizationEndpointSuccessfulCall(jwtAuthorizationRequest.getEncodedJwt(), clientId, registerResponse.getClientSecret());
+    }
+
+    @Parameters({"ES384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Test
+    public void pollFlowES384HappyFlow1(final String keyId, final String userId, final String dnName,
+                                        final String keyStoreFile, final String keyStoreSecret,
+                                        final String clientJwksUri) throws Exception {
+        showTitle("pollFlowES384HappyFlow1");
+        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES384);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        String clientId = registerResponse.getClientId();
+
+        int now = (int)(System.currentTimeMillis() / 1000);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                null, SignatureAlgorithm.ES384, cryptoProvider);
+        jwtAuthorizationRequest.setAud(issuer);
+        jwtAuthorizationRequest.setLoginHint(userId);
+        jwtAuthorizationRequest.setNbf(now);
+        jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
+        jwtAuthorizationRequest.setIss(clientId);
+        jwtAuthorizationRequest.setBindingMessage("1234");
+        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setIat(now);
+        jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
+        jwtAuthorizationRequest.setKeyId(keyId);
+
+        processCibaAuthorizationEndpointSuccessfulCall(jwtAuthorizationRequest.getEncodedJwt(), clientId, registerResponse.getClientSecret());
+    }
+
+    @Parameters({"ES512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Test
+    public void pollFlowES512HappyFlow1(final String keyId, final String userId, final String dnName,
+                                        final String keyStoreFile, final String keyStoreSecret,
+                                        final String clientJwksUri) throws Exception {
+        showTitle("pollFlowES384HappyFlow1");
+        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES512);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        String clientId = registerResponse.getClientId();
+
+        int now = (int)(System.currentTimeMillis() / 1000);
+        JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
+                null, SignatureAlgorithm.ES512, cryptoProvider);
         jwtAuthorizationRequest.setAud(issuer);
         jwtAuthorizationRequest.setLoginHint(userId);
         jwtAuthorizationRequest.setNbf(now);
