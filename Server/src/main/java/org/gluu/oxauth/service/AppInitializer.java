@@ -204,6 +204,7 @@ public class AppInitializer {
 		supportedCustomScriptTypes.remove(CustomScriptType.UPDATE_USER);
 		supportedCustomScriptTypes.remove(CustomScriptType.USER_REGISTRATION);
 		supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
+		supportedCustomScriptTypes.remove(CustomScriptType.IDP);
 
 		// Start timer
 		initSchedulerService();
