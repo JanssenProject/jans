@@ -3,7 +3,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>oxcore-script</artifactId>
-	<name>Reusable CDI Script manager implementation</name>
+	<name>Reusable CDI Script implementation</name>
 
 	<parent>
 		<groupId>org.gluu</groupId>
