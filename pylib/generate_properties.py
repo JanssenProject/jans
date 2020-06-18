@@ -236,10 +236,23 @@ def generate_properties(as_dict=False):
         oxtrust_ConfigurationEntryDN = gluu_prop['oxtrust_ConfigurationEntryDN']
         oxidp_ConfigurationEntryDN = gluu_prop['oxidp_ConfigurationEntryDN']
         gluu_ConfigurationDN = 'ou=configuration,o=gluu'
+        gluu_hybrid_properties_fn = '/etc/gluu/conf/gluu-hybrid.properties'
 
         if setup_prop['persistence_type'] == 'couchbase':
             mappingLocations = {'default': 'couchbase', 'token': 'couchbase', 'cache': 'couchbase', 'user': 'couchbase', 'site': 'couchbase'}
             default_storage = 'couchbase'
+
+
+        if setup_prop['persistence_type'] in ('hybrid'):
+             gluu_hybrid_properties = read_properties_file(gluu_hybrid_properties_fn)
+             mappingLocations = {'default': gluu_hybrid_properties['storage.default']}
+             storages = [ storage.strip() for storage in gluu_hybrid_properties['storages'].split(',') ]
+
+             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
+                 for storage in storages:
+                     if m in gluu_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
+                         mappingLocations[ml] = storage
+
 
         if setup_prop['persistence_type'] in ('ldap', 'hybrid'):
 
