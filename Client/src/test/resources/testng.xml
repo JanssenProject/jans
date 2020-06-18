@@ -828,4 +828,14 @@
             <class name="org.gluu.oxauth.ciba.BackchannelAuthenticationExpiredRequestsTests"></class>
         </classes>
     </test>
+    <test name="CIBA Ping Mode JWT Requests" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.CibaPingModeJwtAuthRequestTests"></class>
+        </classes>
+    </test>
+    <test name="CIBA Poll Mode JWT Requests" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ciba.CibaPollModeJwtAuthRequestTests"></class>
+        </classes>
+    </test>
 </suite>
