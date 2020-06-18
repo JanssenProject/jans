@@ -122,6 +122,9 @@ public class AppConfiguration implements Configuration {
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
     private Boolean returnClientSecretOnRead = false;
     private Boolean rejectJwtWithNoneAlg = true;
+    private Boolean expirationNotificatorEnabled = true;
+    private int expirationNotificatorMapSizeLimit = 100000;
+    private int expirationNotificatorIntervalInSeconds = 600;
 
     private Boolean useCacheForAllImplicitFlowObjects = false;
 
@@ -228,6 +231,32 @@ public class AppConfiguration implements Configuration {
     private int backchannelRequestsProcessorJobChunkSize;
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
+
+    public Boolean getExpirationNotificatorEnabled() {
+        if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = true;
+        return expirationNotificatorEnabled;
+    }
+
+    public void setExpirationNotificatorEnabled(Boolean expirationNotificatorEnabled) {
+        this.expirationNotificatorEnabled = expirationNotificatorEnabled;
+    }
+
+    public int getExpirationNotificatorMapSizeLimit() {
+        if (expirationNotificatorMapSizeLimit == 0) expirationNotificatorMapSizeLimit = 100000;
+        return expirationNotificatorMapSizeLimit;
+    }
+
+    public void setExpirationNotificatorMapSizeLimit(int expirationNotificatorMapSizeLimit) {
+        this.expirationNotificatorMapSizeLimit = expirationNotificatorMapSizeLimit;
+    }
+
+    public int getExpirationNotificatorIntervalInSeconds() {
+        return expirationNotificatorIntervalInSeconds;
+    }
+
+    public void setExpirationNotificatorIntervalInSeconds(int expirationNotificatorIntervalInSeconds) {
+        this.expirationNotificatorIntervalInSeconds = expirationNotificatorIntervalInSeconds;
+    }
 
     public Boolean getRejectJwtWithNoneAlg() {
         if (rejectJwtWithNoneAlg == null) rejectJwtWithNoneAlg = true;
