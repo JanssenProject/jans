@@ -390,7 +390,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 					} else {
 						if (!attributeFromLdap.equals(attributeToPersist)) {
 							if (isEmptyAttributeValues(attributeToPersist)
-									&& !ldapAttributeConfiguration.updateOnly()) {
+									&& (ldapAttributeConfiguration == null || !ldapAttributeConfiguration.updateOnly())) {
 								attributeDataModifications.add(new AttributeDataModification(
 										AttributeModificationType.REMOVE, null, attributeFromLdap));
 							} else {
