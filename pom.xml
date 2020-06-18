@@ -175,6 +175,11 @@
                 <artifactId>oxcore-persistence-standalone</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxcore-script</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
 			<!-- Google -->
 			<dependency>
