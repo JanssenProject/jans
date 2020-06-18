@@ -10,6 +10,7 @@ import copy
 from jproperties import Properties
 from ldif3.ldif3 import LDIFParser
 from attribute_data_types import ATTRUBUTEDATATYPES
+from ldap3.utils import dn as dnutils
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
