@@ -63,6 +63,16 @@ public interface BackchannelAuthenticationRequestParam {
      */
     String REQUESTED_EXPIRY = "requested_expiry";
 
+    /**
+     * An string containing all data about the request as a single JWT
+     */
+    String REQUEST = "request";
+
+    /**
+     * Url where OP could get the request object related to the authorization.
+     */
+    String REQUEST_URI = "request_uri";
+
     String CLIENT_ID = "client_id";
     String CLIENT_SECRET = "client_secret";
     String CLIENT_ASSERTION_TYPE = "client_assertion_type";

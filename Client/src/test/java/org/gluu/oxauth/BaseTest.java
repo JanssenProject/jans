@@ -97,6 +97,7 @@ public abstract class BaseTest {
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
+    protected String issuer;
 
     protected Map<String, String> allTestKeys = Maps.newHashMap();
 
@@ -803,6 +804,7 @@ public abstract class BaseTest {
             revokeSessionEndpoint = response.getSessionRevocationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
+            issuer = response.getIssuer();
         } else {
             showTitle("Loading configuration endpoints from properties file");
 
@@ -821,6 +823,7 @@ public abstract class BaseTest {
             backchannelAuthenticationEndpoint = context.getCurrentXmlTest().getParameter("backchannelAuthenticationEndpoint");
             revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
+            issuer = context.getCurrentXmlTest().getParameter("issuer");
         }
 
         authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
