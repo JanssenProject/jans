@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.gluu.model.security.protect.AuthenticationAttempt;
 import org.gluu.model.security.protect.AuthenticationAttemptList;
 import org.gluu.service.CacheService;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 /**
@@ -105,7 +104,7 @@ public abstract class AuthenticationProtectionService {
             log.debug("Current login attempt requires delay: '{}' seconds", delayTime);
             Thread.sleep(delayTime * 1000);
         } catch (InterruptedException ex) {
-            Log.error("Failed to process authentication delay");
+            log.error("Failed to process authentication delay");
         }
     }
 
