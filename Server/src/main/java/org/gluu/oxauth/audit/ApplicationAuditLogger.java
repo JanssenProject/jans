@@ -111,6 +111,10 @@ public class ApplicationAuditLogger {
 	}
 
 	private boolean tryToEstablishJMSConnection() {
+		if (this.pooledConnectionFactory != null) {
+			return true;
+		}
+
 		lock.lock();
 		try {
 			// Check if another thread initialized JMS pool already
