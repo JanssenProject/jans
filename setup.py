@@ -5168,7 +5168,6 @@ class Setup(object):
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
 
-
         if self.oxd_use_gluu_storage:
             oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
             yml_str = self.readFile(oxd_server_yml_fn)
