@@ -31,6 +31,9 @@ public class BackchannelAuthenticationRequest extends ClientAuthnRequest {
     private String bindingMessage;
     private String userCode;
     private Integer requestedExpiry;
+    private String clientId;
+    private String request;
+    private String requestUri;
 
     public BackchannelAuthenticationRequest() {
         setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -109,6 +112,30 @@ public class BackchannelAuthenticationRequest extends ClientAuthnRequest {
         this.requestedExpiry = requestedExpiry;
     }
 
+    public String getRequest() {
+        return request;
+    }
+
+    public void setRequest(String request) {
+        this.request = request;
+    }
+
+    public String getRequestUri() {
+        return requestUri;
+    }
+
+    public void setRequestUri(String requestUri) {
+        this.requestUri = requestUri;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
     @Override
     public String getQueryString() {
         QueryBuilder builder = QueryBuilder.instance();
@@ -125,6 +152,9 @@ public class BackchannelAuthenticationRequest extends ClientAuthnRequest {
         builder.append(BackchannelAuthenticationRequestParam.BINDING_MESSAGE, bindingMessage);
         builder.append(BackchannelAuthenticationRequestParam.USER_CODE, userCode);
         builder.appendIfNotNull(BackchannelAuthenticationRequestParam.REQUESTED_EXPIRY, requestedExpiry);
+        builder.appendIfNotNull(BackchannelAuthenticationRequestParam.CLIENT_ID, clientId);
+        builder.appendIfNotNull(BackchannelAuthenticationRequestParam.REQUEST, request);
+        builder.appendIfNotNull(BackchannelAuthenticationRequestParam.REQUEST_URI, requestUri);
 
         appendClientAuthnToQuery(builder);
         return builder.toString();
