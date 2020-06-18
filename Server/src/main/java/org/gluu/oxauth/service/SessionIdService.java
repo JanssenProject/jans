@@ -752,6 +752,7 @@ public class SessionIdService {
     public boolean remove(SessionId sessionId) {
         try {
             persistenceEntryManager.remove(sessionId.getDn());
+            externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

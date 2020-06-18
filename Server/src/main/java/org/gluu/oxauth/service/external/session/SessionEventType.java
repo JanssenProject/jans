@@ -6,5 +6,6 @@ package org.gluu.oxauth.service.external.session;
 public enum SessionEventType {
     AUTHENTICATED,
     UNAUTHENTICATED,
-    UPDATED
+    UPDATED,
+    GONE // it can be time out, or expired or ended by /end_session endpoint
 }
