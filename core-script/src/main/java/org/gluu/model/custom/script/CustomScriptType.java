@@ -22,13 +22,15 @@ import org.gluu.model.custom.script.type.client.ClientRegistrationType;
 import org.gluu.model.custom.script.type.client.DummyClientRegistrationType;
 import org.gluu.model.custom.script.type.id.DummyIdGeneratorType;
 import org.gluu.model.custom.script.type.id.IdGeneratorType;
+import org.gluu.model.custom.script.type.idp.DummyIdpType;
+import org.gluu.model.custom.script.type.idp.IdpType;
 import org.gluu.model.custom.script.type.introspection.DummyIntrospectionType;
 import org.gluu.model.custom.script.type.introspection.IntrospectionType;
 import org.gluu.model.custom.script.type.logout.DummyEndSessionType;
 import org.gluu.model.custom.script.type.logout.EndSessionType;
 import org.gluu.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
 import org.gluu.model.custom.script.type.owner.ResourceOwnerPasswordCredentialsType;
-import org.gluu.model.custom.script.type.persistence.DummyDynamicPeristenceType;
+import org.gluu.model.custom.script.type.persistence.DummyPeristenceType;
 import org.gluu.model.custom.script.type.persistence.PersistenceType;
 import org.gluu.model.custom.script.type.postauthn.DummyPostAuthnType;
 import org.gluu.model.custom.script.type.postauthn.PostAuthnType;
@@ -88,7 +90,8 @@ public enum CustomScriptType implements AttributeEnum {
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
-    PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyDynamicPeristenceType());
+    PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
+    IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType());
 
     private String value;
     private String displayName;
