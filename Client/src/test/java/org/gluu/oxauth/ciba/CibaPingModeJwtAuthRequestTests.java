@@ -5,6 +5,7 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -27,20 +28,22 @@ import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
 
 /**
- * Responsible to validate many cases using JWT Requests for Ciba Poll flows.
+ * Responsible to validate many cases using JWT Requests for Ciba Ping flows.
  */
-public class CibaPollModeJwtAuthRequestTests extends BaseTest {
+public class CibaPingModeJwtAuthRequestTests extends BaseTest {
 
     private RegisterResponse registerResponse;
     private String idTokenHintRS384;
 
-    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowPS256HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowPS256HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowPS256HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowPS256HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.PS256);
@@ -49,13 +52,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"PS384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowPS384HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowPS384HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowPS384HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS384);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowPS384HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS384,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.PS384);
@@ -64,13 +69,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"PS512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowPS512HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowPS512HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowPS512HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS512);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowPS512HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS512,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.PS512);
@@ -79,13 +86,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"ES256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"ES256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowES256HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowES256HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowES256HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES256);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowES256HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES256,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.ES256);
@@ -94,13 +103,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"ES384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"ES384_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowES384HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowES384HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowES384HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES384);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowES384HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES384,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.ES384);
@@ -109,13 +120,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"ES512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"ES512_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void pollFlowES512HappyFlow(final String keyId, final String userId, final String dnName,
+    public void pingFlowES512HappyFlow(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("pollFlowES512HappyFlow");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.ES512);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("pingFlowES512HappyFlow");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES512,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName,
                 userId, keyId, SignatureAlgorithm.ES512);
@@ -124,13 +137,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void cibaPollJWTRequestDataValidations(final String keyId, final String userId, final String dnName,
+    public void cibaPingJWTRequestDataValidations(final String keyId, final String userId, final String dnName,
                                         final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri) throws Exception {
-        showTitle("cibaPollJWTRequestDataValidations");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
+                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("cibaPingJWTRequestDataValidations");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
+                backchannelClientNotificationEndpoint);
 
         String clientId = registerResponse.getClientId();
 
@@ -161,15 +176,24 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), "abcabcabcabcabcabcabcabcabcabc",
                 registerResponse.getClientSecret(), 401, BackchannelAuthenticationErrorResponseType.INVALID_CLIENT.getParameter());
+
+        // 5. Request has wrong Client Id
+        jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
+        jwtAuthorizationRequest.setClientNotificationToken(null);
+
+        processCibaAuthorizationEndpointFailCall(jwtAuthorizationRequest.getEncodedJwt(), clientId,
+                registerResponse.getClientSecret(), 400, BackchannelAuthenticationErrorResponseType.INVALID_REQUEST.getParameter());
     }
 
-    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test(dependsOnMethods = "idTokenHintRS384")
-    public void cibaPollJWTRequestIdTokenHint(final String keyId, final String userId, final String dnName,
+    public void cibaPingJWTRequestIdTokenHint(final String keyId, final String userId, final String dnName,
                                                   final String keyStoreFile, final String keyStoreSecret,
-                                                  final String clientJwksUri) throws Exception {
-        showTitle("cibaPollJWTRequestIdTokenHint");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
+                                                  final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("cibaPingJWTRequestIdTokenHint");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
+                backchannelClientNotificationEndpoint);
 
         // 1. Request doesn't include Aud
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
@@ -180,13 +204,15 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
                 registerResponse.getClientId(), registerResponse.getClientSecret());
     }
 
-    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri"})
+    @Parameters({"PS256_keyId", "userId", "dnName", "keyStoreFile", "keyStoreSecret", "clientJwksUri",
+            "backchannelClientNotificationEndpoint"})
     @Test
-    public void cibaPollJWTRequestWrongSigning(final String keyId, final String userId, final String dnName,
+    public void cibaPingJWTRequestWrongSigning(final String keyId, final String userId, final String dnName,
                                               final String keyStoreFile, final String keyStoreSecret,
-                                              final String clientJwksUri) throws Exception {
-        showTitle("cibaPollJWTRequestWrongSigning");
-        registerPollClient(clientJwksUri, BackchannelTokenDeliveryMode.POLL, AsymmetricSignatureAlgorithm.PS256);
+                                              final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+        showTitle("cibaPingJWTRequestWrongSigning");
+        registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
+                backchannelClientNotificationEndpoint);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = createJwtRequest(keyStoreFile, keyStoreSecret, dnName, userId, keyId, SignatureAlgorithm.PS256);
 
@@ -199,10 +225,11 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
     }
 
     /**
-     * Registers a client using CIBA configuration for Poll flow and PS256
+     * Registers a client using CIBA configuration for Ping flow and PS256
      * @param clientJwksUri
      */
-    private void registerPollClient(final String clientJwksUri, BackchannelTokenDeliveryMode mode, AsymmetricSignatureAlgorithm algorithm) {
+    private void registerPingClient(final String clientJwksUri, final BackchannelTokenDeliveryMode mode,
+                                    final AsymmetricSignatureAlgorithm algorithm, final String backchannelClientNotificationEndpoint) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
@@ -210,6 +237,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         registerRequest.setBackchannelTokenDeliveryMode(mode);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(algorithm);
         registerRequest.setBackchannelUserCodeParameter(false);
+        registerRequest.setBackchannelClientNotificationEndpoint(backchannelClientNotificationEndpoint);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -252,7 +280,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
         assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
         assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Ping or Ping modes.
     }
 
     /**
@@ -297,6 +325,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 null, signatureAlgorithm, cryptoProvider);
+        jwtAuthorizationRequest.setClientNotificationToken("notification-token-123");
         jwtAuthorizationRequest.setAud(issuer);
         jwtAuthorizationRequest.setLoginHint(userId);
         jwtAuthorizationRequest.setNbf(now);
