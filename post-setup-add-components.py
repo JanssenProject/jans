@@ -281,7 +281,60 @@ def installSaml():
     print("Shibboleth installation done")
 
 
-    
+
+def add2strlist(client_id, strlist):
+    value2 = []
+    for v in strlist.split(','):
+        if v.strip() and v.strip() != 'None':
+            value2.append(v.strip())
+    value2.append(client_id)
+
+    return  ','.join(value2)
+
+def add_client2script(script_inum, client_id):
+    dn = 'inum={},ou=scripts,o=gluu'.format(script_inum)
+
+    if persistence_type == 'ldap':
+        ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['oxConfigurationProperty'])
+        
+        for e in ldap_conn.response[0]['attributes'].get('oxConfigurationProperty', []):
+            try:
+                oxConfigurationProperty = json.loads(e)
+            except:
+                continue
+            if isinstance(oxConfigurationProperty, dict) and oxConfigurationProperty.get('value1') == 'allowed_clients':
+                if not client_id in oxConfigurationProperty['value2']:
+                    oxConfigurationProperty['value2'] = add2strlist(client_id, oxConfigurationProperty['value2'])
+                    oxConfigurationProperty_js = json.dumps(oxConfigurationProperty)
+                    ldap_conn.modify(
+                        dn,
+                        {'oxConfigurationProperty': [ldap3.MODIFY_DELETE, e]}
+                        )
+                    ldap_conn.modify(
+                        dn,
+                        {'oxConfigurationProperty': [ldap3.MODIFY_ADD, oxConfigurationProperty_js]}
+                        )
+                    break
+
+    else:
+        n1ql = 'SELECT oxConfigurationProperty FROM `gluu` USE KEYS "scripts_{}"'.format(script_inum)
+        result = setupObj.cbm.exec_query(n1ql)
+        js = result.json()
+
+        oxConfigurationProperties = js['results'][0]['oxConfigurationProperty']
+        for i, oxconfigprop_str in enumerate(oxConfigurationProperties):
+            oxconfigprop = json.loads(oxconfigprop_str)
+            if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
+                oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
+                oxConfigurationProperties[i] = json.dumps(oxconfigprop)
+                break
+        else:
+            return
+
+        n1ql = 'UPDATE `gluu` USE KEYS "scripts_{}" SET `oxConfigurationProperty`={}'.format(script_inum, json.dumps(oxConfigurationProperties))
+        setupObj.cbm.exec_query(n1ql)   
+
+
 def installPassport():
     
     if os.path.exists('/opt/gluu/node/passport'):
@@ -388,6 +441,11 @@ def installPassport():
         for scr in scripts_enable:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET oxEnabled=true'.format(bucket, scr)
             setupObj.cbm.exec_query(n1ql)
+
+    setupObj.run([setupObj.cmd_chown, 'root:gluu', setupObj.passport_rs_client_jks_fn])
+    
+    add_client2script('2DAF-F9A5', setupObj.passport_rp_client_id)
+    add_client2script('2DAF-F995', setupObj.passport_rp_client_id)
     
     print("Passport installation done")
 
