@@ -586,7 +586,20 @@ inum: 8AF7.D82A
 oxEnabled: false
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-oxRevision: 19
+oxRevision: 1
 oxScript::%(persistence_extension_samplescript)s
 oxScriptType: persistence_extension
+programmingLanguage: python
+
+dn: inum=8AF7.D82B,ou=scripts,o=gluu
+objectClass: oxCustomScript
+objectClass: top
+displayName: idp
+inum: 8AF7.D82B
+oxEnabled: false
+oxLevel: 100
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(idp_samplescript)s
+oxScriptType: idp
 programmingLanguage: python
