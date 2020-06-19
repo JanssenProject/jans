@@ -5156,12 +5156,12 @@ class Setup(object):
                 os.path.join(self.install_dir, 'static/oxd/oxd-server.default'), 
                 os.path.join(self.osDefault, 'oxd-server')
                 ])
-        lig_dir = '/var/log/oxd-server/'
-        log_file = os.path.join('oxd-server.log')
+        log_dir = '/var/log/oxd-server/'
+        self.run(['mkdir', '-p', log_dir])
+        log_file = os.path.join(log_dir, 'oxd-server.log')
         if not os.path.exists(log_file):
             open(log_file, 'w').close()
 
-        self.run(['mkdir', '/var/log/oxd-server'])
         self.run(['chown', '-r', 'jetty:jetty', lig_dir])
         
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
