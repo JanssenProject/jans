@@ -5162,7 +5162,7 @@ class Setup(object):
         if not os.path.exists(log_file):
             open(log_file, 'w').close()
 
-        self.run(['chown', '-r', 'jetty:jetty', lig_dir])
+        self.run(['chown', '-r', 'jetty:jetty', log_dir])
         
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
