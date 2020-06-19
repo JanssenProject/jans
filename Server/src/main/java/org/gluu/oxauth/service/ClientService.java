@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
@@ -14,11 +15,8 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
-import org.gluu.search.filter.Filter;
 import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
@@ -140,6 +138,14 @@ public class ClientService {
 		}
 		return null;
 	}
+
+	public boolean isPublic(String clientId) {
+	    return isPublic(getClient(clientId));
+    }
+
+	public boolean isPublic(Client client) {
+	    return client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE;
+    }
 
 	public Client getClient(String clientId, String registrationAccessToken) {
         final Client client = getClient(clientId);
