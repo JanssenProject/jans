@@ -28,10 +28,10 @@ public abstract class AbstractCustomScriptService implements Serializable {
     private static final long serialVersionUID = -6187179012715072064L;
 
     @Inject
-    private Logger log;
+    protected Logger log;
 
     @Inject
-    private PersistenceEntryManager persistenceEntryManager;
+    protected PersistenceEntryManager persistenceEntryManager;
 
     public void add(CustomScript customScript) {
         persistenceEntryManager.persist(customScript);

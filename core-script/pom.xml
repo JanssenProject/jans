@@ -81,6 +81,13 @@
 			<artifactId>slf4j-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>oxcore-persistence-ldap</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

@@ -27,6 +27,7 @@ import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides operations with python module
@@ -55,6 +56,10 @@ public class PythonService implements Serializable {
             log.error("Failed to initialize Jython out/err loggers", ex);
         }
     }
+
+    public void configure() {
+		this.log = LoggerFactory.getLogger(PythonService.class);
+	}
 
     /*
      * Initialize singleton instance during startup
