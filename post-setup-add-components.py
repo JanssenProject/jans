@@ -474,18 +474,18 @@ def installOxd():
         setupObj.run(['wget', '-nv', default_url, '-O', os.path.join(oxd_tmp_dir, 'oxd-server-default')])
 
     service_file = 'oxd-server.init.d' if setupObj.os_type + setupObj.os_version in ('ubuntu18','debian9') else 'oxd-server.service'
-    service_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/{}.file'.format(gluu_version, service_file)
+    service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(gluu_version, service_file)
     setupObj.run(['wget', '-nv', service_url, '-O', os.path.join(oxd_tmp_dir, service_file)])
 
-    oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server.sh'.format(gluu_version)
-    setupObj.run(['wget', '-nv', oxd_server_sh_url, '-O', os.path.join(oxd_tmp_dir, 'bin/oxd-server.sh')])
+    oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server'.format(gluu_version)
+    setupObj.run(['wget', '-nv', oxd_server_sh_url, '-O', os.path.join(oxd_tmp_dir, 'bin/oxd-server')])
 
     setupObj.run(['tar', '-zcf', os.path.join(setupObj.distGluuFolder, 'oxd-server.tgz'), 'oxd-server'], cwd='/tmp')
 
     setupObj.oxd_package = os.path.join(setupObj.distGluuFolder, 'oxd-server.tgz')
     setupObj.install_oxd()
 
-
+    
 
 def installCasa():
 
