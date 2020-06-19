@@ -281,6 +281,10 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		return this.persistenceConfiguration.getConfiguration();
 	}
 
+	public FileConfiguration getBaseConfiguration() {
+		return baseConfiguration;
+	}
+
 	public String getCryptoConfigurationSalt() {
 		return cryptoConfigurationSalt;
 	}
