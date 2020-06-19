@@ -4,7 +4,6 @@
 # Author: Yuriy Movchan
 #
 
-from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.model.custom.script.type.idp import IdpType
 from org.gluu.util import StringHelper
 
