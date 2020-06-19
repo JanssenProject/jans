@@ -18,6 +18,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.token.TokenRevocationErrorResponseType;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -34,7 +36,7 @@ import javax.ws.rs.core.SecurityContext;
  * Provides interface for token revocation REST web services
  *
  * @author Javier Rojas Blum
- * @version January 16, 2019
+ * @author Yuriy Zabrovarnyy
  */
 @Path("/")
 public class RevokeRestWebServiceImpl implements RevokeRestWebService {
@@ -57,57 +59,74 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private ClientService clientService;
+
     @Override
-    public Response requestAccessToken(String token, String tokenTypeHint,
+    public Response requestAccessToken(String token, String tokenTypeHint, String clientId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.debug(
-                "Attempting to revoke token: token = {}, tokenTypeHint = {}, isSecure = {}",
-                token, tokenTypeHint, sec.isSecure());
+        log.debug("Attempting to revoke token: token = {}, tokenTypeHint = {}, isSecure = {}", token, tokenTypeHint, sec.isSecure());
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REVOCATION);
+
+        validateToken(token);
 
         Response.ResponseBuilder builder = Response.ok();
         SessionClient sessionClient = identity.getSessionClient();
-        Client client = null;
-        if (sessionClient != null) {
-            client = sessionClient.getClient();
-            oAuth2AuditLog.setClientId(client.getClientId());
 
-            if (validateToken(token)) {
-                TokenTypeHint tth = TokenTypeHint.getByValue(tokenTypeHint);
-                AuthorizationGrant authorizationGrant = null;
-
-                if (tth == TokenTypeHint.ACCESS_TOKEN) {
-                    authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
-                } else if (tth == TokenTypeHint.REFRESH_TOKEN) {
-                    authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
-                } else {
-                    // Since the hint about the type of the token submitted for revocation is optional. oxAuth will
-                    // search it as Access Token then as Refresh Token.
-                    authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
-                    if (authorizationGrant == null) {
-                        authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
-                    }
-                }
-
-                if (authorizationGrant != null) {
-                    grantService.removeAllByGrantId(authorizationGrant.getGrantId());
-                }
-            } else {
-                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()).type(MediaType.APPLICATION_JSON_TYPE); // 400
-                builder.entity(errorResponseFactory.errorAsJson(
-                        TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."));
+        Client client = sessionClient != null ? sessionClient.getClient() : null;
+        if (client == null) {
+            client = clientService.getClient(clientId);
+            if (!clientService.isPublic(client)) {
+                log.trace("Client is not public and not authenticated. Skip revoking.");
+                return response(builder, oAuth2AuditLog);
             }
         }
+        if (client == null) {
+            log.trace("Client is not unknown. Skip revoking.");
+            return response(builder, oAuth2AuditLog);
+        }
+
+        oAuth2AuditLog.setClientId(client.getClientId());
+
+        TokenTypeHint tth = TokenTypeHint.getByValue(tokenTypeHint);
+        AuthorizationGrant authorizationGrant = null;
+
+        if (tth == TokenTypeHint.ACCESS_TOKEN) {
+            authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
+        } else if (tth == TokenTypeHint.REFRESH_TOKEN) {
+            authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
+        } else {
+            // Since the hint about the type of the token submitted for revocation is optional. oxAuth will
+            // search it as Access Token then as Refresh Token.
+            authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
+            if (authorizationGrant == null) {
+                authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), token);
+            }
+        }
+
+        if (authorizationGrant == null) {
+            log.trace("Unable to find token.");
+            return response(builder, oAuth2AuditLog);
+        }
+        if (!authorizationGrant.getClientId().equals(client.getClientId())) {
+            log.trace("Token was issued with client {} but revoke is requested with client {}. Skip revoking.", authorizationGrant.getClientId(), client.getClientId());
+            return response(builder, oAuth2AuditLog);
+        }
+
+        grantService.removeAllByGrantId(authorizationGrant.getGrantId());
+        log.trace("Revoked successfully.");
 
         return response(builder, oAuth2AuditLog);
     }
 
-    private boolean validateToken(String token) {
-        return StringUtils.isNotBlank(token);
-    }
-
-    private TokenTypeHint validateTokenTypeHint(String tokenTypeHint) {
-        return TokenTypeHint.getByValue(tokenTypeHint);
+    private void validateToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(errorResponseFactory.errorAsJson(TokenRevocationErrorResponseType.INVALID_REQUEST, "Failed to validate token."))
+                    .build());
+        }
     }
 
     private Response response(Response.ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
