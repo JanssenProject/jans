@@ -8,7 +8,6 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.TokenTypeHint;
 import org.gluu.oxauth.model.token.TokenRevocationRequestParam;
 
@@ -77,10 +76,9 @@ public class TokenRevocationClient extends BaseClient<TokenRevocationRequest, To
     public TokenRevocationResponse exec() {
         // Prepare request parameters
         initClientRequest();
-        if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC
-                && request.hasCredentials()) {
-            clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-        }
+
+        new ClientAuthnEnabler(clientRequest).exec(request);
+
         clientRequest.header("Content-Type", request.getContentType());
         clientRequest.setHttpMethod(getHttpMethod());
 
@@ -89,6 +87,9 @@ public class TokenRevocationClient extends BaseClient<TokenRevocationRequest, To
         }
         if (getRequest().getTokenTypeHint() != null) {
             clientRequest.formParameter(TokenRevocationRequestParam.TOKEN_TYPE_HINT, getRequest().getTokenTypeHint());
+        }
+        if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
+            clientRequest.formParameter("client_id", request.getAuthUsername());
         }
 
         // Call REST Service and handle response
