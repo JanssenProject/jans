@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.client;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.TokenTypeHint;
 import org.gluu.oxauth.model.token.TokenRevocationRequestParam;
+import org.gluu.oxauth.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
 
@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
  * @author Javier Rojas Blum
  * @version January 16, 2019
  */
-public class TokenRevocationRequest extends BaseRequest {
+public class TokenRevocationRequest extends ClientAuthnRequest {
 
     private static final Logger LOG = Logger.getLogger(TokenRevocationRequest.class);
 
@@ -59,23 +59,10 @@ public class TokenRevocationRequest extends BaseRequest {
      */
     @Override
     public String getQueryString() {
-        StringBuilder queryStringBuilder = new StringBuilder();
-
-        try {
-            if (StringUtils.isNotBlank(token)) {
-                queryStringBuilder.append(TokenRevocationRequestParam.TOKEN)
-                        .append("=").append(token);
-            }
-            if (tokenTypeHint != null) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append(TokenRevocationRequestParam.TOKEN_TYPE_HINT)
-                        .append("=")
-                        .append(tokenTypeHint.toString());
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-        return queryStringBuilder.toString();
+        QueryBuilder queryBuilder = new QueryBuilder();
+        queryBuilder.append(TokenRevocationRequestParam.TOKEN, token);
+        queryBuilder.append(TokenRevocationRequestParam.TOKEN_TYPE_HINT, tokenTypeHint.toString());
+        queryBuilder.append("client_id", getAuthUsername());
+        return queryBuilder.toString();
     }
 }
