@@ -130,7 +130,11 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint) {
+            if (tokenRevocationEndpoint && clientService.isPublic(httpRequest.getParameter("client_id"))) {
+                return; // skip authentication for Token Revocation if client is public
+            }
+
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -151,14 +155,6 @@ public class AuthenticationFilter implements Filter {
                 } else {
                     log.debug("Starting POST Auth token endpoint authentication");
                     processPostAuth(clientFilterService, httpRequest, httpResponse, filterChain, tokenEndpoint);
-                }
-            } else if (tokenRevocationEndpoint) {
-                if (tokenService.isBasicAuthToken(authorizationHeader)) {
-                    processBasicAuth(httpRequest, httpResponse, filterChain);
-                } else {
-                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
-
-                    httpResponse.sendError(401, "Not authorized");
                 }
             } else if (backchannelAuthenticationEnpoint) {
                 if (httpRequest.getParameter("client_assertion") != null

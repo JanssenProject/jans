@@ -39,6 +39,7 @@ public interface RevokeRestWebService {
     Response requestAccessToken(
             @FormParam("token") String token,
             @FormParam("token_type_hint") String tokenTypeHint,
+            @FormParam("client_id") String clientId,
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @Context SecurityContext sec);
