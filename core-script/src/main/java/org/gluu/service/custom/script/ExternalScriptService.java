@@ -21,6 +21,7 @@ import org.gluu.model.custom.script.type.BaseExternalType;
 import org.gluu.service.custom.inject.ReloadScript;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -48,6 +49,14 @@ public abstract class ExternalScriptService implements Serializable {
     public ExternalScriptService(CustomScriptType customScriptType) {
         this.customScriptType = customScriptType;
     }
+
+    /**
+     * Method for standalone usage
+     */
+	public void configure(StandaloneCustomScriptManager customScriptManager) {
+		this.customScriptManager = customScriptManager;
+		this.log = LoggerFactory.getLogger(ExternalScriptService.class);
+	}
 
     public void reload(@Observes @ReloadScript String event) {
     	// Skip reload if global script is not enabled for this application
@@ -151,4 +160,9 @@ public abstract class ExternalScriptService implements Serializable {
         }
         return scripts;
     }
+
+	public CustomScriptType getCustomScriptType() {
+		return customScriptType;
+	}
+
 }

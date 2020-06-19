@@ -74,7 +74,7 @@ public class CustomScriptManager implements Serializable {
 	private Event<TimerEvent> timerEvent;
 
 	@Inject
-	private PythonService pythonService;
+	protected PythonService pythonService;
 
 	@Inject
 	protected AbstractCustomScriptService customScriptService;
@@ -95,8 +95,7 @@ public class CustomScriptManager implements Serializable {
 	public void initTimer(List<CustomScriptType> supportedCustomScriptTypes) {
 		this.supportedCustomScriptTypes = supportedCustomScriptTypes;
 
-		this.isActive = new AtomicBoolean(false);
-		this.lastFinishedTime = System.currentTimeMillis();
+		configure();
 
 		final int delay = 30;
 		final int interval = DEFAULT_INTERVAL;
@@ -105,6 +104,11 @@ public class CustomScriptManager implements Serializable {
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new UpdateScriptEvent(),
 				Scheduled.Literal.INSTANCE));
+	}
+
+	protected void configure() {
+		this.isActive = new AtomicBoolean(false);
+		this.lastFinishedTime = System.currentTimeMillis();
 	}
 
 	public void reloadTimerEvent(@Observes @Scheduled UpdateScriptEvent updateScriptEvent) {
@@ -144,8 +148,12 @@ public class CustomScriptManager implements Serializable {
 		boolean modified = reloadImpl();
 
 		if (modified) {
-			event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
+			updateScriptServices();
 		}
+	}
+
+	protected void updateScriptServices() {
+		event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
 	}
 
 	private boolean reloadImpl() {
