@@ -61,7 +61,7 @@ public class TokenRevocationRequest extends ClientAuthnRequest {
     public String getQueryString() {
         QueryBuilder queryBuilder = new QueryBuilder();
         queryBuilder.append(TokenRevocationRequestParam.TOKEN, token);
-        queryBuilder.append(TokenRevocationRequestParam.TOKEN_TYPE_HINT, tokenTypeHint.toString());
+        queryBuilder.append(TokenRevocationRequestParam.TOKEN_TYPE_HINT, tokenTypeHint != null ? tokenTypeHint.toString() : null);
         queryBuilder.append("client_id", getAuthUsername());
         return queryBuilder.toString();
     }
