@@ -131,7 +131,9 @@ public class AuthenticationFilter implements Filter {
             }
 
             if (tokenRevocationEndpoint && clientService.isPublic(httpRequest.getParameter("client_id"))) {
-                return; // skip authentication for Token Revocation if client is public
+                log.trace("Skipped authentication for Token Revocation for public client.");
+                filterChain.doFilter(httpRequest, httpResponse);
+                return;
             }
 
             if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint) {
