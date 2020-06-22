@@ -552,10 +552,17 @@ def installCasa():
 
 
 def installRadius():
-    outputFolder = setupObj.outputFolder
-    setupObj.outputFolder = os.path.join(cur_dir, 'output')
+
+    tmp_dir = os.path.join(setupObj.staticFolder, 'radius', 'templates')
+    radius_ldif_fp = os.path.join(tmp_dir, 'gluu_radius_server.ldif')
+
+    setupObj.renderTemplateInOut(
+                    os.path.join(radius_ldif_fp),
+                    tmp_dir,
+                    os.path.join(ces_dir, 'output'),
+                    )
+
     setupObj.install_gluu_radius()
-    setupObj.outputFolder = outputFolder
 
     setupObj.run([setupObj.cmd_chown, 'radius:gluu', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
     setupObj.run([setupObj.cmd_chmod, '660', os.path.join(setupObj.certFolder, 'gluu-radius.private-key.pem')])
