@@ -5181,10 +5181,10 @@ class Setup(object):
         oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
 
         if 'bind_ip_addresses' in oxd_yaml:
-            oxd_yaml['bind_ip_addresses'].append(ip)
+            oxd_yaml['bind_ip_addresses'].append(self.ip)
         else:
             for i, k in enumerate(oxd_yaml):
-                if k == 'storagezas':
+                if k == 'storage':
                     break
             else:
                 i = 1
