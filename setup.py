@@ -3067,6 +3067,7 @@ class Setup(object):
                 oxd_server_https = input("oxd Server URL: ").lower()
                 
                 if (not oxd_server_https) and self.oxd_package:
+                    self.oxd_server_https = 'https://{}:{}'.format(self.hostname, self.templateRenderingDict['oxd_port'])
                     self.installOxd = True
                     break
 
@@ -3120,7 +3121,7 @@ class Setup(object):
             else:
                 print("Hostname can't be \033[;1mlocalhost\033[0;0m")
 
-        self.oxd_server_https = 'https://{}:8443'.format(self.hostname)
+        self.oxd_server_https = 'https://{}:{}'.format(self.hostname, self.templateRenderingDict['oxd_port'])
 
         # Get city and state|province code
         self.city = self.getPrompt("Enter your city or locality")
@@ -4130,7 +4131,8 @@ class Setup(object):
         try:
 
             oxd_hostname, oxd_port = self.parse_url(self.oxd_server_https)
-            if not oxd_port: oxd_port=8443
+            if not oxd_port: 
+                oxd_port = self.templateRenderingDict['oxd_port']
 
             oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
             oxd_alias = 'oxd_' + oxd_hostname.replace('.','_')
@@ -5170,10 +5172,23 @@ class Setup(object):
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
 
+
+        yml_str = self.readFile(oxd_server_yml_fn)
+        oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+        if 'bind_ip_addresses' in oxd_yaml:
+            oxd_yaml['bind_ip_addresses'].append(ip)
+        else:
+            for i, k in enumerate(oxd_yaml):
+                if k == 'storagezas':
+                    break
+            else:
+                i = 1
+            oxd_yaml.insert(i, 'bind_ip_addresses',  [self.ip])
+
+
         if self.oxd_use_gluu_storage:
             oxd_server_yml_fn = os.path.join(oxd_root, 'conf/oxd-server.yml')
-            yml_str = self.readFile(oxd_server_yml_fn)
-            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
 
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
 
@@ -5189,9 +5204,8 @@ class Setup(object):
 
             oxd_yaml['storage_configuration']['salt'] = os.path.join(self.configFolder, "salt")
 
-            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
-
-            self.writeFile(oxd_server_yml_fn, yml_str)
+        yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+        self.writeFile(oxd_server_yml_fn, yml_str)
 
         # generate oxd-server.keystore for the hostname
         self.run([
