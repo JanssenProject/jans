@@ -48,9 +48,28 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
             self.run([paths.cmd_chmod, '+x', fn])
 
+        self.modify_config_yml()
+        self.generate_keystore()
+
+        self.enable()
+
+    def modify_config_yml(self):
+
+        yml_str = self.readFile(self.oxd_server_yml_fn)
+        oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+        if 'bind_ip_addresses' in oxd_yaml:
+            oxd_yaml['bind_ip_addresses'].append(Config.ip)
+        else:
+            for i, k in enumerate(oxd_yaml):
+                if k == 'storage':
+                    break
+            else:
+                i = 1
+            oxd_yaml.insert(i, 'bind_ip_addresses',  [Config.ip])
+
         if Config.get('oxd_use_gluu_storage'):
-            yml_str = self.readFile(self.oxd_server_yml_fn)
-            oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
 
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
             oxd_yaml['storage'] = 'gluu_server_configuration'
@@ -59,13 +78,9 @@ class OxdInstaller(SetupUtils, BaseInstaller):
             oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
             oxd_yaml['storage_configuration']['salt'] = os.path.join(Config.configFolder, "salt")
 
-            yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+        yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+        self.writeFile(self.oxd_server_yml_fn, yml_str)
 
-            self.writeFile(self.oxd_server_yml_fn, yml_str)
-
-        self.generate_keystore()
-
-        self.enable()
 
     def generate_keystore(self):
         # generate oxd-server.keystore for the hostname
