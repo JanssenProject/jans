@@ -6,10 +6,16 @@
 
 package org.gluu.fido2.model.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PublicKeyCredentialDescriptor {
 
     private String type;
