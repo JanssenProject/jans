@@ -344,8 +344,14 @@ def generate_properties(as_dict=False):
             result = ldap_conn.response
             if result:
                 setup_prop['installGluuRadius'] = True
-                setup_prop['gluu_radius_client_id'] = result[0]['attributes']['oxRadiusOpenidUsername'][0]
-                setup_prop['gluu_ro_pw'] = unobscure(result[0]['attributes']['oxRadiusOpenidPassword'][0])
+
+            ldap_conn.search(search_base='ou=clients,o=gluu', search_scope=ldap3.SUBTREE, search_filter='(inum=1701.*)', attributes=['*'])
+            result = ldap_conn.response
+
+            if result:
+                setup_prop['gluu_radius_client_id'] = result[0]['attributes']['inum'][0]
+                setup_prop['gluu_ro_encoded_pw'] = result[0]['attributes']['oxAuthClientSecret'][0]
+                setup_prop['gluu_ro_pw'] = unobscure(setup_prop['gluu_ro_encoded_pw'])
 
             ldap_conn.search(search_base='inum=5866-4202,ou=scripts,o=gluu', search_scope=ldap3.BASE, search_filter='(objectClass=*)', attributes=['oxEnabled'])
             result = ldap_conn.response
