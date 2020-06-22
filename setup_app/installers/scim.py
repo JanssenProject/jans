@@ -16,6 +16,9 @@ class ScimInstaller(JettyInstaller):
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installScimServer'
         self.register_progess()
+        self.source_files = [
+                ('scim.war', 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
+                ]
 
     def install(self):
         self.logIt("Copying scim.war into jetty webapps folder...")
@@ -85,6 +88,5 @@ class ScimInstaller(JettyInstaller):
         self.dbUtils.add_client2script('2DAF-F9A5', Config.scim_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.scim_rp_client_id)
 
-
-    
+                
     
