@@ -3011,13 +3011,16 @@ class Setup(object):
                 if oxd_status['status'] == 'running':
                     return True
         except Exception as e:
+            msg = "Can't connect to oxd-server with url {}".format(oxd_url)
+            err = str(e)
+            self.logIt(msg + err, True)
             if log_error:
                 if thread_queue:
                     return str(e)
                 if error_out:
                     print(gluu_utils.colors.DANGER)
-                    print("Can't connect to oxd-server with url {}".format(oxd_url))
-                    print("Reason: ", e)
+                    print(msg)
+                    print("Reason: ", err)
                     print(gluu_utils.colors.ENDC)
 
     def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
@@ -4122,7 +4125,7 @@ class Setup(object):
                 break
             time.sleep(5)
         else:
-            self.logIt("oxd server at  {} did not repond in 15 seconds".format(self.oxd_server_https), True)
+            self.logIt("oxd server at  {} did not repond in 25 seconds".format(self.oxd_server_https), True)
 
         try:
 
@@ -5162,7 +5165,7 @@ class Setup(object):
         if not os.path.exists(log_file):
             open(log_file, 'w').close()
 
-        self.run(['chown', '-r', 'jetty:jetty', log_dir])
+        self.run(['chown', '-R', 'jetty:jetty', log_dir])
         
         for fn in glob.glob(os.path.join(oxd_root,'bin/*')):
             self.run(['chmod', '+x', fn])
