@@ -1,10 +1,15 @@
+import os
 import uuid
 import inspect
 
+from distutils.version import LooseVersion
+
+from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
 from setup_app.utils.progress import gluuProgress
+from setup_app.utils.printVersion import get_war_info
 
 class BaseInstaller:
     needdb = True
@@ -24,6 +29,9 @@ class BaseInstaller:
 
         # execute for each installer
         if Config.downloadWars:
+            self.download_files(force=True)
+
+        if Config.installed_instance:
             self.download_files()
 
         self.create_user()
@@ -103,8 +111,22 @@ class BaseInstaller:
     def update_backend(self):
         pass
 
-    def download_files(self):
-        pass
+    def download_files(self, force=False):
+        if hasattr(self, 'source_files'):
+            for src, url in self.source_files:
+                if not src.startswith('/'):
+                    src = os.path.join(Config.distGluuFolder, src)
+                if force or self.check_download_needed(src):
+                    self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
+                    self.run([paths.cmd_wget, url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
+
+    def check_download_needed(self, src):
+        froot, fext = os.path.splitext(src)
+        if fext in ('.war', '.jar'):
+            war_info = get_war_info(src)
+            if 'version' in war_info:
+                return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
+
 
     def create_user(self):
         pass
@@ -117,3 +139,6 @@ class BaseInstaller:
 
     def installed(self):
         return None
+    
+    def check_need_for_download(self):
+        pass
