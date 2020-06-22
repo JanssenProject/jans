@@ -3,6 +3,8 @@ package org.gluu.service.custom.script;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.PythonService;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 06/19/2020
  */
+@Vetoed
 public class StandaloneCustomScriptManager extends CustomScriptManager {
 
 	private static final long serialVersionUID = -7212146007659551839L;
