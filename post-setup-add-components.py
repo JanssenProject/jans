@@ -556,6 +556,13 @@ def installRadius():
     tmp_dir = os.path.join(setupObj.staticFolder, 'radius', 'templates')
     radius_ldif_fp = os.path.join(tmp_dir, 'gluu_radius_server.ldif')
 
+    if not setupObj.gluu_radius_client_id:
+        setupObj.gluu_radius_client_id = '1701.'  + str(uuid.uuid4())
+
+    if not setupObj.gluu_ro_pw:
+        setupObj.gluu_ro_pw = setupObj.getPW()
+        setupObj.gluu_ro_encoded_pw = setupObj.obscure(setupObj.gluu_ro_pw)
+
     setupObj.renderTemplateInOut(
                     os.path.join(radius_ldif_fp),
                     tmp_dir,
