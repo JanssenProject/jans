@@ -4282,8 +4282,6 @@ class Setup(object):
                 self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
                 self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
 
-                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = 
-                
                 max_meta_mem = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
                 if max_meta_mem < 128:
                     max_meta_mem = 128
