@@ -59,6 +59,7 @@ gluu_version = '4.2.0'
 
 print("Current Gluu Version", gluu_version)
 
+
 if os.path.exists(ces_dir + '.back'):
     os.system('rm -r -f ' + ces_dir + '.back')
 
@@ -84,9 +85,13 @@ os.system('mv {}/{} {}/ces_current'.format(cur_dir, ces_folder, cur_dir))
 
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
 
+
 sys.path.append(ces_dir)
 
+import ruamel.yaml
 from ces_current.setup import *
+from ces_current import setup
+
 from ces_current.pylib.cbm import CBM
 from ces_current.pylib.generate_properties import generate_properties
 from ces_current.pylib.jproperties import Properties as JProperties
@@ -98,7 +103,9 @@ class ProgressBar:
 
 setup_porperties = generate_properties(True)
 
-setupObj = Setup(ces_dir)
+
+setup.__dict__['ruamel'] = ruamel
+setupObj = setup.Setup(ces_dir)
 setupObj.initialize()
 setupObj.pbar = ProgressBar()
 
@@ -112,6 +119,9 @@ for setup_key in setup_porperties:
     if isinstance(val, bytes):
         val = val.decode()
     setattr(setupObj, setup_key, val)
+
+if not setupObj.ip:
+    setupObj.ip = setupObj.detect_ip()
 
 setupObj.log = os.path.join(setupObj.install_dir, 'post_setup.log')
 setupObj.logError = os.path.join(setupObj.install_dir, 'post_setup_error.log')
@@ -523,11 +533,6 @@ def installCasa():
 
     setupObj.import_oxd_certificate()
 
-    setupObj.renderTemplateInOut(
-                    os.path.join(ces_dir, 'templates/casa.json'),
-                    os.path.join(ces_dir, 'templates'),
-                    os.path.join(ces_dir, 'output'),
-                    )
     setupObj.calculate_selected_aplications_memory()
     setupObj.install_casa()
 
