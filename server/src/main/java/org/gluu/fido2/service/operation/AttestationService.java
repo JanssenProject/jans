@@ -345,7 +345,7 @@ public class AttestationService {
                 .filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
                 .filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
                 .map(f -> dataMapperService.convertValue(
-                        new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(), f.getRegistrationData().getPublicKeyId()),
+                        new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(), new String[] {"usb", "ble", "nfc"}, f.getRegistrationData().getPublicKeyId()),
                         JsonNode.class))
                 .collect(Collectors.toList());
 
