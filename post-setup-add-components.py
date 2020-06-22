@@ -515,17 +515,31 @@ def installCasa():
     casa_script_fn = os.path.basename(setupObj.ldif_scripts_casa)
     casa_script_fp = os.path.join(ces_dir, 'output', casa_script_fn)
     
+    setupObj.templateRenderingDict['oxd_hostname'], setupObj.templateRenderingDict['oxd_port'] = setupObj.parse_url(setupObj.oxd_server_https)
+    
+    
     setupObj.renderTemplateInOut(
                     os.path.join(ces_dir, 'templates', casa_script_fn),
                     os.path.join(ces_dir, 'templates'),
                     os.path.join(ces_dir, 'output'),
                     )
 
+    casa_ldif_fn = os.path.basename(setupObj.ldif_casa)
+    casa_ldif_fp = os.path.join(ces_dir, 'output', casa_ldif_fn)
+
+    setupObj.renderTemplateInOut(
+                    os.path.join(ces_dir, 'templates', casa_ldif_fp),
+                    os.path.join(ces_dir, 'templates'),
+                    os.path.join(ces_dir, 'output'),
+                    )
+
+
     if persistence_type == 'ldap':
         setupObj.import_ldif_template_opendj(casa_script_fp)
+        setupObj.import_ldif_template_opendj(casa_ldif_fp)
         
     else:
-        setupObj.import_ldif_couchebase(ldif_file_list=[casa_script_fp], bucket='gluu')
+        setupObj.import_ldif_couchebase(ldif_file_list=[casa_script_fp, casa_ldif_fp], bucket='gluu')
 
     if setupObj.installOxd:
         installOxd()
