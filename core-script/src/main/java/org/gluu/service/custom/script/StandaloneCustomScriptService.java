@@ -1,5 +1,7 @@
 package org.gluu.service.custom.script;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.PythonService;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 06/19/2020
  */
+@Vetoed
 public class StandaloneCustomScriptService extends AbstractCustomScriptService {
 
 	private static final long serialVersionUID = -5283102477313448031L;
