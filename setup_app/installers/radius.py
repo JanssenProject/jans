@@ -78,7 +78,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
             Config.gluu_radius_client_id = result['inum']
             Config.gluu_ro_encoded_pw = result['oxAuthClientSecret']
         else:
-            selg.logIt("Can't find gluu_radius_client_id in database", True, True)
+            self.logIt("Can't find gluu_radius_client_id in database", True, True)
 
         radius_libs = os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip')
         radius_jar = os.path.join(Config.distGluuFolder, 'super-gluu-radius-server.jar')
