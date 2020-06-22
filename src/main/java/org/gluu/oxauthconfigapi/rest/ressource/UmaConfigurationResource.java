@@ -105,23 +105,4 @@ public class UmaConfigurationResource {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
 		}
 	}
-			
-	private UmaConfiguration getUmaConfiguration() throws Exception{
-		
-		UmaConfiguration umaConfiguration = new UmaConfiguration();
-		umaConfiguration.setUmaConfigurationEndpoint("https://pujavs2.infinity.com/oxauth/restv1/uma2-configuration");
-		umaConfiguration.setUmaRptLifetime(3600);
-		umaConfiguration.setUmaTicketLifetime(3600);
-		umaConfiguration.setUmaPctLifetime(2592000);
-		umaConfiguration.setUmaResourceLifetime(2592000);
-		umaConfiguration.setUmaAddScopesAutomatically(true);
-		umaConfiguration.setUmaValidateClaimToken(false);
-		umaConfiguration.setUmaGrantAccessIfNoPolicies(false);
-		umaConfiguration.setUmaRestrictResourceToAssociatedClient(false);
-		umaConfiguration.setUmaRptAsJwt(false);
-		return umaConfiguration;
-		
-	}
-	
-
 }
