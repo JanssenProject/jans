@@ -368,8 +368,13 @@ def generate_properties(as_dict=False):
             result = get_cb_result(cbm, n1ql)
             if result:
                 setup_prop['installGluuRadius'] = True
-                setup_prop['gluu_radius_client_id'] = str(result[0]['gluu']['oxRadiusOpenidUsername'])
-                setup_prop['gluu_ro_pw'] = unobscure(result[0]['gluu']['oxRadiusOpenidPassword'])
+            
+            n1ql =  'SELECT inum from `{}` WHERE objectClass="oxAuthClient" AND inum LIKE "1701.%"'.format(setup_prop['couchbase_bucket_prefix'])
+            result = get_cb_result(cbm, n1ql)
+            if result:
+                ssetup_prop['gluu_radius_client_id'] = str(result[0]['gluu']['inum'])
+                setup_prop['gluu_ro_encoded_pw'] = str(result[0]['oxAuthClientSecret'])
+                setup_prop['gluu_ro_pw'] = unobscure(setup_prop['gluu_ro_encoded_pw'])
             
             n1ql = 'SELECT oxEnabled from `{}` USE KEYS "scripts_5866-4202"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
