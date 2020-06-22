@@ -75,16 +75,14 @@ public class UmaConfigurationResource {
 	}
 	
 	
-	@Path("/updateTest")
-	@GET
+	@PUT
 	@Operation(summary = "Update UMA configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response updateUMAConfiguration() {
+	public Response updateUMAConfiguration(@Valid UmaConfiguration umaConfiguration) {
 		try {
 			log.debug("UmaConfigurationResource::updateUMAConfiguration() - Update UMA configuration");
-			UmaConfiguration umaConfiguration = getUmaConfiguration();
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			appConfiguration.setUmaConfigurationEndpoint(umaConfiguration.getUmaConfigurationEndpoint());
 			appConfiguration.setUmaRptLifetime(umaConfiguration.getUmaRptLifetime());
@@ -100,7 +98,7 @@ public class UmaConfigurationResource {
 			//Save
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 
-			return Response.ok(umaConfiguration).build();
+			return Response.ok(ResponseStatus.SUCCESS).build();
 			
 		}catch(Exception ex) {
 			log.error("Failed to update UMA configuration", ex);
