@@ -71,16 +71,18 @@ class CollectProperties(SetupUtils, BaseInstaller):
         # It is time to bind database
         dbUtils.bind()
 
+        result = dbUtils.search('ou=clients,o=gluu', search_filter='(inum=1701.*)', search_scope=ldap3.SUBTREE)
 
-        result = dbUtils.search('ou=oxradius,ou=configuration,o=gluu', search_scope=ldap3.BASE)
         if result:
-            Config.gluu_radius_client_id = result['oxRadiusOpenidUsername']
-            Config.gluu_ro_pw = self.unobscure(result['oxRadiusOpenidPassword'])
+            Config.gluu_radius_client_id = result['inum']
+            Config.gluu_ro_encoded_pw = result['oxAuthClientSecret']
+            Config.gluu_ro_pw = self.unobscure(Config.gluu_ro_encoded_pw)
+
+            print(Config.gluu_radius_client_id ,  Config.gluu_ro_encoded_pw , Config.gluu_ro_pw)
 
             result = dbUtils.search('inum=5866-4202,ou=scripts,o=gluu', search_scope=ldap3.BASE)
             if result:
                 Config.enableRadiusScripts = result['oxEnabled']
-
 
             result = dbUtils.search('ou=clients,o=gluu', search_filter='(inum=1402.*)', search_scope=ldap3.SUBTREE)
             if result:
