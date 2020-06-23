@@ -603,3 +603,17 @@ oxRevision: 1
 oxScript::%(idp_samplescript)s
 oxScriptType: idp
 programmingLanguage: python
+
+dn: inum=C1BA-C1BA,ou=scripts,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Firebase notification sender
+displayName: firebase_ciba_end_user_notification
+oxEnabled: false
+inum: C1BA-C1BA
+oxLevel: 10
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(ciba_end_user_notification)s
+oxScriptType: ciba_end_user_notification
+programmingLanguage: python
