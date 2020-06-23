@@ -111,7 +111,7 @@ desciribng base installers
   methods/fucntions automatically:
  
    - `check_for_download()`: checks wheter source files are neded to download,
-   - `download_files()`: if war files to be downloaded, downloads from `source_files` defined in installer,
+   - `download_files()`: if war files to be downloaded, downloads from `source_files` defined in installer, you can implement this function within installer, see for example `oxd.py`
    - `create_user()`: if defined user creation function is called,
    - `create_folders()`: if defined directory creation function is called,
    - `install()`: write actual installation codes in this fucntion,
