@@ -43,12 +43,7 @@ class OxtrustInstaller(JettyInstaller):
         # TODO: oxtrust-api installation
         # oxTrust Api configuration
         self.api_rs_client_jks_fn = os.path.join(Config.certFolder, 'api-rs.jks')
-        self.api_rs_client_jwks = None
         self.api_rp_client_jks_fn = os.path.join(Config.certFolder, 'api-rp.jks')
-        self.api_rp_client_jwks = None
-        self.oxtrust_resource_id = None
-        self.oxtrust_requesting_party_client_id = None
-        self.oxtrust_resource_server_client_id = None
 
 
     def install(self):
@@ -88,7 +83,7 @@ class OxtrustInstaller(JettyInstaller):
                     )
 
         self.check_clients(client_var_id_list)
-        self.check_clients([('oxtrust_resource_id', '1402.')], resource=True)
+        self.check_clients([('oxtrust_resource_id', '1403.')], resource=True)
 
         if not Config.get('admin_inum'):
             Config.admin_inum = str(uuid.uuid4())
