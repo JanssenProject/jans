@@ -53,7 +53,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
             Config.couchebaseClusterAdmin = gluu_cb_prop['auth.userName']
             Config.encoded_cb_password = gluu_cb_prop['auth.userPassword']
-            Config.cb_password = self.unobscure(setup_prop['encoded_cb_password'])
+            Config.cb_password = self.unobscure(gluu_cb_prop['auth.userPassword'])
             Config.couchbase_bucket_prefix = gluu_cb_prop['bucket.default']
 
             Config.couchbase_hostname = gluu_cb_prop['servers'].split(',')[0].strip()
