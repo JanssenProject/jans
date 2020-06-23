@@ -28,6 +28,7 @@ import org.gluu.oxtrust.model.scim2.Meta;
 import org.gluu.oxtrust.model.scim2.annotations.Schema;
 import org.gluu.oxtrust.model.scim2.extensions.Extension;
 import org.gluu.oxtrust.model.scim2.fido.FidoDeviceResource;
+import org.gluu.oxtrust.model.scim2.fido.Fido2DeviceResource;
 import org.gluu.oxtrust.model.scim2.group.GroupResource;
 import org.gluu.oxtrust.model.scim2.provider.resourcetypes.ResourceType;
 import org.gluu.oxtrust.model.scim2.provider.resourcetypes.SchemaExtensionHolder;
@@ -51,6 +52,7 @@ public class ResourceTypeWS extends BaseScimWebService {
     private static final String USER_SUFFIX="User";
     private static final String GROUP_SUFFIX="Group";
     private static final String FIDO_SUFFIX="FidoDevice";
+    private static final String FIDO2_SUFFIX="Fido2Device";
 
     @Inject
     private UserWebService userService;
@@ -62,6 +64,9 @@ public class ResourceTypeWS extends BaseScimWebService {
     private FidoDeviceWebService fidoService;
 
     @Inject
+    private Fido2DeviceWebService fido2Service;
+
+    @Inject
     private ExtensionService extService;
 
     @GET
@@ -71,10 +76,11 @@ public class ResourceTypeWS extends BaseScimWebService {
     public Response serve() {
 
         try {
-            ListResponse listResponse = new ListResponse(1, 3, 3);
+            ListResponse listResponse = new ListResponse(1, 4, 4);
             listResponse.addResource(getUserResourceType());
             listResponse.addResource(getGroupResourceType());
             listResponse.addResource(getFidoDeviceResourceType());
+            listResponse.addResource(getFido2DeviceResourceType());
 
             String json = resourceSerializer.getListResponseMapper().writeValueAsString(listResponse);
             return Response.ok(json).location(new URI(endpointUrl)).build();
@@ -139,6 +145,23 @@ public class ResourceTypeWS extends BaseScimWebService {
 
     }
 
+    @Path(FIDO2_SUFFIX)
+    @GET
+    @Produces(MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT)
+    @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
+    @RejectFilterParam
+    public Response fido2ResourceType() {
+        try {
+            URI uri=new URI(getResourceLocation(FIDO2_SUFFIX));
+            return Response.ok(resourceSerializer.serialize(getFido2DeviceResourceType())).location(uri).build();
+        }
+        catch (Exception e){
+            log.error("Failure at fido2ResourceType method", e);
+            return getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e.getMessage());
+        }
+
+    }
+
     @PostConstruct
     public void setup(){
         //weld makes you cry if using getClass() here
@@ -175,22 +198,28 @@ public class ResourceTypeWS extends BaseScimWebService {
             schemaExtensions.add(userExtensionSchema);
         }
 
-        ResourceType usrRT=new ResourceType();
+        ResourceType usrRT = new ResourceType();
         fillResourceType(usrRT, ScimResourceUtil.getSchemaAnnotation(cls), userService.getEndpointUrl(), getResourceLocation(USER_SUFFIX), schemaExtensions);
         return usrRT;
 
     }
 
     private ResourceType getGroupResourceType(){
-        ResourceType grRT=new ResourceType();
+        ResourceType grRT = new ResourceType();
         fillResourceType(grRT, ScimResourceUtil.getSchemaAnnotation(GroupResource.class), groupService.getEndpointUrl(), getResourceLocation(GROUP_SUFFIX), null);
         return grRT;
     }
 
     private ResourceType getFidoDeviceResourceType(){
-        ResourceType fidoRT =new ResourceType();
-        fillResourceType(fidoRT, ScimResourceUtil.getSchemaAnnotation(FidoDeviceResource.class), fidoService.getEndpointUrl(), getResourceLocation(FIDO_SUFFIX),null);
+        ResourceType fidoRT = new ResourceType();
+        fillResourceType(fidoRT, ScimResourceUtil.getSchemaAnnotation(FidoDeviceResource.class), fidoService.getEndpointUrl(), getResourceLocation(FIDO_SUFFIX), null);
         return fidoRT;
+    }
+
+    private ResourceType getFido2DeviceResourceType(){
+        ResourceType fido2RT = new ResourceType();
+        fillResourceType(fido2RT, ScimResourceUtil.getSchemaAnnotation(Fido2DeviceResource.class), fido2Service.getEndpointUrl(), getResourceLocation(FIDO2_SUFFIX), null);
+        return fido2RT;
     }
 
     private String getResourceLocation(String suffix){

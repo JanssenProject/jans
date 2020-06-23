@@ -168,7 +168,7 @@ public class AuthenticationScheme {
 	public static AuthenticationScheme createOAuth2(boolean primary) {
 		return new AuthenticationScheme(
 				"OAuth 2.0", "OAuth2 Access Token Authentication Scheme. Enabled only on 'SCIM Test Mode'.",
-				"http://tools.ietf.org/html/rfc6749", "https://www.gluu.org/docs/ce/admin-guide/user-scim/",
+				"http://tools.ietf.org/html/rfc6749", "http://tools.ietf.org/html/rfc6749",
 				"oauth2", primary);
 	}
 
@@ -194,7 +194,7 @@ public class AuthenticationScheme {
 	public static AuthenticationScheme createUma(boolean primary) {
 		return new AuthenticationScheme(
 				"UMA 2.0", "UMA Authentication Scheme",
-				"https://docs.kantarainitiative.org/uma/ed/oauth-uma-grant-2.0-06.html", "https://www.gluu.org/docs/ce/admin-guide/uma/",
+				"https://docs.kantarainitiative.org/uma/ed/oauth-uma-grant-2.0-06.html", "https://www.gluu.org/docs/gluu-server/admin-guide/uma/",
 				"uma", primary);
 	}
 
