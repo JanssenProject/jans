@@ -7,7 +7,8 @@
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.oxauth.service import AuthenticationService
+from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays
@@ -69,7 +70,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -182,7 +183,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
             print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
             print "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" 
-            facesMessages.add(facesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, "Incorrect Twilio code, please try again.")
 
             return False
 
@@ -213,6 +214,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return "/auth/otp_sms/otp_sms.xhtml"
 
         return ""
+        
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
 
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
+        
     def logout(self, configurationAttributes, requestParameters):
         return True

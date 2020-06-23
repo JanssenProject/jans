@@ -301,11 +301,18 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+        
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
+        return None
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
         return None
 
     def logout(self, configurationAttributes, requestParameters):

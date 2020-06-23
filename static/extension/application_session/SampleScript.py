@@ -14,6 +14,7 @@ from org.gluu.jsf2.message import FacesMessages
 from org.gluu.util import StringHelper, ArrayHelper
 from org.gluu.oxauth.model.config import Constants
 from java.util import Arrays, ArrayList
+from org.gluu.oxauth.service.external.session import SessionEventType
 
 import java
 
@@ -38,6 +39,13 @@ class ApplicationSession(ApplicationSessionType):
 
     def getApiVersion(self):
         return 11
+
+    # Called each time specific session event occurs
+    # event is org.gluu.oxauth.service.external.session.SessionEvent
+    def onEvent(self, event):
+        if event.getType() == SessionEventType.AUTHENTICATED:
+            print "Session is authenticated, session: " + event.getSessionId().getId()
+        return
 
     # Application calls it at start session request to allow notify 3rd part systems
     #   httpRequest is javax.servlet.http.HttpServletRequest
