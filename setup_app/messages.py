@@ -3,7 +3,7 @@ class msg:
     MAIN_label = "System Information"
     HostForm_label = "Gathering Information"
     ServicesForm_label = "Select Services to Install"
-    DBBackendForm_label = "Choose DB Backend"
+    DBBackendForm_label = "Choose to Store in WrenDS"
     StorageSelectionForm_label = "Hybrid Storage Selection"
     InstallStepsForm_label = "Installing Gluu Server"
     DisplaySummaryForm_label = "Gluu Server Installation Summary"
