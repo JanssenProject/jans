@@ -53,7 +53,7 @@ class GluuInstaller(SetupUtils):
 
                 txt += 'Java Type'.ljust(30) + Config.java_type.rjust(35) + "\n"
 
-            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
+            txt += 'Install Apache 2 web server'.ljust(30) + repr(Config.installHttpd).rjust(35) + (' *' if 'installHttpd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Scim Server'.ljust(30) + repr(Config.installScimServer).rjust(35) + (' *' if 'installScimServer' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Shibboleth SAML IDP'.ljust(30) + repr(Config.installSaml).rjust(35) + (' *' if 'installSaml' in Config.addPostSetupService else '') + "\n"
