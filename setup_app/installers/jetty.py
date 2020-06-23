@@ -118,7 +118,12 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         serviceName = serviceConfiguration['name']
+
+        if Config.installed_instance:
+            self.calculate_selected_aplications_memory()
+
         self.logIt("Installing jetty service %s..." % serviceName)
+
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
