@@ -110,7 +110,8 @@ desciribng base installers
   binds to related database and provides through `self.dbutils` property. `start_installation()` method will call the follwoing
   methods/fucntions automatically:
  
-   - `download_files()`: if war files to be installed, it is called automatically,
+   - `check_for_download()`: checks wheter source files are neded to download,
+   - `download_files()`: if war files to be downloaded, downloads from `source_files` defined in installer,
    - `create_user()`: if defined user creation function is called,
    - `create_folders()`: if defined directory creation function is called,
    - `install()`: write actual installation codes in this fucntion,
@@ -221,7 +222,15 @@ class SampleInstaller(JettyInstaller):
         self.install_type = static.InstallOption.OPTONAL # enumartiation for installation type, etiher MONDATORY or OPTONAL
         self.install_var = 'installApplication' # variale defined in Config to determine if thi application is going to be installed or not
         self.register_progess() # we need to register to progress indicator so that it will shows status of installation during installation process
-        
+
+        self.source_files = [('sample.war', 'http://sample.org/sample')] # Define source files here, this is a list contains tuples.
+                                                                         # First element of each touple is filename of package, and second
+                                                                         # element is url where the file is going to be downloaded
+                                                                         # BaseInstaller automatically determines if files are going to be
+                                                                         # downloaded. If it is post-install, current files are checked if up to date before
+                                                                         # attempting to download. If setup.py is called with -w argument, 
+                                                                         # files are forced to download
+
         # We need to define files to be downloaded if Config.downloadWars was set to True.
         # You can spicify multiple download files in list. For example self.oxtrust_war = ['ftp://server/app.zip', 'http://piblic/myapp.war']
         # You need to implement `download_files()` function inside the class. It will be called automatically.
