@@ -42,6 +42,58 @@ public class TokenRevocationTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
+    public void requestTokenRevocation_withPublicClient(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri, final String sectorIdentifierUri) {
+        showTitle("requestTokenRevocation_withPublicClient");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+
+        // 1. Register client
+        RegisterResponse registerResponse = registerPublicClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization and receive the authorization code.
+        String nonce = UUID.randomUUID().toString();
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce);
+
+        String accessToken = authorizationResponse.getAccessToken();
+
+        // 3. Request user info
+        UserInfoClient userInfoClient1 = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse1 = userInfoClient1.execUserInfo(accessToken);
+
+        showClient(userInfoClient1);
+        assertEquals(userInfoResponse1.getStatus(), 200, "Unexpected response code: " + userInfoResponse1.getStatus());
+        assertNotNull(userInfoResponse1.getClaim(JwtClaimName.NAME));
+
+        // 4. Request token revocation
+        TokenRevocationRequest revocationRequest = new TokenRevocationRequest();
+        revocationRequest.setToken(accessToken);
+        revocationRequest.setTokenTypeHint(TokenTypeHint.ACCESS_TOKEN);
+        revocationRequest.setAuthUsername(clientId);
+
+        TokenRevocationClient revocationClient = new TokenRevocationClient(tokenRevocationEndpoint);
+        revocationClient.setRequest(revocationRequest);
+
+        TokenRevocationResponse revocationResponse = revocationClient.exec();
+
+        showClient(revocationClient);
+        assertEquals(revocationResponse.getStatus(), 200, "Unexpected response code: " + revocationResponse.getStatus());
+
+        // 5. Request user info with the revoked access token should fail
+        UserInfoClient userInfoClient2 = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse2 = userInfoClient2.execUserInfo(accessToken);
+
+        showClient(userInfoClient2);
+        assertEquals(userInfoResponse2.getStatus(), 401, "Unexpected response code: " + userInfoResponse2.getStatus());
+        assertNotNull(userInfoResponse2.getErrorType(), "Unexpected result: errorType not found");
+        assertNotNull(userInfoResponse2.getErrorDescription(), "Unexpected result: errorDescription not found");
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
     public void requestTokenRevocation1(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
@@ -877,6 +929,30 @@ public class TokenRevocationTest extends BaseTest {
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
         assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        return registerResponse;
+    }
+
+    private RegisterResponse registerPublicClient(String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setAuthenticationMethod(AuthenticationMethod.NONE);
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.NONE);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+//        assertNull(registerResponse.getClientSecret());
         assertNotNull(registerResponse.getRegistrationAccessToken());
         assertNotNull(registerResponse.getClientIdIssuedAt());
         assertNotNull(registerResponse.getClientSecretExpiresAt());
