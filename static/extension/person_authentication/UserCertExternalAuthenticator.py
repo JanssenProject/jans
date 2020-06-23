@@ -9,10 +9,11 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
 from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService
+from org.gluu.oxauth.service import AuthenticationService
+from org.gluu.oxauth.service.common import UserService
 from org.gluu.util import StringHelper
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.oxauth.service import EncryptionService
+from org.gluu.oxauth.service.common import EncryptionService
 from java.util import Arrays
 from org.gluu.oxauth.cert.fingerprint import FingerprintHelper
 from org.gluu.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
@@ -95,10 +96,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
-        
+
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-  
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -472,3 +473,10 @@ class PersonAuthentication(PersonAuthenticationType):
         response = json.loads(response_string)
         
         return response["success"]
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        return -1
+
+    def getLogoutExternalUrl(self, configurationAttributes, requestParameters):
+        print "Get external logout URL call"
+        return None
