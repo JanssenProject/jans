@@ -37,13 +37,10 @@ class BaseInstaller:
         self.create_user()
         self.create_folders()
 
-        self.logIt("Calling Install for {}".format(self.service_name))
         self.install()
-        self.logIt("Calling copy static for {}".format(self.service_name))
         self.copy_static()
-        self.logIt("Calling generate_configuration for {}".format(self.service_name))
         self.generate_configuration()
-        
+
         # before rendering templates, let's push variables of this class to Config.templateRenderingDict
         self.update_rendering_dict()
 
