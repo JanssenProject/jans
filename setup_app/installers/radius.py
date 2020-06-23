@@ -20,6 +20,11 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.install_type = InstallOption.MONDATORY
         self.register_progess()
 
+        self.source_files = [
+                ('super-gluu-radius-server.jar', 'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}.jar'.format(Config.oxVersion)),
+                ('gluu-radius-libs.zip',  'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}-distribution.zip'.format(Config.oxVersion))
+                ]
+
         self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
         self.source_dir = os.path.join(Config.staticFolder, 'radius')
         self.conf_dir = os.path.join(Config.gluuBaseFolder, 'conf/radius/')
@@ -67,7 +72,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.enable_service('gluuRadiusEnabled')
 
     def install_gluu_radius(self):
-
+        self.check_for_download()
         Config.pbar.progress(self.service_name, "Installing Radius Server", False)
 
         self.dbUtils.bind()
