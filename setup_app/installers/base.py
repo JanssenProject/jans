@@ -135,7 +135,7 @@ class BaseInstaller:
         if fext in ('.war', '.jar'):
             if os.path.exists(src):
                 war_info = get_war_info(src)
-                if 'version' in war_info:
+                if war_info.get('version'):
                     return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
 
         return True
