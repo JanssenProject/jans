@@ -55,7 +55,7 @@ public class StandaloneCustomScriptManagerTest {
 		// Register required external scripts
 		SampleIdpExternalScriptService sampleIdpExternalScriptService = new SampleIdpExternalScriptService();
 		customScriptManager.registerExternalScriptService(sampleIdpExternalScriptService);
-		
+
 		// Init script manager and load scripts
 		customScriptManager.init();
 
@@ -64,7 +64,7 @@ public class StandaloneCustomScriptManagerTest {
 		sampleIdpExternalScriptService.executeExternalUpdateAttributesMethods(context);
 
 		// Reload script if needed
-		customScriptManager.init();
+		customScriptManager.reload();
 
 		// Call script
 		Object context2 = new SampleContext(System.currentTimeMillis());
