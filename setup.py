@@ -332,8 +332,8 @@ if not GSA and proceed:
     do_installation()
     print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % Config.hostname)
 else:
+    Config.thread_queue = queue
     GSA.do_installation = do_installation
-    GSA.queue = queue
     GSA.gluuInstaller = gluuInstaller
     GSA.run()
 
