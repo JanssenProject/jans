@@ -50,7 +50,6 @@ class GluuSetupApp(npyscreen.StandardApp):
     exit_reason = str()
     my_counter = 0
     do_notify = True
-    queue = None
     gluuInstaller = None
     installed_instance = None
 
@@ -482,7 +481,7 @@ class DBBackendForm(GluuSetupForm):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if Config.cb_install and not propertiesUtils.checkPassword(Config.cb_password):
+        if Config.cb_install == static.InstallTypes.LOCAL and not propertiesUtils.checkPassword(Config.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
@@ -549,7 +548,7 @@ class DBBackendForm(GluuSetupForm):
 class StorageSelectionForm(GluuSetupForm):
     def create(self):
 
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(Config.couchbaseBucketDict), 
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=30, max_height=len(Config.couchbaseBucketDict), 
             values=list(Config.couchbaseBucketDict.keys()), name=msg.DBBackendForm_label, scroll_exit=True)
         
         self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(Config.couchbaseBucketDict)+4, editable=False, color='STANDOUT')
@@ -652,7 +651,7 @@ class DisplaySummaryForm(GluuSetupForm):
                     if Config.wrends_install and Config.cb_install:
                         wds_ = []
                         for k in Config.mappingLocations:
-                            if sConfig.mappingLocations[k] == 'ldap':
+                            if Config.mappingLocations[k] == 'ldap':
                                 wds_.append(k)
                         w.hidden = False
                         w.value = ', '.join(wds_)
@@ -706,8 +705,8 @@ class InstallStepsForm(GluuSetupForm):
 
     def do_while_waiting(self):
 
-        if not self.parentApp.queue.empty():
-            data = self.parentApp.queue.get()
+        if not Config.thread_queue.empty():
+            data = Config.thread_queue.get()
             current = data.get('current')
             current_message = data.get('msg','')
             if  current == static.COMPLETED:
