@@ -22,6 +22,7 @@ from setup_app import static
 # second import module base, this makes some initial settings
 from setup_app.utils import base
 
+from setup_app.messages import msg
 from setup_app.config import Config
 from setup_app.utils.progress import gluuProgress
 
@@ -330,7 +331,10 @@ def do_installation():
 
 if not GSA and proceed:
     do_installation()
-    print("\n\n Gluu Server installation successful! Point your browser to https://%s\n\n" % Config.hostname)
+    print('\n', static.colors.OKGREEN)
+    msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
+    print(msg_text)
+    print('\n', static.colors.ENDC)
 else:
     Config.thread_queue = queue
     GSA.do_installation = do_installation
