@@ -37,8 +37,11 @@ class BaseInstaller:
         self.create_user()
         self.create_folders()
 
+        self.logIt("Calling Install for {}".format(self.service_name))
         self.install()
+        self.logIt("Calling copy static for {}".format(self.service_name))
         self.copy_static()
+        self.logIt("Calling generate_configuration for {}".format(self.service_name))
         self.generate_configuration()
         
         # before rendering templates, let's push variables of this class to Config.templateRenderingDict
@@ -62,14 +65,17 @@ class BaseInstaller:
         field_name, ou = ('oxId', 'resources') if resource else ('inum', 'clients')
 
         for client_var_name, client_id_prefix in client_var_id_list:
+            self.logIt("Checking ID for client {}".format(client_var_name))
             if not Config.get(client_var_name):
                 result = self.dbUtils.search('ou={},o=gluu'.format(ou), '({}={}*)'.format(field_name, client_id_prefix))
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
-                else:
-                    setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
-
+            
+            if not Config.get(client_var_name):
+                setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
+                self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
+            
     def run_service_command(self, operation, service):
         if not service:
             service = self.service_name
