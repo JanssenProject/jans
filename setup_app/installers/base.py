@@ -31,7 +31,7 @@ class BaseInstaller:
         if Config.downloadWars:
             self.download_files(force=True)
 
-        if Config.installed_instance:
+        elif Config.installed_instance:
             self.download_files()
 
         self.create_user()
@@ -130,6 +130,7 @@ class BaseInstaller:
             if 'version' in war_info:
                 return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
 
+        return True
 
     def create_user(self):
         pass
