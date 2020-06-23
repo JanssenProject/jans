@@ -385,7 +385,12 @@ class SetupUtils(Crypto64):
         if not os.path.exists(outputFolder):
             os.makedirs(outputFolder)
 
-        rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+        format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        for k in format_dict:
+            if isinstance(format_dict[k], bool):
+                format_dict[k] = str(format_dict[k]).lower()
+
+        rendered_text = self.fomatWithDict(template_text, format_dict)
         out_fp = os.path.join(outputFolder, fn)
         self.writeFile(out_fp, rendered_text)
 
