@@ -27,12 +27,7 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
-        # execute for each installer
-        if Config.downloadWars:
-            self.download_files(force=True)
-
-        elif Config.installed_instance:
-            self.download_files()
+        self.check_for_download()
 
         self.create_user()
         self.create_folders()
@@ -114,9 +109,21 @@ class BaseInstaller:
     def update_backend(self):
         pass
 
-    def download_files(self, force=False):
+
+    def check_for_download(self):
+        # execute for each installer
+        if Config.downloadWars:
+            self.download_files(force=True)
+            
+        elif Config.installed_instance:
+            self.download_files()
+
+
+    def download_files(self, force=False, downloads=[]):
         if hasattr(self, 'source_files'):
             for src, url in self.source_files:
+                if downloads and not src in downloads:
+                    continue
                 if not src.startswith('/'):
                     src = os.path.join(Config.distGluuFolder, src)
                 if force or self.check_download_needed(src):
@@ -126,9 +133,10 @@ class BaseInstaller:
     def check_download_needed(self, src):
         froot, fext = os.path.splitext(src)
         if fext in ('.war', '.jar'):
-            war_info = get_war_info(src)
-            if 'version' in war_info:
-                return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
+            if os.path.exists(src):
+                war_info = get_war_info(src)
+                if 'version' in war_info:
+                    return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
 
         return True
 

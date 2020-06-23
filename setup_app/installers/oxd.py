@@ -124,3 +124,31 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
     def installed(self):
         return os.path.exists(self.oxd_server_yml_fn)
+
+
+    def download_files(self, force):
+        oxd_url = 'https://ox.gluu.org/maven/org/gluu/oxd-server/{0}/oxd-server-{0}-distribution.zip'.format(Config.oxVersion)
+
+        self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
+        
+        oxd_zip_fn = '/tmp/oxd-server.zip'
+        oxd_tmp_dir = '/tmp/oxd-server'
+
+        self.run([paths.cmd_wget, '-nv', oxd_url, '-O', oxd_zip_fn])
+        self.run([paths.cmd_unzip, '-qqo', '/tmp/oxd-server.zip', '-d', oxd_tmp_dir])
+        self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir,'data')])
+
+        if base.os_name in ('ubuntu18','debian9'):
+            default_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server-default'.format(Config.oxVersion)
+            self.run([paths.cmd_wget, '-nv', default_url, '-O', os.path.join(oxd_tmp_dir, 'oxd-server-default')])
+
+        service_file = 'oxd-server.init.d' if base.os_name in ('ubuntu18','debian9') else 'oxd-server.service'
+        service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(Config.oxVersion, service_file)
+        self.run(['wget', '-nv', service_url, '-O', os.path.join(oxd_tmp_dir, service_file)])
+
+        oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server'.format(Config.oxVersion)
+        self.run([paths.cmd_wget, '-nv', oxd_server_sh_url, '-O', os.path.join(oxd_tmp_dir, 'bin/oxd-server')])
+
+        self.run(['tar', '-zcf', os.path.join(Config.distGluuFolder, 'oxd-server.tgz'), 'oxd-server'], cwd='/tmp')
+
+        self.oxd_package = os.path.join(Config.distGluuFolder, 'oxd-server.tgz')
