@@ -712,7 +712,10 @@ class InstallStepsForm(GluuSetupForm):
             if  current == static.COMPLETED:
                 if Config.post_messages:
                     npyscreen.notify_confirm('\n'.join(Config.post_messages), title="Post Install Messages", wide=True)
-                npyscreen.notify_confirm(msg.installation_completed.format(Config.hostname), title="Completed")
+                
+                msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
+                npyscreen.notify_confirm(msg_text, title="Completed")
+                
                 self.parentApp.do_notify = False
                 self.parentApp.switchForm(None)
             elif current == static.ERROR:

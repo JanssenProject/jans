@@ -126,7 +126,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         return os.path.exists(self.oxd_server_yml_fn)
 
 
-    def download_files(self, force):
+    def download_files(self, force=False):
         oxd_url = 'https://ox.gluu.org/maven/org/gluu/oxd-server/{0}/oxd-server-{0}-distribution.zip'.format(Config.oxVersion)
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
