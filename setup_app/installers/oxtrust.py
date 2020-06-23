@@ -16,7 +16,9 @@ class OxtrustInstaller(JettyInstaller):
         self.install_var = 'installOxTrust'
         self.register_progess()
 
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion)
+        self.source_files = [
+                ('identity.war', 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion))
+                ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust')
         self.output_folder = os.path.join(Config.outputFolder, 'oxtrust')
@@ -133,10 +135,6 @@ class OxtrustInstaller(JettyInstaller):
 
         self.dbUtils.import_ldif(ldif_files)
 
-
-    def download_files(self):
-        self.pbar.progress(self.service_name, "Downloading oxTrust war file", False)
-        self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
 
     def create_folders(self):
 

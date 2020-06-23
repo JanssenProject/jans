@@ -16,6 +16,7 @@ class ScimInstaller(JettyInstaller):
         self.install_type = InstallOption.OPTONAL
         self.install_var = 'installScimServer'
         self.register_progess()
+
         self.source_files = [
                 ('scim.war', 'https://ox.gluu.org/maven/org/gluu/scim-server/{0}/scim-server-{0}.war'.format(Config.oxVersion))
                 ]

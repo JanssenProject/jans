@@ -17,6 +17,10 @@ class FidoInstaller(JettyInstaller):
         self.install_var = 'installFido2'
         self.register_progess()
 
+        self.source_files = [
+                ('fido2.war', 'https://ox.gluu.org/maven/org/gluu/fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
+                ]
+
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
         self.output_folder = os.path.join(Config.outputFolder, 'fido2')
         self.template_folder = os.path.join(Config.templateFolder, 'fido2')
