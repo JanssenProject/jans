@@ -20,9 +20,9 @@ class SamlInstaller(JettyInstaller):
         self.needdb = True
 
         self.source_files = [
-                ('idp.war', 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (Config.oxVersion, Config.oxVersion)),
-                ('idp3_cml_keygenerator.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (Config.oxVersion, Config.oxVersion)),
-                ('shibboleth-idp.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (Config.oxVersion, Config.oxVersion)),
+                ('idp.war', 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{0}/oxshibbolethIdp-{0}.war'.format(Config.oxVersion)),
+                ('idp3_cml_keygenerator.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
+                ('shibboleth-idp.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'idp')

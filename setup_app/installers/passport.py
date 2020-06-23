@@ -18,6 +18,11 @@ class PassportInstaller(NodeInstaller):
         self.install_var = 'installPassport'
         self.register_progess()
 
+        passport_version = Config.oxVersion.replace('-SNAPSHOT','')
+        self.source_files = [
+                ('passport.tgz', 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
+                ('passport-node_modules.tar.gz', 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
+                ]
 
         self.gluu_passport_base = os.path.join(self.node_base, 'passport')
         self.passport_initd_script = os.path.join(Config.install_dir, 'static/system/initd/passport')
