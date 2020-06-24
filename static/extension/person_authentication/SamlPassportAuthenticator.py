@@ -496,7 +496,7 @@ class PersonAuthentication(PersonAuthenticationType):
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
             
 
-            alg_string = str(jwt.getHeader().getAlgorithm())
+            alg_string = str(jwt.getHeader().getSignatureAlgorithm())
             signature_string = str(jwt.getEncodedSignature())
 
             if alg_string == "none" or alg_string == "None" or alg_string == "NoNe" or alg_string == "nONE" or alg_string == "NONE" or alg_string == "NonE" or alg_string == "nOnE":
