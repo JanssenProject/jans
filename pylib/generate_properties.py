@@ -331,9 +331,13 @@ def generate_properties(as_dict=False):
     if gluu_3x:
         ldap_conn.search(search_base='o=gluu', search_scope=ldap3.LEVEL, search_filter='(objectClass=*)', attributes=['*'])
         result = ldap_conn.response
-        inumOrg = str(result[1][1]['o'][0])
-        uma_rpt_policy_inum = '{}!0011!2DAF.F995'.format(inumOrg)
-        scim_access_policy_inum = '{}!0011!2DAF-F9A5'.format(inumOrg)
+        for entry in result:
+            if 'gluuOrganization' in entry['attributes']['objectClass']:
+                inumOrg = entry['attributes']['o'][0]
+                uma_rpt_policy_inum = '{}!0011!2DAF.F995'.format(inumOrg)
+                scim_access_policy_inum = '{}!0011!2DAF-F9A5'.format(inumOrg)
+
+
     else:
         uma_rpt_policy_inum = '2DAF-F995'
         scim_access_policy_inum = '2DAF-F9A5'
