@@ -115,9 +115,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray grantTypesSupported = new JSONArray();
             for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
-                if (grantType != GrantType.CIBA) {
-                    grantTypesSupported.put(grantType);
-                }
+                grantTypesSupported.put(grantType);
             }
             if (grantTypesSupported.length() > 0) {
                 jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
