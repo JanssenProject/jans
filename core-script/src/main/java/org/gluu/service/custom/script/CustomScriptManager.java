@@ -62,7 +62,7 @@ public class CustomScriptManager implements Serializable {
 	private static final long serialVersionUID = -4225890597520443390L;
 
 	public static final String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
-	private static final int DEFAULT_INTERVAL = 30; // 30 seconds
+	public static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
 	public static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType",
 			"oxModuleProperty", "oxEnabled" };
