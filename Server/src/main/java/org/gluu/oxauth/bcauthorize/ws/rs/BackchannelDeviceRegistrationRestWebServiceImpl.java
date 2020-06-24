@@ -7,8 +7,7 @@
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
-import org.gluu.oxauth.ciba.CIBADeviceRegistrationValidatorProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.ciba.CIBADeviceRegistrationValidatorService;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
@@ -29,7 +28,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import static org.gluu.oxauth.model.ciba.BackchannelDeviceRegistrationErrorResponseType.ACCESS_DENIED;
 import static org.gluu.oxauth.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
 
 /**
@@ -60,10 +58,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-    private CIBASupportProxy cibaSupportProxy;
-
-    @Inject
-    private CIBADeviceRegistrationValidatorProxy cibaDeviceRegistrationValidatorProxy;
+    private CIBADeviceRegistrationValidatorService cibaDeviceRegistrationValidatorService;
 
     @Override
     public Response requestBackchannelDeviceRegistrationPost(
@@ -80,15 +75,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
 
         Response.ResponseBuilder builder = Response.ok();
 
-        if (!cibaSupportProxy.isCIBASupported()) {
-            builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()); // 403
-            builder.entity(errorResponseFactory.errorAsJson(
-                    ACCESS_DENIED,
-                    "The CIBA (Client Initiated Backchannel Authentication) is not enabled in the server."));
-            return builder.build();
-        }
-
-        DefaultErrorResponse cibaDeviceRegistrationValidation = cibaDeviceRegistrationValidatorProxy.validateParams(
+        DefaultErrorResponse cibaDeviceRegistrationValidation = cibaDeviceRegistrationValidatorService.validateParams(
                 idTokenHint, deviceRegistrationToken);
         if (cibaDeviceRegistrationValidation != null) {
             builder = Response.status(cibaDeviceRegistrationValidation.getStatus());
