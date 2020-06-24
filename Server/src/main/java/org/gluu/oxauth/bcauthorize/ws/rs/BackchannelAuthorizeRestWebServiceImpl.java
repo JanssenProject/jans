@@ -10,9 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.authorize.ws.rs.AuthorizeRestWebServiceValidator;
-import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorProxy;
-import org.gluu.oxauth.ciba.CIBAEndUserNotificationProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.ciba.CIBAAuthorizeParamsValidatorService;
+import org.gluu.oxauth.ciba.CIBAEndUserNotificationService;
 import org.gluu.oxauth.client.JwkClient;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
@@ -35,7 +34,7 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.CibaRequestService;
+import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
@@ -93,13 +92,10 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     private AppConfiguration appConfiguration;
 
     @Inject
-    private CIBASupportProxy cibaSupportProxy;
+    private CIBAAuthorizeParamsValidatorService cibaAuthorizeParamsValidatorService;
 
     @Inject
-    private CIBAAuthorizeParamsValidatorProxy cibaAuthorizeParamsValidatorProxy;
-
-    @Inject
-    private CIBAEndUserNotificationProxy cibaEndUserNotificationProxy;
+    private CIBAEndUserNotificationService cibaEndUserNotificationService;
 
     @Inject
     private CibaRequestService cibaRequestService;
@@ -134,14 +130,6 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 + "isSecure = {}", securityContext.isSecure());
 
         Response.ResponseBuilder builder = Response.ok();
-
-        if (!cibaSupportProxy.isCIBASupported()) {
-            builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()); // 403
-            builder.entity(errorResponseFactory.errorAsJson(
-                    ACCESS_DENIED,
-                    "The CIBA (Client Initiated Backchannel Authentication) is not enabled in the server."));
-            return builder.build();
-        }
 
         SessionClient sessionClient = identity.getSessionClient();
         Client client = null;
@@ -274,7 +262,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
         try {
             String userCode = (String) user.getAttribute("oxAuthBackchannelUserCode", true, false);
-            DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorProxy.validateParams(
+            DefaultErrorResponse cibaAuthorizeParamsValidation = cibaAuthorizeParamsValidatorService.validateParams(
                     scopes, clientNotificationToken, client.getBackchannelTokenDeliveryMode(),
                     loginHintToken, idTokenHint, loginHint, bindingMessage, client.getBackchannelUserCodeParameter(),
                     userCodeParam, userCode, requestedExpiry);
@@ -305,7 +293,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
             String authReqId = cibaRequestCacheControl.getAuthReqId();
 
             // Notify End-User to obtain Consent/Authorization
-            cibaEndUserNotificationProxy.notifyEndUser(
+            cibaEndUserNotificationService.notifyEndUser(
                     cibaRequestCacheControl.getScopesAsString(),
                     cibaRequestCacheControl.getAcrValues(),
                     authReqId,

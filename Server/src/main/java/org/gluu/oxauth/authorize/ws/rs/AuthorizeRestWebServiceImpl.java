@@ -12,9 +12,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
-import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
-import org.gluu.oxauth.ciba.CIBAPushTokenDeliveryProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.ciba.CIBAPingCallbackService;
+import org.gluu.oxauth.ciba.CIBAPushTokenDeliveryService;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.*;
@@ -34,6 +33,7 @@ import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.service.external.context.ExternalPostAuthnContext;
 import org.gluu.oxauth.service.external.session.SessionEvent;
@@ -123,13 +123,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
     @Inject
-    private CIBASupportProxy cibaSupportProxy;
+    private CIBAPushTokenDeliveryService cibaPushTokenDeliveryService;
 
     @Inject
-    private CIBAPushTokenDeliveryProxy cibaPushTokenDeliveryProxy;
-
-    @Inject
-    private CIBAPingCallbackProxy cibaPingCallbackProxy;
+    private CIBAPingCallbackService cibaPingCallbackService;
 
     @Inject
     private ExternalPostAuthnService externalPostAuthnService;
@@ -587,7 +584,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             }
 
-            if (StringUtils.isNotBlank(authReqId) && cibaSupportProxy.isCIBASupported()) {
+            if (StringUtils.isNotBlank(authReqId)) {
                 runCiba(authReqId, httpRequest, httpResponse);
             }
 
@@ -646,7 +643,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaGrant.save();
 
         if (cibaRequest.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
-            cibaPushTokenDeliveryProxy.pushTokenDelivery(
+            cibaPushTokenDeliveryService.pushTokenDelivery(
                     cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken(),
@@ -659,7 +656,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             cibaGrant.setTokensDelivered(false);
             cibaGrant.save();
 
-            cibaPingCallbackProxy.pingCallback(
+            cibaPingCallbackService.pingCallback(
                     cibaGrant.getAuthReqId(),
                     cibaGrant.getClient().getBackchannelClientNotificationEndpoint(),
                     cibaRequest.getClientNotificationToken()
