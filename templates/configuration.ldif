@@ -8,7 +8,7 @@ gluuOrgProfileMgt: false
 gluuManageIdentityPermission: true
 gluuFederationHostingEnabled: disabled
 gluuVdsCacheRefreshEnabled: false
-gluuScimEnabled: false
+gluuScimEnabled: %(gluuScimEnabled)s
 oxAuthenticationMode: simple_password_auth
 oxTrustAuthenticationMode: simple_password_auth
 gluuPassportEnabled: %(gluuPassportEnabled)s
