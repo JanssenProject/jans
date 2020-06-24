@@ -12,9 +12,8 @@ import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.security.Identity;
 import org.gluu.oxauth.auth.Authenticator;
-import org.gluu.oxauth.ciba.CIBAPingCallbackProxy;
-import org.gluu.oxauth.ciba.CIBAPushErrorProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.ciba.CIBAPingCallbackService;
+import org.gluu.oxauth.ciba.CIBAPushErrorService;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
@@ -22,6 +21,7 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
@@ -95,13 +95,10 @@ public class AuthorizeService {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-    private CIBASupportProxy cibaSupportProxy;
+    private CIBAPingCallbackService cibaPingCallbackService;
 
     @Inject
-    private CIBAPingCallbackProxy cibaPingCallbackProxy;
-
-    @Inject
-    private CIBAPushErrorProxy cibaPushErrorProxy;
+    private CIBAPushErrorService cibaPushErrorService;
 
     @Inject
     private CibaRequestService cibaRequestService;
@@ -200,7 +197,7 @@ public class AuthorizeService {
 
         // CIBA
         Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
-        if (cibaSupportProxy.isCIBASupported() && sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
+        if (sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
             String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
             CibaRequestCacheControl request = cibaRequestService.getCibaRequest(authReqId);
 
@@ -219,14 +216,14 @@ public class AuthorizeService {
                         request.setTokensDelivered(false);
                         cibaRequestService.update(request);
 
-                        cibaPingCallbackProxy.pingCallback(
+                        cibaPingCallbackService.pingCallback(
                                 request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken()
                         );
                         break;
                     case PUSH:
-                        cibaPushErrorProxy.pushError(
+                        cibaPushErrorService.pushError(
                                 request.getAuthReqId(),
                                 request.getClient().getBackchannelClientNotificationEndpoint(),
                                 request.getClientNotificationToken(),
