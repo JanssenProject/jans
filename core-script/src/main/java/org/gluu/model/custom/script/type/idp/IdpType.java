@@ -18,6 +18,8 @@ import org.gluu.model.custom.script.type.BaseExternalType;
  */
 public interface IdpType extends BaseExternalType {
 
+	boolean translateAttributes(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
+
 	boolean updateAttributes(Object context, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
