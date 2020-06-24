@@ -278,9 +278,20 @@ class ServicesForm(GluuSetupForm):
                 cb.update()
 
     def nextButtonPressed(self):
+
+        service_enable_dict = {
+                        'installPassport': 'gluuPassportEnabled',
+                        'installGluuRadius': 'gluuRadiusEnabled',
+                        'installSaml': 'gluuSamlEnabled',
+                        'installScimServer': 'gluuScimEnabled',
+                        }
+
         for service in self.services:
             cb_val = getattr(self, service).value
             setattr(self.parentApp.installObject, service, cb_val)
+            if cb_val and service in service_enable_dict:
+                setattr(self.parentApp.installObject, service_enable_dict[service], 'true')
+
 
         if self.installOxd.value:
             self.parentApp.installObject.oxd_server_https = 'https://{}:8443'.format(self.parentApp.installObject.hostname)
