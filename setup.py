@@ -234,6 +234,7 @@ class Setup(object):
         self.gluuRadiusEnabled = 'false'
         self.gluuSamlEnabled = 'false'
         self.scimTestMode = 'false'
+        self.gluuScimEnabled = 'false'
         
         self.enable_scim_access_policy = 'false'
         
@@ -1379,8 +1380,9 @@ class Setup(object):
 
         for si, se in ( 
                         ('installPassport', 'gluuPassportEnabled'),
-                        ('gluuRadiusEnabled', 'gluuRadiusEnabled'),
+                        ('installGluuRadius', 'gluuRadiusEnabled'),
                         ('installSaml', 'gluuSamlEnabled'),
+                        ('installScimServer', 'gluuScimEnabled'),
                         ):
             if getattr(self, si):
                 setattr(self, se, 'true')
@@ -3304,6 +3306,7 @@ class Setup(object):
                                             )[0].lower()
         if promptForScimServer == 'y':
             self.installScimServer = True
+            self.gluuScimEnabled = 'true'
 
         promptForFido2Server = self.getPrompt("Install Fido2 Server?",
                                             self.getDefaultOption(self.installFido2)
