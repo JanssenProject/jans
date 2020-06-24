@@ -36,6 +36,11 @@ public class DummyIdpType implements IdpType {
 	}
 
 	@Override
+	public boolean translateAttributes(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
 	public boolean updateAttributes(Object context, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
