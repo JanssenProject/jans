@@ -59,7 +59,8 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
                 "/restv1/userinfo",
                 "/restv1/revoke",
                 "/restv1/revoke_session",
-                "/restv1/bc-authorize"},
+                "/restv1/bc-authorize",
+                "/restv1/device-authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
@@ -122,6 +123,7 @@ public class AuthenticationFilter implements Filter {
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
+            boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthorizationEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             String authorizationHeader = httpRequest.getHeader("Authorization");
@@ -136,7 +138,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint) {
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
