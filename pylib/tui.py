@@ -478,11 +478,11 @@ class DBBackendForm(GluuSetupForm):
             self.parentApp.installObject.cache_provider_type = 'NATIVE_PERSISTENCE'
             self.parentApp.installObject.add_couchbase_post_messages()
 
-        if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
+        if self.parentApp.installObject.wrends_install  == LOCAL and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if self.parentApp.installObject.cb_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
+        if self.parentApp.installObject.cb_install == LOCAL and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
