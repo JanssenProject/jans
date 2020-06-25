@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @DataEntry
 @ObjectClass("gluuPerson")
@@ -89,7 +90,8 @@ public class ScimCustomPerson extends Entry implements Serializable {
     public List<String> getAttributeList(String attributeName) {
 
         List<Object> list = Optional.ofNullable(getTypedAttribute(attributeName))
-                .map(CustomObjectAttribute::getValues).orElse(Collections.emptyList());
+                .map(CustomObjectAttribute::getValues).orElse(Collections.emptyList())
+                .stream().filter(el -> el != null).collect(Collectors.toList());
         List<String> result = new ArrayList<>();
 
         for (Object obj : list) {
