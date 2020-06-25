@@ -11,10 +11,9 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
-import org.gluu.oxauth.ciba.CIBARegisterClientMetadataProxy;
-import org.gluu.oxauth.ciba.CIBARegisterClientResponseProxy;
-import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorProxy;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
+import org.gluu.oxauth.ciba.CIBARegisterClientMetadataService;
+import org.gluu.oxauth.ciba.CIBARegisterClientResponseService;
+import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorService;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
@@ -119,16 +118,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private AbstractCryptoProvider cryptoProvider;
 
     @Inject
-    private CIBASupportProxy cibaSupportProxy;
+    private CIBARegisterParamsValidatorService cibaRegisterParamsValidatorService;
 
     @Inject
-    private CIBARegisterParamsValidatorProxy cibaRegisterParamsValidatorProxy;
+    private CIBARegisterClientMetadataService cibaRegisterClientMetadataService;
 
     @Inject
-    private CIBARegisterClientMetadataProxy cibaRegisterClientMetadataProxy;
-
-    @Inject
-    private CIBARegisterClientResponseProxy cibaRegisterClientResponseProxy;
+    private CIBARegisterClientResponseService cibaRegisterClientResponseService;
 
     @Override
     public Response requestRegister(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
@@ -252,7 +248,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_REDIRECT_URI, "Failed to validate redirect uris.");
             }
 
-            if (cibaSupportProxy.isCIBASupported() && !cibaRegisterParamsValidatorProxy.validateParams(
+            if (!cibaRegisterParamsValidatorService.validateParams(
                     r.getBackchannelTokenDeliveryMode(),
                     r.getBackchannelClientNotificationEndpoint(),
                     r.getBackchannelAuthenticationRequestSigningAlg(),
@@ -611,11 +607,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setSoftwareStatement(requestObject.getSoftwareStatement());
         }
 
-        if (cibaSupportProxy.isCIBASupported()) {
-            cibaRegisterClientMetadataProxy.updateClient(p_client, requestObject.getBackchannelTokenDeliveryMode(),
-                    requestObject.getBackchannelClientNotificationEndpoint(), requestObject.getBackchannelAuthenticationRequestSigningAlg(),
-                    requestObject.getBackchannelUserCodeParameter());
-        }
+        cibaRegisterClientMetadataService.updateClient(p_client, requestObject.getBackchannelTokenDeliveryMode(),
+                requestObject.getBackchannelClientNotificationEndpoint(), requestObject.getBackchannelAuthenticationRequestSigningAlg(),
+                requestObject.getBackchannelUserCodeParameter());
     }
 
     @Override
@@ -639,7 +633,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     }
 
                     if (redirectUrisValidated) {
-                        if (cibaSupportProxy.isCIBASupported() && !cibaRegisterParamsValidatorProxy.validateParams(
+                        if (!cibaRegisterParamsValidatorService.validateParams(
                                 request.getBackchannelTokenDeliveryMode(),
                                 request.getBackchannelClientNotificationEndpoint(),
                                 request.getBackchannelAuthenticationRequestSigningAlg(),
@@ -865,9 +859,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS.toString(), implode(claimNames, " "));
         }
 
-        if (cibaSupportProxy.isCIBASupported()) {
-            cibaRegisterClientResponseProxy.updateResponse(responseJsonObject, client);
-        }
+        cibaRegisterClientResponseService.updateResponse(responseJsonObject, client);
 
         return responseJsonObject;
     }
