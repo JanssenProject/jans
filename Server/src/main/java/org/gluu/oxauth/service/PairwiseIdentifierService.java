@@ -71,7 +71,10 @@ public class PairwiseIdentifierService {
 
             Filter filter = null;
             if (appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) {
-                filter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
+            	Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
+                Filter userInumFilter = Filter.createEqualityFilter("oxAuthUserId", userInum);
+
+                filter = Filter.createANDFilter(sectorIdentifierFilter, userInumFilter);
             } else {
                 Filter sectorIdentifierFilter = Filter.createEqualityFilter("oxSectorIdentifier", sectorIdentifier);
                 Filter clientIdFilter = Filter.createEqualityFilter("oxAuthClientId", clientId);
