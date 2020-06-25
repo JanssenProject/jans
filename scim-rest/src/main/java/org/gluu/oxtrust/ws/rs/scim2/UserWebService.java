@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2015, Gluu
- */
 package org.gluu.oxtrust.ws.rs.scim2;
 
 import static org.gluu.oxtrust.model.scim2.Constants.MEDIA_TYPE_SCIM_JSON;
@@ -297,9 +292,8 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
             //Apply patches one by one in sequence
             for (PatchOperation po : request.getOperations()) {
                 //Handle special case: https://github.com/GluuFederation/oxTrust/issues/800
-                if (po.getType().equals(REMOVE) && po.getPath().equals("pairwiseIdentitifers")){
+                if (po.getType().equals(REMOVE) && po.getPath().equals("pairwiseIdentifiers")){
                     //If this block weren't here, the implementation will throw error because read-only attribute cannot be altered
-                    //Note the path is intentionally mistyped, see class member in UserResource
                     person.setOxPPID(null);
                     user.setPairwiseIdentifiers(null);
                     scim2UserService.removePPIDsBranch(person.getDn());
