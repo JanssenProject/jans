@@ -94,7 +94,6 @@
 		<module>RP</module>
 		<module>RP-Demo</module>
 		<module>common</module>
-		<module>oxauth-ciba</module>
 		<module>Server</module>
 		<module>rp-spring-boot</module>
   </modules>
