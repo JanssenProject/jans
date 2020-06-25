@@ -477,7 +477,7 @@ class DBBackendForm(GluuSetupForm):
                 npyscreen.notify_confirm(result['reason'], title="Warning")
                 return
 
-        if Config.wrends_install and not propertiesUtils.checkPassword(Config.ldapPass):
+        if Config.wrends_install == static.InstallTypes.LOCAL and not propertiesUtils.checkPassword(Config.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
