@@ -46,6 +46,7 @@ public class AppConfiguration implements Configuration {
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+    private String deviceAuthorizationEndpoint;
 
     private Boolean sessionAsJwt = false;
 
@@ -213,6 +214,8 @@ public class AppConfiguration implements Configuration {
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
+    private int deviceAuthorizationRequestExpiresIn;
+    private int deviceAuthorizationTokenPoolInterval;
 
     // CIBA
     private String backchannelClientId;
@@ -1846,5 +1849,29 @@ public class AppConfiguration implements Configuration {
 
     public void setClientRegDefaultToCodeFlowWithRefresh(Boolean clientRegDefaultToCodeFlowWithRefresh) {
         this.clientRegDefaultToCodeFlowWithRefresh = clientRegDefaultToCodeFlowWithRefresh;
+    }
+
+    public String getDeviceAuthorizationEndpoint() {
+        return deviceAuthorizationEndpoint;
+    }
+
+    public void setDeviceAuthorizationEndpoint(String deviceAuthorizationEndpoint) {
+        this.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint;
+    }
+
+    public int getDeviceAuthorizationRequestExpiresIn() {
+        return deviceAuthorizationRequestExpiresIn;
+    }
+
+    public void setDeviceAuthorizationRequestExpiresIn(int deviceAuthorizationRequestExpiresIn) {
+        this.deviceAuthorizationRequestExpiresIn = deviceAuthorizationRequestExpiresIn;
+    }
+
+    public int getDeviceAuthorizationTokenPoolInterval() {
+        return deviceAuthorizationTokenPoolInterval;
+    }
+
+    public void setDeviceAuthorizationTokenPoolInterval(int deviceAuthorizationTokenPoolInterval) {
+        this.deviceAuthorizationTokenPoolInterval = deviceAuthorizationTokenPoolInterval;
     }
 }
