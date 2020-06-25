@@ -2,8 +2,6 @@ package org.gluu.oxauthconfigapi.rest.ressource;
 
 import java.util.Set;
 import java.util.HashSet;
-import java.util.List;
-import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -22,8 +20,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 
 import org.slf4j.Logger;
-
-import com.kenai.jffi.Array;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.common.GrantType;
@@ -76,16 +72,14 @@ public class DynamicConfigurationResource {
 		}
 	}
 	
-	@Path("/updateTest")
-	@GET
+	@PUT
 	@Operation(summary = "Update dynamic client registration configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response updateDynamicConfiguration() {
+	public Response updateDynamicConfiguration(@Valid DynamicConfiguration dynamicConfiguration) {
 		try {
 			log.debug("DynamicConfigurationResource::updateDynamicConfiguration() - Update dynamic client registration configuration");
-			DynamicConfiguration dynamicConfiguration = getDynamicConfigurationObject();
 			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			appConfiguration.setDynamicRegistrationEnabled(dynamicConfiguration.getDynamicRegistrationEnabled());
@@ -117,32 +111,5 @@ public class DynamicConfigurationResource {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
 		}
 	}
-
 	
-	private DynamicConfiguration getDynamicConfigurationObject() throws Exception {
-		DynamicConfiguration dynamicConfiguration = new DynamicConfiguration();
-		dynamicConfiguration.setDynamicRegistrationEnabled(true);
-		dynamicConfiguration.setDynamicRegistrationPasswordGrantTypeEnabled(false);
-		dynamicConfiguration.setDynamicRegistrationPersistClientAuthorizations(true);
-		dynamicConfiguration.setDynamicRegistrationScopesParamEnabled(true);
-		dynamicConfiguration.setLegacyDynamicRegistrationScopeParam(false);
-        //dynamicConfiguration.setDynamicRegistrationCustomObjectClass(null);
-		dynamicConfiguration.setDefaultSubjectType("pairwise");
-		dynamicConfiguration.setDynamicRegistrationExpirationTime(-1);
-		
-		Set<String> dynamicGrantTypeDefaultSet = new HashSet<String>();
-		dynamicGrantTypeDefaultSet.add("refresh_token");
-		dynamicGrantTypeDefaultSet.add("implicit");
-		dynamicGrantTypeDefaultSet.add("client_credentials");
-		dynamicGrantTypeDefaultSet.add("authorization_code");
-		dynamicGrantTypeDefaultSet.add("urn:ietf:params:oauth:grant-type:uma-ticket");
-		dynamicGrantTypeDefaultSet.add("password"); //New ??
-		dynamicConfiguration.setDynamicGrantTypeDefault(dynamicGrantTypeDefaultSet);
-		
-		List<String> dynamicRegistrationCustomAttributesList = new ArrayList<String>();
-		dynamicRegistrationCustomAttributesList.add("oxAuthTrustedClient");
-		dynamicConfiguration.setDynamicRegistrationCustomAttributes(dynamicRegistrationCustomAttributesList);
-		
-		return dynamicConfiguration;
-	}
 }
