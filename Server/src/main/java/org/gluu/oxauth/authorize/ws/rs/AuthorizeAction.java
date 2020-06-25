@@ -30,6 +30,7 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;

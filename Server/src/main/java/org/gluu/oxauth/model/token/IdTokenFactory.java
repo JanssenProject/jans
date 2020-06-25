@@ -14,7 +14,6 @@ import org.gluu.model.GluuAttribute;
 import org.gluu.model.attribute.AttributeDataType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.auth.PersonAuthenticationType;
-import org.gluu.oxauth.ciba.CIBASupportProxy;
 import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.Claim;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -73,9 +72,6 @@ public class IdTokenFactory {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-    @Inject
-    private CIBASupportProxy cibaSupportProxy;
 
     @Inject
     private JwrService jwrService;
@@ -220,7 +216,7 @@ public class IdTokenFactory {
     }
 
     private void processCiba(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, RefreshToken refreshToken) {
-        if (!cibaSupportProxy.isCIBASupported() || !(authorizationGrant instanceof CIBAGrant)) {
+        if (!(authorizationGrant instanceof CIBAGrant)) {
             return;
         }
 

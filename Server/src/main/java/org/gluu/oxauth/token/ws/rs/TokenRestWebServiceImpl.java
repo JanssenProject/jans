@@ -26,6 +26,7 @@ import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.external.ExternalResourceOwnerPasswordCredentialsService;
 import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import org.gluu.oxauth.uma.service.UmaTokenService;
