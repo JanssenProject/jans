@@ -5,7 +5,6 @@
 #
 
 from org.gluu.model.custom.script.type.user import UserRegistrationType
-from org.gluu.model import GluuStatus
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 
@@ -45,9 +44,9 @@ class UserRegistration(UserRegistrationType):
     def preRegistration(self, user, requestParameters, configurationAttributes):
         print "User registration. Pre method"
 
-        userStatus = GluuStatus.ACTIVE
+        userStatus = "active"
         if not self.enable_user:
-            userStatus = GluuStatus.INACTIVE
+            userStatus = "inactive"
 
         # Disable/Enable registered user
         user.setStatus(userStatus)
