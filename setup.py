@@ -2996,6 +2996,10 @@ class Setup(object):
         except Exception as e:
             result['result'] = False
             result['reason'] = str(e)
+
+        if not conn.bound:
+            result['result'] = False
+            result['reason'] = str(conn.last_error)
         
         return result
 
