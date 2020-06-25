@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.model.util.Util;
 
 import java.io.Serializable;
@@ -41,9 +41,7 @@ public class CibaRequestCacheControl implements Serializable {
     public CibaRequestCacheControl(User user, Client client, int expiresIn, List<String> scopeList,
                                    String clientNotificationToken, String bindingMessage, Long lastAccessControl,
                                    String acrValues) {
-        byte[] nonce = new byte[24];
-        new SecureRandom().nextBytes(nonce);
-        this.authReqId = Util.byteArrayToHexString(nonce);
+        this.authReqId = StringUtils.generateRandomCode((byte) 24); // Entropy above of 160 bits based on specs [RFC section 7.3]
         this.user = user;
         this.client = client;
         this.scopes = scopeList;
