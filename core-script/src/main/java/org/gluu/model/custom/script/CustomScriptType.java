@@ -6,9 +6,6 @@
 
 package org.gluu.model.custom.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.gluu.model.custom.script.type.BaseExternalType;
@@ -42,17 +39,12 @@ import org.gluu.model.custom.script.type.session.ApplicationSessionType;
 import org.gluu.model.custom.script.type.session.DummyApplicationSessionType;
 import org.gluu.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import org.gluu.model.custom.script.type.spontaneous.SpontaneousScopeType;
-import org.gluu.model.custom.script.type.uma.UmaClaimsGatheringType;
-import org.gluu.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
-import org.gluu.model.custom.script.type.uma.UmaDummyRptPolicyType;
-import org.gluu.model.custom.script.type.uma.UmaRptPolicyType;
-import org.gluu.model.custom.script.type.user.CacheRefreshType;
-import org.gluu.model.custom.script.type.user.DummyCacheRefreshType;
-import org.gluu.model.custom.script.type.user.DummyUpdateUserType;
-import org.gluu.model.custom.script.type.user.DummyUserRegistrationType;
-import org.gluu.model.custom.script.type.user.UpdateUserType;
-import org.gluu.model.custom.script.type.user.UserRegistrationType;
+import org.gluu.model.custom.script.type.uma.*;
+import org.gluu.model.custom.script.type.user.*;
 import org.gluu.persist.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -78,6 +70,7 @@ public enum CustomScriptType implements AttributeEnum {
             new DummyIdGeneratorType()),
     UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy",
             new UmaDummyRptPolicyType()),
+    UMA_RPT_CLAIMS("uma_rpt_claims", "UMA RPT Claims", UmaRptClaimsType.class, CustomScript.class, "UmaRptClaims", new UmaDummyRptClaimsType()),
     UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering",
             new UmaDummyClaimsGatheringType()),
     CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering",
