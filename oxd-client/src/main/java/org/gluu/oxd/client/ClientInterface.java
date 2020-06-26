@@ -24,6 +24,11 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     JsonNode getRpJwks();
 
+    @GET
+    @Path("/get-request-object-jwt/{request_object_id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    String getRequestObject(@PathParam("request_object_id") String id);
+
     @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
@@ -167,4 +172,10 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     GetIssuerResponse getIssuer(GetIssuerParams params);
+
+    @POST
+    @Path("/get-request-uri")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    GetRequestUriResponse getRequestUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, GetRequestUriParams params);
 }
