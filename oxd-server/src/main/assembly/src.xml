@@ -12,6 +12,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>org.bouncycastle:bcprov-jdk15on</include>
+                <include>org.bouncycastle:bcpkix-jdk15on</include>
             </includes>
             <scope>runtime</scope>
         </dependencySet>
@@ -23,6 +24,10 @@
         </file>
         <file>
             <source>${project.basedir}/src/main/resources/oxd-server.keystore</source>
+            <outputDirectory>/conf</outputDirectory>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/resources/oxd-jwks.keystore</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
