@@ -53,6 +53,7 @@ public class ExpiredObject implements Serializable {
 
     public ExpiredObject(String key, String value, ExpiredObjectType expiredObjectType, Date iat, Date exp) {
         Preconditions.checkState(!Strings.isNullOrEmpty(key), "Expired Object contains blank or null value. Please specify valid Expired Object.");
+        Preconditions.checkState(!Strings.isNullOrEmpty(value), "Expired Object contains blank or null value. Please specify valid Expired Object.");
         this.key = key;
         this.type = expiredObjectType;
         this.typeString = expiredObjectType.getValue();
