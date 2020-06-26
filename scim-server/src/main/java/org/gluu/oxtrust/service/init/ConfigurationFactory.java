@@ -1,11 +1,5 @@
 package org.gluu.oxtrust.service.init;
 
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2020, Gluu
- */
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
@@ -13,9 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.config.oxtrust.AppConfiguration;
-import org.gluu.config.oxtrust.AttributeResolverConfiguration;
-import org.gluu.config.oxtrust.CacheRefreshConfiguration;
-import org.gluu.config.oxtrust.ImportPersonConfig;
 import org.gluu.config.oxtrust.LdapOxTrustConfiguration;
 import org.gluu.oxtrust.service.ApplicationFactory;
 import org.gluu.persist.PersistenceEntryManager;
@@ -36,9 +27,6 @@ public class ConfigurationFactory extends org.gluu.service.config.ConfigurationF
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
-
-	private CacheRefreshConfiguration cacheRefreshConfiguration;
-	private ImportPersonConfig importPersonConfig;
 	private AppConfiguration appConfiguration;
 
 	private long loadedRevision = -1;
@@ -46,9 +34,6 @@ public class ConfigurationFactory extends org.gluu.service.config.ConfigurationF
 	@Override
 	protected void init(LdapOxTrustConfiguration conf) {
 		this.appConfiguration = conf.getApplication();
-		this.cacheRefreshConfiguration = conf.getCacheRefresh();
-		this.importPersonConfig = conf.getImportPersonConfig();
-		this.attributeResolverConfiguration = conf.getAttributeResolverConfig();
 		this.loadedRevision = conf.getRevision();
 	}
 
@@ -72,9 +57,6 @@ public class ConfigurationFactory extends org.gluu.service.config.ConfigurationF
 	@Override
 	protected void destroryLoadedConfiguration() {
 		destroy(AppConfiguration.class);
-		destroy(CacheRefreshConfiguration.class);
-		destroy(ImportPersonConfig.class);
-		destroy(AttributeResolverConfiguration.class);
 	}
 
 	@Override
@@ -85,14 +67,6 @@ public class ConfigurationFactory extends org.gluu.service.config.ConfigurationF
 	@Override
 	public String getConfigurationDn() {
 		return this.baseConfiguration.getString("oxtrust_ConfigurationEntryDN");
-	}
-
-	public CacheRefreshConfiguration getCacheRefreshConfiguration() {
-		return cacheRefreshConfiguration;
-	}
-
-	public ImportPersonConfig getImportPersonConfig() {
-		return importPersonConfig;
 	}
 
 	@Produces

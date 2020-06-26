@@ -26,8 +26,6 @@ public class ExternalScimService extends ExternalScriptService {
 
     public ExternalScimService() {
         super(CustomScriptType.SCIM);
-        //TODO: remove
-        System.out.println("CONSTRUCTOR.");
     }
 
     private boolean executeScimCreateUserMethod(ScimCustomPerson user, CustomScriptConfiguration customScriptConfiguration) {
