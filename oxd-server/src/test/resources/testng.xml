@@ -55,6 +55,11 @@
             <class name="org.gluu.oxd.server.GetRpJwksTest"></class>
         </classes>
     </test>
+    <test name="Get Request Uri" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetRequestUriTest"></class>
+        </classes>
+    </test>
     <test name="Get Issuer" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.GetIssuerTest"></class>

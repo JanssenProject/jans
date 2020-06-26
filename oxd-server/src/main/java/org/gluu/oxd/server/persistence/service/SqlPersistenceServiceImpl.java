@@ -186,7 +186,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
 
             rs.next();
             if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject(rs.getString("key"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getDate("iat"), rs.getDate("exp"));
+                expiredObject = new ExpiredObject(rs.getString("key"), rs.getString("value"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getDate("iat"), rs.getDate("exp"));
             }
 
             query.close();
