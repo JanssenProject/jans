@@ -48,10 +48,9 @@ public enum CommandType {
     GET_JWKS("get_jwks", false),
     GET_DISCOVERY("get_discovery", false),
     ISSUER_DISCOVERY("issuer_discovery", false),
-
-    //jwks, request_uri
-    GET_RP_JWKS("get_rp_jwks", false);
-
+    GET_RP_JWKS("get_rp_jwks", false),
+    GET_REQUEST_OBJECT_JWT("get_request_object_jwt", false),
+    GET_REQUEST_URI("get_request_uri", true);
     private final String value;
     private final boolean authorizationRequired;
 

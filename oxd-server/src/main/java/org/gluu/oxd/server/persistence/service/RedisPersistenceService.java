@@ -103,7 +103,7 @@ public class RedisPersistenceService implements PersistenceService {
                 LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
                 expiredObjectFromDb = new ExpiredObject();
             }
-            ExpiredObject expiredObject = new ExpiredObject(key, expiredObjectFromDb.getType(), expiredObjectFromDb.getIat(), expiredObjectFromDb.getExp());
+            ExpiredObject expiredObject = new ExpiredObject(key, value, expiredObjectFromDb.getType(), expiredObjectFromDb.getIat(), expiredObjectFromDb.getExp());
 
             return expiredObject;
         }

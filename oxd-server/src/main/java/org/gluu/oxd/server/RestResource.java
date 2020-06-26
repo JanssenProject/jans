@@ -1,9 +1,10 @@
 package org.gluu.oxd.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import io.dropwizard.util.Strings;
 import io.opentracing.Scope;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.IntrospectionResponse;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -11,7 +12,10 @@ import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;
-import org.gluu.oxd.server.service.*;
+import org.gluu.oxd.server.service.ConfigurationService;
+import org.gluu.oxd.server.service.Rp;
+import org.gluu.oxd.server.service.RpSyncService;
+import org.gluu.oxd.server.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +24,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Path("/")
 public class RestResource {
@@ -42,6 +47,13 @@ public class RestResource {
     public String healthCheck() {
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
         return "{\"status\":\"running\"}";
+    }
+
+    @GET
+    @Path("/get-request-object-jwt/{request_object_id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getRequestObject(@PathParam("request_object_id") String id) {
+        return returnResponseAsString(process(CommandType.GET_REQUEST_OBJECT_JWT, convertParamToJsonString(GetRequestObjectJwtParams.class, id), GetRequestObjectJwtParams.class, null, null, httpRequest), "request_object");
     }
 
     @GET
@@ -243,6 +255,14 @@ public class RestResource {
         return process(CommandType.ISSUER_DISCOVERY, params, GetIssuerParams.class, null, null, httpRequest);
     }
 
+    @POST
+    @Path("/get-request-uri")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getRequestUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, String params) {
+        return process(CommandType.GET_REQUEST_URI, params, GetRequestUriParams.class, authorization, authorizationOxdId, httpRequest);
+    }
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return Jackson2.createJsonMapper().readValue(params, clazz);
@@ -356,6 +376,35 @@ public class RestResource {
 
         final ValidationService validationService = ServerLauncher.getInjector().getInstance(ValidationService.class);
         validationService.validateAccessToken(accessToken, authorizationOxdId);
+    }
+
+    private <T extends IParams> String convertParamToJsonString(Class<T> clazz, String... params) {
+        if (params != null && params.length > 0) {
+            Field[] fields = clazz.getDeclaredFields();
+
+            if (params.length > fields.length) {
+                LOG.error("Number of path parameter(s) more than fields in response object: {} ", clazz.getName());
+                throw new HttpException(ErrorResponseCode.PARAMETER_OUT_OF_BOUND);
+            }
+            List<String> paramsList = Lists.newArrayList(params);
+
+            JsonObject jsonObject = new JsonObject();
+            IntStream.range(0, paramsList.size())
+                    .forEach(i -> jsonObject.addProperty(fields[i].toString().substring(fields[i].toString().lastIndexOf('.') + 1), paramsList.get(i)));
+
+            return jsonObject.toString();
+        }
+        LOG.error("Missing path parameter in request.");
+        throw new HttpException(ErrorResponseCode.MISSING_PATH_PARAMETER);
+    }
+
+    private <T extends IParams> String returnResponseAsString(String jsonString, String fieldName) {
+        try {
+            return Jackson2.createRpMapper().readTree(jsonString).get(fieldName).textValue();
+        } catch (JsonProcessingException e) {
+            LOG.error("Error in converting string to json. ", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
