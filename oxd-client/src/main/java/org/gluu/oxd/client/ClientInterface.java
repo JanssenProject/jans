@@ -19,6 +19,11 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     String healthCheck();
 
+    @GET
+    @Path("/get-rp-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    JsonNode getRpJwks();
+
     @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
