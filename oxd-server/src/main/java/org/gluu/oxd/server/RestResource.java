@@ -44,6 +44,13 @@ public class RestResource {
         return "{\"status\":\"running\"}";
     }
 
+    @GET
+    @Path("/get-rp-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getRpJwks() {
+        return process(CommandType.GET_RP_JWKS, null, GetJwksParams.class, null, null, httpRequest);
+    }
+
     @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
@@ -285,7 +292,7 @@ public class RestResource {
 
     private static <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String authorizationOxdId) {
         LOG.trace("Command: {}", paramsAsString);
-        T params = read(paramsAsString, paramsClass);
+        T params = read(safeToJson(paramsAsString), paramsClass);
 
         final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
 
@@ -353,5 +360,9 @@ public class RestResource {
 
     private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
         return Strings.isNullOrEmpty(authorizationOxdId) ? params.getOxdId() : authorizationOxdId;
+    }
+
+    private static String safeToJson(String jsonString) {
+        return Strings.isNullOrEmpty(jsonString) ? "{}" : jsonString;
     }
 }
