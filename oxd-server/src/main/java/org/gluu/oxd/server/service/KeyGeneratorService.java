@@ -132,8 +132,8 @@ public class KeyGeneratorService {
         try {
             return cryptoProvider.sign(signingInput, alias, sharedSecret, signatureAlgorithm);
         } catch (Exception e) {
-            LOG.error("Failed to sign json web keys.", e);
-            throw new RuntimeException("Failed to generate json web keys.", e);
+            LOG.error("Failed to sign signingInput.", e);
+            throw new RuntimeException("Failed to signingInput.", e);
         }
     }
 
