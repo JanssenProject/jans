@@ -26,4 +26,3 @@ public class GetRpJwksOperation extends BaseOperation<GetJwksParams> {
 
     }
 }
-
