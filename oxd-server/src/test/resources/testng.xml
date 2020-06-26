@@ -50,6 +50,11 @@
             <class name="org.gluu.oxd.server.HealthCheckTest"></class>
         </classes>
     </test>
+    <test name="Get Rp Jwks" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetRpJwksTest"></class>
+        </classes>
+    </test>
     <test name="Get Issuer" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.GetIssuerTest"></class>
