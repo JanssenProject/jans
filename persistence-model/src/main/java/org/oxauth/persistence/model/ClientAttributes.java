@@ -54,6 +54,18 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("introspectionScripts")
     private List<String> introspectionScripts;
 
+    @JsonProperty("rptClaimsScripts")
+    private List<String> rptClaimsScripts;
+
+    public List<String> getRptClaimsScripts() {
+        if (rptClaimsScripts == null) rptClaimsScripts = Lists.newArrayList();
+        return rptClaimsScripts;
+    }
+
+    public void setRptClaimsScripts(List<String> rptClaimsScripts) {
+        this.rptClaimsScripts = rptClaimsScripts;
+    }
+
     public List<String> getIntrospectionScripts() {
         if (introspectionScripts == null) introspectionScripts = Lists.newArrayList();
         return introspectionScripts;
@@ -180,6 +192,7 @@ public class ClientAttributes implements Serializable {
                 ", postAuthnScripts=" + postAuthnScripts +
                 ", consentGatheringScripts=" + consentGatheringScripts +
                 ", introspectionScripts=" + introspectionScripts +
+                ", rptClaimsScripts=" + rptClaimsScripts +
                 '}';
     }
 }
