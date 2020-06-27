@@ -181,14 +181,12 @@ public class StringUtils {
     public static String generateRandomReadableCode(byte length) {
         StringBuilder sb = new StringBuilder();
         SecureRandom sc = new SecureRandom();
-        byte grouper = 0;
         for (int i = 0; i < length; i++) {
-            char item = EASY_TO_READ_CHARACTERS.charAt(sc.nextInt(EASY_TO_READ_CHARACTERS.length()));
-            sb.append(item);
-            grouper++;
-            if (grouper % 4 == 0) {
+            if (i % 4 == 0 && i > 0) {
                 sb.append('-');
             }
+            char item = EASY_TO_READ_CHARACTERS.charAt(sc.nextInt(EASY_TO_READ_CHARACTERS.length()));
+            sb.append(item);
         }
         return sb.toString();
     }
