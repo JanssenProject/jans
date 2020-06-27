@@ -29,22 +29,21 @@ import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-
+import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam.*;
 import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
 
 /**
@@ -147,7 +146,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         String userCode = StringUtils.generateRandomReadableCode((byte) 8); // Entropy 20^8 which is suggested in the RFC8628 section 6.1
         String deviceCode = StringUtils.generateRandomCode((byte) 24); // Entropy 160 bits which is over userCode entropy based on RFC8628 section 5.2
-        URI verificationUri = URI.create(appConfiguration.getIssuer()).resolve("device-code");
+        URI verificationUri = UriBuilder.fromUri(appConfiguration.getIssuer()).path("device-code").build();
         URI verificationUriComplete = UriBuilder.fromUri(verificationUri).queryParam(DeviceAuthorizationResponseParam.USER_CODE, userCode).build();
         int expiresIn = appConfiguration.getDeviceAuthorizationRequestExpiresIn();
         int interval = appConfiguration.getDeviceAuthorizationTokenPoolInterval();
@@ -159,6 +158,23 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        return null;
+        return Response.ok()
+                .entity(getResponseJSONObject(deviceAuthorizationCacheControl).toString(4).replace("\\/", "/"))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
     }
+
+    private JSONObject getResponseJSONObject(DeviceAuthorizationCacheControl deviceAuthorizationCacheControl) throws JSONException {
+        JSONObject responseJsonObject = new JSONObject();
+
+        responseJsonObject.put(DEVICE_CODE, deviceAuthorizationCacheControl.getDeviceCode());
+        responseJsonObject.put(USER_CODE, deviceAuthorizationCacheControl.getUserCode());
+        responseJsonObject.put(VERIFICATION_URI, deviceAuthorizationCacheControl.getVerificationUri());
+        responseJsonObject.put(VERIFICATION_URI_COMPLETE, deviceAuthorizationCacheControl.getVerificationUriComplete());
+        responseJsonObject.put(EXPIRES_IN, deviceAuthorizationCacheControl.getExpiresIn());
+        responseJsonObject.put(INTERVAL, deviceAuthorizationCacheControl.getInterval());
+
+        return responseJsonObject;
+    }
+
 }
