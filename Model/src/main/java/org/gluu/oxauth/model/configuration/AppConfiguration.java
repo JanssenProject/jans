@@ -308,6 +308,10 @@ public class AppConfiguration implements Configuration {
         return changeSessionIdOnAuthentication;
     }
 
+    public void setChangeSessionIdOnAuthentication(Boolean changeSessionIdOnAuthentication) {
+        this.changeSessionIdOnAuthentication = changeSessionIdOnAuthentication;
+    }
+
     public Boolean getReturnClientSecretOnRead() {
         if (returnClientSecretOnRead == null) returnClientSecretOnRead = false;
         return returnClientSecretOnRead;
