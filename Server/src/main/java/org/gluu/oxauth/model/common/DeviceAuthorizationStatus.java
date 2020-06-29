@@ -9,14 +9,14 @@ package org.gluu.oxauth.model.common;
 /**
  * Contains a list of values of  status for OAuth2 Device Flow requests.
  */
-public enum DeviceFlowRequestStatus {
+public enum DeviceAuthorizationStatus {
     PENDING("pending"),
     DENIED("denied"),
     EXPIRED("expired");
 
     private final String value;
 
-    DeviceFlowRequestStatus(String name) {
+    DeviceAuthorizationStatus(String name) {
         value = name;
     }
 

@@ -7,26 +7,19 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
-import org.gluu.oxauth.ciba.CIBAPingCallbackService;
-import org.gluu.oxauth.ciba.CIBAPushTokenDeliveryService;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
-import org.gluu.oxauth.model.common.DeviceFlowRequestStatus;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
-import org.gluu.oxauth.service.ciba.CibaRequestService;
-import org.gluu.oxauth.service.external.ExternalPostAuthnService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
@@ -62,57 +55,16 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private AuthorizationGrantList authorizationGrantList;
-
-    @Inject
-    private ClientService clientService;
-
-    @Inject
-    private UserService userService;
-
-    @Inject
     private Identity identity;
-
-    @Inject
-    private AuthenticationFilterService authenticationFilterService;
-
-    @Inject
-    private SessionIdService sessionIdService;
-
-    @Inject CookieService cookieService;
 
     @Inject
     private ScopeChecker scopeChecker;
 
     @Inject
-    private ClientAuthorizationsService clientAuthorizationsService;
-
-    @Inject
-    private RequestParameterService requestParameterService;
-
-    @Inject
     private AppConfiguration appConfiguration;
 
     @Inject
-    private ConfigurationFactory сonfigurationFactory;
-
-    @Inject
-    private AbstractCryptoProvider cryptoProvider;
-
-    @Inject
-    private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
-
-    @Inject
-    private CIBAPushTokenDeliveryService cibaPushTokenDeliveryService;
-
-    @Inject
-    private CIBAPingCallbackService cibaPingCallbackService;
-
-    @Inject
-    private ExternalPostAuthnService externalPostAuthnService;
-
-    @Inject
-    private CibaRequestService cibaRequestService;
+    private DeviceAuthorizationService deviceAuthorizationService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -127,41 +79,47 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
         oAuth2AuditLog.setClientId(clientId);
         oAuth2AuditLog.setScope(scope);
 
-        log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
+        try {
+            log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
+            SessionClient sessionClient = identity.getSessionClient();
+            Client client = null;
+            if (sessionClient != null) {
+                client = sessionClient.getClient();
+            }
+            if (client == null) {
+                throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
+            }
 
-        SessionClient sessionClient = identity.getSessionClient();
-        Client client = null;
-        if (sessionClient != null) {
-            client = sessionClient.getClient();
+            List<String> scopes = new ArrayList<>();
+            if (StringHelper.isNotEmpty(scope)) {
+                Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+                scopes.addAll(grantedScopes);
+            }
+
+            String userCode = StringUtils.generateRandomReadableCode((byte) 8); // Entropy 20^8 which is suggested in the RFC8628 section 6.1
+            String deviceCode = StringUtils.generateRandomCode((byte) 24); // Entropy 160 bits which is over userCode entropy based on RFC8628 section 5.2
+            URI verificationUri = UriBuilder.fromUri(appConfiguration.getIssuer()).path("device-code").build();
+            URI verificationUriComplete = UriBuilder.fromUri(verificationUri).queryParam(DeviceAuthorizationResponseParam.USER_CODE, userCode).build();
+            int expiresIn = appConfiguration.getDeviceAuthorizationRequestExpiresIn();
+            int interval = appConfiguration.getDeviceAuthorizationTokenPoolInterval();
+            long lastAccess = System.currentTimeMillis();
+            DeviceAuthorizationStatus status = DeviceAuthorizationStatus.PENDING;
+
+            DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = new DeviceAuthorizationCacheControl(userCode,
+                    deviceCode, client, scopes, verificationUri, verificationUriComplete, expiresIn, interval, lastAccess, status);
+            deviceAuthorizationService.saveInCache(deviceAuthorizationCacheControl);
+            log.info("Device authorization flow initiated, userCode: {}, deviceCode: {}, clientId: {}, verificationUri: {}, expiresIn: {}, interval: {}", userCode, deviceCode, clientId, verificationUri, expiresIn, interval);
+
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+            return Response.ok()
+                    .entity(getResponseJSONObject(deviceAuthorizationCacheControl).toString(4).replace("\\/", "/"))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build();
+        } catch (Exception e) {
+            log.error("Problems processing device authorization init flow, clientId: {}, scope: {}", clientId, scope);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .build();
         }
-        if (client == null) {
-            throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
-        }
-
-        List<String> scopes = new ArrayList<>();
-        if (StringHelper.isNotEmpty(scope)) {
-            Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-            scopes.addAll(grantedScopes);
-        }
-
-        String userCode = StringUtils.generateRandomReadableCode((byte) 8); // Entropy 20^8 which is suggested in the RFC8628 section 6.1
-        String deviceCode = StringUtils.generateRandomCode((byte) 24); // Entropy 160 bits which is over userCode entropy based on RFC8628 section 5.2
-        URI verificationUri = UriBuilder.fromUri(appConfiguration.getIssuer()).path("device-code").build();
-        URI verificationUriComplete = UriBuilder.fromUri(verificationUri).queryParam(DeviceAuthorizationResponseParam.USER_CODE, userCode).build();
-        int expiresIn = appConfiguration.getDeviceAuthorizationRequestExpiresIn();
-        int interval = appConfiguration.getDeviceAuthorizationTokenPoolInterval();
-        long lastAccess = System.currentTimeMillis();
-        DeviceFlowRequestStatus status = DeviceFlowRequestStatus.PENDING;
-
-        DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = new DeviceAuthorizationCacheControl(userCode,
-                deviceCode, client, scopes, verificationUri, verificationUriComplete, expiresIn, interval, lastAccess, status);
-
-        
-        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        return Response.ok()
-                .entity(getResponseJSONObject(deviceAuthorizationCacheControl).toString(4).replace("\\/", "/"))
-                .type(MediaType.APPLICATION_JSON_TYPE)
-                .build();
     }
 
     private JSONObject getResponseJSONObject(DeviceAuthorizationCacheControl deviceAuthorizationCacheControl) throws JSONException {
