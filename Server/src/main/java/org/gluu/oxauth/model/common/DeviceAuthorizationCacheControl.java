@@ -20,20 +20,22 @@ public class DeviceAuthorizationCacheControl implements Serializable {
     private String userCode;
     private String deviceCode;
     private Client client;
+    private User user;
     private List<String> scopes;
     private URI verificationUri;
     private URI verificationUriComplete;
     private int expiresIn = 1;
     private int interval = 5;
     private long lastAccessControl;
-    private DeviceFlowRequestStatus status;
+    private DeviceAuthorizationStatus status;
+    private String acrValues;
 
     public DeviceAuthorizationCacheControl() {
     }
 
     public DeviceAuthorizationCacheControl(String userCode, String deviceCode, Client client, List<String> scopes,
                                            URI verificationUri, URI verificationUriComplete, int expiresIn,
-                                           int interval, long lastAccessControl, DeviceFlowRequestStatus status) {
+                                           int interval, long lastAccessControl, DeviceAuthorizationStatus status) {
         this.userCode = userCode;
         this.deviceCode = deviceCode;
         this.client = client;
@@ -114,16 +116,32 @@ public class DeviceAuthorizationCacheControl implements Serializable {
         return lastAccessControl;
     }
 
-    public void setLastAccessControl(Long lastAccessControl) {
+    public void setLastAccessControl(long lastAccessControl) {
         this.lastAccessControl = lastAccessControl;
     }
 
-    public DeviceFlowRequestStatus getStatus() {
+    public DeviceAuthorizationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(DeviceFlowRequestStatus status) {
+    public void setStatus(DeviceAuthorizationStatus status) {
         this.status = status;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
     }
 
     @Override
@@ -132,6 +150,7 @@ public class DeviceAuthorizationCacheControl implements Serializable {
                 "userCode='" + userCode + '\'' +
                 ", deviceCode='" + deviceCode + '\'' +
                 ", client=" + client +
+                ", user=" + user +
                 ", scopes=" + scopes +
                 ", verificationUri='" + verificationUri + '\'' +
                 ", verificationUriComplete='" + verificationUriComplete + '\'' +
@@ -139,6 +158,7 @@ public class DeviceAuthorizationCacheControl implements Serializable {
                 ", interval=" + interval +
                 ", lastAccessControl=" + lastAccessControl +
                 ", status=" + status +
+                ", acrValues=" + acrValues +
                 '}';
     }
 }
