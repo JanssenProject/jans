@@ -35,6 +35,7 @@ public class CacheGrant implements Serializable {
     private String codeChallenge;
     private String codeChallengeMethod;
     private String claims;
+    private String deviceCode;
 
     private String acrValues;
     private String sessionDn;
@@ -240,6 +241,23 @@ public class CacheGrant implements Serializable {
         grant.setNonce(nonce);
         grant.setClaims(claims);
         grant.setAuthReqId(authReqId);
+        grant.setTokensDelivered(tokensDelivered);
+
+        return grant;
+    }
+
+    public DeviceCodeGrant asDeviceCodeGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
+        DeviceCodeGrant grant = grantInstance.select(DeviceCodeGrant.class).get();
+        grant.init(user, AuthorizationGrantType.DEVICE_CODE,  client, authenticationTime);
+        grant.setScopes(scopes);
+        grant.setGrantId(grantId);
+        grant.setSessionDn(sessionDn);
+        grant.setCodeChallenge(codeChallenge);
+        grant.setCodeChallengeMethod(codeChallengeMethod);
+        grant.setAcrValues(acrValues);
+        grant.setNonce(nonce);
+        grant.setClaims(claims);
+        grant.setDeviceCode(deviceCode);
         grant.setTokensDelivered(tokensDelivered);
 
         return grant;
