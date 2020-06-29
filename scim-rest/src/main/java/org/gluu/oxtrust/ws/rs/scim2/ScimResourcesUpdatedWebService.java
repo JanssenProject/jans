@@ -40,8 +40,6 @@ import static org.gluu.oxtrust.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 @Path("/scim")
 public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
-    private static final int MAX_COUNT = 1000;
-
     @Inject
     private PersistenceEntryManager entryManager;
 
@@ -94,12 +92,12 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
                 log.trace("Using filter {}", filter.toString());
 
                 List<ScimCustomPerson> list = entryManager.findPagedEntries(personService.getDnForPerson(null), ScimCustomPerson.class,
-                        filter, null,  "uid", SortOrder.ASCENDING, start, itemsPerPage, MAX_COUNT).getEntries();
+                        filter, null,  "uid", SortOrder.ASCENDING, start, itemsPerPage, getMaxCount()).getEntries();
 
                 response = Response.ok(getUserResultsAsJson(list)).build();
             }
         } catch (Exception e1) {
-            log.error("Failure at searchUsers method", e1);
+            log.error("Failure at usersChangedAfter method", e1);
             response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e1.getMessage());
         }
         return response;
