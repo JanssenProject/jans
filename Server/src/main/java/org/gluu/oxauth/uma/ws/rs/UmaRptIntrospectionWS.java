@@ -11,6 +11,9 @@ import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
 import org.gluu.oxauth.model.uma.UmaConstants;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.external.ExternalUmaRptClaimsService;
+import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.uma.service.UmaPctService;
@@ -19,10 +22,14 @@ import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -50,24 +57,32 @@ public class UmaRptIntrospectionWS {
     private UmaScopeService umaScopeService;
     @Inject
     private UmaPctService pctService;
+    @Inject
+    private ExternalUmaRptClaimsService externalUmaRptClaimsService;
+    @Inject
+    private ClientService clientService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response introspectGet(@HeaderParam("Authorization") String authorization,
                                   @QueryParam("token") String token,
-                                  @QueryParam("token_type_hint") String tokenTypeHint) {
-        return introspect(authorization, token, tokenTypeHint);
+                                  @QueryParam("token_type_hint") String tokenTypeHint,
+                                  @Context HttpServletRequest httpRequest,
+                                  @Context HttpServletResponse httpResponse) {
+        return introspect(authorization, token, tokenTypeHint, httpRequest, httpResponse);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response introspectPost(@HeaderParam("Authorization") String authorization,
                                    @FormParam("token") String token,
-                                   @FormParam("token_type_hint") String tokenTypeHint) {
-        return introspect(authorization, token, tokenTypeHint);
+                                   @FormParam("token_type_hint") String tokenTypeHint,
+                                   @Context HttpServletRequest httpRequest,
+                                   @Context HttpServletResponse httpResponse) {
+        return introspect(authorization, token, tokenTypeHint, httpRequest, httpResponse);
     }
 
-    private Response introspect(String authorization, String token, String tokenTypeHint) {
+    private Response introspect(String authorization, String token, String tokenTypeHint, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
@@ -108,12 +123,18 @@ public class UmaRptIntrospectionWS {
                 }
             }
 
+            JSONObject rptAsJson = new JSONObject(ServerUtil.asJson(statusResponse));
 
-            // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-            final String entity = ServerUtil.asJson(statusResponse);
+            ExternalUmaRptClaimsContext context = new ExternalUmaRptClaimsContext(clientService.getClient(rpt.getClientId()), httpRequest, httpResponse);
+            if (externalUmaRptClaimsService.externalModify(rptAsJson, context)) {
+                log.trace("Successfully run external RPT Claims script associated with {}", rpt.getClientId());
+            } else {
+                rptAsJson = new JSONObject(ServerUtil.asJson(statusResponse));
+                log.trace("Canceled changes made by external RPT Claims script since method returned `false`.");
+            }
 
             return Response.status(Response.Status.OK)
-                    .entity(entity)
+                    .entity(rptAsJson.toString())
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .cacheControl(ServerUtil.cacheControl(true))
                     .build();
