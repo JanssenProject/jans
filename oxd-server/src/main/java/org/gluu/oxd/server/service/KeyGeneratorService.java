@@ -162,7 +162,7 @@ public class KeyGeneratorService {
     }
 
     public JSONWebKeySet getKeysFromStorage() {
-        ExpiredObject expiredObject = persistenceService.getExpiredObject(ExpiredObjectType.JWKS.toString());
+        ExpiredObject expiredObject = persistenceService.getExpiredObject(ExpiredObjectType.JWKS.getValue());
         if (expiredObject != null && !Strings.isNullOrEmpty(expiredObject.getValue())) {
             JSONObject keys = new JSONObject(expiredObject.getValue());
             return JSONWebKeySet.fromJSONObject(keys);
