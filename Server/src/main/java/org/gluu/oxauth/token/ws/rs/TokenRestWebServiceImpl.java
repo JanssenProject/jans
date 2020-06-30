@@ -542,7 +542,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), oAuth2AuditLog);
             }
         } else {
-            final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(deviceCode);
+            final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(deviceCode, null);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
             if (cacheData != null) {
                 if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
