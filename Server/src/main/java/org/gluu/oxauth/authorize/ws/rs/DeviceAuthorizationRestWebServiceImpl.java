@@ -9,6 +9,7 @@ package org.gluu.oxauth.authorize.ws.rs;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
+import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
@@ -37,7 +38,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam.*;
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_CLIENT;
+import static org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST;
+import static org.gluu.oxauth.model.token.TokenErrorResponseType.INVALID_CLIENT;
 
 /**
  * Implementation for device authorization rest service.
@@ -75,7 +77,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
                                         HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded
 
-        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.BACKCHANNEL_AUTHENTICATION);
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.DEVICE_CODE_AUTHORIZATION);
         oAuth2AuditLog.setClientId(clientId);
         oAuth2AuditLog.setScope(scope);
 
@@ -88,6 +90,9 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             }
             if (client == null) {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
+            }
+            if (!deviceAuthorizationService.hasDeviceCodeCompatibility(client)) {
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, INVALID_REQUEST, "");
             }
 
             List<String> scopes = new ArrayList<>();
