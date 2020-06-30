@@ -9,6 +9,7 @@ package org.gluu.oxauth.uma.service;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
 import org.gluu.oxauth.claims.Audience;
+import org.gluu.oxauth.model.common.ExecutionContext;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
@@ -17,7 +18,10 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.external.ExternalUmaRptClaimsService;
+import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.util.ServerUtil;
@@ -28,6 +32,7 @@ import org.gluu.util.INumGenerator;
 import org.gluu.util.StringHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -74,6 +79,9 @@ public class UmaRptService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ExternalUmaRptClaimsService externalUmaRptClaimsService;
 
     private boolean containsBranch = false;
 
@@ -188,14 +196,15 @@ public class UmaRptService {
         return calendar.getTime();
     }
 
-    public UmaRPT createRPTAndPersist(Client client, List<UmaPermission> permissions) {
+    public UmaRPT createRPTAndPersist(ExecutionContext executionContext, List<UmaPermission> permissions) {
         try {
             final Date creationDate = new Date();
             final Date expirationDate = rptExpirationDate();
+            final Client client = executionContext.getClient();
 
             final String code;
             if (client.isRptAsJwt()) {
-                code = createRptJwt(client, permissions, creationDate, expirationDate);
+                code = createRptJwt(executionContext, permissions, creationDate, expirationDate);
             } else {
                 code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
             }
@@ -206,7 +215,7 @@ public class UmaRptService {
             return rpt;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("Failed to generate RPT, clientId: " + client.getClientId(), e);
+            throw new RuntimeException("Failed to generate RPT, clientId: " + executionContext.getClient().getClientId(), e);
         }
     }
 
@@ -214,7 +223,8 @@ public class UmaRptService {
         ldapEntryManager.merge(rpt);
     }
 
-    private String createRptJwt(Client client, List<UmaPermission> permissions, Date creationDate, Date expirationDate) throws Exception {
+    private String createRptJwt(ExecutionContext executionContext, List<UmaPermission> permissions, Date creationDate, Date expirationDate) throws Exception {
+        Client client = executionContext.getClient();
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getAccessTokenSigningAlg() != null && SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg()) != null) {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getAccessTokenSigningAlg());
@@ -240,11 +250,28 @@ public class UmaRptService {
 
             jwt.getClaims().setClaim("permissions", buildPermissionsJSONObject(permissions));
         }
+        runScriptAndInjectValuesIntoJwt(jwt, executionContext);
+
         return jwtSigner.sign().toString();
     }
 
+    private void runScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
+        JSONObject responseAsJsonObject = new JSONObject();
+
+        ExternalUmaRptClaimsContext context = new ExternalUmaRptClaimsContext(executionContext);
+        if (externalUmaRptClaimsService.externalModify(responseAsJsonObject, context)) {
+            log.trace("Successfully run external RPT Claim scripts.");
+
+            if (context.isTranferPropertiesIntoJwtClaims()) {
+                log.trace("Transfering claims into jwt ...");
+                JwtUtil.transferIntoJwtClaims(responseAsJsonObject, jwt);
+                log.trace("Transfered.");
+            }
+        }
+    }
+
     public JSONArray buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
-        List<org.gluu.oxauth.model.uma.UmaPermission> result = new ArrayList<org.gluu.oxauth.model.uma.UmaPermission>();
+        List<org.gluu.oxauth.model.uma.UmaPermission> result = new ArrayList<>();
 
         for (UmaPermission permission : permissions) {
             permission.checkExpired();
