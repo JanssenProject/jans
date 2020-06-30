@@ -42,22 +42,20 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
                     SignatureAlgorithm.fromString(rp.getRequestObjectSigningAlg());
 
             if (algo == null) {
-                LOG.trace("The `request_object_signing_alg` parameter is not set. Using `none` algorithm by default.");
-                algo = SignatureAlgorithm.fromString("none");
+                LOG.error("`request_object_signing_alg` is required parameter in request. Please set this parameter if it is not set during client registration.");
+                throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
             }
 
-            Jwt jwt = setRequestObject(algo, rp, params);
+            Jwt unsignedJwt = createRequestObject(algo, rp, params);
 
             //signing request object
-            String encodedSignature = getKeyGeneratorService().sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), rp.getClientSecret(), algo);
-            LOG.trace("encodedSignature : {} ", encodedSignature);
-            jwt.setEncodedSignature(encodedSignature);
+            Jwt signedJwt = getKeyGeneratorService().sign(unsignedJwt, rp.getClientSecret(), algo);
 
             //setting request object in Expired Object
-            getStateService().deleteExpiredObjectsByKey(rp.getOxdId());
-            getStateService().putRequestObject(rp.getOxdId(), jwt.toString());
+            String requestUriId = UUID.randomUUID().toString();
+            getRequestObjectService().putRequestObject(requestUriId, signedJwt.toString());
 
-            String requestUri = baseOxdUrl(params.getOxdHostUrl(), params.getOxdId());
+            String requestUri = baseRequestUri(params.getOxdHostUrl()) + requestUriId;
             LOG.trace("RequestObject created successfully. request_uri : {} ", requestUri);
 
             GetRequestUriResponse response = new GetRequestUriResponse();
@@ -72,7 +70,7 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
         throw new HttpException(ErrorResponseCode.FAILED_TO_GET_REQUEST_URI);
     }
 
-    public Jwt setRequestObject(SignatureAlgorithm algo, Rp rp, GetRequestUriParams params) {
+    public Jwt createRequestObject(SignatureAlgorithm algo, Rp rp, GetRequestUriParams params) {
         Jwt jwt = new Jwt();
         //set header
         jwt.getHeader().setType(JwtType.JWT);
@@ -98,37 +96,7 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
 
             Map<String, Object> claims = params.getParams();
             claims.forEach((key, value) -> {
-
-                if (value instanceof String) {
-                    jwt.getClaims().setClaim(key, (String) value);
-                }
-                if (value instanceof Date) {
-                    jwt.getClaims().setClaim(key, (Date) value);
-                }
-                if (value instanceof Boolean) {
-                    jwt.getClaims().setClaim(key, (Boolean) value);
-                }
-                if (value instanceof Integer) {
-                    jwt.getClaims().setClaim(key, (Integer) value);
-                }
-                if (value instanceof Long) {
-                    jwt.getClaims().setClaim(key, (Long) value);
-                }
-                if (value instanceof Character) {
-                    jwt.getClaims().setClaim(key, (Character) value);
-                }
-                if (value instanceof List) {
-                    jwt.getClaims().setClaim(key, (List) value);
-                }
-                if (value instanceof Map) {
-                    jwt.getClaims().setClaim(key, (new JSONObject((Map) value)));
-                }
-                if (value instanceof JSONObject) {
-                    jwt.getClaims().setClaim(key, (JSONObject) value);
-                }
-                if (value instanceof JSONArray) {
-                    jwt.getClaims().setClaim(key, (JSONArray) value);
-                }
+                jwt.getClaims().setClaimObject(key, value, true);
             });
         }
         return jwt;
@@ -141,13 +109,13 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
         }
     }
 
-    private String baseOxdUrl(String oxdHost, String oxdId) {
+    private String baseRequestUri(String oxdHost) {
         if (!oxdHost.startsWith("http")) {
             oxdHost = "https://" + oxdHost;
         }
         if (oxdHost.endsWith("/")) {
             oxdHost = StringUtils.removeEnd(oxdHost, "/");
         }
-        return oxdHost + "/get-request-object-jwt/" + oxdId;
+        return oxdHost + "/get-request-object-jwt/";
     }
 }

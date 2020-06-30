@@ -43,34 +43,20 @@ public class PersistenceServiceImpl implements PersistenceService {
         switch (storage) {
             case "h2":
                 this.sqlProvider = new H2PersistenceProvider(this.configurationService);
-                setTimerForDBCleanUpTask();
                 return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
             case "redis":
                 return new RedisPersistenceService(this.configurationService.getConfiguration());
             case "jdbc":
                 this.sqlProvider = new JDBCPersistenceProvider(this.configurationService);
-                setTimerForDBCleanUpTask();
                 return new SqlPersistenceServiceImpl(this.sqlProvider, this.configurationService);
             case "gluu_server_configuration":
-                setTimerForDBCleanUpTask();
                 return new GluuPersistenceService(this.configurationService.getConfiguration());
             case "ldap":
-                setTimerForDBCleanUpTask();
                 return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
             case "couchbase":
                 return new GluuPersistenceService(this.configurationService.getConfiguration(), storage);
         }
         throw new RuntimeException("Failed to create persistence provider. Unrecognized storage specified: " + storage + ", full configuration: " + this.configurationService.get());
-    }
-
-    public void setTimerForDBCleanUpTask() {
-        ScheduledExecutorService scheduledExecutorService = CoreUtils.createExecutor();
-        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                LOG.debug("Deleting expired_objects from database.");
-                persistenceService.deleteAllExpiredObjects();
-            }
-        }, configurationService.get().getDbCleanupIntervalInHours(), configurationService.get().getDbCleanupIntervalInHours(), TimeUnit.HOURS);
     }
 
     public boolean create(Rp rp) {
