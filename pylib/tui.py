@@ -549,7 +549,7 @@ class DBBackendForm(GluuSetupForm):
 class StorageSelectionForm(GluuSetupForm):
     def create(self):
 
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(msg.storages), 
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=30, max_height=len(msg.storages), 
             values=msg.storages, name=msg.DBBackendForm_label, scroll_exit=True)
 
         self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storages)+4, editable=False, color='STANDOUT')
