@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.uma.service;
 
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
+import org.gluu.oxauth.model.common.ExecutionContext;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.jwt.Jwt;
@@ -15,9 +15,6 @@ import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.UmaTokenResponse;
 import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
-import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
@@ -27,6 +24,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -53,17 +51,9 @@ public class UmaTokenService {
     @Inject
     private UmaValidationService umaValidationService;
     @Inject
-    private ClientService clientService;
-    @Inject
-    private TokenService tokenService;
-    @Inject
     private AppConfiguration appConfiguration;
     @Inject
-    private WebKeysConfiguration webKeysConfiguration;
-    @Inject
     private UmaNeedsInfoService umaNeedsInfoService;
-    @Inject
-    private ExternalUmaRptPolicyService policyService;
     @Inject
     private UmaExpressionService expressionService;
 
@@ -75,7 +65,8 @@ public class UmaTokenService {
             String pctCode,
             String rptCode,
             String scope,
-            HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
         try {
             log.trace("requestRpt grant_type: {}, ticket: {}, claim_token: {}, claim_token_format: {}, pct: {}, rpt: {}, scope: {}"
                     , grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope);
@@ -112,7 +103,9 @@ public class UmaTokenService {
 
             boolean upgraded = false;
             if (rpt == null) {
-                rpt = rptService.createRPTAndPersist(client, permissions);
+                ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
+                executionContext.setClient(client);
+                rpt = rptService.createRPTAndPersist(executionContext, permissions);
                 rptCode = rpt.getNotHashedCode();
             } else if (rptService.addPermissionToRPT(rpt, permissions)) {
                 upgraded = true;
@@ -146,14 +139,14 @@ public class UmaTokenService {
     private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<Scope, Boolean> scopes) {
         log.trace("Updating permissions with requested scopes ...");
         for (UmaPermission permission : permissions) {
-            Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
+            Set<String> scopeDns = new HashSet<>(permission.getScopeDns());
 
             for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
                 log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
                 scopeDns.add(entry.getKey().getDn());
             }
 
-            permission.setScopeDns(new ArrayList<String>(scopeDns));
+            permission.setScopeDns(new ArrayList<>(scopeDns));
         }
     }
 }
