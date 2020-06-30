@@ -53,7 +53,7 @@ public class RestResource {
     @Path("/get-request-object-jwt/{request_object_id}")
     @Produces(MediaType.TEXT_PLAIN)
     public String getRequestObject(@PathParam("request_object_id") String id) {
-        return returnResponseAsString(process(CommandType.GET_REQUEST_OBJECT_JWT, convertParamToJsonString(GetRequestObjectJwtParams.class, id), GetRequestObjectJwtParams.class, null, null, httpRequest), "request_object");
+        return process(CommandType.GET_REQUEST_OBJECT_JWT, convertParamToJsonString(GetRequestObjectJwtParams.class, id), GetRequestObjectJwtParams.class, null, null, httpRequest);
     }
 
     @GET
@@ -281,10 +281,17 @@ public class RestResource {
 
             validateIpAddressAllowed(httpRequest.getRemoteAddr());
             Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, authorizationOxdId);
-            final String json = Jackson2.asJsonSilently(forJsonConversion);
-            TracingUtil.log("Send back response: " + json);
-            LOG.trace("Send back response: {}", json);
-            return json;
+            String response = null;
+
+            if (commandType.getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
+                response = Jackson2.asJsonSilently(forJsonConversion);
+            } else if (commandType.getReturnType().equalsIgnoreCase(MediaType.TEXT_PLAIN)) {
+                response = forJsonConversion.toString();
+            }
+
+            TracingUtil.log("Send back response: " + response);
+            LOG.trace("Send back response: {}", response);
+            return response;
         }
     }
 
@@ -396,15 +403,6 @@ public class RestResource {
         }
         LOG.error("Missing path parameter in request.");
         throw new HttpException(ErrorResponseCode.MISSING_PATH_PARAMETER);
-    }
-
-    private <T extends IParams> String returnResponseAsString(String jsonString, String fieldName) {
-        try {
-            return Jackson2.createRpMapper().readTree(jsonString).get(fieldName).textValue();
-        } catch (JsonProcessingException e) {
-            LOG.error("Error in converting string to json. ", e);
-            throw new RuntimeException(e);
-        }
     }
 
     private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
