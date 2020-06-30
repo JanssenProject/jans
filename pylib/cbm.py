@@ -141,6 +141,10 @@ class CBM:
 
         return result
 
+    def get_services(self):
+        result = self._get('pools/default/nodeServices')
+        return result
+
     def set_admin_password(self):
         data = {
                     'password': self.auth.password,
