@@ -91,13 +91,17 @@ public class ExternalApplicationSessionService extends ExternalScriptService {
         return result;
     }
 
-    public void executeExternalOnEventMethod(SessionEvent event) {
+    public void externalEvent(SessionEvent event) {
+        if (!isEnabled()) {
+            return;
+        }
+
         for (CustomScriptConfiguration scriptConfiguration : this.customScriptConfigurations) {
-            executeExternalOnEventMethod(scriptConfiguration, event);
+            externalEvent(scriptConfiguration, event);
         }
     }
 
-    private void executeExternalOnEventMethod(CustomScriptConfiguration scriptConfiguration, SessionEvent event) {
+    private void externalEvent(CustomScriptConfiguration scriptConfiguration, SessionEvent event) {
         try {
             log.trace("Executing python 'onEvent' method of script: " + scriptConfiguration.getName() + ", event: " + event);
             event.setScriptConfiguration(scriptConfiguration);
