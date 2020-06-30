@@ -877,9 +877,6 @@ public class SessionIdService {
     }
 
     public void externalEvent(SessionEvent event) {
-        if (!externalApplicationSessionService.isEnabled()) {
-            return;
-        }
-        externalApplicationSessionService.executeExternalOnEventMethod(event);
+        externalApplicationSessionService.externalEvent(event);
     }
 }
