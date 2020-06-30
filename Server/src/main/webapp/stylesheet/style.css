@@ -649,4 +649,37 @@ input.btn.btn-done {
 .step_bx form {
     padding: 0 19px;
 }
-	
+
+.device-authz-container {
+    padding: 8px 12px 9px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 10px;
+    background: white;
+    border: 1px solid #008b8b;
+}
+
+.device-authz-title {
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.device-authz-subtitle {
+    padding: 10px 0;
+}
+
+.device-authz-button {
+    margin: 30px 0 0;
+}
+
+@media (max-width:575px) {
+    .device-authz-label {
+        margin: 10px 0;
+    }
+
+    .no-margin {
+        margin: 0 !important;
+    }
+}
