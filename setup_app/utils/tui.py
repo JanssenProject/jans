@@ -13,6 +13,9 @@ import inspect
 import threading
 import math
 
+# for putty connections we need the following env
+os.environ['NCURSES_NO_UTF8_ACS'] = "1" 
+
 from setup_app.messages import msg
 from setup_app.config import Config
 from setup_app import static
