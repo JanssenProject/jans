@@ -7,7 +7,8 @@ import org.apache.commons.lang.StringUtils;
 public enum ExpiredObjectType {
     STATE("state"),
     NONCE("nonce"),
-    REQUEST_OBJECT("request_object");
+    REQUEST_OBJECT("request_object"),
+    JWKS("jwks");
 
     private final String value;
 
