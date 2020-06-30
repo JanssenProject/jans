@@ -19,20 +19,21 @@
 			<h:panelGroup rendered="true">
 				<div class="device-authz-container">
 					<div class="row">
-						<h:messages class="text-center"
-							style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;"
-							infoClass="text-center" errorClass="text-center" />
-					</div>
-					<div class="row">
 						<div class="col-12 device-authz-title">
 							<h:outputText value="#{msgs['device.authorization.title']}" />
+						</div>
+						<div class="col-12">
+							<h:messages class="text-center"
+										style="color:#8b0000; width: 100%"
+										id="messages"
+										infoClass="text-center" errorClass="text-center" />
 						</div>
 						<div class="col-12">
 							<h:outputText value="#{msgs['device.authorization.subtitle']}" />
 						</div>
 					</div>
 					<h:form id="deviceAuthzForm" style="padding:30px 15px;">
-						<div class="row">
+						<div class="row col-md-12">
 							<div class="col-sm-7 device-authz-label">
 								<h:outputText value="#{msgs['device.authorization.code.inputbox.label']}" />
 							</div>
@@ -44,7 +45,7 @@
 										maxlength="4"
 										onkeyup="keyUpInput('userCode1', 'userCode2')"
 										styleClass="form-control"
-										value=""
+										value="#{deviceAuthorizationAction.userCode1}"
 										style="width:45%">
 									</h:inputText>
 									&nbsp;-&nbsp;
@@ -54,7 +55,7 @@
 										 maxlength="4"
 										 onkeyup="keyUpInput('userCode2', null, 'userCode1')"
 										 styleClass="form-control"
-										 value=""
+										 value="#{deviceAuthorizationAction.userCode2}"
 										 style="width:45%">
 									</h:inputText>
 								</div>
@@ -65,7 +66,9 @@
 								<h:commandButton id="continueButton"
 									style="background-color: #00BE79; color:white;"
 									styleClass="btn col-sm-12" value="#{msgs['device.authorization.confirm.button']}"
-									iconAwesome="fa-sign-in" />
+									iconAwesome="fa-sign-in">
+									<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.processUserCodeVerification}" />
+								</h:commandButton>
 							</div>
 						</div>
 						<h:inputHidden id="platform" />
