@@ -2933,24 +2933,26 @@ class Setup(object):
 
         for i, cb_host in enumerate(cb_hosts):
 
-                cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
-                if not thread_queue:
-                    print("    Checking Couchbase connection for " + cb_host)
+            cbm_ = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
+            if not thread_queue:
+                print("    Checking Couchbase connection for " + cb_host)
 
-                cbm_result = cbm_.test_connection()
-                if not cbm_result.ok:
-                    if not thread_queue:
-                        print("    Can't establish connection to Couchbase server with given parameters.")
-                        print("**", cbm_result.reason)
-                    retval['result'] = False
-                    retval['reason'] = cb_host + ': ' + cbm_result.reason
-                    return retval
-                try:
-                    qr = cbm_.exec_query('select * from system:indexes limit 1')
-                    if qr.ok:
-                        cb_query_node = i
-                except:
-                    pass
+            cbm_result = cbm_.test_connection()
+            if not cbm_result.ok:
+                if not thread_queue:
+                    print("    Can't establish connection to Couchbase server with given parameters.")
+                    print("**", cbm_result.reason)
+                retval['result'] = False
+                retval['reason'] = cb_host + ': ' + cbm_result.reason
+                return retval
+                
+            result = cbm_.get_services()
+            if result.ok:
+                data = result.json()
+                for node in data.get('nodesExt', []):
+                    if node.get('thisNode'):
+                        if 'n1qlSSL' in node.get('services', []):
+                            cb_query_node = i
         else:
 
             if cbm_result.ok and cb_query_node != None:
