@@ -6,8 +6,8 @@ import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.params.GetRequestObjectJwtParams;
-import org.gluu.oxd.common.response.GetRequestObjectJwtResponse;
 import org.gluu.oxd.common.response.IOpResponse;
+import org.gluu.oxd.common.response.POJOResponse;
 import org.gluu.oxd.server.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +23,14 @@ public class GetRequestObjectJwtOperation extends BaseOperation<GetRequestObject
     public IOpResponse execute(GetRequestObjectJwtParams params) {
 
         try {
-            ExpiredObject expiredObject = getStateService().getRequestObject(params.getRequestObjectId());
+            ExpiredObject expiredObject = getRequestObjectService().getRequestObject(params.getRequestObjectId());
 
             if (expiredObject == null || Strings.isNullOrEmpty(expiredObject.getValue())) {
                 LOG.error("Request Object not found. The `request_uri` has either expired or it does not exist.");
                 throw new HttpException(ErrorResponseCode.REQUEST_OBJECT_NOT_FOUND);
             }
 
-            final GetRequestObjectJwtResponse response = new GetRequestObjectJwtResponse();
-            response.setRequestObject(expiredObject.getValue());
-            return response;
+            return new POJOResponse(expiredObject.getValue());
         } catch (HttpException e) {
             throw e;
         } catch (Exception e) {

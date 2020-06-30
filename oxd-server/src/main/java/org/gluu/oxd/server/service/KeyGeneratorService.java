@@ -2,16 +2,22 @@ package org.gluu.oxd.server.service;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import io.dropwizard.util.Strings;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
 import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.*;
-import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.JSONWebKey;
+import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import org.gluu.oxauth.model.jwk.Use;
+import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObject;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.OxdServerConfiguration;
-import org.json.JSONArray;
+import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -22,22 +28,21 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
-
 public class KeyGeneratorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeyGeneratorService.class);
 
     private OxdServerConfiguration configuration;
-
+    private PersistenceService persistenceService;
     private AbstractCryptoProvider cryptoProvider;
 
     private JSONWebKeySet keys;
 
     @Inject
-    public KeyGeneratorService(OxdServerConfiguration configuration) {
+    public KeyGeneratorService(OxdServerConfiguration configuration, PersistenceService persistenceService) {
         this.configuration = configuration;
         this.keys = new JSONWebKeySet();
+        this.persistenceService = persistenceService;
         try {
             this.cryptoProvider = new OxAuthCryptoProvider(configuration.getCryptProviderKeyStorePath(), configuration.getCryptProviderKeyStorePassword(), configuration.getCryptProviderDnName());
         } catch (Exception e) {
@@ -46,7 +51,8 @@ public class KeyGeneratorService {
         }
     }
 
-    public void load() {
+    public void generateKeys() {
+
         List<Algorithm> signatureAlgorithms = Lists.newArrayList(Algorithm.RS256, Algorithm.RS384, Algorithm.RS512, Algorithm.ES256,
                 Algorithm.ES384, Algorithm.ES512, Algorithm.PS256, Algorithm.PS384, Algorithm.PS512);
 
@@ -54,7 +60,8 @@ public class KeyGeneratorService {
 
         try {
             if (configuration.getEnableJwksGeneration()) {
-                this.keys = generateKeys(signatureAlgorithms, encryptionAlgorithms, configuration.getJwksExpirationInDays(), configuration.getJwksExpirationInHours());
+                setKeys(generateKeys(signatureAlgorithms, encryptionAlgorithms, configuration.getJwksExpirationInHours()));
+                saveKeysInStorage(this.keys.toString());
             }
         } catch (Exception e) {
             LOG.error("Failed to generate json web keys.", e);
@@ -63,11 +70,11 @@ public class KeyGeneratorService {
     }
 
     private JSONWebKeySet generateKeys(List<Algorithm> signatureAlgorithms,
-                                       List<Algorithm> encryptionAlgorithms, int expiration, int expiration_hours) throws Exception, JSONException {
+                                       List<Algorithm> encryptionAlgorithms, int expiration_hours) throws Exception, JSONException {
+        LOG.trace("Generating jwks keys...");
         JSONWebKeySet jwks = new JSONWebKeySet();
 
         Calendar calendar = new GregorianCalendar();
-        calendar.add(Calendar.DATE, expiration);
         calendar.add(Calendar.HOUR, expiration_hours);
 
         for (Algorithm algorithm : signatureAlgorithms) {
@@ -75,27 +82,12 @@ public class KeyGeneratorService {
                 SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.name());
                 JSONObject result = this.cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), Use.SIGNATURE);
 
-                JSONWebKey key = new JSONWebKey();
-                key.setKid(result.getString(KEY_ID));
-                key.setUse(Use.SIGNATURE);
-                key.setAlg(algorithm);
-                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily().toString()));
-                key.setExp(result.optLong(EXPIRATION_TIME));
-                key.setCrv(signatureAlgorithm.getCurve());
-                key.setN(result.optString(MODULUS));
-                key.setE(result.optString(EXPONENT));
-                key.setX(result.optString(X));
-                key.setY(result.optString(Y));
-
-                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-                key.setX5c(StringUtils.toList(x5c));
-
+                JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);
             }
         }
-
 
         for (Algorithm algorithm : encryptionAlgorithms) {
             try {
@@ -103,20 +95,7 @@ public class KeyGeneratorService {
                 JSONObject result = this.cryptoProvider.generateKey(algorithm,
                         calendar.getTimeInMillis(), Use.ENCRYPTION);
 
-                JSONWebKey key = new JSONWebKey();
-                key.setKid(result.getString(KEY_ID));
-                key.setUse(Use.ENCRYPTION);
-                key.setAlg(algorithm);
-                key.setKty(KeyType.fromString(encryptionAlgorithm.getFamily()));
-                key.setExp(result.optLong(EXPIRATION_TIME));
-                key.setN(result.optString(MODULUS));
-                key.setE(result.optString(EXPONENT));
-                key.setX(result.optString(X));
-                key.setY(result.optString(Y));
-
-                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-                key.setX5c(StringUtils.toList(x5c));
-
+                JSONWebKey key = JSONWebKey.fromJSONObject(result);
                 jwks.getKeys().add(key);
             } catch (Exception ex) {
                 LOG.error(ex.getMessage(), ex);
@@ -128,9 +107,12 @@ public class KeyGeneratorService {
         return jwks;
     }
 
-    public String sign(String signingInput, String alias, String sharedSecret, SignatureAlgorithm signatureAlgorithm) {
+    public Jwt sign(Jwt jwt, String sharedSecret, SignatureAlgorithm signatureAlgorithm) {
         try {
-            return cryptoProvider.sign(signingInput, alias, sharedSecret, signatureAlgorithm);
+            String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
+            jwt.setEncodedSignature(signature);
+            //return signed jwt
+            return jwt;
         } catch (Exception e) {
             LOG.error("Failed to sign signingInput.", e);
             throw new RuntimeException("Failed to signingInput.", e);
@@ -139,7 +121,18 @@ public class KeyGeneratorService {
 
     public JSONWebKeySet getKeys() {
         if (configuration.getEnableJwksGeneration()) {
-            return keys;
+            if (keys != null && !keys.getKeys().isEmpty()) {
+                return this.keys;
+            }
+            //if keys not found then search in storage
+            JSONWebKeySet keys = getKeysFromStorage();
+            if (keys != null && !keys.getKeys().isEmpty()) {
+                this.keys = keys;
+                return this.keys;
+            }
+            //generate new keys in case they do not exist
+            generateKeys();
+            return this.keys;
         }
         LOG.info("Relying party JWKS generation is disabled in running oxd instance. To enable it set `enable_jwks_generation` field to true in `oxd-server.yml`.");
         throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
@@ -160,6 +153,19 @@ public class KeyGeneratorService {
         } catch (KeyStoreException e) {
             LOG.error("Error in keyId generation");
 
+        }
+        return null;
+    }
+
+    public void saveKeysInStorage(String jwks) {
+        persistenceService.createExpiredObject(new ExpiredObject(ExpiredObjectType.JWKS.getValue(), jwks, ExpiredObjectType.JWKS, configuration.getJwksExpirationInHours() * 60));
+    }
+
+    public JSONWebKeySet getKeysFromStorage() {
+        ExpiredObject expiredObject = persistenceService.getExpiredObject(ExpiredObjectType.JWKS.toString());
+        if (expiredObject != null && !Strings.isNullOrEmpty(expiredObject.getValue())) {
+            JSONObject keys = new JSONObject(expiredObject.getValue());
+            return JSONWebKeySet.fromJSONObject(keys);
         }
         return null;
     }

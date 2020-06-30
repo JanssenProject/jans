@@ -31,10 +31,8 @@ public class OxdServerConfiguration extends Configuration {
     private String cryptProviderKeyStorePassword;
     @JsonProperty(value = "crypt_provider_dn_name")
     private String cryptProviderDnName;
-    @JsonProperty(value = "jwks_expiration_in_days")
-    private int jwksExpirationInDays = 365;
     @JsonProperty(value = "jwks_expiration_in_hours")
-    private int jwksExpirationInHours = 0;
+    private int jwksExpirationInHours = 24;
     @JsonProperty(value = "support-google-logout")
     private Boolean supportGoogleLogout = true;
     @JsonProperty(value = "state_expiration_in_minutes")
@@ -378,14 +376,6 @@ public class OxdServerConfiguration extends Configuration {
         this.enableJwksGeneration = enableJwksGeneration;
     }
 
-    public int getJwksExpirationInDays() {
-        return jwksExpirationInDays;
-    }
-
-    public void setJwksExpirationInDays(int jwksExpirationInDays) {
-        this.jwksExpirationInDays = jwksExpirationInDays;
-    }
-
     public int getJwksExpirationInHours() {
         return jwksExpirationInHours;
     }
@@ -437,7 +427,6 @@ public class OxdServerConfiguration extends Configuration {
                 ", persistenceManagerRemoveCount=" + persistenceManagerRemoveCount + '\'' +
                 ", bindIpAddresses=" + bindIpAddresses + '\'' +
                 ", enableJwksGeneration=" + enableJwksGeneration + '\'' +
-                ", jwksExpirationInDays=" + jwksExpirationInDays + '\'' +
                 ", jwksExpirationInHours=" + jwksExpirationInHours + '\'' +
                 ", requestObjectExpirationInMinutes=" + requestObjectExpirationInMinutes + '\'' +
                 '}';

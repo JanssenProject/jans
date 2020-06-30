@@ -36,5 +36,6 @@ public class GuiceModule extends AbstractModule {
         bind(RpSyncService.class).in(Singleton.class);
         bind(OpClientFactory.class).to(OpClientFactoryImpl.class).in(Singleton.class);
         bind(KeyGeneratorService.class).in(Singleton.class);
+        bind(RequestObjectService.class).in(Singleton.class);
     }
 }
