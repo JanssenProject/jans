@@ -20,10 +20,10 @@ attribDataTypes = ATTRUBUTEDATATYPES()
 listAttrib = ['member']
 
 supportes_os_types = {
-                'centos': ['7'],
-                'red': ['7'], 
+                'centos': ['7', '8'],
+                'red': ['7', '8'], 
                 'fedora': [], 
-                'ubuntu': ['16', '18'],
+                'ubuntu': ['18', '20'],
                 'debian': ['9', '10']
                 }
 
