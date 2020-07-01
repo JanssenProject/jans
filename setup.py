@@ -4354,10 +4354,12 @@ class Setup(object):
         package_list = {
                 'debian 10': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': ''},
                 'debian 9': {'mondatory': 'apache2 curl wget tar xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': ''},
-                'ubuntu 16': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel.yaml bzip2', 'optional': ''},
                 'ubuntu 18': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel.yaml bzip2', 'optional': ''},
+                'ubuntu 20': {'mondatory': 'apache2 curl wget xz-utils unzip facter python3 rsyslog python3-ldap3 net-tools python3-requests python3-ruamel.yaml bzip2', 'optional': ''},
                 'centos 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2', 'optional': ''},
+                'centos 8': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 python3-ldap3 python3-ruamel-yaml rsyslog bzip2', 'optional': ''},
                 'red 7': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': ''},
+                'red 8': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': ''},
                 'fedora 22': {'mondatory': 'httpd mod_ssl curl wget tar xz unzip facter python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2', 'optional': ''},
                 }
 
