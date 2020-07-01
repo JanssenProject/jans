@@ -17,5 +17,6 @@ public class ApiConstants {
 	public static final String REQUEST_OBJECT = "/request_object";
 	public static final String UMA = "/uma";
 	public static final String DYN_REGISTRATION = "/dyn_registration";
+	public static final String SESSIONID = "/sessionid";
 
 }
