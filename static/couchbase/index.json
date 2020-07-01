@@ -40,7 +40,6 @@
       ["ssnId"],
       ["oxAuthClientId"],
       ["clnId"],
-      ["oxAuthSessionId"],
       ["oxAuthUserDN"],
       ["oxState"],
       ["del","exp"],
@@ -84,7 +83,9 @@
 
   "!bucket_prefix!_token": {
     "attributes": [
-      ["authzCode"]
+      ["authzCode"],
+      ["oxId"], 
+      ["del","exp"]
     ],
     "static" : [
       [["grtId"], "objectClass = \"token\""],
