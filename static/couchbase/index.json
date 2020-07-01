@@ -49,7 +49,8 @@
       [["creationDate"], "objectClass = \"gluuPasswordResetRequest\""],
       [["oxScriptType"], "objectClass = \"oxCustomScript\""],
       [["oxApplicationType", "oxMetricType", "oxStartDate", "oxEndDate"], "objectClass = \"oxMetric\""],
-      [["exp"], "del=true"]
+      [["exp"], "del=true"],
+      [["oxStatus", "exp"], "objectClass = \"cibaRequest\""]
         
     ]
   },
