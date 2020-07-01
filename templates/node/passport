@@ -4,7 +4,7 @@ NODE=$NODE_HOME/bin/node
 NODE_BASE=%(node_base)s/passport/server
 NODE_LOGS=${NODE_BASE}/logs
 NODE_APP=app.js
-NODE_OPTIONS="PORT=8090 NODE_ENV=unknown NODE_CONFIG_DIR=$NODE_BASE HOSTNAME=localhost"
+NODE_OPTIONS="PORT=8090 NODE_ENV=production NODE_CONFIG_DIR=$NODE_BASE HOSTNAME=localhost"
 NODE_ARGS="--max-old-space-size=%(passport_max_mem)s"
 APP_ARGS=""
 
