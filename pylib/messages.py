@@ -24,7 +24,7 @@ class msg:
     password_label = "Password"
     hosts_label = "Hosts"
     username_label = "Username"
-    
+
     installOxAuth_label = "Install OxAuth"
     installOxTrust_label = "Install OxTrust"
     backend_types_label = "Backend Types"
@@ -40,25 +40,26 @@ class msg:
     installCasa_label = "Install Casa"
     installScimServer_label = "Install Scim"
     installFido2_label = "Install Fido2"
-    
+
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
     insufficient_number_of_cpu = "Available CPU Units found was {}. This is less than the required amount of {} CPU Units"
     insufficient_file_max = "Maximum number of files that can be opened on this computer is {}. Please increase number of file-max to {} on the host system and re-run setup.py"
     insufficient_free_disk_space = "Available free disk space was determined to be {} GB. This is less than the required disk space of {}"
-    
+
     suggested_free_disk_space = 40 #in GB
     suggested_mem_size = 3.7 # in GB
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
-    
+
     cert_info_label = "Information to Generate Certificates"
     sys_info_label =  "System Information"
     application_max_ram_label = "Maximum RAM in MB"
     oxtrust_admin_password_label = "oxTrust Admin Password"
     oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
     max_ram_int_warning = "Please enter and integer value for Max ram"
-    
+    memory_warning = "WARINIG: You don't have enough memory to run Gluu CE properly with selected applications."
+
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
     acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the Apache-2.0 license"
@@ -126,6 +127,5 @@ class msg:
     installation_description_fido2 = "FIDO 2.0 (FIDO2) is an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments"
     
     installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code."
-    
-    
+
     installation_error = "The following error was occurred while installing Gluu Server:"
