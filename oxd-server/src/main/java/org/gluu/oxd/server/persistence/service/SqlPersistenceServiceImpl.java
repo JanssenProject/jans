@@ -51,7 +51,7 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
             Statement stmt = conn.createStatement();
 
             stmt.addBatch("create table if not exists rp(id varchar(36) primary key, data varchar(50000))");
-            stmt.addBatch("create table if not exists expired_objects( " + this.expiredObjectColumnName + " varchar(50) primary key, value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
+            stmt.addBatch("create table if not exists expired_objects( " + this.expiredObjectColumnName + " varchar(50), value varchar(50000), type varchar(20), iat TIMESTAMP NULL DEFAULT NULL, exp TIMESTAMP NULL DEFAULT NULL)");
 
             stmt.executeBatch();
 
