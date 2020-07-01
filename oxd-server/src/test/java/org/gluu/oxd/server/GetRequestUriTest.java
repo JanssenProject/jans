@@ -39,7 +39,8 @@ public class GetRequestUriTest {
         GetRequestUriResponse getRequestUriResponse = client.getRequestUri(Tester.getAuthorization(site), null, getRequestUriParams);
         assertNotNull(getRequestUriResponse.getRequestUri());
         //Get Request object
-        String requestObject = client.getRequestObject(site.getOxdId());
+        String requestObjectId = getRequestUriResponse.getRequestUri().substring(getRequestUriResponse.getRequestUri().lastIndexOf('/') + 1);
+        String requestObject = client.getRequestObject(requestObjectId);
         assertNotNull(requestObject);
         Map<String, String> paramsMap = new HashMap<>();
         paramsMap.put("request", requestObject);
