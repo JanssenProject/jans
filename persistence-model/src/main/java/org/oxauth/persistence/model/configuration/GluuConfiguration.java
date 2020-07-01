@@ -6,9 +6,6 @@
 
 package org.oxauth.persistence.model.configuration;
 
-import java.io.Serializable;
-import java.util.List;
-
 import org.gluu.model.SmtpConfiguration;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
@@ -17,6 +14,9 @@ import org.gluu.persist.annotation.ObjectClass;
 import org.gluu.persist.model.base.InumEntry;
 import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.document.store.conf.DocumentStoreConfiguration;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Gluu Configuration
@@ -53,6 +53,9 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	
 	@AttributeName(name = "gluuPassportEnabled")
 	private Boolean passportEnabled;
+
+	@AttributeName(name = "gluuCibaEnabled")
+	private Boolean cibaEnabled;
 
 	public Boolean getPassportEnabled() {
 		return passportEnabled;
@@ -108,6 +111,14 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setAuthenticationMode(String authenticationMode) {
 		this.authenticationMode = authenticationMode;
+	}
+
+	public Boolean getCibaEnabled() {
+		return cibaEnabled;
+	}
+
+	public void setCibaEnabled(Boolean cibaEnabled) {
+		this.cibaEnabled = cibaEnabled;
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 import static org.gluu.oxauth.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
 
 /**
@@ -60,6 +61,9 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
     @Inject
     private CIBADeviceRegistrationValidatorService cibaDeviceRegistrationValidatorService;
 
+    @Inject
+    private Boolean isCibaEnabled;
+
     @Override
     public Response requestBackchannelDeviceRegistrationPost(
             String idTokenHint, String deviceRegistrationToken,
@@ -74,6 +78,13 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
                 idTokenHint, deviceRegistrationToken, securityContext.isSecure());
 
         Response.ResponseBuilder builder = Response.ok();
+
+        if (!this.isCibaEnabled) {
+            log.warn("Trying to register a CIBA device, however CIBA config is disabled.");
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            return builder.build();
+        }
 
         DefaultErrorResponse cibaDeviceRegistrationValidation = cibaDeviceRegistrationValidatorService.validateParams(
                 idTokenHint, deviceRegistrationToken);
