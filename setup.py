@@ -292,43 +292,43 @@ class Setup(object):
         self.jetty_app_configuration = OrderedDict((
                 ('oxauth', {'name' : 'oxauth',
                             'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                            'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                            'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048, 'metaspace_mb': 128},
                             'installed' : False
                             }),
                 ('identity', {'name' : 'identity',
                               'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                              'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                              'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048, 'metaspace_mb': 128},
                               'installed' : False
                               }),
                 ('idp', {'name' : 'idp',
                          'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp'},
-                         'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                         'memory' : {'ratio' : 0.20, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048, 'metaspace_mb': 128},
                          'installed' : False
                          }),
 
                 ('oxauth-rp', {'name' : 'oxauth-rp',
                                'jetty' : {'modules' : 'server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket'},
-                               'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384},
+                               'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 384, 'metaspace_mb': 128},
                                'installed' : False
                                }),
                 ('passport', {'name' : 'passport',
                               'node' : {},
-                              'memory' : {'ratio' : 0.08, "max_allowed_mb" : 1024},
+                              'memory' : {'ratio' : 0.08, "max_allowed_mb" : 1024, 'metaspace_mb': 128},
                               'installed' : False
                                }),
                 ('casa', {'name': 'casa',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024, 'metaspace_mb': 128},
                          'installed': False
                          }),
                 ('fido2', {'name' : 'fido2',
                             'jetty' : {'modules' : 'server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp'},
-                            'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
+                            'memory' : {'ratio' : 0.08, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512, 'metaspace_mb': 128},
                             'installed' : False
                             }),
                 ('scim', {'name': 'scim',
                          'jetty': {'modules': 'server,deploy,resources,http,http-forwarded,console-capture,jsp'},
-                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024},
+                         'memory': {'ratio': 0.08, "jvm_heap_ration": 0.7, "max_allowed_mb": 1024, 'metaspace_mb': 128},
                          'installed': False
                          }),
             ))
@@ -4252,9 +4252,8 @@ class Setup(object):
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
         self.logIt("Calculating memory setting for applications")
-
         allowedApplicationsMemory = {}
-
+        retVal = True
         usedRatio = 0.001
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
@@ -4280,6 +4279,9 @@ class Setup(object):
 
             self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
 
+            self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationConfiguration['memory']['metaspace_mb']
+            applicationMemory = applicationMemory - applicationConfiguration['memory']['metaspace_mb']
+
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
 
@@ -4291,11 +4293,10 @@ class Setup(object):
                 self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
                 self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
 
-                max_meta_mem = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
-                if max_meta_mem < 128:
-                    max_meta_mem = 128
+                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:    
+                    retVal = False
 
-                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = max_meta_mem
+        return retVal
 
     def calculate_selected_aplications_memory(self):
         installedComponents = []
@@ -4311,12 +4312,15 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
         if self.installCasa:
             installedComponents.append(self.jetty_app_configuration['casa'])
-
+        if self.installScimServer:
+            installedComponents.append(self.jetty_app_configuration['scim'])
+        if self.installFido2:
+            installedComponents.append(self.jetty_app_configuration['fido2'])
         # Node apps
         if self.installPassport:
             installedComponents.append(self.jetty_app_configuration['passport'])
-            
-        self.calculate_aplications_memory(self.application_max_ram, self.jetty_app_configuration, installedComponents)
+        
+        return self.calculate_aplications_memory(self.application_max_ram, self.jetty_app_configuration, installedComponents)
 
     def merge_dicts(self, *dict_args):
         result = {}
@@ -5954,6 +5958,11 @@ if __name__ == '__main__':
 
         # Show to properties for approval
         print('\n%s\n' % repr(installObject))
+
+        # check if we have enough memory
+        if not installObject.calculate_selected_aplications_memory():
+            print("{}WARINIG: You don't have enough memory to run Gluu CE properly{}\n".format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+
         if not setupOptions['noPrompt']:
             proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
             if proceed_prompt and proceed_prompt[0] !='y':
