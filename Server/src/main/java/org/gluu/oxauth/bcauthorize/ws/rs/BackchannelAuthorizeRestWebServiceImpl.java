@@ -106,6 +106,9 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     @Inject
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
+    @Inject
+    private Boolean isCibaEnabled;
+
     @Override
     public Response requestBackchannelAuthorizationPost(
             String clientId, String scope, String clientNotificationToken, String acrValues, String loginHintToken,
@@ -131,6 +134,13 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
         Response.ResponseBuilder builder = Response.ok();
 
+        if (!this.isCibaEnabled) {
+            log.warn("Trying to register a CIBA request, however CIBA config is disabled.");
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+            return builder.build();
+        }
+
         SessionClient sessionClient = identity.getSessionClient();
         Client client = null;
         if (sessionClient != null) {
@@ -140,6 +150,12 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         if (client == null) {
             builder = Response.status(Response.Status.UNAUTHORIZED.getStatusCode()); // 401
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_CLIENT));
+            return builder.build();
+        }
+
+        if (!cibaRequestService.hasCibaCompatibility(client)) {
+            builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 401
+            builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
             return builder.build();
         }
 

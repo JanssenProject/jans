@@ -50,6 +50,8 @@ import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
 import java.util.Date;
 
+import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+
 /**
  * Provides interface for token REST web services
  *
@@ -104,6 +106,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private CibaRequestService cibaRequestService;
+
+    @Inject
+    private Boolean isCibaEnabled;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -386,6 +391,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                 }
             } else if (gt == GrantType.CIBA) {
+                if (!this.isCibaEnabled) {
+                    log.warn("Trying to get CIBA token, however CIBA config is disabled.");
+                    return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Grant types are invalid."), oAuth2AuditLog);
+                }
+
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                 }
