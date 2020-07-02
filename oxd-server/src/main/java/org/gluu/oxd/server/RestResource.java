@@ -50,10 +50,10 @@ public class RestResource {
     }
 
     @GET
-    @Path("/get-request-object-jwt/{request_object_id}")
+    @Path("/get-request-object/{value}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getRequestObject(@PathParam("request_object_id") String id) {
-        return process(CommandType.GET_REQUEST_OBJECT_JWT, convertParamToJsonString(GetRequestObjectJwtParams.class, id), GetRequestObjectJwtParams.class, null, null, httpRequest);
+    public String getRequestObject(@PathParam("value") String value) {
+        return process(CommandType.GET_REQUEST_OBJECT_JWT, (new StringParam(value)).toJsonString(), StringParam.class, null, null, httpRequest);
     }
 
     @GET
@@ -256,11 +256,11 @@ public class RestResource {
     }
 
     @POST
-    @Path("/get-request-uri")
+    @Path("/get-request-object-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getRequestUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, String params) {
-        return process(CommandType.GET_REQUEST_URI, params, GetRequestUriParams.class, authorization, authorizationOxdId, httpRequest);
+    public String getRequestObjectUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, String params) {
+        return process(CommandType.GET_REQUEST_URI, params, GetRequestObjectUriParams.class, authorization, authorizationOxdId, httpRequest);
     }
 
     public static <T> T read(String params, Class<T> clazz) {
@@ -383,26 +383,6 @@ public class RestResource {
 
         final ValidationService validationService = ServerLauncher.getInjector().getInstance(ValidationService.class);
         validationService.validateAccessToken(accessToken, authorizationOxdId);
-    }
-
-    private <T extends IParams> String convertParamToJsonString(Class<T> clazz, String... params) {
-        if (params != null && params.length > 0) {
-            Field[] fields = clazz.getDeclaredFields();
-
-            if (params.length > fields.length) {
-                LOG.error("Number of path parameter(s) more than fields in response object: {} ", clazz.getName());
-                throw new HttpException(ErrorResponseCode.PARAMETER_OUT_OF_BOUND);
-            }
-            List<String> paramsList = Lists.newArrayList(params);
-
-            JsonObject jsonObject = new JsonObject();
-            IntStream.range(0, paramsList.size())
-                    .forEach(i -> jsonObject.addProperty(fields[i].toString().substring(fields[i].toString().lastIndexOf('.') + 1), paramsList.get(i)));
-
-            return jsonObject.toString();
-        }
-        LOG.error("Missing path parameter in request.");
-        throw new HttpException(ErrorResponseCode.MISSING_PATH_PARAMETER);
     }
 
     private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {

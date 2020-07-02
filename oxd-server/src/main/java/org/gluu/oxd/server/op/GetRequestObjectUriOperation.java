@@ -10,29 +10,31 @@ import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
-import org.gluu.oxd.common.params.GetRequestUriParams;
-import org.gluu.oxd.common.response.GetRequestUriResponse;
+import org.gluu.oxd.common.params.GetRequestObjectUriParams;
+import org.gluu.oxd.common.response.GetRequestObjectUriResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 
-public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
+public class GetRequestObjectUriOperation extends BaseOperation<GetRequestObjectUriParams> {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(GetRequestUriOperation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetRequestObjectUriOperation.class);
 
-    protected GetRequestUriOperation(Command command, final Injector injector) {
-        super(command, injector, GetRequestUriParams.class);
+    protected GetRequestObjectUriOperation(Command command, final Injector injector) {
+        super(command, injector, GetRequestObjectUriParams.class);
     }
 
-    public IOpResponse execute(GetRequestUriParams params) {
+    public IOpResponse execute(GetRequestObjectUriParams params) {
 
         try {
             validate(params);
@@ -53,12 +55,12 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
 
             //setting request object in Expired Object
             String requestUriId = UUID.randomUUID().toString();
-            getRequestObjectService().putRequestObject(requestUriId, signedJwt.toString());
+            getRequestObjectService().put(requestUriId, signedJwt.toString());
 
             String requestUri = baseRequestUri(params.getOxdHostUrl()) + requestUriId;
             LOG.trace("RequestObject created successfully. request_uri : {} ", requestUri);
 
-            GetRequestUriResponse response = new GetRequestUriResponse();
+            GetRequestObjectUriResponse response = new GetRequestObjectUriResponse();
             response.setRequestUri(requestUri);
             return response;
 
@@ -70,7 +72,7 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
         throw new HttpException(ErrorResponseCode.FAILED_TO_GET_REQUEST_URI);
     }
 
-    public Jwt createRequestObject(SignatureAlgorithm algo, Rp rp, GetRequestUriParams params) {
+    public Jwt createRequestObject(SignatureAlgorithm algo, Rp rp, GetRequestObjectUriParams params) {
         Jwt jwt = new Jwt();
         //set header
         jwt.getHeader().setType(JwtType.JWT);
@@ -91,18 +93,23 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
         jwt.getClaims().setIssuedAt(new Date());
         jwt.getClaims().setExpirationTime(Utils.addTimeToDate(new Date(), getConfigurationService().getConfiguration().getRequestObjectExpirationInMinutes(), Calendar.MINUTE));
         jwt.getClaims().setClaim("response_type", rp.getResponseTypes());
+        jwt.getClaims().setClaim("oxd_id", rp.getOxdId());
         //set claims from params
         if (params.getParams() != null && !params.getParams().isEmpty()) {
 
             Map<String, Object> claims = params.getParams();
             claims.forEach((key, value) -> {
-                jwt.getClaims().setClaimObject(key, value, true);
+                if (value instanceof Map) {
+                    jwt.getClaims().setClaim(key, (new JSONObject((Map) value)));
+                } else {
+                    jwt.getClaims().setClaimObject(key, value, true);
+                }
             });
         }
         return jwt;
     }
 
-    private void validate(GetRequestUriParams params) {
+    private void validate(GetRequestObjectUriParams params) {
         if (Strings.isNullOrEmpty(params.getOxdHostUrl())) {
             LOG.error("'oxd_host_url' is empty or not specified.");
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_OXD_HOST);
@@ -116,6 +123,6 @@ public class GetRequestUriOperation extends BaseOperation<GetRequestUriParams> {
         if (oxdHost.endsWith("/")) {
             oxdHost = StringUtils.removeEnd(oxdHost, "/");
         }
-        return oxdHost + "/get-request-object-jwt/";
+        return oxdHost + "/get-request-object/";
     }
 }

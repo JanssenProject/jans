@@ -25,9 +25,9 @@ public interface ClientInterface {
     JsonNode getRpJwks();
 
     @GET
-    @Path("/get-request-object-jwt/{request_object_id}")
+    @Path("/get-request-object/{value}")
     @Produces(MediaType.TEXT_PLAIN)
-    String getRequestObject(@PathParam("request_object_id") String id);
+    String getRequestObject(@PathParam("value") String value);
 
     @POST
     @Path("/get-client-token")
@@ -174,8 +174,8 @@ public interface ClientInterface {
     GetIssuerResponse getIssuer(GetIssuerParams params);
 
     @POST
-    @Path("/get-request-uri")
+    @Path("/get-request-object-uri")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    GetRequestUriResponse getRequestUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, GetRequestUriParams params);
+    GetRequestObjectUriResponse getRequestObjectUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, GetRequestObjectUriParams params);
 }
