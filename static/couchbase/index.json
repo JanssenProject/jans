@@ -84,7 +84,8 @@
 
   "!bucket_prefix!_token": {
     "attributes": [
-      ["authzCode"]
+      ["authzCode"],
+      ["oxAuthUserDN"]
     ],
     "static" : [
       [["grtId"], "objectClass = \"token\""],
