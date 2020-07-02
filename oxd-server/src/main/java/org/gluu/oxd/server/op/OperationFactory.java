@@ -79,9 +79,9 @@ public class OperationFactory {
                 case GET_RP_JWKS:
                     return new GetRpJwksOperation(command, injector);
                 case GET_REQUEST_URI:
-                    return new GetRequestUriOperation(command, injector);
+                    return new GetRequestObjectUriOperation(command, injector);
                 case GET_REQUEST_OBJECT_JWT:
-                    return new GetRequestObjectJwtOperation(command, injector);
+                    return new GetRequestObjectOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {

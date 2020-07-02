@@ -2,7 +2,7 @@ package org.gluu.oxd.common.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class GetRequestUriResponse implements IOpResponse {
+public class GetRequestObjectUriResponse implements IOpResponse {
 
     @JsonProperty(value = "request_uri" )
     private String requestUri;

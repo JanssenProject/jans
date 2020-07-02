@@ -3,10 +3,10 @@ package org.gluu.oxd.server;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
-import org.gluu.oxd.common.params.GetRequestUriParams;
+import org.gluu.oxd.common.params.GetRequestObjectUriParams;
 import org.gluu.oxd.common.params.UpdateSiteParams;
 import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
-import org.gluu.oxd.common.response.GetRequestUriResponse;
+import org.gluu.oxd.common.response.GetRequestObjectUriResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -33,10 +33,10 @@ public class GetRequestUriTest {
         updateSiteParams.setRequestObjectSigningAlg("RS256");
         client.updateSite(Tester.getAuthorization(site), null, updateSiteParams);
         //Request uri
-        GetRequestUriParams getRequestUriParams = new GetRequestUriParams();
+        GetRequestObjectUriParams getRequestUriParams = new GetRequestObjectUriParams();
         getRequestUriParams.setOxdId(site.getOxdId());
         getRequestUriParams.setOxdHostUrl("http://localhost" + ":" + SetUpTest.SUPPORT.getLocalPort());
-        GetRequestUriResponse getRequestUriResponse = client.getRequestUri(Tester.getAuthorization(site), null, getRequestUriParams);
+        GetRequestObjectUriResponse getRequestUriResponse = client.getRequestObjectUri(Tester.getAuthorization(site), null, getRequestUriParams);
         assertNotNull(getRequestUriResponse.getRequestUri());
         //Get Request object
         String requestObjectId = getRequestUriResponse.getRequestUri().substring(getRequestUriResponse.getRequestUri().lastIndexOf('/') + 1);
