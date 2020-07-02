@@ -24,7 +24,7 @@ public class OxdServerConfiguration extends Configuration {
     @JsonProperty(value = "trust_store_password")
     private String keyStorePassword;
     @JsonProperty(value = "enable_jwks_generation")
-    private Boolean enableJwksGeneration = false;
+    private Boolean enableJwksGeneration = true;
     @JsonProperty(value = "crypt_provider_key_store_path")
     private String cryptProviderKeyStorePath;
     @JsonProperty(value = "crypt_provider_key_store_password")
@@ -32,7 +32,9 @@ public class OxdServerConfiguration extends Configuration {
     @JsonProperty(value = "crypt_provider_dn_name")
     private String cryptProviderDnName;
     @JsonProperty(value = "jwks_expiration_in_hours")
-    private int jwksExpirationInHours = 24;
+    private int jwksExpirationInHours = 720;
+    @JsonProperty(value = "jwks_regeneration_interval_in_hours")
+    private int jwksRegenerationIntervalInHours = 720;
     @JsonProperty(value = "support-google-logout")
     private Boolean supportGoogleLogout = true;
     @JsonProperty(value = "state_expiration_in_minutes")
@@ -392,6 +394,14 @@ public class OxdServerConfiguration extends Configuration {
         this.requestObjectExpirationInMinutes = requestObjectExpirationInMinutes;
     }
 
+    public int getJwksRegenerationIntervalInHours() {
+        return jwksRegenerationIntervalInHours;
+    }
+
+    public void setJwksRegenerationIntervalInHours(int jwksRegenerationIntervalInHours) {
+        this.jwksRegenerationIntervalInHours = jwksRegenerationIntervalInHours;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -429,6 +439,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", enableJwksGeneration=" + enableJwksGeneration + '\'' +
                 ", jwksExpirationInHours=" + jwksExpirationInHours + '\'' +
                 ", requestObjectExpirationInMinutes=" + requestObjectExpirationInMinutes + '\'' +
+                ", jwksRegenerationIntervalInHours=" + jwksRegenerationIntervalInHours + '\'' +
                 '}';
     }
 }
