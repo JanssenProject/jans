@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.security.KeyStoreException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -60,8 +61,9 @@ public class KeyGeneratorService {
 
         try {
             if (configuration.getEnableJwksGeneration()) {
-                setKeys(generateKeys(signatureAlgorithms, encryptionAlgorithms, configuration.getJwksExpirationInHours()));
-                saveKeysInStorage(this.keys.toString());
+                JSONWebKeySet keySet = generateKeys(signatureAlgorithms, encryptionAlgorithms, configuration.getJwksExpirationInHours());
+                saveKeysInStorage(keySet.toString());
+                setKeys(keySet);
             }
         } catch (Exception e) {
             LOG.error("Failed to generate json web keys.", e);
@@ -163,10 +165,37 @@ public class KeyGeneratorService {
 
     public JSONWebKeySet getKeysFromStorage() {
         ExpiredObject expiredObject = persistenceService.getExpiredObject(ExpiredObjectType.JWKS.getValue());
-        if (expiredObject != null && !Strings.isNullOrEmpty(expiredObject.getValue())) {
-            JSONObject keys = new JSONObject(expiredObject.getValue());
-            return JSONWebKeySet.fromJSONObject(keys);
+
+        if (expiredObject == null || Strings.isNullOrEmpty(expiredObject.getValue())) {
+            return null;
         }
-        return null;
+
+        JSONObject keysInJson = new JSONObject(expiredObject.getValue());
+        JSONWebKeySet keys = JSONWebKeySet.fromJSONObject(keysInJson);
+        try {
+            if (hasKeysExpired(expiredObject)) {
+                LOG.trace("The keys in storage got expired. Deleting the expired keys from storage.");
+                deleteKeysFromStorage();
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error("Error in reading expiry date or deleting expired keys from storage. Trying to delete the keys from storage.", e);
+            deleteKeysFromStorage();
+            return null;
+        }
+        return keys;
+    }
+
+    public void deleteKeysFromStorage() {
+        persistenceService.deleteExpiredObjectsByKey(ExpiredObjectType.JWKS.getValue());
+    }
+
+    public boolean hasKeysExpired(ExpiredObject expiredObject) {
+
+        long expirationDate = expiredObject.getExp().getTime();
+        long today = new Date().getTime();
+        long expiresInMinutes = (expirationDate - today) / (60 * 1000);
+
+        return (expiresInMinutes <= 0);
     }
 }

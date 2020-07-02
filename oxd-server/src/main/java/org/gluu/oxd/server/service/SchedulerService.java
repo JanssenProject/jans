@@ -26,36 +26,43 @@ public class SchedulerService {
     }
 
     public void scheduleTasks() {
-        ScheduledExecutorService scheduledExecutorService = CoreUtils.createExecutor();
-        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                dbCleanUpTask();
-                jwksRegenerationTask();
-            }
-        }, configurationService.get().getDbCleanupIntervalInHours(), configurationService.get().getDbCleanupIntervalInHours(), TimeUnit.HOURS);
+        dbCleanUpTask();
+        jwksRegenerationTask();
     }
 
     public void jwksRegenerationTask() {
-        if (configurationService.get().getEnableJwksGeneration()) {
+        ScheduledExecutorService scheduledExecutorService = CoreUtils.createExecutor();
+        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                if (!configurationService.get().getEnableJwksGeneration()) {
+                    return;
+                }
 
-            LOG.trace("Delete jwks from object if not present in storage...");
-            if (keyGeneratorService.getKeysFromStorage() == null) {
-                LOG.trace("Jwks not present in storage. Resetting jwks in object to null...");
-                keyGeneratorService.setKeys(null);
+                LOG.trace("Delete jwks from object if not present in storage...");
+                if (keyGeneratorService.getKeysFromStorage() == null) {
+                    LOG.trace("Jwks not present in storage. Resetting jwks in object to null...");
+                    keyGeneratorService.setKeys(null);
+                }
+
+                LOG.trace("Generating jwks if missing in storage or expired...");
+                keyGeneratorService.getKeys();
+
             }
-
-            LOG.trace("Generating jwks if missing in storage or expired...");
-            keyGeneratorService.getKeys();
-        }
+        }, configurationService.get().getJwksRegenerationIntervalInHours(), configurationService.get().getJwksRegenerationIntervalInHours(), TimeUnit.HOURS);
     }
 
     public void dbCleanUpTask() {
-        LOG.trace("Deleting expired_objects from storage...");
-        String storage = configurationService.get().getStorage();
-        //this task is not required for redis and couchbase storage
-        if (!Lists.newArrayList("redis", "couchbase").contains(storage)) {
-            persistenceService.deleteAllExpiredObjects();
-        }
+        ScheduledExecutorService scheduledExecutorService = CoreUtils.createExecutor();
+        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                LOG.trace("Deleting expired_objects from storage...");
+                String storage = configurationService.get().getStorage();
+                //this task is not required for redis and couchbase storage
+                if (!Lists.newArrayList("redis", "couchbase").contains(storage)) {
+                    persistenceService.deleteAllExpiredObjects();
+                }
+            }
+        }, configurationService.get().getDbCleanupIntervalInHours(), configurationService.get().getDbCleanupIntervalInHours(), TimeUnit.HOURS);
     }
 
 }

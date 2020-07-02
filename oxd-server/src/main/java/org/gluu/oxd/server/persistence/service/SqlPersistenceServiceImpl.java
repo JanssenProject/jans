@@ -179,14 +179,14 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
         try {
             conn = provider.getConnection();
             conn.setAutoCommit(false);
-            PreparedStatement query = conn.prepareStatement("select " + this.expiredObjectColumnName + ", value, type, iat, exp from expired_objects where " + this.expiredObjectColumnName + " = ? and exp >= CURRENT_TIMESTAMP()");
+            PreparedStatement query = conn.prepareStatement("select " + this.expiredObjectColumnName + ", value, type, iat, exp from expired_objects where " + this.expiredObjectColumnName + " = ?");
             query.setString(1, key.trim());
             ResultSet rs = query.executeQuery();
             ExpiredObject expiredObject = null;
 
             rs.next();
             if (!Strings.isNullOrEmpty(rs.getString("key"))) {
-                expiredObject = new ExpiredObject(rs.getString("key"), rs.getString("value"), ExpiredObjectType.fromValue(rs.getString("type")), rs.getDate("iat"), rs.getDate("exp"));
+                expiredObject = new ExpiredObject(rs.getString("key"), rs.getString("value"), ExpiredObjectType.fromValue(rs.getString("type")), new java.util.Date(rs.getTimestamp("iat").getTime()), new java.util.Date(rs.getTimestamp("exp").getTime()));
             }
 
             query.close();
