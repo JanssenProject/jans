@@ -20,11 +20,11 @@ public class RequestObjectService {
         this.configurationService = configurationService;
     }
 
-    public void putRequestObject(String requestUriId, String requestObject) {
+    public void put(String requestUriId, String requestObject) {
         persistenceService.createExpiredObject(new ExpiredObject(requestUriId, requestObject, ExpiredObjectType.REQUEST_OBJECT, configurationService.get().getRequestObjectExpirationInMinutes()));
     }
 
-    public ExpiredObject getRequestObject(String requestUriId) {
+    public ExpiredObject get(String requestUriId) {
         return persistenceService.getExpiredObject(requestUriId);
     }
 
