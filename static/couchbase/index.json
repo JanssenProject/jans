@@ -89,7 +89,8 @@
     ],
     "static" : [
       [["grtId"], "objectClass = \"token\""],
-      [["ssnId"], "objectClass = \"token\""]
+      [["ssnId"], "objectClass = \"token\""],
+      [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
