@@ -228,6 +228,18 @@
         </classes>
     </test>
 
+    <test name="Rp Jwks Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetRpJwksTest"/>
+        </classes>
+    </test>
+
+    <test name="Request Uri Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetRequestUriTest"/>
+        </classes>
+    </test>
+
     <test name="Get Issuer swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.GetIssuerTest"></class>
