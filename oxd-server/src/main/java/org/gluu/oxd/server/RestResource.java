@@ -50,9 +50,9 @@ public class RestResource {
     }
 
     @GET
-    @Path("/get-request-object/{value}")
+    @Path("/get-request-object/{request_object_id}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getRequestObject(@PathParam("value") String value) {
+    public String getRequestObject(@PathParam("request_object_id") String value) {
         return process(CommandType.GET_REQUEST_OBJECT_JWT, (new StringParam(value)).toJsonString(), StringParam.class, null, null, httpRequest);
     }
 

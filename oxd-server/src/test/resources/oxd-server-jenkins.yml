@@ -4,7 +4,7 @@ use_client_authentication_for_pat: true
 trust_all_certs: true
 trust_store_path: ''
 trust_store_password: ''
-crypt_provider_key_store_path: './src/main/resources/oxd-jwks.keystore'
+crypt_provider_key_store_path: './oxd-jwks.keystore'
 crypt_provider_key_store_password: 'example'
 crypt_provider_dn_name: 'CN=oxd CA Certificates'
 enable_jwks_generation: true
