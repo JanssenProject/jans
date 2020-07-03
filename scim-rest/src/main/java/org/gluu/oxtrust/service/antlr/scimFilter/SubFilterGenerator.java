@@ -146,7 +146,7 @@ public class SubFilterGenerator {
                     //attribute>"value"
                     subfilter = Filter.createGreaterOrEqualFilter(attribute, value);
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value).multiValued(multivalued)),
                             subfilter
                     );
                 }
@@ -164,7 +164,7 @@ public class SubFilterGenerator {
                     //attribute < "value"
                     subfilter = Filter.createLessOrEqualFilter(attribute, value);
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value).multiValued(multivalued)),
                             subfilter
                     );
                 }
@@ -216,7 +216,7 @@ public class SubFilterGenerator {
                     //&(!(attribute=value))(attribute>=value)  --> LDAP does not support greater than operator
                     //attribute > value
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue).multiValued(multivalued)),
                             Filter.createGreaterOrEqualFilter(attribute, objValue)
                     );
                 }
@@ -232,7 +232,7 @@ public class SubFilterGenerator {
                     //&(!(attribute=value))(attribute<=value)  --> LDAP does not support less than operator
                     //attribute < value
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue).multiValued(multivalued)),
                             Filter.createLessOrEqualFilter(attribute, objValue)
                     );
                 }
@@ -306,7 +306,7 @@ public class SubFilterGenerator {
                     //&(!(attribute=value))(attribute>=value)  --> LDAP does not support greater than operator
                     //attribute > "value"
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate).multiValued(multivalued)),
                             Filter.createGreaterOrEqualFilter(attribute, stringDate)
                     );
                 }
@@ -323,7 +323,7 @@ public class SubFilterGenerator {
                     //&(!(attribute=value))(attribute<=value)  --> LDAP does not support less than operator
                     //attribute < "value"
                     subfilter = Filter.createANDFilter(
-                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate)),
+                            Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate).multiValued(multivalued)),
                             Filter.createLessOrEqualFilter(attribute, stringDate)
                     );
                 }
