@@ -25,9 +25,9 @@ public interface ClientInterface {
     JsonNode getRpJwks();
 
     @GET
-    @Path("/get-request-object/{value}")
+    @Path("/get-request-object/{request_object_id}")
     @Produces(MediaType.TEXT_PLAIN)
-    String getRequestObject(@PathParam("value") String value);
+    String getRequestObject(@PathParam("request_object_id") String value);
 
     @POST
     @Path("/get-client-token")
