@@ -152,7 +152,6 @@ if defaul_storage == 'ldap':
         elif l.startswith('bindDN'):
             ldap_binddn = l.split(':')[1].strip()
 
-    # Enable custom script oxtrust_api_access_policy
     server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True)
     
     ldap_conn = ldap3.Connection(server, user=ldap_binddn, password=ldap_password)
