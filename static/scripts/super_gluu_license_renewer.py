@@ -1,13 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import urllib
 import os
 import json
-import ldap
+import ldap3
 import time
 import shutil
-
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 def renew_license():
 
@@ -36,43 +34,47 @@ def renew_license():
     cmd = encode_fn + ' -D ' + prop['bindPassword']
     encoded_password = os.popen(cmd).read().strip()
     if not encoded_password:
-        print "Password can't be encoded"
+        print("Password can't be encoded")
         return
 
     ldap_server = prop['servers'].split(',')[0].strip()
-    ldap_conn = ldap.initialize('ldaps://' + ldap_server)
+    ldap_host, ldap_port = ldap_server.split(':')
 
+    server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True)
+    ldap_conn = ldap3.Connection(server, user=prop['bindDN'], password=encoded_password)
     try:
-    
-        ldap_conn.simple_bind_s(prop['bindDN'], encoded_password)
+        ldap_conn.bind()
     except:
-        print "Can't connect to ldap server"
+        print("Can't connect to ldap server")
         return
-                    
 
     scr_dn = 'inum=92F0-BF9E,ou=scripts,o=gluu'
 
-    result = ldap_conn.search_s(scr_dn,
-                           ldap.SCOPE_BASE,
-                           attrlist=['oxConfigurationProperty']
-                           )
+    ldap_conn.search(
+                search_base=scr_dn, 
+                search_scope=ldap3.BASE, 
+                search_filter='(objectClass=*)', 
+                attributes=['oxConfigurationProperty']
+                )
+
+    result = ldap_conn.response
 
     if not result:
-        print "Can't find Super Gluu script with dn {} in ldap".format(scr_dn)
+        print("Can't find Super Gluu script with dn {} in ldap".format(scr_dn))
         return
         
-    for oxprop_s in result[0][1]['oxConfigurationProperty']:
+    for oxprop_s in result[0]['attributes']['oxConfigurationProperty']:
          oxprop = json.loads(oxprop_s)
          if oxprop['value1'] == 'license_file':
              license_fn = oxprop['value2']
              break
     else:
-        print "Super gluu license file not found in ldap"
+        print("Super gluu license file not found in ldap")
         return
 
 
     if not os.path.exists(license_fn):
-        print "Super gluu license file {} does not exist".format(license_fn)
+        print("Super gluu license file {} does not exist".format(license_fn))
         return
         
     with open(license_fn) as f:
@@ -81,7 +83,7 @@ def renew_license():
     licenseId = license_js.get('licenseId')
 
     if not licenseId:
-        print license_fn, " does not include licenseId"
+        print(license_fn, " does not include licenseId")
         return
 
     url_metadata = 'https://license.gluu.org/oxLicense/rest/metadata?licenseId=' + licenseId
@@ -91,26 +93,26 @@ def renew_license():
         metadata_s = url_metadata_fd.read()
 
     except:
-        print "Can't read from", url_metadata
+        print("Can't read from", url_metadata)
         return
 
     try:
         metadata = json.loads(metadata_s)
     except:
-        print "Can't load json from", metadata_s
+        print("Can't load json from", metadata_s)
         return
         
     if 'expiration_date' in metadata: 
         expiration_date =  metadata['expiration_date']
     else:
-        print "Can't get expiration_date from json", metadata
+        print("Can't get expiration_date from json", metadata)
         return
 
     seconds_left = int(expiration_date/1000) - time.time()
     a_day = 24*60*60
 
     if seconds_left >= a_day:
-        print int(seconds_left/a_day), "days left to expire. No need to renew"
+        print(int(seconds_left/a_day), "days left to expire. No need to renew")
         return
 
     url = 'https://license.gluu.org/oxLicense/rest/generate?licenseId=' + licenseId
@@ -119,13 +121,13 @@ def renew_license():
         data_s = url_fd.read()
 
     except:
-        print "Can't read from", url
+        print("Can't read from", url)
         return
 
     try:
         data = json.loads(data_s)
     except:
-        print "Can't load json from", data
+        print("Can't load json from", data)
         return
 
     if data and data[0].get('license','').startswith('rO'):
@@ -135,9 +137,9 @@ def renew_license():
             json.dump(license_js, w, indent=2)
 
     else:
-        print "Data read from", url, "does not contain valid license"
+        print("Data read from", url, "does not contain valid license")
         return
 
-    print "Super Gluu license was renewed successfully"
+    print("Super Gluu license was renewed successfully")
 
 renew_license()
