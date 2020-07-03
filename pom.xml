@@ -177,12 +177,6 @@
 		</repository>
 	</repositories>
 	<build>
-	   <testResources>
-            <testResource>
-                <directory>src/test/resources</directory>
-            </testResource>
-        </testResources>
-        
 		<plugins>
 			<plugin>
 				<groupId>io.quarkus</groupId>
@@ -212,6 +206,7 @@
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
 						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+						<karate.options>--tags ~@ignore</karate.options>
 					</systemProperties>
 				</configuration>
 				<executions>

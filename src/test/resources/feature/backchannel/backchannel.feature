@@ -1,15 +1,14 @@
-Feature: Verify backchannel configuration
+Feature: Verify backchannel configuration endpoint
 
 Background:
   * def mainUrl = backchannelUrl
-  
-  Scenario: Get backchannel configuration
+   
+  @backchannel-get
+  Scenario: Retrieve backchannel configuration
     Given url  mainUrl
     When method GET
     Then status 200
-    #And print response.backchannelAuthenticationResponseInterval
-    #And assert (response.backchannelAuthenticationResponseInterval != null && response.backchannelAuthenticationResponseInterval >= 0 && response.backchannelAuthenticationResponseInterval <= 2147483647 && response.backchannelAuthenticationResponseInterval & 1 == 0)
-    And print response
+    #And print response
     And match response == 
      """
   { 
@@ -21,10 +20,24 @@ Background:
 	backchannelAuthenticationRequestSigningAlgValuesSupported: '##[] #string',
 	backchannelUserCodeParameterSupported: '##boolean',
 	backchannelBindingMessagePattern: '##string',
-	backchannelAuthenticationResponseExpiresIn: '#number? _ >= 1 && _ < 2147483647',
-	backchannelAuthenticationResponseInterval: '#number? _ >= 1 && _ < 2147483647',
+	backchannelAuthenticationResponseExpiresIn: '#number? _ >= 1 && _ <= 2147483647',
+	backchannelAuthenticationResponseInterval: '#number? _ >= 1 && _ <= 2147483647',
 	backchannelLoginHintClaims: '##[] #string'
   }
   """
+   
+   @backchannel-put
+   Scenario: Update backchannel configuration
+   Given url  mainUrl
+   When method GET
+   Then status 200
+   #And print response
+   Then def first_response = response 
+   #And print first_response
+   Given url  mainUrl
+   And request first_response
+   When method PUT
+   Then status 200
+   And print response
   
 	
