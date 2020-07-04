@@ -73,12 +73,12 @@ public class FilterListener extends ScimFilterBaseListener {
                     error = String.format("Attribute path '%s' is not recognized in %s", path, resourceClass.getSimpleName());
                 } else {
                     attrType = field.getAttributeDefinitionType();
-                    //multiValued = field.isMultiValued();
+                    multiValued = field.isMultiValued();
                     ldapAttribute = path.substring(path.lastIndexOf(":") + 1);
                 }
             } else {
                 attrType = attrAnnot.type();
-                //multiValued = attrAnnot.multiValueClass().equals(NullType.class);
+                multiValued = attrAnnot.multiValueClass().equals(NullType.class);
                 Pair<String, Boolean> pair = FilterUtil.getLdapAttributeOfResourceAttribute(path, resourceClass);
                 ldapAttribute = pair.getFirst();
                 isNested = pair.getSecond();
