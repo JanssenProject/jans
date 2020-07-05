@@ -38,7 +38,6 @@ install -m 755 oxd-server/src/main/bin/oxd-start.sh %{buildroot}/opt/oxd-server/
 install -m 755 oxd-server/src/main/bin/lsox.sh %{buildroot}/opt/oxd-server/bin/
 install -m 644 oxd-server/src/main/resources/oxd-server.yml %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/src/main/resources/oxd-server.keystore %{buildroot}/opt/oxd-server/conf/
-install -m 644 oxd-server/src/main/resources/oxd-jwks.keystore %{buildroot}/opt/oxd-server/conf/
 install -m 644 oxd-server/src/main/resources/swagger.yaml %{buildroot}/opt/oxd-server/conf/
 install -m 644 bcprov-jdk15on-1.54.jar %{buildroot}/opt/oxd-server/lib/
 install -m 644 bcpkix-jdk15on-1.54.jar %{buildroot}/opt/oxd-server/lib/
