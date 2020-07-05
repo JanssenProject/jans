@@ -26,7 +26,6 @@ override_dh_auto_install:
 		cp oxd-server/src/main/bin/lsox.sh debian/oxd-server/opt/oxd-server/bin/
 		cp oxd-server/src/main/resources/oxd-server.yml debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/oxd-server.keystore debian/oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/oxd-jwks.keystore debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/swagger.yaml debian/oxd-server/opt/oxd-server/conf/
 		cp bcprov-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
 		cp bcpkix-jdk15on-1.54.jar debian/oxd-server/opt/oxd-server/lib/
