@@ -52,6 +52,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             log.debug("RedisProvider started.");
         } catch (Exception e) {
             log.error("Failed to start RedisProvider.");
+            log.error("Log Error",e);
             throw new IllegalStateException("Error starting RedisProvider", e);
         }
     }
