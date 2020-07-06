@@ -23,18 +23,26 @@ public class OxdServerConfiguration extends Configuration {
     private String keyStorePath;
     @JsonProperty(value = "trust_store_password")
     private String keyStorePassword;
+    @JsonProperty(value = "enable_jwks_generation")
+    private Boolean enableJwksGeneration = true;
     @JsonProperty(value = "crypt_provider_key_store_path")
     private String cryptProviderKeyStorePath;
     @JsonProperty(value = "crypt_provider_key_store_password")
     private String cryptProviderKeyStorePassword;
     @JsonProperty(value = "crypt_provider_dn_name")
     private String cryptProviderDnName;
+    @JsonProperty(value = "jwks_expiration_in_hours")
+    private int jwksExpirationInHours = 720;
+    @JsonProperty(value = "jwks_regeneration_interval_in_hours")
+    private int jwksRegenerationIntervalInHours = 720;
     @JsonProperty(value = "support-google-logout")
     private Boolean supportGoogleLogout = true;
     @JsonProperty(value = "state_expiration_in_minutes")
     private int stateExpirationInMinutes = 5;
     @JsonProperty(value = "nonce_expiration_in_minutes")
     private int nonceExpirationInMinutes = 5;
+    @JsonProperty(value = "request_object_expiration_in_minutes")
+    private int requestObjectExpirationInMinutes = 5;
     @JsonProperty(value = "db_cleanup_interval_in_hours")
     private int dbCleanupIntervalInHours = 1;
     @JsonProperty(value = "rp_cache_expiration_in_minutes")
@@ -362,6 +370,38 @@ public class OxdServerConfiguration extends Configuration {
         this.bindIpAddresses = bindIpAddresses;
     }
 
+    public Boolean getEnableJwksGeneration() {
+        return enableJwksGeneration;
+    }
+
+    public void setEnableJwksGeneration(Boolean enableJwksGeneration) {
+        this.enableJwksGeneration = enableJwksGeneration;
+    }
+
+    public int getJwksExpirationInHours() {
+        return jwksExpirationInHours;
+    }
+
+    public void setJwksExpirationInHours(int jwksExpirationInHours) {
+        this.jwksExpirationInHours = jwksExpirationInHours;
+    }
+
+    public int getRequestObjectExpirationInMinutes() {
+        return requestObjectExpirationInMinutes;
+    }
+
+    public void setRequestObjectExpirationInMinutes(int requestObjectExpirationInMinutes) {
+        this.requestObjectExpirationInMinutes = requestObjectExpirationInMinutes;
+    }
+
+    public int getJwksRegenerationIntervalInHours() {
+        return jwksRegenerationIntervalInHours;
+    }
+
+    public void setJwksRegenerationIntervalInHours(int jwksRegenerationIntervalInHours) {
+        this.jwksRegenerationIntervalInHours = jwksRegenerationIntervalInHours;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -396,6 +436,10 @@ public class OxdServerConfiguration extends Configuration {
                 ", protectCommandsWithOxdId=" + protectCommandsWithOxdId + '\'' +
                 ", persistenceManagerRemoveCount=" + persistenceManagerRemoveCount + '\'' +
                 ", bindIpAddresses=" + bindIpAddresses + '\'' +
+                ", enableJwksGeneration=" + enableJwksGeneration + '\'' +
+                ", jwksExpirationInHours=" + jwksExpirationInHours + '\'' +
+                ", requestObjectExpirationInMinutes=" + requestObjectExpirationInMinutes + '\'' +
+                ", jwksRegenerationIntervalInHours=" + jwksRegenerationIntervalInHours + '\'' +
                 '}';
     }
 }

@@ -30,6 +30,8 @@ public class ParamsSecurityTest {
             HasOxdIdParams.class,
             GetDiscoveryParams.class,
             GetIssuerParams.class,
+            GetRequestObjectUriParams.class,
+            StringParam.class,
             IParams.class
     );
 
