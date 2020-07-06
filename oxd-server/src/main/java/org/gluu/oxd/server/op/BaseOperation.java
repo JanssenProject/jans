@@ -78,6 +78,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(StateService.class);
     }
 
+    public RequestObjectService getRequestObjectService() {
+        return getInstance(RequestObjectService.class);
+    }
+
     public DiscoveryService getDiscoveryService() {
         return getInstance(DiscoveryService.class);
     }
@@ -96,6 +100,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
 
     public ConfigurationService getConfigurationService() {
         return getInstance(ConfigurationService.class);
+    }
+
+    public KeyGeneratorService getKeyGeneratorService() {
+        return getInstance(KeyGeneratorService.class);
     }
 
     public OxAuthCryptoProvider getCryptoProvider() throws Exception {

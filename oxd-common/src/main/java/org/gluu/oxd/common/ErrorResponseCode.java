@@ -87,6 +87,10 @@ public enum ErrorResponseCode {
     REDIRECT_URI_IS_NOT_REGISTERED(400, "redirect_uri_is_not_registered", "The authorization redirect uri is not registered."),
     FAILED_TO_GET_DISCOVERY(500, "failed_to_get_discovery", "Failed to get OP discovery configuration."),
     FAILED_TO_GET_ISSUER(500, "failed_to_get_issuer", "Failed to get OP Issuer. Please check 1) if correct `resource` parameter is passed to this command. 2) oxd log file for error details (oxd-server.log)."),
+    FAILED_TO_GET_REQUEST_URI(500, "failed_to_get_request_uri", "Failed to create `request_uri`."),
+    REQUEST_OBJECT_NOT_FOUND(404, "request_object_not_found", "Request object not found. The `request_uri` has either expired or it does not exist."),
+    BAD_REQUEST_NO_OXD_HOST(400, "bad_request_no_oxd_host", "'oxd_host_url' is empty or not specified."),
+    PARAMETER_OUT_OF_BOUND(400, "parameter_out_of_bound", "Number of path parameter(s) more than required."),
     SSL_HANDSHAKE_ERROR(500, "ssl_handshake_error", "Unable to find valid certification path to requested target. Please check if key_store_path in oxd configuration is correct."),
     INVALID_ALGORITHM(500, "invalid_algorithm", "Invalid algorithm provided (empty or null)."),
     ALGORITHM_NOT_SUPPORTED(500, "algorithm_not_supported", "Algorithm not supported."),
@@ -102,7 +106,8 @@ public enum ErrorResponseCode {
     AUTHORIZATION_OXD_ID_NOT_FOUND(400, "authorization_oxd_id_not_found", "`oxd_id` in `AuthorizationOxdId` header is not registered in oxd."),
     NO_CLIENT_ID_RETURNED(500, "no_client_id_returned", "`client_id` is not returned from OP host. Please check OP log file for error (oxauth.log)."),
     NO_CLIENT_SECRET_RETURNED(500, "no_client_secret_returned", "`client_secret` is not returned from OP host. Please check: 1) OP log file for error (oxauth.log) 2) whether `returnClientSecretOnRead` configuration property is set to true on OP host."),
-    OXD_ACCESS_DENIED(403, "oxd_access_denied", "The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` in field of `oxd-server.yml`.");
+    OXD_ACCESS_DENIED(403, "oxd_access_denied", "The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` field of `oxd-server.yml`."),
+    JWKS_GENERATION_DISABLE(500, "jwks_generation_disable", "Relying party JWKS generation is disabled in running oxd instance. To enable it set `enable_jwks_generation` field to true in `oxd-server.yml`.");
 
     private final int httpStatus;
     private final String code;

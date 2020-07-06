@@ -12,6 +12,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <includes>
                 <include>org.bouncycastle:bcprov-jdk15on</include>
+                <include>org.bouncycastle:bcpkix-jdk15on</include>
             </includes>
             <scope>runtime</scope>
         </dependencySet>
@@ -26,6 +27,10 @@
             <source>${project.basedir}/src/main/resources/oxd-server.yml</source>
             <outputDirectory>/conf</outputDirectory>
             <destName>oxd-server.yml</destName>
+        </file>
+        <file>
+            <source>${project.basedir}/src/main/resources/oxd-jwks.keystore</source>
+            <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
             <source>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows/amd64/prunsrv.exe</source>

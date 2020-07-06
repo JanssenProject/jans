@@ -19,6 +19,16 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     String healthCheck();
 
+    @GET
+    @Path("/get-rp-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    JsonNode getRpJwks();
+
+    @GET
+    @Path("/get-request-object/{request_object_id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    String getRequestObject(@PathParam("request_object_id") String value);
+
     @POST
     @Path("/get-client-token")
     @Produces(MediaType.APPLICATION_JSON)
@@ -162,4 +172,10 @@ public interface ClientInterface {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     GetIssuerResponse getIssuer(GetIssuerParams params);
+
+    @POST
+    @Path("/get-request-object-uri")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    GetRequestObjectUriResponse getRequestObjectUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, GetRequestObjectUriParams params);
 }

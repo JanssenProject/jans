@@ -8,13 +8,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxd.server.guice.GuiceModule;
 import org.gluu.oxd.server.persistence.service.PersistenceService;
-import org.gluu.oxd.server.service.ConfigurationService;
-import org.gluu.oxd.server.service.MigrationService;
-import org.gluu.oxd.server.service.RpService;
+import org.gluu.oxd.server.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.security.Provider;
@@ -48,6 +46,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(RpService.class).load();
             INJECTOR.getInstance(MigrationService.class).migrate();
+            INJECTOR.getInstance(SchedulerService.class).scheduleTasks();
             LOG.info("oxD Services are configured successfully.");
         } catch (Throwable e) {
             LOG.error("Failed to start oxd server.", e);

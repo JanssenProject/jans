@@ -1,6 +1,5 @@
 package org.gluu.oxd.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.gluu.persist.annotation.*;
@@ -19,7 +18,6 @@ public class ExpiredObject implements Serializable {
     private String dn;
     @AttributeName(name = "oxId")
     private String key;
-    @JsonObject
     @AttributeName(name = "dat")
     private String value;
     @AttributeName(name = "iat")
@@ -37,8 +35,9 @@ public class ExpiredObject implements Serializable {
     public ExpiredObject() {
     }
 
-    public ExpiredObject(String key, ExpiredObjectType expiredObjectType, int expiredObjectExpirationInMins) {
-        Preconditions.checkState(!Strings.isNullOrEmpty(key), "Expired Object contains blank or null value. Please specify valid Expired Object.");
+    public ExpiredObject(String key, String value, ExpiredObjectType expiredObjectType, int expiredObjectExpirationInMins) {
+        Preconditions.checkState(!Strings.isNullOrEmpty(key), "Expired Object contains blank or null key. Please specify valid Expired Object.");
+        Preconditions.checkState(!Strings.isNullOrEmpty(value), "Expired Object contains blank or null value. Please specify valid Expired Object.");
 
         Calendar cal = Calendar.getInstance();
 
@@ -49,28 +48,18 @@ public class ExpiredObject implements Serializable {
         cal.add(Calendar.MINUTE, expiredObjectExpirationInMins);
         this.exp = cal.getTime();
         this.ttl = expiredObjectExpirationInMins * 60;
-        try {
-            this.value = Jackson2.createJsonMapperWithoutEmptyAttributes().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
-        }
+        this.value = value;
     }
 
-    public ExpiredObject(String key, ExpiredObjectType expiredObjectType, Date iat, Date exp) {
+    public ExpiredObject(String key, String value, ExpiredObjectType expiredObjectType, Date iat, Date exp) {
         Preconditions.checkState(!Strings.isNullOrEmpty(key), "Expired Object contains blank or null value. Please specify valid Expired Object.");
-
-        Calendar cal = Calendar.getInstance();
-
+        Preconditions.checkState(!Strings.isNullOrEmpty(value), "Expired Object contains blank or null value. Please specify valid Expired Object.");
         this.key = key;
         this.type = expiredObjectType;
         this.typeString = expiredObjectType.getValue();
         this.iat = iat;
         this.exp = exp;
-        try {
-            this.value = Jackson2.createJsonMapperWithoutEmptyAttributes().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
-        }
+        this.value = value;
     }
 
     public String getDn() {

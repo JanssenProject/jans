@@ -5,7 +5,6 @@ import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.PersistenceConfigKeys;
 import org.gluu.oxd.server.OxdServerConfiguration;
-import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.persistence.modal.OrganizationBranch;
 import org.gluu.oxd.server.persistence.modal.RpObject;
 import org.gluu.oxd.server.persistence.providers.GluuPersistenceConfiguration;
@@ -269,8 +268,7 @@ public class GluuPersistenceService implements PersistenceService {
         try {
             final Calendar cal = Calendar.getInstance();
             final Date currentTime = cal.getTime();
-            Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp",
-                    this.persistenceEntryManager.encodeTime(baseDn, currentTime));
+            Filter exirationDateFilter = Filter.createLessOrEqualFilter("exp", this.persistenceEntryManager.encodeTime(baseDn, currentTime));
 
             this.persistenceEntryManager.remove(String.format("%s,%s", new Object[]{getExpiredObjOu(), getOxdDn()}), ExpiredObject.class, exirationDateFilter, this.configuration.getPersistenceManagerRemoveCount());
             LOG.debug("Removed all expired_objects successfully. ");
