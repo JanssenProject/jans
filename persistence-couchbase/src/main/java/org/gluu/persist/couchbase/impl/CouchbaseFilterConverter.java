@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.functions.Collections;
 import com.couchbase.client.java.query.dsl.functions.StringFunctions;
 
 /**
@@ -180,11 +181,23 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).lte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+        	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+            if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
+            	String internalAttribute = toInternalAttribute(currentGenericFilter);
+            	return ConvertedExpression.build(Collections.anyIn(internalAttribute + "_", Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)))).satisfies(Expression.path(Expression.path(internalAttribute + "_")).lte(buildTypedExpression(currentGenericFilter))), requiredConsistency);
+            } else {
+            	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).lte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            }
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).gte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+        	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+            if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
+            	String internalAttribute = toInternalAttribute(currentGenericFilter);
+            	return ConvertedExpression.build(Collections.anyIn(internalAttribute + "_", Expression.path(Expression.path(toInternalAttribute(currentGenericFilter)))).satisfies(Expression.path(Expression.path(internalAttribute + "_")).gte(buildTypedExpression(currentGenericFilter))), requiredConsistency);
+            } else {
+            	return ConvertedExpression.build(Expression.path(Expression.path(toInternalAttribute(currentGenericFilter))).gte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+            }
         }
 
         if (FilterType.PRESENCE == type) {
