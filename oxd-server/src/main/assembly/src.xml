@@ -27,10 +27,6 @@
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/oxd-jwks.keystore</source>
-            <outputDirectory>/conf</outputDirectory>
-        </file>
-        <file>
             <source>${project.basedir}/src/main/resources/swagger.yaml</source>
             <outputDirectory>/conf</outputDirectory>
         </file>
