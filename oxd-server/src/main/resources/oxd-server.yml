@@ -4,8 +4,9 @@ use_client_authentication_for_pat: true
 trust_all_certs: false
 trust_store_path: ''
 trust_store_password: ''
-crypt_provider_key_store_path: ''
-crypt_provider_key_store_password: ''
+enable_jwks_generation: true
+crypt_provider_key_store_path: '/opt/oxd-server/conf/oxd-jwks.keystore'
+crypt_provider_key_store_password: 'example'
 crypt_provider_dn_name: ''
 support-google-logout: true
 state_expiration_in_minutes: 5
