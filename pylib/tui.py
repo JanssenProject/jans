@@ -283,7 +283,7 @@ class ServicesForm(GluuSetupForm):
                         'installPassport': ['gluuPassportEnabled', 'enable_scim_access_policy'],
                         'installGluuRadius': ['gluuRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
                         'installSaml': ['gluuSamlEnabled'],
-                        'installScimServer': ['gluuScimEnabled'],
+                        'installScimServer': ['gluuScimEnabled', 'enable_scim_access_policy'],
                         }
 
         for service in self.services:
