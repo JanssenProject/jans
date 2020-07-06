@@ -39,5 +39,33 @@ Background:
    When method PUT
    Then status 200
    And print response
+   
+   
+   @error
+   Scenario: Error case while updating backchannel configuration
+   Given url  mainUrl
+   When method GET
+   Then status 400
+   Then def first_response = response 
+   Then set first_response.backchannelAuthenticationResponseExpiresIn = 0
+   Given url mainUrl
+   And request first_response
+   When method PUT
+   Then status 200
+   And print response
+   
+   
+   @error
+   Scenario: Error case while updating backchannel configuration
+   Given url  mainUrl
+   When method GET
+   Then status 400
+   Then def first_response = response 
+   Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483647
+   Given url mainUrl
+   And request first_response
+   When method PUT
+   Then status 200
+   And print response
   
 	

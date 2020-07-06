@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Size;
 
 /**
  * @author Puja Sharma
@@ -17,16 +18,22 @@ public class Backchannel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	@Size(min=0)
 	private String backchannelClientId;
 	
+	@Size(min=0)
 	private String backchannelRedirectUri;
 	
+	@Size(min=0)
 	private String backchannelAuthenticationEndpoint;
 	
+	@Size(min=0)
 	private String backchannelDeviceRegistrationEndpoint;
 	
+	@Size(min=0)
 	private List<String> backchannelTokenDeliveryModesSupported;
 	
+	@Size(min=0)
 	private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
 	
 	private Boolean backchannelUserCodeParameterSupported;
