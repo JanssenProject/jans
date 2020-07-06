@@ -2582,6 +2582,161 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       x-codegen-request-body-name: GetDiscoveryParams
+  /get-rp-jwks:
+    get:
+      tags:
+      - developers
+      summary: Get Rp JWKS
+      description: Get Rp JWKS
+      operationId: get-rp-jwks
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: GetRpJwksResponse
+                required:
+                - keys
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey'
+        500:
+          description: Internal error occured. Please check oxd-server.log file for
+            details (usually located in /var/log/oxd-server/oxd-server.log).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: GetJwksParams
+  /get-request-object-uri:
+    post:
+      tags:
+      - developers
+      summary: Get Request Object Uri
+      description: Get Request Object Uri
+      operationId: get-request-object-uri
+      parameters:
+      - name: Authorization
+        in: header
+        schema:
+          type: string
+      - name: AuthorizationOxdId
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: GetRequestObjectUriParams
+              required:
+              - oxd_id
+              - oxd_host_url
+              type: object
+              properties:
+                oxd_id:
+                  type: string
+                  example: bcad760f-91ba-46e1-a020-05e4281d91b6
+                params:
+                  type: object
+                  additionalProperties:
+                    type: object
+                request_object_signing_alg:
+                  type: string
+                  example: RS256
+                  description: choose the JWS alg algorithm (JWA) that must be required
+                    by the Authorization Server. Valid values are none, HS256, HS384,
+                    HS512, RS256, RS384, RS512, ES256, ES384, ES512, PS256, PS384,
+                    PS512
+                oxd_host_url:
+                  type: string
+                  example: https://<oxd-host>
+        required: false
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: GetRequestObjectUriResponse
+                required:
+                - request_uri
+                type: object
+                properties:
+                  request_uri:
+                    type: string
+                    example: https://<oxd-host>/get-request-object/d871gpie16np0f5kfv936sc33k
+        400:
+          description: Invalid parameters are provided to endpoint.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        403:
+          description: Forbidden. Invalid access token provided in Authorization header.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal error occured. Please check oxd-server.log file for
+            details (usually located in /var/log/oxd-server/oxd-server.log).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-codegen-request-body-name: GetRequestObjectUriResponse
+  /get-request-object/{request_object_id}:
+    get:
+      tags:
+      - developers
+      summary: Get Request Object
+      description: Get Request Object
+      operationId: get-request-object
+      parameters:
+      - in: path
+        name: request_object_id
+        schema:
+          type: string
+        required: true
+        description: request object id
+      responses:
+        200:
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: eyJraWQiOiIyN2QyMGU2Zi1mNjZlLTQzZTUtOGY5Yi0yNDE3YTRjMjQ1YjB
+                  fc2lnX3JzMjU2IiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYifQ.eyJhdWQiOiJodHRw
+                  czovL2plbmtpbnMtbGRhcC5nbHV1Lm9yZyIsImlzcyI6IjJmOTk4OWY1LWU4MjAtNGQ5
+                  Yi1iYzAzLWZlZmU4ZDU0YmU4NSIsInJlc3BvbnNlX3R5cGUiOlsiY29kZSJdLCJzdGF0Z
+                  SI6IjEya2E0IiwiZXhwIjoxNTkzNjk0OTU2LCJveGRfaWQiOiJhNzMxODdmZi0zODJiLT
+                  Q0YzgtYjEzMi0zYjE0YjYwNWY0OTQiLCJpYXQiOjE1OTM2OTQ2NTYsImp0aSI6IjQ5NzF
+                  jMWE4LThmYmEtNDExMS1iYWQxLWQ4NmI0MTdiYzBmMCIsImNsaWVudF9pZCI6IjJmOTk4O
+                  WY1LWU4MjAtNGQ5Yi1iYzAzLWZlZmU4ZDU0YmU4NSJ9.TIuQm4aj8X2wX9g8aiHs62Y_5y
+                  U3sz5jh-PW3egzFIZ99N7TDkYXf6-NM_F9UuFiA8aO7Yjjrl1xjrhmonQxpZ56e2Gyd4-h
+                  YI8oTINy2l3iGHNE9Ss7ypZ-PblI7eNoHoshFziCM7VhhBFbOqqxwG8tQ4lxvbcI-BXN_d
+                  uxHLvfy7uMrCo1KKyB0TTjqEt5ik1O0V2UPmYqRkN1mObZJvYAA9-vxa5AMu3mf7Wj8CNl
+                  FL4pgx_mwo3NTU23_TErL_nI6vf_gfC0UJanGCmUE5hWC_lY9QJi01VRMMNdXVIYUtXtoE
+                  F3y4dh77CZuvM9CMVj4g0WBro006UUiC21ow
+        404:
+          description: Request object not found.
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal error occured. Please check oxd-server.log file for
+            details (usually located in /var/log/oxd-server/oxd-server.log).
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     oxd_id:

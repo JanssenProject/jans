@@ -1,9 +1,10 @@
 package org.gluu.oxd.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
 import io.dropwizard.util.Strings;
 import io.opentracing.Scope;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.IntrospectionResponse;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.CommandType;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -11,7 +12,10 @@ import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.*;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.POJOResponse;
-import org.gluu.oxd.server.service.*;
+import org.gluu.oxd.server.service.ConfigurationService;
+import org.gluu.oxd.server.service.Rp;
+import org.gluu.oxd.server.service.RpSyncService;
+import org.gluu.oxd.server.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +24,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Path("/")
 public class RestResource {
@@ -42,6 +47,20 @@ public class RestResource {
     public String healthCheck() {
         validateIpAddressAllowed(httpRequest.getRemoteAddr());
         return "{\"status\":\"running\"}";
+    }
+
+    @GET
+    @Path("/get-request-object/{request_object_id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getRequestObject(@PathParam("request_object_id") String value) {
+        return process(CommandType.GET_REQUEST_OBJECT_JWT, (new StringParam(value)).toJsonString(), StringParam.class, null, null, httpRequest);
+    }
+
+    @GET
+    @Path("/get-rp-jwks")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getRpJwks() {
+        return process(CommandType.GET_RP_JWKS, null, GetJwksParams.class, null, null, httpRequest);
     }
 
     @POST
@@ -236,6 +255,14 @@ public class RestResource {
         return process(CommandType.ISSUER_DISCOVERY, params, GetIssuerParams.class, null, null, httpRequest);
     }
 
+    @POST
+    @Path("/get-request-object-uri")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String getRequestObjectUri(@HeaderParam("Authorization") String authorization, @HeaderParam("AuthorizationOxdId") String authorizationOxdId, String params) {
+        return process(CommandType.GET_REQUEST_URI, params, GetRequestObjectUriParams.class, authorization, authorizationOxdId, httpRequest);
+    }
+
     public static <T> T read(String params, Class<T> clazz) {
         try {
             return Jackson2.createJsonMapper().readValue(params, clazz);
@@ -254,10 +281,17 @@ public class RestResource {
 
             validateIpAddressAllowed(httpRequest.getRemoteAddr());
             Object forJsonConversion = getObjectForJsonConversion(commandType, paramsAsString, paramsClass, authorization, authorizationOxdId);
-            final String json = Jackson2.asJsonSilently(forJsonConversion);
-            TracingUtil.log("Send back response: " + json);
-            LOG.trace("Send back response: {}", json);
-            return json;
+            String response = null;
+
+            if (commandType.getReturnType().equalsIgnoreCase(MediaType.APPLICATION_JSON)) {
+                response = Jackson2.asJsonSilently(forJsonConversion);
+            } else if (commandType.getReturnType().equalsIgnoreCase(MediaType.TEXT_PLAIN)) {
+                response = forJsonConversion.toString();
+            }
+
+            TracingUtil.log("Send back response: " + response);
+            LOG.trace("Send back response: {}", response);
+            return response;
         }
     }
 
@@ -285,7 +319,7 @@ public class RestResource {
 
     private static <T extends IParams> Object getObjectForJsonConversion(CommandType commandType, String paramsAsString, Class<T> paramsClass, String authorization, String authorizationOxdId) {
         LOG.trace("Command: {}", paramsAsString);
-        T params = read(paramsAsString, paramsClass);
+        T params = read(safeToJson(paramsAsString), paramsClass);
 
         final OxdServerConfiguration conf = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
 
@@ -353,5 +387,9 @@ public class RestResource {
 
     private static String safeToOxdId(HasOxdIdParams params, String authorizationOxdId) {
         return Strings.isNullOrEmpty(authorizationOxdId) ? params.getOxdId() : authorizationOxdId;
+    }
+
+    private static String safeToJson(String jsonString) {
+        return Strings.isNullOrEmpty(jsonString) ? "{}" : jsonString;
     }
 }

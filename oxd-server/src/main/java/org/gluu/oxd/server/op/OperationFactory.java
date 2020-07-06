@@ -76,7 +76,12 @@ public class OperationFactory {
                     return new GetDiscoveryOperation(command, injector);
                 case ISSUER_DISCOVERY:
                     return new GetIssuerOperation(command, injector);
-
+                case GET_RP_JWKS:
+                    return new GetRpJwksOperation(command, injector);
+                case GET_REQUEST_URI:
+                    return new GetRequestObjectUriOperation(command, injector);
+                case GET_REQUEST_OBJECT_JWT:
+                    return new GetRequestObjectOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
