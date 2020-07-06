@@ -29,10 +29,6 @@
             <destName>oxd-server.yml</destName>
         </file>
         <file>
-            <source>${project.basedir}/src/main/resources/oxd-jwks.keystore</source>
-            <outputDirectory>/conf</outputDirectory>
-        </file>
-        <file>
             <source>${project.build.directory}/commons-daemon-${commons-daemon.bin.version}-bin-windows/amd64/prunsrv.exe</source>
             <outputDirectory>/bin</outputDirectory>
             <destName>oxdServer.exe</destName>
