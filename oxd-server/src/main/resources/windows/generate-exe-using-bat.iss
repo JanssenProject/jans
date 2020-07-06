@@ -48,7 +48,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Source: "{#OXDTargetDir}bin\*"; DestDir: "{app}\bin"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#OXDTargetDir}conf\generate-exe-using-bat.iss"; DestDir: "{app}\conf"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#OXDTargetDir}conf\oxd-server.keystore"; DestDir: "{app}\conf"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#OXDTargetDir}conf\oxd-jwks.keystore"; DestDir: "{app}\conf"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#OXDTargetDir}conf\oxd-server-win.yml"; DestDir: "{app}\conf"; DestName: "oxd-server.yml"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#OXDTargetDir}lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#OXDTargetDir}license\*"; DestDir: "{app}\license"; Flags: ignoreversion recursesubdirs createallsubdirs
