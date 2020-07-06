@@ -280,18 +280,21 @@ class ServicesForm(GluuSetupForm):
     def nextButtonPressed(self):
 
         service_enable_dict = {
-                        'installPassport': 'gluuPassportEnabled',
-                        'installGluuRadius': 'gluuRadiusEnabled',
-                        'installSaml': 'gluuSamlEnabled',
-                        'installScimServer': 'gluuScimEnabled',
+                        'installPassport': ['gluuPassportEnabled', 'enable_scim_access_policy'],
+                        'installGluuRadius': ['gluuRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
+                        'installSaml': ['gluuSamlEnabled'],
+                        'installScimServer': ['gluuScimEnabled'],
                         }
 
         for service in self.services:
             cb_val = getattr(self, service).value
             setattr(self.parentApp.installObject, service, cb_val)
             if cb_val and service in service_enable_dict:
-                setattr(self.parentApp.installObject, service_enable_dict[service], 'true')
+                for attribute in service_enable_dict[service]:
+                    setattr(self.parentApp.installObject, attribute, 'true')
 
+        if self.installSaml:
+            self.parentApp.installObject.shibboleth_version = 'v3'
 
         if self.installOxd.value:
             self.parentApp.installObject.oxd_server_https = 'https://{}:8443'.format(self.parentApp.installObject.hostname)
