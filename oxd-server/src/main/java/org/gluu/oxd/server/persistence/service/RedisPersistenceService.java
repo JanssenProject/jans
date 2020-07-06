@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.gluu.oxd.common.ExpiredObject;
-import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.OxdServerConfiguration;
 import org.gluu.oxd.server.service.MigrationService;
@@ -58,14 +57,23 @@ public class RedisPersistenceService implements PersistenceService {
         }
     }
 
-
     public boolean createExpiredObject(ExpiredObject obj) {
         try {
             int objectExpirationInMinutes = 0;
-            if (obj.getType() == ExpiredObjectType.STATE) {
-                objectExpirationInMinutes = configuration.getStateExpirationInMinutes();
-            } else if (obj.getType() == ExpiredObjectType.NONCE) {
-                objectExpirationInMinutes = configuration.getNonceExpirationInMinutes();
+
+            switch (obj.getType()) {
+                case STATE:
+                    objectExpirationInMinutes = configuration.getStateExpirationInMinutes();
+                    break;
+                case NONCE:
+                    objectExpirationInMinutes = configuration.getNonceExpirationInMinutes();
+                    break;
+                case REQUEST_OBJECT:
+                    objectExpirationInMinutes = configuration.getRequestObjectExpirationInMinutes();
+                    break;
+                case JWKS:
+                    objectExpirationInMinutes = configuration.getJwksExpirationInHours() * 60;
+                    break;
             }
 
             put(objectExpirationInMinutes * 60, obj.getKey(), obj.getValue());
@@ -103,7 +111,7 @@ public class RedisPersistenceService implements PersistenceService {
                 LOG.error("Error in assigning json value to ExpiredObject value attribute.", e);
                 expiredObjectFromDb = new ExpiredObject();
             }
-            ExpiredObject expiredObject = new ExpiredObject(key, expiredObjectFromDb.getType(), expiredObjectFromDb.getIat(), expiredObjectFromDb.getExp());
+            ExpiredObject expiredObject = new ExpiredObject(key, value, expiredObjectFromDb.getType(), expiredObjectFromDb.getIat(), expiredObjectFromDb.getExp());
 
             return expiredObject;
         }
@@ -113,7 +121,6 @@ public class RedisPersistenceService implements PersistenceService {
     public boolean isExpiredObjectPresent(String key) {
         return getExpiredObject(key) != null;
     }
-
 
     @Override
     public boolean removeAllRps() {

@@ -50,6 +50,16 @@
             <class name="org.gluu.oxd.server.HealthCheckTest"></class>
         </classes>
     </test>
+    <test name="Get Rp Jwks" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetRpJwksTest"></class>
+        </classes>
+    </test>
+    <test name="Get Request Uri" enabled="true">
+        <classes>
+            <class name="org.gluu.oxd.server.GetRequestUriTest"></class>
+        </classes>
+    </test>
     <test name="Get Issuer" enabled="true">
         <classes>
             <class name="org.gluu.oxd.server.GetIssuerTest"></class>
@@ -215,6 +225,18 @@
     <test name="Get OpDiscovery swagger" enabled="true">
         <classes>
             <class name="io.swagger.client.api.GetDiscoveryTest"></class>
+        </classes>
+    </test>
+
+    <test name="Rp Jwks Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetRpJwksTest"/>
+        </classes>
+    </test>
+
+    <test name="Request Uri Swagger" enabled="true">
+        <classes>
+            <class name="io.swagger.client.api.GetRequestUriTest"/>
         </classes>
     </test>
 

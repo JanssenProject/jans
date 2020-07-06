@@ -51,12 +51,12 @@ public class StateService {
     }
 
     public String putState(String state) {
-        persistenceService.createExpiredObject(new ExpiredObject(state, ExpiredObjectType.STATE, configurationService.get().getStateExpirationInMinutes()));
+        persistenceService.createExpiredObject(new ExpiredObject(state, state, ExpiredObjectType.STATE, configurationService.get().getStateExpirationInMinutes()));
         return state;
     }
 
     public String putNonce(String nonce) {
-        persistenceService.createExpiredObject(new ExpiredObject(nonce, ExpiredObjectType.NONCE, configurationService.get().getNonceExpirationInMinutes()));
+        persistenceService.createExpiredObject(new ExpiredObject(nonce, nonce, ExpiredObjectType.NONCE, configurationService.get().getNonceExpirationInMinutes()));
         return nonce;
     }
 }
