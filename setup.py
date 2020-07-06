@@ -3313,6 +3313,7 @@ class Setup(object):
         if promptForScimServer == 'y':
             self.installScimServer = True
             self.gluuScimEnabled = 'true'
+            self.enable_scim_access_policy = 'true'
 
         promptForFido2Server = self.getPrompt("Install Fido2 Server?",
                                             self.getDefaultOption(self.installFido2)
