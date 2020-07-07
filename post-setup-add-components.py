@@ -59,7 +59,7 @@ gluu_version = '4.2.0'
 
 print("Current Gluu Version", gluu_version)
 
-
+"""
 if os.path.exists(ces_dir + '.back'):
     os.system('rm -r -f ' + ces_dir + '.back')
 
@@ -84,7 +84,7 @@ os.system('unzip -o -qq {}'.format(ces_path))
 os.system('mv {}/{} {}/ces_current'.format(cur_dir, ces_folder, cur_dir))
 
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
-
+"""
 
 sys.path.append(ces_dir)
 
@@ -131,7 +131,7 @@ print("Log Files:", setupObj.log, setupObj.logError)
 setupObj.ldapCertFn = setupObj.opendj_cert_fn
 
 # Determine persistence type
-gluu_cb_prop_fn = '/etc/gluu/conf/gluu-couchbase.properties'
+gluu_cb_prop_fn = setupObj.gluuCouchebaseProperties
 gluu_prop = read_properties_file(setupObj.gluu_properties_fn)
 persistence_type = gluu_prop['persistence.type']
 setupObj.persistence_type = persistence_type
@@ -145,6 +145,9 @@ if persistence_type == 'couchbase':
 else:
     setupObj.createLdapPw()
     ldap_conn = get_ldap_conn()
+
+if os.path.exists(gluu_cb_prop_fn):
+    gluu_cb_prop = read_properties_file(gluu_cb_prop_fn)
 
 def get_oxAuthConfiguration_ldap():
 
