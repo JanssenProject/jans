@@ -24,8 +24,8 @@ public class DeviceCodeGrant extends AuthorizationGrant {
     public DeviceCodeGrant() {
     }
 
-    public void init(DeviceAuthorizationCacheControl cacheData) {
-        super.init(cacheData.getUser(), AuthorizationGrantType.CIBA, cacheData.getClient(), null);
+    public void init(DeviceAuthorizationCacheControl cacheData, User user) {
+        super.init(user, AuthorizationGrantType.CIBA, cacheData.getClient(), null);
         setDeviceCode(cacheData.getDeviceCode());
         setAcrValues(cacheData.getAcrValues());
         setIsCachedWithNoPersistence(true);
@@ -34,7 +34,7 @@ public class DeviceCodeGrant extends AuthorizationGrant {
     @Override
     public void save() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
-        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.getAuthReqId(), cachedGrant);
+        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.getDeviceCode(), cachedGrant);
     }
 
     public String getDeviceCode() {

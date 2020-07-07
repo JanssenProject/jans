@@ -138,12 +138,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public DeviceCodeGrant createDeviceGrant(DeviceAuthorizationCacheControl data) {
+    public DeviceCodeGrant createDeviceGrant(DeviceAuthorizationCacheControl data, User user) {
         DeviceCodeGrant grant = grantInstance.select(DeviceCodeGrant.class).get();
-        grant.init(data);
+        grant.init(data, user);
 
         CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
-        cacheService.put(data.getExpiresIn(), memcachedGrant.getAuthReqId(), memcachedGrant);
+        cacheService.put(data.getExpiresIn(), memcachedGrant.getDeviceCode(), memcachedGrant);
         log.trace("Device code grant saved in cache, deviceCode: {}, grantId: {}", grant.getDeviceCode(), grant.getGrantId());
         return grant;
     }

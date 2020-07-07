@@ -20,7 +20,6 @@ public class DeviceAuthorizationCacheControl implements Serializable {
     private String userCode;
     private String deviceCode;
     private Client client;
-    private User user;
     private List<String> scopes;
     private URI verificationUri;
     private URI verificationUriComplete;
@@ -128,14 +127,6 @@ public class DeviceAuthorizationCacheControl implements Serializable {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public String getAcrValues() {
         return acrValues;
     }
@@ -150,7 +141,6 @@ public class DeviceAuthorizationCacheControl implements Serializable {
                 "userCode='" + userCode + '\'' +
                 ", deviceCode='" + deviceCode + '\'' +
                 ", client=" + client +
-                ", user=" + user +
                 ", scopes=" + scopes +
                 ", verificationUri='" + verificationUri + '\'' +
                 ", verificationUriComplete='" + verificationUriComplete + '\'' +
