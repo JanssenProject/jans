@@ -72,7 +72,7 @@ public class DeviceAuthorizationAction {
         try {
             String authorizationEndpoint = appConfiguration.getAuthorizationEndpoint();
             String clientId = cacheData.getClient().getClientId();
-            String responseType = "token id_token";
+            String responseType = "code";
             String scope = Util.listAsString(cacheData.getScopes());
             String state = UUID.randomUUID().toString();
             String nonce = UUID.randomUUID().toString();
@@ -83,6 +83,7 @@ public class DeviceAuthorizationAction {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
+            authRequest.addResponseParameter(USER_CODE, cacheData.getUserCode());
 
             FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
         } catch (IOException e) {
