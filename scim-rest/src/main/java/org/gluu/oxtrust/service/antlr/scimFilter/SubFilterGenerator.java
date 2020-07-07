@@ -53,13 +53,13 @@ public class SubFilterGenerator {
             if (subAttribute == null) {
                 //attribute=*
                 //attribute IS NOT MISSING
-                filth = Filter.createPresenceFilter(attribute);
+                filth = Filter.createPresenceFilter(attribute).multiValued(multivalued);
                 filth = negateIf(filth, operator.equals(ScimOperator.EQUAL));
             } else {
                 //attribute=*"subattribute":null*
                 //attribute LIKE "%\"subattribute\":null%"
                 String sub = String.format("\"%s\":null", subAttribute);
-                filth = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null);
+                filth = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null).multiValued(multivalued);
                 filth = negateIf(filth, operator.equals(ScimOperator.NOT_EQUAL));
             }
         } else if (Type.STRING.equals(attrType) || Type.REFERENCE.equals(attrType)) {
@@ -94,13 +94,14 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute=value
                     //attribute="value"
-                    subfilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attribute), ldapBackend ? value : value.toLowerCase())
-                            .multiValued(multivalued);
+                    subfilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attribute), 
+                    		ldapBackend ? value : value.toLowerCase()).multiValued(multivalued);
                 } else {
                     //attribute=*"subattribute":"value"*
                     //attribute LIKE "%\"subAttribute\":\"value\"%"
                     String sub = String.format("\"%s\":\"%s\"", subAttribute, value);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null)
+                    				.multiValued(multivalued);
                 }
                 subfilter = negateIf(subfilter, operator.equals(ScimOperator.NOT_EQUAL));
                 break;
@@ -108,43 +109,48 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute=*value*
                     //attribute LIKE "%value%"
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ value }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ value }, null)
+                    				.multiValued(multivalued);
                 } else {
                     //attribute=*"subAttribute":"*value*"*
                     //attribute LIKE "%\"subAttribute\":\"%value%\"%"
                     String sub = String.format("\"%s\":\"", subAttribute);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, value, "\"" }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, value, "\"" }, null)
+                    				.multiValued(multivalued);
                 }
                 break;
             case STARTS_WITH:
                 if (subAttribute == null) {
                     //attribute=value*
                     //attribute LIKE "value%"
-                    subfilter = Filter.createSubstringFilter(attribute, value, null, null);
+                    subfilter = Filter.createSubstringFilter(attribute, value, null, null)
+                    				.multiValued(multivalued);
                 } else {
                     //attribute=*"subAttribute":"value*"*
                     //attribute LIKE "%\"subAttribute\":\"value%\"%"
                     String sub = String.format("\"%s\":\"%s", subAttribute, value);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, "\"" }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, "\"" }, null)
+                    				.multiValued(multivalued);
                 }
                 break;
             case ENDS_WITH:
                 if (subAttribute == null) {
                     //attribute=*value
                     //attribute LIKE "%value"
-                    subfilter = Filter.createSubstringFilter(attribute, null, null, value);
+                    subfilter = Filter.createSubstringFilter(attribute, null, null, value).multiValued(multivalued);
                 } else {
                     //attribute=*"subAttribute":"*value"*
                     //attribute LIKE "%\"subAttribute\":\"%value\"%"
                     String sub = String.format("\"%s\":\"", subAttribute);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, value + "\"" }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub, value + "\"" }, null)
+                    				.multiValued(multivalued);
                 }
                 break;
             case GREATER_THAN:
                 if (subAttribute == null) {
                     //&(!(attribute=value))(attribute>=value)  --> LDAP does not support greater than operator
                     //attribute>"value"
-                    subfilter = Filter.createGreaterOrEqualFilter(attribute, value);
+                    subfilter = Filter.createGreaterOrEqualFilter(attribute, value).multiValued(multivalued);
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value).multiValued(multivalued)),
                             subfilter
@@ -155,14 +161,14 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute>=value
                     //attribute >= "value"
-                    subfilter = Filter.createGreaterOrEqualFilter(attribute, value);
+                    subfilter = Filter.createGreaterOrEqualFilter(attribute, value).multiValued(multivalued);
                 }
                 break;
             case LESS_THAN:
                 if (subAttribute == null) {
                     //&(!(attribute=value))(attribute<=value) --> LDAP does not support less than operator
                     //attribute < "value"
-                    subfilter = Filter.createLessOrEqualFilter(attribute, value);
+                    subfilter = Filter.createLessOrEqualFilter(attribute, value).multiValued(multivalued);
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, value).multiValued(multivalued)),
                             subfilter
@@ -173,7 +179,7 @@ public class SubFilterGenerator {
                 //attribute<=value
                 //attribute <= "value"
                 if (subAttribute == null) {
-                    subfilter = Filter.createLessOrEqualFilter(attribute, value);
+                    subfilter = Filter.createLessOrEqualFilter(attribute, value).multiValued(multivalued);
                 }
                 break;
         }
@@ -206,7 +212,8 @@ public class SubFilterGenerator {
                     //attribute=*"subAttribute":value*
                     //attribute LIKE "%\"subAttribute\":value%"
                     String sub = String.format("\"%s\":%s", subAttribute, value);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null)
+                    				.multiValued(multivalued);
                 }
 
                 subfilter = negateIf(subfilter, operator.equals(ScimOperator.NOT_EQUAL));
@@ -217,14 +224,14 @@ public class SubFilterGenerator {
                     //attribute > value
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue).multiValued(multivalued)),
-                            Filter.createGreaterOrEqualFilter(attribute, objValue)
+                            Filter.createGreaterOrEqualFilter(attribute, objValue).multiValued(multivalued)
                     );
                 }
                 break;
             case GREATER_THAN_OR_EQUAL:
                 if (subAttribute == null) {
                     //attribute>=value
-                    subfilter = Filter.createGreaterOrEqualFilter(attribute, objValue);
+                    subfilter = Filter.createGreaterOrEqualFilter(attribute, objValue).multiValued(multivalued);
                 }
                 break;
             case LESS_THAN:
@@ -240,7 +247,7 @@ public class SubFilterGenerator {
             case LESS_THAN_OR_EQUAL:
                 if (subAttribute == null) {
                     //attribute<=value
-                    subfilter = Filter.createLessOrEqualFilter(attribute, objValue);
+                    subfilter = Filter.createLessOrEqualFilter(attribute, objValue).multiValued(multivalued);
                 }
                 break;
             default:
@@ -263,7 +270,8 @@ public class SubFilterGenerator {
                 //attribute=*"subAttribute":value*
                 //attribute LIKE "%\"subAttribute\":value%"
                 String sub = String.format("\"%s\":%s", subAttribute, value);
-                subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null);
+                subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null)
+                				.multiValued(multivalued);
             }
             subfilter = negateIf(subfilter, operator.equals(ScimOperator.NOT_EQUAL));
 
@@ -296,7 +304,7 @@ public class SubFilterGenerator {
                     //attribute=*"subAttribute":stringDate*
                     //attribute LIKE "%\"subAttribute\":\"stringDate\"%"
                     String sub = String.format("\"%s\":%s", subAttribute, stringDate);
-                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null);
+                    subfilter = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null).multiValued(multivalued);
                 }
 
                 subfilter = negateIf(subfilter, operator.equals(ScimOperator.NOT_EQUAL));
@@ -307,7 +315,7 @@ public class SubFilterGenerator {
                     //attribute > "value"
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate).multiValued(multivalued)),
-                            Filter.createGreaterOrEqualFilter(attribute, stringDate)
+                            Filter.createGreaterOrEqualFilter(attribute, stringDate).multiValued(multivalued)
                     );
                 }
                 break;
@@ -315,7 +323,7 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute>=value
                     //attribute >= "value"
-                    subfilter = Filter.createGreaterOrEqualFilter(attribute, stringDate);
+                    subfilter = Filter.createGreaterOrEqualFilter(attribute, stringDate).multiValued(multivalued);
                 }
                 break;
             case LESS_THAN:
@@ -324,7 +332,7 @@ public class SubFilterGenerator {
                     //attribute < "value"
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, stringDate).multiValued(multivalued)),
-                            Filter.createLessOrEqualFilter(attribute, stringDate)
+                            Filter.createLessOrEqualFilter(attribute, stringDate).multiValued(multivalued)
                     );
                 }
                 break;
@@ -332,7 +340,7 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute<=value
                     //attribute <= "value"
-                    subfilter = Filter.createLessOrEqualFilter(attribute, stringDate);
+                    subfilter = Filter.createLessOrEqualFilter(attribute, stringDate).multiValued(multivalued);
                 }
                 break;
             default:
