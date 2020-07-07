@@ -44,7 +44,7 @@ public interface IAuthorizationGrantList {
 
     CIBAGrant getCIBAGrant(String authReqId);
 
-    DeviceCodeGrant createDeviceGrant(DeviceAuthorizationCacheControl data);
+    DeviceCodeGrant createDeviceGrant(DeviceAuthorizationCacheControl data, User user);
 
     DeviceCodeGrant getDeviceCodeGrant(String deviceCode);
 

@@ -554,7 +554,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     lastAccess = currentTime;
                 }
                 cacheData.setLastAccessControl(currentTime);
-                deviceAuthorizationService.saveInCache(cacheData);
+                deviceAuthorizationService.saveInCache(cacheData, true, true);
 
                 if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
                     int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
