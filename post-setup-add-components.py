@@ -59,7 +59,7 @@ gluu_version = '4.2.0'
 
 print("Current Gluu Version", gluu_version)
 
-"""
+
 if os.path.exists(ces_dir + '.back'):
     os.system('rm -r -f ' + ces_dir + '.back')
 
@@ -84,7 +84,7 @@ os.system('unzip -o -qq {}'.format(ces_path))
 os.system('mv {}/{} {}/ces_current'.format(cur_dir, ces_folder, cur_dir))
 
 open(os.path.join(cur_dir, 'ces_current/__init__.py'),'w').close()
-"""
+
 
 sys.path.append(ces_dir)
 
