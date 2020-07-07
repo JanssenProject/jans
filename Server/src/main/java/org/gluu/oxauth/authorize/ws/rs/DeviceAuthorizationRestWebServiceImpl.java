@@ -9,7 +9,6 @@ package org.gluu.oxauth.authorize.ws.rs;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
@@ -20,7 +19,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.security.Identity;
-import org.gluu.oxauth.service.*;
+import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
@@ -31,6 +30,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 import java.net.URI;
 import java.util.ArrayList;
@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam.*;
-import static org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST;
 import static org.gluu.oxauth.model.token.TokenErrorResponseType.INVALID_CLIENT;
+import static org.gluu.oxauth.model.token.TokenErrorResponseType.INVALID_GRANT;
 
 /**
  * Implementation for device authorization rest service.
@@ -92,7 +92,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
                 throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
             }
             if (!deviceAuthorizationService.hasDeviceCodeCompatibility(client)) {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, INVALID_REQUEST, "");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, INVALID_GRANT, "");
             }
 
             List<String> scopes = new ArrayList<>();
@@ -112,7 +112,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = new DeviceAuthorizationCacheControl(userCode,
                     deviceCode, client, scopes, verificationUri, verificationUriComplete, expiresIn, interval, lastAccess, status);
-            deviceAuthorizationService.saveInCache(deviceAuthorizationCacheControl);
+            deviceAuthorizationService.saveInCache(deviceAuthorizationCacheControl, true, true);
             log.info("Device authorization flow initiated, userCode: {}, deviceCode: {}, clientId: {}, verificationUri: {}, expiresIn: {}, interval: {}", userCode, deviceCode, clientId, verificationUri, expiresIn, interval);
 
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
@@ -120,8 +120,10 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
                     .entity(getResponseJSONObject(deviceAuthorizationCacheControl).toString(4).replace("\\/", "/"))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build();
+        } catch (WebApplicationException wae) {
+            throw wae;
         } catch (Exception e) {
-            log.error("Problems processing device authorization init flow, clientId: {}, scope: {}", clientId, scope);
+            log.error("Problems processing device authorization init flow, clientId: {}, scope: {}", clientId, scope, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .build();
         }

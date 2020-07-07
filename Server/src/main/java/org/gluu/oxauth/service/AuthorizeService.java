@@ -103,6 +103,9 @@ public class AuthorizeService {
     @Inject
     private CibaRequestService cibaRequestService;
 
+    @Inject
+    private DeviceAuthorizationService deviceAuthorizationService;
+
     public SessionId getSession() {
         return getSession(null);
     }
@@ -233,6 +236,9 @@ public class AuthorizeService {
                 }
             }
         }
+        if (sessionAttribute.containsKey(AuthorizeRequestParam.USER_CODE)) {
+            processDeviceAuthDeniedResponse(sessionAttribute);
+        }
 
         facesService.redirectToExternalURL(redirectUri.toString());
     }
@@ -289,5 +295,18 @@ public class AuthorizeService {
             log.error(e.getMessage(), e);
         }
         return false;
+    }
+
+    private void processDeviceAuthDeniedResponse(Map<String, String> sessionAttribute) {
+        String userCode = sessionAttribute.get(AuthorizeRequestParam.USER_CODE);
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
+
+        if (cacheData != null) {
+            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                cacheData.setStatus(DeviceAuthorizationStatus.DENIED);
+                deviceAuthorizationService.saveInCache(cacheData, true, false);
+                deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, null);
+            }
+        }
     }
 }
