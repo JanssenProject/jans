@@ -96,6 +96,30 @@ public class CacheGrant implements Serializable {
         tokensDelivered = grant.isTokensDelivered();
     }
 
+    public CacheGrant(DeviceCodeGrant grant, AppConfiguration appConfiguration) {
+        if (grant.getAuthorizationCode() != null) {
+            authorizationCodeString = grant.getAuthorizationCode().getCode();
+            authorizationCodeCreationDate = grant.getAuthorizationCode().getCreationDate();
+            authorizationCodeExpirationDate = grant.getAuthorizationCode().getExpirationDate();
+        }
+        initExpiresIn(grant, appConfiguration);
+
+        user = grant.getUser();
+        client = grant.getClient();
+        authenticationTime = grant.getAuthenticationTime();
+        scopes = grant.getScopes();
+        tokenBindingHash = grant.getTokenBindingHash();
+        grantId = grant.getGrantId();
+        nonce = grant.getNonce();
+        acrValues = grant.getAcrValues();
+        codeChallenge = grant.getCodeChallenge();
+        codeChallengeMethod = grant.getCodeChallengeMethod();
+        claims = grant.getClaims();
+        sessionDn = grant.getSessionDn();
+        deviceCode = grant.getDeviceCode();
+        tokensDelivered = grant.isTokensDelivered();
+    }
+
     private void initExpiresIn(AuthorizationGrant grant, AppConfiguration appConfiguration) {
         if (grant.getAuthorizationCode() != null) {
             expiresIn = grant.getAuthorizationCode().getExpiresIn();
@@ -288,6 +312,10 @@ public class CacheGrant implements Serializable {
 
     public void setTokensDelivered(boolean tokensDelivered) {
         this.tokensDelivered = tokensDelivered;
+    }
+
+    public String getDeviceCode() {
+        return deviceCode;
     }
 
     @Override

@@ -329,7 +329,8 @@ public class AuthorizeAction {
             return;
         }
 
-        if (StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
+        String userCode = session.getSessionAttributes().get(AuthorizeRequestParam.USER_CODE);
+        if (StringUtils.isBlank(userCode) && StringUtils.isBlank(redirectionUriService.validateRedirectionUri(clientId, redirectUri))) {
             ExternalContext externalContext = facesContext.getExternalContext();
             externalContext.setResponseStatus(HttpServletResponse.SC_BAD_REQUEST);
             externalContext.setResponseContentType(MediaType.APPLICATION_JSON);
