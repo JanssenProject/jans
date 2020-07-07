@@ -53,13 +53,13 @@ public class SubFilterGenerator {
             if (subAttribute == null) {
                 //attribute=*
                 //attribute IS NOT MISSING
-                filth = Filter.createPresenceFilter(attribute).multiValued(multivalued);
+                filth = Filter.createPresenceFilter(attribute).multiValued(multiValued);
                 filth = negateIf(filth, operator.equals(ScimOperator.EQUAL));
             } else {
                 //attribute=*"subattribute":null*
                 //attribute LIKE "%\"subattribute\":null%"
                 String sub = String.format("\"%s\":null", subAttribute);
-                filth = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null).multiValued(multivalued);
+                filth = Filter.createSubstringFilter(attribute, null, new String[]{ sub }, null).multiValued(multiValued);
                 filth = negateIf(filth, operator.equals(ScimOperator.NOT_EQUAL));
             }
         } else if (Type.STRING.equals(attrType) || Type.REFERENCE.equals(attrType)) {
