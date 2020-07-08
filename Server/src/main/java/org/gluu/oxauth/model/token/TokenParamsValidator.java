@@ -63,6 +63,9 @@ public class TokenParamsValidator {
             case CIBA:
                 result = true;
                 break;
+            case DEVICE_CODE:
+                result = true;
+                break;
         }
 
         return result;
