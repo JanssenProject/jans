@@ -46,6 +46,7 @@ public class TokenAction implements Serializable {
     private String assertion;
     private String refreshToken;
     private String authReqId;
+    private String deviceCode;
 
     private boolean showResults;
     private String requestString;
@@ -70,6 +71,7 @@ public class TokenAction implements Serializable {
                 request.setAudience(tokenEndpoint);
             }
             request.setAuthReqId(authReqId);
+            request.setDeviceCode(deviceCode);
 
             TokenClient client = new TokenClient(tokenEndpoint);
             client.setRequest(request);
@@ -213,5 +215,13 @@ public class TokenAction implements Serializable {
 
     public void setAuthenticationMethod(AuthenticationMethod authenticationMethod) {
         this.authenticationMethod = authenticationMethod;
+    }
+
+    public String getDeviceCode() {
+        return deviceCode;
+    }
+
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
     }
 }

@@ -66,6 +66,7 @@ public class TokenRequest extends ClientAuthnRequest {
     private String refreshToken;
     private String codeVerifier;
     private String authReqId;
+    private String deviceCode;
 
     /**
      * Constructs a token request.
@@ -260,6 +261,14 @@ public class TokenRequest extends ClientAuthnRequest {
         this.authReqId = authReqId;
     }
 
+    public String getDeviceCode() {
+        return deviceCode;
+    }
+
+    public void setDeviceCode(String deviceCode) {
+        this.deviceCode = deviceCode;
+    }
+
     /**
      * Returns a query string with the parameters of the authorization request.
      * Any <code>null</code> or empty parameter will be omitted.
@@ -279,6 +288,7 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("assertion", assertion);
         builder.append("refreshToken", refreshToken);
         builder.append("authReqId", authReqId);
+        builder.append("device_code", deviceCode);
         appendClientAuthnToQuery(builder);
         for (String key : getCustomParameters().keySet()) {
             builder.append(key, getCustomParameters().get(key));
