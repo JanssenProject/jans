@@ -107,6 +107,7 @@ setup.__dict__['ruamel'] = ruamel
 setupObj = setup.Setup(ces_dir)
 setupObj.initialize()
 setupObj.pbar = ProgressBar()
+setupObj.oxVersion = gluu_version 
 
 setupObj.setup = setupObj
 
