@@ -8,8 +8,6 @@ import json
 import zipfile
 import ldap3
 
-from pylib.dbutils import get_ldap_conn, get_cbm_conn
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.join(cur_dir, 'ces_current')
 
@@ -96,6 +94,7 @@ from ces_current.pylib.cbm import CBM
 from ces_current.pylib.generate_properties import generate_properties
 from ces_current.pylib.jproperties import Properties as JProperties
 from ces_current.pylib.gluu_utils import read_properties_file
+from ces_current.pylib.dbutils import get_ldap_conn, get_cbm_conn
 
 class ProgressBar:
     def progress(self, ptype, msg, incr=True):
