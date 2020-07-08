@@ -255,6 +255,9 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         if (StringUtils.isNotBlank(getRequest().getAuthReqId())) {
             clientRequest.formParameter("auth_req_id", getRequest().getAuthReqId());
         }
+        if (StringUtils.isNotBlank(getRequest().getDeviceCode())) {
+            clientRequest.formParameter("device_code", getRequest().getDeviceCode());
+        }
 
         // Call REST Service and handle response
         try {
