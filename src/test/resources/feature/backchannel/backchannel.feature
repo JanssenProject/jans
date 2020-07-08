@@ -45,13 +45,13 @@ Background:
    Scenario: Error case while updating backchannel configuration
    Given url  mainUrl
    When method GET
-   Then status 400
+   Then status 200
    Then def first_response = response 
    Then set first_response.backchannelAuthenticationResponseExpiresIn = 0
    Given url mainUrl
    And request first_response
    When method PUT
-   Then status 200
+   Then status 400
    And print response
    
    
@@ -59,13 +59,13 @@ Background:
    Scenario: Error case while updating backchannel configuration
    Given url  mainUrl
    When method GET
-   Then status 400
+   Then status 200
    Then def first_response = response 
    Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483647
    Given url mainUrl
    And request first_response
    When method PUT
-   Then status 200
+   Then status 400
    And print response
   
 	
