@@ -114,7 +114,7 @@ public class DeviceAuthorizationAction implements Serializable {
             return;
         }
 
-        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
         log.debug("Verifying device authorization cache data: {}", cacheData);
 
         String message = null;

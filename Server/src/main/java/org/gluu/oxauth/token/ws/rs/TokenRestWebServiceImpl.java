@@ -519,7 +519,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         if (deviceCodeGrant != null) {
             if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
-                return response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog));
             }
             if (!deviceCodeGrant.isTokensDelivered()) {
                 RefreshToken refToken = deviceCodeGrant.createRefreshToken();
@@ -550,45 +550,44 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
                         accessToken.getExpiresIn(), reToken, scope, idToken)).build();
             } else {
-                return response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), oAuth2AuditLog);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), oAuth2AuditLog));
             }
         } else {
-            final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(deviceCode, null);
+            final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
-            if (cacheData != null) {
-                if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
-                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog);
-                }
-                long currentTime = new Date().getTime();
-                Long lastAccess = cacheData.getLastAccessControl();
-                if (lastAccess == null) {
-                    lastAccess = currentTime;
-                }
-                cacheData.setLastAccessControl(currentTime);
-                deviceAuthorizationService.saveInCache(cacheData, true, true);
-
-                if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
-                    int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
-                    long timeFromLastAccess = currentTime - lastAccess;
-
-                    if (timeFromLastAccess > intervalSeconds * 1000) {
-                        log.debug("Access hasn't been granted yet for deviceCode: '{}'", deviceCode);
-                        return response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), oAuth2AuditLog);
-                    } else {
-                        log.debug("Slow down protection deviceCode: '{}'", deviceCode);
-                        return response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), oAuth2AuditLog);
-                    }
-                } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
-                    log.debug("The end-user denied the authorization request for deviceCode: '{}'", deviceCode);
-                    return response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), oAuth2AuditLog);
-                } else {
-                    log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
-                    return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), oAuth2AuditLog);
-                }
-            } else {
-                log.debug("AuthorizationGrant is empty by deviceCode: '{}'", deviceCode);
-                return response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given device_code."), oAuth2AuditLog);
+            if (cacheData == null) {
+                log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired."), oAuth2AuditLog));
             }
+            if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog));
+            }
+            long currentTime = new Date().getTime();
+            Long lastAccess = cacheData.getLastAccessControl();
+            if (lastAccess == null) {
+                lastAccess = currentTime;
+            }
+            cacheData.setLastAccessControl(currentTime);
+            deviceAuthorizationService.saveInCache(cacheData, true, true);
+
+            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                long timeFromLastAccess = currentTime - lastAccess;
+
+                if (timeFromLastAccess > intervalSeconds * 1000) {
+                    log.debug("Access hasn't been granted yet for deviceCode: '{}'", deviceCode);
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), oAuth2AuditLog));
+                } else {
+                    log.debug("Slow down protection deviceCode: '{}'", deviceCode);
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), oAuth2AuditLog));
+                }
+            }
+            if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
+                log.debug("The end-user denied the authorization request for deviceCode: '{}'", deviceCode);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), oAuth2AuditLog));
+            }
+            log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), oAuth2AuditLog));
         }
     }
 
