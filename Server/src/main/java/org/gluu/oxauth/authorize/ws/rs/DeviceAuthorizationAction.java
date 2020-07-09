@@ -15,11 +15,9 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.util.RedirectUri;
-import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -27,11 +25,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
+import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
 
+/**
+ * Action used to process all requests related to device authorization.
+ */
 @Named
 @SessionScoped
 public class DeviceAuthorizationAction implements Serializable {
@@ -63,6 +64,8 @@ public class DeviceAuthorizationAction implements Serializable {
     // UI data
     private String userCode1;
     private String userCode2;
+    private String titleMsg;
+    private String descriptionMsg;
 
     // Internal process
     private Long lastAttempt;
@@ -75,15 +78,28 @@ public class DeviceAuthorizationAction implements Serializable {
         code = sessionId = state = sessionState = error = errorDescription = userCode = userCode1 = userCode2 = null;
     }
 
+    /**
+     * Method used by the view to load all query params and set the page state.
+     */
     public void pageLoaded() {
         log.info("Processing device authorization page request, userCode: {}, code: {}, sessionId: {}, state: {}, sessionState: {}, error: {}, errorDescription: {}", userCode, code, sessionId, state, sessionState, error, errorDescription);
+        if (StringUtils.isNotBlank(error)) {
+            this.titleMsg = error;
+            this.descriptionMsg = errorDescription;
+        }
+        if (this.isDeviceAuthnCompleted()) {
+            this.titleMsg = languageBean.getMessage("device.authorization.access.granted.title");
+            this.descriptionMsg = languageBean.getMessage("device.authorization.authorization.completed.msg");
+        }
     }
 
+    /**
+     * Processes user code introduced or loaded in the veritification page and redirects whether user code is correct
+     * or return an error if there is something wrong.
+     */
     public void processUserCodeVerification() {
-        String message = null;
         if (!preventBruteForcing()) {
-            message = languageBean.getMessage("device.authorization.expired.code.msg");
-            facesMessages.add(FacesMessage.SEVERITY_WARN, message);
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.expired.code.msg"));
             return;
         }
 
@@ -93,8 +109,15 @@ public class DeviceAuthorizationAction implements Serializable {
         } else {
             userCode = userCode1 + '-' + userCode2;
         }
+        if (!validateFormat(userCode)) {
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.invalid.user.code"));
+            return;
+        }
 
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
+        log.debug("Verifying device authorization cache data: {}", cacheData);
+
+        String message = null;
         if (cacheData != null) {
             if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
                 redirectToAuthorization(cacheData);
@@ -112,6 +135,9 @@ public class DeviceAuthorizationAction implements Serializable {
         }
     }
 
+    /**
+     * Prevents brute forcing for user code field from device_authorization page.
+     */
     private boolean preventBruteForcing() {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastAttempt > 500 && attempts < 5) {
@@ -123,8 +149,22 @@ public class DeviceAuthorizationAction implements Serializable {
         }
     }
 
+    /**
+     * Ensures that the user code gotten from UI is well formatted.
+     * @param userCode User code to be processed.
+     */
+    private boolean validateFormat(String userCode) {
+        String regex = "[" + EASY_TO_READ_CHARACTERS + "]{4}-[" + EASY_TO_READ_CHARACTERS + "]{4}";
+        return userCode.matches(regex);
+    }
+
+    /**
+     * Process data related to device authorization and redirects to the authorization page.
+     * @param cacheData Data related to the device code request.
+     */
     private void redirectToAuthorization(DeviceAuthorizationCacheControl cacheData) {
         try {
+            log.info("Redirecting to authorization code flow to process device authorization, data: {}", cacheData);
             String authorizationEndpoint = appConfiguration.getAuthorizationEndpoint();
             String clientId = cacheData.getClient().getClientId();
             String responseType = "code";
@@ -152,19 +192,32 @@ public class DeviceAuthorizationAction implements Serializable {
         }
     }
 
+    /**
+     * Checks if page is loaded for a new device request.
+     */
     public boolean isNewRequest() {
         return StringUtils.isBlank(code) && StringUtils.isBlank(sessionId) && StringUtils.isBlank(state)
                 && StringUtils.isBlank(error) && StringUtils.isBlank(errorDescription);
     }
 
+    /**
+     * Checks if page should show error messages.
+     */
     public boolean isErrorResponse() {
         return StringUtils.isNotBlank(error) && StringUtils.isNotBlank(error);
     }
 
+    /**
+     * Checks if page should be shown in complete verification mode, it means that the
+     * user code has been shared by the url.
+     */
     public boolean isCompleteVerificationMode() {
         return isNewRequest() && StringUtils.isNotBlank(userCode);
     }
 
+    /**
+     * Checks if the authorization is complete and page should show confirmation to the end-user.
+     */
     public boolean isDeviceAuthnCompleted() {
         return StringUtils.isNotBlank(code) && StringUtils.isNotBlank(state) && StringUtils.isBlank(error);
     }
@@ -239,6 +292,22 @@ public class DeviceAuthorizationAction implements Serializable {
 
     public void setUserCode(String userCode) {
         this.userCode = userCode;
+    }
+
+    public String getTitleMsg() {
+        return titleMsg;
+    }
+
+    public void setTitleMsg(String titleMsg) {
+        this.titleMsg = titleMsg;
+    }
+
+    public String getDescriptionMsg() {
+        return descriptionMsg;
+    }
+
+    public void setDescriptionMsg(String descriptionMsg) {
+        this.descriptionMsg = descriptionMsg;
     }
 }
 
