@@ -123,7 +123,7 @@ public class AuthenticationFilter implements Filter {
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
-            boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthorizationEndpoint());
+            boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthzEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             String authorizationHeader = httpRequest.getHeader("Authorization");
