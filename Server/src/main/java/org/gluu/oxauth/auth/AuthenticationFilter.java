@@ -132,8 +132,8 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenRevocationEndpoint && clientService.isPublic(httpRequest.getParameter("client_id"))) {
-                log.trace("Skipped authentication for Token Revocation for public client.");
+            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint) && clientService.isPublic(httpRequest.getParameter("client_id"))) {
+                log.trace("Skipped authentication for {} for public client.", tokenRevocationEndpoint ? "Token Revocation" : "Device Authorization");
                 filterChain.doFilter(httpRequest, httpResponse);
                 return;
             }
