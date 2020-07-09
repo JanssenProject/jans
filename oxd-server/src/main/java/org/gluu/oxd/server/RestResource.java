@@ -304,6 +304,11 @@ public class RestResource {
         if ((bindIpAddresses == null || bindIpAddresses.isEmpty()) && LOCALHOST_IP_ADDRESS.equalsIgnoreCase(callerIpAddress)) {
             return;
         }
+        //show error if ip_address is not set in `bind_ip_addresses` and a remote caller makes request.
+        if (bindIpAddresses == null || bindIpAddresses.isEmpty()) {
+            LOG.error("The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` array of `oxd-server.yml`.");
+            throw new HttpException(ErrorResponseCode.OXD_ACCESS_DENIED);
+        }
         //allow all ip_address
         if (bindIpAddresses.contains("*")) {
             return;
