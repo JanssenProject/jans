@@ -64,15 +64,27 @@ public class DeviceAuthorizationService implements Serializable {
     }
 
     /**
-     * Returns cache data related to the device code request using one of these codes: device_code or user_code.
+     * Returns cache data related to the device authz request using device_code as cache key.
      */
-    public DeviceAuthorizationCacheControl getDeviceAuthorizationCacheData(String deviceCode, String userCode) {
-        String cacheKey = deviceCode != null ? deviceCode : userCode;
-        Object cachedObject = cacheService.get(cacheKey);
+    public DeviceAuthorizationCacheControl getDeviceAuthzByUserCode(String userCode) {
+        Object cachedObject = cacheService.get(userCode);
         if (cachedObject == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedObject = cacheService.get(cacheKey);
-            log.trace("Failed to fetch DeviceAuthorizationCacheControl request from cache, cacheKey: {}", cacheKey);
+            cachedObject = cacheService.get(userCode);
+            log.trace("Failed to fetch DeviceAuthorizationCacheControl request from cache, cacheKey: {}", userCode);
+        }
+        return cachedObject instanceof DeviceAuthorizationCacheControl ? (DeviceAuthorizationCacheControl) cachedObject : null;
+    }
+
+    /**
+     * Returns cache data related to the device authz request using user_code as cache key.
+     */
+    public DeviceAuthorizationCacheControl getDeviceAuthzByDeviceCode(String deviceCode) {
+        Object cachedObject = cacheService.get(deviceCode);
+        if (cachedObject == null) {
+            // retry one time : sometimes during high load cache client may be not fast enough
+            cachedObject = cacheService.get(deviceCode);
+            log.trace("Failed to fetch DeviceAuthorizationCacheControl request from cache, cacheKey: {}", deviceCode);
         }
         return cachedObject instanceof DeviceAuthorizationCacheControl ? (DeviceAuthorizationCacheControl) cachedObject : null;
     }

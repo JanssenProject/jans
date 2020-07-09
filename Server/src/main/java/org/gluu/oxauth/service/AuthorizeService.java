@@ -299,7 +299,7 @@ public class AuthorizeService {
 
     private void processDeviceAuthDeniedResponse(Map<String, String> sessionAttribute) {
         String userCode = sessionAttribute.get(AuthorizeRequestParam.USER_CODE);
-        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
 
         if (cacheData != null) {
             if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
