@@ -167,7 +167,7 @@ public class DeviceAuthorizationAction implements Serializable {
             log.info("Redirecting to authorization code flow to process device authorization, data: {}", cacheData);
             String authorizationEndpoint = appConfiguration.getAuthorizationEndpoint();
             String clientId = cacheData.getClient().getClientId();
-            String responseType = "code";
+            String responseType = appConfiguration.getDeviceAuthzResponseTypeToProcessAuthz();
             String scope = Util.listAsString(cacheData.getScopes());
             String state = UUID.randomUUID().toString();
             String nonce = UUID.randomUUID().toString();
