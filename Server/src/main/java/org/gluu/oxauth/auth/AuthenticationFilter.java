@@ -60,7 +60,7 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
                 "/restv1/revoke",
                 "/restv1/revoke_session",
                 "/restv1/bc-authorize",
-                "/restv1/device-authorization"},
+                "/restv1/device_authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
@@ -321,7 +321,7 @@ public class AuthenticationFilter implements Filter {
                                 || servletRequest.getRequestURI().endsWith("/revoke_session")
                                 || servletRequest.getRequestURI().endsWith("/userinfo")
                                 || servletRequest.getRequestURI().endsWith("/bc-authorize")
-                                || servletRequest.getRequestURI().endsWith("/device-authorization")) {
+                                || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                             Client client = clientService.getClient(username);
                             if (client == null
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
