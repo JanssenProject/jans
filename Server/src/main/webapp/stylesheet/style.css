@@ -651,7 +651,7 @@ input.btn.btn-done {
 }
 
 .device-authz-container {
-    padding: 8px 12px 9px 20px;
+    padding: 20px 20px 40px;
     max-width: 500px;
     margin: 0 auto;
     border-radius: 10px;
@@ -674,12 +674,37 @@ input.btn.btn-done {
     margin: 30px 0 0;
 }
 
-@media (max-width:575px) {
-    .device-authz-label {
-        margin: 10px 0;
-    }
+.device-authz-init-btn {
+    margin-top: 40px;
+}
 
-    .no-margin {
-        margin: 0 !important;
-    }
+.no-margin {
+    margin: 0 !important;
+}
+
+.device-authz-label {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.device-authz-static-code {
+    margin-top: 10px !important;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.device-authz-input-container {
+    margin-top: 10px !important;
+    text-align: center;
+    font-weight: bold;
+    font-size: 25px !important;
+}
+
+.device-authz-input-code {
+    text-align: center;
+    font-weight: bold !important;
+    font-size: 25px !important;
+    height: 45px !important;
+    width: 40% !important;
 }
