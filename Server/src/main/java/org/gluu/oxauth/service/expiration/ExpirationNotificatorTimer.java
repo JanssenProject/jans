@@ -6,8 +6,8 @@ import net.jodah.expiringmap.ExpiringMap;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.cdi.event.ExpirationEvent;
+import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.session.SessionEvent;
 import org.gluu.oxauth.service.external.session.SessionEventType;
 import org.gluu.persist.PersistenceEntryManager;
@@ -54,7 +54,7 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
     private AppConfiguration appConfiguration;
 
     @Inject
-    private SessionIdService sessionIdService;
+    private ExternalApplicationSessionService externalApplicationSessionService;
 
     private ExpiringMap<ExpId, Object> expiringMap = ExpiringMap.builder()
             .expirationPolicy(ExpirationPolicy.CREATED)
@@ -118,7 +118,9 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
 
     private void fillSessions(Date future) {
         final String baseDn = staticConfiguration.getBaseDn().getSessions();
-        final Filter filter = Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, future));
+        final Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("del", true),
+                Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, future)));
         final List<SessionId> sessions = persistenceEntryManager.findEntries(baseDn, SessionId.class, filter);
         if (sessions == null || sessions.isEmpty()) {
             return;
@@ -129,7 +131,7 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
             final long duration = session.getExpirationDate().getTime() - now;
 
             if (duration <= 0) {
-                sessionIdService.remove(session);
+                remove(session);
                 continue;
             }
             expiringMap.put(new ExpId(session.getId(), ExpType.SESSION), session, duration, TimeUnit.MILLISECONDS);
@@ -139,7 +141,7 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
     @Override
     public void expired(ExpId key, Object value) {
         if (key.getType() == ExpType.SESSION && value instanceof SessionId) {
-            sessionIdService.externalEvent(new SessionEvent(SessionEventType.GONE, (SessionId) value));
+            externalApplicationSessionService.externalEvent(new SessionEvent(SessionEventType.GONE, (SessionId) value));
         }
     }
 
@@ -156,5 +158,16 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
         long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
 
         return timeDiffrence >= timerInterval;
+    }
+
+    public boolean remove(SessionId sessionId) {
+        try {
+            persistenceEntryManager.remove(sessionId.getDn());
+            externalApplicationSessionService.externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
     }
 }
