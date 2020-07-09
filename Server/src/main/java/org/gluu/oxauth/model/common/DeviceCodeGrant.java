@@ -25,7 +25,7 @@ public class DeviceCodeGrant extends AuthorizationGrant {
     }
 
     public void init(DeviceAuthorizationCacheControl cacheData, User user) {
-        super.init(user, AuthorizationGrantType.CIBA, cacheData.getClient(), null);
+        super.init(user, AuthorizationGrantType.DEVICE_CODE, cacheData.getClient(), null);
         setDeviceCode(cacheData.getDeviceCode());
         setIsCachedWithNoPersistence(true);
     }
