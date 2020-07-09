@@ -215,7 +215,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
     private int deviceAuthorizationRequestExpiresIn;
-    private int deviceAuthorizationTokenPoolInterval;
+    private int deviceAuthorizationTokenPollInterval;
 
     // CIBA
     private String backchannelClientId;
@@ -1871,11 +1871,11 @@ public class AppConfiguration implements Configuration {
         this.deviceAuthorizationRequestExpiresIn = deviceAuthorizationRequestExpiresIn;
     }
 
-    public int getDeviceAuthorizationTokenPoolInterval() {
-        return deviceAuthorizationTokenPoolInterval;
+    public int getDeviceAuthorizationTokenPollInterval() {
+        return deviceAuthorizationTokenPollInterval;
     }
 
-    public void setDeviceAuthorizationTokenPoolInterval(int deviceAuthorizationTokenPoolInterval) {
-        this.deviceAuthorizationTokenPoolInterval = deviceAuthorizationTokenPoolInterval;
+    public void setDeviceAuthorizationTokenPollInterval(int deviceAuthorizationTokenPollInterval) {
+        this.deviceAuthorizationTokenPollInterval = deviceAuthorizationTokenPollInterval;
     }
 }

@@ -36,7 +36,7 @@ public interface DeviceAuthorizationRestWebService {
      * @param scope The scope of the access request as defined by Section 3.3 of [RFC6749].
      */
     @POST
-    @Path("/device-authorization")
+    @Path("/device_authorization")
     @Produces({MediaType.APPLICATION_JSON})
     Response deviceAuthorization(
             @FormParam(DeviceAuthorizationRequestParam.CLIENT_ID) String clientId,
