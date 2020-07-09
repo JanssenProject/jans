@@ -22,25 +22,22 @@ public class DeviceAuthorizationCacheControl implements Serializable {
     private Client client;
     private List<String> scopes;
     private URI verificationUri;
-    private URI verificationUriComplete;
     private int expiresIn = 1;
     private int interval = 5;
     private long lastAccessControl;
     private DeviceAuthorizationStatus status;
-    private String acrValues;
 
     public DeviceAuthorizationCacheControl() {
     }
 
     public DeviceAuthorizationCacheControl(String userCode, String deviceCode, Client client, List<String> scopes,
-                                           URI verificationUri, URI verificationUriComplete, int expiresIn,
-                                           int interval, long lastAccessControl, DeviceAuthorizationStatus status) {
+                                           URI verificationUri, int expiresIn, int interval, long lastAccessControl,
+                                           DeviceAuthorizationStatus status) {
         this.userCode = userCode;
         this.deviceCode = deviceCode;
         this.client = client;
         this.scopes = scopes;
         this.verificationUri = verificationUri;
-        this.verificationUriComplete = verificationUriComplete;
         this.expiresIn = expiresIn;
         this.interval = interval;
         this.lastAccessControl = lastAccessControl;
@@ -87,14 +84,6 @@ public class DeviceAuthorizationCacheControl implements Serializable {
         this.verificationUri = verificationUri;
     }
 
-    public URI getVerificationUriComplete() {
-        return verificationUriComplete;
-    }
-
-    public void setVerificationUriComplete(URI verificationUriComplete) {
-        this.verificationUriComplete = verificationUriComplete;
-    }
-
     public int getExpiresIn() {
         return expiresIn;
     }
@@ -127,14 +116,6 @@ public class DeviceAuthorizationCacheControl implements Serializable {
         this.status = status;
     }
 
-    public String getAcrValues() {
-        return acrValues;
-    }
-
-    public void setAcrValues(String acrValues) {
-        this.acrValues = acrValues;
-    }
-
     @Override
     public String toString() {
         return "DeviceAuthorizationCacheControl{" +
@@ -143,12 +124,10 @@ public class DeviceAuthorizationCacheControl implements Serializable {
                 ", client=" + client +
                 ", scopes=" + scopes +
                 ", verificationUri='" + verificationUri + '\'' +
-                ", verificationUriComplete='" + verificationUriComplete + '\'' +
                 ", expiresIn=" + expiresIn +
                 ", interval=" + interval +
                 ", lastAccessControl=" + lastAccessControl +
                 ", status=" + status +
-                ", acrValues=" + acrValues +
                 '}';
     }
 }

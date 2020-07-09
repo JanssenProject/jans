@@ -104,14 +104,13 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             String userCode = StringUtils.generateRandomReadableCode((byte) 8); // Entropy 20^8 which is suggested in the RFC8628 section 6.1
             String deviceCode = StringUtils.generateRandomCode((byte) 24); // Entropy 160 bits which is over userCode entropy based on RFC8628 section 5.2
             URI verificationUri = UriBuilder.fromUri(appConfiguration.getIssuer()).path("device-code").build();
-            URI verificationUriComplete = UriBuilder.fromUri(verificationUri).queryParam(DeviceAuthorizationResponseParam.USER_CODE, userCode).build();
             int expiresIn = appConfiguration.getDeviceAuthorizationRequestExpiresIn();
-            int interval = appConfiguration.getDeviceAuthorizationTokenPoolInterval();
+            int interval = appConfiguration.getDeviceAuthorizationTokenPollInterval();
             long lastAccess = System.currentTimeMillis();
             DeviceAuthorizationStatus status = DeviceAuthorizationStatus.PENDING;
 
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = new DeviceAuthorizationCacheControl(userCode,
-                    deviceCode, client, scopes, verificationUri, verificationUriComplete, expiresIn, interval, lastAccess, status);
+                    deviceCode, client, scopes, verificationUri, expiresIn, interval, lastAccess, status);
             deviceAuthorizationService.saveInCache(deviceAuthorizationCacheControl, true, true);
             log.info("Device authorization flow initiated, userCode: {}, deviceCode: {}, clientId: {}, verificationUri: {}, expiresIn: {}, interval: {}", userCode, deviceCode, clientId, verificationUri, expiresIn, interval);
 
@@ -130,12 +129,16 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
     }
 
     private JSONObject getResponseJSONObject(DeviceAuthorizationCacheControl deviceAuthorizationCacheControl) throws JSONException {
+        URI verificationUriComplete = UriBuilder.fromUri(deviceAuthorizationCacheControl.getVerificationUri())
+                .queryParam(DeviceAuthorizationResponseParam.USER_CODE, deviceAuthorizationCacheControl.getUserCode())
+                .build();
+
         JSONObject responseJsonObject = new JSONObject();
 
         responseJsonObject.put(DEVICE_CODE, deviceAuthorizationCacheControl.getDeviceCode());
         responseJsonObject.put(USER_CODE, deviceAuthorizationCacheControl.getUserCode());
         responseJsonObject.put(VERIFICATION_URI, deviceAuthorizationCacheControl.getVerificationUri());
-        responseJsonObject.put(VERIFICATION_URI_COMPLETE, deviceAuthorizationCacheControl.getVerificationUriComplete());
+        responseJsonObject.put(VERIFICATION_URI_COMPLETE, verificationUriComplete.toString());
         responseJsonObject.put(EXPIRES_IN, deviceAuthorizationCacheControl.getExpiresIn());
         responseJsonObject.put(INTERVAL, deviceAuthorizationCacheControl.getInterval());
 

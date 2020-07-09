@@ -912,7 +912,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      * @param httpResponse
      */
     private void processDeviceAuthorization(String userCode, User user, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
         if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
             log.trace("User responded too late and the authorization {} has expired, {}", userCode, cacheData);
             return;
