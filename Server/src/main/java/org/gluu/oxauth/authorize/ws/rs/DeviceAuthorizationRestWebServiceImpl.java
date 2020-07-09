@@ -115,8 +115,8 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             String userCode = StringUtils.generateRandomReadableCode((byte) 8); // Entropy 20^8 which is suggested in the RFC8628 section 6.1
             String deviceCode = StringUtils.generateRandomCode((byte) 24); // Entropy 160 bits which is over userCode entropy based on RFC8628 section 5.2
             URI verificationUri = UriBuilder.fromUri(appConfiguration.getIssuer()).path("device-code").build();
-            int expiresIn = appConfiguration.getDeviceAuthorizationRequestExpiresIn();
-            int interval = appConfiguration.getDeviceAuthorizationTokenPollInterval();
+            int expiresIn = appConfiguration.getDeviceAuthzRequestExpiresIn();
+            int interval = appConfiguration.getDeviceAuthzTokenPollInterval();
             long lastAccess = System.currentTimeMillis();
             DeviceAuthorizationStatus status = DeviceAuthorizationStatus.PENDING;
 

@@ -46,7 +46,7 @@ public class AppConfiguration implements Configuration {
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
-    private String deviceAuthorizationEndpoint;
+    private String deviceAuthzEndpoint;
 
     private Boolean sessionAsJwt = false;
 
@@ -214,8 +214,9 @@ public class AppConfiguration implements Configuration {
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
-    private int deviceAuthorizationRequestExpiresIn;
-    private int deviceAuthorizationTokenPollInterval;
+    private int deviceAuthzRequestExpiresIn;
+    private int deviceAuthzTokenPollInterval;
+    private String deviceAuthzResponseTypeToProcessAuthz;
 
     // CIBA
     private String backchannelClientId;
@@ -1855,27 +1856,35 @@ public class AppConfiguration implements Configuration {
         this.clientRegDefaultToCodeFlowWithRefresh = clientRegDefaultToCodeFlowWithRefresh;
     }
 
-    public String getDeviceAuthorizationEndpoint() {
-        return deviceAuthorizationEndpoint;
+    public String getDeviceAuthzEndpoint() {
+        return deviceAuthzEndpoint;
     }
 
-    public void setDeviceAuthorizationEndpoint(String deviceAuthorizationEndpoint) {
-        this.deviceAuthorizationEndpoint = deviceAuthorizationEndpoint;
+    public void setDeviceAuthzEndpoint(String deviceAuthzEndpoint) {
+        this.deviceAuthzEndpoint = deviceAuthzEndpoint;
     }
 
-    public int getDeviceAuthorizationRequestExpiresIn() {
-        return deviceAuthorizationRequestExpiresIn;
+    public int getDeviceAuthzRequestExpiresIn() {
+        return deviceAuthzRequestExpiresIn;
     }
 
-    public void setDeviceAuthorizationRequestExpiresIn(int deviceAuthorizationRequestExpiresIn) {
-        this.deviceAuthorizationRequestExpiresIn = deviceAuthorizationRequestExpiresIn;
+    public void setDeviceAuthzRequestExpiresIn(int deviceAuthzRequestExpiresIn) {
+        this.deviceAuthzRequestExpiresIn = deviceAuthzRequestExpiresIn;
     }
 
-    public int getDeviceAuthorizationTokenPollInterval() {
-        return deviceAuthorizationTokenPollInterval;
+    public int getDeviceAuthzTokenPollInterval() {
+        return deviceAuthzTokenPollInterval;
     }
 
-    public void setDeviceAuthorizationTokenPollInterval(int deviceAuthorizationTokenPollInterval) {
-        this.deviceAuthorizationTokenPollInterval = deviceAuthorizationTokenPollInterval;
+    public void setDeviceAuthzTokenPollInterval(int deviceAuthzTokenPollInterval) {
+        this.deviceAuthzTokenPollInterval = deviceAuthzTokenPollInterval;
+    }
+
+    public String getDeviceAuthzResponseTypeToProcessAuthz() {
+        return deviceAuthzResponseTypeToProcessAuthz;
+    }
+
+    public void setDeviceAuthzResponseTypeToProcessAuthz(String deviceAuthzResponseTypeToProcessAuthz) {
+        this.deviceAuthzResponseTypeToProcessAuthz = deviceAuthzResponseTypeToProcessAuthz;
     }
 }
