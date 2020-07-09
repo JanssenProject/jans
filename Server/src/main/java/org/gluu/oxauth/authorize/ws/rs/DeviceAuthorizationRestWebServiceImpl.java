@@ -19,6 +19,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.util.StringHelper;
@@ -68,6 +69,9 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
     @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
 
+    @Inject
+    private ClientService clientService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -83,14 +87,21 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         try {
             log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
+
             SessionClient sessionClient = identity.getSessionClient();
-            Client client = null;
-            if (sessionClient != null) {
-                client = sessionClient.getClient();
+            Client client = sessionClient != null ? sessionClient.getClient() : null;
+            if (client == null) {
+                client = clientService.getClient(clientId);
+                if (!clientService.isPublic(client)) {
+                    log.trace("Client is not public and not authenticated. Skip device authorization, clientId: {}", clientId);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
+                }
             }
             if (client == null) {
+                log.trace("Client is not unknown. Skip revoking.");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");
             }
+
             if (!deviceAuthorizationService.hasDeviceCodeCompatibility(client)) {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, INVALID_GRANT, "");
             }
