@@ -124,7 +124,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         boolean isUma = StringUtils.isNotBlank(ticket);
         if (isUma) {
-            return umaTokenService.requestRpt(grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope, request);
+            return umaTokenService.requestRpt(grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope, request, response);
         }
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REQUEST);
