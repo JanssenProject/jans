@@ -600,7 +600,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 runCiba(authReqId, httpRequest, httpResponse);
             }
             if (StringUtils.isNotBlank(userCode)) {
-                processDeviceAuthorization(userCode, user, httpRequest, httpResponse);
+                processDeviceAuthorization(userCode, user);
             }
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
@@ -908,10 +908,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      * Processes an authorization granted for device code grant type.
      * @param userCode User code used in the device code flow.
      * @param user Authenticated user that is giving the permissions.
-     * @param httpRequest
-     * @param httpResponse
      */
-    private void processDeviceAuthorization(String userCode, User user, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private void processDeviceAuthorization(String userCode, User user) {
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
         if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
             log.trace("User responded too late and the authorization {} has expired, {}", userCode, cacheData);
@@ -921,20 +919,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, cacheData.getDeviceCode());
         DeviceCodeGrant deviceCodeGrant = authorizationGrantList.createDeviceGrant(cacheData, user);
 
-        RefreshToken refreshToken = deviceCodeGrant.createRefreshToken();
-        log.debug("Issuing refresh token: {}", refreshToken.getCode());
-
-        AccessToken accessToken = deviceCodeGrant.createAccessToken(httpRequest.getHeader("X-ClientCert"), new ExecutionContext(httpRequest, httpResponse));
-        log.debug("Issuing access token: {}", accessToken.getCode());
-
-        deviceCodeGrant.createIdToken(
-                null, null, accessToken, refreshToken,
-                null, deviceCodeGrant, false, null);
-
-        deviceCodeGrant.setDeviceCode(cacheData.getDeviceCode());
-        deviceCodeGrant.setTokensDelivered(false);
-        deviceCodeGrant.save();
-        log.info("Issued all tokens needed for device authorization request, user_code: {}", userCode);
+        log.info("Granted device authorization request, user_code: {}, device_code: {}, grant_id: {}", userCode, cacheData.getDeviceCode(), deviceCodeGrant.getGrantId());
     }
 
 }
