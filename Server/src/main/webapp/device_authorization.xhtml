@@ -6,7 +6,14 @@
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	template="/WEB-INF/incl/layout/login-template.xhtml">
 	<f:metadata>
-
+		<f:viewParam name="user_code" value="#{deviceAuthorizationAction.userCode}" />
+		<f:viewParam name="code" value="#{deviceAuthorizationAction.code}" />
+		<f:viewParam name="session_id" value="#{deviceAuthorizationAction.sessionId}" />
+		<f:viewParam name="state" value="#{deviceAuthorizationAction.state}" />
+		<f:viewParam name="session_state" value="#{deviceAuthorizationAction.sessionState}" />
+		<f:viewParam name="error" value="#{deviceAuthorizationAction.error}" />
+		<f:viewParam name="error_description" value="#{deviceAuthorizationAction.errorDescription}" />
+		<f:viewAction action="#{deviceAuthorizationAction.pageLoaded}" />
 	</f:metadata>
 	<ui:define name="head">
 		<meta name="description" content="Gluu, Inc." />
@@ -15,29 +22,29 @@
 		<h:outputText value="#{msgs['device.authorization.pageTitle']}" />
 	</ui:define>
 	<ui:define name="body">
-		<div class="container">
-			<h:panelGroup rendered="true">
-				<div class="device-authz-container">
-					<div class="row">
-						<div class="col-12 device-authz-title">
-							<h:outputText value="#{msgs['device.authorization.title']}" />
+		<h:form id="deviceAuthzForm" style="padding:30px 15px;">
+			<div class="container">
+				<h:panelGroup rendered="#{deviceAuthorizationAction.newRequest}">
+					<div class="device-authz-container">
+						<div class="row">
+							<div class="col-12 device-authz-title">
+								<h:outputText value="#{msgs['device.authorization.title']}" />
+							</div>
+							<div class="col-12">
+								<h:messages class="text-center"
+											style="color:#8b0000; width: 100%"
+											id="messages"
+											infoClass="text-center" errorClass="text-center" />
+							</div>
+							<div class="col-12">
+								<h:outputText value="#{msgs['device.authorization.subtitle']}" />
+							</div>
 						</div>
-						<div class="col-12">
-							<h:messages class="text-center"
-										style="color:#8b0000; width: 100%"
-										id="messages"
-										infoClass="text-center" errorClass="text-center" />
-						</div>
-						<div class="col-12">
-							<h:outputText value="#{msgs['device.authorization.subtitle']}" />
-						</div>
-					</div>
-					<h:form id="deviceAuthzForm" style="padding:30px 15px;">
 						<div class="row col-md-12">
 							<div class="col-sm-7 device-authz-label">
 								<h:outputText value="#{msgs['device.authorization.code.inputbox.label']}" />
 							</div>
-							<div class="col-sm-5">
+							<h:panelGroup layout="block" styleClass="col-sm-5" rendered="#{!deviceAuthorizationAction.completeVerificationMode}">
 								<div class="row no-margin">
 									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
 										id="userCode1" name="userCode1" required="true" colMd="10"
@@ -59,7 +66,12 @@
 										 style="width:45%">
 									</h:inputText>
 								</div>
-							</div>
+							</h:panelGroup>
+							<h:panelGroup layout="block" styleClass="col-sm-5" rendered="#{deviceAuthorizationAction.completeVerificationMode}">
+								<div class="row no-margin">
+									<h:outputText value="#{deviceAuthorizationAction.userCode}" />
+								</div>
+							</h:panelGroup>
 						</div>
 						<div class="row device-authz-button">
 							<div class="col-sm-offset-2 offset-md-2 col-sm-8 col-md-8">
@@ -71,12 +83,25 @@
 								</h:commandButton>
 							</div>
 						</div>
-						<h:inputHidden id="platform" />
-					</h:form>
-				</div>
-			</h:panelGroup>
-		</div>
+					</div>
+				</h:panelGroup>
 
+				<h:panelGroup rendered="#{deviceAuthorizationAction.errorResponse}">
+					<h:outputLabel value="#{deviceAuthorizationAction.error}" />
+					<h:outputLabel value="#{deviceAuthorizationAction.errorDescription}" />
+				</h:panelGroup>
+
+				<h:panelGroup rendered="#{deviceAuthorizationAction.deviceAuthnCompleted}">
+					<h:outputLabel value="Authorization process has been completed, your device has required permission." />
+					<h:commandButton id="newAuthn"
+									 style="background-color: #00BE79; color:white;"
+									 styleClass="btn col-sm-12" value="#{msgs['device.authorization.init.new.request.msg']}"
+									 iconAwesome="fa-sign-in" onclick="initNewRequest()">
+						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.init}" />
+					</h:commandButton>
+				</h:panelGroup>
+			</div>
+		</h:form>
 		<script type="text/javascript">
 			function keyUpInput(component, switchToComponent, switchBackToComponent) {
 				let inputComponent = document.getElementById("deviceAuthzForm:" + component)
@@ -101,6 +126,10 @@
 						}
 					}
 				}
+			}
+
+			function initNewRequest() {
+				window.location = window.location.href.split("?")[0];
 			}
 		</script>
 
