@@ -495,6 +495,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return response(builder, oAuth2AuditLog);
     }
 
+    /**
+     * Processes token request for device code grant type.
+     * @param grantType Grant type used, should be device code.
+     * @param client Client in process.
+     * @param deviceCode Device code generated in device authn request.
+     * @param scope Scope registered in device authn request.
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param oAuth2AuditLog OAuth2AuditLog
+     */
     private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
                                                 String scope, final HttpServletRequest request,
                                                 final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
@@ -533,6 +543,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 if (scope != null && !scope.isEmpty()) {
                     scope = deviceCodeGrant.checkScopesPolicy(scope);
                 }
+                log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
                 oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
 

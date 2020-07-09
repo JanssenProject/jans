@@ -28,6 +28,9 @@ import javax.ws.rs.core.UriBuilder;
 import java.io.Serializable;
 import java.net.URI;
 
+/**
+ * Service used to process data related to device code grant type.
+ */
 @Stateless
 @Named
 public class DeviceAuthorizationService implements Serializable {
@@ -44,6 +47,12 @@ public class DeviceAuthorizationService implements Serializable {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    /**
+     * Saves data in cache, it could be saved with two identifiers used by Token endpoint or device_authorization page.
+     * @param data Data to be saved.
+     * @param saveDeviceCode Defines whether data should be saved using device code.
+     * @param saveUserCode Defines whether data should be saved using user code.
+     */
     public void saveInCache(DeviceAuthorizationCacheControl data, boolean saveDeviceCode, boolean saveUserCode) {
         if (saveDeviceCode) {
             cacheService.put(data.getExpiresIn(), data.getDeviceCode(), data);
@@ -54,6 +63,9 @@ public class DeviceAuthorizationService implements Serializable {
         log.trace("Device request saved in cache, userCode: {}, deviceCode: {}, clientId: {}", data.getUserCode(), data.getDeviceCode(), data.getClient().getClientId());
     }
 
+    /**
+     * Returns cache data related to the device code request using one of these codes: device_code or user_code.
+     */
     public DeviceAuthorizationCacheControl getDeviceAuthorizationCacheData(String deviceCode, String userCode) {
         String cacheKey = deviceCode != null ? deviceCode : userCode;
         Object cachedObject = cacheService.get(cacheKey);
@@ -79,6 +91,15 @@ public class DeviceAuthorizationService implements Serializable {
         return false;
     }
 
+    /**
+     * Validates data related to the cache, status and client in order to return correct redirection
+     * used to process device authorizations.
+     *
+     * @param deviceAuthorizationCacheControl Cache data related to the device code request.
+     * @param client Client in process.
+     * @param state State of the authorization request.
+     * @param servletRequest HttpServletRequest
+     */
     public String getDeviceAuthorizationPage(DeviceAuthorizationCacheControl deviceAuthorizationCacheControl, Client client,
                                              String state, HttpServletRequest servletRequest) {
         if (deviceAuthorizationCacheControl == null) {
@@ -107,6 +128,11 @@ public class DeviceAuthorizationService implements Serializable {
         return uri.toString();
     }
 
+    /**
+     * Removes device request data from cache using user_code and device_code.
+     * @param userCode User code used as key in cache.
+     * @param deviceCode Device code used as key in cache.
+     */
     public void removeDeviceAuthRequestInCache(String userCode, String deviceCode) {
         try {
             if (StringUtils.isNotBlank(userCode)) {
@@ -115,6 +141,7 @@ public class DeviceAuthorizationService implements Serializable {
             if (StringUtils.isNotBlank(deviceCode)) {
                 cacheService.remove(deviceCode);
             }
+            log.debug("Removed from cache device authorization using user_code: {}, device_code: {}", userCode, deviceCode);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
