@@ -25,11 +25,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import java.io.Serializable;
 import java.net.URI;
 
 @Stateless
 @Named
-public class DeviceAuthorizationService {
+public class DeviceAuthorizationService implements Serializable {
 
     @Inject
     private Logger log;
@@ -50,7 +51,7 @@ public class DeviceAuthorizationService {
         if (saveUserCode) {
             cacheService.put(data.getExpiresIn(), data.getUserCode(), data);
         }
-        log.trace("Ciba request saved in cache, userCode: {}, deviceCode: {}, clientId: {}", data.getUserCode(), data.getDeviceCode(), data.getClient().getClientId());
+        log.trace("Device request saved in cache, userCode: {}, deviceCode: {}, clientId: {}", data.getUserCode(), data.getDeviceCode(), data.getClient().getClientId());
     }
 
     public DeviceAuthorizationCacheControl getDeviceAuthorizationCacheData(String deviceCode, String userCode) {
