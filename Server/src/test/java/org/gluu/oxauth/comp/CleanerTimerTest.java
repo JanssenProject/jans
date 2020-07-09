@@ -266,7 +266,10 @@ public class CleanerTimerTest extends BaseComponentTest {
         clientService.persist(client);
 
         // 1. create RPT
-        final UmaRPT rpt = umaRptService.createRPTAndPersist(client, Lists.newArrayList());
+        final ExecutionContext executionContext = new ExecutionContext(null, null);
+        executionContext.setClient(client);
+
+        final UmaRPT rpt = umaRptService.createRPTAndPersist(executionContext, Lists.newArrayList());
 
         // 2. RPT exists
         assertNotNull(umaRptService.getRPTByCode(rpt.getNotHashedCode()));

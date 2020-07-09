@@ -370,7 +370,7 @@
 						</h:commandButton>
 					</div>
 					<h:panelGroup layout="block" id="registrationResults">
-						<h:inputHidden id="clientCibaTokenDeliveryMode" value="#{registrationAction.backchannelTokenDeliveryMode}" />
+						<h:inputHidden id="clientCibaTokenDeliveryMode" readonly="#{true}" value="#{registrationAction.backchannelTokenDeliveryMode}" />
 						<h:panelGroup layout="block"
 							rendered="#{registrationAction.showResults}">
 							<b:panel title="Registration Request" look="primary">
@@ -777,7 +777,7 @@
 					</div>
 
 					<h:panelGroup layout="block" id="backchannelAuthenticationResults">
-						<h:inputHidden id="bcAuthorizationResponse" value="#{backchannelAuthenticationAction.jsonResponse}" />
+						<h:inputHidden id="bcAuthorizationResponse" readonly="#{true}" value="#{backchannelAuthenticationAction.jsonResponse}" />
 						<h:panelGroup layout="block"
 									  rendered="#{backchannelAuthenticationAction.showResults}">
 							<b:panel title="Backchannel Authentication Request" look="primary">
