@@ -904,6 +904,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
+    /**
+     * Processes an authorization granted for device code grant type.
+     * @param userCode User code used in the device code flow.
+     * @param user Authenticated user that is giving the permissions.
+     * @param httpRequest
+     * @param httpResponse
+     */
     private void processDeviceAuthorization(String userCode, User user, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthorizationCacheData(null, userCode);
         if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
@@ -927,6 +934,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         deviceCodeGrant.setDeviceCode(cacheData.getDeviceCode());
         deviceCodeGrant.setTokensDelivered(false);
         deviceCodeGrant.save();
+        log.info("Issued all tokens needed for device authorization request, user_code: {}", userCode);
     }
 
 }
