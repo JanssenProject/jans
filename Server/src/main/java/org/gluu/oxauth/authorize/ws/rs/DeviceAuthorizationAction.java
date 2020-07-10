@@ -8,16 +8,19 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
+import org.gluu.model.security.Identity;
 import org.gluu.oxauth.i18n.LanguageBean;
-import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
-import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
+import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -25,6 +28,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
@@ -34,8 +40,12 @@ import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
  * Action used to process all requests related to device authorization.
  */
 @Named
-@SessionScoped
+@RequestScoped
 public class DeviceAuthorizationAction implements Serializable {
+
+    private static final String SESSION_ATTEMPTS_KEY = "attemps";
+    private static final String SESSION_LAST_ATTEMPT_KEY = "lastAttempt";
+    private static final String SESSION_USER_CODE = "userCode";
 
     @Inject
     private Logger log;
@@ -51,6 +61,12 @@ public class DeviceAuthorizationAction implements Serializable {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    private CookieService cookieService;
 
     // Query params
     private String code;
@@ -68,15 +84,8 @@ public class DeviceAuthorizationAction implements Serializable {
     private String descriptionMsg;
 
     // Internal process
-    private Long lastAttempt;
+    private Long lastAttempt = System.currentTimeMillis();
     private byte attempts;
-
-    @PostConstruct
-    public void init() {
-        lastAttempt = System.currentTimeMillis();
-        attempts = 0;
-        code = sessionId = state = sessionState = error = errorDescription = userCode = userCode1 = userCode2 = null;
-    }
 
     /**
      * Method used by the view to load all query params and set the page state.
@@ -91,6 +100,35 @@ public class DeviceAuthorizationAction implements Serializable {
             this.titleMsg = languageBean.getMessage("device.authorization.access.granted.title");
             this.descriptionMsg = languageBean.getMessage("device.authorization.authorization.completed.msg");
         }
+
+        initializeSession(false);
+    }
+
+    /**
+     * Initialize session used to prevent brute forcing.
+     */
+    public void initializeSession(boolean forceNewSession) {
+        SessionId sessionId = sessionIdService.getSessionId();
+        if (sessionId == null) {
+            Map<String, String> requestParameterMap = new HashMap<>();
+            requestParameterMap.put(SESSION_LAST_ATTEMPT_KEY, String.valueOf(lastAttempt));
+            requestParameterMap.put(SESSION_ATTEMPTS_KEY, String.valueOf(attempts));
+            requestParameterMap.put(SESSION_USER_CODE, userCode);
+            SessionId deviceAuthzSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            sessionIdService.persistSessionId(deviceAuthzSession);
+            cookieService.createSessionIdCookie(deviceAuthzSession, false);
+            log.debug("Created session for device authorization grant page, sessionId: {}", deviceAuthzSession.getId());
+        } else {
+            if (forceNewSession) {
+                log.debug("Initializing a new session for device authz page");
+                sessionIdService.remove(sessionId);
+                initializeSession(false);
+            }
+            if (StringUtils.isNotBlank(userCode)) {
+                sessionId.getSessionAttributes().put(SESSION_USER_CODE, userCode);
+                sessionIdService.updateSessionId(sessionId);
+            }
+        }
     }
 
     /**
@@ -98,15 +136,19 @@ public class DeviceAuthorizationAction implements Serializable {
      * or return an error if there is something wrong.
      */
     public void processUserCodeVerification() {
-        if (!preventBruteForcing()) {
+        SessionId session = sessionIdService.getSessionId();
+        if (session == null) {
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("error.errorEncountered"));
+            return;
+        }
+
+        if (!preventBruteForcing(session)) {
             facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
             return;
         }
 
-        String userCode;
-        if (isCompleteVerificationMode()) {
-            userCode = this.userCode;
-        } else {
+        String userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
+        if (StringUtils.isBlank(userCode)) {
             userCode = userCode1 + '-' + userCode2;
         }
         if (!validateFormat(userCode)) {
@@ -137,14 +179,21 @@ public class DeviceAuthorizationAction implements Serializable {
 
     /**
      * Prevents brute forcing for user code field from device_authorization page.
+     * @param session Session used to keep data related to all attemps done.
      */
-    private boolean preventBruteForcing() {
+    private boolean preventBruteForcing(SessionId session) {
+        lastAttempt = Long.valueOf(session.getSessionAttributes().getOrDefault(SESSION_LAST_ATTEMPT_KEY, "0"));
+        attempts = Byte.parseByte(session.getSessionAttributes().getOrDefault(SESSION_ATTEMPTS_KEY, "0"));
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastAttempt > 500 && attempts < 5) {
             lastAttempt = currentTime;
             attempts++;
+            session.getSessionAttributes().put(SESSION_LAST_ATTEMPT_KEY, String.valueOf(lastAttempt));
+            session.getSessionAttributes().put(SESSION_ATTEMPTS_KEY, String.valueOf(attempts));
+            sessionIdService.updateSessionId(session);
             return true;
         } else {
+            log.trace("User has done too many failed user code verification requests, sessionId: {}", sessionIdService.getSessionId());
             return false;
         }
     }
