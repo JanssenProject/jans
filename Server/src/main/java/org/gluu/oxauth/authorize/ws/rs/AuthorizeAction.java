@@ -25,6 +25,7 @@ import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
@@ -92,6 +93,7 @@ import org.slf4j.Logger;
  * @version March 4, 2020
  */
 @RequestScoped
+@Named
 public class AuthorizeAction {
 
     @Inject
