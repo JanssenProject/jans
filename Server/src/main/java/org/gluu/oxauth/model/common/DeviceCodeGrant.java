@@ -16,7 +16,6 @@ import javax.inject.Inject;
 public class DeviceCodeGrant extends AuthorizationGrant {
 
     private String deviceCode;
-    private boolean tokensDelivered;
 
     @Inject
     private CacheService cacheService;
@@ -42,14 +41,6 @@ public class DeviceCodeGrant extends AuthorizationGrant {
 
     public void setDeviceCode(String deviceCode) {
         this.deviceCode = deviceCode;
-    }
-
-    public boolean isTokensDelivered() {
-        return tokensDelivered;
-    }
-
-    public void setTokensDelivered(boolean tokensDelivered) {
-        this.tokensDelivered = tokensDelivered;
     }
 
 }
