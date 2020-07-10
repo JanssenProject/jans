@@ -33,6 +33,7 @@ import org.gluu.oxauth.model.token.JwtSigner;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Pair;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -115,6 +116,9 @@ public class SessionIdService {
 
     @Inject
     private CookieService cookieService;
+
+    @Inject
+    private Identity identity;
 
     private String buildDn(String sessionId) {
         return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -293,6 +297,10 @@ public class SessionIdService {
 
     public SessionId getSessionId() {
         String sessionId = cookieService.getSessionIdFromCookie();
+
+        if (StringHelper.isEmpty(sessionId)) {
+        	sessionId = identity.getSessionId().getId();
+        }
 
         if (StringHelper.isNotEmpty(sessionId)) {
             return getSessionId(sessionId);
