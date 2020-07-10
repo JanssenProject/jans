@@ -186,6 +186,7 @@ public class ScimCustomPerson extends Entry implements Serializable {
 
     public void setCustomAttribute(String attributeName, List<Object> attributeValue) {
         CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
+        attribute.setMultiValued(true);
         typedCustomAttributes.remove(attribute);
         typedCustomAttributes.add(attribute);
     }
