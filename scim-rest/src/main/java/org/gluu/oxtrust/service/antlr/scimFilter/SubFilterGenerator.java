@@ -240,7 +240,7 @@ public class SubFilterGenerator {
                     //attribute < value
                     subfilter = Filter.createANDFilter(
                             Filter.createNOTFilter(Filter.createEqualityFilter(attribute, objValue).multiValued(multivalued)),
-                            Filter.createLessOrEqualFilter(attribute, objValue)
+                            Filter.createLessOrEqualFilter(attribute, objValue).multiValued(multivalued)
                     );
                 }
                 break;
