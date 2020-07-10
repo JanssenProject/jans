@@ -117,7 +117,6 @@ public class CacheGrant implements Serializable {
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
         deviceCode = grant.getDeviceCode();
-        tokensDelivered = grant.isTokensDelivered();
     }
 
     private void initExpiresIn(AuthorizationGrant grant, AppConfiguration appConfiguration) {
@@ -282,7 +281,6 @@ public class CacheGrant implements Serializable {
         grant.setNonce(nonce);
         grant.setClaims(claims);
         grant.setDeviceCode(deviceCode);
-        grant.setTokensDelivered(tokensDelivered);
 
         return grant;
     }

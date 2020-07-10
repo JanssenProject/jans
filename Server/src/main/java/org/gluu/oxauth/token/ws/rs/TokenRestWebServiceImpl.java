@@ -521,37 +521,32 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog));
             }
-            if (!deviceCodeGrant.isTokensDelivered()) {
-                RefreshToken refToken = deviceCodeGrant.createRefreshToken();
-                log.debug("Issuing refresh token: {}", refToken.getCode());
+            RefreshToken refToken = deviceCodeGrant.createRefreshToken();
+            log.debug("Issuing refresh token: {}", refToken.getCode());
 
-                AccessToken accessToken = deviceCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
-                log.debug("Issuing access token: {}", accessToken.getCode());
+            AccessToken accessToken = deviceCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
+            log.debug("Issuing access token: {}", accessToken.getCode());
 
-                IdToken idToken = deviceCodeGrant.createIdToken(
-                        null, null, accessToken, refToken,
-                        null, deviceCodeGrant, false, null);
+            IdToken idToken = deviceCodeGrant.createIdToken(
+                    null, null, accessToken, refToken,
+                    null, deviceCodeGrant, false, null);
 
-                deviceCodeGrant.setTokensDelivered(true);
-                deviceCodeGrant.save();
-
-                RefreshToken reToken = null;
-                if (isRefreshTokenAllowed(client, deviceCodeGrant)) {
-                    reToken = refToken;
-                }
-
-                if (scope != null && !scope.isEmpty()) {
-                    scope = deviceCodeGrant.checkScopesPolicy(scope);
-                }
-                log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
-
-                oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
-
-                return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
-                        accessToken.getExpiresIn(), reToken, scope, idToken)).build();
-            } else {
-                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "AuthReqId is no longer available."), oAuth2AuditLog));
+            RefreshToken reToken = null;
+            if (isRefreshTokenAllowed(client, deviceCodeGrant)) {
+                reToken = refToken;
             }
+
+            if (scope != null && !scope.isEmpty()) {
+                scope = deviceCodeGrant.checkScopesPolicy(scope);
+            }
+            log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
+
+            oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
+
+            grantService.removeAllByGrantId(deviceCodeGrant.getGrantId());
+
+            return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
+                    accessToken.getExpiresIn(), reToken, scope, idToken)).build();
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
