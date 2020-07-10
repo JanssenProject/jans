@@ -1,6 +1,3 @@
-# raw swagger spec link:
-# https://raw.githubusercontent.com/GluuFederation/oxauth-config/master/docs/oxauth-config-swagger.yaml
-# https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/GluuFederation/oxauth-config/master/docs/oxauth-config-swagger.yaml
 openapi: 3.0.1
 info:
   title: oxauth-config
@@ -9,156 +6,155 @@ info:
     email: xxx@gluu.org
   license:
     name: License
-    url: https://github.com/GluuFederation/oxauth-config/blob/master/LICENSE
-  version: "1.0"
+    url: 'https://github.com/GluuFederation/oxauth-config/blob/master/LICENSE'
+  version: '1.0'
 servers:
-
-- url: https://gluu.org/
+  - url: 'https://gluu.org/'
 tags:
-- name: developers
-  description: oxauth-config enables access to the features available via the existing oxAuth API.
-   
+  - name: developers
+    description: oxauth-config enables access to the features available via the existing oxAuth API.
+  - name: Graphics
 paths:
   /config/properties:
     get:
       tags:
-      - Properties
+        - Properties
       summary: Gets all oxauth-config properties.
       description: Gets all oxauth-config JSON properties.
       operationId: properties
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: AppConfiguration 
+                title: AppConfiguration
                 description: List of all oxauth-config properties.
-                items: 
+                items:
                   type: object
                   title: AppConfiguration
                   description: App configuration properties.
                   required:
-                  - sessionAsJwt
-                  - issuer
-                  - baseEndpoint
-                  - authorizationEndpoint
-                  - tokenEndpoint
-                  - tokenRevocationEndpoint
-                  - userInfoEndpoint
-                  - clientInfoEndpoint
-                  - checkSessionIFrame
-                  - endSessionEndpoint
-                  - jwksUri
-                  - registrationEndpoint
-                  - openIdDiscoveryEndpoint
-                  - openIdConfigurationEndpoint
-                  - idGenerationEndpoint
-                  - introspectionEndpoint
-                  - introspectionAccessTokenMustHaveUmaProtectionScope
-                  - umaConfigurationEndpoint
-                  - oxElevenGenerateKeyEndpoint
-                  - oxElevenSignEndpoint
-                  - oxElevenVerifySignatureEndpoint
-                  - oxElevenDeleteKeyEndpoint
-                  - oxElevenJwksEndpoint
-                  - openidSubAttribute
-                  - responseTypesSupported
-                  - responseModesSupported
-                  - grantTypesSupported
-                  - defaultSubjectType
-                  - userInfoSigningAlgValuesSupported
-                  - userInfoEncryptionAlgValuesSupported
-                  - userInfoEncryptionEncValuesSupported
-                  - idTokenSigningAlgValuesSupported
-                  - idTokenEncryptionAlgValuesSupported
-                  - idTokenEncryptionEncValuesSupported
-                  - requestObjectSigningAlgValuesSupported
-                  - requestObjectEncryptionAlgValuesSupported
-                  - requestObjectEncryptionEncValuesSupported
-                  - tokenEndpointAuthMethodsSupported
-                  - tokenEndpointAuthSigningAlgValuesSupported
-                  - dynamicRegistrationCustomAttributes
-                  - displayValuesSupported
-                  - claimTypesSupported
-                  - serviceDocumentation
-                  - claimsLocalesSupported
-                  - idTokenTokenBindingCnfValuesSupported
-                  - uiLocalesSupported
-                  - opPolicyUri
-                  - opTosUri
-                  - authorizationCodeLifetime
-                  - refreshTokenLifetime
-                  - idTokenLifetime
-                  - accessTokenLifetime
-                  - umaRptLifetime
-                  - umaTicketLifetime
-                  - umaPctLifetime
-                  - umaResourceLifetime
+                    - sessionAsJwt
+                    - issuer
+                    - baseEndpoint
+                    - authorizationEndpoint
+                    - tokenEndpoint
+                    - tokenRevocationEndpoint
+                    - userInfoEndpoint
+                    - clientInfoEndpoint
+                    - checkSessionIFrame
+                    - endSessionEndpoint
+                    - jwksUri
+                    - registrationEndpoint
+                    - openIdDiscoveryEndpoint
+                    - openIdConfigurationEndpoint
+                    - idGenerationEndpoint
+                    - introspectionEndpoint
+                    - introspectionAccessTokenMustHaveUmaProtectionScope
+                    - umaConfigurationEndpoint
+                    - oxElevenGenerateKeyEndpoint
+                    - oxElevenSignEndpoint
+                    - oxElevenVerifySignatureEndpoint
+                    - oxElevenDeleteKeyEndpoint
+                    - oxElevenJwksEndpoint
+                    - openidSubAttribute
+                    - responseTypesSupported
+                    - responseModesSupported
+                    - grantTypesSupported
+                    - defaultSubjectType
+                    - userInfoSigningAlgValuesSupported
+                    - userInfoEncryptionAlgValuesSupported
+                    - userInfoEncryptionEncValuesSupported
+                    - idTokenSigningAlgValuesSupported
+                    - idTokenEncryptionAlgValuesSupported
+                    - idTokenEncryptionEncValuesSupported
+                    - requestObjectSigningAlgValuesSupported
+                    - requestObjectEncryptionAlgValuesSupported
+                    - requestObjectEncryptionEncValuesSupported
+                    - tokenEndpointAuthMethodsSupported
+                    - tokenEndpointAuthSigningAlgValuesSupported
+                    - dynamicRegistrationCustomAttributes
+                    - displayValuesSupported
+                    - claimTypesSupported
+                    - serviceDocumentation
+                    - claimsLocalesSupported
+                    - idTokenTokenBindingCnfValuesSupported
+                    - uiLocalesSupported
+                    - opPolicyUri
+                    - opTosUri
+                    - authorizationCodeLifetime
+                    - refreshTokenLifetime
+                    - idTokenLifetime
+                    - accessTokenLifetime
+                    - umaRptLifetime
+                    - umaTicketLifetime
+                    - umaPctLifetime
+                    - umaResourceLifetime
                   properties:
                     sessionAsJwt:
                       type: boolean
                       description: Boolean value true saves session data as a JWT.
                     issuer:
-                      type : string
+                      type: string
                       description: URL using the https scheme that OP asserts as Issuer identifier.
-                      example: https://server.example.com/
+                      example: 'https://server.example.com/'
                     baseEndpoint:
-                      type : string
+                      type: string
                       description: The base URL for endpoints.
-                      example: https://server.example.com/oxauth/restv1
+                      example: 'https://server.example.com/oxauth/restv1'
                     authorizationEndpoint:
                       type: string
                       description: The authorization endpoint URL.
-                      example: https://server.example.com/oxauth/restv1/authorize
+                      example: 'https://server.example.com/oxauth/restv1/authorize'
                     tokenEndpoint:
                       type: string
                       description: The token endpoint URL.
-                      example: https://server.example.com/oxauth/restv1/token
+                      example: 'https://server.example.com/oxauth/restv1/token'
                     tokenRevocationEndpoint:
                       type: string
                       description: The URL for the access_token or refresh_token revocation endpoint.
-                      example: https://server.example.com/oxauth/restv1/revoke
+                      example: 'https://server.example.com/oxauth/restv1/revoke'
                     userInfoEndpoint:
                       type: string
                       description: The User Info endpoint URL.
-                      example: https://server.example.com/oxauth/restv1/userinfo
+                      example: 'https://server.example.com/oxauth/restv1/userinfo'
                     clientInfoEndpoint:
                       type: string
                       description: The Client Info endpoint URL.
-                      example: https://server.example.com/oxauth/restv1/clientinfo
+                      example: 'https://server.example.com/oxauth/restv1/clientinfo'
                     checkSessionIFrame:
                       type: string
                       description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
-                      example: https://server.example.com/oxauth/opiframe.htm
+                      example: 'https://server.example.com/oxauth/opiframe.htm'
                     endSessionEndpoint:
                       type: string
                       description: URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP.
-                      example: https://server.example.com/oxauth/restv1/end_session
+                      example: 'https://server.example.com/oxauth/restv1/end_session'
                     jwksUri:
                       type: string
                       description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
-                      example: https://server.example.com/oxauth/restv1/jwks
+                      example: 'https://server.example.com/oxauth/restv1/jwks'
                     registrationEndpoint:
                       type: string
                       description: URL of the Registration Enpoint.
-                      example: https://server.example.com/oxauth/restv1/register
+                      example: 'https://server.example.com/oxauth/restv1/register'
                     openIdDiscoveryEndpoint:
                       type: string
                       description: URL for the Discovery Endpoint.
-                      example: https://server.example.com/.well-known/webfinger
+                      example: 'https://server.example.com/.well-known/webfinger'
                     openIdConfigurationEndpoint:
                       type: string
                       description: URL for the Open ID Connect Configuration Endpoint.
-                      example: https://server.example.com/.well-known/openid-configuration
+                      example: 'https://server.example.com/.well-known/openid-configuration'
                     idGenerationEndpoint:
                       type: string
                       description: URL for the ID Generation Endpoint.
-                      example: https://server.example.com/oxauth/restv1/id
+                      example: 'https://server.example.com/oxauth/restv1/id'
                     introspectionEndpoint:
                       type: string
                       description: URL for the Introspection Endpoint.
-                      example: https://server.example.com/oxauth/restv1/introspection
+                      example: 'https://server.example.com/oxauth/restv1/introspection'
                     introspectionAccessTokenMustHaveUmaProtectionScope:
                       type: boolean
                       description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
@@ -166,31 +162,31 @@ paths:
                     umaConfigurationEndpoint:
                       type: string
                       description: URL for the UMA Configuration Endpoint.
-                      example: https://server.example.com/oxauth/restv1/uma2-configuration
+                      example: 'https://server.example.com/oxauth/restv1/uma2-configuration'
                     sectorIdentifierEndpoint:
                       type: string
                       description: URL for the Sector Identifier Endpoint.
-                      example: 
+                      example: null
                     oxElevenGenerateKeyEndpoint:
                       type: string
                       description: URL for the oxEleven Generate Key Endpoint.
-                      example: https://server.example.com/oxeleven/rest/oxeleven/generateKey
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/generateKey'
                     oxElevenSignEndpoint:
                       type: string
                       description: URL for the oxEleven Sign Endpoint.
-                      example: https://server.example.com/oxeleven/rest/oxeleven/sign
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/sign'
                     oxElevenVerifySignatureEndpoint:
                       type: string
                       description: URL for the oxEleven Verify Signature Endpoint.
-                      example: https://server.example.com/oxeleven/rest/oxeleven/verifySignature
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/verifySignature'
                     oxElevenDeleteKeyEndpoint:
                       type: string
                       description: URL for the oxEleven Delete Key Endpoint.
-                      example: https://server.example.com/oxeleven/rest/oxeleven/deleteKey
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
                     oxElevenJwksEndpoint:
                       type: string
                       description: URL for the oxEleven JWKS Endpoint..
-                      example: 
+                      example: null
                     openidSubAttribute:
                       type: string
                       description: Specifies which LDAP attribute is used for the subject identifier claim.
@@ -199,67 +195,67 @@ paths:
                       type: array
                       description: A list of the OAuth 2.0 response_type values that this OP supports.
                       minItems: 1
-                      items: 
+                      items:
                         type: string
                       example:
-                       - code
-                       - token
-                       - id_token
+                        - code
+                        - token
+                        - id_token
                     responseModesSupported:
                       type: array
                       description: A list of the OAuth 2.0 Response Mode values that this OP supports.
-                      items: 
+                      items:
                         type: string
                       example:
-                       - query
-                       - fragment
-                       - form_post
+                        - query
+                        - fragment
+                        - form_post
                     grantTypesSupported:
                       type: array
                       description: A list of the OAuth 2.0 Grant Type values that this OP supports.
-                      items: 
+                      items:
                         type: string
                       example:
-                       - authorization_code
-                       - implicit
-                       - password
-                       - client_credentials
-                       - refresh_token
-                       - \urn\:ietf\:params\:oauth\:grant-type\:uma-ticket
-                       - \urn\:openid\:params\:grant-type\:ciba
+                        - authorization_code
+                        - implicit
+                        - password
+                        - client_credentials
+                        - refresh_token
+                        - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
+                        - '\urn\:openid\:params\:grant-type\:ciba'
                     dynamicGrantTypeDefault:
                       type: array
                       description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
-                      items: 
+                      items:
                         type: string
                       example:
-                       - authorization_code
-                       - implicit
-                       - password
-                       - client_credentials
-                       - refresh_token
-                       - urn:ietf:params:oauth:grant-type:uma-ticket
-                       - urn:openid:params:grant-type:ciba
+                        - authorization_code
+                        - implicit
+                        - password
+                        - client_credentials
+                        - refresh_token
+                        - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+                        - 'urn:openid:params:grant-type:ciba'
                     subjectTypesSupported:
                       type: array
                       description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
-                      items: 
+                      items:
                         type: string
                       example:
-                       - public
-                       - pairwise
+                        - public
+                        - pairwise
                     defaultSubjectType:
-                      type : string
+                      type: string
                       description: Default Subject Type used for Dynamic Client Registration.
-                      items: 
+                      items:
                         type: string
                       example:
-                       - public
-                       - pairwise
+                        - public
+                        - pairwise
                     userInfoSigningAlgValuesSupported:
                       type: array
                       description: A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - HS256
@@ -277,7 +273,7 @@ paths:
                     userInfoEncryptionAlgValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - RSA1_5
@@ -287,7 +283,7 @@ paths:
                     userInfoEncryptionEncValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - A128CBC+HS256
@@ -297,7 +293,7 @@ paths:
                     idTokenSigningAlgValuesSupported:
                       type: array
                       description: A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - none
@@ -305,18 +301,18 @@ paths:
                         - HS384
                         - HS512
                         - RS256
-                        - RS384                    
-                        - RS512                    
-                        - ES256                    
-                        - ES384                    
-                        - ES512                    
-                        - PS256                    
-                        - PS384                    
-                        - PS512 
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
                     idTokenEncryptionAlgValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - RSA1_5
@@ -326,7 +322,7 @@ paths:
                     idTokenEncryptionEncValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT.
-                      items: 
+                      items:
                         type: string
                       example:
                         - A128CBC+HS256
@@ -336,7 +332,7 @@ paths:
                     requestObjectSigningAlgValuesSupported:
                       type: array
                       description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects.
-                      items: 
+                      items:
                         type: string
                       example:
                         - none
@@ -355,7 +351,7 @@ paths:
                     requestObjectEncryptionAlgValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects.
-                      items: 
+                      items:
                         type: string
                       example:
                         - RSA1_5
@@ -365,7 +361,7 @@ paths:
                     requestObjectEncryptionEncValuesSupported:
                       type: array
                       description: A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects.
-                      items: 
+                      items:
                         type: string
                       example:
                         - A128CBC+HS256
@@ -375,7 +371,7 @@ paths:
                     tokenEndpointAuthMethodsSupported:
                       type: array
                       description: A list of Client Authentication methods supported by this Token Endpoint.
-                      items: 
+                      items:
                         type: string
                       example:
                         - client_secret_basic
@@ -385,7 +381,7 @@ paths:
                     tokenEndpointAuthSigningAlgValuesSupported:
                       type: array
                       description: A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
-                      items: 
+                      items:
                         type: string
                       example:
                         - HS256
@@ -428,7 +424,7 @@ paths:
                       items:
                         type: string
                       format: url
-                      example: http://gluu.org/docs
+                      example: 'http://gluu.org/docs'
                     claimsLocalesSupported:
                       type: array
                       description: Languages and scripts supported for values in Claims being returned.
@@ -438,10 +434,10 @@ paths:
                         - en
                     idTokenTokenBindingCnfValuesSupported:
                       type: array
-                      description: Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.
+                      description: 'Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.'
                       items:
                         type: string
-                      example: 
+                      example:
                         - tbh
                     uiLocalesSupported:
                       type: array
@@ -478,12 +474,12 @@ paths:
                     opPolicyUri:
                       type: string
                       description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.
-                      example: http://ox.gluu.org/doku.php?id=oxauth:policy
+                      example: 'http://ox.gluu.org/doku.php?id=oxauth:policy'
                     opTosUri:
                       type: string
                       description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
-                      example: http://ox.gluu.org/doku.php?id=oxauth:tos
-                    authorizationCodeLifetime: 
+                      example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
+                    authorizationCodeLifetime:
                       type: integer
                       description: The lifetime of the Authorization Code.
                       multipleOf: 1
@@ -492,7 +488,7 @@ paths:
                       maximum: 2147483647
                       exclusiveMaximum: false
                       example: 60
-                    refreshTokenLifetime: 
+                    refreshTokenLifetime:
                       type: integer
                       description: The lifetime of the Refresh Token.
                       multipleOf: 1
@@ -501,7 +497,7 @@ paths:
                       maximum: 2147483647
                       exclusiveMaximum: false
                       example: 14400
-                    idTokenLifetime: 
+                    idTokenLifetime:
                       type: integer
                       description: The lifetime of the ID Token.
                       multipleOf: 1
@@ -510,7 +506,7 @@ paths:
                       maximum: 2147483647
                       exclusiveMaximum: false
                       example: 3600
-                    accessTokenLifetime: 
+                    accessTokenLifetime:
                       type: integer
                       description: The lifetime of the short lived Access Token.
                       multipleOf: 1
@@ -519,7 +515,7 @@ paths:
                       maximum: 2147483647
                       exclusiveMaximum: false
                       example: 3600
-                    umaRptLifetime: 
+                    umaRptLifetime:
                       type: integer
                       description: UMA RPT lifetime.
                       multipleOf: 1
@@ -528,7 +524,7 @@ paths:
                       maximum: 2147483647
                       exclusiveMaximum: false
                       example: 3600
-                    umaTicketLifetime: 
+                    umaTicketLifetime:
                       type: integer
                       description: UMA ticket lifetime.
                       multipleOf: 1
@@ -536,7 +532,7 @@ paths:
                       exclusiveMinimum: false
                       maximum: 2147483647
                       exclusiveMaximum: false
-                      example: 3600  
+                      example: 3600
                     umaPctLifetime:
                       type: integer
                       description: UMA PCT lifetime.
@@ -545,7 +541,7 @@ paths:
                       exclusiveMinimum: false
                       maximum: 2147483647
                       exclusiveMaximum: false
-                      example: 3600  
+                      example: 3600
                     umaResourceLifetime:
                       type: integer
                       description: UMA PCT lifetime.
@@ -554,7 +550,7 @@ paths:
                       exclusiveMinimum: false
                       maximum: 2147483647
                       exclusiveMaximum: false
-                      example: 3600  
+                      example: 3600
                     umaAddScopesAutomatically:
                       type: boolean
                       description: Add UMA scopes automatically if it is not registered yet.
@@ -587,7 +583,7 @@ paths:
                       exclusiveMinimum: false
                       maximum: 2147483647
                       exclusiveMaximum: false
-                      example: 60  
+                      example: 60
                     cleanServiceBaseDns:
                       type: array
                       description: List of additional base dns under which AS will look up for expired entities.
@@ -622,7 +618,7 @@ paths:
                     defaultSignatureAlgorithm:
                       type: string
                       description: The default signature algorithm to sign ID Tokens.
-                      items: 
+                      items:
                         type: string
                       example:
                         - HS256
@@ -644,14 +640,14 @@ paths:
                       description: URL for the Inum generator Service.
                       format: url
                       minLength: 1
-                      example: https://server.example.com/oxid/service/gluu/inum
+                      example: 'https://server.example.com/oxid/service/gluu/inum'
                     dynamicRegistrationEnabled:
                       type: boolean
                       description: Boolean value specifying whether to enable Dynamic Registration.
                       default: false
                     dynamicRegistrationExpirationTime:
                       type: integer
-                      description: Expiration time in seconds for clients created with dynamic registration, -1 means never expire.
+                      description: 'Expiration time in seconds for clients created with dynamic registration, -1 means never expire.'
                       multipleOf: 1
                       minimum: 0
                       exclusiveMinimum: false
@@ -681,7 +677,7 @@ paths:
                       minItems: 0
                       items:
                         type: string
-                      example: 
+                      example:
                         - gluuCustomPerson
                         - gluuPerson
                     authenticationFiltersEnabled:
@@ -702,7 +698,7 @@ paths:
                         properties:
                           filter:
                             type: string
-                            example: (&(mail=*{0}*)(inum={1}))
+                            example: '(&(mail=*{0}*)(inum={1}))'
                           bind:
                             type: boolean
                             default: false
@@ -710,7 +706,7 @@ paths:
                             type: string
                           base-dn:
                             type: string
-                            example: ou=people,o=gluu
+                            example: 'ou=people,o=gluu'
                     clientAuthenticationFilters:
                       type: array
                       description: Client authentication filters.
@@ -721,7 +717,7 @@ paths:
                         properties:
                           filter:
                             type: string
-                            example: myCustomAttr1={0}
+                            example: 'myCustomAttr1={0}'
                           bind:
                             type: boolean
                             default: false
@@ -729,8 +725,8 @@ paths:
                             type: string
                           base-dn:
                             type: string
-                            example: ou=clients,o=gluu
-                    sessionIdUnusedLifetime: 
+                            example: 'ou=clients,o=gluu'
+                    sessionIdUnusedLifetime:
                       type: integer
                       description: The lifetime for unused session states.
                       multipleOf: 1
@@ -813,7 +809,7 @@ paths:
                     pairwiseIdType:
                       type: string
                       description: The pairwise ID type.
-                      items: 
+                      items:
                         type: string
                       example:
                         - persistent
@@ -833,10 +829,8 @@ paths:
                     webKeysStorage:
                       type: string
                       description: Web Key Storage Type.
-                      format: enum
-                        - keystore
-                        - pkcs11
-                    dnName: 
+                      format: enum - keystore - pkcs11
+                    dnName:
                       type: string
                       description: DN of certificate issuer.
                       minLength: 1
@@ -899,14 +893,7 @@ paths:
                     loggingLevel:
                       type: string
                       description: Logging level for oxAuth logers.
-                      format: enum
-                        - TRACE
-                        - DEBUG
-                        - INFO
-                        - WARN
-                        - ERROR
-                        - FATAL
-                        - OFF
+                      format: enum - TRACE - DEBUG - INFO - WARN - ERROR - FATAL - OFF
                     corsConfigurationFilters:
                       type: array
                       description: CORS Configuration filters.
@@ -927,11 +914,11 @@ paths:
                             default: \*
                           corsAllowedMethods:
                             type: string
-                            default: GET,POST,HEAD,OPTIONS
+                            default: 'GET,POST,HEAD,OPTIONS'
                           corsAllowedHeaders:
                             type: string
                             minLength: 1
-                            default: Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers
+                            default: 'Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers'
                           corsExposedHeaders:
                             type: string
                             minLength: 1
@@ -963,18 +950,18 @@ paths:
                       description: Authorization Request Custom Allowed Parameters.
                       minItems: 0
                       uniqueItems: true
-                      items: 
+                      items:
                         type: string
                     legacyDynamicRegistrationScopeParam:
                       type: boolean
                       description: Legacy Dynamic Registration Scopes JSON Array Param.
                     openidScopeBackwardCompatibility:
                       type: boolean
-                      description: Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
+                      description: 'Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.'
                       default: false
                     skipAuthorizationForOpenIdScopeAndPairwiseId:
                       type: boolean
-                      description: If a client has only openid scope and pairwise id, person should not have to authorize.
+                      description: 'If a client has only openid scope and pairwise id, person should not have to authorize.'
                       default: false
                     allowPostLogoutRedirectWithoutValidation:
                       type: boolean
@@ -991,7 +978,7 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
-                      example: \"/oxauth/img\", \"/oxauth/stylesheet\"
+                      example: '\"/oxauth/img\", \"/oxauth/stylesheet\"'
                     externalLoggerConfiguration:
                       type: string
                       description: Path to external log4j2 logging configuration.
@@ -1053,22 +1040,19 @@ paths:
                           exclusiveMaximum: false
                         bruteForceProtectionEnabled:
                           type: boolean
-                    #fido2Configuration: ?????
                     errorHandlingMethod:
                       type: string
                       description: A list of possible error handling methods.
-                      format: enum
-                       - internal
-                       - remote
+                      format: enum - internal - remote
                     useLocalCache:
                       type: boolean
-                      description: Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.
+                      description: 'Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.'
                       default: false
                     spontaneousScopeLifetime:
                       type: integer
                       description: The lifetime of spontaneous scope in seconds.
                       multipleOf: 1
-                      minimum: 1                        
+                      minimum: 1
                       maximum: 2147483647
                       exclusiveMinimum: false
                       exclusiveMaximum: false
@@ -1079,18 +1063,7 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
-                      format: select
-                        - RS256
-                        - RS384
-                        - RS512
-                        - ES256
-                        - ES384
-                        - ES512
-                        - PS256
-                        - PS384
-                        - PS512
-                        - RSA1_5
-                        - RSA-OAEP
+                      format: select - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512 - RSA1_5 - RSA-OAEP
                     dynamicRegistrationPasswordGrantTypeEnabled:
                       type: boolean
                       description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
@@ -1105,7 +1078,7 @@ paths:
                       default: true
                     expirationNotificatorEnabled:
                       type: boolean
-                      description: Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).
+                      description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
                       default: true
                     expirationNotificatorMapSizeLimit:
                       type: integer
@@ -1121,15 +1094,15 @@ paths:
                     sessionIdRequestParameterEnabled:
                       type: boolean
                       description: Boolean value specifying whether to enable session_id HTTP request parameter.
-                      default : false
+                      default: false
                     changeSessionIdOnAuthentication:
                       type: boolean
                       description: Boolean value specifying whether to enable session_id HTTP request parameter.
-                      default : true
+                      default: true
                     serverSessionIdLifetime:
                       type: integer
                       description: The sessionId lifetime in seconds for sessionId.
-                      default : 86400
+                      default: 86400
                     cookieDomain:
                       type: string
                       description: Sets cookie domain for all cookies created by OP.
@@ -1176,17 +1149,17 @@ paths:
                       type: string
                       description: Backchannel Redirect Uri.
                       minLength: 0
-                      example: https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
                     backchannelAuthenticationEndpoint:
                       type: string
                       description: Backchannel Authentication Endpoint.
                       minLength: 0
-                      example: https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
                     backchannelDeviceRegistrationEndpoint:
                       type: string
                       description: Backchannel Device Registration Endpoint.
                       minLength: 0
-                      example: https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
                     backchannelTokenDeliveryModesSupported:
                       type: array
                       description: Backchannel Token Delivery Modes Supported.
@@ -1194,10 +1167,7 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
-                      format: select
-                        - poll
-                        - ping
-                        - push
+                      format: select - poll - ping - push
                     backchannelAuthenticationRequestSigningAlgValuesSupported:
                       type: array
                       description: Backchannel Authentication Request Signing Alg Values Supported.
@@ -1205,21 +1175,14 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
-                      format: select
-                        - RS512
-                        - ES256
-                        - ES384
-                        - ES512
-                        - PS256
-                        - PS384
-                        - PS512
+                      format: select - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
                     backchannelUserCodeParameterSupported:
                       type: boolean
-                      description: Backchannel User Code Parameter Supported                      
+                      description: Backchannel User Code Parameter Supported
                     backchannelBindingMessagePattern:
-                     type: string
-                     description: Backchannel Binding Message Pattern.
-                     minLength: 0
+                      type: string
+                      description: Backchannel Binding Message Pattern.
+                      minLength: 0
                     backchannelAuthenticationResponseExpiresIn:
                       type: integer
                       description: Backchannel Authentication Response Expires In.
@@ -1247,16 +1210,16 @@ paths:
                       type: object
                       description: CIBA End User Notification Config.
                       required:
-                      - apiKey
-                      - authDomain
-                      - databaseURL
-                      - projectId
-                      - storageBucket
-                      - messagingSenderId
-                      - appId
-                      - notificationUrl
-                      - notificationKey
-                      - publicVapidKey
+                        - apiKey
+                        - authDomain
+                        - databaseURL
+                        - projectId
+                        - storageBucket
+                        - messagingSenderId
+                        - appId
+                        - notificationUrl
+                        - notificationKey
+                        - publicVapidKey
                       properties:
                         apiKey:
                           type: string
@@ -1266,13 +1229,13 @@ paths:
                           minLength: 1
                         databaseURL:
                           type: string
-                          minLength: 1 
+                          minLength: 1
                         projectId:
                           type: string
-                          minLength: 1 
+                          minLength: 1
                         storageBucket:
                           type: string
-                          minLength: 1 
+                          minLength: 1
                         messagingSenderId:
                           type: string
                           minLength: 1
@@ -1300,7 +1263,7 @@ paths:
                     cibaMaxExpirationTimeAllowedSec:
                       type: integer
                       description: Specifies the CIBA token expiration time in seconds.
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /config/graphics:
     get:
@@ -1310,25 +1273,25 @@ paths:
       description: Retrieve organization graphics configuration.
       operationId: get-organization-graphics
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: OrganizationConfiguration  
+                title: OrganizationConfiguration
                 description: Organization graphics configuration details.
                 type: object
-                required:
-                  - logoLocation
-                  - faviconPath
                 properties:
                   logoLocation:
                     type: string
                     description: Directory name for the images and logos that are used.
                   faviconPath:
-                    type : string
-                    description: Directory name for the images and logos that are used.
-        500:
+                    type: string
+                    description: Directory name for the images and favicon that are used.
+                required:
+                  - logoLocation
+                  - faviconPath
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
@@ -1341,44 +1304,72 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              title: OrganizationConfiguration  
+              title: OrganizationConfiguration
               description: Organization graphics configuration details.
               type: object
-              required:
-                - logoLocation
-                - faviconPath
               properties:
                 logoLocation:
                   type: string
                   description: Directory name for the images and logos that are used.
                 faviconPath:
-                  type : string
-                  description: Directory name for the images and logos that are used.
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - logoLocation
+                - faviconPath
+        description: Organization graphics configuration details.
       responses:
-        200:
+        '200':
           description: OK
           content: {}
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'            
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: ''
+      operationId: put-organization-graphics
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      description: Update organization graphics configuration.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - logoLocation
+                - faviconPath
+      tags:
+        - Graphics
+    parameters: []
   /scripts/client_reg:
     get:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Gets all client custom scripts.
       description: Gets all client custom scripts.
       operationId: get-custom-scripts
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: CustomScript  
+                title: CustomScript
                 description: Provides list of client custom scripts.
                 type: array
-                items: 
+                items:
                   type: object
                   title: CustomScript
                   description: Custom script configuration.
@@ -1387,13 +1378,13 @@ paths:
                       type: string
                       description: Dn(Distinguished Name) of the script.
                     inum:
-                      type : string
+                      type: string
                       description: XRI i-number
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                     aliases:
-                      type: array                    
+                      type: array
                       items:
                         type: string
                     description:
@@ -1427,7 +1418,7 @@ paths:
                         - idp
                     programmingLanguage:
                       type: string
-                      description: Specifies programming language of the custom script.                      
+                      description: Specifies programming language of the custom script.
                       enum:
                         - python
                         - javascript
@@ -1446,7 +1437,7 @@ paths:
                     configurationProperties:
                       type: array
                       description: List of configuration properties.
-                      items: 
+                      items:
                         type: object
                         properties:
                           value1:
@@ -1476,11 +1467,11 @@ paths:
                       type: boolean
                     internal:
                       type: boolean
-        500:
-          $ref: '#/components/responses/InternalServerError'    
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Add new custom script.
       description: Add new custom script.
       operationId: post-custom-scripts
@@ -1495,13 +1486,13 @@ paths:
                   type: string
                   description: Dn(Distinguished Name) of the script.
                 inum:
-                  type : string
+                  type: string
                   description: XRI i-number
-                  example: name, displayName,birthdate, email
+                  example: 'name, displayName,birthdate, email'
                 displayName:
-                  type : string
+                  type: string
                 aliases:
-                  type: array                    
+                  type: array
                   items:
                     type: string
                 description:
@@ -1554,7 +1545,7 @@ paths:
                 configurationProperties:
                   type: array
                   description: List of configuration properties.
-                  items: 
+                  items:
                     type: object
                     properties:
                       value1:
@@ -1583,14 +1574,14 @@ paths:
                 modified:
                   type: boolean
                 internal:
-                   type: boolean
+                  type: boolean
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: CustomScript  
+                title: CustomScript
                 description: Provides list of client custom scripts.
                 type: object
                 properties:
@@ -1598,13 +1589,13 @@ paths:
                     type: string
                     description: Dn(Distinguished Name) of the script.
                   inum:
-                    type : string
+                    type: string
                     description: XRI i-number
-                    example: name, displayName,birthdate, email
+                    example: 'name, displayName,birthdate, email'
                   displayName:
-                    type : string
+                    type: string
                   aliases:
-                    type: array                    
+                    type: array
                     items:
                       type: string
                   description:
@@ -1657,7 +1648,7 @@ paths:
                   configurationProperties:
                     type: array
                     description: List of configuration properties.
-                    items: 
+                    items:
                       type: object
                       properties:
                         value1:
@@ -1686,12 +1677,12 @@ paths:
                   modified:
                     type: boolean
                   internal:
-                     type: boolean                      
-        500:
-          $ref: '#/components/responses/InternalServerError'    
+                    type: boolean
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Update custom script.
       description: Add new custom script.
       operationId: put-custom-scripts
@@ -1706,13 +1697,13 @@ paths:
                   type: string
                   description: Dn(Distinguished Name) of the script.
                 inum:
-                  type : string
+                  type: string
                   description: XRI i-number
-                  example: name, displayName,birthdate, email
+                  example: 'name, displayName,birthdate, email'
                 displayName:
-                  type : string
+                  type: string
                 aliases:
-                  type: array                    
+                  type: array
                   items:
                     type: string
                 description:
@@ -1765,7 +1756,7 @@ paths:
                 configurationProperties:
                   type: array
                   description: List of configuration properties.
-                  items: 
+                  items:
                     type: object
                     properties:
                       value1:
@@ -1794,19 +1785,19 @@ paths:
                 modified:
                   type: boolean
                 internal:
-                   type: boolean
+                  type: boolean
       responses:
-        200:
+        '200':
           description: OK
           content: {}
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
-  /scripts/client_reg/{type}:
+  '/scripts/client_reg/{type}':
     get:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Get person authentication scripts by type.
       description: Get person authentication scripts by type.
       operationId: get-custom-scripts-by-type
@@ -1818,15 +1809,15 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: CustomScript  
+                title: CustomScript
                 description: Provides list of client custom scripts.
                 type: array
-                items: 
+                items:
                   type: object
                   title: CustomScript
                   description: Custom script configuration.
@@ -1835,13 +1826,13 @@ paths:
                       type: string
                       description: Dn(Distinguished Name) of the script.
                     inum:
-                      type : string
+                      type: string
                       description: XRI i-number
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                     aliases:
-                      type: array                    
+                      type: array
                       items:
                         type: string
                     description:
@@ -1894,7 +1885,7 @@ paths:
                     configurationProperties:
                       type: array
                       description: List of configuration properties.
-                      items: 
+                      items:
                         type: object
                         properties:
                           value1:
@@ -1924,12 +1915,12 @@ paths:
                       type: boolean
                     internal:
                       type: boolean
-        500:
-          $ref: '#/components/responses/InternalServerError'                            
-  /scripts/client_reg/{inum}:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/scripts/client_reg/{inum}':
     get:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Gets custom scripts by inum.
       description: Gets custom scripts by inum.
       operationId: get-custom-scripts-by-identifier
@@ -1941,15 +1932,15 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
-                title: CustomScript  
+                title: CustomScript
                 description: Provides list of client custom scripts.
                 type: array
-                items: 
+                items:
                   type: object
                   title: CustomScript
                   description: Custom script configuration.
@@ -1958,13 +1949,13 @@ paths:
                       type: string
                       description: Dn(Distinguished Name) of the script.
                     inum:
-                      type : string
+                      type: string
                       description: XRI i-number
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                     aliases:
-                      type: array                    
+                      type: array
                       items:
                         type: string
                     description:
@@ -2017,7 +2008,7 @@ paths:
                     configurationProperties:
                       type: array
                       description: List of configuration properties.
-                      items: 
+                      items:
                         type: object
                         properties:
                           value1:
@@ -2047,11 +2038,11 @@ paths:
                       type: boolean
                     internal:
                       type: boolean
-        500:
-          $ref: '#/components/responses/InternalServerError'                              
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-      - Custom scripts
+        - Custom scripts
       summary: Delete custom script.
       description: Delete custom script.
       operationId: delete-custom-scripts
@@ -2063,24 +2054,22 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: OK
           content: {}
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'                       
-                        
-                        
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /attributes:
     get:
       tags:
-      - Attribute
-      summary: Gets all  Gluu attributes filtered, active as well as inactive.
-      description: Gets all  Gluu attributes filtered, active as well as inactive.
+        - Attribute
+      summary: 'Gets all  Gluu attributes filtered, active as well as inactive.'
+      description: 'Gets all  Gluu attributes filtered, active as well as inactive.'
       operationId: attributes
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2088,40 +2077,40 @@ paths:
                 title: GluuAttributes
                 description: List of all attribute.
                 type: array
-                items: 
+                items:
                   type: object
                   title: GluuAttribute
                   description: Newly added attribute.
                   required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
+                    - inum
+                    - name
+                    - displayName
+                    - dataType
+                    - status
                   properties:
                     inum:
                       type: string
                       description: Unique id identifying the attribute
                     name:
-                      type : string
+                      type: string
                       description: Name of the attribute.
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                       items:
-                        type: string                  
+                        type: string
                     description:
-                      type: string 
+                      type: string
                       description: User friendly descriptive detail of attribute.
                     dataType:
                       type: string
                       description: Data Type of attribute.
                       enum:
-                      - STRING 
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE 
+                        - STRING
+                        - NUMERIC
+                        - BOOLEAN
+                        - BINARY
+                        - DATE
                     status:
                       type: string
                       description: Distingusihed Name
@@ -2185,11 +2174,11 @@ paths:
                           type: integer
                     gluuTooltip:
                       type: string
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-      - Attribute
+        - Attribute
       summary: Adds a new Gluu attribute.
       description: Adds a new Gluu attribute.
       operationId: post-attributes
@@ -2202,31 +2191,31 @@ paths:
               description: Newly added attribute.
               type: object
               required:
-              - name
-              - displayName
-              - dataType
-              - status
+                - name
+                - displayName
+                - dataType
+                - status
               properties:
                 name:
-                  type : string
+                  type: string
                   description: Name of the attribute.
-                  example: name, displayName,birthdate, email
+                  example: 'name, displayName,birthdate, email'
                 displayName:
-                  type : string
+                  type: string
                   items:
-                    type: string                  
+                    type: string
                 description:
-                  type: string 
+                  type: string
                   description: User friendly descriptive detail of attribute.
                 dataType:
                   type: string
                   description: Data Type of attribute.
                   enum:
-                  - STRING 
-                  - NUMERIC
-                  - BOOLEAN
-                  - BINARY
-                  - DATE 
+                    - STRING
+                    - NUMERIC
+                    - BOOLEAN
+                    - BINARY
+                    - DATE
                 status:
                   type: string
                   description: Distingusihed Name
@@ -2289,9 +2278,9 @@ paths:
                     maxLength:
                       type: integer
                 gluuTooltip:
-                      type: string
+                  type: string
       responses:
-        200:        
+        '200':
           description: OK
           content:
             application/json:
@@ -2300,35 +2289,35 @@ paths:
                 description: Newly added attribute.
                 type: object
                 required:
-                - inum
-                - name
-                - displayName
-                - dataType
-                - status
+                  - inum
+                  - name
+                  - displayName
+                  - dataType
+                  - status
                 properties:
                   inum:
                     type: string
                     description: Unique id identifying the attribute
                   name:
-                    type : string
+                    type: string
                     description: Name of the attribute.
-                    example: name, displayName,birthdate, email
+                    example: 'name, displayName,birthdate, email'
                   displayName:
-                    type : string
+                    type: string
                     items:
-                      type: string                  
+                      type: string
                   description:
-                    type: string 
+                    type: string
                     description: User friendly descriptive detail of attribute.
                   dataType:
                     type: string
                     description: Data Type of attribute.
                     enum:
-                    - STRING 
-                    - NUMERIC
-                    - BOOLEAN
-                    - BINARY
-                    - DATE 
+                      - STRING
+                      - NUMERIC
+                      - BOOLEAN
+                      - BINARY
+                      - DATE
                   status:
                     type: string
                     description: Distingusihed Name
@@ -2392,11 +2381,11 @@ paths:
                         type: integer
                   gluuTooltip:
                     type: string
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-      - Attribute
+        - Attribute
       summary: Updates an existing attribute.
       description: Updates an existing attribute.
       operationId: put-attributes
@@ -2409,35 +2398,35 @@ paths:
               description: Attribute details
               type: object
               required:
-              - inum
-              - name
-              - displayName
-              - dataType
-              - status
+                - inum
+                - name
+                - displayName
+                - dataType
+                - status
               properties:
                 inum:
                   type: string
                   description: Unique id identifying the attribute
                 name:
-                  type : string
+                  type: string
                   description: Name of the attribute.
-                  example: name, displayName,birthdate, email
+                  example: 'name, displayName,birthdate, email'
                 displayName:
-                  type : string
+                  type: string
                   items:
-                    type: string                  
+                    type: string
                 description:
-                  type: string 
+                  type: string
                   description: User friendly descriptive detail of attribute.
                 dataType:
                   type: string
                   description: Data Type of attribute.
                   enum:
-                  - STRING 
-                  - NUMERIC
-                  - BOOLEAN
-                  - BINARY
-                  - DATE 
+                    - STRING
+                    - NUMERIC
+                    - BOOLEAN
+                    - BINARY
+                    - DATE
                 status:
                   type: string
                   description: Distingusihed Name
@@ -2502,7 +2491,7 @@ paths:
                 gluuTooltip:
                   type: string
       responses:
-        200:        
+        '200':
           description: OK
           content:
             application/json:
@@ -2511,35 +2500,35 @@ paths:
                 description: Updated attribute object.
                 type: object
                 required:
-                - inum
-                - name
-                - displayName
-                - dataType
-                - status
+                  - inum
+                  - name
+                  - displayName
+                  - dataType
+                  - status
                 properties:
                   inum:
                     type: string
                     description: Unique id identifying the attribute
                   name:
-                    type : string
+                    type: string
                     description: Name of the attribute.
-                    example: name, displayName,birthdate, email
+                    example: 'name, displayName,birthdate, email'
                   displayName:
-                    type : string
+                    type: string
                     items:
-                      type: string                  
+                      type: string
                   description:
-                    type: string 
+                    type: string
                     description: User friendly descriptive detail of attribute.
                   dataType:
                     type: string
                     description: Data Type of attribute.
                     enum:
-                    - STRING 
-                    - NUMERIC
-                    - BOOLEAN
-                    - BINARY
-                    - DATE 
+                      - STRING
+                      - NUMERIC
+                      - BOOLEAN
+                      - BINARY
+                      - DATE
                   status:
                     type: string
                     description: Distingusihed Name
@@ -2603,41 +2592,41 @@ paths:
                         type: integer
                   gluuTooltip:
                     type: string
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError' 
-  /attributes/{inum}:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/attributes/{inum}':
     delete:
       tags:
-      - Attribute
-      summary: Deletes an attribute identified inum. 
+        - Attribute
+      summary: Deletes an attribute identified inum.
       description: Deletes an attribute identified inum.
-      operationId: delete-attributes/{inum}
+      operationId: 'delete-attributes/{inum}'
       parameters:
         - name: inum
           in: path
           required: true
           description: Attribute ID.
           schema:
-            type : string
+            type: string
       responses:
-        200:
+        '200':
           description: OK
           content: {}
-        404:
-          $ref: '#/components/responses/NotFound'        
-        500:
-          $ref: '#/components/responses/InternalServerError' 
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /attributes/active:
     get:
       tags:
-      - Attribute
+        - Attribute
       summary: Get all active attributes.
       description: Gets all active attributes
       operationId: attributes-active
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2645,40 +2634,40 @@ paths:
                 title: GluuAttributes
                 description: List of active attribute.
                 type: array
-                items: 
+                items:
                   type: object
                   title: GluuAttribute
                   description: Newly added attribute.
                   required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
+                    - inum
+                    - name
+                    - displayName
+                    - dataType
+                    - status
                   properties:
                     inum:
                       type: string
                       description: Unique id identifying the attribute
                     name:
-                      type : string
+                      type: string
                       description: Name of the attribute.
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                       items:
-                        type: string                  
+                        type: string
                     description:
-                      type: string 
+                      type: string
                       description: User friendly descriptive detail of attribute.
                     dataType:
                       type: string
                       description: Data Type of attribute.
                       enum:
-                      - STRING 
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE 
+                        - STRING
+                        - NUMERIC
+                        - BOOLEAN
+                        - BINARY
+                        - DATE
                     status:
                       type: string
                       description: Distingusihed Name
@@ -2742,17 +2731,17 @@ paths:
                           type: integer
                     gluuTooltip:
                       type: string
-        500:
-          $ref: '#/components/responses/InternalServerError' 
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /attributes/inactive:
     get:
       tags:
-      - Attribute
+        - Attribute
       summary: Get all inactive attributes.
       description: Gets all inactive attributes
       operationId: attributes-inactive
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -2760,40 +2749,40 @@ paths:
                 title: GluuAttributes
                 description: List of inactive attributes.
                 type: array
-                items: 
+                items:
                   type: object
                   title: GluuAttribute
                   description: Newly added attribute.
                   required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
+                    - inum
+                    - name
+                    - displayName
+                    - dataType
+                    - status
                   properties:
                     inum:
                       type: string
                       description: Unique id identifying the attribute
                     name:
-                      type : string
+                      type: string
                       description: Name of the attribute.
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                       items:
-                        type: string                  
+                        type: string
                     description:
-                      type: string 
+                      type: string
                       description: User friendly descriptive detail of attribute.
                     dataType:
                       type: string
                       description: Data Type of attribute.
                       enum:
-                      - STRING 
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE 
+                        - STRING
+                        - NUMERIC
+                        - BOOLEAN
+                        - BINARY
+                        - DATE
                     status:
                       type: string
                       description: Distingusihed Name
@@ -2856,62 +2845,62 @@ paths:
                         maxLength:
                           type: integer
                     gluuTooltip:
-                      type: string                 
-        500:
-          $ref: '#/components/responses/InternalServerError' 
-  /attributes/attribute/{inum}:
+                      type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/attributes/attribute/{inum}':
     get:
       tags:
-      - Attribute
-      summary: Gets attribute by inum 
-      description: Gets attribute by inum 
-      operationId: attributes/attribute/{inum}
+        - Attribute
+      summary: Gets attribute by inum
+      description: Gets attribute by inum
+      operationId: 'attributes/attribute/{inum}'
       parameters:
         - name: inum
           in: path
           required: true
           description: Attribute ID.
           schema:
-            type : string
+            type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 title: GluuAttribute
-                description: Gluu Server attribute coreesponding to the identifier{inum}
+                description: 'Gluu Server attribute coreesponding to the identifier{inum}'
                 type: object
                 required:
-                - inum
-                - name
-                - displayName
-                - dataType
-                - status
+                  - inum
+                  - name
+                  - displayName
+                  - dataType
+                  - status
                 properties:
                   inum:
                     type: string
                     description: Unique id identifying the attribute
                   name:
-                    type : string
+                    type: string
                     description: Name of the attribute.
-                    example: name, displayName,birthdate, email
+                    example: 'name, displayName,birthdate, email'
                   displayName:
-                    type : string
+                    type: string
                     items:
-                      type: string                  
+                      type: string
                   description:
-                    type: string 
+                    type: string
                     description: User friendly descriptive detail of attribute.
                   dataType:
                     type: string
                     description: Data Type of attribute.
                     enum:
-                    - STRING 
-                    - NUMERIC
-                    - BOOLEAN
-                    - BINARY
-                    - DATE 
+                      - STRING
+                      - NUMERIC
+                      - BOOLEAN
+                      - BINARY
+                      - DATE
                   status:
                     type: string
                     description: Distingusihed Name
@@ -2975,14 +2964,14 @@ paths:
                         type: integer
                   gluuTooltip:
                     type: string
-        500:
-          $ref: '#/components/responses/InternalServerError' 
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /attributes/search:
     get:
       tags:
-      - Attribute
-      summary: Search attributes by pattern , and specify the max size of the results to return.
-      description: Search attributes by pattern , and specify the max size of the results to return.
+        - Attribute
+      summary: 'Search attributes by pattern , and specify the max size of the results to return.'
+      description: 'Search attributes by pattern , and specify the max size of the results to return.'
       operationId: attributes-search
       parameters:
         - name: pattern
@@ -2990,56 +2979,56 @@ paths:
           required: true
           description: Serach pattern.
           schema:
-            type : string
+            type: string
         - name: size
           in: query
           required: true
           description: Serach size -  max size of the results to return.
           schema:
-            type : integer
+            type: integer
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 title: GluuAttributes
-                description: List of attributes with either of \"displayName\", \"description\" and \"gluuAttribute\" matching the specified partner.
+                description: 'List of attributes with either of \"displayName\", \"description\" and \"gluuAttribute\" matching the specified partner.'
                 type: array
-                items: 
+                items:
                   type: object
                   title: GluuAttribute
                   description: Attribute details
                   required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
+                    - inum
+                    - name
+                    - displayName
+                    - dataType
+                    - status
                   properties:
                     inum:
                       type: string
                       description: Unique id identifying the attribute
                     name:
-                      type : string
+                      type: string
                       description: Name of the attribute.
-                      example: name, displayName,birthdate, email
+                      example: 'name, displayName,birthdate, email'
                     displayName:
-                      type : string
+                      type: string
                       items:
-                        type: string                  
+                        type: string
                     description:
-                      type: string 
+                      type: string
                       description: User friendly descriptive detail of attribute.
                     dataType:
                       type: string
                       description: Data Type of attribute.
                       enum:
-                      - STRING 
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE 
+                        - STRING
+                        - NUMERIC
+                        - BOOLEAN
+                        - BINARY
+                        - DATE
                     status:
                       type: string
                       description: Distingusihed Name
@@ -3103,17 +3092,17 @@ paths:
                           type: integer
                     gluuTooltip:
                       type: string
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /acrs:
     get:
       tags:
-      - Authentication
+        - Authentication
       summary: Gets default authentication method.
       description: Gets default authentication method.
       operationId: get-acrs
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3121,16 +3110,16 @@ paths:
                 title: AuthenticationMethod
                 description: Default Authentication Method.
                 type: object
-                properties: 
+                properties:
                   defaultAcr:
                     type: string
                   oxtrustAcr:
                     type: string
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
     put:
       tags:
-      - Authentication
+        - Authentication
       summary: Updates default authentication method.
       description: Updates default authentication method.
       operationId: put-acrs
@@ -3141,13 +3130,13 @@ paths:
               title: AuthenticationMethod
               description: Authentication Method to be updated as default.
               type: object
-              properties: 
+              properties:
                 defaultAcr:
                   type: string
                 oxtrustAcr:
                   type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3155,22 +3144,22 @@ paths:
                 title: AuthenticationMethod
                 description: Updated Authentication Method.
                 type: object
-                properties: 
+                properties:
                   defaultAcr:
                     type: string
                   oxtrustAcr:
                     type: string
-        500:
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /configuration/ldap:
     get:
       tags:
-      - LDAP configuration
+        - LDAP configuration
       summary: Gets an existing LDAP configuration.
       description: Gets an existing LDAP configuration.
       operationId: get-configuration-ldap
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3181,60 +3170,60 @@ paths:
                 items:
                   type: object
                   required:
-                  - configId
-                  - bindDN
-                  - bindPassword
-                  - servers
-                  - baseDNs
-                  - primaryKey
-                  - localPrimaryKey
-                  properties: 
-                     configId:
-                       type: string
-                       description: Unique identifier
-                     bindDN:
-                       type: string
-                       description: User Distingusihed Name for binding. 
-                     bindPassword:
-                       type: string
-                       description: User password for binding.
-                     servers:
-                       type: array
-                       description: List of LDAP authentication servers.
-                       items:
-                         type: string
-                         description: Unique name of the authentication server and port number.
-                         example:  authserver.org:63
-                     maxConnections:
-                       type: integer
-                       description: Total number of simultaneous connections allowed.
-                     useSSL:
-                       type: boolean
-                     baseDNs:
-                       type: array
-                       description: list of LDAP base Distingusihed Name
-                       items:
-                         type: string
-                     primaryKey:
-                       type: string
-                       description: Used to search and bind operations in configured LDAP server.
-                       example: SAMAccountName,uid, email
-                     localPrimaryKey:
-                       type: string
-                       description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                       example: uid, email
-                     useAnonymousBind:
-                       type: boolean
-                       description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                     enabled:
-                       type: boolean
-                     level:
-                       type: integer                    
-        500:
+                    - configId
+                    - bindDN
+                    - bindPassword
+                    - servers
+                    - baseDNs
+                    - primaryKey
+                    - localPrimaryKey
+                  properties:
+                    configId:
+                      type: string
+                      description: Unique identifier
+                    bindDN:
+                      type: string
+                      description: User Distingusihed Name for binding.
+                    bindPassword:
+                      type: string
+                      description: User password for binding.
+                    servers:
+                      type: array
+                      description: List of LDAP authentication servers.
+                      items:
+                        type: string
+                        description: Unique name of the authentication server and port number.
+                        example: 'authserver.org:63'
+                    maxConnections:
+                      type: integer
+                      description: Total number of simultaneous connections allowed.
+                    useSSL:
+                      type: boolean
+                    baseDNs:
+                      type: array
+                      description: list of LDAP base Distingusihed Name
+                      items:
+                        type: string
+                    primaryKey:
+                      type: string
+                      description: Used to search and bind operations in configured LDAP server.
+                      example: 'SAMAccountName,uid, email'
+                    localPrimaryKey:
+                      type: string
+                      description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+                      example: 'uid, email'
+                    useAnonymousBind:
+                      type: boolean
+                      description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+                    enabled:
+                      type: boolean
+                    level:
+                      type: integer
+        '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       tags:
-      - LDAP configuration
+        - LDAP configuration
       summary: Adds a new LDAP configuration.
       description: Adds a new LDAP configuration.
       operationId: post-configuration-ldap
@@ -3246,20 +3235,20 @@ paths:
               type: object
               description: LDAP configuration to be added.
               required:
-              - configId
-              - bindDN
-              - bindPassword
-              - servers
-              - baseDNs
-              - primaryKey
-              - localPrimaryKey
-              properties: 
+                - configId
+                - bindDN
+                - bindPassword
+                - servers
+                - baseDNs
+                - primaryKey
+                - localPrimaryKey
+              properties:
                 configId:
                   type: string
                   description: Unique identifier
                 bindDN:
                   type: string
-                  description: User Distingusihed Name for binding.  
+                  description: User Distingusihed Name for binding.
                 bindPassword:
                   type: string
                   description: User password for binding.
@@ -3269,7 +3258,7 @@ paths:
                   items:
                     type: string
                     description: Unique name of the authentication server and port number.
-                    example:  authserver.org:63
+                    example: 'authserver.org:63'
                 maxConnections:
                   type: integer
                   description: Total number of simultaneous connections allowed.
@@ -3283,20 +3272,20 @@ paths:
                 primaryKey:
                   type: string
                   description: Used to search and bind operations in configured LDAP server.
-                  example: SAMAccountName,uid, email
+                  example: 'SAMAccountName,uid, email'
                 localPrimaryKey:
                   type: string
                   description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                  example: uid, email
+                  example: 'uid, email'
                 useAnonymousBind:
                   type: boolean
                   description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
                 enabled:
                   type: boolean
                 level:
-                  type: integer      
+                  type: integer
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3305,138 +3294,14 @@ paths:
                 description: Newly added LdapConfiguration.
                 type: object
                 required:
-                - configId
-                - bindDN
-                - bindPassword
-                - servers
-                - baseDNs
-                - primaryKey
-                - localPrimaryKey
-                properties: 
-                  configId:
-                    type: string
-                    description: Unique identifier
-                  bindDN:
-                    type: string
-                    description: User Distingusihed Name for binding. 
-                  bindPassword:
-                    type: string
-                    description: User password for binding. 
-                  servers:
-                    type: array
-                    description: List of LDAP authentication servers.
-                    items:
-                      type: string
-                      description: Unique name of the authentication server and port number.
-                      example:  authserver.org:63
-                  maxConnections:
-                    type: integer
-                    description: Total number of simultaneous connections allowed.
-                  useSSL:
-                    type: boolean
-                  baseDNs:
-                    type: array
-                    description: list of LDAP base Distingusihed Name
-                    items:
-                      type: string
-                  primaryKey:
-                    type: string
-                    description: Used to search and bind operations in configured LDAP server.
-                    example: SAMAccountName,uid, email
-                  localPrimaryKey:
-                    type: string
-                    description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                    example: uid, email
-                  useAnonymousBind:
-                    type: boolean
-                    description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                  enabled:
-                    type: boolean
-                  level:
-                    type: integer                    
-        500:
-          $ref: '#/components/responses/InternalServerError'
-    put:
-      tags:
-      - LDAP configuration
-      summary: Updates an existing LDAP configuration.
-      description: Updates an existing LDAP configuration.
-      operationId: put-configuration-ldap
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              description: Updated LDAP configuration.              
-              required:
-              - configId
-              - bindDN
-              - bindPassword
-              - servers
-              - baseDNs
-              - primaryKey
-              - localPrimaryKey
-              properties: 
-                configId:
-                  type: string
-                  description: Unique identifier
-                bindDN:
-                  type: string
-                  description: User Distingusihed Name for binding.  
-                bindPassword:
-                  type: string
-                  description: User password for binding.  
-                servers:
-                  type: array
-                  description: List of LDAP authentication servers.
-                  items:
-                    type: string
-                    description: Unique name of the authentication server and port number.
-                    example:  authserver.org:63
-                maxConnections:
-                  type: integer
-                  description: Total number of simultaneous connections allowed.
-                useSSL:
-                  type: boolean
-                baseDNs:
-                  type: array
-                  description: list of LDAP base Distingusihed Name
-                  items:
-                    type: string
-                primaryKey:
-                  type: string
-                  description: Used to search and bind operations in configured LDAP server.
-                  example: SAMAccountName,uid, email
-                localPrimaryKey:
-                  type: string
-                  description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                  example: uid, email
-                useAnonymousBind:
-                  type: boolean
-                  description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                enabled:
-                  type: boolean
-                level:
-                  type: integer      
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: LdapConfiguration
-                description: Updated LdapConfiguration.
-                type: object
-                required:
-                - configId
-                - bindDN
-                - bindPassword
-                - servers
-                - baseDNs
-                - primaryKey
-                - localPrimaryKey
-                properties: 
+                  - configId
+                  - bindDN
+                  - bindPassword
+                  - servers
+                  - baseDNs
+                  - primaryKey
+                  - localPrimaryKey
+                properties:
                   configId:
                     type: string
                     description: Unique identifier
@@ -3452,7 +3317,7 @@ paths:
                     items:
                       type: string
                       description: Unique name of the authentication server and port number.
-                      example:  authserver.org:63
+                      example: 'authserver.org:63'
                   maxConnections:
                     type: integer
                     description: Total number of simultaneous connections allowed.
@@ -3466,38 +3331,162 @@ paths:
                   primaryKey:
                     type: string
                     description: Used to search and bind operations in configured LDAP server.
-                    example: SAMAccountName,uid, email
+                    example: 'SAMAccountName,uid, email'
                   localPrimaryKey:
                     type: string
                     description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                    example: uid, email
+                    example: 'uid, email'
                   useAnonymousBind:
                     type: boolean
                     description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
                   enabled:
                     type: boolean
                   level:
-                    type: integer                    
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
+                    type: integer
+        '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap/{name}:
+    put:
+      tags:
+        - LDAP configuration
+      summary: Updates an existing LDAP configuration.
+      description: Updates an existing LDAP configuration.
+      operationId: put-configuration-ldap
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              description: Updated LDAP configuration.
+              required:
+                - configId
+                - bindDN
+                - bindPassword
+                - servers
+                - baseDNs
+                - primaryKey
+                - localPrimaryKey
+              properties:
+                configId:
+                  type: string
+                  description: Unique identifier
+                bindDN:
+                  type: string
+                  description: User Distingusihed Name for binding.
+                bindPassword:
+                  type: string
+                  description: User password for binding.
+                servers:
+                  type: array
+                  description: List of LDAP authentication servers.
+                  items:
+                    type: string
+                    description: Unique name of the authentication server and port number.
+                    example: 'authserver.org:63'
+                maxConnections:
+                  type: integer
+                  description: Total number of simultaneous connections allowed.
+                useSSL:
+                  type: boolean
+                baseDNs:
+                  type: array
+                  description: list of LDAP base Distingusihed Name
+                  items:
+                    type: string
+                primaryKey:
+                  type: string
+                  description: Used to search and bind operations in configured LDAP server.
+                  example: 'SAMAccountName,uid, email'
+                localPrimaryKey:
+                  type: string
+                  description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+                  example: 'uid, email'
+                useAnonymousBind:
+                  type: boolean
+                  description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+                enabled:
+                  type: boolean
+                level:
+                  type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: LdapConfiguration
+                description: Updated LdapConfiguration.
+                type: object
+                required:
+                  - configId
+                  - bindDN
+                  - bindPassword
+                  - servers
+                  - baseDNs
+                  - primaryKey
+                  - localPrimaryKey
+                properties:
+                  configId:
+                    type: string
+                    description: Unique identifier
+                  bindDN:
+                    type: string
+                    description: User Distingusihed Name for binding.
+                  bindPassword:
+                    type: string
+                    description: User password for binding.
+                  servers:
+                    type: array
+                    description: List of LDAP authentication servers.
+                    items:
+                      type: string
+                      description: Unique name of the authentication server and port number.
+                      example: 'authserver.org:63'
+                  maxConnections:
+                    type: integer
+                    description: Total number of simultaneous connections allowed.
+                  useSSL:
+                    type: boolean
+                  baseDNs:
+                    type: array
+                    description: list of LDAP base Distingusihed Name
+                    items:
+                      type: string
+                  primaryKey:
+                    type: string
+                    description: Used to search and bind operations in configured LDAP server.
+                    example: 'SAMAccountName,uid, email'
+                  localPrimaryKey:
+                    type: string
+                    description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+                    example: 'uid, email'
+                  useAnonymousBind:
+                    type: boolean
+                    description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+                  enabled:
+                    type: boolean
+                  level:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/configuration/ldap/{name}':
     delete:
       tags:
-      - LDAP configuration
+        - LDAP configuration
       summary: Deletes an existing LDAP configuration.
       description: Deletes existing LDAP configuration.
-      operationId: delete-configuration-ldap/{name}
+      operationId: 'delete-configuration-ldap/{name}'
       parameters:
         - name: name
           in: path
           required: true
           description: Name of the LDAP configuration.
           schema:
-            type : string   
+            type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3508,61 +3497,61 @@ paths:
                 items:
                   type: object
                   required:
-                  - configId
-                  - bindDN
-                  - bindPassword
-                  - servers
-                  - baseDNs
-                  - primaryKey
-                  - localPrimaryKey
-                  properties: 
-                     configId:
-                       type: string
-                       description: Unique identifier
-                     bindDN:
-                       type: string
-                       description: User Distingusihed Name for binding. 
-                     bindPassword:
-                       type: string
-                       description: User password for binding. 
-                     servers:
-                       type: array
-                       description: List of LDAP authentication servers.
-                       items:
-                         type: string
-                         description: Unique name of the authentication server and port number.
-                         example:  authserver.org:63
-                     maxConnections:
-                       type: integer
-                       description: Total number of simultaneous connections allowed.
-                     useSSL:
-                       type: boolean
-                     baseDNs:
-                       type: array
-                       description: list of LDAP base Distingusihed Name
-                       items:
-                         type: string
-                     primaryKey:
-                       type: string
-                       description: Used to search and bind operations in configured LDAP server.
-                       example: SAMAccountName,uid, email
-                     localPrimaryKey:
-                       type: string
-                       description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                       example: uid, email
-                     useAnonymousBind:
-                       type: boolean
-                       description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                     enabled:
-                       type: boolean
-                     level:
-                       type: integer      
-        500:
+                    - configId
+                    - bindDN
+                    - bindPassword
+                    - servers
+                    - baseDNs
+                    - primaryKey
+                    - localPrimaryKey
+                  properties:
+                    configId:
+                      type: string
+                      description: Unique identifier
+                    bindDN:
+                      type: string
+                      description: User Distingusihed Name for binding.
+                    bindPassword:
+                      type: string
+                      description: User password for binding.
+                    servers:
+                      type: array
+                      description: List of LDAP authentication servers.
+                      items:
+                        type: string
+                        description: Unique name of the authentication server and port number.
+                        example: 'authserver.org:63'
+                    maxConnections:
+                      type: integer
+                      description: Total number of simultaneous connections allowed.
+                    useSSL:
+                      type: boolean
+                    baseDNs:
+                      type: array
+                      description: list of LDAP base Distingusihed Name
+                      items:
+                        type: string
+                    primaryKey:
+                      type: string
+                      description: Used to search and bind operations in configured LDAP server.
+                      example: 'SAMAccountName,uid, email'
+                    localPrimaryKey:
+                      type: string
+                      description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+                      example: 'uid, email'
+                    useAnonymousBind:
+                      type: boolean
+                      description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+                    enabled:
+                      type: boolean
+                    level:
+                      type: integer
+        '500':
           $ref: '#/components/responses/InternalServerError'
   /configuration/ldap/status:
     post:
       tags:
-      - LDAP configuration
+        - LDAP configuration
       summary: Fetches LDAP connection status.
       description: Fetches LDAP connection status.
       operationId: post-configuration-ldap-status
@@ -3574,28 +3563,28 @@ paths:
               type: object
               description: LdapConnectionData.
               required:
-              - bindDN
-              - bindPassword
-              - servers
-              - useSSL
-              properties: 
+                - bindDN
+                - bindPassword
+                - servers
+                - useSSL
+              properties:
                 bindDN:
                   type: string
-                  description: User Distingusihed Name for binding. 
+                  description: User Distingusihed Name for binding.
                 bindPassword:
                   type: string
-                  description: User password for binding. 
+                  description: User password for binding.
                 servers:
                   type: array
                   description: List of LDAP authentication servers.
                   items:
                     type: string
                     description: Unique name of the authentication server and port number.
-                    example:  authserver.org:63               
+                    example: 'authserver.org:63'
                 useSSL:
-                  type: boolean               
+                  type: boolean
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3604,30 +3593,30 @@ paths:
                 description: LDAP ConnectionStatus object.
                 type: object
                 required:
-                - isUp
+                  - isUp
                 properties:
-                 isUp:
-                   type: boolean
-                   description: Boolean value indicating the status of LDAP connection.
-                   example: true for connection up and running
-        500:
+                  isUp:
+                    type: boolean
+                    description: Boolean value indicating the status of LDAP connection.
+                    example: true for connection up and running
+        '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap/{name}/status:
+  '/configuration/ldap/{name}/status':
     get:
       tags:
-      - LDAP configuration
+        - LDAP configuration
       summary: Fetches the LDAP connection status based on name.
       description: Fetches LDAP connection status.
-      operationId: get-configuration-ldap-{name}-status
+      operationId: 'get-configuration-ldap-{name}-status'
       parameters:
-       - name: name
-         in: path
-         required: true
-         description: Name of the LDAP configuration.
-         schema:
-           type : string 
+        - name: name
+          in: path
+          required: true
+          description: Name of the LDAP configuration.
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -3636,62 +3625,252 @@ paths:
                 description: LDAP ConnectionStatus object.
                 type: object
                 required:
-                - isUp
+                  - isUp
                 properties:
-                 isUp:
-                   type: boolean
-                   description: Boolean value indicating the status of LDAP connection.
-                   example: true for connection up and running
-        500:
-          $ref: '#/components/responses/InternalServerError' 
-          
-components: 
+                  isUp:
+                    type: boolean
+                    description: Boolean value indicating the status of LDAP connection.
+                    example: true for connection up and running
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/graphics/logo:
+    get:
+      summary: Retrieve organization logo details.
+      tags:
+        - Graphics
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logoLocation:
+                    type: string
+                    description: Directory name for the images and logos that are used.
+                required:
+                  - logoLocation
+        '500':
+          description: Internal Server Error
+      operationId: get-config-graphics-logo
+      description: Retrieve organization logo details.
+    delete:
+      summary: ''
+      operationId: delete-config-graphics-logo
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Delete organization logo
+      tags:
+        - Graphics
+    post:
+      summary: ''
+      operationId: post-config-graphics-logo
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      description: Add organization logo details.
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - logoLocation
+        description: Organization logo details.
+    put:
+      summary: ''
+      operationId: put-config-graphics-logo
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Update organization logo details.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '':
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - ''
+        description: Organization logo details.
+    patch:
+      summary: ''
+      operationId: patch-config-graphics-logo
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      description: Patch organization logo details.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - logoLocation
+  /config/graphics/favicon:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Graphics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  faviconPath:
+                    type: string
+                    description: Directory name for the images and favicon that are used.
+                required:
+                  - faviconPath
+        '500':
+          description: Internal Server Error
+      operationId: get-config-graphics-favicon
+      description: Retrieve organization favicon
+    delete:
+      summary: ''
+      operationId: delete-config-graphics-favicon
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Delete organization favicon
+      tags:
+        - Graphics
+    patch:
+      summary: ''
+      operationId: patch-config-graphics-favicon
+      responses:
+        '200':
+          description: OK
+      description: Details of organization favicon.
+    put:
+      summary: ''
+      operationId: put-config-graphics-favicon
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Update organization logo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - faviconPath
+        description: Details of organization favicon to be updated.
+      tags:
+        - Graphics
+    post:
+      summary: ''
+      operationId: post-config-graphics-favicon
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      description: Add organization favicon
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - faviconPath
+        description: Details of organization favicon.
+      tags:
+        - Graphics
+components:
   responses:
-    Found: #302 - FOUND
-      description: Resource Found. 
+    Found:
+      description: Resource Found.
       content: {}
-    InvalidRequest: #400 - BAD_REQUEST
-      description: Invalid parameters are provided to endpoint. 
+    InvalidRequest:
+      description: Invalid parameters are provided to endpoint.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'  
-    Unauthorized: #401 - UNAUTHORIZED
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
       description: Unauthorized access request.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    AccessDenied: #403 - FORBIDDEN
-          description: Invalid details provided hence access denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    NotFound: #404 - NOT_FOUND
-          description: Resource Not Found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    NotAcceptable: #406 - NOT_ACCEPTABLE
-          description: Request Not Acceptable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    InternalServerError: #500 - INTERNAL_SERVER_ERROR
+    AccessDenied:
+      description: Invalid details provided hence access denied.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource Not Found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotAcceptable:
+      description: Request Not Acceptable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
       description: Internal error occured. Please check log file for details.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-     
-  schemas:  
+  schemas:
     ErrorResponse:
       required:
-      - error
-      - error_description
+        - error
+        - error_description
       type: object
       properties:
         error:
