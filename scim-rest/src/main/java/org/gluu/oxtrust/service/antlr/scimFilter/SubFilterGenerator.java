@@ -1,8 +1,3 @@
-/*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
- *
- * Copyright (c) 2019, Gluu
- */
 package org.gluu.oxtrust.service.antlr.scimFilter;
 
 import org.gluu.oxtrust.model.scim2.AttributeDefinition.Type;
@@ -74,7 +69,7 @@ public class SubFilterGenerator {
 
         } else if (Type.DATETIME.equals(attrType)) {
             compValue = compValue.substring(1, compValue.length() - 1);
-            //Dates dol not have characters to escape...
+            //Dates do not have characters to escape...
             filth = getSubFilterDateTime(subAttribute, attribute, compValue, operator, multiValued);
 
         }
@@ -94,8 +89,9 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute=value
                     //attribute="value"
-                    subfilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attribute), 
-                    		ldapBackend ? value : value.toLowerCase()).multiValued(multivalued);
+                    subfilter = Filter.createEqualityFilter(//Filter.createLowercaseFilter(attribute), 
+                    		//ldapBackend ? value : value.toLowerCase()
+                    		attribute, value).multiValued(multivalued);
                 } else {
                     //attribute=*"subattribute":"value"*
                     //attribute LIKE "%\"subAttribute\":\"value\"%"
@@ -276,7 +272,7 @@ public class SubFilterGenerator {
             subfilter = negateIf(subfilter, operator.equals(ScimOperator.NOT_EQUAL));
 
         } else {
-            error = FilterUtil.getOperatorInconsistencyError(operator.getValue(), Type.BOOLEAN.toString(), subAttribute);
+            error = FilterUtil.getOperatorInconsistencyError(operator.getValue(), Type.BOOLEAN.toString(), attribute);
         }
         return subfilter;
 
@@ -344,7 +340,7 @@ public class SubFilterGenerator {
                 }
                 break;
             default:
-                error = FilterUtil.getOperatorInconsistencyError(operator.getValue(), Type.DATETIME.toString(), subAttribute);
+                error = FilterUtil.getOperatorInconsistencyError(operator.getValue(), Type.DATETIME.toString(), attribute);
         }
 
         return subfilter;
