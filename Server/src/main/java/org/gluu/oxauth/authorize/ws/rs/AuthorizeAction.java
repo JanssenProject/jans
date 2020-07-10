@@ -320,8 +320,12 @@ public class AuthorizeAction {
 
             boolean enableRedirect = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false); 
             if (!enableRedirect && redirectTo.toLowerCase().endsWith("xhtml")) {
-            	authenticator.prepareAuthenticationForStep(unauthenticatedSession);
-            	facesService.renderView(redirectTo);
+            	if (redirectTo.toLowerCase().endsWith("postlogin.xhtml")) {
+                	authenticator.authenticateWithOutcome();
+            	} else {
+	            	authenticator.prepareAuthenticationForStep(unauthenticatedSession);
+	            	facesService.renderView(redirectTo);
+            	}
             } else {
             	facesService.redirectWithExternal(redirectTo, loginParameters);
             }
