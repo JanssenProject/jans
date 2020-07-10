@@ -92,7 +92,7 @@
 									 style="background-color: #00BE79; color:white;"
 									 styleClass="btn device-authz-init-btn" value="#{msgs['device.authorization.init.new.request.msg']}"
 									 iconAwesome="fa-sign-in" onclick="initNewRequest()">
-						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.init}" />
+						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.initializeSession(true)}" />
 					</h:commandButton>
 				</h:panelGroup>
 			</div>
