@@ -299,7 +299,9 @@ public class SessionIdService {
         String sessionId = cookieService.getSessionIdFromCookie();
 
         if (StringHelper.isEmpty(sessionId)) {
-        	sessionId = identity.getSessionId().getId();
+        	if (identity.getSessionId() != null) {
+        		sessionId = identity.getSessionId().getId();
+        	}
         }
 
         if (StringHelper.isNotEmpty(sessionId)) {
