@@ -99,7 +99,7 @@ public class DeviceAuthorizationAction implements Serializable {
      */
     public void processUserCodeVerification() {
         if (!preventBruteForcing()) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.expired.code.msg"));
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
             return;
         }
 
