@@ -78,7 +78,7 @@ public class FilterListener extends ScimFilterBaseListener {
                 }
             } else {
                 attrType = attrAnnot.type();
-                multiValued = attrAnnot.multiValueClass().equals(NullType.class);
+                multiValued = !attrAnnot.multiValueClass().equals(NullType.class);
                 Pair<String, Boolean> pair = FilterUtil.getLdapAttributeOfResourceAttribute(path, resourceClass);
                 ldapAttribute = pair.getFirst();
                 isNested = pair.getSecond();
