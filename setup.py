@@ -2543,11 +2543,12 @@ class Setup(object):
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
         
-        passport_modules_archive = os.path.join(self.distGluuFolder, 'passport-%s-node_modules.tar.gz' % self.githubBranchName)
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
         self.run([self.cmd_mkdir, '-p', modules_target_dir])
 
-        if os.path.exists(passport_modules_archive):
+        node_modules_list = glob.glob(os.path.join(self.distGluuFolder,  'passport*node_modules*'))
+        if node_modules_list:
+            passport_modules_archive = max(node_modules_list)
             self.logIt("Extracting passport node modules")
             self.run(['tar', '--strip', '1', '-xzf', passport_modules_archive, '-C', modules_target_dir, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         else:
@@ -2563,12 +2564,13 @@ class Setup(object):
                 self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
                 self.logIt(traceback.format_exc(), True)
 
+        
         # Create logs folder
-        self.run([self.cmd_mkdir, '-p', '%s/server/logs' % self.gluu_passport_base])
+        self.run([self.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base,'logs')])
         
         #create empty log file
-        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
-        open(log_file,'w')
+        log_file = os.path.join(self.gluu_passport_base, 'logs/start.log')
+        open(log_file,'w').close()
 
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
