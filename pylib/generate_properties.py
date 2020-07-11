@@ -533,7 +533,10 @@ def generate_properties(as_dict=False):
     setup_prop['state'] = ssl_subj['ST']
     setup_prop['city'] = ssl_subj['L']
     setup_prop['city'] = ssl_subj['L']
-    setup_prop['oxtrust_admin_password'] = setup_prop['ldapPass']
+    if 'ldapPass' in setup_prop:
+        setup_prop['oxtrust_admin_password'] = setup_prop['ldapPass']
+    elif 'cb_password' in setup_prop:
+            setup_prop['oxtrust_admin_password'] = setup_prop['cb_password']
 
     if not 'orgName' in setup_prop:
         setup_prop['orgName'] = ssl_subj['O']
