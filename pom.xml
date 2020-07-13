@@ -5,7 +5,7 @@
 	<groupId>org.gluu</groupId>
 	<artifactId>oxnotify</artifactId>
 	<packaging>pom</packaging>
-	<version>4.2.0-SNAPSHOT</version>
+	<version>4.3.0-SNAPSHOT</version>
 	<name>oxNotify</name>
 	<url>http://ox.gluu.org</url>
 
@@ -49,7 +49,7 @@
             <dependency>
                 <groupId>org.gluu</groupId>
                 <artifactId>gluu-core-bom</artifactId>
-                <version>4.2.0-SNAPSHOT</version>
+                <version>4.3.0-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
