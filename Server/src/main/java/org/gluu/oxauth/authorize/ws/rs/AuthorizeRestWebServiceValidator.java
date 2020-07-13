@@ -253,10 +253,10 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, String state,
-                                      String userCode, HttpServletRequest httpRequest) {
-        if (StringUtils.isNotBlank(userCode)) {
+                                      String deviceAuthzUserCode, HttpServletRequest httpRequest) {
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
             DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = deviceAuthorizationService
-                    .getDeviceAuthzByUserCode(userCode);
+                    .getDeviceAuthzByUserCode(deviceAuthzUserCode);
             redirectUri = deviceAuthorizationService.getDeviceAuthorizationPage(deviceAuthorizationCacheControl, client, state, httpRequest);
         } else {
             redirectUri = redirectionUriService.validateRedirectionUri(client, redirectUri);
