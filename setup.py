@@ -4847,7 +4847,10 @@ class Setup(object):
                 self.logIt("Creating couchbase readonly user for shib")
                 self.cbm.create_user(shib_user, shib_user_password, 'Shibboleth IDP', shib_user_roles)
             else:
-                self.post_messages.append('{}Please create a user on Couchbase Server with the following credidentals and roles{}'.format(gluu_utils.colors.WARNING, gluu_utils.colors.ENDC))
+                user_role_msg = "Please create a user on Couchbase Server with the following credidentals and roles"
+                if not thread_queue:
+                    user_role_msg = gluu_utils.colors.WARNING + user_role_msg + gluu_utils.colors.ENDC
+                self.post_messages.append(user_role_msg)
                 self.post_messages.append('Username: {}'.format(shib_user))
                 self.post_messages.append('Password: {}'.format(shib_user_password))
                 self.post_messages.append('Roles: {}'.format(shib_user_roles))
