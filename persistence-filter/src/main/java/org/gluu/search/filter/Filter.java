@@ -200,6 +200,22 @@ public class Filter {
     }
 
     @Override
+	protected Filter clone() {
+    	Filter clonedFilter = new Filter(type);
+
+    	clonedFilter.filters = this.filters;
+    	clonedFilter.filterString = this.filterString;
+    	clonedFilter.attributeName = this.attributeName;
+    	clonedFilter.assertionValue = this.assertionValue;
+    	clonedFilter.subInitial = this.subInitial;
+    	clonedFilter.subAny = this.subAny;
+    	clonedFilter.subFinal = this.subFinal;
+    	clonedFilter.multiValued = this.multiValued;
+
+    	return clonedFilter;
+	}
+
+	@Override
     public String toString() {
         if (FilterType.RAW == this.type) {
             return this.filterString;
