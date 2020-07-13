@@ -21,6 +21,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+try:
+    import warnings
+    warnings.filterwarnings("ignore")
+except:
+    pass
 
 import readline
 import sys
@@ -1040,7 +1045,7 @@ class Setup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on" if action=='enable' else 'off'])
                 
-        elif self.os_type+self.os_version in ('ubuntu18','debian9','debian10'):
+        elif self.os_type+self.os_version in ('ubuntu20', 'ubuntu18','debian9','debian10'):
             self.run([self.systemctl, action, serviceName])
                 
         elif self.os_type in ['ubuntu', 'debian']:
@@ -1746,7 +1751,7 @@ class Setup(object):
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(self.service_requirements[serviceName][1], 100 - self.service_requirements[serviceName][1])
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu20', 'ubuntu18','debian9','debian10')):
             service_init_script_fn = os.path.join(self.distFolder, 'scripts', serviceName)
         else:
             service_init_script_fn = os.path.join('/etc/init.d', serviceName)
@@ -2538,11 +2543,12 @@ class Setup(object):
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
         
-        passport_modules_archive = os.path.join(self.distGluuFolder, 'passport-%s-node_modules.tar.gz' % self.githubBranchName)
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
         self.run([self.cmd_mkdir, '-p', modules_target_dir])
 
-        if os.path.exists(passport_modules_archive):
+        node_modules_list = glob.glob(os.path.join(self.distGluuFolder,  'passport*node_modules*'))
+        if node_modules_list:
+            passport_modules_archive = max(node_modules_list)
             self.logIt("Extracting passport node modules")
             self.run(['tar', '--strip', '1', '-xzf', passport_modules_archive, '-C', modules_target_dir, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         else:
@@ -2558,12 +2564,13 @@ class Setup(object):
                 self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
                 self.logIt(traceback.format_exc(), True)
 
+        
         # Create logs folder
-        self.run([self.cmd_mkdir, '-p', '%s/server/logs' % self.gluu_passport_base])
+        self.run([self.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base,'logs')])
         
         #create empty log file
-        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
-        open(log_file,'w')
+        log_file = os.path.join(self.gluu_passport_base, 'logs/start.log')
+        open(log_file,'w').close()
 
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
@@ -3704,7 +3711,7 @@ class Setup(object):
             os.remove(self.ldapPassFn)
 
     def install_opendj(self):
-        self.logIt("Running OpenDJ Setup")
+        self.logIt("Running WrenDS Setup")
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
@@ -3733,7 +3740,7 @@ class Setup(object):
         #Append self.jre_home to OpenDj java.properties        
         opendj_java_properties_fn = os.path.join(self.ldapBaseFolder, 'config/java.properties')
 
-        self.logIt("append self.jre_home to OpenDj %s" % opendj_java_properties_fn)
+        self.logIt("append self.jre_home to WrenDS %s" % opendj_java_properties_fn)
         with open(opendj_java_properties_fn,'a') as f:
             f.write('\ndefault.java-home={}\n'.format(self.jre_home))
 
@@ -3749,11 +3756,11 @@ class Setup(object):
         try:
             os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
-            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
+            self.logIt("Error deleting WrenDS properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
             self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
-        self.logIt("Configuring OpenDJ")
+        self.logIt("Configuring WrenDS")
 
         opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
         config_changes = [
@@ -3804,14 +3811,14 @@ class Setup(object):
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
-        self.logIt("Getting OpenDJ certificate")
+        self.logIt("Getting WrenDS certificate")
 
         opendj_cert = ssl.get_server_certificate((self.ldap_hostname, self.ldaps_port))
         with open(self.opendj_cert_fn,'w') as w:
             w.write(opendj_cert)
 
         # Convert OpenDJ certificate to PKCS12
-        self.logIt("Importing OpenDJ certificate to truststore")
+        self.logIt("Importing WrenDS certificate to truststore")
         self.run([self.cmd_keytool,
                   '-importcert',
                   '-noprompt',
@@ -3828,14 +3835,14 @@ class Setup(object):
                   ])
 
         # Import OpenDJ certificate into java truststore
-        self.logIt("Import OpenDJ certificate")
+        self.logIt("Import WrenDS certificate")
 
         self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
                   "-file", self.opendj_cert_fn, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
     def import_ldif_template_opendj(self, ldif):
-        self.logIt("Importing LDIF file '%s' into OpenDJ" % ldif)
+        self.logIt("Importing LDIF file '%s' into WrenDS" % ldif)
         realInstallDir = os.path.realpath(self.outputFolder)
 
         ldif_file_fullpath = os.path.realpath(ldif)
@@ -3927,38 +3934,39 @@ class Setup(object):
             for attrDict in index_json:
                 attr_name = attrDict['attribute']
                 index_types = attrDict['index']
-                for index_type in index_types:
-                    backend_names = attrDict['backend']
-                    for backend_name in backend_names:
-                        if (backend_name == backend):
-                            self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                            indexCmd = " ".join([
-                                                 self.ldapDsconfigCommand,
-                                                 index_command,
-                                                 '--backend-name',
-                                                 backend,
-                                                 '--type',
-                                                 'generic',
-                                                 '--index-name',
-                                                 attr_name,
-                                                 '--set',
-                                                 'index-type:%s' % index_type,
-                                                 '--set',
-                                                 'index-entry-limit:4000',
-                                                 '--hostName',
-                                                 self.ldap_hostname,
-                                                 '--port',
-                                                 self.ldap_admin_port,
-                                                 '--bindDN',
-                                                 '"%s"' % self.ldap_binddn,
-                                                 '-j', self.ldapPassFn,
-                                                 '--trustAll',
-                                                 '--noPropertiesFile',
-                                                 '--no-prompt'])
-                            self.run(['/bin/su',
-                                      'ldap',
-                                      '-c',
-                                      indexCmd], cwd=cwd)
+
+                index_type_list = [ '--set index-type:' + index_type for index_type in index_types ]
+                index_type_str = ' '.join(index_type_list)
+                backend_names = attrDict['backend']
+                for backend_name in backend_names:
+                    if (backend_name == backend):
+                        self.logIt("Creating %s index for attribute %s" % (', '.join(index_types), attr_name))
+                        indexCmd = " ".join([
+                                             self.ldapDsconfigCommand,
+                                             index_command,
+                                             '--backend-name',
+                                             backend,
+                                             '--type',
+                                             'generic',
+                                             '--index-name',
+                                             attr_name,
+                                             index_type_str,
+                                             '--set',
+                                             'index-entry-limit:4000',
+                                             '--hostName',
+                                             self.ldap_hostname,
+                                             '--port',
+                                             self.ldap_admin_port,
+                                             '--bindDN',
+                                             '"%s"' % self.ldap_binddn,
+                                             '-j', self.ldapPassFn,
+                                             '--trustAll',
+                                             '--noPropertiesFile',
+                                             '--no-prompt'])
+                        self.run(['/bin/su',
+                                  'ldap',
+                                  '-c',
+                                  indexCmd], cwd=cwd)
 
         except:
             self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
@@ -3971,7 +3979,7 @@ class Setup(object):
 
 
     def prepare_opendj_schema(self):
-        self.logIt("Copying OpenDJ schema")
+        self.logIt("Copying WrenDS schema")
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
@@ -3982,7 +3990,7 @@ class Setup(object):
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
         init_script_fn = '/etc/init.d/opendj'
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu20', 'ubuntu18','debian9','debian10')):
             remove_init_script = True
             opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
             opendj_dest_folder = "/etc/systemd/system"
@@ -4046,7 +4054,7 @@ class Setup(object):
     def detect_service_path(self):
         service_path = '/sbin/service'
 
-        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+        if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu20', 'ubuntu18','debian9','debian10')):
             service_path = self.systemctl
             
         elif self.os_type in ['debian', 'ubuntu']:
@@ -4058,7 +4066,7 @@ class Setup(object):
         service_path = self.detect_service_path()
 
         try:
-            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu18','debian9','debian10')):
+            if (self.os_type in ['centos', 'red', 'fedora'] and self.os_initdaemon == 'systemd') or (self.os_type+self.os_version in ('ubuntu20', 'ubuntu18','debian9','debian10')):
                 self.run([service_path, operation, service], None, None, True)
             else:
                 self.run([service_path, service, operation], None, None, True)
@@ -4203,31 +4211,31 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def install_ldap_server(self):
-        self.logIt("Running OpenDJ Setup")
+        self.logIt("Running WrenDS Setup")
         
-        self.pbar.progress("opendj", "Extracting OpenDJ", False)
+        self.pbar.progress("opendj", "Extracting WrenDS", False)
         self.extractOpenDJ()
 
         self.createLdapPw()
         
         try:
-            self.pbar.progress("opendj", "OpenDJ: installing", False)
+            self.pbar.progress("opendj", "WrenDS: installing", False)
             if self.wrends_install == LOCAL:
                 self.install_opendj()
 
-                self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
+                self.pbar.progress("opendj", "WrenDS: preparing schema", False)
                 self.prepare_opendj_schema()
-                self.pbar.progress("opendj", "OpenDJ: setting up service", False)
+                self.pbar.progress("opendj", "WrenDS: setting up service", False)
                 self.setup_opendj_service()
 
             if self.wrends_install:
-                self.pbar.progress("opendj", "OpenDJ: configuring", False)
+                self.pbar.progress("opendj", "WrenDS: configuring", False)
                 self.configure_opendj()
-                self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
+                self.pbar.progress("opendj", "WrenDS:  exporting certificate", False)
                 self.export_opendj_public_cert()
-                self.pbar.progress("opendj", "OpenDJ: creating indexes", False)
+                self.pbar.progress("opendj", "WrenDS: creating indexes", False)
                 self.index_opendj()
-                self.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
+                self.pbar.progress("opendj", "WrenDS: importing Ldif files", False)
                 
                 ldif_files = []
 
@@ -4244,7 +4252,7 @@ class Setup(object):
 
                 self.import_ldif_opendj(ldif_files)
                 
-                self.pbar.progress("opendj", "OpenDJ: post installation", False)
+                self.pbar.progress("opendj", "WrenDS: post installation", False)
                 if self.wrends_install == LOCAL:
                     self.post_install_opendj()
         except:
@@ -5103,7 +5111,7 @@ class Setup(object):
         self.create_test_client_keystore()
 
         # Disable token binding module
-        if self.os_type+self.os_version == 'ubuntu18':
+        if self.os_type+self.os_version in ('ubuntu20', 'ubuntu18'):
             self.run(['a2dismod', 'mod_token_binding'])
             self.run_service_command('apache2', 'restart')
 
