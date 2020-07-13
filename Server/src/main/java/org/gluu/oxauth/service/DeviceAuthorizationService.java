@@ -11,6 +11,7 @@ import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Map;
 
 /**
  * Service used to process data related to device code grant type.
@@ -34,6 +36,10 @@ import java.net.URI;
 @Stateless
 @Named
 public class DeviceAuthorizationService implements Serializable {
+
+    public static final String SESSION_ATTEMPTS_KEY = "attemps";
+    public static final String SESSION_LAST_ATTEMPT_KEY = "last_attempt";
+    public static final String SESSION_USER_CODE = "user_code";
 
     @Inject
     private Logger log;
@@ -46,6 +52,9 @@ public class DeviceAuthorizationService implements Serializable {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private SessionIdService sessionIdService;
 
     /**
      * Saves data in cache, it could be saved with two identifiers used by Token endpoint or device_authorization page.
@@ -157,5 +166,20 @@ public class DeviceAuthorizationService implements Serializable {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Uses an HttpServletRequest, process it and return userCode in the session whether it exists.
+     * @param httpRequest Request received from an user agent.
+     */
+    public String getUserCodeFromSession(HttpServletRequest httpRequest) {
+        SessionId sessionId = sessionIdService.getSessionId(httpRequest);
+        if (sessionId != null) {
+            final Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
+            if (sessionAttributes.containsKey(SESSION_USER_CODE)) {
+                return sessionAttributes.get(SESSION_USER_CODE);
+            }
+        }
+        return null;
     }
 }
