@@ -50,7 +50,7 @@
 										id="userCode1" name="userCode1" colMd="10"
 										labelColMd="2" autocomplete="off"
 										maxlength="4"
-										onkeyup="keyUpInput('userCode1', 'userCode2')"
+										onkeydown="keyUpInput(event, 'userCode1', 'userCode2')"
 										styleClass="form-control device-authz-input-code"
 										value="#{deviceAuthorizationAction.userCodePart1}">
 									</h:inputText>
@@ -59,7 +59,7 @@
 										 id="userCode2" name="userCode2" colMd="10"
 										 labelColMd="2" autocomplete="off"
 										 maxlength="4"
-										 onkeyup="keyUpInput('userCode2', null, 'userCode1')"
+										 onkeydown="keyUpInput(event, 'userCode2', null)"
 										 styleClass="form-control device-authz-input-code"
 										 value="#{deviceAuthorizationAction.userCodePart2}">
 									</h:inputText>
@@ -98,26 +98,27 @@
 			</div>
 		</h:form>
 		<script type="text/javascript">
-			function keyUpInput(component, switchToComponent, switchBackToComponent) {
-				let inputComponent = document.getElementById("deviceAuthzForm:" + component)
+			function keyUpInput(event, component, switchToComponent) {
+				if (!isLetter(event.key)) {
+					return;
+				}
+				let inputComponent = document.getElementById("deviceAuthzForm:" + component);
 				if (inputComponent) {
-					if (inputComponent.value) {
-						if (inputComponent.value.length &lt; 5) {
-							inputComponent.value = inputComponent.value.toUpperCase();
+					let newValue = inputComponent.value + event.key;
+					if (newValue) {
+						if (newValue.length &lt; 5) {
+							newValue = newValue.toUpperCase();
 						} else {
-							inputComponent.value = inputComponent.value.substring(0, 4).toUpperCase();
+							newValue = newValue.substring(0, 4).toUpperCase();
 						}
+						inputComponent.value = newValue;
+						event.preventDefault();
 
-						if (inputComponent.value.length === 4 &amp;&amp; switchToComponent) {
+						if (newValue.length === 4 &amp;&amp; switchToComponent) {
 							let switchedComponent = document.getElementById("deviceAuthzForm:" + switchToComponent)
 							if (switchedComponent) {
 								switchedComponent.focus();
 							}
-						}
-					} else if (switchBackToComponent) {
-						let switchedComponent = document.getElementById("deviceAuthzForm:" + switchBackToComponent)
-						if (switchedComponent) {
-							switchedComponent.focus();
 						}
 					}
 				}
@@ -125,6 +126,10 @@
 
 			function initNewRequest() {
 				window.location = window.location.href.split("?")[0];
+			}
+
+			function isLetter(str) {
+				return str.length === 1 &amp;&amp; str.match(/[a-z]/i);
 			}
 		</script>
 
