@@ -52,7 +52,7 @@
 										maxlength="4"
 										onkeyup="keyUpInput('userCode1', 'userCode2')"
 										styleClass="form-control device-authz-input-code"
-										value="#{deviceAuthorizationAction.userCode1}">
+										value="#{deviceAuthorizationAction.userCodePart1}">
 									</h:inputText>
 									&nbsp;-&nbsp;
 									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
@@ -61,7 +61,7 @@
 										 maxlength="4"
 										 onkeyup="keyUpInput('userCode2', null, 'userCode1')"
 										 styleClass="form-control device-authz-input-code"
-										 value="#{deviceAuthorizationAction.userCode2}">
+										 value="#{deviceAuthorizationAction.userCodePart2}">
 									</h:inputText>
 								</div>
 							</h:panelGroup>
@@ -92,7 +92,7 @@
 									 style="background-color: #00BE79; color:white;"
 									 styleClass="btn device-authz-init-btn" value="#{msgs['device.authorization.init.new.request.msg']}"
 									 iconAwesome="fa-sign-in" onclick="initNewRequest()">
-						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.initializeSession(true)}" />
+						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.initializeSession()}" />
 					</h:commandButton>
 				</h:panelGroup>
 			</div>
