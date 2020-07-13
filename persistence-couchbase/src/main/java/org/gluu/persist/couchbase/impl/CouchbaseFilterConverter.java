@@ -153,8 +153,18 @@ public class CouchbaseFilterConverter {
         if (FilterType.EQUALITY == type) {
         	boolean hasSubFilters = ArrayHelper.isNotEmpty(currentGenericFilter.getFilters());
         	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
-            if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
-                return ConvertedExpression.build(Expression.path(buildTypedExpression(currentGenericFilter).in(Expression.path(toInternalAttribute(currentGenericFilter)))), requiredConsistency);
+
+        	String internalAttribute = toInternalAttribute(currentGenericFilter);
+            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            	if (hasSubFilters) {
+            		Filter clonedFilter = currentGenericFilter.getFilters()[0];
+            		clonedFilter.setAttributeName(internalAttribute + "_");
+
+            		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(clonedFilter, propertiesAnnotationsMap);
+                	return ConvertedExpression.build(Collections.anyIn(internalAttribute + "_", Expression.path(Expression.path(internalAttribute))).satisfies(nameConvertedExpression.expression().eq(buildTypedExpression(currentGenericFilter))), requiredConsistency);
+            	}
+
+            	return ConvertedExpression.build(Collections.anyIn(internalAttribute + "_", Expression.path(Expression.path(internalAttribute))).satisfies(Expression.path(Expression.path(internalAttribute + "_").eq(buildTypedExpression(currentGenericFilter)))), requiredConsistency);
             } else if (Boolean.FALSE.equals(currentGenericFilter.getMultiValued()) || Boolean.FALSE.equals(isMultiValuedDetected)) {
             	if (hasSubFilters) {
             		ConvertedExpression nameConvertedExpression = convertToCouchbaseFilter(currentGenericFilter.getFilters()[0], propertiesAnnotationsMap);
@@ -254,15 +264,23 @@ public class CouchbaseFilterConverter {
 	}
 
 	private String toInternalAttribute(Filter filter) {
-		if (ArrayHelper.isNotEmpty(filter.getFilters())) {
-			
-			
-		}
-		if (couchbaseEntryManager == null) {
-			return filter.getAttributeName();
+		String attributeName = filter.getAttributeName();
+
+		if (StringHelper.isEmpty(attributeName)) {
+			// Try to find inside sub-filter
+			for (Filter subFilter : filter.getFilters()) {
+				attributeName = subFilter.getAttributeName();
+				if (StringHelper.isNotEmpty(attributeName)) {
+					break;
+				}
+			}
 		}
 
-		return couchbaseEntryManager.toInternalAttribute(filter.getAttributeName());
+		if (couchbaseEntryManager == null) {
+			return attributeName;
+		}
+
+		return couchbaseEntryManager.toInternalAttribute(attributeName);
 	}
 
 	private Expression buildTypedExpression(Filter currentGenericFilter) {
