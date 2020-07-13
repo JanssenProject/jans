@@ -4943,14 +4943,14 @@ class Setup(object):
         if self.mappingLocations['default'] == 'ldap':
             self.import_ldif_opendj(ldif_files)
         else:
-            cb_host = cb_hosts[self.cb_query_node]
+            cb_host = cb_hosts[int(self.cb_query_node)]
             self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             self.import_ldif_couchebase(ldif_files)
 
         if self.mappingLocations['user'] == 'ldap':
             self.import_ldif_opendj(ldif_user_files)
         else:
-            cb_host = cb_hosts[self.cb_query_node]
+            cb_host = cb_hosts[int(self.cb_query_node)]
             self.cbm = CBM(cb_host, self.couchebaseClusterAdmin, self.cb_password)
             bucket = '{}_user'.format(self.couchbase_bucket_prefix)
             self.import_ldif_couchebase(ldif_user_files,  bucket='gluu_user')
