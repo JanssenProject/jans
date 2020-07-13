@@ -3711,7 +3711,7 @@ class Setup(object):
             os.remove(self.ldapPassFn)
 
     def install_opendj(self):
-        self.logIt("Running OpenDJ Setup")
+        self.logIt("Running WrenDS Setup")
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
@@ -3740,7 +3740,7 @@ class Setup(object):
         #Append self.jre_home to OpenDj java.properties        
         opendj_java_properties_fn = os.path.join(self.ldapBaseFolder, 'config/java.properties')
 
-        self.logIt("append self.jre_home to OpenDj %s" % opendj_java_properties_fn)
+        self.logIt("append self.jre_home to WrenDS %s" % opendj_java_properties_fn)
         with open(opendj_java_properties_fn,'a') as f:
             f.write('\ndefault.java-home={}\n'.format(self.jre_home))
 
@@ -3756,11 +3756,11 @@ class Setup(object):
         try:
             os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
-            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
+            self.logIt("Error deleting WrenDS properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
             self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
-        self.logIt("Configuring OpenDJ")
+        self.logIt("Configuring WrenDS")
 
         opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
         config_changes = [
@@ -3811,14 +3811,14 @@ class Setup(object):
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
-        self.logIt("Getting OpenDJ certificate")
+        self.logIt("Getting WrenDS certificate")
 
         opendj_cert = ssl.get_server_certificate((self.ldap_hostname, self.ldaps_port))
         with open(self.opendj_cert_fn,'w') as w:
             w.write(opendj_cert)
 
         # Convert OpenDJ certificate to PKCS12
-        self.logIt("Importing OpenDJ certificate to truststore")
+        self.logIt("Importing WrenDS certificate to truststore")
         self.run([self.cmd_keytool,
                   '-importcert',
                   '-noprompt',
@@ -3835,14 +3835,14 @@ class Setup(object):
                   ])
 
         # Import OpenDJ certificate into java truststore
-        self.logIt("Import OpenDJ certificate")
+        self.logIt("Import WrenDS certificate")
 
         self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
                   "-file", self.opendj_cert_fn, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
     def import_ldif_template_opendj(self, ldif):
-        self.logIt("Importing LDIF file '%s' into OpenDJ" % ldif)
+        self.logIt("Importing LDIF file '%s' into WrenDS" % ldif)
         realInstallDir = os.path.realpath(self.outputFolder)
 
         ldif_file_fullpath = os.path.realpath(ldif)
@@ -3979,7 +3979,7 @@ class Setup(object):
 
 
     def prepare_opendj_schema(self):
-        self.logIt("Copying OpenDJ schema")
+        self.logIt("Copying WrenDS schema")
         for schemaFile in self.openDjschemaFiles:
             self.copyFile(schemaFile, self.openDjSchemaFolder)
 
@@ -4211,31 +4211,31 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def install_ldap_server(self):
-        self.logIt("Running OpenDJ Setup")
+        self.logIt("Running WrenDS Setup")
         
-        self.pbar.progress("opendj", "Extracting OpenDJ", False)
+        self.pbar.progress("opendj", "Extracting WrenDS", False)
         self.extractOpenDJ()
 
         self.createLdapPw()
         
         try:
-            self.pbar.progress("opendj", "OpenDJ: installing", False)
+            self.pbar.progress("opendj", "WrenDS: installing", False)
             if self.wrends_install == LOCAL:
                 self.install_opendj()
 
-                self.pbar.progress("opendj", "OpenDJ: preparing schema", False)
+                self.pbar.progress("opendj", "WrenDS: preparing schema", False)
                 self.prepare_opendj_schema()
-                self.pbar.progress("opendj", "OpenDJ: setting up service", False)
+                self.pbar.progress("opendj", "WrenDS: setting up service", False)
                 self.setup_opendj_service()
 
             if self.wrends_install:
-                self.pbar.progress("opendj", "OpenDJ: configuring", False)
+                self.pbar.progress("opendj", "WrenDS: configuring", False)
                 self.configure_opendj()
-                self.pbar.progress("opendj", "OpenDJ:  exporting certificate", False)
+                self.pbar.progress("opendj", "WrenDS:  exporting certificate", False)
                 self.export_opendj_public_cert()
-                self.pbar.progress("opendj", "OpenDJ: creating indexes", False)
+                self.pbar.progress("opendj", "WrenDS: creating indexes", False)
                 self.index_opendj()
-                self.pbar.progress("opendj", "OpenDJ: importing Ldif files", False)
+                self.pbar.progress("opendj", "WrenDS: importing Ldif files", False)
                 
                 ldif_files = []
 
@@ -4252,7 +4252,7 @@ class Setup(object):
 
                 self.import_ldif_opendj(ldif_files)
                 
-                self.pbar.progress("opendj", "OpenDJ: post installation", False)
+                self.pbar.progress("opendj", "WrenDS: post installation", False)
                 if self.wrends_install == LOCAL:
                     self.post_install_opendj()
         except:
