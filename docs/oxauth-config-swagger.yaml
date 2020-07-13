@@ -14,6 +14,8 @@ tags:
   - name: developers
     description: oxauth-config enables access to the features available via the existing oxAuth API.
   - name: Graphics
+  - name: LDAP configuration
+  - name: Library
 paths:
   /config/properties:
     get:
@@ -3715,6 +3717,8 @@ paths:
               required:
                 - ''
         description: Organization logo details.
+      tags:
+        - Graphics
     patch:
       summary: ''
       operationId: patch-config-graphics-logo
@@ -3735,6 +3739,8 @@ paths:
                   description: Directory name for the images and logos that are used.
               required:
                 - logoLocation
+      tags:
+        - Graphics
   /config/graphics/favicon:
     get:
       summary: Your GET endpoint
@@ -3758,7 +3764,7 @@ paths:
       operationId: get-config-graphics-favicon
       description: Retrieve organization favicon
     delete:
-      summary: ''
+      summary: Delete organization favicon
       operationId: delete-config-graphics-favicon
       responses:
         '200':
@@ -3777,6 +3783,8 @@ paths:
         '200':
           description: OK
       description: Details of organization favicon.
+      tags:
+        - Graphics
     put:
       summary: ''
       operationId: put-config-graphics-favicon
@@ -3825,6 +3833,74 @@ paths:
         description: Details of organization favicon.
       tags:
         - Graphics
+  /config/library:
+    post:
+      summary: Upload custom library.
+      tags:
+        - Library
+      description: Upload custom library.
+      operationId: post-config-library
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload.
+              required:
+                - file
+        description: Library to be added to oxAuth Path
+    parameters: []
+    get:
+      summary: Retrieve custom library.
+      operationId: get-config-library
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: List of custom librarires added to oxAuth path.
+                items:
+                  type: string
+        '500':
+          description: Internal Server Error
+      description: Retrieve custom library.
+      tags:
+        - Library
+  '/config/library/{libName}':
+    parameters:
+      - schema:
+          type: string
+          minLength: 1
+        name: libName
+        in: path
+        description: Name of the libraray to be removed.
+        required: true
+    delete:
+      summary: Delete custom library.
+      operationId: delete-config-library-libName
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Delete custom library.
+      tags:
+        - Library
 components:
   responses:
     Found:
