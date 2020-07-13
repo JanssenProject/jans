@@ -37,8 +37,8 @@ import java.util.Map;
 @Named
 public class DeviceAuthorizationService implements Serializable {
 
-    public static final String SESSION_ATTEMPTS_KEY = "attemps";
-    public static final String SESSION_LAST_ATTEMPT_KEY = "last_attempt";
+    public static final String SESSION_ATTEMPTS = "attemps";
+    public static final String SESSION_LAST_ATTEMPT = "last_attempt";
     public static final String SESSION_USER_CODE = "user_code";
 
     @Inject
