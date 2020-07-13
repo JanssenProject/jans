@@ -75,8 +75,8 @@ public class DeviceAuthorizationAction implements Serializable {
     private String userCode;
 
     // UI data
-    private String userCode1;
-    private String userCode2;
+    private String userCodePart1;
+    private String userCodePart2;
     private String titleMsg;
     private String descriptionMsg;
 
@@ -98,28 +98,33 @@ public class DeviceAuthorizationAction implements Serializable {
             this.descriptionMsg = languageBean.getMessage("device.authorization.authorization.completed.msg");
         }
 
-        initializeSession(false);
+        initializeSession();
     }
 
     /**
-     * Initialize session used to prevent brute forcing.
+     * Reset data in session or create a new one whether there is no session.
      */
-    public void initializeSession(boolean forceNewSession) {
+    public void initializeSession() {
         SessionId sessionId = sessionIdService.getSessionId();
+        Map<String, String> sessionAttributes = new HashMap<>();
+        if (StringUtils.isNotBlank(userCode)) {
+            sessionAttributes.put(SESSION_USER_CODE, userCode);
+        }
         if (sessionId == null) {
-            Map<String, String> requestParameterMap = new HashMap<>();
-            requestParameterMap.put(SESSION_LAST_ATTEMPT_KEY, String.valueOf(lastAttempt));
-            requestParameterMap.put(SESSION_ATTEMPTS_KEY, String.valueOf(attempts));
-            SessionId deviceAuthzSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            SessionId deviceAuthzSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, sessionAttributes, false);
             sessionIdService.persistSessionId(deviceAuthzSession);
             cookieService.createSessionIdCookie(deviceAuthzSession, false);
             log.debug("Created session for device authorization grant page, sessionId: {}", deviceAuthzSession.getId());
         } else {
-            if (forceNewSession) {
-                log.debug("Initializing a new session for device authz page");
-                sessionIdService.remove(sessionId);
-                initializeSession(false);
+            if (StringUtils.isNotBlank(sessionId.getSessionAttributes().get(SESSION_LAST_ATTEMPT))
+                    && StringUtils.isNotBlank(sessionId.getSessionAttributes().get(SESSION_ATTEMPTS))) {
+                lastAttempt = Long.parseLong(sessionId.getSessionAttributes().get(SESSION_LAST_ATTEMPT));
+                attempts = Byte.parseByte(sessionId.getSessionAttributes().get(SESSION_ATTEMPTS));
             }
+            sessionAttributes.put(SESSION_LAST_ATTEMPT, String.valueOf(lastAttempt));
+            sessionAttributes.put(SESSION_ATTEMPTS, String.valueOf(attempts));
+            sessionId.setSessionAttributes(sessionAttributes);
+            sessionIdService.updateSessionId(sessionId);
         }
     }
 
@@ -139,10 +144,14 @@ public class DeviceAuthorizationAction implements Serializable {
             return;
         }
 
-        String userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
-        if (StringUtils.isBlank(userCode)) {
-            userCode = userCode1 + '-' + userCode2;
+        String userCode;
+        if (StringUtils.isBlank(userCodePart1) && StringUtils.isBlank(userCodePart2)) {
+            userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
+        } else {
+            userCode = userCodePart1 + '-' + userCodePart2;
         }
+        userCode = userCode.toUpperCase();
+
         if (!validateFormat(userCode)) {
             facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.invalid.user.code"));
             return;
@@ -155,6 +164,8 @@ public class DeviceAuthorizationAction implements Serializable {
         if (cacheData != null) {
             if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
                 session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
+                session.getSessionAttributes().remove(SESSION_LAST_ATTEMPT);
+                session.getSessionAttributes().remove(SESSION_ATTEMPTS);
                 sessionIdService.updateSessionId(session);
 
                 redirectToAuthorization(cacheData);
@@ -177,14 +188,14 @@ public class DeviceAuthorizationAction implements Serializable {
      * @param session Session used to keep data related to all attemps done.
      */
     private boolean preventBruteForcing(SessionId session) {
-        lastAttempt = Long.valueOf(session.getSessionAttributes().getOrDefault(SESSION_LAST_ATTEMPT_KEY, "0"));
-        attempts = Byte.parseByte(session.getSessionAttributes().getOrDefault(SESSION_ATTEMPTS_KEY, "0"));
+        lastAttempt = Long.valueOf(session.getSessionAttributes().getOrDefault(SESSION_LAST_ATTEMPT, "0"));
+        attempts = Byte.parseByte(session.getSessionAttributes().getOrDefault(SESSION_ATTEMPTS, "0"));
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastAttempt > 500 && attempts < 5) {
             lastAttempt = currentTime;
             attempts++;
-            session.getSessionAttributes().put(SESSION_LAST_ATTEMPT_KEY, String.valueOf(lastAttempt));
-            session.getSessionAttributes().put(SESSION_ATTEMPTS_KEY, String.valueOf(attempts));
+            session.getSessionAttributes().put(SESSION_LAST_ATTEMPT, String.valueOf(lastAttempt));
+            session.getSessionAttributes().put(SESSION_ATTEMPTS, String.valueOf(attempts));
             sessionIdService.updateSessionId(session);
             return true;
         } else {
@@ -222,10 +233,6 @@ public class DeviceAuthorizationAction implements Serializable {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
-
-
-
-            log.info("SESSION :::::::::::::::::::::::::::xxxxx : " + sessionIdService.getSessionId());
 
             FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
         } catch (IOException e) {
@@ -269,20 +276,20 @@ public class DeviceAuthorizationAction implements Serializable {
         return StringUtils.isNotBlank(code) && StringUtils.isNotBlank(state) && StringUtils.isBlank(error);
     }
 
-    public String getUserCode1() {
-        return userCode1;
+    public String getUserCodePart1() {
+        return userCodePart1;
     }
 
-    public void setUserCode1(String userCode1) {
-        this.userCode1 = userCode1;
+    public void setUserCodePart1(String userCodePart1) {
+        this.userCodePart1 = userCodePart1;
     }
 
-    public String getUserCode2() {
-        return userCode2;
+    public String getUserCodePart2() {
+        return userCodePart2;
     }
 
-    public void setUserCode2(String userCode2) {
-        this.userCode2 = userCode2;
+    public void setUserCodePart2(String userCodePart2) {
+        this.userCodePart2 = userCodePart2;
     }
 
     public String getCode() {
