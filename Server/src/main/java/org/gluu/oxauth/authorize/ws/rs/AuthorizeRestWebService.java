@@ -156,7 +156,6 @@ public interface AuthorizeRestWebService {
             @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
             @QueryParam("claims") String claims,
             @QueryParam("auth_req_id") String authReqId,
-            @QueryParam("user_code") String userCode,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
