@@ -60,6 +60,8 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
 
+import static org.gluu.oxauth.service.DeviceAuthorizationService.SESSION_USER_CODE;
+
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
@@ -285,6 +287,12 @@ public class AuthorizeAction {
             // Store Remote IP
             String remoteIp = networkService.getRemoteIp();
             requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
+
+            // User Code used in Device Authz flow
+            if (session != null && session.getSessionAttributes().containsKey(SESSION_USER_CODE)) {
+                String userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
+                requestParameterMap.put(SESSION_USER_CODE, userCode);
+            }
 
             // Create unauthenticated session
             SessionId unauthenticatedSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);

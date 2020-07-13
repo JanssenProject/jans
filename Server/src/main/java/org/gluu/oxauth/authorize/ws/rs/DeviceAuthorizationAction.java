@@ -8,9 +8,11 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
-import org.gluu.model.security.Identity;
 import org.gluu.oxauth.i18n.LanguageBean;
-import org.gluu.oxauth.model.common.*;
+import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
+import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.CookieService;
@@ -19,9 +21,7 @@ import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
 import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
+import static org.gluu.oxauth.service.DeviceAuthorizationService.*;
 
 /**
  * Action used to process all requests related to device authorization.
@@ -42,10 +43,6 @@ import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
 @Named
 @RequestScoped
 public class DeviceAuthorizationAction implements Serializable {
-
-    private static final String SESSION_ATTEMPTS_KEY = "attemps";
-    private static final String SESSION_LAST_ATTEMPT_KEY = "lastAttempt";
-    private static final String SESSION_USER_CODE = "userCode";
 
     @Inject
     private Logger log;
@@ -113,7 +110,6 @@ public class DeviceAuthorizationAction implements Serializable {
             Map<String, String> requestParameterMap = new HashMap<>();
             requestParameterMap.put(SESSION_LAST_ATTEMPT_KEY, String.valueOf(lastAttempt));
             requestParameterMap.put(SESSION_ATTEMPTS_KEY, String.valueOf(attempts));
-            requestParameterMap.put(SESSION_USER_CODE, userCode);
             SessionId deviceAuthzSession = sessionIdService.generateUnauthenticatedSessionId(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             sessionIdService.persistSessionId(deviceAuthzSession);
             cookieService.createSessionIdCookie(deviceAuthzSession, false);
@@ -123,10 +119,6 @@ public class DeviceAuthorizationAction implements Serializable {
                 log.debug("Initializing a new session for device authz page");
                 sessionIdService.remove(sessionId);
                 initializeSession(false);
-            }
-            if (StringUtils.isNotBlank(userCode)) {
-                sessionId.getSessionAttributes().put(SESSION_USER_CODE, userCode);
-                sessionIdService.updateSessionId(sessionId);
             }
         }
     }
@@ -162,6 +154,9 @@ public class DeviceAuthorizationAction implements Serializable {
         String message = null;
         if (cacheData != null) {
             if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
+                sessionIdService.updateSessionId(session);
+
                 redirectToAuthorization(cacheData);
             } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
                 message = languageBean.getMessage("device.authorization.access.denied.msg");
@@ -227,7 +222,10 @@ public class DeviceAuthorizationAction implements Serializable {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
-            authRequest.addResponseParameter(USER_CODE, cacheData.getUserCode());
+
+
+
+            log.info("SESSION :::::::::::::::::::::::::::xxxxx : " + sessionIdService.getSessionId());
 
             FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
         } catch (IOException e) {
