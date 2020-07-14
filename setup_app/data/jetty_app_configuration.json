@@ -41,8 +41,8 @@
   "oxauth-rp": {
     "memory": {
       "max_allowed_mb": 384,
-      "metaspace_mb": 128,
-      "jvm_heap_ration": 0.7,
+      "metaspace_mb": 64,
+      "jvm_heap_ration": 0.85,
       "ratio": 0.08
     },
     "jetty": {
