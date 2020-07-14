@@ -13,7 +13,7 @@ key = salt_property.split("=")[1].strip()
 
 def obscure(data=""):
     engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
-    data = data.encode('ascii')
+    data = data.encode('utf-8')
     en_data = engine.encrypt(data)
     return base64.b64encode(en_data).decode('utf-8')
 
