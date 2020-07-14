@@ -43,7 +43,11 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         if not os.path.exists(log_dir):
             self.run([paths.cmd_mkdir, log_dir])
 
-        self.run(['chown', 'jetty:jetty', '/var/log/oxd-server'])
+        log_file = os.path.join(log_dir, 'oxd-server.log')
+        if not os.path.exists(log_file):
+            open(log_file, 'w').close()
+
+        self.run(['chown', '-R', 'jetty:jetty', '/var/log/oxd-server'])
 
         for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
             self.run([paths.cmd_chmod, '+x', fn])
