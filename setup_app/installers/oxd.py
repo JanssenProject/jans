@@ -142,11 +142,11 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.run([paths.cmd_unzip, '-qqo', '/tmp/oxd-server.zip', '-d', oxd_tmp_dir])
         self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir,'data')])
 
-        if base.os_name in ('ubuntu18','debian9'):
+        if base.deb_sysd_clone:
             default_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server-default'.format(Config.oxVersion)
             self.run([paths.cmd_wget, '-nv', default_url, '-O', os.path.join(oxd_tmp_dir, 'oxd-server-default')])
 
-        service_file = 'oxd-server.init.d' if base.os_name in ('ubuntu18','debian9') else 'oxd-server.service'
+        service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
         service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(Config.oxVersion, service_file)
         self.run(['wget', '-nv', service_url, '-O', os.path.join(oxd_tmp_dir, service_file)])
 
