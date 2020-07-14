@@ -42,7 +42,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         oxidp_ConfigurationEntryDN = gluu_prop['oxidp_ConfigurationEntryDN']
         gluu_ConfigurationDN = 'ou=configuration,o=gluu'
 
-        # TODO: collect mapping locations in case of hybrid setup
         if Config.persistence_type == 'couchbase':
             Config.mappingLocations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
             default_storage = 'couchbase'
@@ -67,6 +66,16 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.opendj_p12_pass = self.unobscure(gluu_ldap_prop['ssl.trustStorePin'])
             Config.ldap_hostname, Config.ldaps_port = gluu_ldap_prop['servers'].split(',')[0].split(':')
 
+
+        if Config.persistence_type in ['hybrid']:
+             gluu_hybrid_properties = base.read_properties_file(gluu_hybrid_properties_fn)
+             Config.mappingLocations = {'default': gluu_hybrid_properties['storage.default']}
+             storages = [ storage.strip() for storage in gluu_hybrid_properties['storages'].split(',') ]
+
+             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
+                 for storage in storages:
+                     if m in gluu_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
+                         Config.mappingLocations[ml] = storage
 
         # It is time to bind database
         dbUtils.bind()
