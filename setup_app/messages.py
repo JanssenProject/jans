@@ -48,7 +48,6 @@ class msg:
     insufficient_free_disk_space = "Available free disk space was determined to be {} GB. This is less than the required disk space of {}"
     
     suggested_free_disk_space = 40 #in GB
-    suggested_mem_size = 3.7 # in GB
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
     
