@@ -98,7 +98,7 @@ class PropertiesUtils(SetupUtils):
             Config.encode_salt = self.getPW() + self.getPW()
 
         if not Config.application_max_ram:
-            Config.application_max_ram = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
+            Config.application_max_ram = base.suggested_mem_size
 
         self.check_oxd_server_https()
 
