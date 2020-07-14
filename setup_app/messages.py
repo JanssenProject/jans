@@ -57,7 +57,8 @@ class msg:
     oxtrust_admin_password_label = "oxTrust Admin Password"
     oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
     max_ram_int_warning = "Please enter and integer value for Max ram"
-    
+    memory_warning = "WARINIG: You don't have enough memory to run Gluu CE properly with selected applications."
+
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
     acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the Apache-2.0 license"

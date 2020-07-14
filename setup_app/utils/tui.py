@@ -55,6 +55,7 @@ class GluuSetupApp(npyscreen.StandardApp):
     do_notify = True
     gluuInstaller = None
     installed_instance = None
+    jettyInstaller = None
 
     def onStart(self):
 
@@ -351,6 +352,12 @@ class ServicesForm(GluuSetupForm):
             result = npyscreen.notify_yes_no(msg.ask_use_gluu_storage_oxd, title=msg.ask_use_gluu_storage_oxd_title)
             if result:
                 Config.oxd_use_gluu_storage = True
+
+        # check if we have enough memory
+        if not self.parentApp.installObject.calculate_selected_aplications_memory():
+            result = npyscreen.notify_yes_no(msg.memory_warning, title="Warning")
+            if not result:
+                return
 
         if Config.installed_instance:
             self.parentApp.switchForm('DisplaySummaryForm')

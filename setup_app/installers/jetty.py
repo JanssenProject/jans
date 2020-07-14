@@ -229,6 +229,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         allowedApplicationsMemory = {}
 
+        retVal = True
         usedRatio = 0.001
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
@@ -254,10 +255,12 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
             Config.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
 
+            Config.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationConfiguration['memory']['metaspace_mb']
+            applicationMemory = applicationMemory - applicationConfiguration['memory']['metaspace_mb']
+
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
 
-                minHeapMem = 256
                 maxHeapMem = int(applicationMemory * jvmHeapRation)
                 if maxHeapMem < minHeapMem:
                     minHeapMem = maxHeapMem
@@ -267,6 +270,12 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
                 Config.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - Config.templateRenderingDict["%s_max_heap_mem" % applicationName]
 
+
+                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:    
+                    retVal = False
+
+        return retVal
+        
     def calculate_selected_aplications_memory(self):
         Config.pbar.progress("gluu", "Calculating application memory")
 
@@ -280,4 +289,4 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             if Config.get(config_var):
                 installedComponents.append(self.jetty_app_configuration[service])
 
-        self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
+        return self.calculate_aplications_memory(Config.application_max_ram, self.jetty_app_configuration, installedComponents)
