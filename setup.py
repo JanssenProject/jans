@@ -339,6 +339,7 @@ else:
     Config.thread_queue = queue
     GSA.do_installation = do_installation
     GSA.gluuInstaller = gluuInstaller
+    GSA.jettyInstaller = jettyInstaller
     GSA.run()
 
 # we need this for progress write last line
