@@ -243,7 +243,7 @@ def generate_properties(as_dict=False):
             default_storage = 'couchbase'
 
 
-        if setup_prop['persistence_type'] in ('hybrid'):
+        if setup_prop['persistence_type'] in ['hybrid']:
             gluu_hybrid_properties = read_properties_file(gluu_hybrid_properties_fn)
             mappingLocations = {'default': gluu_hybrid_properties['storage.default']}
             storages = [ storage.strip() for storage in gluu_hybrid_properties['storages'].split(',') ]
