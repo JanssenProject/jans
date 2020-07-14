@@ -5,13 +5,12 @@
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.model.custom.script.type.user import UserRegistrationType
 from org.gluu.service import MailService
-from org.gluu.oxtrust.ldap.service import PersonService
-from org.gluu.model import GluuStatus
+from org.gluu.oxtrust.service import PersonService
 from org.gluu.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from org.gluu.config.oxtrust import AppConfiguration
 from javax.faces.context import ExternalContext
-from org.gluu.oxtrust.ldap.service import ConfigurationService
+from org.gluu.oxtrust.service import ConfigurationService
 
 import java
 
@@ -46,7 +45,7 @@ class UserRegistration(UserRegistrationType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def preRegistration(self, user, requestParameters, configurationAttributes):
         print "User Confirm registration. Pre method"
-        userStatus = GluuStatus.INACTIVE
+        userStatus = "inactive"
 
         # Disable/Enable registered user
         user.setStatus(userStatus)
@@ -93,7 +92,7 @@ class UserRegistration(UserRegistrationType):
             return False
 
         if confirmation_code == user.getGuid():
-            user.setStatus(GluuStatus.ACTIVE)
+            user.setStatus("active")
             user.setGuid("")
             personService.updatePerson(user)
             print "User Confirm registration. Confirm method. User '%s' confirmed his registration" % user.getUid()

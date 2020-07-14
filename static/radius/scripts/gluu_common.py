@@ -9,7 +9,7 @@ from javax.ws.rs import InternalServerErrorException
 from org.gluu.oxnotify.model import NotifyMetadata
 from org.gluu.oxnotify.client import NotifyClientFactory
 from org.apache.http.params import CoreConnectionPNames
-from org.gluu.oxauth.service import EncryptionService , UserService
+from org.gluu.oxauth.service.common import EncryptionService, UserService
 from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService

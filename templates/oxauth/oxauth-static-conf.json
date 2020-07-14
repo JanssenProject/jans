@@ -14,6 +14,7 @@
         "umaPolicy":"ou=policies,ou=uma,o=gluu",
         "u2fBase":"ou=u2f,o=gluu",
         "metric":"ou=statistic,o=metric",
-        "sectorIdentifiers": "ou=sector_identifiers,o=gluu"
+        "sectorIdentifiers": "ou=sector_identifiers,o=gluu",
+        "ciba": "ou=ciba,o=gluu"
     }
 }

@@ -31,7 +31,7 @@ identtiy_xml_fn = '/opt/gluu/jetty/identity/webapps/identity.xml'
 tree = ET.parse(identtiy_xml_fn)
 root = tree.getroot()
 
-oxtrust_api_server_version = '4.2.0-SNAPSHOT'
+oxtrust_api_server_version = '4.3.0-SNAPSHOT'
 oxtrust_api_server_url = 'https://ox.gluu.org/maven/org/gluu/oxtrust-api-server/{0}/oxtrust-api-server-{0}.jar'.format(oxtrust_api_server_version)
 oxtrust_api_server_path = '/opt/gluu/jetty/identity/custom/libs/oxtrust-api-server.jar'
 
