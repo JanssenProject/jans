@@ -1,7 +1,3 @@
-#########################
-# OX Clients Definition
-#########################
-
 dn: inum=%(oxauth_client_id)s,ou=clients,o=gluu
 objectClass: oxAuthClient
 objectClass: top
@@ -22,30 +18,6 @@ oxAuthRedirectURI: https://%(hostname)s/identity/authcode.htm
 oxAuthRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims?authentication=true
 oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
 oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/finishlogout.htm
-oxAuthTokenEndpointAuthMethod: client_secret_basic
-oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthTrustedClient: true
-oxAuthSubjectType: public
-oxPersistClientAuthorizations: false
-oxAuthLogoutSessionRequired: true
-
-
-dn: inum=%(idp_client_id)s,ou=clients,o=gluu
-objectClass: oxAuthClient
-objectClass: top
-displayName: IDP client
-inum: %(idp_client_id)s
-oxAuthClientSecret: %(idpClient_encoded_pw)s
-oxAuthAppType: web
-oxAuthResponseType: code
-oxAuthGrantType: authorization_code
-oxAuthGrantType: refresh_token
-oxAuthScope: inum=F0C4,ou=scopes,o=gluu
-oxAuthScope: inum=10B2,ou=scopes,o=gluu
-oxAuthScope: inum=764C,ou=scopes,o=gluu
-oxAuthLogoutURI: https://%(hostname)s/idp/Authn/oxAuth/ssologout
-oxAuthRedirectURI: https://%(hostname)s/idp/Authn/oxAuth
-oxAuthPostLogoutRedirectURI: https://%(hostname)s/idp/profile/Logout
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthTrustedClient: true
