@@ -62,6 +62,7 @@ class ScimInstaller(JettyInstaller):
         if not Config.get('scim_rp_client_jks_pass'):
             Config.scim_rp_client_jks_pass = 'secret'
 
+        Config.gluuScimEnabled = 'false'
         Config.scimTestMode = Config.get('scimTestMode', 'false')
         Config.enable_scim_access_policy = 'true' if Config.installPassport else 'false'
 

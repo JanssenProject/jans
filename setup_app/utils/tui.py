@@ -286,12 +286,19 @@ class ServicesForm(GluuSetupForm):
 
 
     def nextButtonPressed(self):
+        service_enable_dict = {
+                        'installPassport': ['gluuPassportEnabled', 'enable_scim_access_policy'],
+                        'installGluuRadius': ['gluuRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
+                        'installSaml': ['gluuSamlEnabled'],
+                        'installScimServer': ['gluuScimEnabled', 'enable_scim_access_policy'],
+                        }
+
         for service in self.services:
             cb_val = getattr(self, service).value
             setattr(Config, service, cb_val)
-
-            if cb_val and (service not in self.services_before_this_form):
-                Config.addPostSetupService.append(service)
+            if cb_val and service in service_enable_dict:
+                for attribute in service_enable_dict[service]:
+                    setattr(Config, attribute, 'true')
 
         if Config.installed_instance and not Config.addPostSetupService:
                 exit_result = npyscreen.notify_yes_no(
@@ -302,6 +309,9 @@ class ServicesForm(GluuSetupForm):
                     sys.exit(False)
                 else:
                     return
+
+        if self.installSaml:
+            Config.shibboleth_version = 'v3'
 
         if self.installOxd.value:
             Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
