@@ -149,14 +149,14 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
                         if not a in may_list:
                             may_list.append(a)
-                    
+
                     objcl.tokens['MAY'] = tuple(may_list)
                     obcl_parser.entries[0][1]['objectClasses'][i] = objcl.getstr()
 
             tmp_fn = '/tmp/77-customAttributes.ldif'
             with open(tmp_fn, 'wb') as w:
                 ldif_writer = LDIFWriter(w)
-                for dn, entry in obcl_parser.entries:                
+                for dn, entry in obcl_parser.entries:
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, openDjSchemaFolder)
@@ -213,7 +213,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.create_test_client_keystore()
 
         # Disable token binding module
-        if base.os_name == 'ubuntu18':
+        if base.os_name in ('ubuntu18', 'ubuntu20'):
             self.run(['a2dismod', 'mod_token_binding'])
             self.restart('apache2')
 

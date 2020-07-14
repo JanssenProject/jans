@@ -72,7 +72,7 @@ class BaseInstaller:
         if not service:
             service = self.service_name
         try:
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
+            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
                 self.run([base.service_path, operation, service], None, None, True)
             else:
                 self.run([base.service_path, service, operation], None, None, True)
@@ -95,7 +95,7 @@ class BaseInstaller:
     def reload_daemon(self, service=None):
         if not service:
             service = self.service_name
-        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
             self.run([base.service_path, 'daemon-reload'])
         elif base.os_name == 'ubuntu16':
             self.run([paths.cmd_update_rc, service, 'defaults'])

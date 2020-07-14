@@ -20,7 +20,7 @@ from setup_app.config import Config
 from setup_app.utils.base import logIt as logOnly
 from setup_app.utils.base import logOSChanges as logOSChangesOnly
 from setup_app.utils.base import run as runOnly
-from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type
+from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type, deb_sysd_clone
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
@@ -461,7 +461,7 @@ class SetupUtils(Crypto64):
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
 
-        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or (os_name in ('ubuntu18','debian9','debian10')):
+        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or deb_sysd_clone):
             service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
         else:
             service_init_script_fn = os.path.join('/etc/init.d', serviceName)
