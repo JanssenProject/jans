@@ -461,7 +461,7 @@ class SetupUtils(Crypto64):
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
 
-        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or deb_sysd_clone):
+        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or deb_sysd_clone:
             service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
         else:
             service_init_script_fn = os.path.join('/etc/init.d', serviceName)
