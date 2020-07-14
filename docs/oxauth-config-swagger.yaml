@@ -1355,7 +1355,7 @@ paths:
                 - faviconPath
       tags:
         - Graphics
-    parameters: []  
+    parameters: []
   /attributes:
     get:
       tags:
@@ -3773,6 +3773,585 @@ paths:
                       type: boolean
       operationId: get-scripts-person_authn-type
       description: Get all person authentication scripts based on type.
+  /scripts/consent:
+    get:
+      summary: Get all consent gathering script.
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Dn(Distinguished Name) of the script.
+                  properties:
+                    dn:
+                      type: string
+                      description: XRI i-number
+                    inum:
+                      type: string
+                      example: '''name, displayName,birthdate, email'''
+                    name:
+                      type: string
+                      description: 'Name should contain only letters, digits and underscores.'
+                      minLength: 1
+                      maxLength: 60
+                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+                    aliases:
+                      type: array
+                      items:
+                        type: string
+                    description:
+                      type: string
+                    script:
+                      type: string
+                    scriptType:
+                      type: string
+                      enum:
+                        - person_authentication
+                        - introspection
+                        - resource_owner_password_credentials
+                        - application_session
+                        - cache_refresh
+                        - update_user
+                        - user_registration
+                        - client_registration
+                        - id_generator
+                        - uma_rpt_policy
+                        - uma_rpt_claims
+                        - uma_claims_gathering
+                        - consent_gathering
+                        - dynamic_scope
+                        - spontaneous_scope
+                        - end_session
+                        - post_authn
+                        - scim
+                        - ciba_end_user_notification
+                        - persistence_extension
+                        - idp
+                    programmingLanguage:
+                      type: string
+                      enum:
+                        - python
+                        - javascript
+                      description: Specifies programming language of the custom script.
+                    moduleProperties:
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                    configurationProperties:
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                        hide:
+                          type: boolean
+                    level:
+                      type: integer
+                    revision:
+                      type: integer
+                      format: int64
+                    enabled:
+                      type: boolean
+                    scriptError:
+                      type: object
+                      properties:
+                        raisedAt:
+                          type: string
+                          format: date
+                        stackTrace:
+                          type: string
+                    modified:
+                      type: boolean
+                    internal:
+                      type: boolean
+        '500':
+          description: Internal Server Error
+      operationId: get-scripts-consent
+      description: Retrieve all custom consent gathering script.
+    post:
+      summary: Add new consent gathering script.
+      operationId: post-scripts-consent
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+      description: Add new custom consent gathering script.
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dn:
+                  type: string
+                  description: Dn(Distinguished Name) of the script.
+                inum:
+                  type: string
+                  description: XRI i-number
+                name:
+                  type: string
+                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+                  minLength: 1
+                  maxLength: 60
+                  description: 'Name should contain only letters, digits and underscores.'
+                aliases:
+                  type: array
+                  items:
+                    type: string
+                description:
+                  type: string
+                script:
+                  type: string
+                  description: Actual script
+                scriptType:
+                  type: string
+                  enum:
+                    - person_authentication
+                    - introspection
+                    - resource_owner_password_credentials
+                    - application_session
+                    - cache_refresh
+                    - update_user
+                    - user_registration
+                    - client_registration
+                    - id_generator
+                    - uma_rpt_policy
+                    - uma_rpt_claims
+                    - uma_claims_gathering
+                    - consent_gathering
+                    - dynamic_scope
+                    - spontaneous_scope
+                    - end_session
+                    - post_authn
+                    - scim
+                    - ciba_end_user_notification
+                    - persistence_extension
+                    - idp
+                programmingLanguage:
+                  type: string
+                  enum:
+                    - python
+                    - javascript
+                  description: Specifies programming language of the custom script.
+                moduleProperties:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value1:
+                        type: string
+                      value2:
+                        type: string
+                      description:
+                        type: string
+                configurationProperties:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      value1:
+                        type: string
+                      value2:
+                        type: string
+                      description:
+                        type: string
+                      hide:
+                        type: boolean
+                level:
+                  type: integer
+                revision:
+                  type: integer
+                  format: int64
+                enabled:
+                  type: boolean
+                scriptError:
+                  type: object
+                  properties:
+                    raisedAt:
+                      type: string
+                      format: date
+                    stackTrace:
+                      type: string
+                modified:
+                  type: boolean
+                internal:
+                  type: boolean
+        description: New consent gathering script.
+    put:
+      summary: Modify consent gathering script.
+      operationId: put-scripts-consent
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Modify consent gathering script.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dn:
+                  type: string
+                  description: Dn(Distinguished Name) of the script.
+                inum:
+                  type: string
+                  description: XRI i-number
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+                  description: 'Name should contain only letters, digits and underscores.'
+                aliases:
+                  type: array
+                  items:
+                    type: string
+                description:
+                  type: string
+                script:
+                  type: string
+                  description: Actual consent gathering script.
+                scriptType:
+                  type: string
+                  enum:
+                    - person_authentication
+                    - introspection
+                    - resource_owner_password_credentials
+                    - application_session
+                    - cache_refresh
+                    - update_user
+                    - user_registration
+                    - client_registration
+                    - id_generator
+                    - uma_rpt_policy
+                    - uma_rpt_claims
+                    - uma_claims_gathering
+                    - consent_gathering
+                    - dynamic_scope
+                    - spontaneous_scope
+                    - end_session
+                    - post_authn
+                    - scim
+                    - ciba_end_user_notification
+                    - persistence_extension
+                    - idp
+                programmingLanguage:
+                  type: string
+                  description: Specifies programming language of the custom script.
+                  enum:
+                    - python
+                    - javascript
+                moduleProperties:
+                  type: object
+                  properties:
+                    value1:
+                      type: string
+                    value2:
+                      type: string
+                    description:
+                      type: string
+                      description: ''
+                configurationProperties:
+                  type: object
+                  description: List of configuration properties.
+                  properties:
+                    value1:
+                      type: string
+                    value2:
+                      type: string
+                    description:
+                      type: string
+                    hide:
+                      type: boolean
+                level:
+                  type: integer
+                revision:
+                  type: integer
+                  format: int64
+                enabled:
+                  type: boolean
+                scriptError:
+                  type: object
+                  properties:
+                    raisedAt:
+                      type: string
+                      format: date
+                    stackTrace:
+                      type: string
+                modified:
+                  type: boolean
+                internal:
+                  type: boolean
+        description: Modified consent gathering script.
+      tags:
+        - Custom Scripts
+  '/scripts/consent/{inum}':
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Delete consent gathering script.
+      operationId: delete-scripts-consent-inum
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      description: Delete consent gathering script.
+      tags:
+        - Custom Scripts
+    get:
+      summary: Get consent gathering script by inum.
+      operationId: get-scripts-consent-inum
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dn:
+                    type: string
+                    description: Dn(Distinguished Name) of the script.
+                  inum:
+                    type: string
+                    description: XRI i-number
+                  name:
+                    type: string
+                    pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+                    minLength: 1
+                    maxLength: 60
+                    description: 'Name should contain only letters, digits and underscores.'
+                  aliases:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+                  script:
+                    type: string
+                    description: Actual script.
+                  scriptType:
+                    type: string
+                    enum:
+                      - person_authentication
+                      - introspection
+                      - resource_owner_password_credentials
+                      - application_session
+                      - cache_refresh
+                      - update_user
+                      - user_registration
+                      - client_registration
+                      - id_generator
+                      - uma_rpt_policy
+                      - uma_rpt_claims
+                      - uma_claims_gathering
+                      - consent_gathering
+                      - dynamic_scope
+                      - spontaneous_scope
+                      - end_session
+                      - post_authn
+                      - scim
+                      - ciba_end_user_notification
+                      - persistence_extension
+                      - idp
+                  programmingLanguage:
+                    type: string
+                    description: Specifies programming language of the custom script.
+                    enum:
+                      - python
+                      - javascript
+                  moduleProperties:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                  configurationProperties:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                        hide:
+                          type: boolean
+                  level:
+                    type: integer
+                  revision:
+                    type: integer
+                    format: int64
+                  enabled:
+                    type: boolean
+                  scriptError:
+                    type: object
+                    properties:
+                      raisedAt:
+                        type: string
+                        format: date
+                      stackTrace:
+                        type: string
+                  modified:
+                    type: boolean
+                  internal:
+                    type: boolean
+      description: Get consent gathering script identified by inum.
+      tags:
+        - Custom Scripts
+  '/scripts/consent/{type}':
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Get all consent gathering scripts by type.
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: Dn(Distinguished Name) of the script.
+                  properties:
+                    dn:
+                      type: string
+                    inum:
+                      type: string
+                    name:
+                      type: string
+                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+                      minLength: 1
+                      maxLength: 60
+                      description: 'Name should contain only letters, digits and underscores.'
+                    aliases:
+                      type: array
+                      items:
+                        type: string
+                    description:
+                      type: string
+                    script:
+                      type: string
+                      description: Actual script.
+                    scriptType:
+                      type: string
+                      enum:
+                        - person_authentication
+                        - introspection
+                        - resource_owner_password_credentials
+                        - application_session
+                        - cache_refresh
+                        - update_user
+                        - user_registration
+                        - client_registration
+                        - id_generator
+                        - uma_rpt_policy
+                        - uma_rpt_claims
+                        - uma_claims_gathering
+                        - consent_gathering
+                        - dynamic_scope
+                        - spontaneous_scope
+                        - end_session
+                        - post_authn
+                        - scim
+                        - ciba_end_user_notification
+                        - persistence_extension
+                        - idp
+                    programmingLanguage:
+                      type: string
+                      enum:
+                        - python
+                        - javascript
+                      description: Specifies programming language of the custom script.
+                    moduleProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          value1:
+                            type: string
+                          value2:
+                            type: string
+                          description:
+                            type: string
+                    configurationProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          value1:
+                            type: string
+                          value2:
+                            type: string
+                          description:
+                            type: string
+                          hide:
+                            type: boolean
+                    level:
+                      type: integer
+                    revision:
+                      type: integer
+                      format: int64
+                    enabled:
+                      type: boolean
+                    scriptError:
+                      type: object
+                      properties:
+                        raisedAt:
+                          type: string
+                          format: date
+                        stackTrace:
+                          type: string
+                    modified:
+                      type: boolean
+                    internal:
+                      type: boolean
+      operationId: get-scripts-consent-type
+      description: Get all consent gathering scripts based on type.
   /scripts/client_reg:
     get:
       summary: Gets all client registration script.
