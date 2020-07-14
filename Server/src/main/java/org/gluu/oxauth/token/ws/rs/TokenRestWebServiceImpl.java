@@ -543,7 +543,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
 
-            grantService.removeAllByGrantId(deviceCodeGrant.getGrantId());
+            grantService.removeByCode(deviceCodeGrant.getDeviceCode());
 
             return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
                     accessToken.getExpiresIn(), reToken, scope, idToken)).build();
