@@ -355,7 +355,7 @@ class ServicesForm(GluuSetupForm):
                 Config.oxd_use_gluu_storage = True
 
         # check if we have enough memory
-        if not self.parentApp.installObject.calculate_selected_aplications_memory():
+        if not self.parentApp.jettyInstaller.calculate_selected_aplications_memory():
             result = npyscreen.notify_yes_no(msg.memory_warning, title="Warning")
             if not result:
                 return
