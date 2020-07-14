@@ -276,6 +276,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = cibaGrant;
                         break;
+                    case DEVICE_CODE:
+                        DeviceCodeGrant deviceCodeGrant = grantInstance.select(DeviceCodeGrant.class).get();
+                        deviceCodeGrant.init(user, AuthorizationGrantType.DEVICE_CODE, client, tokenLdap.getCreationDate());
+
+                        result = deviceCodeGrant;
+                        break;
                     default:
                         return null;
                 }
