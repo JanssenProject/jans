@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import glob
-import platform
+import csv
 import zipfile
 import json
 import datetime
@@ -35,9 +35,23 @@ with open('/proc/1/status', 'r') as f:
     os_initdaemon = f.read().split()[1]
 
 # Determine os_type and os_version
-p = platform.linux_distribution()
-os_type = p[0].split()[0].lower()
-os_version = p[1].split('.')[0]
+os_type, os_version = '', ''
+
+with open("/etc/os-release") as f:
+    reader = csv.reader(f, delimiter="=")
+    for row in reader:
+        if row:
+            if row[0] == 'ID':
+                os_type = row[1].lower()
+                if os_type == 'rhel':
+                    os_type = 'redhat'
+            elif row[0] == 'VERSION_ID':
+                os_version = row[1].split('.')[0]
+
+if not (os_type and os_version):
+    print("Can't determine OS type and OS version")
+    sys.exit()
+
 os_name = os_type + os_version
 
 if os_type == 'debian':
