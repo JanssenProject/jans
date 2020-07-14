@@ -27,6 +27,7 @@ public class DeviceCodeGrant extends AuthorizationGrant {
         super.init(user, AuthorizationGrantType.DEVICE_CODE, cacheData.getClient(), null);
         setDeviceCode(cacheData.getDeviceCode());
         setIsCachedWithNoPersistence(true);
+        setScopes(cacheData.getScopes());
     }
 
     @Override
