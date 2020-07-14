@@ -1,6 +1,6 @@
 import os
 import glob
-
+import shutil
 
 from setup_app.utils.base import httpd_name, clone_type, \
     os_initdaemon, os_type, determineApacheVersion
@@ -107,13 +107,18 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
                     self.writeFile(mod_load_fn, ''.join(mod_load_content))
         else:
 
+            cmd_a2enmod = shutil.which('a2enmod')
+            cmd_a2dismod = shutil.which('a2dismod')
+
             for mod_load_fn in glob.glob('/etc/apache2/mods-enabled/*'):
                 mod_load_base_name = os.path.basename(mod_load_fn)
                 f_name, f_ext = os.path.splitext(mod_load_base_name)
-
                 if not f_name in mods_enabled:
-                    self.run(['unlink', mod_load_fn])
+                    self.run([cmd_a2dismod, mod_load_fn])
 
+            for amod in mods_enabled:
+                self.run([cmd_a2enmod, amod])
+            
         if not Config.get('httpdKeyPass'):
             Config.httpdKeyPass = self.getPW()
 
