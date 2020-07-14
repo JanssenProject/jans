@@ -26,7 +26,7 @@ from org.gluu.persist import PersistenceEntryManager
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
 from java.util import ArrayList, Arrays, Collections, HashSet
-
+from org.gluu.oxauth.model.exception import InvalidJwtException
 from javax.faces.application import FacesMessage
 from javax.faces.context import FacesContext
 
@@ -298,7 +298,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.isInboundFlow(identity):
                 print "Passport. getPageForStep for step 1. Detected inbound Saml flow"
                 return "/postlogin.xhtml"
-
+            print "Passport. getPageForStep 1. NormalFlow, returning passportlogin.xhtml"
             return "/auth/passport/passportlogin.xhtml"
 
         return "/auth/passport/passportpostlogin.xhtml"
@@ -736,7 +736,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def addUser(self, externalUid, profile, userService):
-
+        print "Passport. Entered addUser()."
+        print "Passport. addUser. externalUid = %s" % externalUid
+        print "Passport. addUser. profile = %s" % profile
         newUser = User()
         #Fill user attrs
         newUser.setAttribute("oxExternalUid", externalUid)
@@ -753,7 +755,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def fillUser(self, foundUser, profile):
-
+        print
+        print "Passport. Entered fillUser()."
+        print "Passport. fillUser. foundUser = %s" % foundUser
+        print "Passport. fillUser. profile = %s" % profile
         for attr in profile:
             # "provider" is disregarded if part of mapping
             if attr != self.providerKey:
@@ -762,6 +767,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 foundUser.setAttribute(attr, values)
 
                 if attr == "mail":
+                    print "Passport. fillUser. entered if attr == mail"
                     oxtrustMails = []
                     for mail in values:
                         oxtrustMails.append('{"value":"%s","primary":false}' % mail)
@@ -821,9 +827,11 @@ class PersonAuthentication(PersonAuthenticationType):
             print "passport.isInboundJwt. user_profile_json = %s" % user_profile_json
             if StringHelper.isEmpty(user_profile_json):
                 return False
+        except InvalidJwtException:
+            return False
+
         except:
             print("Unexpected error:", sys.exc_info()[0])
-            raise
             return False
 
         return True
