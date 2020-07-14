@@ -38,5 +38,6 @@ class PostAuthn(PostAuthnType):
     # This script has higher priority and can cancel Pre-Authorization and persisted authorizations.
     # Note :
     # context is reference of org.gluu.oxauth.service.external.context.ExternalPostAuthnContext(in https://github.com/GluuFederation/oxauth project, )
+    # To get session object just call context.getSession()
     def forceAuthorization(self, context):
         return False

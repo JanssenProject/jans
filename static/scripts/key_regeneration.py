@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Please place this script in the same directory as setup.py
 
 import os
@@ -57,6 +59,7 @@ algs_for_versions = {
     '4.0.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
     '4.1.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
     '4.1.1': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
+    '4.2.0': {'sig_keys': 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512', 'enc_keys': 'RSA1_5 RSA-OAEP'},
 }
 
 sig_keys = 'RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512'
@@ -79,7 +82,7 @@ def run_command(args):
         cmd = ' '.join(args)
     else:
         cmd = args
-    print "Executing command", cmd
+    print("Executing command", cmd)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     result = p.communicate()
     return result
@@ -87,15 +90,15 @@ def run_command(args):
 missing_packages = []
 
 try:
-    import ldap
+    import ldap3
 except:
-    missing_packages.append('python-ldap')
+    missing_packages.append('python3-ldap3')
 
 if missing_packages:
     packages_str = ' '.join(missing_packages)
     result = raw_input("Missing package(s): {0}. Install now? (Y|n): ".format(packages_str))
     if result.strip() and result.strip().lower()[0] == 'n':
-        print "Can't continue without installing these packages. Exiting ..."
+        print("Can't continue without installing these packages. Exiting ...")
         sys.exit(False)
 
     if package_type == 'rpm':
@@ -108,16 +111,13 @@ if missing_packages:
         os.system('apt-get update')
         cmd = "apt-get install -y {0}".format(packages_str)
 
-    print "Installing package(s) with command: "+ cmd
+    print("Installing package(s) with command: "+ cmd)
     os.system(cmd)
 
 
 if missing_packages:
     python_ = sys.executable
     os.execl(python_, python_, * sys.argv)
-
-
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 backup_file(keystore_fn)
 backup_file(oxauth_keys_json_fn)
@@ -133,7 +133,7 @@ if os.path.exists(gluu_hybrid_roperties_fn):
 elif os.path.exists(gluu_couchbase_roperties_fn):
     defaul_storage = 'couchbase'
 
-print "Obtaining keystore passwrod"
+print("Obtaining keystore passwrod")
 
 if defaul_storage == 'ldap':
     prop_fn = gluu_ldap_roperties_fn if os.path.exists(gluu_ldap_roperties_fn) else ox_ldap_roperties_fn
@@ -148,26 +148,35 @@ if defaul_storage == 'ldap':
             s = ls[n+1:].strip()
             servers_s = s.split(',')
             ldap_server = servers_s[0].strip()
+            ldap_host, ldap_port = ldap_server.split(':')
         elif l.startswith('bindDN'):
             ldap_binddn = l.split(':')[1].strip()
 
-    # Enable custom script oxtrust_api_access_policy
-    ldap_conn = ldap.initialize('ldaps://{}'.format(ldap_server))
-    ldap_conn.simple_bind_s(ldap_binddn, ldap_password)
+    server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True)
+    
+    ldap_conn = ldap3.Connection(server, user=ldap_binddn, password=ldap_password)
+    ldap_conn.bind()
 
-    result = ldap_conn.search_s('o=gluu', ldap.SCOPE_SUBTREE, '(objectClass=oxAuthConfiguration)', ['oxAuthConfDynamic','oxAuthConfWebKeys', 'oxRevision'])
+    ldap_conn.search(
+                search_base='o=gluu', 
+                search_scope=ldap3.SUBTREE, 
+                search_filter='(objectClass=oxAuthConfiguration)', 
+                attributes=['oxAuthConfDynamic','oxAuthConfWebKeys', 'oxRevision']
+                )
 
-    dn = result[0][0]
+    result = ldap_conn.response
 
-    oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0])
+    dn = result[0]['dn']
+
+    oxAuthConfDynamic = json.loads(result[0]['attributes']['oxAuthConfDynamic'][0])
     keyStoreSecret = oxAuthConfDynamic['keyStoreSecret']
     try:
-        oxAuthConfWebKeys = json.loads(result[0][1]['oxAuthConfWebKeys'][0])
+        oxAuthConfWebKeys = json.loads(result[0]['attributes']['oxAuthConfWebKeys'][0])
     except:
         oxAuthConfWebKeys = None
     oxRevision = 1
     try:
-        oxRevision = result[0][1]['oxRevision'][0]
+        oxRevision = result[0]['attributes']['oxRevision'][0]
     except:
         pass
 else:
@@ -194,11 +203,11 @@ else:
         oxAuthConfWebKeys = configuration_oxauth['results'][0]['gluu']['oxAuthConfWebKeys']
         oxRevision = configuration_oxauth['results'][0]['gluu']['oxRevision']
     else:
-        print "Couchbase server responded unexpectedly", result.text
+        print("Couchbase server responded unexpectedly", result.text)
 
 oxRevision = int(oxRevision) + 1
 
-print "Creating oxauth-keys.jks"
+print("Creating oxauth-keys.jks")
 # Create oxauth-keys.jks
 args = ['/opt/jre/bin/keytool', '-genkey',
         '-alias', 'dummy',
@@ -211,13 +220,40 @@ args = ['/opt/jre/bin/keytool', '-genkey',
 output = run_command(args)
 
 
-print "Determining oxauth key generator path"
+print("Determining version and vendor_id")
+#Determine version and vendor_id
+war_zip = zipfile.ZipFile('/opt/gluu/jetty/oxauth/webapps/oxauth.war', 'r')
+menifest = war_zip.read('META-INF/MANIFEST.MF')
+
+for l in menifest.splitlines():
+    ls = l.decode().strip()
+    n = ls.find(':')
+    if ls.startswith('Implementation-Version:'):
+        gluu_ver = ls[n+1:].strip()
+    elif ls.startswith('Implementation-Vendor-Id:'):
+        vendor_id = ls[n+1:].strip()
+
+vendor = vendor_id.split('.')[-1]
+
+oxauth_client_jar_fn = '/opt/dist/gluu/oxauth-client-jar-with-dependencies.jar'
+if not os.path.exists(oxauth_client_jar_fn):
+    print("Downloading oxauth-client with dependencies")
+    # Download oxauth-client with dependencies
+    oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/oxauth-client/{1}/oxauth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
+    args = ['wget', '-nv',oxauth_client_url, '-O', oxauth_client_jar_fn]
+    output = run_command(args)
+
+
+print("Determining oxauth key generator path")
 # Determine oxauth key generator path
 try:
     oxauth_client_jar_fn = max(list(glob.iglob('/home/jetty/lib/oxauth-client-*.jar')))
 except:
-    print "Can't find oxauth-client jar file. Exiting..."
-    sys.exit(False)
+    try:
+        oxauth_client_jar_fn = max(list(glob.iglob('/opt/dist/gluu/oxauth-client-*.jar')))
+    except:
+        print("Can't find oxauth-client jar file. Exiting...")
+        sys.exit(False)
 
 
 oxauth_client_jar_zf = zipfile.ZipFile(oxauth_client_jar_fn)
@@ -227,31 +263,10 @@ for fn in oxauth_client_jar_zf.namelist():
         key_gen_path = fp.replace('/','.')
         break
 else:
-    print "Can't determine oxauth-client KeyGenerator path. Exiting..."
+    print("Can't determine oxauth-client KeyGenerator path. Exiting...")
     sys.exit(False)
 
-print "Determining version and vendor_id"
-#Determine version and vendor_id
-war_zip = zipfile.ZipFile('/opt/gluu/jetty/oxauth/webapps/oxauth.war', 'r')
-menifest = war_zip.read('META-INF/MANIFEST.MF')
 
-for l in menifest.splitlines():
-    ls = l.strip()
-    n = ls.find(':')
-    if ls.startswith('Implementation-Version:'):
-        gluu_ver = ls[n+1:].strip()
-    elif ls.startswith('Implementation-Vendor-Id:'):
-        vendor_id = ls[n+1:].strip()
-
-vendor = vendor_id.split('.')[-1]
-
-print "Downloading oxauth-client with dependencies"
-# Download oxauth-client with dependencies
-oxauth_client_url = 'https://ox.gluu.org/maven/org/{0}/oxauth-client/{1}/oxauth-client-{1}-jar-with-dependencies.jar'.format(vendor, gluu_ver)
-oxauth_client_fn = os.path.basename(oxauth_client_url)
-oxauth_client_fn_path = os.path.join('/home/jetty/lib', oxauth_client_fn)
-args = ['wget', '-nv',oxauth_client_url, '-O', oxauth_client_fn_path]
-output = run_command(args)
 
 
 # Delete current keys
@@ -265,23 +280,24 @@ args = [ '/opt/jre/bin/keytool', '-delete',
 output = run_command(args)
 
 if output[1]:
-    print "ERROR:", output[1]
+    print("ERROR:", output[1])
 
 
-print "Genereting keys"
+print("Genereting keys")
 
-ver_tmp_list = gluu_ver.split('.')
-if not ver_tmp_list[-1].isdigit():
-    ver_tmp_list.pop()
-gluu_ver_real = '.'.join(ver_tmp_list)
+n_ = gluu_ver.find('-')
+if n_ > -1:
+    gluu_ver_real = gluu_ver[:n_]
+else:
+    gluu_ver_real = gluu_ver
 
 if gluu_ver_real in algs_for_versions:
-    key_algs = algs_for_versions[gluu_ver]['sig_keys']
-    enc_keys = algs_for_versions[gluu_ver].get('enc_keys', key_algs)
+    key_algs = algs_for_versions[gluu_ver_real]['sig_keys']
+    enc_keys = algs_for_versions[gluu_ver_real].get('enc_keys', key_algs)
 
 #Generete keys
 args = ['/opt/jre/bin/java', '-Dlog4j.defaultInitOverride=true',
-    '-cp', oxauth_client_fn_path, key_gen_path,
+    '-cp', oxauth_client_jar_fn, key_gen_path,
     '-keystore oxauth-keys.jks',
     '-keypasswd', keyStoreSecret]
 
@@ -310,7 +326,7 @@ shutil.copy(keystore_fn, keystore_fn_gluu)
 
 output = run_command(['chown', 'jetty:jetty', keystore_fn_gluu])
 
-print "Validating ... "
+print("Validating ... ")
 
 args = ['/opt/jre/bin/keytool', '-list', '-v',
         '-keystore', keystore_fn,
@@ -318,13 +334,13 @@ args = ['/opt/jre/bin/keytool', '-list', '-v',
         '|', 'grep', '"Alias name:"'
         ]
 cmd = ' '.join(args)
-print cmd
+print("Executing command", cmd)
 
 output = run_command(args)
 
 jsk_aliases = []
 for l in output[0].splitlines():
-    ls = l.strip()
+    ls = l.decode().strip()
     n = ls.find(':')
     alias_name = ls[n+1:].strip()
     jsk_aliases.append(alias_name)
@@ -339,32 +355,37 @@ json_aliases = [ wkey['kid'] for wkey in oxauth_keys_json['keys'] ]
 valid1 = True
 for alias_name in json_aliases:
     if not alias_name in jsk_aliases:
-        print keystore_fn, "does not contain", alias_name
+        print(keystore_fn, "does not contain", alias_name)
         valid1 = False
 
 valid2 = True
 for alias_name in jsk_aliases:
     if not alias_name in json_aliases:
-        print oxauth_keys_json_fn, "does not contain", alias_name
+        print(oxauth_keys_json_fn, "does not contain", alias_name)
         valid2 = False
 
 if valid1 and valid2:
-    print "Content of {} and {} matches".format(oxauth_keys_json_fn, keystore_fn)
+    print("Content of {} and {} matches".format(oxauth_keys_json_fn, keystore_fn))
 else:
-    print "Validation failed, not updating db"
+    print("Validation failed, not updating db")
     sys.exit(1)
 
-print "Updating oxAuthConfWebKeys in db"
+print("Updating oxAuthConfWebKeys in db")
 
 with open(oxauth_keys_json_fn) as f:
     oxauth_oxAuthConfWebKeys = f.read()
 
 if defaul_storage == 'ldap':
-    ldap_conn.modify_s(dn, [    ( ldap.MOD_REPLACE, 'oxAuthConfWebKeys',  oxauth_oxAuthConfWebKeys),
-                                ( ldap.MOD_REPLACE, 'oxRevision',  str(oxRevision))
-                            ])
+    ldap_conn.modify(
+                    dn,
+                    {
+                        "oxAuthConfWebKeys": [ldap3.MODIFY_REPLACE, oxauth_oxAuthConfWebKeys],
+                        "oxRevision": [ldap3.MODIFY_REPLACE, str(oxRevision)]
+                    }
+                )
+
 else:
     result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxAuthConfWebKeys='{}'".format(oxauth_oxAuthConfWebKeys))
     result = cbm.exec_query("update gluu USE KEYS 'configuration_oxauth' set gluu.oxRevision={}".format(oxRevision))
 
-print "Please exit container and restart Gluu Server"
+print("Please exit container and restart Gluu Server")
