@@ -261,6 +261,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
 
+                minHeapMem = 256
                 maxHeapMem = int(applicationMemory * jvmHeapRation)
                 if maxHeapMem < minHeapMem:
                     minHeapMem = maxHeapMem
