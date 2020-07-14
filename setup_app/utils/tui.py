@@ -303,6 +303,9 @@ class ServicesForm(GluuSetupForm):
                 else:
                     return
 
+        if self.installOxd.value:
+            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
+
         if self.installCasa.value:
             if not self.installOxd.value and not self.oxd_url.value:
                 npyscreen.notify_confirm(msg.install_oxd_or_url_warning, title="Warning")
