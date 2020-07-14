@@ -63,7 +63,7 @@ current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 disk_st = os.statvfs('/')
-current_free_disk_space = disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024)
+current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 def check_resources():
 
@@ -102,7 +102,7 @@ def check_resources():
 
 
     if current_free_disk_space < static.suggested_free_disk_space:
-        print(("{0}Warning: Available free disk space was determined to be {1:0.1f} "
+        print(("{0}Warning: Available free disk space was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         static.colors.WARNING,
                                                         available_disk_space,
