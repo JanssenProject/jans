@@ -62,7 +62,7 @@ class PassportInstaller(NodeInstaller):
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
         self.run([paths.cmd_mkdir, '-p', modules_target_dir])
 
-        node_modules_list = glob.glob(os.path.join(self.distGluuFolder,  'passport*node_modules*'))
+        node_modules_list = glob.glob(os.path.join(Config.distGluuFolder,  'passport*node_modules*'))
 
         if node_modules_list:
             passport_modules_archive = max(node_modules_list)
