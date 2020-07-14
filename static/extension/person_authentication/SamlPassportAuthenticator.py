@@ -5,6 +5,7 @@
 # Author: Yuriy Movchan
 # Author: Christian Eland
 #
+
 from org.gluu.jsf2.service import FacesService
 from org.gluu.jsf2.message import FacesMessages
 
@@ -32,6 +33,7 @@ from javax.faces.context import FacesContext
 import json
 import sys
 import datetime
+import base64
 
 
 class PersonAuthentication(PersonAuthenticationType):
@@ -39,7 +41,7 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        
+
         print "Passport. init called"
 
         self.extensionModule = self.loadExternalModule(configurationAttributes.get("extension_module"))
@@ -67,10 +69,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
-        
+
     def getAuthenticationMethodClaims(self, requestParameters):
         return None
-        
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
 
@@ -88,7 +90,13 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. authenticate for step %s called" % str(step)
         identity = CdiUtil.bean(Identity)
 
+        # Loading self.registeredProviders in case passport destroyed
+        if not hasattr(self,'registeredProviders'):
+            print "Passport. Fetching registered providers."
+            self.parseProviderConfigs()
+
         if step == 1:
+
             jwt_param = None
 
             if self.isInboundFlow(identity):
@@ -96,23 +104,29 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Detected idp-initiated inbound Saml flow"
                 # get request from session attributes
                 jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
+                print "Passport. authenticate. step ==1. if self.isInboundFlow(identity):."
+                print "jwt_param = %s" % jwt_param
                 # now jwt_param != None
 
 
 
             if jwt_param == None:
+                print "Entered if jwt_param == None"
                 # gets jwt parameter "user" sent after authentication by passport (if exists)
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
 
 
             if jwt_param != None:
                 # and now that the jwt_param user exists...
-                
+                print "Entered if jwt_param != None"
                 print "Passport. authenticate for step 1. JWT user profile token found"
+
+                if self.isInboundFlow(identity):
+                    jwt_param = base64.urlsafe_b64decode(str(jwt_param+'=='))
 
                 # Parse JWT and validate
                 jwt = Jwt.parse(jwt_param)
-                
+
                 if not self.validSignature(jwt):
                     return False
 
@@ -125,10 +139,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 if user_profile == None:
                     return False
 
+                sessionAttributes = identity.getSessionId().getSessionAttributes()
+                self.skipProfileUpdate = StringHelper.equalsIgnoreCase(sessionAttributes.get("skipPassportProfileUpdate"), "true")
+
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
             #See passportlogin.xhtml
+            print "-------------============------------"
             provider = ServerUtil.getFirstValue(requestParameters, "loginForm:provider")
+            print "authenticate() - provider = %s" % str(provider)
+
+
+            print "authenticate - self.registeredProviders: %s" % str(self.registeredProviders)
             if StringHelper.isEmpty(provider):
 
                 #it's username + passw auth
@@ -147,9 +169,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 return logged_in
 
 
+
             elif provider in self.registeredProviders:
                 # user selected provider
-                # it's a recognized external IDP
+                    # it's a recognized external IDP
 
                 identity.setWorkingParameter("selectedProvider", provider)
                 print "Passport. authenticate for step 1. Retrying step 1"
@@ -231,7 +254,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # if no provider selected yet...
             if url == None:
                 print "Passport. prepareForStep. A page to manually select an identity provider will be shown"
-            
+
             # else already got the /passport/auth/<provider>/<token> url...
             else:
 
@@ -239,7 +262,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 # redirects to Passport getRedirectURL - sends browser to IDP.
                 print "Passport. Redirecting to external url: %s" + url
-                
+
                 facesService.redirectToExternalURL(url)
 
         return True
@@ -271,6 +294,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             identity = CdiUtil.bean(Identity)
+            print "Passport. getPageForStep. Entered if step ==1"
             if self.isInboundFlow(identity):
                 print "Passport. getPageForStep for step 1. Detected inbound Saml flow"
                 return "/postlogin.xhtml"
@@ -427,6 +451,7 @@ class PersonAuthentication(PersonAuthenticationType):
             for provider in toRemove:
                 registeredProviders.pop(provider)
 
+
             if len(registeredProviders.keys()) > 0:
                 print "Passport. parseProviderConfigs. Configured providers:", registeredProviders
             else:
@@ -434,7 +459,10 @@ class PersonAuthentication(PersonAuthenticationType):
         except:
             print "Passport. parseProviderConfigs. An error occurred while building the list of supported authentication providers", sys.exc_info()[1]
 
+
+        print "parseProviderConfigs - registeredProviders = %s" % str(registeredProviders)
         self.registeredProviders = registeredProviders
+        print "parseProviderConfigs - self.registeredProviders = %s" % str(self.registeredProviders)
 
 # Auxiliary routines
 
@@ -494,9 +522,9 @@ class PersonAuthentication(PersonAuthenticationType):
             appConfiguration.setKeyRegenerationEnabled(False)
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration)
-            
 
-            alg_string = str(jwt.getHeader().getAlgorithm())
+
+            alg_string = str(jwt.getHeader().getSignatureAlgorithm())
             signature_string = str(jwt.getEncodedSignature())
 
             if alg_string == "none" or alg_string == "None" or alg_string == "NoNe" or alg_string == "nONE" or alg_string == "NONE" or alg_string == "NonE" or alg_string == "nOnE":
@@ -504,20 +532,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 print "WARNING: JWT Signature algorithm is none"
                 valid = False
-            
+
             elif alg_string != "RS512":
                 # blocks anything that's not RS512
-            
+
                 print "WARNING: JWT Signature algorithm is NOT RS512"
                 valid = False
-            
+
             elif signature_string == "" :
                 # blocks empty signature string
                 print "WARNING: JWT Signature not sent"
                 valid = False
-            
+
             else:
-                
+
                 # class extends AbstractCryptoProvider
                 ''' on version 4.2 .getAlgorithm() method was renamed to .getSignatureAlgorithm()
                 for older versions:
@@ -528,7 +556,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # working on 4.2:
                 valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
                                                             None, None, jwt.getHeader().getSignatureAlgorithm())
-               
+
         except:
             print "Exception: ", sys.exc_info()[1]
 
@@ -551,10 +579,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def getUserProfile(self, jwt):
-        
+
         # getClaims method located at org.gluu.oxauth.model.token.JsonWebResponse.java as a org.gluu.oxauth.model.jwt.JwtClaims object
         jwt_claims = jwt.getClaims()
-        
+
         user_profile_json = None
 
         try:
@@ -569,16 +597,23 @@ class PersonAuthentication(PersonAuthenticationType):
 
 
     def attemptAuthentication(self, identity, user_profile, user_profile_json):
+
+        print "Entered attemptAuthentication..."
         uidKey = "uid"
         if not self.checkRequiredAttributes(user_profile, [uidKey, self.providerKey]):
             return False
 
         provider = user_profile[self.providerKey]
+        print "user_profile[self.providerKey] = %s" % str(user_profile[self.providerKey])
         if not provider in self.registeredProviders:
+            print "Entered if note provider in self.registeredProviers:"
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
+        print "attemptAuthentication. user_profile = %s" % user_profile
+        print "user_profile[uidKey] = %s" % user_profile[uidKey]
         uid = user_profile[uidKey][0]
+        print "attemptAuthentication - uid = %s" % uid
         externalUid = "passport-%s:%s:%s" % ("saml", provider, uid)
 
         userService = CdiUtil.bean(UserService)
@@ -735,17 +770,33 @@ class PersonAuthentication(PersonAuthenticationType):
 # IDP-initiated flow routines
 
     def isInboundFlow(self, identity):
+        print "passport. entered isInboundFlow"
+
         sessionId = identity.getSessionId()
+        print "passport. isInboundFlow. sessionId = %s" % sessionId
         if sessionId == None:
+            print "passport. isInboundFlow. sessionId not found yet..."
             # Detect mode if there is no session yet. It's needed for getPageForStep method
             facesContext = CdiUtil.bean(FacesContext)
             requestParameters = facesContext.getExternalContext().getRequestParameterMap()
+            print "passport. isInboundFlow. requestParameters = %s" % requestParameters
 
             authz_state = requestParameters.get(AuthorizeRequestParam.STATE)
+            print "passport. isInboundFlow. authz_state = %s" % authz_state
         else:
             authz_state = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
 
-        if self.isInboundJwt(authz_state):
+        print "passport. IsInboundFlow. authz_state = %s" % authz_state
+
+        # the replace above is workaround due a problem reported
+        # on issue: https://github.com/GluuFederation/gluu-passport/issues/95
+        # TODO: Remove after fixed on JSF side
+
+        b64url_decoded_auth_state = base64.urlsafe_b64decode(str(authz_state+'=='))
+
+        # print "passport. IsInboundFlow. b64url_decoded_auth_state = %s" % str(b64url_decoded_auth_state)
+        print "passport. IsInboundFlow. self.isInboundJwt() = %s" % str(self.isInboundJwt(b64url_decoded_auth_state))
+        if self.isInboundJwt(b64url_decoded_auth_state):
             return True
 
         return False
@@ -756,11 +807,23 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         try:
+
+            print("passport.isInboundJwt. value = %s" % value)
+            # value = value.replace("_", ".")
+            # print("passport.isInboundJwt. value = %s" % value)
+
             jwt = Jwt.parse(value)
-            user_profile_json = jwt.getClaims().getClaimAsString("data")
+            print "passport.isInboundJwt. jwt = %s" % jwt
+
+            # user_profile_json = jwt.getClaims().getClaimAsString("data")
+
+            user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt.getClaims().getClaimAsString("data"))
+            print "passport.isInboundJwt. user_profile_json = %s" % user_profile_json
             if StringHelper.isEmpty(user_profile_json):
                 return False
         except:
+            print("Unexpected error:", sys.exc_info()[0])
+            raise
             return False
 
         return True

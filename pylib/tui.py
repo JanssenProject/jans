@@ -15,6 +15,10 @@ import math
 from queue import Queue
 from .messages import msg
 
+# for putty connections we need the following env
+os.environ['NCURSES_NO_UTF8_ACS'] = "1" 
+
+
 import npyscreen
 
 queue = Queue()
@@ -72,9 +76,9 @@ class GluuSetupApp(npyscreen.StandardApp):
 class GluuSetupForm(npyscreen.FormBaseNew):
 
     def beforeEditing(self):
-        
+
         self.parentApp.my_counter = 0
-        
+
         self.add_handlers({curses.KEY_F1: self.display_help})
         self.add(npyscreen.MultiLineEdit, value='=' * (self.columns - 4), max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
@@ -85,15 +89,15 @@ class GluuSetupForm(npyscreen.FormBaseNew):
 
             next_x = 20 if  form_name == 'MAIN' else 28
             self.button_next = self.add(npyscreen.ButtonPress, name="Next", when_pressed_function=self.nextButtonPressed, rely=self.lines-5, relx=self.columns - next_x)
-            
+
             if next_x == 28:
                 self.button_back = self.add(npyscreen.ButtonPress, name="Back", when_pressed_function=self.backButtonPressed, rely=self.lines-5, relx=self.columns - 20)
-        
+
         self.button_quit = self.add(npyscreen.ButtonPress, name="Quit", when_pressed_function=self.quitButtonPressed, rely=self.lines-5, relx=self.columns - 12)
 
         if hasattr(self, 'do_beforeEditing'):
             self.do_beforeEditing()
-    
+
     def while_waiting(self):
         if self.parentApp.my_counter % marketing_text_period == 0:
             self.marketing_label.value = random.choice(random_marketing_strings)
@@ -111,21 +115,21 @@ class GluuSetupForm(npyscreen.FormBaseNew):
             self.parentApp.switchForm(None)
 
     def display_help(self, code_of_key_pressed):
-        
+
         class_name = self.__class__.__name__
         if hasattr(msg, class_name+'Help'):
             help_text = getattr(msg, class_name+'Help')
         else:
             help_text = msg.no_help
-        
+
         npyscreen.notify_confirm(help_text, title="Help", wide=True)
 
 class MAIN(GluuSetupForm):
-    
+
     def create(self):
- 
+
         desc_wrap = textwrap.wrap(msg.decription, self.columns - 6)
-        
+
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
         self.description_label.autowrap = True
 
@@ -140,13 +144,13 @@ class MAIN(GluuSetupForm):
             req_val = getattr(msg, 'suggested_' + sys_req)
             if cur_val < req_val:
                 warning_text = getattr(msg, 'insufficient_' + sys_req).format(cur_val, req_val)
-                
+
                 if sys_req == 'file_max':
                     self.parentApp.exit_reason = warning_text
                     self.parentApp.onCleanExit()
                     time.sleep(3.5)
                     sys.exit(False)
-                
+
                 warning_text += '. Do you want to continue?'
                 result = npyscreen.notify_yes_no(warning_text, title="Warning")
                 if not result:
@@ -156,13 +160,13 @@ class MAIN(GluuSetupForm):
 
 
     def nextButtonPressed(self):
-    
+
         if not self.license_confirm.value:
             npyscreen.notify_confirm(msg.acknowledge_lisence_ask, title="Info")
             return
-        
+
         self.parentApp.switchForm("HostForm")
-        
+
 
     def on_cancel(self):
         self.title.value = "Hello World!"
@@ -177,9 +181,9 @@ class MAIN(GluuSetupForm):
         self.button_next.relx = self.columns-20
 
 class HostForm(GluuSetupForm):
-    
+
     myfields_ = ('ip', 'hostname', 'city', 'state', 'orgName', 'admin_email', 'countryCode', 'application_max_ram', 'oxtrust_admin_password')
-    
+
     def create(self):
 
         self.add(npyscreen.FixedText, value=make_title(msg.cert_info_label), editable=False)
@@ -195,7 +199,7 @@ class HostForm(GluuSetupForm):
         self.application_max_ram = self.add(npyscreen.TitleText, name=msg.application_max_ram_label, begin_entry_at=25)
         self.oxtrust_admin_password = self.add(npyscreen.TitleText, name=msg.oxtrust_admin_password_label, begin_entry_at=25)
 
-        
+
     def nextButtonPressed(self):
 
         if not self.hostname.value:
@@ -209,7 +213,7 @@ class HostForm(GluuSetupForm):
         if not self.parentApp.installObject.check_email(self.admin_email.value):
             npyscreen.notify_confirm(msg.enter_valid_email, title="Info")
             return
-        
+
         if not self.parentApp.installObject.isIP(self.ip.value):
             npyscreen.notify_confirm(msg.enter_valid_ip, title="Info")
             return
@@ -217,7 +221,7 @@ class HostForm(GluuSetupForm):
         if len(self.countryCode.value) < 2:
             npyscreen.notify_confirm(msg.enter_valid_countryCode, title="Info")
             return
-        
+
         if len(self.oxtrust_admin_password.value) < 6:
             npyscreen.notify_confirm(msg.oxtrust_admin_password_warning, title="Info")
             return
@@ -274,9 +278,26 @@ class ServicesForm(GluuSetupForm):
                 cb.update()
 
     def nextButtonPressed(self):
+
+        service_enable_dict = {
+                        'installPassport': ['gluuPassportEnabled', 'enable_scim_access_policy'],
+                        'installGluuRadius': ['gluuRadiusEnabled', 'oxauth_legacyIdTokenClaims', 'oxauth_openidScopeBackwardCompatibility', 'enableRadiusScripts'],
+                        'installSaml': ['gluuSamlEnabled'],
+                        'installScimServer': ['gluuScimEnabled', 'enable_scim_access_policy'],
+                        }
+
         for service in self.services:
             cb_val = getattr(self, service).value
             setattr(self.parentApp.installObject, service, cb_val)
+            if cb_val and service in service_enable_dict:
+                for attribute in service_enable_dict[service]:
+                    setattr(self.parentApp.installObject, attribute, 'true')
+
+        if self.installSaml:
+            self.parentApp.installObject.shibboleth_version = 'v3'
+
+        if self.installOxd.value:
+            self.parentApp.installObject.oxd_server_https = 'https://{}:8443'.format(self.parentApp.installObject.hostname)
 
         if self.installCasa.value:
             if not self.installOxd.value and not self.oxd_url.value:
@@ -284,11 +305,10 @@ class ServicesForm(GluuSetupForm):
                 return
 
             if not self.installOxd.value:
-        
+
                 oxd_server_https = self.oxd_url.value
-        
                 oxd_connection_result = self.parentApp.installObject.check_oxd_server(oxd_server_https)
-        
+
                 if oxd_connection_result != True:
                     npyscreen.notify_confirm(
                             msg.oxd_connection_error.format(oxd_server_https, oxd_connection_result),
@@ -304,7 +324,7 @@ class ServicesForm(GluuSetupForm):
                             msg.oxd_ssl_cert_error.format(oxd_ssl_result['CN'], oxd_hostname),
                             title="Warning")
                     return
-        
+
                 self.parentApp.installObject.oxd_server_https = oxd_server_https
 
         oxd_hostname, oxd_port = self.parentApp.installObject.parse_url(self.parentApp.installObject.oxd_server_https)
@@ -319,20 +339,26 @@ class ServicesForm(GluuSetupForm):
             if result:
                 self.parentApp.installObject.oxd_use_gluu_storage = True
 
+        # check if we have enough memory
+        if not self.parentApp.installObject.calculate_selected_aplications_memory():
+            result = npyscreen.notify_yes_no(msg.memory_warning, title="Warning")
+            if not result:
+                return
+
         self.parentApp.switchForm('DBBackendForm')
 
 
     def casa_oxd_option_changed(self, widget):
-        
+
         if self.installOxd.value:
             self.oxd_url.hidden = True
-        
+
         elif self.installCasa.value and not self.installOxd.value:
             self.oxd_url.hidden = False
-        
+
         elif not self.installCasa.value:
             self.oxd_url.hidden = True
-        
+
         self.oxd_url.update()
 
 
@@ -461,11 +487,11 @@ class DBBackendForm(GluuSetupForm):
             self.parentApp.installObject.cache_provider_type = 'NATIVE_PERSISTENCE'
             self.parentApp.installObject.add_couchbase_post_messages()
 
-        if self.parentApp.installObject.wrends_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
+        if self.parentApp.installObject.wrends_install  == LOCAL and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.ldapPass):
             npyscreen.notify_confirm(msg.weak_password.format('WrenDS'), title="Warning")
             return
 
-        if self.parentApp.installObject.cb_install and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
+        if self.parentApp.installObject.cb_install == LOCAL and not self.parentApp.installObject.checkPassword(self.parentApp.installObject.cb_password):
             npyscreen.notify_confirm(msg.weak_password.format('Couchbase Server'), title="Warning")
             return
 
@@ -482,7 +508,7 @@ class DBBackendForm(GluuSetupForm):
 
                 for s in storage_list:
                     self.parentApp.installObject.mappingLocations[s] = storage
-                
+
                 self.parentApp.installObject.persistence_type = storage
 
                 self.parentApp.switchForm('DisplaySummaryForm')
@@ -501,7 +527,7 @@ class DBBackendForm(GluuSetupForm):
             elif str(self.ask_wrends.value[0]) == REMOTE:
                 self.wrends_password.hidden = False
                 self.wrends_hosts.hidden = False
-                
+
             self.wrends_password.update()
             self.wrends_hosts.update()
 
@@ -532,9 +558,9 @@ class DBBackendForm(GluuSetupForm):
 class StorageSelectionForm(GluuSetupForm):
     def create(self):
 
-        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=25, max_height=len(msg.storages), 
+        self.wrends_storage = self.add(npyscreen.TitleMultiSelect, begin_entry_at=30, max_height=len(msg.storages), 
             values=msg.storages, name=msg.DBBackendForm_label, scroll_exit=True)
-        
+
         self.add(npyscreen.FixedText, value=msg.unselected_storages, rely=len(msg.storages)+4, editable=False, color='STANDOUT')
 
     def backButtonPressed(self):
@@ -548,7 +574,7 @@ class StorageSelectionForm(GluuSetupForm):
             if self.parentApp.installObject.mappingLocations[s] == 'ldap':
                 value.append(i)
         self.wrends_storage.value = value
-        
+
         self.wrends_storage.update()
 
     def nextButtonPressed(self):
@@ -561,6 +587,7 @@ class StorageSelectionForm(GluuSetupForm):
                 self.parentApp.installObject.mappingLocations[s] = 'couchbase'
 
         self.parentApp.switchForm('DisplaySummaryForm')
+
 
 class DisplaySummaryForm(GluuSetupForm):
 
@@ -612,7 +639,6 @@ class DisplaySummaryForm(GluuSetupForm):
 
 
 
-
     def do_beforeEditing(self):
         wrends_storages_widget = getattr(self, 'wrends_storages')
 
@@ -652,7 +678,7 @@ class DisplaySummaryForm(GluuSetupForm):
             self.parentApp.switchForm('StorageSelectionForm')
         else:
             self.parentApp.switchForm('DBBackendForm')
-        
+
 
     def nextButtonPressed(self):
         # Validate Properties
@@ -664,9 +690,9 @@ class InputBox(npyscreen.BoxTitle):
     _contained_widget = npyscreen.MultiLineEdit
 
 class InstallStepsForm(GluuSetupForm):
-    
+
     desc_value = None
-    
+
     def create(self):
         self.prgress_percantage = self.add(npyscreen.TitleSliderPercent, accuracy=0, out_of=msg.installation_step_number+1, rely=4, editable=False, name="Progress")
         self.installing = self.add(npyscreen.TitleFixedText, name=msg.installing_label, value="", editable=False)
@@ -693,7 +719,7 @@ class InstallStepsForm(GluuSetupForm):
                 npyscreen.notify_confirm(msg.installation_error +"\n"+data[2], title="ERROR")
                 self.parentApp.do_notify = False
                 self.parentApp.switchForm(None)
-                
+
             self.prgress_percantage.value = data[0]
             self.prgress_percantage.update()
             self.installing.value = data[2]
@@ -703,13 +729,13 @@ class InstallStepsForm(GluuSetupForm):
 
                 if hasattr(msg, 'installation_description_' + data[1]):
                     desc = getattr(msg, 'installation_description_' + data[1])
-                    
+
                 else:
                     desc = msg.installation_description_gluu
                 self.description.value = '\n'.join(textwrap.wrap(desc, self.columns - 10))
                 self.description.update()
                 self.desc_value = data[1]
-                
+
 
     def backButtonPressed(self):
         pass

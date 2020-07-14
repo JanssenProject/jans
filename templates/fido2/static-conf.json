@@ -3,6 +3,7 @@
         "configuration":"ou=configuration,o=gluu",
         "people":"ou=people,o=gluu",
         "scripts": "ou=scripts,o=gluu",
-        "metric":"ou=statistic,o=metric"
+        "metric":"ou=statistic,o=metric",
+        "sessions":"ou=sessions,o=gluu"
     }
 }
