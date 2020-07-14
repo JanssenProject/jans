@@ -19,7 +19,6 @@ from collections import OrderedDict
 
 from setup_app import paths
 from setup_app import static
-from setup_app import messages
 from setup_app.config import Config
 from setup_app.pylib.jproperties import Properties
 
@@ -80,8 +79,6 @@ current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
 disk_st = os.statvfs('/')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
-suggested_mem_size = int(current_mem_size * .83 * 1000) # 83% of physical memory
-messages.suggested_mem_size = suggested_mem_size
 
 def check_resources():
 
@@ -92,11 +89,11 @@ def check_resources():
                                                                 static.colors.ENDC)))
         sys.exit(1)
 
-    if current_mem_size < suggested_mem_size:
+    if current_mem_size < static.suggested_mem_size:
         print(("{0}Warning: RAM size was determined to be {1:0.1f} GB. This is less "
                "than the suggested RAM size of {2} GB.{3}").format(static.colors.WARNING,
                                                         current_mem_size, 
-                                                        suggested_mem_size,
+                                                        static.suggested_mem_size,
                                                         static.colors.ENDC))
 
 
