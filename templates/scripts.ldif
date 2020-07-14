@@ -21,23 +21,6 @@ oxScript::%(person_authentication_usercertexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
-dn: inum=2FDB-CF02,ou=scripts,o=gluu
-objectClass: oxCustomScript
-objectClass: top
-description: Passport authentication module
-displayName: passport_social
-oxEnabled: %(gluuPassportEnabled)s
-inum: 2FDB-CF02
-oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
-oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
-oxLevel: 40
-oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-oxRevision: 1
-oxScript::%(person_authentication_passportexternalauthenticator)s
-oxScriptType: person_authentication
-programmingLanguage: python
-
 dn: inum=CB5B-3211,ou=scripts,o=gluu
 objectClass: oxCustomScript
 objectClass: top
@@ -133,7 +116,7 @@ description: Sample UMA RPT Policy
 displayName: uma_rpt_policy
 oxEnabled: false
 inum: 2DAF-F995
-oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"","description":""}
 oxLevel: 100
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -146,9 +129,9 @@ objectClass: top
 objectClass: oxCustomScript
 description: Client authorization UMA RPT Policy for SCIM and Passport
 displayName: scim_access_policy
-oxEnabled: %(enable_scim_access_policy)s
+oxEnabled: false
 inum: 2DAF-F9A5
-oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
+oxConfigurationProperty: {"value1":"allowed_clients","value2":"","description":""}
 oxLevel: 100
 oxRevision: 1
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
@@ -477,23 +460,6 @@ oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
 oxScript::%(scim_samplescript)s
 oxScriptType: scim
-programmingLanguage: python
-
-dn: inum=D40C-1CA4,ou=scripts,o=gluu
-objectClass: oxCustomScript
-objectClass: top
-description: Passport SAML authentication module
-displayName: passport_saml
-oxEnabled: %(gluuPassportEnabled)s
-inum: D40C-1CA4
-oxConfigurationProperty: {"value1":"key_store_file","value2":"%(passport_rp_client_jks_fn)s","hide":false,"description":""}
-oxConfigurationProperty: {"value1":"key_store_password","value2":"%(passport_rp_client_jks_pass)s","hide":false,"description":""}
-oxLevel: 60
-oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-oxRevision: 1
-oxScript::%(person_authentication_samlpassportauthenticator)s
-oxScriptType: person_authentication
 programmingLanguage: python
 
 dn: inum=DAA9-B788,ou=scripts,o=gluu

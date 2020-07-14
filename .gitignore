@@ -1,7 +1,7 @@
 setup.properties
 *.log
 *.pyc
-setup.properties.last
+setup.properties.last*
 /.project
 /.pydevproject
 /.idea
@@ -9,3 +9,4 @@ setup.properties.last
 env/
 __pycache_/_
 pylib/__pycache_/
+@*

@@ -9,9 +9,6 @@
     "idpUrl":"https://%(hostname)s",
     "applicationUrl":"https://%(hostname)s",
 
-    "keystorePath":"%(shibJksFn)s",
-    "keystorePassword":"%(shibJksPass)s",
-
     "personObjectClassTypes":[
         "gluuCustomPerson",
         "gluuPerson",
@@ -47,8 +44,6 @@
     "photoRepositoryCountLeveles":3,
     "photoRepositoryCountFoldersPerLevel":20,
 
-    "shibboleth3FederationRootDir":"/opt/shibboleth-federation",
-
     "spMetadataPath":"",
 
     "logoLocation":"/var/gluu/photos",
@@ -57,13 +52,8 @@
 
     ],
 
-    "configGeneration":%(oxTrustConfigGeneration)s,
+    "configGeneration":false,
     "ignoreValidation":false,
-
-    "idpSecurityCert":"/etc/certs/shibIDP.crt",
-    "idpSecurityKey":"/etc/certs/shibIDP.key",
-    "idpSecurityKeyPassword":"%(encoded_shib_jks_pw)s",
-    "gluuSpCert":"/etc/certs/shibIDP.crt",
 
     "idpBindDn":"cn=Directory Manager",
     "idpBindPassword":"%(encoded_ox_ldap_pw)s",
@@ -97,13 +87,6 @@
 
     "umaIssuer":"https://%(hostname)s",
 
-    "scimUmaClientId":"%(scim_rs_client_id)s",
-    "scimUmaClientKeyId":"",
-    "scimUmaResourceId":"%(scim_resource_oxid)s",
-    "scimUmaScope":"https://%(hostname)s/oxauth/restv1/uma/scopes/scim_access",
-    "scimUmaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
-    "scimUmaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
-
     "apiUmaClientId":"%(oxtrust_resource_server_client_id)s",
     "apiUmaClientKeyId":"",
     "apiUmaResourceId":"%(oxtrust_resource_id)s",
@@ -120,17 +103,12 @@
     "rptConnectionPoolValidateAfterInactivity":10,
     "rptConnectionPoolCustomKeepAliveTimeout":5,
 
-    "shibbolethVersion":"%(shibboleth_version)s",
-    "shibboleth3IdpRootDir":"%(idp3Folder)s",
-    "shibboleth3SpConfDir":"%(idp3Folder)s/sp",
+
     "organizationName":"%(orgName)s",
-    "idp3SigningCert":"/etc/certs/idp-signing.crt",
-    "idp3EncryptionCert":"/etc/certs/idp-encryption.crt",
 
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
 
-    "scimTestMode": %(scimTestMode)s,
     "oxTrustApiTestMode": false,
     "ScimProperties": {
         "maxCount": 200
