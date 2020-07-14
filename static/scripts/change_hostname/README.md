@@ -2,32 +2,29 @@
 
 Used to change a Gluu Server from one hostname to another.
 
-**Currently tested to work with Gluu Server 3.1.x using Ubuntu 16 and CentOS 7**
+Notes:
+ * Currently tested to work with Gluu Server 4.x using CentOS 7
+ * This script should be run on host system, not inside container.
+
 
 Requirements:
 
 - Python 2
-- Python-pip
-- ldap3
+- python-ldap3
 - change_config.py
 - change_gluu_host.py
 
 Ubuntu Users
 -------------
-Install python-pip and ldap3
 
 ```
-apt install python-pip
-pip install ldap3
+apt install python-ldap3
 ```
 
 CentOS7 Users
 --------------
-
 ```
-curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-python get-pip.py
-pip install ldap3
+yum install python-ldap3
 ```
 
 Download [change_config.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_config.py) and [change_gluu_host.py](https://github.com/GluuFederation/community-edition-setup/blob/master/static/scripts/change_hostname/change_gluu_host.py) on the Gluu Server you're trying to change the hostname of, outside the chroot.
@@ -76,7 +73,7 @@ name_changer = ChangeGluuHostname(
     # Not recommended as the script should be run locally
     local = True,
     
-    # Version of Gluu Server you're trying to modify. For example: '3.1.3'
+    # Version of Gluu Server you're trying to modify. For example: '4.1.0'
     gluu_version='<gluu_server_version>'
 )
 ```

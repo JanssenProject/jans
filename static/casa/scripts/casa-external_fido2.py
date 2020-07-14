@@ -5,10 +5,9 @@ from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
 from javax.ws.rs.core import Response
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.oxauth.fido2.client import Fido2ClientFactory
+from org.gluu.fido2.client import Fido2ClientFactory
 from org.gluu.oxauth.security import Identity
-from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
-from org.gluu.oxauth.fido2.persist import RegistrationPersistenceService
+from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper
@@ -18,7 +17,6 @@ from java.util.concurrent.locks import ReentrantLock
 import java
 import sys
 import json
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -33,6 +31,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.fido2_server_uri = configurationAttributes.get("fido2_server_uri").getValue2()
 
+        #self.fido2_domain = None
+        #if configurationAttributes.containsKey("fido2_domain"):
+        #    self.fido2_domain = configurationAttributes.get("fido2_domain").getValue2()
+            
         self.metaDataLoaderLock = ReentrantLock()
         self.metaDataConfiguration = None
         
@@ -46,6 +48,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
+
+    def getAuthenticationMethodClaims(self, configurationAttributes):
+        return None
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -147,15 +152,12 @@ class PersonAuthentication(PersonAuthenticationType):
             userName = user.getUserId()
 
             metaDataConfiguration = self.getMetaDataConfiguration()
-
-            # Check if user have registered devices
-            registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
-            
             assertionResponse = None
             attestationResponse = None
 
-            userFido2Devices = registrationPersistenceService.findAllRegisteredByUsername(userName)
-            if (userFido2Devices.size() > 0):
+            # Check if user have registered devices
+            count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName)
+            if (count > 0):
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 
                 try:
@@ -245,7 +247,4 @@ class PersonAuthentication(PersonAuthenticationType):
     # Added for Casa compliance
 
     def hasEnrollments(self, configurationAttributes, user):
-
-        registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
-        userFido2Devices = registrationPersistenceService.findAllRegisteredByUsername(user.getUserId())
-        return userFido2Devices.size() > 0
+        return CdiUtil.bean(UserService).countFido2RegisteredDevices(user.getUserId()) > 0

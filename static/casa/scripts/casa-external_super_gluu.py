@@ -8,12 +8,12 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.model.config import ConfigurationFactory
-from org.gluu.oxauth.service import UserService, AuthenticationService, SessionIdService
+from org.gluu.oxauth.service import AuthenticationService, UserService, SessionIdService
+from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.util import StringHelper
-from org.gluu.oxauth.service import EncryptionService
 from org.gluu.service import MailService
 from org.gluu.oxauth.service.push.sns import PushPlatform, PushSnsService
 from org.gluu.oxnotify.client import NotifyClientFactory
@@ -151,6 +151,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 11
+
+    def getAuthenticationMethodClaims(self, configurationAttributes):
+        return None
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True

@@ -3,7 +3,7 @@ class msg:
     MAIN_label = "System Information"
     HostForm_label = "Gathering Information"
     ServicesForm_label = "Select Services to Install"
-    DBBackendForm_label = "Choose DB Backend"
+    DBBackendForm_label = "Choose to Store in WrenDS"
     StorageSelectionForm_label = "Hybrid Storage Selection"
     InstallStepsForm_label = "Installing Gluu Server"
     DisplaySummaryForm_label = "Gluu Server Installation Summary"
@@ -24,7 +24,7 @@ class msg:
     password_label = "Password"
     hosts_label = "Hosts"
     username_label = "Username"
-    
+
     installOxAuth_label = "Install OxAuth"
     installOxTrust_label = "Install OxTrust"
     backend_types_label = "Backend Types"
@@ -40,25 +40,26 @@ class msg:
     installCasa_label = "Install Casa"
     installScimServer_label = "Install Scim"
     installFido2_label = "Install Fido2"
-    
+
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
     insufficient_number_of_cpu = "Available CPU Units found was {}. This is less than the required amount of {} CPU Units"
     insufficient_file_max = "Maximum number of files that can be opened on this computer is {}. Please increase number of file-max to {} on the host system and re-run setup.py"
     insufficient_free_disk_space = "Available free disk space was determined to be {} GB. This is less than the required disk space of {}"
-    
+
     suggested_free_disk_space = 40 #in GB
     suggested_mem_size = 3.7 # in GB
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
-    
+
     cert_info_label = "Information to Generate Certificates"
     sys_info_label =  "System Information"
     application_max_ram_label = "Maximum RAM in MB"
     oxtrust_admin_password_label = "oxTrust Admin Password"
     oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
     max_ram_int_warning = "Please enter and integer value for Max ram"
-    
+    memory_warning = "WARINIG: You don't have enough memory to run Gluu CE properly with selected applications."
+
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
     acknowledge_lisence = "I acknowledge that use of the Gluu Server is under the Apache-2.0 license"
@@ -110,7 +111,7 @@ class msg:
     installation_completed = "Gluu Server installation successful! Point your browser to https://{}"
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
-    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
+    installation_description_opendj = "WrenDS is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
     installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
     installation_description_oxtrust = "oxTrust is a Weld based web application for Gluu Server administration."
     installation_description_saml = "The Gluu Server acts as a SAML identity provider (IDP) to support outbound SAML single sign-on (SSO)."
@@ -126,6 +127,5 @@ class msg:
     installation_description_fido2 = "FIDO 2.0 (FIDO2) is an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments"
     
     installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code."
-    
-    
+
     installation_error = "The following error was occurred while installing Gluu Server:"

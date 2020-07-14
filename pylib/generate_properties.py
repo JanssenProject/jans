@@ -41,9 +41,9 @@ needs_restart = False
 dev_env = True if os.environ.get('update_dev') else False
 
 try:
-    import ldap
+    import ldap3
 except:
-    missing_packages.append('python-ldap')
+    missing_packages.append('python-ldap3')
 
 try:
     import requests
@@ -97,6 +97,7 @@ if missing_packages:
     print("Installing package(s) with command: "+ cmd)
     os.system(cmd)
 
+
 prop_path = os.path.join(cur_dir, 'jproperties.py')
 if not os.path.exists(prop_path):
     os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/jproperties.py -O ' + prop_path)
@@ -110,16 +111,15 @@ if needs_restart:
     os.execl(python_, python_, * sys.argv)
 
 
-from ldap.dn import explode_dn, str2dn, dn2str
-import ldap
+import ldap3
+from ldap3.utils import dn as dnutils
 
 
-if ((3, 0) <= sys.version_info <= (3, 9)):
+try:
     from .jproperties import Properties
-elif ((2, 0) <= sys.version_info <= (2, 9)):
+except:
     from jproperties import Properties
 
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_ALLOW)
 
 def read_properties_file(fn):
     retDict = {}
@@ -145,7 +145,7 @@ def unobscure(s=""):
     engine = triple_des(salt, ECB, pad=None, padmode=PAD_PKCS5)
     cipher = triple_des(salt)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=PAD_PKCS5)
-    return decrypted
+    return decrypted.decode()
 
 
 def get_ssl_subject(ssl_fn):
@@ -162,13 +162,13 @@ def get_ssl_subject(ssl_fn):
 
 def get_key_from(dn):
     dns = []
-    for d in str2dn(dn):
-        for rd in d:
-            if rd[0] == 'o' and rd[1] == 'gluu':
-                continue
-            dns.append(rd[1])
 
-    dns.reverse(),
+    for rd in dnutils.parse_dn(dn):
+        if rd[0] == 'o' and rd[1] == 'gluu':
+            continue
+        dns.append(rd[1])
+
+    dns.reverse()
     key = '_'.join(dns)
 
     if not key:
@@ -236,10 +236,24 @@ def generate_properties(as_dict=False):
         oxtrust_ConfigurationEntryDN = gluu_prop['oxtrust_ConfigurationEntryDN']
         oxidp_ConfigurationEntryDN = gluu_prop['oxidp_ConfigurationEntryDN']
         gluu_ConfigurationDN = 'ou=configuration,o=gluu'
+        gluu_hybrid_properties_fn = '/etc/gluu/conf/gluu-hybrid.properties'
 
         if setup_prop['persistence_type'] == 'couchbase':
             mappingLocations = {'default': 'couchbase', 'token': 'couchbase', 'cache': 'couchbase', 'user': 'couchbase', 'site': 'couchbase'}
             default_storage = 'couchbase'
+
+
+        if setup_prop['persistence_type'] in ('hybrid'):
+            gluu_hybrid_properties = read_properties_file(gluu_hybrid_properties_fn)
+            mappingLocations = {'default': gluu_hybrid_properties['storage.default']}
+            storages = [ storage.strip() for storage in gluu_hybrid_properties['storages'].split(',') ]
+
+            for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
+                for storage in storages:
+                    if m in gluu_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
+                        mappingLocations[ml] = storage
+
+            default_storage = mappingLocations['default']
 
         if setup_prop['persistence_type'] in ('ldap', 'hybrid'):
 
@@ -304,47 +318,69 @@ def generate_properties(as_dict=False):
             pass
         setup_prop['ldap_hostname'], setup_prop['ldaps_port']  = gluu_ldap_prop['servers'].split(',')[0].split(':')
 
-        ldap_conn = ldap.initialize('ldaps://{0}:1636'.format(setup_prop['ldap_hostname']))
-        ldap_conn.simple_bind_s(setup_prop['ldap_binddn'], setup_prop['ldapPass'])
+
+        ldap_server = ldap3.Server(setup_prop['ldap_hostname'], port=int(setup_prop['ldaps_port']), use_ssl=True)
+        ldap_conn = ldap3.Connection(
+                                ldap_server,
+                                user=setup_prop['ldap_binddn'],
+                                password=setup_prop['ldapPass'],
+                                )
+
+        ldap_conn.bind()
 
 
     if gluu_3x:
-        result = ldap_conn.search_s('o=gluu',ldap.SCOPE_ONELEVEL)
-        inumOrg = str(result[1][1]['o'][0])
-        uma_rpt_policy_inum = '{}!0011!2DAF.F995'.format(inumOrg)
-        scim_access_policy_inum = '{}!0011!2DAF-F9A5'.format(inumOrg)
+        ldap_conn.search(search_base='o=gluu', search_scope=ldap3.LEVEL, search_filter='(objectClass=*)', attributes=['*'])
+        result = ldap_conn.response
+        for entry in result:
+            if 'gluuOrganization' in entry['attributes']['objectClass']:
+                inumOrg = entry['attributes']['o'][0]
+                uma_rpt_policy_inum = '{}!0011!2DAF.F995'.format(inumOrg)
+                scim_access_policy_inum = '{}!0011!2DAF-F9A5'.format(inumOrg)
+
+
     else:
         uma_rpt_policy_inum = '2DAF-F995'
         scim_access_policy_inum = '2DAF-F9A5'
 
         if default_storage == 'ldap':
 
-            try:
-                result = ldap_conn.search_s('ou=oxradius,ou=configuration,o=gluu',ldap.SCOPE_BASE)
-                setup_prop['installGluuRadius'] = True
-                setup_prop['gluu_radius_client_id'] = result[0][1]['oxRadiusOpenidUsername'][0]
-                setup_prop['gluu_ro_pw'] = unobscure(result[0][1]['oxRadiusOpenidPassword'][0])
-            except:
-                pass
-
-            try:
-                result = ldap_conn.search_s('inum=5866-4202,ou=scripts,o=gluu',ldap.SCOPE_BASE, attrlist=['oxEnabled'])
-                if result[0][1]['oxEnabled'][0].lower() == 'true':
-                    setup_prop['enableRadiusScripts'] = True
-            except:
-                pass
-
-            result = ldap_conn.search_s('ou=clients,o=gluu',ldap.SCOPE_SUBTREE, '(inum=1402.*)', ['inum'])
+            ldap_conn.search(search_base='ou=oxradius,ou=configuration,o=gluu', search_scope=ldap3.BASE, search_filter='(objectClass=*)', attributes=['*'])
+            result = ldap_conn.response
             if result:
-                setup_prop['oxtrust_requesting_party_client_id'] = result[0][1]['inum'][0]
+                setup_prop['installGluuRadius'] = True
+
+            ldap_conn.search(search_base='ou=clients,o=gluu', search_scope=ldap3.SUBTREE, search_filter='(inum=1701.*)', attributes=['*'])
+            result = ldap_conn.response
+
+            if result:
+                setup_prop['gluu_radius_client_id'] = result[0]['attributes']['inum'][0]
+                setup_prop['gluu_ro_encoded_pw'] = result[0]['attributes']['oxAuthClientSecret'][0]
+                setup_prop['gluu_ro_pw'] = unobscure(setup_prop['gluu_ro_encoded_pw'])
+
+            ldap_conn.search(search_base='inum=5866-4202,ou=scripts,o=gluu', search_scope=ldap3.BASE, search_filter='(objectClass=*)', attributes=['oxEnabled'])
+            result = ldap_conn.response
+            if result and result[0]['attributes']['oxEnabled'][0]:
+                setup_prop['enableRadiusScripts'] = True
+
+            ldap_conn.search(search_base='ou=clients,o=gluu', search_scope=ldap3.SUBTREE, search_filter='(inum=1402.*)', attributes=['inum'])
+            result = ldap_conn.response
+            if result:
+                setup_prop['oxtrust_requesting_party_client_id'] = result[0]['attributes']['inum'][0]
 
         elif default_storage == 'couchbase':
             n1ql = 'SELECT * from `{}` USE KEYS "configuration_oxradius"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
             if result:
                 setup_prop['installGluuRadius'] = True
-                setup_prop['gluu_radius_client_id'] = str(result[0]['gluu']['oxRadiusOpenidUsername'])
-                setup_prop['gluu_ro_pw'] = unobscure(result[0]['gluu']['oxRadiusOpenidPassword'])
+            
+            n1ql =  'SELECT inum from `{}` WHERE objectClass="oxAuthClient" AND inum LIKE "1701.%"'.format(setup_prop['couchbase_bucket_prefix'])
+            result = get_cb_result(cbm, n1ql)
+            if result:
+                setup_prop['gluu_radius_client_id'] = str(result[0]['inum'])
+                if 'oxAuthClientSecret' in result[0]:
+                    setup_prop['gluu_ro_encoded_pw'] = str(result[0]['oxAuthClientSecret'])
+                    setup_prop['gluu_ro_pw'] = unobscure(setup_prop['gluu_ro_encoded_pw'])
             
             n1ql = 'SELECT oxEnabled from `{}` USE KEYS "scripts_5866-4202"'.format(setup_prop['couchbase_bucket_prefix'])
             result = get_cb_result(cbm, n1ql)
@@ -358,9 +394,10 @@ def generate_properties(as_dict=False):
 
     admin_dn = None
     if mappingLocations['user'] == 'ldap':
-        result = ldap_conn.search_s('o=gluu',ldap.SCOPE_SUBTREE, '(gluuGroupType=gluuManagerGroup)', ['member'])
-        if result and result[0][1]['member']:
-            admin_dn = result[0][1]['member'][0]
+        ldap_conn.search(search_base='o=gluu', search_scope=ldap3.SUBTREE, search_filter='(gluuGroupType=gluuManagerGroup)', attributes=['member'])
+        result = ldap_conn.response
+        if result and result[0]['attributes'].get('member'):
+            admin_dn = result[0]['attributes']['member'][0]
 
 
     if mappingLocations['user'] == 'couchbase':
@@ -371,11 +408,10 @@ def generate_properties(as_dict=False):
            admin_dn = result[0][bucket]['member'][0]
 
     if admin_dn:
-        for d in str2dn(admin_dn):
-            for rd in d:
-                if rd[0] == 'inum':
-                    setup_prop['admin_inum'] = str(rd[1])
-                    break
+        for rd in dnutils.parse_dn(admin_dn):
+            if rd[0] == 'inum':
+                setup_prop['admin_inum'] = str(rd[1])
+                break
 
     oxTrustConfApplication = None
     oxConfApplication = None
@@ -384,25 +420,28 @@ def generate_properties(as_dict=False):
 
     if default_storage == 'ldap':
 
-        result = ldap_conn.search_s(gluu_ConfigurationDN, ldap.SCOPE_BASE,'(objectClass=*)')
-        if 'gluuIpAddress' in result[0][1]:
-            setup_prop['ip'] = str(result[0][1]['gluuIpAddress'][0])
-
+        ldap_conn.search(search_base=gluu_ConfigurationDN, search_scope=ldap3.BASE, search_filter='(objectClass=*)', attributes=['*'])
+        result = ldap_conn.response
+        if 'gluuIpAddress' in result[0]['attributes']:
+            setup_prop['ip'] = str(result[0]['attributes']['gluuIpAddress'][0])
 
         try:
-            oxCacheConfiguration = json.loads(result[0][1]['oxCacheConfiguration'][0].decode('utf-8'))
+            oxCacheConfiguration = json.loads(result[0]['attributes']['oxCacheConfiguration'][0])
             setup_prop['cache_provider_type'] = str(oxCacheConfiguration['cacheProviderType'])
-        except:
-            pass
+        except Exception as e:
+            print("Error getting cache provider type", e)
 
-        result = ldap_conn.search_s(oxidp_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxApplicationConfiguration)', ['oxConfApplication'])
-        oxConfApplication = json.loads(result[0][1]['oxConfApplication'][0].decode('utf-8'))
+        result = ldap_conn.search(search_base=oxidp_ConfigurationEntryDN, search_scope=ldap3.BASE, search_filter='(objectClass=oxApplicationConfiguration)', attributes=['oxConfApplication'])
+        result = ldap_conn.response
+        oxConfApplication = json.loads(result[0]['attributes']['oxConfApplication'][0])
 
-        result = ldap_conn.search_s(oxauth_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxAuthConfiguration)', ['oxAuthConfDynamic'])
-        oxAuthConfDynamic = json.loads(result[0][1]['oxAuthConfDynamic'][0].decode('utf-8'))
+        result = ldap_conn.search(search_base=oxauth_ConfigurationEntryDN, search_scope=ldap3.BASE, search_filter='(objectClass=oxAuthConfiguration)', attributes=['oxAuthConfDynamic'])
+        result = ldap_conn.response
+        oxAuthConfDynamic = json.loads(result[0]['attributes']['oxAuthConfDynamic'][0])
 
-        result = ldap_conn.search_s(oxtrust_ConfigurationEntryDN, ldap.SCOPE_BASE,'(objectClass=oxTrustConfiguration)', ['oxTrustConfApplication'])
-        oxTrustConfApplication = json.loads(result[0][1]['oxTrustConfApplication'][0].decode('utf-8'))
+        result = ldap_conn.search(search_base=oxtrust_ConfigurationEntryDN, search_scope=ldap3.BASE, search_filter='(objectClass=oxTrustConfiguration)', attributes=['oxTrustConfApplication'])
+        result = ldap_conn.response
+        oxTrustConfApplication = json.loads(result[0]['attributes']['oxTrustConfApplication'][0])
 
 
     elif default_storage == 'couchbase':
@@ -494,7 +533,10 @@ def generate_properties(as_dict=False):
     setup_prop['state'] = ssl_subj['ST']
     setup_prop['city'] = ssl_subj['L']
     setup_prop['city'] = ssl_subj['L']
-    setup_prop['oxtrust_admin_password'] = setup_prop['ldapPass']
+    if 'ldapPass' in setup_prop:
+        setup_prop['oxtrust_admin_password'] = setup_prop['ldapPass']
+    elif 'cb_password' in setup_prop:
+            setup_prop['oxtrust_admin_password'] = setup_prop['cb_password']
 
     if not 'orgName' in setup_prop:
         setup_prop['orgName'] = ssl_subj['O']
