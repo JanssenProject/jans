@@ -50,7 +50,7 @@ class msg:
     suggested_free_disk_space = 40 #in GB
     suggested_number_of_cpu = 2
     suggested_file_max = 64000
-    
+
     cert_info_label = "Information to Generate Certificates"
     sys_info_label =  "System Information"
     application_max_ram_label = "Maximum RAM in MB"

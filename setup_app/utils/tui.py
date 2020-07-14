@@ -142,7 +142,8 @@ class MAIN(GluuSetupForm):
 
         for sys_req in ('file_max', 'mem_size', 'number_of_cpu', 'free_disk_space'):
             cur_val = getattr(base, 'current_' + sys_req)
-            req_val = getattr(msg, 'suggested_' + sys_req)
+            req_val =  static.suggested_mem_size if sys_req == 'mem_size' else getattr(msg, 'suggested_' + sys_req)
+            
             if cur_val < req_val:
                 warning_text = getattr(msg, 'insufficient_' + sys_req).format(cur_val, req_val)
                 
