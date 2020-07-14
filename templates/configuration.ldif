@@ -11,9 +11,9 @@ gluuVdsCacheRefreshEnabled: false
 gluuScimEnabled: %(gluuScimEnabled)s
 oxAuthenticationMode: simple_password_auth
 oxTrustAuthenticationMode: simple_password_auth
-gluuPassportEnabled: %(gluuPassportEnabled)s
-gluuRadiusEnabled: %(gluuRadiusEnabled)s
-gluuSamlEnabled: %(gluuSamlEnabled)s
+gluuPassportEnabled: false
+gluuRadiusEnabled: false
+gluuSamlEnabled: false
 oxCacheConfiguration: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
 oxDocumentStoreConfiguration: {"documentStoreType":"LOCAL","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
 oxTrustStoreConf: {"useJreCertificates":true}
@@ -50,45 +50,3 @@ oxLogViewerConfig: {
     }
   ]}
 
-######################################
-
-# SAML Trust Relationships - Level 2
-dn: ou=trustRelationships,o=gluu
-objectClass: top
-objectClass: organizationalUnit
-ou: trustRelationships
-
-######################################
-
-# SAML2 Federations - LEVEL 2
-# WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
-dn: ou=federations,o=gluu
-objectClass: top
-objectClass: organizationalUnit
-ou: federations
-
-dn: ou=oxauth,ou=configuration,o=gluu
-objectClass: oxAuthConfiguration
-objectClass: top
-ou: oxauth
-oxAuthConfDynamic::%(oxauth_config_base64)s
-oxAuthConfStatic::%(oxauth_static_conf_base64)s
-oxAuthConfWebKeys::%(oxauth_openid_key_base64)s
-oxAuthConfErrors::%(oxauth_error_base64)s
-oxRevision: 1
-
-dn: ou=oxtrust,ou=configuration,o=gluu
-objectClass: top
-objectClass: oxTrustConfiguration
-ou: oxtrust
-oxTrustConfApplication::%(oxtrust_config_base64)s
-oxTrustConfCacheRefresh::%(oxtrust_cache_refresh_base64)s
-oxTrustConfImportPerson::%(oxtrust_import_person_base64)s
-oxRevision: 1
-
-dn: ou=oxidp,ou=configuration,o=gluu
-objectClass: top
-objectClass: oxApplicationConfiguration
-ou: oxidp
-oxConfApplication::%(oxidp_config_base64)s
-oxRevision: 1
