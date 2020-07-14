@@ -17,6 +17,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'opendj'
+        self.pbar_text = "Installing WrenDS"
         self.needdb = False # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -33,15 +34,15 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
 
     def install(self):
-        self.logIt("Running OpenDJ Setup")
+        self.logIt("Running WrenDS Setup")
 
-        Config.pbar.progress(self.service_name, "Extracting OpenDJ", False)
+        Config.pbar.progress(self.service_name, "Extracting WrenDS", False)
         self.extractOpenDJ()
 
         self.createLdapPw()
         
         try:
-            Config.pbar.progress(self.service_name, "Installing OpenDJ", False)
+            Config.pbar.progress(self.service_name, "Installing WrenDS", False)
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.install_opendj()
                 Config.pbar.progress(self.service_name, "Setting up service", False)
@@ -50,7 +51,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.prepare_opendj_schema()
 
             if Config.wrends_install:
-                Config.pbar.progress(self.service_name, "Configuring OpenDJ", False)
+                Config.pbar.progress(self.service_name, "Configuring WrenDS", False)
                 self.configure_opendj()
                 Config.pbar.progress(self.service_name, "Exporting certificate", False)
                 self.export_opendj_public_cert()
@@ -79,7 +80,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 if Config.wrends_install == InstallTypes.LOCAL:
                     self.post_install_opendj()
         except:
-            self.logIt("Error installing opendj", True)
+            self.logIt("Error installing WrenDS", True)
 
     def extractOpenDJ(self):        
 
@@ -149,7 +150,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldapBaseFolder)
 
     def configure_opendj(self):
-        self.logIt("Configuring OpenDJ")
+        self.logIt("Configuring WrenDS")
 
         opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
         config_changes = [

@@ -111,7 +111,7 @@ class msg:
     post_installation = "Please exit from container and restart Gluu Server."
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
-    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
+    installation_description_opendj = "WrenDS is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
     installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
     installation_description_oxtrust = "oxTrust is a Weld based web application for Gluu Server administration."
     installation_description_saml = "The Gluu Server acts as a SAML identity provider (IDP) to support outbound SAML single sign-on (SSO)."
