@@ -319,7 +319,7 @@ class Config:
 
                         ('token',   { 'ldif': [],
                                       'memory_allocation': 300,
-                                      'mapping': 'tokens',
+                                      'mapping': 'tokens, sessions',
                                       'document_key_prefix': ['tokens_'],
                                     }),
 
