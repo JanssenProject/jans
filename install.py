@@ -94,6 +94,10 @@ shutil.rmtree(target_dir)
 
 os.chmod('/install/community-edition-setup/setup.py', 33261)
 
+post_setup = '/install/community-edition-setup/post-setup-add-components.py'
+if os.path.exists(post_setup):
+    os.chmod(post_setup, 33261)
+
 if argsp.o:
     npy_download_link = 'https://github.com/npcole/npyscreen/archive/master.zip'
     result = requests.get(npy_download_link, allow_redirects=True)

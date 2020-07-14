@@ -6,10 +6,12 @@ import zipfile
 import json
 import datetime
 import copy
+import csv
 
 from jproperties import Properties
 from ldif3.ldif3 import LDIFParser
 from attribute_data_types import ATTRUBUTEDATATYPES
+from ldap3.utils import dn as dnutils
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
@@ -19,10 +21,10 @@ attribDataTypes = ATTRUBUTEDATATYPES()
 listAttrib = ['member']
 
 supportes_os_types = {
-                'centos': ['7'],
-                'red': ['7'], 
+                'centos': ['7', '8'],
+                'red': ['7', '8'], 
                 'fedora': [], 
-                'ubuntu': ['16', '18'],
+                'ubuntu': ['18', '20'],
                 'debian': ['9', '10']
                 }
 
@@ -65,15 +67,18 @@ def prepare_multivalued_list():
 
 
 def get_os_type():
-    #Determine OS type and version
-    try:
-        p = platform.linux_distribution()
-        os_type = p[0].split()[0].lower()
-        os_version = p[1].split('.')[0]
-        return os_type, os_version
-    except:
-        return None, None
-
+    os_type, os_version = '', ''
+    with open("/etc/os-release") as f:
+        reader = csv.reader(f, delimiter="=")
+        for row in reader:
+            if row:
+                if row[0] == 'ID':
+                    os_type = row[1].lower()
+                    if os_type == 'rhel':
+                        os_type = 'redhat'
+                elif row[0] == 'VERSION_ID':
+                    os_version = row[1].split('.')[0]
+    return os_type, os_version
 
 def read_properties_file(fn):
     retDict = {}

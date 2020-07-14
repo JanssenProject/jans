@@ -116,6 +116,16 @@ objectClass: oxAuthCustomScope
 objectClass: top
 oxScopeType: openid
 
+dn: inum=7D90,ou=scopes,o=gluu
+defaultScope: false
+description: revoke_session scope which is required to be able call /revoke_session endpoint
+oxId: revoke_session
+displayName: revoke_session
+inum: 7D90
+objectClass: oxAuthCustomScope
+objectClass: top
+oxScopeType: openid
+
 dn: inum=8A01,ou=scopes,o=gluu
 objectClass: top
 objectClass: oxAuthCustomScope

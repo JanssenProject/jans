@@ -6,6 +6,14 @@
 
 from org.gluu.model.custom.script.type.idp import IdpType
 from org.gluu.util import StringHelper
+from org.gluu.idp.externalauth import AuthenticatedNameTranslator
+from net.shibboleth.idp.authn.principal import UsernamePrincipal, IdPAttributePrincipal
+from net.shibboleth.idp.authn import ExternalAuthentication
+from net.shibboleth.idp.attribute import IdPAttribute, StringAttributeValue
+from net.shibboleth.idp.authn.context import AuthenticationContext, ExternalAuthenticationContext
+from net.shibboleth.idp.attribute.context import AttributeContext
+from javax.security.auth import Subject
+from java.util import Collections, HashSet, ArrayList, Arrays
 
 import java
 
@@ -16,6 +24,9 @@ class IdpExtension(IdpType):
 
     def init(self, customScript, configurationAttributes):
         print "Idp extension. Initialization"
+        
+        self.defaultNameTranslator = AuthenticatedNameTranslator()
+        
         return True
 
     def destroy(self, configurationAttributes):
@@ -25,5 +36,66 @@ class IdpExtension(IdpType):
     def getApiVersion(self):
         return 11
 
+    # Translate attributes from user profile
+    #   context is org.gluu.idp.externalauth.TranslateAttributesContext (https://github.com/GluuFederation/shib-oxauth-authn3/blob/master/src/main/java/org/gluu/idp/externalauth/TranslateAttributesContext.java)
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    def translateAttributes(self, context, configurationAttributes):
+        print "Idp extension. Method: translateAttributes"
+        
+        # Return False to use default method
+        #return False
+        
+        request = context.getRequest()
+        userProfile = context.getUserProfile()
+        principalAttributes = self.defaultNameTranslator.produceIdpAttributePrincipal(userProfile.getAttributes())
+        print "Idp extension. Converted user profile: '%s' to attribute principal: '%s'" % (userProfile, principalAttributes)
+
+        if not principalAttributes.isEmpty():
+            print "Idp extension. Found attributes from oxAuth. Processing..."
+            
+            # Start: Custom part
+            # Add givenName attribute
+            givenNameAttribute = IdPAttribute("oxEnrollmentCode")
+            givenNameAttribute.setValues(ArrayList(Arrays.asList(StringAttributeValue("Dummy"))))
+            principalAttributes.add(IdPAttributePrincipal(givenNameAttribute))
+            print "Idp extension. Updated attribute principal: '%s'" % principalAttributes
+            # End: Custom part
+
+            principals = HashSet()
+            principals.addAll(principalAttributes)
+            principals.add(UsernamePrincipal(userProfile.getId()))
+
+            request.setAttribute(ExternalAuthentication.SUBJECT_KEY, Subject(False, Collections.singleton(principals),
+                Collections.emptySet(), Collections.emptySet()))
+
+            print "Created an IdP subject instance with principals containing attributes for: '%s'" % userProfile.getId()
+
+            if False:
+                idpAttributes = ArrayList()
+                for principalAttribute in principalAttributes:
+                    idpAttributes.add(principalAttribute.getAttribute())
+    
+                request.setAttribute(ExternalAuthentication.ATTRIBUTES_KEY, idpAttributes)
+    
+                authenticationKey = context.getAuthenticationKey()
+                profileRequestContext = ExternalAuthentication.getProfileRequestContext(authenticationKey, request)
+                authContext = profileRequestContext.getSubcontext(AuthenticationContext)
+                extContext = authContext.getSubcontext(ExternalAuthenticationContext)
+    
+                extContext.setSubject(Subject(False, Collections.singleton(principals), Collections.emptySet(), Collections.emptySet()));
+    
+                extContext.getSubcontext(AttributeContext, True).setUnfilteredIdPAttributes(idpAttributes)
+                extContext.getSubcontext(AttributeContext).setIdPAttributes(idpAttributes)
+        else:
+            print "No attributes released from oxAuth. Creating an IdP principal for: '%s'" % userProfile.getId()
+            request.setAttribute(ExternalAuthentication.PRINCIPAL_NAME_KEY, userProfile.getId())
+
+        #Return True to specify that default method is not needed
+        return False
+
+    # Update attributes before releasing them
+    #   context is org.gluu.idp.consent.processor.PostProcessAttributesContext (https://github.com/GluuFederation/shib-oxauth-authn3/blob/master/src/main/java/org/gluu/idp/consent/processor/PostProcessAttributesContext.java)
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"
+        return True
