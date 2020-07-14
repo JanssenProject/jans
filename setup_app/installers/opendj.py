@@ -302,7 +302,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def setup_opendj_service(self):
 
         init_script_fn = '/etc/init.d/opendj'
-        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or (base.os_name in ('ubuntu18','debian9','debian10')):
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
             remove_init_script = True
             opendj_script_name = os.path.basename(self.opendj_service_centos7)
             opendj_dest_folder = "/etc/systemd/system"
