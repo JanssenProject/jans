@@ -533,10 +533,8 @@ class PropertiesUtils(SetupUtils):
         
         if promptForScimServer == 'y':
             Config.installScimServer = True
-            Config.gluuScimEnabled = 'true'
         else:
             Config.installScimServer = False
-            Config.gluuScimEnabled = 'false'
 
         if Config.installed_instance and Config.installScimServer:
             Config.addPostSetupService.append('installScimServer')

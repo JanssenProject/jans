@@ -12,7 +12,6 @@ from setup_app.static import InstallTypes, BackendTypes
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
 
-
 class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
@@ -40,47 +39,46 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.extractOpenDJ()
 
         self.createLdapPw()
-        
-        try:
-            Config.pbar.progress(self.service_name, "Installing WrenDS", False)
+
+        Config.pbar.progress(self.service_name, "Installing WrenDS", False)
+        if Config.wrends_install == InstallTypes.LOCAL:
+            self.install_opendj()
+            Config.pbar.progress(self.service_name, "Setting up WrenDS service", False)
+            self.setup_opendj_service()
+            Config.pbar.progress(self.service_name, "Preparing WrenDS schema", False)
+            self.prepare_opendj_schema()
+
+        # it is time to bind WrenDS
+        self.dbUtils.bind()
+
+        if Config.wrends_install:
+            Config.pbar.progress(self.service_name, "Configuring WrenDS", False)
+            self.configure_opendj()
+            Config.pbar.progress(self.service_name, "Exporting WrenDS certificate", False)
+            self.export_opendj_public_cert()
+            Config.pbar.progress(self.service_name, "Creating WrenDS indexes", False)
+            self.index_opendj()
+
+            ldif_files = []
+
+            if Config.mappingLocations['default'] == 'ldap':
+                ldif_files += Config.couchbaseBucketDict['default']['ldif']
+
+            ldap_mappings = self.getMappingType('ldap')
+
+            for group in ldap_mappings:
+                ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
+
+            Config.pbar.progress(self.service_name, "Importing ldif files to WrenDS", False)
+            if not Config.ldif_base in ldif_files:
+                self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.LDAP)
+
+            self.dbUtils.import_ldif(ldif_files)
+
+            Config.pbar.progress(self.service_name, "WrenDS post installation", False)
             if Config.wrends_install == InstallTypes.LOCAL:
-                self.install_opendj()
-                Config.pbar.progress(self.service_name, "Setting up service", False)
-                self.setup_opendj_service()
-                Config.pbar.progress(self.service_name, "Preparing schema", False)
-                self.prepare_opendj_schema()
+                self.post_install_opendj()
 
-            if Config.wrends_install:
-                Config.pbar.progress(self.service_name, "Configuring WrenDS", False)
-                self.configure_opendj()
-                Config.pbar.progress(self.service_name, "Exporting certificate", False)
-                self.export_opendj_public_cert()
-                Config.pbar.progress(self.service_name, "Creating indexes", False)
-                self.index_opendj()
-
-                ldif_files = []
-
-                if Config.mappingLocations['default'] == 'ldap':
-                    ldif_files += Config.couchbaseBucketDict['default']['ldif']
-
-                ldap_mappings = self.getMappingType('ldap')
-  
-                for group in ldap_mappings:
-                    ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
-  
-                # Now bind ldap and import ldif files
-                self.dbUtils.bind()
-                Config.pbar.progress(self.service_name, "Importing ldif files", False)
-                if not Config.ldif_base in ldif_files:
-                    self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.LDAP)
-
-                self.dbUtils.import_ldif(ldif_files)
-
-                Config.pbar.progress(self.service_name, "Post installation", False)
-                if Config.wrends_install == InstallTypes.LOCAL:
-                    self.post_install_opendj()
-        except:
-            self.logIt("Error installing WrenDS", True)
 
     def extractOpenDJ(self):        
 
@@ -232,60 +230,31 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                   "-storepass", "changeit", "-noprompt"])
 
 
-    def index_opendj_backend(self, backend):
-        index_command = 'create-backend-index'
-        cwd = os.path.join(Config.ldapBaseFolder, 'bin')
-        try:
-            self.logIt("Running LDAP index creation commands for " + backend + " backend")
-            # This json file contains a mapping of the required indexes.
-            # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
-
-            with open(self.openDjIndexJson) as f:
-                index_json = json.load(f)
-
-            for attrDict in index_json:
-                attr_name = attrDict['attribute']
-                index_types = attrDict['index']
-                for index_type in index_types:
-                    backend_names = attrDict['backend']
-                    for backend_name in backend_names:
-                        if (backend_name == backend):
-                            self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                            indexCmd = " ".join([
-                                                 self.ldapDsconfigCommand,
-                                                 index_command,
-                                                 '--backend-name',
-                                                 backend,
-                                                 '--type',
-                                                 'generic',
-                                                 '--index-name',
-                                                 attr_name,
-                                                 '--set',
-                                                 'index-type:%s' % index_type,
-                                                 '--set',
-                                                 'index-entry-limit:4000',
-                                                 '--hostName',
-                                                 Config.ldap_hostname,
-                                                 '--port',
-                                                 Config.ldap_admin_port,
-                                                 '--bindDN',
-                                                 '"%s"' % Config.ldap_binddn,
-                                                 '-j', Config.ldapPassFn,
-                                                 '--trustAll',
-                                                 '--noPropertiesFile',
-                                                 '--no-prompt'])
-                            self.run(['/bin/su',
-                                      'ldap',
-                                      '-c',
-                                      indexCmd], cwd=cwd)
-
-        except:
-            self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
-
     def index_opendj(self):
-        self.index_opendj_backend('userRoot')
+
+        self.logIt("Creating WrenDS Indexes")
+
+        with open(self.openDjIndexJson) as f:
+            index_json = json.load(f)
+
+        index_backends = ['userRoot']
+
         if Config.mappingLocations['site'] == 'ldap':
-            self.index_opendj_backend('site')
+            index_backends.append('site')
+
+        for attrDict in index_json:
+            attr_name = attrDict['attribute']
+            for backend in attrDict['backend']:
+                if backend in index_backends:
+                    dn = 'ds-cfg-attribute={},cn=Index,ds-cfg-backend-id={},cn=Backends,cn=config'.format(attrDict['attribute'], backend)
+                    entry = {
+                            'objectClass': ['top','ds-cfg-backend-index'],
+                            'ds-cfg-attribute': [attrDict['attribute']],
+                            'ds-cfg-index-type': attrDict['index'],
+                            'ds-cfg-index-entry-limit': ['4000']
+                            }
+                    self.logIt("Creating Index {}".format(dn))
+                    self.dbUtils.ldap_conn.add(dn, attributes=entry)
 
 
     def prepare_opendj_schema(self):
@@ -335,6 +304,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.fix_init_scripts('opendj', init_script_fn)
 
         self.reload_daemon()
+
 
     def installed(self):
         if os.path.exists(self.openDjSchemaFolder):
