@@ -1,13 +1,3 @@
-######################################
-
-# SAML Trust Relationships - Level 2
-dn: ou=trustRelationships,o=gluu
-objectClass: top
-objectClass: organizationalUnit
-ou: trustRelationships
-
-######################################
-
 # SAML2 Federations - LEVEL 2
 # WARNING ! This feature is deprecated! Use Jagger: http://www.gluu.co/jag
 dn: ou=federations,o=gluu
