@@ -9,7 +9,7 @@ package org.gluu.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
-import org.gluu.oxauth.model.register.RegisterErrorResponseType;
+import org.gluu.oxauth.model.authorize.DeviceAuthzErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +17,7 @@ import org.json.JSONObject;
 /**
  * Represents a device authz response received from the authorization server.
  */
-public class DeviceAuthzResponse extends BaseResponseWithErrors<RegisterErrorResponseType> {
+public class DeviceAuthzResponse extends BaseResponseWithErrors<DeviceAuthzErrorResponseType> {
 
     private static final Logger LOG = Logger.getLogger(DeviceAuthzResponse.class);
 
@@ -33,8 +33,8 @@ public class DeviceAuthzResponse extends BaseResponseWithErrors<RegisterErrorRes
     }
 
     @Override
-    public RegisterErrorResponseType fromString(String p_string) {
-        return RegisterErrorResponseType.fromString(p_string);
+    public DeviceAuthzErrorResponseType fromString(String p_string) {
+        return DeviceAuthzErrorResponseType.fromString(p_string);
     }
 
     public void injectDataFromJson(String json) {
