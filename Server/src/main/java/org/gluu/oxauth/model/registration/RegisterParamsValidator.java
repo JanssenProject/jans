@@ -81,7 +81,8 @@ public class RegisterParamsValidator {
 
         if (grantTypes != null &&
                 (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
-                || responseTypes.contains(ResponseType.CODE) || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
+                || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
+                || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
             if (redirectUris == null || redirectUris.isEmpty()) {
                 return new Pair<>(false, "Redirect uris are empty.");
             }
@@ -256,7 +257,8 @@ public class RegisterParamsValidator {
                 }
             }
         } else if (!grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
-                !responseTypes.contains(ResponseType.CODE) && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN)) {
+                (!responseTypes.contains(ResponseType.CODE) || grantTypes.contains(GrantType.DEVICE_CODE))
+                && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN)) {
             // It is valid for grant types: password, client_credentials, urn:ietf:params:oauth:grant-type:uma-ticket and urn:openid:params:grant-type:ciba
             valid = true;
         } else {

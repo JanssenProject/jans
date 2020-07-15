@@ -94,6 +94,7 @@ public abstract class BaseTest {
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
+    protected String deviceAuthzEndpoint;
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
@@ -800,6 +801,7 @@ public abstract class BaseTest {
             registrationEndpoint = response.getRegistrationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
+            deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
             backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
             revokeSessionEndpoint = response.getSessionRevocationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
