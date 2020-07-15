@@ -38,6 +38,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String registrationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+    private String deviceAuthzEndpoint;
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
     private List<String> responseModesSupported;
@@ -1082,6 +1083,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.backchannelUserCodeParameterSupported = backchannelUserCodeParameterSupported;
     }
 
+    public String getDeviceAuthzEndpoint() {
+        return deviceAuthzEndpoint;
+    }
+
+    public void setDeviceAuthzEndpoint(String deviceAuthzEndpoint) {
+        this.deviceAuthzEndpoint = deviceAuthzEndpoint;
+    }
+
     @Override
     public String toString() {
         return "OpenIdConfigurationResponse{" +
@@ -1097,6 +1106,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", idGenerationEndpoint='" + idGenerationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
+                ", deviceAuthzEndpoint='" + deviceAuthzEndpoint + '\'' +
                 ", scopesSupported=" + scopesSupported +
                 ", responseTypesSupported=" + responseTypesSupported +
                 ", responseModesSupported=" + responseModesSupported +
