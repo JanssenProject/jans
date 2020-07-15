@@ -3,6 +3,7 @@ import glob
 import shutil
 import ssl
 import json
+import ldap3
 
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
@@ -52,6 +53,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.bind()
 
         if Config.wrends_install:
+            Config.pbar.progress(self.service_name, "Creating WrenDS backends", False)
+            self.create_backends()
             Config.pbar.progress(self.service_name, "Configuring WrenDS", False)
             self.configure_opendj()
             Config.pbar.progress(self.service_name, "Exporting WrenDS certificate", False)
@@ -147,38 +150,16 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         except:
             self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldapBaseFolder)
 
-    def configure_opendj(self):
-        self.logIt("Configuring WrenDS")
 
-        opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
-        config_changes = [
-                          ['set-backend-prop', '--backend-name', 'userRoot', '--set', 'db-cache-percent:70'],
-                          ['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
-                          ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
-                          ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                          ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
-                          ]
+    def create_backends(self):
+        backends = [
+                    ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
+                    ]
                           
         if Config.mappingLocations['site'] == 'ldap':
-            config_changes.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
+            backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
-        config_changes += [
-                          ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
-                          ['set-connection-handler-prop', '--handler-name', '"JMX Connection Handler"', '--set', 'enabled:false'],
-                          ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
-                          ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
-                          ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                          ['create-plugin', '--plugin-name', '"Unique mail address"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:mail'],
-                          ['create-plugin', '--plugin-name', '"Unique uid entry"', '--type', 'unique-attribute', '--set enabled:true',  '--set', 'base-dn:o=gluu', '--set', 'type:uid'],
-                          ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                          ]
-
-
-        if (not Config.listenAllInterfaces) and (Config.wrends_install == InstallTypes.LOCAL):
-            config_changes.append(['set-connection-handler-prop', '--handler-name', '"LDAPS Connection Handler"', '--set', 'enabled:true', '--set', 'listen-address:127.0.0.1'])
-            config_changes.append(['set-administration-connector-prop', '--set', 'listen-address:127.0.0.1'])
-                          
-        for changes in config_changes:
+        for changes in backends:
             cwd = os.path.join(Config.ldapBaseFolder, 'bin')
             dsconfigCmd = " ".join([
                                     self.ldapDsconfigCommand,
@@ -196,6 +177,52 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                       'ldap',
                       '-c',
                       dsconfigCmd], cwd=cwd)
+
+
+    def configure_opendj(self):
+        self.logIt("Configuring WrenDS")
+
+        opendj_config = [
+                ('ds-cfg-backend-id=userRoot,cn=Backends,cn=config', 'ds-cfg-db-cache-percent', '70', ldap3.MODIFY_REPLACE),
+                ('cn=config', 'ds-cfg-single-structural-objectclass-behavior','accept', ldap3.MODIFY_REPLACE),
+                ('cn=config', 'ds-cfg-reject-unauthenticated-requests', 'true', ldap3.MODIFY_REPLACE),
+                ('cn=Default Password Policy,cn=Password Policies,cn=config', 'ds-cfg-allow-pre-encoded-passwords', 'true', ldap3.MODIFY_REPLACE),
+                ('cn=Default Password Policy,cn=Password Policies,cn=config', 'ds-cfg-default-password-storage-scheme', 'cn=Salted SHA-512,cn=Password Storage Schemes,cn=config', ldap3.MODIFY_REPLACE),
+                ('cn=File-Based Audit Logger,cn=Loggers,cn=config', 'ds-cfg-enabled', 'true', ldap3.MODIFY_REPLACE),
+                ('cn=LDAP Connection Handler,cn=Connection Handlers,cn=config', 'ds-cfg-enabled', 'false', ldap3.MODIFY_REPLACE),
+                ('cn=JMX Connection Handler,cn=Connection Handlers,cn=config', 'ds-cfg-enabled', 'false', ldap3.MODIFY_REPLACE),
+                ('cn=Access Control Handler,cn=config', 'ds-cfg-global-aci', '(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)', ldap3.MODIFY_DELETE),        
+            ]
+
+        if (not Config.listenAllInterfaces) and (Config.wrends_install == InstallTypes.LOCAL):
+            opendj_config.append(('cn=LDAPS Connection Handler,cn=Connection Handlers,cn=config', 'ds-cfg-listen-address', '127.0.0.1', ldap3.MODIFY_REPLACE))
+            opendj_config.append(('cn=Administration Connector,cn=config', 'ds-cfg-listen-address', '127.0.0.1', ldap3.MODIFY_REPLACE))
+
+        for dn, attr, val, change_type in opendj_config:
+            self.logIt("Changing WrenDS Configuration for {}".format(dn))
+            self.dbUtils.ldap_conn.modify(
+                    dn, 
+                     {attr: [change_type, val]}
+                    )
+        #Create uniqueness for attrbiutes
+        for attr in ('mail', 'uid'):
+            self.logIt("Creating WrenDS uniqueness for {}".format(attr))
+            cn = 'Unique {} entry'.format(attr)
+            self.dbUtils.ldap_conn.add(
+                'cn={},cn=Plugins,cn=config'.format(cn),
+                attributes={
+                        'objectClass': ['top', 'ds-cfg-plugin', 'ds-cfg-unique-attribute-plugin'],
+                        'ds-cfg-java-class': ['org.opends.server.plugins.UniqueAttributePlugin'],
+                        'ds-cfg-enabled': ['true'],
+                        'ds-cfg-plugin-type': ['postoperationadd', 'postoperationmodify', 'postoperationmodifydn', 'postsynchronizationadd', 'postsynchronizationmodify', 'postsynchronizationmodifydn', 'preoperationadd', 'preoperationmodify', 'preoperationmodifydn'],
+                        'ds-cfg-type': [attr],
+                        'cn': [cn],
+                        'ds-cfg-base-dn': ['o=gluu']
+                        }
+                )
+
+
+
 
     def export_opendj_public_cert(self):
         # Load password to acces OpenDJ truststore
