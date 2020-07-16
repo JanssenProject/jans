@@ -107,7 +107,7 @@ public abstract class BaseTest {
     protected String loginFormPassword;
     protected String loginFormLoginButton;
     private String authorizeFormAllowButton;
-    private String authorizeFormDoNotAllowButton;
+    protected String authorizeFormDoNotAllowButton;
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
