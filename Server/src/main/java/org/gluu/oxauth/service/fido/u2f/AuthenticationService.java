@@ -163,6 +163,8 @@ public class AuthenticationService extends RequestService {
         rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
                 Base64Util.base64urldecode(usedDeviceRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
         rawAuthenticateResponse.checkUserPresence();
+
+        log.debug("Counter in finish authentication request'{}', countr in database '{}'", rawAuthenticateResponse.getCounter(), usedDeviceRegistration.getCounter());
         usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
         usedDeviceRegistration.setLastAccessTime(new Date());
