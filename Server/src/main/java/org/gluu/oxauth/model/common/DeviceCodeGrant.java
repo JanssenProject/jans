@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.service.CacheService;
 
 import javax.inject.Inject;
@@ -33,7 +34,8 @@ public class DeviceCodeGrant extends AuthorizationGrant {
     @Override
     public void save() {
         CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
-        cacheService.put(cachedGrant.getExpiresIn(), cachedGrant.getDeviceCode(), cachedGrant);
+        String cacheKey = StringUtils.isNotBlank(cachedGrant.getDeviceCode()) ? cachedGrant.getDeviceCode() : cachedGrant.getGrantId();
+        cacheService.put(cachedGrant.getExpiresIn(), cacheKey, cachedGrant);
     }
 
     public String getDeviceCode() {

@@ -27,7 +27,7 @@ import static org.testng.Assert.*;
 /**
  * Tests for WS used to register device authz requests.
  */
-public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
+public class DeviceAuthzRequestRegistrationTest extends BaseTest {
 
     /**
      * Verifies normal flow with different scopes, AS should generate user_code, device_code and other data.
@@ -39,7 +39,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
 
         // Register client
         RegisterResponse registerResponse = registerClientForDeviceAuthz(AuthenticationMethod.CLIENT_SECRET_BASIC,
-                Collections.singletonList(GrantType.DEVICE_CODE), null, null);
+                Collections.singletonList(GrantType.DEVICE_CODE), null, null, registrationEndpoint);
         String clientId = registerResponse.getClientId();
 
         // 1. OpenId, profile, address and email scopes
@@ -54,7 +54,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         DeviceAuthzResponse response = deviceAuthzClient.exec();
 
         showClient(deviceAuthzClient);
-        validateResponse(response);
+        validateSuccessfulResponse(response);
 
         // 2. Only openid scope
         scopes = Collections.singletonList("openid");
@@ -68,7 +68,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         response = deviceAuthzClient.exec();
 
         showClient(deviceAuthzClient);
-        validateResponse(response);
+        validateSuccessfulResponse(response);
     }
 
     /**
@@ -81,7 +81,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
 
         // Register client
         RegisterResponse registerResponse = registerClientForDeviceAuthz(AuthenticationMethod.NONE,
-                Collections.singletonList(GrantType.DEVICE_CODE), null, null);
+                Collections.singletonList(GrantType.DEVICE_CODE), null, null, registrationEndpoint);
         String clientId = registerResponse.getClientId();
 
         // 1. OpenId, profile, address and email scopes
@@ -95,7 +95,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         DeviceAuthzResponse response = deviceAuthzClient.exec();
 
         showClient(deviceAuthzClient);
-        validateResponse(response);
+        validateSuccessfulResponse(response);
 
         // 2. Only openid scope
         scopes = Collections.singletonList("openid");
@@ -109,7 +109,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         response = deviceAuthzClient.exec();
 
         showClient(deviceAuthzClient);
-        validateResponse(response);
+        validateSuccessfulResponse(response);
     }
 
     /**
@@ -122,7 +122,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
 
         // Register client
         RegisterResponse registerResponse = registerClientForDeviceAuthz(AuthenticationMethod.CLIENT_SECRET_BASIC,
-                Collections.singletonList(GrantType.AUTHORIZATION_CODE), redirectUris, sectorIdentifierUri);
+                Collections.singletonList(GrantType.AUTHORIZATION_CODE), redirectUris, sectorIdentifierUri, registrationEndpoint);
         String clientId = registerResponse.getClientId();
 
         // Device authz request registration
@@ -150,7 +150,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
 
         // Register client
         RegisterResponse registerResponse = registerClientForDeviceAuthz(AuthenticationMethod.CLIENT_SECRET_BASIC,
-                Collections.singletonList(GrantType.DEVICE_CODE), null, null);
+                Collections.singletonList(GrantType.DEVICE_CODE), null, null, registrationEndpoint);
         String clientId = registerResponse.getClientId();
 
         // 1. No authentication data sent
@@ -190,7 +190,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
 
         // Register client
         RegisterResponse registerResponse = registerClientForDeviceAuthz(AuthenticationMethod.NONE,
-                Collections.singletonList(GrantType.DEVICE_CODE), null, null);
+                Collections.singletonList(GrantType.DEVICE_CODE), null, null, registrationEndpoint);
         String clientId = registerResponse.getClientId();
 
         // Device authz request
@@ -205,13 +205,14 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         DeviceAuthzResponse response = deviceAuthzClient.exec();
 
         showClient(deviceAuthzClient);
-        validateResponse(response);
+        validateSuccessfulResponse(response);
     }
 
-    private RegisterResponse registerClientForDeviceAuthz(AuthenticationMethod authenticationMethod,
+    protected static RegisterResponse registerClientForDeviceAuthz(AuthenticationMethod authenticationMethod,
                                                           List<GrantType> grantTypes, String redirectUris,
-                                                          String sectorIdentifierUri) {
+                                                          String sectorIdentifierUri, String registrationEndpoint) {
         List<ResponseType> responseTypes = Collections.singletonList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -219,6 +220,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setTokenEndpointAuthMethod(authenticationMethod);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -235,7 +237,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         return registerResponse;
     }
 
-    private void validateResponse(DeviceAuthzResponse response) {
+    protected static void validateSuccessfulResponse(DeviceAuthzResponse response) {
         final String regex = "[" + EASY_TO_READ_CHARACTERS + "]{4}-[" + EASY_TO_READ_CHARACTERS + "]{4}";
         assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getUserCode(), "User code is null");
@@ -251,7 +253,7 @@ public class DeviceAuthzDeviceRegistrationTest extends BaseTest {
         assertTrue(response.getUserCode().matches(regex));
     }
 
-    private void validateErrorResponse(DeviceAuthzResponse response, int status, DeviceAuthzErrorResponseType errorType) {
+    protected static void validateErrorResponse(DeviceAuthzResponse response, int status, DeviceAuthzErrorResponseType errorType) {
         assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getErrorType(), "Error expected, however no error was found");
         assertNotNull(response.getErrorDescription(), "Error description expected, however no error was found");
