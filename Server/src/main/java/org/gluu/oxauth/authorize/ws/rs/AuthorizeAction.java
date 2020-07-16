@@ -29,6 +29,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -151,6 +152,9 @@ public class AuthorizeAction {
 
     @Inject
     private CibaRequestService cibaRequestService;
+
+	@Inject
+	private Identity identity;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -320,6 +324,7 @@ public class AuthorizeAction {
             this.sessionId = unauthenticatedSession.getId();
             cookieService.createSessionIdCookie(unauthenticatedSession, false);
             cookieService.creatRpOriginIdCookie(redirectUri);
+            identity.setSessionId(unauthenticatedSession);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
             if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
