@@ -13,18 +13,21 @@ servers:
 tags:
   - name: developers
     description: oxauth-config enables access to the features available via the existing oxAuth API.
+  - name: Attribute
+  - name: Authentication
+  - name: Custom Scripts
   - name: Graphics
   - name: LDAP configuration
   - name: Library
-  - name: Custom Scripts
+  - name: Properties
 paths:
   /config/properties:
-    get:
+    get:      
+      summary: Gets all oxauth configuration properties.
+      description: Gets all oxauth configuration properties.
+      operationId: properties
       tags:
         - Properties
-      summary: Gets all oxauth-config properties.
-      description: Gets all oxauth-config JSON properties.
-      operationId: properties
       responses:
         '200':
           description: OK
@@ -1269,12 +1272,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /config/graphics:
-    get:
+    get:      
+      summary: Retrieves organization graphic configuration.
+      description: Retrieves organization graphic configuration.
+      operationId: get-organization-graphics
       tags:
         - Graphics
-      summary: Retrieve organization graphics configuration.
-      description: Retrieve organization graphics configuration.
-      operationId: get-organization-graphics
       responses:
         '200':
           description: OK
@@ -1282,7 +1285,7 @@ paths:
             application/json:
               schema:
                 title: OrganizationConfiguration
-                description: Organization graphics configuration details.
+                description: Organization graphic configuration details.
                 type: object
                 properties:
                   logoLocation:
@@ -1296,19 +1299,19 @@ paths:
                   - faviconPath
         '500':
           $ref: '#/components/responses/InternalServerError'
-    post:
+    post:      
+      summary: Adds organization graphic configuration.
+      description: Adds organization graphic configuration.
+      operationId: post-organization-graphics
       tags:
         - Graphics
-      summary: Add organization graphics configuration.
-      description: Add organization graphics configuration.
-      operationId: post-organization-graphics
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               title: OrganizationConfiguration
-              description: Organization graphics configuration details.
+              description: Organization graphic configuration details.
               type: object
               properties:
                 logoLocation:
@@ -1320,7 +1323,7 @@ paths:
               required:
                 - logoLocation
                 - faviconPath
-        description: Organization graphics configuration details.
+        description: Organization graphic configuration details.
       responses:
         '200':
           description: OK
@@ -1330,14 +1333,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
-      summary: ''
+      summary: Updates organization graphic configuration.
+      description: Updates organization graphic configuration.
       operationId: put-organization-graphics
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Update organization graphics configuration.
+      tags:
+        - Graphics
+      parameters: []
       requestBody:
         content:
           application/json:
@@ -1353,16 +1354,228 @@ paths:
               required:
                 - logoLocation
                 - faviconPath
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/graphics/logo:
+    get:
+      summary: Retrieves organization logo graphic details.
+      description: Retrieves organization logo graphic details.
+      operationId: get-config-graphics-logo      
       tags:
         - Graphics
-    parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logoLocation:
+                    type: string
+                    description: Directory name for the images and logos that are used.
+                required:
+                  - logoLocation
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Adds organization logo graphic details.
+      description: Adds organization logo graphic details.
+      operationId: post-config-graphics-logo      
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - logoLocation
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Updates organization logo graphic details.
+      description: Updates organization logo graphic details.
+      operationId: put-config-graphics-logo
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - logoLocation
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    patch:
+      summary: Patches organization logo graphic details.
+      description: Patches organization logo graphic details.
+      operationId: patch-config-graphics-logo
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logoLocation:
+                  type: string
+                  description: Directory name for the images and logos that are used.
+              required:
+                - logoLocation
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Deletes organization logo graphic details.     
+      description: Deletes organization logo graphic details.
+      operationId: delete-config-graphics-logo
+      tags:
+        - Graphics
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /config/graphics/favicon:
+    get:
+      summary: Gets organization favicon graphic details.     
+      description: Gets organization favicon graphic details.     
+      operationId: get-config-graphics-favicon
+      tags:
+        - Graphics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  faviconPath:
+                    type: string
+                    description: Directory name for the images and favicon that are used.
+                required:
+                  - faviconPath
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Adds organization favicon graphic details.      
+      description: Adds organization favicon graphic details.      
+      operationId: post-config-graphics-favicon
+      tags:
+        - Graphics      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - faviconPath
+        description: Details of organization favicon.
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Updates organization favicon graphic details.      
+      description: Updates organization favicon graphic details.
+      operationId: put-config-graphics-favicon
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Details of organization favicon to be updated.
+              properties:
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - faviconPath
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    patch:
+      summary: Patches organization favicon graphic details.
+      description: Patches organization favicon graphic details.  
+      operationId: patch-config-graphics-favicon
+      tags:
+        - Graphics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Details of organization favicon to be updated.
+              properties:
+                faviconPath:
+                  type: string
+                  description: Directory name for the images and favicon that are used.
+              required:
+                - faviconPath
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error          
+    delete:
+      summary: Deletes organization favicon graphic details.  
+      description: Deletes organization favicon graphic details.
+      operationId: delete-config-graphics-favicon
+      tags:
+        - Graphics
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
   /attributes:
     get:
+      summary: Gets all  Gluu attributes, active as well as inactive.
+      description: Gets all  Gluu attributes, active as well as inactive.
+      operationId: get-attributes
       tags:
         - Attribute
-      summary: 'Gets all  Gluu attributes filtered, active as well as inactive.'
-      description: 'Gets all  Gluu attributes filtered, active as well as inactive.'
-      operationId: attributes
       responses:
         '200':
           description: OK
@@ -1375,7 +1588,6 @@ paths:
                 items:
                   type: object
                   title: GluuAttribute
-                  description: Newly added attribute.
                   required:
                     - inum
                     - name
@@ -1471,19 +1683,19 @@ paths:
                       type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-    post:
+    post:      
+      summary: Adds new Gluu attribute.
+      description: Adds new Gluu attribute.
+      operationId: post-attributes
       tags:
         - Attribute
-      summary: Adds a new Gluu attribute.
-      description: Adds a new Gluu attribute.
-      operationId: post-attributes
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               title: GluuAttribute
-              description: Newly added attribute.
+              description: New attribute.
               type: object
               required:
                 - name
@@ -1581,7 +1793,6 @@ paths:
             application/json:
               schema:
                 title: GluuAttribute
-                description: Newly added attribute.
                 type: object
                 required:
                   - inum
@@ -1678,12 +1889,12 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-    put:
-      tags:
-        - Attribute
+    put:      
       summary: Updates an existing attribute.
       description: Updates an existing attribute.
       operationId: put-attributes
+      tags:
+        - Attribute
       requestBody:
         required: true
         content:
@@ -1792,7 +2003,6 @@ paths:
             application/json:
               schema:
                 title: GluuAttribute
-                description: Updated attribute object.
                 type: object
                 required:
                   - inum
@@ -1891,20 +2101,20 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/attributes/{inum}':
+  /attributes/{inum}:
+    parameters:
+      - name: inum
+        in: path
+        required: true
+        description: Attribute ID.
+        schema:
+          type: string
     delete:
+      summary: Deletes an attribute identified by inum.
+      description: Deletes an attribute identified based on inum.
+      operationId: delete-attributes-by-inum
       tags:
-        - Attribute
-      summary: Deletes an attribute identified inum.
-      description: Deletes an attribute identified inum.
-      operationId: 'delete-attributes/{inum}'
-      parameters:
-        - name: inum
-          in: path
-          required: true
-          description: Attribute ID.
-          schema:
-            type: string
+        - Attribute     
       responses:
         '200':
           description: OK
@@ -1914,12 +2124,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /attributes/active:
-    get:
+    get:      
+      summary: Gets all active attributes.
+      description: Gets all active attributes.
+      operationId: get-attributes-active
       tags:
         - Attribute
-      summary: Get all active attributes.
-      description: Gets all active attributes
-      operationId: attributes-active
       responses:
         '200':
           description: OK
@@ -1932,7 +2142,6 @@ paths:
                 items:
                   type: object
                   title: GluuAttribute
-                  description: Newly added attribute.
                   required:
                     - inum
                     - name
@@ -2029,12 +2238,12 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /attributes/inactive:
-    get:
+    get:     
+      summary: Gets all inactive attributes.
+      description: Gets all inactive attributes.
+      operationId: get-attributes-inactive
       tags:
         - Attribute
-      summary: Get all inactive attributes.
-      description: Gets all inactive attributes
-      operationId: attributes-inactive
       responses:
         '200':
           description: OK
@@ -2047,7 +2256,6 @@ paths:
                 items:
                   type: object
                   title: GluuAttribute
-                  description: Newly added attribute.
                   required:
                     - inum
                     - name
@@ -2143,20 +2351,20 @@ paths:
                       type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/attributes/attribute/{inum}':
+  /attributes/attribute/{inum}:
+    parameters:
+      - name: inum
+        in: path
+        required: true
+        description: Attribute ID.
+        schema:
+          type: string
     get:
+      summary: Gets attribute by inum.
+      description: Gets attribute based on inum.
+      operationId: get-attributes-by-inum
       tags:
-        - Attribute
-      summary: Gets attribute by inum
-      description: Gets attribute by inum
-      operationId: 'attributes/attribute/{inum}'
-      parameters:
-        - name: inum
-          in: path
-          required: true
-          description: Attribute ID.
-          schema:
-            type: string
+        - Attribute     
       responses:
         '200':
           description: OK
@@ -2164,7 +2372,7 @@ paths:
             application/json:
               schema:
                 title: GluuAttribute
-                description: 'Gluu Server attribute coreesponding to the identifier{inum}'
+                description: Gluu Server attribute corresponding to the identifier{inum}
                 type: object
                 required:
                   - inum
@@ -2262,25 +2470,25 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /attributes/search:
-    get:
+    parameters:
+      - name: pattern
+        in: query
+        required: true
+        description: Serach pattern.
+        schema:
+          type: string
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:      
+      summary: Searches attributes by pattern, and specify the max size of the results to return.
+      description: Searches attributes by pattern, and specify the max size of the results to return.
+      operationId: get-attributes-by-pattern
       tags:
-        - Attribute
-      summary: 'Search attributes by pattern , and specify the max size of the results to return.'
-      description: 'Search attributes by pattern , and specify the max size of the results to return.'
-      operationId: attributes-search
-      parameters:
-        - name: pattern
-          in: query
-          required: true
-          description: Serach pattern.
-          schema:
-            type: string
-        - name: size
-          in: query
-          required: true
-          description: Serach size -  max size of the results to return.
-          schema:
-            type: integer
+        - Attribute      
       responses:
         '200':
           description: OK
@@ -2391,11 +2599,11 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /acrs:
     get:
-      tags:
-        - Authentication
       summary: Gets default authentication method.
       description: Gets default authentication method.
       operationId: get-acrs
+      tags:
+        - Authentication
       responses:
         '200':
           description: OK
@@ -2403,7 +2611,7 @@ paths:
             application/json:
               schema:
                 title: AuthenticationMethod
-                description: Default Authentication Method.
+                description: Default authentication method.
                 type: object
                 properties:
                   defaultAcr:
@@ -2412,18 +2620,18 @@ paths:
                     type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-    put:
+    post:
+      summary: Adds authentication method.
+      description: Adds default authentication method.
+      operationId: post-acrs
       tags:
         - Authentication
-      summary: Updates default authentication method.
-      description: Updates default authentication method.
-      operationId: put-acrs
       requestBody:
         content:
           application/json:
             schema:
               title: AuthenticationMethod
-              description: Authentication Method to be updated as default.
+              description: Authentication method to be added as default.
               type: object
               properties:
                 defaultAcr:
@@ -2433,26 +2641,42 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                title: AuthenticationMethod
-                description: Updated Authentication Method.
-                type: object
-                properties:
-                  defaultAcr:
-                    type: string
-                  oxtrustAcr:
-                    type: string
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates default authentication method.
+      description: Updates default authentication method.
+      operationId: put-acrs
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: AuthenticationMethod
+              description: Authentication method to be updated as default.
+              type: object
+              properties:
+                defaultAcr:
+                  type: string
+                oxtrustAcr:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /configuration/ldap:
     get:
+      summary: Gets existing LDAP configuration.
+      description: Gets existing LDAP configuration.
+      operationId: get-configuration-ldap
       tags:
         - LDAP configuration
-      summary: Gets an existing LDAP configuration.
-      description: Gets an existing LDAP configuration.
-      operationId: get-configuration-ldap
       responses:
         '200':
           description: OK
@@ -2517,11 +2741,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
+      summary: Adds new LDAP configuration.
+      description: Adds new LDAP configuration.
+      operationId: post-configuration-ldap
       tags:
         - LDAP configuration
-      summary: Adds a new LDAP configuration.
-      description: Adds a new LDAP configuration.
-      operationId: post-configuration-ldap
       requestBody:
         required: true
         content:
@@ -2582,77 +2806,22 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                title: LdapConfiguration
-                description: Newly added LdapConfiguration.
-                type: object
-                required:
-                  - configId
-                  - bindDN
-                  - bindPassword
-                  - servers
-                  - baseDNs
-                  - primaryKey
-                  - localPrimaryKey
-                properties:
-                  configId:
-                    type: string
-                    description: Unique identifier
-                  bindDN:
-                    type: string
-                    description: User Distingusihed Name for binding.
-                  bindPassword:
-                    type: string
-                    description: User password for binding.
-                  servers:
-                    type: array
-                    description: List of LDAP authentication servers.
-                    items:
-                      type: string
-                      description: Unique name of the authentication server and port number.
-                      example: 'authserver.org:63'
-                  maxConnections:
-                    type: integer
-                    description: Total number of simultaneous connections allowed.
-                  useSSL:
-                    type: boolean
-                  baseDNs:
-                    type: array
-                    description: list of LDAP base Distingusihed Name
-                    items:
-                      type: string
-                  primaryKey:
-                    type: string
-                    description: Used to search and bind operations in configured LDAP server.
-                    example: 'SAMAccountName,uid, email'
-                  localPrimaryKey:
-                    type: string
-                    description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                    example: 'uid, email'
-                  useAnonymousBind:
-                    type: boolean
-                    description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                  enabled:
-                    type: boolean
-                  level:
-                    type: integer
+          content: {}            
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
+      summary: Updates existing LDAP configuration.
+      description: Updates existing LDAP configuration.
+      operationId: put-configuration-ldap
       tags:
         - LDAP configuration
-      summary: Updates an existing LDAP configuration.
-      description: Updates an existing LDAP configuration.
-      operationId: put-configuration-ldap
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              description: Updated LDAP configuration.
+              description: LDAP configuration.
               required:
                 - configId
                 - bindDN
@@ -2706,210 +2875,70 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                title: LdapConfiguration
-                description: Updated LdapConfiguration.
-                type: object
-                required:
-                  - configId
-                  - bindDN
-                  - bindPassword
-                  - servers
-                  - baseDNs
-                  - primaryKey
-                  - localPrimaryKey
-                properties:
-                  configId:
-                    type: string
-                    description: Unique identifier
-                  bindDN:
-                    type: string
-                    description: User Distingusihed Name for binding.
-                  bindPassword:
-                    type: string
-                    description: User password for binding.
-                  servers:
-                    type: array
-                    description: List of LDAP authentication servers.
-                    items:
-                      type: string
-                      description: Unique name of the authentication server and port number.
-                      example: 'authserver.org:63'
-                  maxConnections:
-                    type: integer
-                    description: Total number of simultaneous connections allowed.
-                  useSSL:
-                    type: boolean
-                  baseDNs:
-                    type: array
-                    description: list of LDAP base Distingusihed Name
-                    items:
-                      type: string
-                  primaryKey:
-                    type: string
-                    description: Used to search and bind operations in configured LDAP server.
-                    example: 'SAMAccountName,uid, email'
-                  localPrimaryKey:
-                    type: string
-                    description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                    example: 'uid, email'
-                  useAnonymousBind:
-                    type: boolean
-                    description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                  enabled:
-                    type: boolean
-                  level:
-                    type: integer
+          content: {}            
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  '/configuration/ldap/{name}':
-    delete:
-      tags:
-        - LDAP configuration
-      summary: Deletes an existing LDAP configuration.
-      description: Deletes existing LDAP configuration.
-      operationId: 'delete-configuration-ldap/{name}'
-      parameters:
+  /configuration/ldap/{name}:
+    parameters:
         - name: name
           in: path
           required: true
-          description: Name of the LDAP configuration.
+          description: Name of LDAP configuration.
           schema:
             type: string
+    delete:
+      summary: Deletes existing LDAP configuration.
+      description: Deletes existing LDAP configuration.
+      operationId: delete-configuration-ldap
+      tags:
+        - LDAP configuration      
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                title: LdapConfiguration
-                description: List of configured LDAP configuration.
-                type: array
-                items:
-                  type: object
-                  required:
-                    - configId
-                    - bindDN
-                    - bindPassword
-                    - servers
-                    - baseDNs
-                    - primaryKey
-                    - localPrimaryKey
-                  properties:
-                    configId:
-                      type: string
-                      description: Unique identifier
-                    bindDN:
-                      type: string
-                      description: User Distingusihed Name for binding.
-                    bindPassword:
-                      type: string
-                      description: User password for binding.
-                    servers:
-                      type: array
-                      description: List of LDAP authentication servers.
-                      items:
-                        type: string
-                        description: Unique name of the authentication server and port number.
-                        example: 'authserver.org:63'
-                    maxConnections:
-                      type: integer
-                      description: Total number of simultaneous connections allowed.
-                    useSSL:
-                      type: boolean
-                    baseDNs:
-                      type: array
-                      description: list of LDAP base Distingusihed Name
-                      items:
-                        type: string
-                    primaryKey:
-                      type: string
-                      description: Used to search and bind operations in configured LDAP server.
-                      example: 'SAMAccountName,uid, email'
-                    localPrimaryKey:
-                      type: string
-                      description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                      example: 'uid, email'
-                    useAnonymousBind:
-                      type: boolean
-                      description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                    enabled:
-                      type: boolean
-                    level:
-                      type: integer
+          content: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
   /configuration/ldap/status:
-    post:
+    get:
+      summary: Gets LDAP connection based on status.
+      description: Gets LDAP connection based on status.
+      operationId: get-configuration-ldap-by-status
       tags:
         - LDAP configuration
-      summary: Fetches LDAP connection status.
-      description: Fetches LDAP connection status.
-      operationId: post-configuration-ldap-status
-      requestBody:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ConnectionStatusDTO
+                description: LDAP ConnectionStatus object.
+                type: object
+                required:
+                  - isUp
+                properties:
+                  isUp:
+                    type: boolean
+                    description: Boolean value indicating the status of LDAP connection.
+                    example: true for connection up and running
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /configuration/ldap/{name}/status:
+    parameters:
+      - name: name
+        in: path
         required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              description: LdapConnectionData.
-              required:
-                - bindDN
-                - bindPassword
-                - servers
-                - useSSL
-              properties:
-                bindDN:
-                  type: string
-                  description: User Distingusihed Name for binding.
-                bindPassword:
-                  type: string
-                  description: User password for binding.
-                servers:
-                  type: array
-                  description: List of LDAP authentication servers.
-                  items:
-                    type: string
-                    description: Unique name of the authentication server and port number.
-                    example: 'authserver.org:63'
-                useSSL:
-                  type: boolean
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: ConnectionStatusDTO
-                description: LDAP ConnectionStatus object.
-                type: object
-                required:
-                  - isUp
-                properties:
-                  isUp:
-                    type: boolean
-                    description: Boolean value indicating the status of LDAP connection.
-                    example: true for connection up and running
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  '/configuration/ldap/{name}/status':
-    get:
+        description: Name of LDAP configuration.
+        schema:
+          type: string
+    get:    
+      summary: Gets LDAP connection status based on name.
+      description: Gets LDAP connection status based on name.
+      operationId: get-configuration-ldap-status-by-name
       tags:
         - LDAP configuration
-      summary: Fetches the LDAP connection status based on name.
-      description: Fetches LDAP connection status.
-      operationId: 'get-configuration-ldap-{name}-status'
-      parameters:
-        - name: name
-          in: path
-          required: true
-          description: Name of the LDAP configuration.
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -2927,236 +2956,14 @@ paths:
                     description: Boolean value indicating the status of LDAP connection.
                     example: true for connection up and running
         '500':
-          $ref: '#/components/responses/InternalServerError'
-  /config/graphics/logo:
-    get:
-      summary: Retrieve organization logo details.
-      tags:
-        - Graphics
-      responses:
-        '200':
-          description: OK
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  logoLocation:
-                    type: string
-                    description: Directory name for the images and logos that are used.
-                required:
-                  - logoLocation
-        '500':
-          description: Internal Server Error
-      operationId: get-config-graphics-logo
-      description: Retrieve organization logo details.
-    delete:
-      summary: ''
-      operationId: delete-config-graphics-logo
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Delete organization logo
-      tags:
-        - Graphics
-    post:
-      summary: ''
-      operationId: post-config-graphics-logo
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Add organization logo details.
-      tags:
-        - Graphics
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                logoLocation:
-                  type: string
-                  description: Directory name for the images and logos that are used.
-              required:
-                - logoLocation
-        description: Organization logo details.
-    put:
-      summary: ''
-      operationId: put-config-graphics-logo
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Update organization logo details.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                '':
-                  type: string
-                  description: Directory name for the images and logos that are used.
-              required:
-                - ''
-        description: Organization logo details.
-      tags:
-        - Graphics
-    patch:
-      summary: ''
-      operationId: patch-config-graphics-logo
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Patch organization logo details.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                logoLocation:
-                  type: string
-                  description: Directory name for the images and logos that are used.
-              required:
-                - logoLocation
-      tags:
-        - Graphics
-  /config/graphics/favicon:
-    get:
-      summary: Your GET endpoint
-      tags:
-        - Graphics
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  faviconPath:
-                    type: string
-                    description: Directory name for the images and favicon that are used.
-                required:
-                  - faviconPath
-        '500':
-          description: Internal Server Error
-      operationId: get-config-graphics-favicon
-      description: Retrieve organization favicon
-    delete:
-      summary: Delete organization favicon
-      operationId: delete-config-graphics-favicon
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Delete organization favicon
-      tags:
-        - Graphics
-    patch:
-      summary: ''
-      operationId: patch-config-graphics-favicon
-      responses:
-        '200':
-          description: OK
-      description: Details of organization favicon.
-      tags:
-        - Graphics
-    put:
-      summary: ''
-      operationId: put-config-graphics-favicon
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Update organization logo
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                faviconPath:
-                  type: string
-                  description: Directory name for the images and favicon that are used.
-              required:
-                - faviconPath
-        description: Details of organization favicon to be updated.
-      tags:
-        - Graphics
-    post:
-      summary: ''
-      operationId: post-config-graphics-favicon
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Add organization favicon
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                faviconPath:
-                  type: string
-                  description: Directory name for the images and favicon that are used.
-              required:
-                - faviconPath
-        description: Details of organization favicon.
-      tags:
-        - Graphics
+          $ref: '#/components/responses/InternalServerError'  
   /config/library:
-    post:
-      summary: Upload custom library.
+    get:
+      summary: Gets custom library.
+      description: Gets custom library.
+      operationId: get-config-library      
       tags:
         - Library
-      description: Upload custom library.
-      operationId: post-config-library
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: File to upload.
-              required:
-                - file
-        description: Library to be added to oxAuth Path
-    parameters: []
-    get:
-      summary: Retrieve custom library.
-      operationId: get-config-library
       responses:
         '200':
           description: OK
@@ -3169,1635 +2976,25 @@ paths:
                   type: string
         '500':
           description: Internal Server Error
-      description: Retrieve custom library.
+    post:
+      summary: Uploads custom library.      
+      description: Uploads custom library.
+      operationId: post-config-library
       tags:
         - Library
-  '/config/library/{libName}':
-    parameters:
-      - schema:
-          type: string
-          minLength: 1
-        name: libName
-        in: path
-        description: Name of the libraray to be removed.
-        required: true
-    delete:
-      summary: Delete custom library.
-      operationId: delete-config-library-libName
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Delete custom library.
-      tags:
-        - Library
-  /scripts/person_authn:
-    get:
-      summary: Get all person authentication script.
-      tags:
-        - Custom Scripts
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: Dn(Distinguished Name) of the script.
-                  properties:
-                    dn:
-                      type: string
-                      description: XRI i-number
-                    inum:
-                      type: string
-                      example: '''name, displayName,birthdate, email'''
-                    name:
-                      type: string
-                      description: 'Name should contain only letters, digits and underscores.'
-                      minLength: 1
-                      maxLength: 60
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                    scriptType:
-                      type: string
-                      enum:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      enum:
-                        - python
-                        - javascript
-                      description: Specifies programming language of the custom script.
-                    moduleProperties:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                    configurationProperties:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
-        '500':
-          description: Internal Server Error
-      operationId: get-scripts-person_authn
-      description: Retrieve all person authentication script.
-    post:
-      summary: Add new person authentication script.
-      operationId: post-scripts-person_authn
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Add new custom person authentication script.
-      tags:
-        - Custom Scripts
+      parameters: []
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                dn:
+                file:
                   type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                name:
-                  type: string
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  minLength: 1
-                  maxLength: 60
-                  description: 'Name should contain only letters, digits and underscores.'
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                  description: Actual script
-                scriptType:
-                  type: string
-                  enum:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  enum:
-                    - python
-                    - javascript
-                  description: Specifies programming language of the custom script.
-                moduleProperties:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                configurationProperties:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                      hide:
-                        type: boolean
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
-        description: New person authentication script.
-    put:
-      summary: Modify person authentication script.
-      operationId: put-scripts-person_authn
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Modify person authentication script.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dn:
-                  type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                name:
-                  type: string
-                  minLength: 1
-                  maxLength: 60
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  description: 'Name should contain only letters, digits and underscores.'
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                  description: Actual person auth script.
-                scriptType:
-                  type: string
-                  enum:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  description: Specifies programming language of the custom script.
-                  enum:
-                    - python
-                    - javascript
-                moduleProperties:
-                  type: object
-                  properties:
-                    value1:
-                      type: string
-                    value2:
-                      type: string
-                    description:
-                      type: string
-                      description: ''
-                configurationProperties:
-                  type: object
-                  description: List of configuration properties.
-                  properties:
-                    value1:
-                      type: string
-                    value2:
-                      type: string
-                    description:
-                      type: string
-                    hide:
-                      type: boolean
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
-        description: Modified person authentication custom script.
-      tags:
-        - Custom Scripts
-  '/scripts/person_authn/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Delete person authentication script.
-      operationId: delete-scripts-person_authn-inum
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Delete person authentication script.
-      tags:
-        - Custom Scripts
-    get:
-      summary: Get person authentication script by inum.
-      operationId: get-scripts-person_authn-inum
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  dn:
-                    type: string
-                    description: Dn(Distinguished Name) of the script.
-                  inum:
-                    type: string
-                    description: XRI i-number
-                  name:
-                    type: string
-                    pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    minLength: 1
-                    maxLength: 60
-                    description: 'Name should contain only letters, digits and underscores.'
-                  aliases:
-                    type: array
-                    items:
-                      type: string
-                  description:
-                    type: string
-                  script:
-                    type: string
-                    description: Actual script.
-                  scriptType:
-                    type: string
-                    enum:
-                      - person_authentication
-                      - introspection
-                      - resource_owner_password_credentials
-                      - application_session
-                      - cache_refresh
-                      - update_user
-                      - user_registration
-                      - client_registration
-                      - id_generator
-                      - uma_rpt_policy
-                      - uma_rpt_claims
-                      - uma_claims_gathering
-                      - consent_gathering
-                      - dynamic_scope
-                      - spontaneous_scope
-                      - end_session
-                      - post_authn
-                      - scim
-                      - ciba_end_user_notification
-                      - persistence_extension
-                      - idp
-                  programmingLanguage:
-                    type: string
-                    description: Specifies programming language of the custom script.
-                    enum:
-                      - python
-                      - javascript
-                  moduleProperties:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                  configurationProperties:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
-                  level:
-                    type: integer
-                  revision:
-                    type: integer
-                    format: int64
-                  enabled:
-                    type: boolean
-                  scriptError:
-                    type: object
-                    properties:
-                      raisedAt:
-                        type: string
-                        format: date
-                      stackTrace:
-                        type: string
-                  modified:
-                    type: boolean
-                  internal:
-                    type: boolean
-      description: Get person authentication script identified by inum.
-      tags:
-        - Custom Scripts
-  '/scripts/person_authn/{type}':
-    parameters:
-      - schema:
-          type: string
-        name: type
-        in: path
-        required: true
-        description: Script type.
-    get:
-      summary: Get all person authentication scripts by type.
-      tags:
-        - Custom Scripts
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: Dn(Distinguished Name) of the script.
-                  properties:
-                    dn:
-                      type: string
-                    inum:
-                      type: string
-                    name:
-                      type: string
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                      minLength: 1
-                      maxLength: 60
-                      description: 'Name should contain only letters, digits and underscores.'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                      description: Actual script.
-                    scriptType:
-                      type: string
-                      enum:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      enum:
-                        - python
-                        - javascript
-                      description: Specifies programming language of the custom script.
-                    moduleProperties:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                    configurationProperties:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                          hide:
-                            type: boolean
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
-      operationId: get-scripts-person_authn-type
-      description: Get all person authentication scripts based on type.
-  /scripts/consent:
-    get:
-      summary: Get all consent gathering script.
-      tags:
-        - Custom Scripts
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: Dn(Distinguished Name) of the script.
-                  properties:
-                    dn:
-                      type: string
-                      description: XRI i-number
-                    inum:
-                      type: string
-                      example: '''name, displayName,birthdate, email'''
-                    name:
-                      type: string
-                      description: 'Name should contain only letters, digits and underscores.'
-                      minLength: 1
-                      maxLength: 60
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                    scriptType:
-                      type: string
-                      enum:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      enum:
-                        - python
-                        - javascript
-                      description: Specifies programming language of the custom script.
-                    moduleProperties:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                    configurationProperties:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
-        '500':
-          description: Internal Server Error
-      operationId: get-scripts-consent
-      description: Retrieve all custom consent gathering script.
-    post:
-      summary: Add new consent gathering script.
-      operationId: post-scripts-consent
-      responses:
-        '200':
-          description: OK
-        '500':
-          description: Internal Server Error
-      description: Add new custom consent gathering script.
-      tags:
-        - Custom Scripts
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dn:
-                  type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                name:
-                  type: string
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  minLength: 1
-                  maxLength: 60
-                  description: 'Name should contain only letters, digits and underscores.'
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                  description: Actual script
-                scriptType:
-                  type: string
-                  enum:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  enum:
-                    - python
-                    - javascript
-                  description: Specifies programming language of the custom script.
-                moduleProperties:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                configurationProperties:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                      hide:
-                        type: boolean
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
-        description: New consent gathering script.
-    put:
-      summary: Modify consent gathering script.
-      operationId: put-scripts-consent
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Modify consent gathering script.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dn:
-                  type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                name:
-                  type: string
-                  minLength: 1
-                  maxLength: 60
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  description: 'Name should contain only letters, digits and underscores.'
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                  description: Actual consent gathering script.
-                scriptType:
-                  type: string
-                  enum:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  description: Specifies programming language of the custom script.
-                  enum:
-                    - python
-                    - javascript
-                moduleProperties:
-                  type: object
-                  properties:
-                    value1:
-                      type: string
-                    value2:
-                      type: string
-                    description:
-                      type: string
-                      description: ''
-                configurationProperties:
-                  type: object
-                  description: List of configuration properties.
-                  properties:
-                    value1:
-                      type: string
-                    value2:
-                      type: string
-                    description:
-                      type: string
-                    hide:
-                      type: boolean
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
-        description: Modified consent gathering script.
-      tags:
-        - Custom Scripts
-  '/scripts/consent/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Delete consent gathering script.
-      operationId: delete-scripts-consent-inum
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      description: Delete consent gathering script.
-      tags:
-        - Custom Scripts
-    get:
-      summary: Get consent gathering script by inum.
-      operationId: get-scripts-consent-inum
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  dn:
-                    type: string
-                    description: Dn(Distinguished Name) of the script.
-                  inum:
-                    type: string
-                    description: XRI i-number
-                  name:
-                    type: string
-                    pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    minLength: 1
-                    maxLength: 60
-                    description: 'Name should contain only letters, digits and underscores.'
-                  aliases:
-                    type: array
-                    items:
-                      type: string
-                  description:
-                    type: string
-                  script:
-                    type: string
-                    description: Actual script.
-                  scriptType:
-                    type: string
-                    enum:
-                      - person_authentication
-                      - introspection
-                      - resource_owner_password_credentials
-                      - application_session
-                      - cache_refresh
-                      - update_user
-                      - user_registration
-                      - client_registration
-                      - id_generator
-                      - uma_rpt_policy
-                      - uma_rpt_claims
-                      - uma_claims_gathering
-                      - consent_gathering
-                      - dynamic_scope
-                      - spontaneous_scope
-                      - end_session
-                      - post_authn
-                      - scim
-                      - ciba_end_user_notification
-                      - persistence_extension
-                      - idp
-                  programmingLanguage:
-                    type: string
-                    description: Specifies programming language of the custom script.
-                    enum:
-                      - python
-                      - javascript
-                  moduleProperties:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                  configurationProperties:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
-                  level:
-                    type: integer
-                  revision:
-                    type: integer
-                    format: int64
-                  enabled:
-                    type: boolean
-                  scriptError:
-                    type: object
-                    properties:
-                      raisedAt:
-                        type: string
-                        format: date
-                      stackTrace:
-                        type: string
-                  modified:
-                    type: boolean
-                  internal:
-                    type: boolean
-      description: Get consent gathering script identified by inum.
-      tags:
-        - Custom Scripts
-  '/scripts/consent/{type}':
-    parameters:
-      - schema:
-          type: string
-        name: type
-        in: path
-        required: true
-        description: Script type.
-    get:
-      summary: Get all consent gathering scripts by type.
-      tags:
-        - Custom Scripts
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: Dn(Distinguished Name) of the script.
-                  properties:
-                    dn:
-                      type: string
-                    inum:
-                      type: string
-                    name:
-                      type: string
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                      minLength: 1
-                      maxLength: 60
-                      description: 'Name should contain only letters, digits and underscores.'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                      description: Actual script.
-                    scriptType:
-                      type: string
-                      enum:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      enum:
-                        - python
-                        - javascript
-                      description: Specifies programming language of the custom script.
-                    moduleProperties:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                    configurationProperties:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                          hide:
-                            type: boolean
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
-      operationId: get-scripts-consent-type
-      description: Get all consent gathering scripts based on type.
-  /scripts/client_reg:
-    get:
-      summary: Gets all client registration script.
-      description: Gets all custom client registration script.
-      operationId: get-custom-scripts
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: CustomScript
-                description: Provides list of client custom scripts.
-                type: array
-                items:
-                  type: object
-                  title: CustomScript
-                  description: Custom script configuration.
-                  properties:
-                    dn:
-                      type: string
-                      description: Dn(Distinguished Name) of the script.
-                    inum:
-                      type: string
-                      description: XRI i-number
-                      example: 'name, displayName,birthdate, email'
-                    name:
-                      type: string
-                      description: 'Name should contain only letters, digits and underscores.'
-                      minLength: 1
-                      maxLength: 60
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                    scriptType:
-                      type: object
-                      format: enum
-                      example:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      description: Specifies programming language of the custom script.
-                      enum:
-                        - python
-                        - javascript
-                    moduleProperties:
-                      type: array
-                      description: List of module properties
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                    configurationProperties:
-                      type: array
-                      description: List of configuration properties.
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          hide:
-                            type: boolean
-                          description:
-                            type: string
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      tags:
-        - Custom Scripts
-    post:
-      summary: Add new client registration script.
-      description: Add new custom client registration script.
-      operationId: post-custom-scripts
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              description: Custom scripts json object
-              properties:
-                dn:
-                  type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                  example: 'name, displayName,birthdate, email'
-                name:
-                  type: string
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  minLength: 1
-                  maxLength: 60
-                  description: 'Name should contain only letters, digits and underscores.'
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                scriptType:
-                  type: object
-                  format: enum
-                  example:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  description: Specifies programming language of the custom script.
-                  enum:
-                    - python
-                    - javascript
-                moduleProperties:
-                  type: array
-                  description: List of module properties
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                configurationProperties:
-                  type: array
-                  description: List of configuration properties.
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      hide:
-                        type: boolean
-                      description:
-                        type: string
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: CustomScript
-                description: Provides list of client custom scripts.
-                type: object
-                properties:
-                  dn:
-                    type: string
-                    description: Dn(Distinguished Name) of the script.
-                  inum:
-                    type: string
-                    description: XRI i-number
-                    example: 'name, displayName,birthdate, email'
-                  name:
-                    type: string
-                    description: 'Name should contain only letters, digits and underscores.'
-                    pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                    minLength: 1
-                    maxLength: 60
-                  aliases:
-                    type: array
-                    items:
-                      type: string
-                  description:
-                    type: string
-                  script:
-                    type: string
-                  scriptType:
-                    type: object
-                    format: enum
-                    example:
-                      - person_authentication
-                      - introspection
-                      - resource_owner_password_credentials
-                      - application_session
-                      - cache_refresh
-                      - update_user
-                      - user_registration
-                      - client_registration
-                      - id_generator
-                      - uma_rpt_policy
-                      - uma_rpt_claims
-                      - uma_claims_gathering
-                      - consent_gathering
-                      - dynamic_scope
-                      - spontaneous_scope
-                      - end_session
-                      - post_authn
-                      - scim
-                      - ciba_end_user_notification
-                      - persistence_extension
-                      - idp
-                  programmingLanguage:
-                    type: string
-                    description: Specifies programming language of the custom script.
-                    enum:
-                      - python
-                      - javascript
-                  moduleProperties:
-                    type: array
-                    description: List of module properties
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                  configurationProperties:
-                    type: array
-                    description: List of configuration properties.
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        hide:
-                          type: boolean
-                        description:
-                          type: string
-                  level:
-                    type: integer
-                  revision:
-                    type: integer
-                    format: int64
-                  enabled:
-                    type: boolean
-                  scriptError:
-                    type: object
-                    properties:
-                      raisedAt:
-                        type: string
-                        format: date
-                      stackTrace:
-                        type: string
-                  modified:
-                    type: boolean
-                  internal:
-                    type: boolean
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      tags:
-        - Custom Scripts
-    put:
-      summary: Update client registration script.
-      description: Update custom client registration script.
-      operationId: put-custom-scripts
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              description: Custom scripts json object
-              properties:
-                dn:
-                  type: string
-                  description: Dn(Distinguished Name) of the script.
-                inum:
-                  type: string
-                  description: XRI i-number
-                name:
-                  type: string
-                  description: 'Name should contain only letters, digits and underscores.'
-                  pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                  minLength: 1
-                  maxLength: 60
-                aliases:
-                  type: array
-                  items:
-                    type: string
-                description:
-                  type: string
-                script:
-                  type: string
-                scriptType:
-                  type: object
-                  format: enum
-                  example:
-                    - person_authentication
-                    - introspection
-                    - resource_owner_password_credentials
-                    - application_session
-                    - cache_refresh
-                    - update_user
-                    - user_registration
-                    - client_registration
-                    - id_generator
-                    - uma_rpt_policy
-                    - uma_rpt_claims
-                    - uma_claims_gathering
-                    - consent_gathering
-                    - dynamic_scope
-                    - spontaneous_scope
-                    - end_session
-                    - post_authn
-                    - scim
-                    - ciba_end_user_notification
-                    - persistence_extension
-                    - idp
-                programmingLanguage:
-                  type: string
-                  description: Specifies programming language of the custom script.
-                  enum:
-                    - python
-                    - javascript
-                moduleProperties:
-                  type: array
-                  description: List of module properties
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      description:
-                        type: string
-                configurationProperties:
-                  type: array
-                  description: List of configuration properties.
-                  items:
-                    type: object
-                    properties:
-                      value1:
-                        type: string
-                      value2:
-                        type: string
-                      hide:
-                        type: boolean
-                      description:
-                        type: string
-                level:
-                  type: integer
-                revision:
-                  type: integer
-                  format: int64
-                enabled:
-                  type: boolean
-                scriptError:
-                  type: object
-                  properties:
-                    raisedAt:
-                      type: string
-                      format: date
-                    stackTrace:
-                      type: string
-                modified:
-                  type: boolean
-                internal:
-                  type: boolean
+                  format: binary
+                  description: File to upload.
+              required:
+                - file
       responses:
         '200':
           description: OK
@@ -4806,13 +3003,343 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /config/library/{name}:
+    parameters:
+      - schema:
+          type: string
+          minLength: 1
+        name: name
+        in: path
+        description: Name of the libraray.
+        required: true
+    get:
+      summary: Gets custom library by name.
+      description: Gets custom library by name.
+      operationId: get-config-library-by-name    
+      tags:
+        - Library
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file:
+                    type: string
+                    format: binary
+                required:
+                  - file
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Deletes custom library by name.
+      description: Deletes custom library by name.
+      operationId: delete-config-library-by-name
+      tags:
+        - Library
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/person_authn:
+    get:
+      summary: Gets all person authentication script.
+      description: Gets all person authentication script.
+      operationId: get-scripts-person_authn
       tags:
         - Custom Scripts
-  '/scripts/client_reg/{type}':
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Adds new person authentication script.
+      description: Adds new custom person authentication script.
+      operationId: post-scripts-person_authn
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Updates person authentication script.
+      description: Updates person authentication script.
+      operationId: put-scripts-person_authn
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/person_authn/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes person authentication script.
+      description: Deletes person authentication script.
+      operationId: delete-scripts-person_authn-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     get:
-      summary: Get client registration script by type.
-      description: Get client registration script by type.
-      operationId: get-custom-scripts-by-type
+      summary: Gets person authentication script by inum.
+      description: Gets person authentication script identified by inum.
+      operationId: get-scripts-person_authn-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error
+  /scripts/person_authn/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all person authentication scripts by type.
+      description: Gets all person authentication scripts based on type.
+      operationId: get-scripts-person_authn-by-type
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error
+  /scripts/consent:
+    get:
+      summary: Gets all consent gathering script.
+      description: Gets all custom consent gathering script.
+      operationId: get-scripts-consent
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Adds new consent gathering script.
+      description: Adds new custom consent gathering script.
+      operationId: post-scripts-consent      
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error 
+    put:
+      summary: Updates consent gathering script.     
+      description: Updates consent gathering script.
+      operationId: put-scripts-consent
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/consent/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes consent gathering script by inum.
+      description: Deletes consent gathering script by inum.
+      operationId: delete-scripts-consent-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Gets consent gathering script by inum.
+      description: Gets consent gathering script identified by inum.
+      operationId: get-scripts-consent-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript' 
+        '500':
+          description: Internal Server Error                
+  /scripts/consent/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all consent gathering scripts by type.      
+      description: Gets all consent gathering scripts based on type.
+      operationId: get-scripts-consent-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error      
+  /scripts/client_reg:
+    get:
+      summary: Gets all client registration script.
+      description: Gets all custom client registration script.
+      operationId: get-scripts-client_reg
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CustomScript
+                description: Provides list of client custom scripts.
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'      
+    post:
+      summary: Adds new client registration script.
+      description: Adds new custom client registration script.
+      operationId: post-scripts-client_reg
+      tags:
+        - Custom Scripts      
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomScript'  
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'      
+    put:
+      summary: Updates client registration script.
+      description: Updates custom client registration script.
+      operationId: put-scripts-client_reg
+      tags:
+        - Custom Scripts       
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomScript' 
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'      
+  /scripts/client_reg/{type}:
+    get:
+      summary: Gets client registration script by type.
+      description: Gets client registration script by type.
+      operationId: get-scripts-client_reg-by-type
+      tags:
+        - Custom Scripts      
       parameters:
         - name: type
           in: path
@@ -4830,123 +3357,23 @@ paths:
                 description: Provides list of client custom scripts.
                 type: array
                 items:
-                  type: object
-                  title: CustomScript
-                  description: Custom script configuration.
-                  properties:
-                    dn:
-                      type: string
-                      description: Dn(Distinguished Name) of the script.
-                    inum:
-                      type: string
-                      description: XRI i-number
-                      example: 'name, displayName,birthdate, email'
-                    name:
-                      type: string
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                      minLength: 1
-                      maxLength: 60
-                      description: 'Name should contain only letters, digits and underscores.'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                    scriptType:
-                      type: object
-                      format: enum
-                      example:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      description: Specifies programming language of the custom script.
-                      enum:
-                        - python
-                        - javascript
-                    moduleProperties:
-                      type: array
-                      description: List of module properties
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                    configurationProperties:
-                      type: array
-                      description: List of configuration properties.
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          hide:
-                            type: boolean
-                          description:
-                            type: string
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
+                  $ref: '#/components/schemas/CustomScript'
         '500':
-          $ref: '#/components/responses/InternalServerError'
-      tags:
-        - Custom Scripts
-  '/scripts/client_reg/{inum}':
-    get:
-      summary: Get client registration script by inum.
-      description: Gets custom client registration script by inum.
-      operationId: get-custom-scripts-by-identifier
-      parameters:
+          $ref: '#/components/responses/InternalServerError'      
+  /scripts/client_reg/{inum}:
+    parameters:
         - name: inum
           in: path
           required: true
           description: Authentication script ID.
           schema:
             type: string
+    get:
+      summary: Gets client registration script by inum.
+      description: Gets custom client registration script by inum.
+      operationId: get-scripts-client_reg-by-inum
+      tags:
+        - Custom Scripts
       responses:
         '200':
           description: OK
@@ -4957,122 +3384,15 @@ paths:
                 description: Provides list of client custom scripts.
                 type: array
                 items:
-                  type: object
-                  title: CustomScript
-                  description: Custom script configuration.
-                  properties:
-                    dn:
-                      type: string
-                      description: Dn(Distinguished Name) of the script.
-                    inum:
-                      type: string
-                      description: XRI i-number
-                      example: 'name, displayName,birthdate, email'
-                    name:
-                      type: string
-                      pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
-                      minLength: 1
-                      maxLength: 60
-                      description: 'Name should contain only letters, digits and underscores.'
-                    aliases:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                    script:
-                      type: string
-                    scriptType:
-                      type: object
-                      format: enum
-                      example:
-                        - person_authentication
-                        - introspection
-                        - resource_owner_password_credentials
-                        - application_session
-                        - cache_refresh
-                        - update_user
-                        - user_registration
-                        - client_registration
-                        - id_generator
-                        - uma_rpt_policy
-                        - uma_rpt_claims
-                        - uma_claims_gathering
-                        - consent_gathering
-                        - dynamic_scope
-                        - spontaneous_scope
-                        - end_session
-                        - post_authn
-                        - scim
-                        - ciba_end_user_notification
-                        - persistence_extension
-                        - idp
-                    programmingLanguage:
-                      type: string
-                      description: Specifies programming language of the custom script.
-                      enum:
-                        - python
-                        - javascript
-                    moduleProperties:
-                      type: array
-                      description: List of module properties
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                    configurationProperties:
-                      type: array
-                      description: List of configuration properties.
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          hide:
-                            type: boolean
-                          description:
-                            type: string
-                    level:
-                      type: integer
-                    revision:
-                      type: integer
-                      format: int64
-                    enabled:
-                      type: boolean
-                    scriptError:
-                      type: object
-                      properties:
-                        raisedAt:
-                          type: string
-                          format: date
-                        stackTrace:
-                          type: string
-                    modified:
-                      type: boolean
-                    internal:
-                      type: boolean
+                  $ref: '#/components/schemas/CustomScript'                  
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          $ref: '#/components/responses/InternalServerError'      
+    delete:
+      summary: Deletes client registration script by inum.
+      description: Deletes custom client registration script by inum.
+      operationId: delete-scripts-client_reg
       tags:
         - Custom Scripts
-    delete:
-      summary: Delete client registration script by inum.
-      description: Delete custom client registration script.
-      operationId: delete-custom-scripts
-      parameters:
-        - name: inum
-          in: path
-          required: true
-          description: Authentication script ID.
-          schema:
-            type: string
       responses:
         '200':
           description: OK
@@ -5081,8 +3401,919 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /scripts/dyn_scopes:
+    get:
+      summary: Gets all dynamic scope scripts.
+      description: Gets all custom dynamic scope scripts.
+      operationId: get-scripts-dyn_scopes
       tags:
         - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error      
+    post:
+      summary: Adds new dynamic scope script.
+      description: Adds new custom dynamic scope script.
+      operationId: post-scripts-dyn_scopes
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error      
+    put:
+      summary: Updates dynamic scope script.
+      description: Updates dynamic scope script.
+      operationId: put-scripts-dyn_scopes
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'      
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/dyn_scopes/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes dynamic scope script by inum.      
+      description: Deletes dynamic scope script by inum.
+      operationId: delete-scripts-dyn_scopes-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Gets dynamic scope script by inum.
+      description: Gets dynamic scope script identified by inum.
+      operationId: get-scripts-dyn_scopes-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates dynamic scope script by inum.            
+      description: Updates dynamic scope script based on inum.
+      operationId: put-scripts-dyn_scopes-by-inum
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'        
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/dyn_scopes/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all dynamic scope scripts by type.      
+      description: Gets all dynamic scope scripts based on type.
+      operationId: get-scripts-dyn_scopes-by-type
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error      
+  /scripts/uma_rpt:
+    get:
+      summary: Gets all UMA RPT Policy scripts.
+      description: Gets all custom UMA RPT policy scripts.
+      operationId: get-scripts-uma_rpt      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          description: Internal Server Error      
+    post:
+      summary: Adds new UMA RPT policy script.          
+      description: Adds new custom UMA RPT policy script.
+      operationId: post-scripts-uma_rpt
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Updates UMA RPT policy script.
+      description: Updates UMA RPT policy script.
+      operationId: put-scripts-uma_rpt
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript' 
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/uma_rpt/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes UMA RPT policy script.      
+      description: Deletes UMA RPT policy script.
+      operationId: delete-scripts-uma_rpt-by-inum
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Gets UMA RPT policy script by inum.
+      description: Gets UMA RPT policy script identified by inum.
+      operationId: get-scripts-uma_rpt-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+    put:
+      summary: Updates UMA RPT policy script based on inum.
+      description: Updates UMA RPT policy script based on inum.
+      operationId: put-scripts-uma_rpt-by-inum
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'  
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/uma_rpt/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all UMA RPT policy scripts by type.
+      description: Gets all UMA RPT policy scripts based on type.
+      operationId: get-scripts-uma_rpt-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/uma_rpt/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets UMA RPT policy scripts by name.
+      description: Gets UMA RPT policy script based on name.
+      operationId: get-scripts-uma_rpt-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+  /scripts/uma_gather:
+    get:
+      summary: Gets all UMA claims gathering scripts.
+      description: Gets all custom UMA claims gathering scripts.
+      operationId: get-scripts-uma_gather      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'  
+    post:
+      summary: Adds new UMA claims gathering script.
+      description: Adds new custom UMA claims gathering script.
+      operationId: post-scripts-uma_gather
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates UMA claims gathering script.
+      description: Updates UMA claims gathering script.
+      operationId: put-scripts-uma_gather
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/uma_gather/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes UMA claims gathering script.
+      description: Deletes UMA claims gathering script.
+      operationId: delete-scripts-uma_gather-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'   
+    get:
+      summary: Gets UMA claims gathering script by inum.
+      description: Gets UMA claims gathering script identified by inum.
+      operationId: get-scripts-uma_gather-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+    put:
+      summary: Updates UMA claims gathering script.
+      description: Updates UMA claims gathering script based on inum.
+      operationId: put-scripts-uma_gather-by-inum
+      tags:
+        - Custom Scripts  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+  /scripts/uma_gather/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all UMA claims gathering scripts by type.
+      description: Gets all UMA claims gathering scripts based on type.
+      operationId: get-scripts-uma_gather-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/uma_gather/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets UMA claims gathering scripts by name.
+      description: Gets UMA claims gathering script based on name.
+      operationId: get-scripts-uma_gather-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/introspection:
+    get:
+      summary: Gets all introspection scripts.
+      description: Gets all custom introspection scripts.
+      operationId: get-scripts-introspection      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'  
+    post:
+      summary: Adds new introspection script.
+      description: Adds new custom introspection script.
+      operationId: post-scripts-introspection
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates introspection script.
+      description: Updates introspection script.
+      operationId: put-scripts-introspection
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/introspection/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes introspection script.
+      description: Deletes introspection script.
+      operationId: delete-scripts-introspection-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'   
+    get:
+      summary: Gets introspection script by inum.
+      description: Gets introspection script identified by inum.
+      operationId: get-scripts-introspection-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+    put:
+      summary: Updates introspection script.
+      description: Updates introspection script based on inum.
+      operationId: put-scripts-introspection-by-inum
+      tags:
+        - Custom Scripts  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+  /scripts/introspection/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all introspection scripts by type.
+      description: Gets all introspection scripts based on type.
+      operationId: get-scripts-introspection-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/introspection/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets introspection scripts by name.
+      description: Gets introspection script based on name.
+      operationId: get-scripts-introspection-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+  /scripts/ropw:
+    get:
+      summary: Gets all Resource Owner Password Credentials scripts.
+      description: Gets all custom Resource Owner Password Credentials scripts.
+      operationId: get-scripts-ropw      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'  
+    post:
+      summary: Adds new Resource Owner Password Credentials script.
+      description: Adds new custom Resource Owner Password Credentials script.
+      operationId: post-scripts-ropw
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates Resource Owner Password Credentials script.
+      description: Updates Resource Owner Password Credentials script.
+      operationId: put-scripts-ropw
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/ropw/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes Resource Owner Password Credentials script.
+      description: Deletes Resource Owner Password Credentials script.
+      operationId: delete-scripts-ropw-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'   
+    get:
+      summary: Gets Resource Owner Password Credentials script by inum.
+      description: Gets Resource Owner Password Credentials script identified by inum.
+      operationId: get-scripts-ropw-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+    put:
+      summary: Updates Resource Owner Password Credentials script.
+      description: Updates Resource Owner Password Credentials script based on inum.
+      operationId: put-scripts-ropw-by-inum
+      tags:
+        - Custom Scripts  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+  /scripts/ropw/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all Resource Owner Password Credentials scripts by type.
+      description: Gets all Resource Owner Password Credentials scripts based on type.
+      operationId: get-scripts-ropw-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/ropw/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets Resource Owner Password Credentials scripts by name.
+      description: Gets Resource Owner Password Credentials script based on name.
+      operationId: get-scripts-ropw-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/app_session:
+    get:
+      summary: Gets all Application session scripts.
+      description: Gets all custom Application session scripts.
+      operationId: get-scripts-app_session    
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'  
+    post:
+      summary: Adds new Application session script.
+      description: Adds new custom Application session script.
+      operationId: post-scripts-app_session
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates Application session script.
+      description: Updates Application session script.
+      operationId: put-scripts-app_session
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/app_session/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        description: Script identifier
+        required: true
+    delete:
+      summary: Deletes Application session script.
+      description: Deletes Application session script.
+      operationId: delete-scripts-app_session-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'   
+    get:
+      summary: Gets Application session script by inum.
+      description: Gets Application session script identified by inum.
+      operationId: get-scripts-app_session-by-inum      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+    put:
+      summary: Updates Application session script.
+      description: Updates Application session script based on inum.
+      operationId: put-scripts-app_session-by-inum
+      tags:
+        - Custom Scripts  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomScript'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+  /scripts/app_session/{type}:
+    parameters:
+      - schema:
+          type: string
+        name: type
+        in: path
+        required: true
+        description: Script type.
+    get:
+      summary: Gets all Application session scripts by type.
+      description: Gets all Application session scripts based on type.
+      operationId: get-scripts-app_session-by-type      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /scripts/app_session/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets Application session scripts by name.
+      description: Gets Application session script based on name.
+      operationId: get-scripts-app_session-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '500':
+          $ref: '#/components/responses/InternalServerError'            
 components:
   responses:
     Found:
@@ -5137,3 +4368,101 @@ components:
           type: string
         details:
           type: string
+    CustomScript:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        name:
+          type: string
+          pattern: '^[a-zA-Z0-9_\\-\\:\\/\\.]+$'
+          minLength: 1
+          maxLength: 60
+          description: 'Name should contain only letters, digits and underscores.'
+        aliases:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        script:
+          type: string
+          description: Actual script.
+        scriptType:
+          type: string
+          enum:
+            - person_authentication
+            - introspection
+            - resource_owner_password_credentials
+            - application_session
+            - cache_refresh
+            - update_user
+            - user_registration
+            - client_registration
+            - id_generator
+            - uma_rpt_policy
+            - uma_rpt_claims
+            - uma_claims_gathering
+            - consent_gathering
+            - dynamic_scope
+            - spontaneous_scope
+            - end_session
+            - post_authn
+            - scim
+            - ciba_end_user_notification
+            - persistence_extension
+            - idp
+        programmingLanguage:
+          type: string
+          enum:
+            - python
+            - javascript
+          description: Specifies programming language of the custom script.
+        moduleProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              value1:
+                type: string
+              value2:
+                type: string
+              description:
+                type: string
+        configurationProperties:
+          type: array
+          items:
+            type: object
+            properties:
+              value1:
+                type: string
+              value2:
+                type: string
+              description:
+                type: string
+              hide:
+                type: boolean
+        level:
+          type: integer
+        revision:
+          type: integer
+          format: int64
+        enabled:
+          type: boolean
+        scriptError:
+          type: object
+          properties:
+            raisedAt:
+              type: string
+              format: date
+            stackTrace:
+              type: string
+        modified:
+          type: boolean
+        internal:
+          type: boolean      
