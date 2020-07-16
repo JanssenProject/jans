@@ -8,6 +8,7 @@ package org.gluu.oxauth.ws.rs.deviceauthz;
 
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
@@ -17,6 +18,7 @@ import org.gluu.oxauth.model.jws.RSASigner;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
+import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.page.PageConfig;
 import org.openqa.selenium.By;
@@ -77,15 +79,17 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         showClient(deviceAuthzClient);
         DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
 
-        final String[] userCodeParts = response.getUserCode().split("-");
-
         // 3. Load device authz page, process user_code and authorization
-        AuthorizationResponse authorizationResponse = processDeviceAuthz(userId, userSecret, userCodeParts);
+        WebDriver currentDriver = initWebDriver(false, true);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false);
+        AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
 
+        stopWebDriver(false, currentDriver);
         assertSuccessAuthzResponse(authorizationResponse);
 
         // 4. Token request
         TokenResponse tokenResponse1 = processTokens(clientId, clientSecret, response.getDeviceCode());
+        validateTokenSuccessfulResponse(tokenResponse1);
 
         String refreshToken = tokenResponse1.getRefreshToken();
         String idToken = tokenResponse1.getIdToken();
@@ -96,11 +100,272 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         // 6. Request new access token using the refresh token.
         TokenResponse tokenResponse2 = processNewTokenWithRefreshToken(StringUtils.implode(scopes, " "),
                 refreshToken, clientId, clientSecret);
+        validateTokenSuccessfulResponse(tokenResponse2);
 
         String accessToken = tokenResponse2.getAccessToken();
 
         // 7. Request user info
         processUserInfo(accessToken);
+    }
+
+    /**
+     * Device authorization with access denied.
+     */
+    @Parameters({"userId", "userSecret"})
+    @Test
+    public void deviceAuthzFlowAccessDenied(final String userId, final String userSecret) throws Exception {
+        showTitle("deviceAuthzFlowAccessDenied");
+
+        // 1. Init device authz request from WS
+        RegisterResponse registerResponse = DeviceAuthzRequestRegistrationTest.registerClientForDeviceAuthz(
+                AuthenticationMethod.CLIENT_SECRET_BASIC, Collections.singletonList(GrantType.DEVICE_CODE),
+                null, null, registrationEndpoint);
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Device request registration
+        final List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        DeviceAuthzRequest deviceAuthzRequest = new DeviceAuthzRequest(clientId, scopes);
+        deviceAuthzRequest.setAuthUsername(clientId);
+        deviceAuthzRequest.setAuthPassword(clientSecret);
+
+        DeviceAuthzClient deviceAuthzClient = new DeviceAuthzClient(deviceAuthzEndpoint);
+        deviceAuthzClient.setRequest(deviceAuthzRequest);
+
+        DeviceAuthzResponse response = deviceAuthzClient.exec();
+
+        showClient(deviceAuthzClient);
+        DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
+
+        // 3. Load device authz page, process user_code and authorization
+        WebDriver currentDriver = initWebDriver(false, true);
+        AuthorizationResponse authorizationResponse = processDeviceAuthzDenyAccess(userId, userSecret,
+                response.getUserCode(), currentDriver, false);
+
+        validateErrorResponse(authorizationResponse, AuthorizeErrorResponseType.ACCESS_DENIED);
+
+        // 4. Token request
+        TokenResponse tokenResponse = processTokens(clientId, clientSecret, response.getDeviceCode());
+        assertNotNull(tokenResponse.getErrorType(), "Error expected, however no error was found");
+        assertNotNull(tokenResponse.getErrorDescription(), "Error description expected, however no error was found");
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.ACCESS_DENIED, "Unexpected error");
+    }
+
+    /**
+     * Validate server denies brute forcing
+     */
+    @Test
+    public void preventBruteForcing() throws Exception {
+        showTitle("deviceAuthzFlow");
+
+        WebDriver currentDriver = initWebDriver(false, true);
+        List<WebElement> list = currentDriver.findElements(By.xpath("//*[contains(text(),'Too many failed attemps')]"));
+        byte limit = 10;
+        while (list.size() == 0 && limit > 0) {
+            processDeviceAuthzPutUserCodeAndPressContinue("ABCD-ABCD", currentDriver, false);
+            Thread.sleep(500);
+            list = currentDriver.findElements(By.xpath("//*[contains(text(),'Too many failed attemps')]"));
+            limit--;
+        }
+        stopWebDriver(false, currentDriver);
+        assertTrue(list.size() > 0 && limit > 0, "Brute forcing prevention not working correctly.");
+    }
+
+    /**
+     * Verifies that token endpoint should return slow down or authorization pending states when token is in process.
+     */
+    @Test
+    public void checkSlowDownOrPendingState() throws Exception {
+        showTitle("checkSlowDownOrPendingState");
+
+        // 1. Init device authz request from WS
+        RegisterResponse registerResponse = DeviceAuthzRequestRegistrationTest.registerClientForDeviceAuthz(
+                AuthenticationMethod.CLIENT_SECRET_BASIC, Collections.singletonList(GrantType.DEVICE_CODE),
+                null, null, registrationEndpoint);
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Device request registration
+        final List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        DeviceAuthzRequest deviceAuthzRequest = new DeviceAuthzRequest(clientId, scopes);
+        deviceAuthzRequest.setAuthUsername(clientId);
+        deviceAuthzRequest.setAuthPassword(clientSecret);
+
+        DeviceAuthzClient deviceAuthzClient = new DeviceAuthzClient(deviceAuthzEndpoint);
+        deviceAuthzClient.setRequest(deviceAuthzRequest);
+
+        DeviceAuthzResponse response = deviceAuthzClient.exec();
+
+        showClient(deviceAuthzClient);
+        DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
+
+        byte count = 3;
+        while (count > 0) {
+            TokenResponse tokenResponse = processTokens(clientId, clientSecret, response.getDeviceCode());
+            assertNotNull(tokenResponse.getErrorType(), "Error expected, however no error was found");
+            assertNotNull(tokenResponse.getErrorDescription(), "Error description expected, however no error was found");
+            assertTrue(tokenResponse.getErrorType() == TokenErrorResponseType.AUTHORIZATION_PENDING
+                    || tokenResponse.getErrorType() == TokenErrorResponseType.SLOW_DOWN, "Unexpected error");
+            Thread.sleep(200);
+            count--;
+        }
+    }
+
+    /**
+     * Attempts to get token with a wrong device_code, after that it attempts to get token twice,
+     * second one should be rejected.
+     */
+    @Parameters({"userId", "userSecret"})
+    @Test
+    public void attemptDifferentFailedValuesToTokenEndpoint(final String userId, final String userSecret) throws Exception {
+        showTitle("deviceAuthzFlow");
+
+        // 1. Init device authz request from WS
+        RegisterResponse registerResponse = DeviceAuthzRequestRegistrationTest.registerClientForDeviceAuthz(
+                AuthenticationMethod.CLIENT_SECRET_BASIC, Collections.singletonList(GrantType.DEVICE_CODE),
+                null, null, registrationEndpoint);
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Device request registration
+        final List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        DeviceAuthzRequest deviceAuthzRequest = new DeviceAuthzRequest(clientId, scopes);
+        deviceAuthzRequest.setAuthUsername(clientId);
+        deviceAuthzRequest.setAuthPassword(clientSecret);
+
+        DeviceAuthzClient deviceAuthzClient = new DeviceAuthzClient(deviceAuthzEndpoint);
+        deviceAuthzClient.setRequest(deviceAuthzRequest);
+
+        DeviceAuthzResponse response = deviceAuthzClient.exec();
+
+        showClient(deviceAuthzClient);
+        DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
+
+        // 3. Load device authz page, process user_code and authorization
+        WebDriver currentDriver = initWebDriver(false, true);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false);
+        AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
+
+        stopWebDriver(false, currentDriver);
+        assertSuccessAuthzResponse(authorizationResponse);
+
+        // 4. Token request with a wrong device code
+        String wrongDeviceCode = "WRONG" + response.getDeviceCode();
+        TokenResponse tokenResponse1 = processTokens(clientId, clientSecret, wrongDeviceCode);
+        assertNotNull(tokenResponse1.getErrorType(), "Error expected, however no error was found");
+        assertNotNull(tokenResponse1.getErrorDescription(), "Error description expected, however no error was found");
+        assertEquals(tokenResponse1.getErrorType(), TokenErrorResponseType.EXPIRED_TOKEN, "Unexpected error");
+
+        // 5. Token request with a right device code value
+        tokenResponse1 = processTokens(clientId, clientSecret, response.getDeviceCode());
+        validateTokenSuccessfulResponse(tokenResponse1);
+
+        // 6. Try to get token again, however this should be rejected by the server
+        tokenResponse1 = processTokens(clientId, clientSecret, response.getDeviceCode());
+        assertNotNull(tokenResponse1.getErrorType(), "Error expected, however no error was found");
+        assertNotNull(tokenResponse1.getErrorDescription(), "Error description expected, however no error was found");
+        assertEquals(tokenResponse1.getErrorType(), TokenErrorResponseType.EXPIRED_TOKEN, "Unexpected error");
+    }
+
+    /**
+     * Process a complete device authorization flow using verification_uri_complete
+     */
+    @Parameters({"userId", "userSecret"})
+    @Test
+    public void deviceAuthzFlowWithCompleteVerificationUri(final String userId, final String userSecret) throws Exception {
+        showTitle("deviceAuthzFlow");
+
+        // 1. Init device authz request from WS
+        RegisterResponse registerResponse = DeviceAuthzRequestRegistrationTest.registerClientForDeviceAuthz(
+                AuthenticationMethod.CLIENT_SECRET_BASIC, Collections.singletonList(GrantType.DEVICE_CODE),
+                null, null, registrationEndpoint);
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Device request registration
+        final List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        DeviceAuthzRequest deviceAuthzRequest = new DeviceAuthzRequest(clientId, scopes);
+        deviceAuthzRequest.setAuthUsername(clientId);
+        deviceAuthzRequest.setAuthPassword(clientSecret);
+
+        DeviceAuthzClient deviceAuthzClient = new DeviceAuthzClient(deviceAuthzEndpoint);
+        deviceAuthzClient.setRequest(deviceAuthzRequest);
+
+        DeviceAuthzResponse response = deviceAuthzClient.exec();
+
+        showClient(deviceAuthzClient);
+        DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
+
+        // 3. Load device authz page, process user_code and authorization
+        WebDriver currentDriver = initWebDriver(false, true);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, true);
+        AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
+
+        stopWebDriver(false, currentDriver);
+        assertSuccessAuthzResponse(authorizationResponse);
+
+        // 4. Token request
+        TokenResponse tokenResponse1 = processTokens(clientId, clientSecret, response.getDeviceCode());
+        validateTokenSuccessfulResponse(tokenResponse1);
+
+        String refreshToken = tokenResponse1.getRefreshToken();
+        String idToken = tokenResponse1.getIdToken();
+
+        // 5. Validate id_token
+        verifyIdToken(idToken);
+
+        // 6. Request new access token using the refresh token.
+        TokenResponse tokenResponse2 = processNewTokenWithRefreshToken(StringUtils.implode(scopes, " "),
+                refreshToken, clientId, clientSecret);
+        validateTokenSuccessfulResponse(tokenResponse2);
+
+        String accessToken = tokenResponse2.getAccessToken();
+
+        // 7. Request user info
+        processUserInfo(accessToken);
+    }
+
+    /**
+     * Device authorization with access denied and using complete verification uri.
+     */
+    @Parameters({"userId", "userSecret"})
+    @Test
+    public void deviceAuthzFlowAccessDeniedWithCompleteVerificationUri(final String userId, final String userSecret) throws Exception {
+        showTitle("deviceAuthzFlowAccessDenied");
+
+        // 1. Init device authz request from WS
+        RegisterResponse registerResponse = DeviceAuthzRequestRegistrationTest.registerClientForDeviceAuthz(
+                AuthenticationMethod.CLIENT_SECRET_BASIC, Collections.singletonList(GrantType.DEVICE_CODE),
+                null, null, registrationEndpoint);
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Device request registration
+        final List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "phone", "user_name");
+        DeviceAuthzRequest deviceAuthzRequest = new DeviceAuthzRequest(clientId, scopes);
+        deviceAuthzRequest.setAuthUsername(clientId);
+        deviceAuthzRequest.setAuthPassword(clientSecret);
+
+        DeviceAuthzClient deviceAuthzClient = new DeviceAuthzClient(deviceAuthzEndpoint);
+        deviceAuthzClient.setRequest(deviceAuthzRequest);
+
+        DeviceAuthzResponse response = deviceAuthzClient.exec();
+
+        showClient(deviceAuthzClient);
+        DeviceAuthzRequestRegistrationTest.validateSuccessfulResponse(response);
+
+        // 3. Load device authz page, process user_code and authorization
+        WebDriver currentDriver = initWebDriver(false, true);
+        AuthorizationResponse authorizationResponse = processDeviceAuthzDenyAccess(userId, userSecret,
+                response.getUserCode(), currentDriver, true);
+
+        validateErrorResponse(authorizationResponse, AuthorizeErrorResponseType.ACCESS_DENIED);
+
+        // 4. Token request
+        TokenResponse tokenResponse = processTokens(clientId, clientSecret, response.getDeviceCode());
+        assertNotNull(tokenResponse.getErrorType(), "Error expected, however no error was found");
+        assertNotNull(tokenResponse.getErrorDescription(), "Error description expected, however no error was found");
+        assertEquals(tokenResponse.getErrorType(), TokenErrorResponseType.ACCESS_DENIED, "Unexpected error");
     }
 
     private void processUserInfo(String accessToken) throws UnrecoverableKeyException, NoSuchAlgorithmException,
@@ -185,14 +450,17 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
 
         return tokenResponse1;
+    }
+
+    private void validateTokenSuccessfulResponse(TokenResponse tokenResponse) {
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
     }
 
     private void assertSuccessAuthzResponse(final AuthorizationResponse authorizationResponse) {
@@ -201,19 +469,77 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         assertNull(authorizationResponse.getErrorType());
     }
 
-    private AuthorizationResponse processDeviceAuthz(String userId, String userSecret, String[] userCodeParts) {
-        WebDriver currentDriver = initWebDriver(false, true);
-
-        String deviceAuthzPageUrl = deviceAuthzEndpoint.replace("/restv1/device_authorization", "/device_authorization.htm");
+    private void processDeviceAuthzPutUserCodeAndPressContinue(String userCode, WebDriver currentDriver, boolean complete) {
+        String deviceAuthzPageUrl = deviceAuthzEndpoint.replace("/restv1/device_authorization", "/device_authorization.htm")
+                + (complete ? "?user_code=" + userCode : "");
         System.out.println("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
 
         navigateToAuhorizationUrl(currentDriver, deviceAuthzPageUrl);
 
-        WebElement userCodePart1 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_1_ID));
-        userCodePart1.sendKeys(userCodeParts[0]);
+        if (!complete) {
+            String[] userCodeParts = userCode.split("-");
 
-        WebElement userCodePart2 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_2_ID));
-        userCodePart2.sendKeys(userCodeParts[1]);
+            WebElement userCodePart1 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_1_ID));
+            userCodePart1.sendKeys(userCodeParts[0]);
+
+            WebElement userCodePart2 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_2_ID));
+            userCodePart2.sendKeys(userCodeParts[1]);
+        }
+
+        WebElement continueButton = currentDriver.findElement(By.id(FORM_CONTINUE_BUTTON_ID));
+        continueButton.click();
+    }
+
+    private AuthorizationResponse processAuthorization(String userId, String userSecret, WebDriver currentDriver) {
+        Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
+                .pollingEvery(Duration.ofMillis(500))
+                .ignoring(NoSuchElementException.class);
+
+        if (userSecret != null) {
+            final String previousUrl = currentDriver.getCurrentUrl();
+            WebElement loginButton = wait.until(d -> currentDriver.findElement(By.id(loginFormLoginButton)));
+
+            if (userId != null) {
+                WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
+                usernameElement.sendKeys(userId);
+            }
+
+            WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
+            passwordElement.sendKeys(userSecret);
+
+            loginButton.click();
+
+            if (ENABLE_REDIRECT_TO_LOGIN_PAGE) {
+                waitForPageSwitch(currentDriver, previousUrl);
+            }
+        }
+
+        acceptAuthorization(currentDriver, null);
+
+        String deviceAuthzResponseStr = currentDriver.getCurrentUrl();
+
+        System.out.println("Device authz redirection response url: " + deviceAuthzResponseStr);
+        return new AuthorizationResponse(deviceAuthzResponseStr);
+    }
+
+    private AuthorizationResponse processDeviceAuthzDenyAccess(String userId, String userSecret, String userCode,
+                                                               WebDriver currentDriver, boolean complete) {
+        String deviceAuthzPageUrl = deviceAuthzEndpoint.replace("/restv1/device_authorization", "/device_authorization.htm")
+                + (complete ? "?user_code=" + userCode : "");
+        System.out.println("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
+
+        navigateToAuhorizationUrl(currentDriver, deviceAuthzPageUrl);
+
+        if (!complete) {
+            final String[] userCodeParts = userCode.split("-");
+
+            WebElement userCodePart1 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_1_ID));
+            userCodePart1.sendKeys(userCodeParts[0]);
+
+            WebElement userCodePart2 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_2_ID));
+            userCodePart2.sendKeys(userCodeParts[1]);
+        }
 
         WebElement continueButton = currentDriver.findElement(By.id(FORM_CONTINUE_BUTTON_ID));
         continueButton.click();
@@ -242,13 +568,38 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
             }
         }
 
-        acceptAuthorization(currentDriver, null);
+        denyAuthorization(currentDriver);
 
         String deviceAuthzResponseStr = currentDriver.getCurrentUrl();
         stopWebDriver(false, currentDriver);
 
         System.out.println("Device authz redirection response url: " + deviceAuthzResponseStr);
         return new AuthorizationResponse(deviceAuthzResponseStr);
+    }
+
+    protected void denyAuthorization(WebDriver currentDriver) {
+        String authorizationResponseStr = currentDriver.getCurrentUrl();
+
+        // Check for authorization form if client has no persistent authorization
+        if (!authorizationResponseStr.contains("#")) {
+            Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+                    .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
+                    .pollingEvery(Duration.ofMillis(500))
+                    .ignoring(NoSuchElementException.class);
+
+            WebElement doNotAllowButton = wait.until(d -> currentDriver.findElement(By.id(authorizeFormDoNotAllowButton)));
+            final String previousUrl2 = driver.getCurrentUrl();
+            doNotAllowButton.click();
+            waitForPageSwitch(driver, previousUrl2);
+        } else {
+            fail("The authorization form was expected to be shown.");
+        }
+    }
+
+    protected void validateErrorResponse(AuthorizationResponse response, AuthorizeErrorResponseType errorType) {
+        assertNotNull(response.getErrorType(), "Error expected, however no error was found");
+        assertNotNull(response.getErrorDescription(), "Error description expected, however no error was found");
+        assertEquals(response.getErrorType(), errorType, "Unexpected error");
     }
 
 }
