@@ -47,19 +47,19 @@
 							<h:panelGroup layout="block" styleClass="col-12" rendered="#{!deviceAuthorizationAction.completeVerificationMode}">
 								<div class="row no-margin device-authz-input-container justify-content-center">
 									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
-										id="userCode1" name="userCode1" colMd="10"
+										id="userCodePart1" name="userCodePart1" colMd="10"
 										labelColMd="2" autocomplete="off"
 										maxlength="4"
-										onkeydown="keyUpInput(event, 'userCode1', 'userCode2')"
+										onkeydown="keyDownInput(event, 'userCodePart1', 'userCodePart2')"
 										styleClass="form-control device-authz-input-code"
 										value="#{deviceAuthorizationAction.userCodePart1}">
 									</h:inputText>
 									&nbsp;-&nbsp;
 									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
-										 id="userCode2" name="userCode2" colMd="10"
+										 id="userCodePart2" name="userCodePart2" colMd="10"
 										 labelColMd="2" autocomplete="off"
 										 maxlength="4"
-										 onkeydown="keyUpInput(event, 'userCode2', null)"
+										 onkeydown="keyDownInput(event, 'userCodePart2', null)"
 										 styleClass="form-control device-authz-input-code"
 										 value="#{deviceAuthorizationAction.userCodePart2}">
 									</h:inputText>
@@ -98,13 +98,13 @@
 			</div>
 		</h:form>
 		<script type="text/javascript">
-			function keyUpInput(event, component, switchToComponent) {
+			function keyDownInput(event, component, switchToComponent) {
 				if (!isLetter(event.key)) {
 					return;
 				}
-				let inputComponent = document.getElementById("deviceAuthzForm:" + component);
+				var inputComponent = document.getElementById("deviceAuthzForm:" + component);
 				if (inputComponent) {
-					let newValue = inputComponent.value + event.key;
+					var newValue = inputComponent.value + event.key;
 					if (newValue) {
 						if (newValue.length &lt; 5) {
 							newValue = newValue.toUpperCase();
@@ -115,7 +115,7 @@
 						event.preventDefault();
 
 						if (newValue.length === 4 &amp;&amp; switchToComponent) {
-							let switchedComponent = document.getElementById("deviceAuthzForm:" + switchToComponent)
+							var switchedComponent = document.getElementById("deviceAuthzForm:" + switchToComponent)
 							if (switchedComponent) {
 								switchedComponent.focus();
 							}
@@ -129,7 +129,7 @@
 			}
 
 			function isLetter(str) {
-				return str.length === 1 &amp;&amp; str.match(/[a-z]/i);
+				return str &amp;&amp; str.length === 1 &amp;&amp; str.match(/[a-z]/i);
 			}
 		</script>
 
