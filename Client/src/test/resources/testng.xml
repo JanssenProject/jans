@@ -838,4 +838,16 @@
             <class name="org.gluu.oxauth.ciba.CibaPollModeJwtAuthRequestTests"></class>
         </classes>
     </test>
+
+    <!-- Device authorization tests -->
+    <test name="Tests for Device Authz WS" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.deviceauthz.DeviceAuthzRequestRegistrationTest"></class>
+        </classes>
+    </test>
+    <test name="Tests for Device Authz flow" enabled="true">
+        <classes>
+            <class name="org.gluu.oxauth.ws.rs.deviceauthz.DeviceAuthzFlowHttpTest"></class>
+        </classes>
+    </test>
 </suite>
