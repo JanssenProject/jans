@@ -6,11 +6,22 @@
 
 package org.gluu.oxauth.service;
 
-import com.google.common.collect.Sets;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.security.Identity;
 import org.gluu.oxauth.auth.Authenticator;
 import org.gluu.oxauth.ciba.CIBAPingCallbackService;
 import org.gluu.oxauth.ciba.CIBAPushErrorService;
@@ -21,32 +32,21 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
  * @version May 9, 2020
  */
-@Stateless
-@Named
+@RequestScoped
 public class AuthorizeService {
 
     @Inject
@@ -157,6 +157,7 @@ public class AuthorizeService {
             // OXAUTH-297 - set session_id cookie
             if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
                 cookieService.createSessionIdCookie(session, false);
+                identity.setSessionId(session);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
