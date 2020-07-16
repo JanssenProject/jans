@@ -9,6 +9,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService, AppInitializer
 from org.gluu.oxauth.service import MetricService
+from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.model.metric import MetricType
 from org.gluu.util import StringHelper
 from org.gluu.util import ArrayHelper
@@ -257,7 +258,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (self.containsAttributeString(connectionConfiguration, "bindDN")):
                 useAnonymousBind = False
                 bindDN = connectionConfiguration["bindDN"]
-                bindPassword = connectionConfiguration["bindPassword"]
+                bindPassword = CdiUtil.bean(EncryptionService).decrypt(connectionConfiguration["bindPassword"])
 
             useSSL = connectionConfiguration["useSSL"]
             maxConnections = connectionConfiguration["maxConnections"]
