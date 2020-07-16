@@ -257,7 +257,7 @@ public class DeviceAuthzRequestRegistrationTest extends BaseTest {
         assertEquals(response.getStatus(), status, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getErrorType(), "Error expected, however no error was found");
         assertNotNull(response.getErrorDescription(), "Error description expected, however no error was found");
-        assertEquals(response.getErrorType(), errorType, "invalid_client error expected");
+        assertEquals(response.getErrorType(), errorType, "Unexpected error");
         assertNull(response.getUserCode(), "User code must not be null");
         assertNull(response.getDeviceCode(), "Device code must not be null");
     }
