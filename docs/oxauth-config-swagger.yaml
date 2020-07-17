@@ -16,8 +16,19 @@ tags:
   - name: Attribute
   - name: Authentication
   - name: Custom Scripts
-  - name: Graphics
-  - name: LDAP configuration
+  - name: Custom Scripts - Person Authentication
+  - name: Custom Scripts - Consent Gathering
+  - name: Custom Scripts - Client Registration
+  - name: Custom Scripts - Dynamic Scopes
+  - name: Custom Scripts - UMA RPT Policies
+  - name: Custom Scripts - UMA Claims Gathering
+  - name: Custom Scripts - Introspection
+  - name: Custom Scripts - Resource Owner Password Credentials
+  - name: Custom Scripts - Application Session
+  - name: Database - Couchbase
+  - name: Database - LDAP configuration
+  - name: Graphics - Logo
+  - name: Graphics - Favicon
   - name: Library
   - name: Properties
 paths:
@@ -53,7 +64,7 @@ paths:
                     - endSessionEndpoint
                     - jwksUri
                     - registrationEndpoint
-                    - openIdDiscoveryEndpoint
+                    - openIdDiscoveryEndpointLDAP
                     - openIdConfigurationEndpoint
                     - idGenerationEndpoint
                     - introspectionEndpoint
@@ -1365,7 +1376,7 @@ paths:
       description: Retrieves organization logo graphic details.
       operationId: get-config-graphics-logo      
       tags:
-        - Graphics
+        - Graphics - Logo
       responses:
         '200':
           description: OK
@@ -1387,7 +1398,7 @@ paths:
       description: Adds organization logo graphic details.
       operationId: post-config-graphics-logo      
       tags:
-        - Graphics
+        - Graphics - Logo
       requestBody:
         content:
           application/json:
@@ -1409,7 +1420,7 @@ paths:
       description: Updates organization logo graphic details.
       operationId: put-config-graphics-logo
       tags:
-        - Graphics
+        - Graphics - Logo
       requestBody:
         content:
           application/json:
@@ -1433,7 +1444,7 @@ paths:
       description: Patches organization logo graphic details.
       operationId: patch-config-graphics-logo
       tags:
-        - Graphics
+        - Graphics - Logo
       requestBody:
         content:
           application/json:
@@ -1455,7 +1466,7 @@ paths:
       description: Deletes organization logo graphic details.
       operationId: delete-config-graphics-logo
       tags:
-        - Graphics
+        - Graphics - Logo
       responses:
         '200':
           description: OK
@@ -1469,7 +1480,7 @@ paths:
       description: Gets organization favicon graphic details.     
       operationId: get-config-graphics-favicon
       tags:
-        - Graphics
+        - Graphics - Favicon
       responses:
         '200':
           description: OK
@@ -1490,7 +1501,7 @@ paths:
       description: Adds organization favicon graphic details.      
       operationId: post-config-graphics-favicon
       tags:
-        - Graphics      
+        - Graphics - Favicon     
       requestBody:
         content:
           application/json:
@@ -1513,7 +1524,7 @@ paths:
       description: Updates organization favicon graphic details.
       operationId: put-config-graphics-favicon
       tags:
-        - Graphics
+        - Graphics - Favicon
       requestBody:
         content:
           application/json:
@@ -1538,7 +1549,7 @@ paths:
       description: Patches organization favicon graphic details.  
       operationId: patch-config-graphics-favicon
       tags:
-        - Graphics
+        - Graphics - Favicon
       requestBody:
         content:
           application/json:
@@ -1561,7 +1572,7 @@ paths:
       description: Deletes organization favicon graphic details.
       operationId: delete-config-graphics-favicon
       tags:
-        - Graphics
+        - Graphics - Favicon
       responses:
         '200':
           description: OK
@@ -2670,13 +2681,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap:
+  /config/database/ldap:
     get:
       summary: Gets existing LDAP configuration.
       description: Gets existing LDAP configuration.
-      operationId: get-configuration-ldap
+      operationId: get-config-database-ldap
       tags:
-        - LDAP configuration
+        - Database - LDAP configuration
       responses:
         '200':
           description: OK
@@ -2687,122 +2698,21 @@ paths:
                 description: List of configured LDAP configuration.
                 type: array
                 items:
-                  type: object
-                  required:
-                    - configId
-                    - bindDN
-                    - bindPassword
-                    - servers
-                    - baseDNs
-                    - primaryKey
-                    - localPrimaryKey
-                  properties:
-                    configId:
-                      type: string
-                      description: Unique identifier
-                    bindDN:
-                      type: string
-                      description: User Distingusihed Name for binding.
-                    bindPassword:
-                      type: string
-                      description: User password for binding.
-                    servers:
-                      type: array
-                      description: List of LDAP authentication servers.
-                      items:
-                        type: string
-                        description: Unique name of the authentication server and port number.
-                        example: 'authserver.org:63'
-                    maxConnections:
-                      type: integer
-                      description: Total number of simultaneous connections allowed.
-                    useSSL:
-                      type: boolean
-                    baseDNs:
-                      type: array
-                      description: list of LDAP base Distingusihed Name
-                      items:
-                        type: string
-                    primaryKey:
-                      type: string
-                      description: Used to search and bind operations in configured LDAP server.
-                      example: 'SAMAccountName,uid, email'
-                    localPrimaryKey:
-                      type: string
-                      description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                      example: 'uid, email'
-                    useAnonymousBind:
-                      type: boolean
-                      description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                    enabled:
-                      type: boolean
-                    level:
-                      type: integer
+                  $ref: '#/components/schemas/LdapConfiguration'
         '500':
           $ref: '#/components/responses/InternalServerError'
     post:
       summary: Adds new LDAP configuration.
       description: Adds new LDAP configuration.
-      operationId: post-configuration-ldap
+      operationId: post-config-database-ldap
       tags:
-        - LDAP configuration
+        - Database - LDAP configuration
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: object
-              description: LDAP configuration to be added.
-              required:
-                - configId
-                - bindDN
-                - bindPassword
-                - servers
-                - baseDNs
-                - primaryKey
-                - localPrimaryKey
-              properties:
-                configId:
-                  type: string
-                  description: Unique identifier
-                bindDN:
-                  type: string
-                  description: User Distingusihed Name for binding.
-                bindPassword:
-                  type: string
-                  description: User password for binding.
-                servers:
-                  type: array
-                  description: List of LDAP authentication servers.
-                  items:
-                    type: string
-                    description: Unique name of the authentication server and port number.
-                    example: 'authserver.org:63'
-                maxConnections:
-                  type: integer
-                  description: Total number of simultaneous connections allowed.
-                useSSL:
-                  type: boolean
-                baseDNs:
-                  type: array
-                  description: list of LDAP base Distingusihed Name
-                  items:
-                    type: string
-                primaryKey:
-                  type: string
-                  description: Used to search and bind operations in configured LDAP server.
-                  example: 'SAMAccountName,uid, email'
-                localPrimaryKey:
-                  type: string
-                  description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                  example: 'uid, email'
-                useAnonymousBind:
-                  type: boolean
-                  description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                enabled:
-                  type: boolean
-                level:
-                  type: integer
+              $ref: '#/components/schemas/LdapConfiguration'
       responses:
         '200':
           description: OK
@@ -2810,68 +2720,17 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
-      summary: Updates existing LDAP configuration.
-      description: Updates existing LDAP configuration.
-      operationId: put-configuration-ldap
+      summary: Updates LDAP configuration.
+      description: Updates LDAP configuration.
+      operationId: put-config-database-ldap
       tags:
-        - LDAP configuration
+        - Database - LDAP configuration
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: object
-              description: LDAP configuration.
-              required:
-                - configId
-                - bindDN
-                - bindPassword
-                - servers
-                - baseDNs
-                - primaryKey
-                - localPrimaryKey
-              properties:
-                configId:
-                  type: string
-                  description: Unique identifier
-                bindDN:
-                  type: string
-                  description: User Distingusihed Name for binding.
-                bindPassword:
-                  type: string
-                  description: User password for binding.
-                servers:
-                  type: array
-                  description: List of LDAP authentication servers.
-                  items:
-                    type: string
-                    description: Unique name of the authentication server and port number.
-                    example: 'authserver.org:63'
-                maxConnections:
-                  type: integer
-                  description: Total number of simultaneous connections allowed.
-                useSSL:
-                  type: boolean
-                baseDNs:
-                  type: array
-                  description: list of LDAP base Distingusihed Name
-                  items:
-                    type: string
-                primaryKey:
-                  type: string
-                  description: Used to search and bind operations in configured LDAP server.
-                  example: 'SAMAccountName,uid, email'
-                localPrimaryKey:
-                  type: string
-                  description: Used to search local user entry in Gluu Server’s internal LDAP directory.
-                  example: 'uid, email'
-                useAnonymousBind:
-                  type: boolean
-                  description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
-                enabled:
-                  type: boolean
-                level:
-                  type: integer
+              $ref: '#/components/schemas/LdapConfiguration'
       responses:
         '200':
           description: OK
@@ -2880,7 +2739,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap/{name}:
+  /config/database/ldap/{name}:
     parameters:
         - name: name
           in: path
@@ -2888,25 +2747,41 @@ paths:
           description: Name of LDAP configuration.
           schema:
             type: string
-    delete:
-      summary: Deletes existing LDAP configuration.
-      description: Deletes existing LDAP configuration.
-      operationId: delete-configuration-ldap
+    get:
+      summary: Gets LDAP configuration by name.
+      description: Gets LDAP configuration by name.
+      operationId: get-config-database-ldap-by-name
       tags:
-        - LDAP configuration      
+        - Database - LDAP configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: LdapConfiguration
+                $ref: '#/components/schemas/LdapConfiguration'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Deletes LDAP configuration by name.
+      description: Deletes LDAP configuration by name.
+      operationId: delete-config-database-ldap
+      tags:
+        - Database - LDAP configuration
       responses:
         '200':
           description: OK
           content: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap/status:
+  /config/database/ldap/status:
     get:
-      summary: Gets LDAP connection based on status.
-      description: Gets LDAP connection based on status.
-      operationId: get-configuration-ldap-by-status
+      summary: Gets LDAP connection status.
+      description: Gets LDAP connection status.
+      operationId: get-config-database-ldap-status
       tags:
-        - LDAP configuration
+        - Database - LDAP configuration
       responses:
         '200':
           description: OK
@@ -2925,7 +2800,7 @@ paths:
                     example: true for connection up and running
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /configuration/ldap/{name}/status:
+  /config/database/ldap/{name}/status:
     parameters:
       - name: name
         in: path
@@ -2936,9 +2811,9 @@ paths:
     get:    
       summary: Gets LDAP connection status based on name.
       description: Gets LDAP connection status based on name.
-      operationId: get-configuration-ldap-status-by-name
+      operationId: get-config-database-ldap-status-by-name
       tags:
-        - LDAP configuration
+        - Database - LDAP configuration
       responses:
         '200':
           description: OK
@@ -2956,7 +2831,77 @@ paths:
                     description: Boolean value indicating the status of LDAP connection.
                     example: true for connection up and running
         '500':
-          $ref: '#/components/responses/InternalServerError'  
+          $ref: '#/components/responses/InternalServerError' 
+  /config/database/couchbase:
+    get:
+      summary: Gets Couchbase configuration.
+      description: Gets Couchbase configuration.
+      operationId: get-config-database-couchbase
+      tags:
+        - Database - Couchbase
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CouchbaseConfiguration
+                description: List of configured Couchbase configuration.
+                type: array
+                items:
+                  $ref: '#/components/schemas/CouchbaseConfiguration'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Adds Couchbase configuration.
+      description: Adds Couchbase configuration.
+      operationId: post-config-database-couchbase
+      tags:
+        - Database - Couchbase
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CouchbaseConfiguration'
+      responses:
+        '200':
+          description: OK
+          content: {}            
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates Couchbase configuration.
+      description: Updates Couchbase configuration.
+      operationId: put-config-database-couchbase
+      tags:
+        - Database - Couchbase
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CouchbaseConfiguration'
+      responses:
+        '200':
+          description: OK
+          content: {}            
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Deletes Couchbase configuration.
+      description: Deletes Couchbase configuration.
+      operationId: delete-config-database-couchbase
+      tags:
+        - Database - Couchbase
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'          
   /config/library:
     get:
       summary: Gets custom library.
@@ -3054,7 +2999,7 @@ paths:
       description: Gets all person authentication script.
       operationId: get-scripts-person_authn
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       responses:
         '200':
           description: OK
@@ -3071,7 +3016,7 @@ paths:
       description: Adds new custom person authentication script.
       operationId: post-scripts-person_authn
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       requestBody:
         content:
           application/json:
@@ -3087,7 +3032,7 @@ paths:
       description: Updates person authentication script.
       operationId: put-scripts-person_authn
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       requestBody:
         content:
           application/json:
@@ -3113,7 +3058,7 @@ paths:
       description: Deletes person authentication script.
       operationId: delete-scripts-person_authn-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       responses:
         '200':
           description: OK
@@ -3126,7 +3071,7 @@ paths:
       description: Gets person authentication script identified by inum.
       operationId: get-scripts-person_authn-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       responses:
         '200':
           description: OK
@@ -3134,6 +3079,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error
   /scripts/person_authn/{type}:
@@ -3149,7 +3096,7 @@ paths:
       description: Gets all person authentication scripts based on type.
       operationId: get-scripts-person_authn-by-type
       tags:
-        - Custom Scripts
+        - Custom Scripts - Person Authentication
       responses:
         '200':
           description: OK
@@ -3159,6 +3106,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error
   /scripts/consent:
@@ -3167,7 +3116,7 @@ paths:
       description: Gets all custom consent gathering script.
       operationId: get-scripts-consent
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       responses:
         '200':
           description: OK
@@ -3184,7 +3133,7 @@ paths:
       description: Adds new custom consent gathering script.
       operationId: post-scripts-consent      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       requestBody:
         content:
           application/json:
@@ -3200,7 +3149,7 @@ paths:
       description: Updates consent gathering script.
       operationId: put-scripts-consent
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       requestBody:
         content:
           application/json:
@@ -3226,7 +3175,7 @@ paths:
       description: Deletes consent gathering script by inum.
       operationId: delete-scripts-consent-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       responses:
         '200':
           description: OK
@@ -3239,14 +3188,16 @@ paths:
       description: Gets consent gathering script identified by inum.
       operationId: get-scripts-consent-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomScript' 
+                $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error                
   /scripts/consent/{type}:
@@ -3262,7 +3213,7 @@ paths:
       description: Gets all consent gathering scripts based on type.
       operationId: get-scripts-consent-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Consent Gathering
       responses:
         '200':
           description: OK
@@ -3272,6 +3223,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error      
   /scripts/client_reg:
@@ -3280,7 +3233,7 @@ paths:
       description: Gets all custom client registration script.
       operationId: get-scripts-client_reg
       tags:
-        - Custom Scripts
+        - Custom Scripts - Client Registration
       responses:
         '200':
           description: OK
@@ -3299,7 +3252,7 @@ paths:
       description: Adds new custom client registration script.
       operationId: post-scripts-client_reg
       tags:
-        - Custom Scripts      
+        - Custom Scripts - Client Registration      
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3319,7 +3272,7 @@ paths:
       description: Updates custom client registration script.
       operationId: put-scripts-client_reg
       tags:
-        - Custom Scripts       
+        - Custom Scripts - Client Registration       
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3339,7 +3292,7 @@ paths:
       description: Gets client registration script by type.
       operationId: get-scripts-client_reg-by-type
       tags:
-        - Custom Scripts      
+        - Custom Scripts - Client Registration     
       parameters:
         - name: type
           in: path
@@ -3358,6 +3311,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'      
   /scripts/client_reg/{inum}:
@@ -3373,7 +3328,7 @@ paths:
       description: Gets custom client registration script by inum.
       operationId: get-scripts-client_reg-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Client Registration
       responses:
         '200':
           description: OK
@@ -3384,7 +3339,9 @@ paths:
                 description: Provides list of client custom scripts.
                 type: array
                 items:
-                  $ref: '#/components/schemas/CustomScript'                  
+                  $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'                  
         '500':
           $ref: '#/components/responses/InternalServerError'      
     delete:
@@ -3392,7 +3349,7 @@ paths:
       description: Deletes custom client registration script by inum.
       operationId: delete-scripts-client_reg
       tags:
-        - Custom Scripts
+        - Custom Scripts - Client Registration
       responses:
         '200':
           description: OK
@@ -3407,7 +3364,7 @@ paths:
       description: Gets all custom dynamic scope scripts.
       operationId: get-scripts-dyn_scopes
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       responses:
         '200':
           description: OK
@@ -3424,7 +3381,7 @@ paths:
       description: Adds new custom dynamic scope script.
       operationId: post-scripts-dyn_scopes
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       requestBody:
         content:
           application/json:
@@ -3440,7 +3397,7 @@ paths:
       description: Updates dynamic scope script.
       operationId: put-scripts-dyn_scopes
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       requestBody:
         content:
           application/json:
@@ -3466,7 +3423,7 @@ paths:
       description: Deletes dynamic scope script by inum.
       operationId: delete-scripts-dyn_scopes-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       responses:
         '200':
           description: OK
@@ -3479,7 +3436,7 @@ paths:
       description: Gets dynamic scope script identified by inum.
       operationId: get-scripts-dyn_scopes-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       responses:
         '200':
           description: OK
@@ -3496,7 +3453,7 @@ paths:
       description: Updates dynamic scope script based on inum.
       operationId: put-scripts-dyn_scopes-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       requestBody:
         content:
           application/json:
@@ -3522,7 +3479,7 @@ paths:
       description: Gets all dynamic scope scripts based on type.
       operationId: get-scripts-dyn_scopes-by-type
       tags:
-        - Custom Scripts
+        - Custom Scripts - Dynamic Scopes
       responses:
         '200':
           description: OK
@@ -3532,6 +3489,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error      
   /scripts/uma_rpt:
@@ -3540,7 +3499,7 @@ paths:
       description: Gets all custom UMA RPT policy scripts.
       operationId: get-scripts-uma_rpt      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       responses:
         '200':
           description: OK
@@ -3550,6 +3509,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error      
     post:
@@ -3557,7 +3518,7 @@ paths:
       description: Adds new custom UMA RPT policy script.
       operationId: post-scripts-uma_rpt
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       requestBody:
         content:
           application/json:
@@ -3573,7 +3534,7 @@ paths:
       description: Updates UMA RPT policy script.
       operationId: put-scripts-uma_rpt
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       requestBody:
         content:
           application/json:
@@ -3599,7 +3560,7 @@ paths:
       description: Deletes UMA RPT policy script.
       operationId: delete-scripts-uma_rpt-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       responses:
         '200':
           description: OK
@@ -3612,7 +3573,7 @@ paths:
       description: Gets UMA RPT policy script identified by inum.
       operationId: get-scripts-uma_rpt-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       responses:
         '200':
           description: OK
@@ -3620,6 +3581,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'    
     put:
@@ -3627,7 +3590,7 @@ paths:
       description: Updates UMA RPT policy script based on inum.
       operationId: put-scripts-uma_rpt-by-inum
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       requestBody:
         content:
           application/json:
@@ -3653,7 +3616,7 @@ paths:
       description: Gets all UMA RPT policy scripts based on type.
       operationId: get-scripts-uma_rpt-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       responses:
         '200':
           description: OK
@@ -3663,6 +3626,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/uma_rpt/{name}:
@@ -3678,7 +3643,7 @@ paths:
       description: Gets UMA RPT policy script based on name.
       operationId: get-scripts-uma_rpt-by-name      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA RPT Policies
       responses:
         '200':
           description: OK
@@ -3688,6 +3653,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
   /scripts/uma_gather:
@@ -3713,7 +3680,7 @@ paths:
       description: Adds new custom UMA claims gathering script.
       operationId: post-scripts-uma_gather
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       requestBody:
         content:
           application/json:
@@ -3729,7 +3696,7 @@ paths:
       description: Updates UMA claims gathering script.
       operationId: put-scripts-uma_gather
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       requestBody:
         content:
           application/json:
@@ -3755,7 +3722,7 @@ paths:
       description: Deletes UMA claims gathering script.
       operationId: delete-scripts-uma_gather-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       responses:
         '200':
           description: OK
@@ -3768,7 +3735,7 @@ paths:
       description: Gets UMA claims gathering script identified by inum.
       operationId: get-scripts-uma_gather-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       responses:
         '200':
           description: OK
@@ -3776,6 +3743,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
     put:
@@ -3783,7 +3752,7 @@ paths:
       description: Updates UMA claims gathering script based on inum.
       operationId: put-scripts-uma_gather-by-inum
       tags:
-        - Custom Scripts  
+        - Custom Scripts - UMA Claims Gathering
       requestBody:
         content:
           application/json:
@@ -3809,7 +3778,7 @@ paths:
       description: Gets all UMA claims gathering scripts based on type.
       operationId: get-scripts-uma_gather-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       responses:
         '200':
           description: OK
@@ -3819,6 +3788,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/uma_gather/{name}:
@@ -3834,7 +3805,7 @@ paths:
       description: Gets UMA claims gathering script based on name.
       operationId: get-scripts-uma_gather-by-name      
       tags:
-        - Custom Scripts
+        - Custom Scripts - UMA Claims Gathering
       responses:
         '200':
           description: OK
@@ -3844,6 +3815,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/introspection:
@@ -3852,7 +3825,7 @@ paths:
       description: Gets all custom introspection scripts.
       operationId: get-scripts-introspection      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       responses:
         '200':
           description: OK
@@ -3862,6 +3835,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'  
     post:
@@ -3869,7 +3844,7 @@ paths:
       description: Adds new custom introspection script.
       operationId: post-scripts-introspection
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       requestBody:
         content:
           application/json:
@@ -3885,7 +3860,7 @@ paths:
       description: Updates introspection script.
       operationId: put-scripts-introspection
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       requestBody:
         content:
           application/json:
@@ -3911,7 +3886,7 @@ paths:
       description: Deletes introspection script.
       operationId: delete-scripts-introspection-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       responses:
         '200':
           description: OK
@@ -3924,7 +3899,7 @@ paths:
       description: Gets introspection script identified by inum.
       operationId: get-scripts-introspection-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       responses:
         '200':
           description: OK
@@ -3932,6 +3907,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
     put:
@@ -3939,7 +3916,7 @@ paths:
       description: Updates introspection script based on inum.
       operationId: put-scripts-introspection-by-inum
       tags:
-        - Custom Scripts  
+        - Custom Scripts - Introspection
       requestBody:
         content:
           application/json:
@@ -3965,7 +3942,7 @@ paths:
       description: Gets all introspection scripts based on type.
       operationId: get-scripts-introspection-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       responses:
         '200':
           description: OK
@@ -3975,6 +3952,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/introspection/{name}:
@@ -3990,7 +3969,7 @@ paths:
       description: Gets introspection script based on name.
       operationId: get-scripts-introspection-by-name      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Introspection
       responses:
         '200':
           description: OK
@@ -4000,6 +3979,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
   /scripts/ropw:
@@ -4008,7 +3989,7 @@ paths:
       description: Gets all custom Resource Owner Password Credentials scripts.
       operationId: get-scripts-ropw      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       responses:
         '200':
           description: OK
@@ -4018,6 +3999,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'  
     post:
@@ -4025,7 +4008,7 @@ paths:
       description: Adds new custom Resource Owner Password Credentials script.
       operationId: post-scripts-ropw
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       requestBody:
         content:
           application/json:
@@ -4041,7 +4024,7 @@ paths:
       description: Updates Resource Owner Password Credentials script.
       operationId: put-scripts-ropw
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       requestBody:
         content:
           application/json:
@@ -4067,7 +4050,7 @@ paths:
       description: Deletes Resource Owner Password Credentials script.
       operationId: delete-scripts-ropw-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       responses:
         '200':
           description: OK
@@ -4080,7 +4063,7 @@ paths:
       description: Gets Resource Owner Password Credentials script identified by inum.
       operationId: get-scripts-ropw-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       responses:
         '200':
           description: OK
@@ -4088,6 +4071,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
     put:
@@ -4095,7 +4080,7 @@ paths:
       description: Updates Resource Owner Password Credentials script based on inum.
       operationId: put-scripts-ropw-by-inum
       tags:
-        - Custom Scripts  
+        - Custom Scripts - Resource Owner Password Credentials
       requestBody:
         content:
           application/json:
@@ -4121,7 +4106,7 @@ paths:
       description: Gets all Resource Owner Password Credentials scripts based on type.
       operationId: get-scripts-ropw-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       responses:
         '200':
           description: OK
@@ -4131,6 +4116,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/ropw/{name}:
@@ -4146,7 +4133,7 @@ paths:
       description: Gets Resource Owner Password Credentials script based on name.
       operationId: get-scripts-ropw-by-name      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Resource Owner Password Credentials
       responses:
         '200':
           description: OK
@@ -4156,6 +4143,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/app_session:
@@ -4164,7 +4153,7 @@ paths:
       description: Gets all custom Application session scripts.
       operationId: get-scripts-app_session    
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       responses:
         '200':
           description: OK
@@ -4181,7 +4170,7 @@ paths:
       description: Adds new custom Application session script.
       operationId: post-scripts-app_session
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       requestBody:
         content:
           application/json:
@@ -4197,7 +4186,7 @@ paths:
       description: Updates Application session script.
       operationId: put-scripts-app_session
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       requestBody:
         content:
           application/json:
@@ -4223,7 +4212,7 @@ paths:
       description: Deletes Application session script.
       operationId: delete-scripts-app_session-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       responses:
         '200':
           description: OK
@@ -4236,7 +4225,7 @@ paths:
       description: Gets Application session script identified by inum.
       operationId: get-scripts-app_session-by-inum      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       responses:
         '200':
           description: OK
@@ -4244,6 +4233,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError' 
     put:
@@ -4251,7 +4242,7 @@ paths:
       description: Updates Application session script based on inum.
       operationId: put-scripts-app_session-by-inum
       tags:
-        - Custom Scripts  
+        - Custom Scripts - Application Session
       requestBody:
         content:
           application/json:
@@ -4277,7 +4268,7 @@ paths:
       description: Gets all Application session scripts based on type.
       operationId: get-scripts-app_session-by-type      
       tags:
-        - Custom Scripts
+        - Custom Scripts - Application Session
       responses:
         '200':
           description: OK
@@ -4287,6 +4278,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /scripts/app_session/{name}:
@@ -4302,6 +4295,33 @@ paths:
       description: Gets Application session script based on name.
       operationId: get-scripts-app_session-by-name      
       tags:
+        - Custom Scripts - Application Session
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/scripts/{name}:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets script details by name.
+      description: Gets script details based on name.
+      operationId: get-config-scripts-by-name      
+      tags:
         - Custom Scripts
       responses:
         '200':
@@ -4312,8 +4332,86 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CustomScript'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
-          $ref: '#/components/responses/InternalServerError'            
+          $ref: '#/components/responses/InternalServerError'
+  /config/scripts/{name}/property:
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Script name.
+    get:
+      summary: Gets script property by name.
+      description: Gets script property based on name.
+      operationId: get-config-scripts-property-by-name      
+      tags:
+        - Custom Scripts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Adds script property by name.
+      description: Adds script property by name.
+      operationId: post-config-scripts-property-by-name
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Updates script property by name.
+      description: Updates script property by name.
+      operationId: put-config-scripts-property-by-name
+      tags:
+        - Custom Scripts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Deletes script property by name.
+      description: Deletes script property by name.
+      operationId: delete-config-scripts-property-by-name
+      tags:
+        - Custom Scripts      
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     Found:
@@ -4465,4 +4563,144 @@ components:
         modified:
           type: boolean
         internal:
-          type: boolean      
+          type: boolean
+    LdapConfiguration:
+      type: object
+      required:
+        - configId
+        - bindDN
+        - maxConnections
+        - primaryKey
+        - localPrimaryKey
+        - servers
+        - baseDNs
+        - useSSL
+      properties:
+        configId:
+          type: string
+          description: Unique identifier - Name
+          example: auth_ldap_server
+        bindDN:
+          type: string
+          description: User Distingusihed Name for binding.
+        maxConnections:
+          type: integer
+          description: Total number of simultaneous connections allowed.
+          format: int32
+          default: 2
+        primaryKey:
+          type: string
+          description: Used to search and bind operations in configured LDAP server.
+          example: 'SAMAccountName,uid, email'
+        localPrimaryKey:
+          type: string
+          description: Used to search local user entry in Gluu Server’s internal LDAP directory.
+          example: 'uid, email'
+        servers:
+          type: array
+          description: List of LDAP authentication servers.
+          items:
+            type: string
+            description: Unique name of the authentication server and port number.
+            example: 'authserver.org:63'
+        baseDNs:
+          type: array
+          description: list of LDAP base Distingusihed Name
+          items:
+            type: string
+        useSSL:
+          type: boolean                      
+        bindPassword:
+          type: string
+          description: User password for binding.
+        useAnonymousBind:
+          type: boolean
+          description: Boolean value used to indicate if the LDAP Server will allow anonymous bind request.
+        enabled:
+          type: boolean
+        version:
+          type: integer
+    CouchbaseConfiguration:
+      type: object
+      required:
+        - userName
+        - userPassword
+        - servers
+        - defaultBucket
+        - buckets
+      properties:
+        userName:
+          type: string
+          description: Couchbase server user.
+        userPassword:
+          type: string
+          description: Encoded Couchbase server user password.
+        servers:
+          type: array
+          items: 
+            type: string
+          description: Couchbase server host and port.
+        defaultBucket:
+          type: string
+          description: Main bucket that application should use if other mapping rules were not applied.
+        buckets:
+          type: array
+          items: 
+            type: string
+          description: List of buckets defining mapping rules.
+        passwordEncryptionMethod:
+          type: string
+          enum:
+            - SHA
+            - SSHA
+            - SHA-256
+            - SSHA-256
+            - SHA-384
+            - SSHA-384
+            - SHA-512
+            - SSHA-512
+            - MD5
+            - SMD5
+            - CRYPT
+            - CRYPT-MD5
+            - CRYPT-SHA-256
+            - CRYPT-SHA-512
+            - CRYPT-BCRYPT
+            - CRYPT-BCRYPT
+            - PKCS5S2
+        operationTracingEnabled:
+          type: boolean
+          default: false
+        mutationTokensEnabled:
+          type: boolean
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements,as well as optimized RYOW consistency.
+          default: false
+        connectTimeout:
+          type: integer
+          format: int32
+        computationPoolSize:
+          type: integer
+          format: int32
+          description: Sets the pool size (number of threads to use) for all non blocking operations,default value is the number of CPUs.
+        useSSL:
+          type: boolean
+        sslTrustStoreFile:
+          type: string
+          description: The path to the trust store file to use. It contains the trusted certificates.
+        sslTrustStorePin:
+          type: string
+          description: The PIN to use to access the contents of the trust store. 
+        sslTrustStoreFormat:
+          type: string
+          description: The format to use for the trust store.         
+        binaryAttributes:
+          type: array
+          items: 
+            type: string
+        certificateAttributes:
+          type: array
+          items: 
+            type: string
+       
+          
+      
