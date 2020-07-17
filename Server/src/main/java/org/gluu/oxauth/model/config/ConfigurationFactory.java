@@ -390,13 +390,12 @@ public class ConfigurationFactory {
 					destroy(StaticConfiguration.class);
 					destroy(WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
-
-					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
 
 				this.loaded = true;
 				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(conf);
 
+                destroyCryptoProviderInstance();
 				AbstractCryptoProvider newAbstractCryptoProvider = abstractCryptoProviderInstance.get();
 				cryptoProviderEvent.select(CryptoProviderEvent.Literal.INSTANCE).fire(newAbstractCryptoProvider);
 
@@ -422,9 +421,12 @@ public class ConfigurationFactory {
 		configurationInstance.destroy(confInstance.get());
 	}
 
-	public void destroyCryptoProviderInstance(Class<? extends AbstractCryptoProvider> clazz) {
+	private void destroyCryptoProviderInstance() {
+	    log.trace("Destroyed crypto provider instance.");
+
 		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
 		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
+        CryptoProviderFactory.reset();
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
