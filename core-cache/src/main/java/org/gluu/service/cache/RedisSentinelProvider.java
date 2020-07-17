@@ -32,8 +32,7 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
             LOG.debug("Starting RedisSentinelProvider ... configuration:" + getRedisConfiguration());
 
             JedisPoolConfig poolConfig = createPoolConfig();
-            String password = StringUtils.isBlank(redisConfiguration.getDecryptedPassword()) ? null : redisConfiguration.getDecryptedPassword();
-
+            String password = redisConfiguration.getPassword();
             pool = new JedisSentinelPool(
                     getRedisConfiguration().getSentinelMasterGroupName(),
                     Sets.newHashSet(StringUtils.split(getRedisConfiguration().getServers().trim(), ",")),
@@ -42,7 +41,6 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
                     redisConfiguration.getSoTimeout(),
                     password,
                     Protocol.DEFAULT_DATABASE);
-
             testConnection();
             LOG.debug("RedisSentinelProvider started.");
         } catch (Exception e) {

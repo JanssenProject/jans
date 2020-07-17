@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -33,7 +32,7 @@ public class RedisClusterProvider extends AbstractRedisProvider {
             LOG.debug("Starting RedisClusterProvider ... configuration:" + getRedisConfiguration());
 
             JedisPoolConfig poolConfig = createPoolConfig();
-            String password = StringUtils.isBlank(redisConfiguration.getDecryptedPassword()) ? null : redisConfiguration.getDecryptedPassword();
+            String password = redisConfiguration.getPassword();
             pool = new JedisCluster(hosts(getRedisConfiguration().getServers()), redisConfiguration.getConnectionTimeout(), redisConfiguration.getSoTimeout(), redisConfiguration.getMaxRetryAttempts(), password, poolConfig);
 
             testConnection();
