@@ -390,13 +390,12 @@ public class ConfigurationFactory {
 					destroy(StaticConfiguration.class);
 					destroy(WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
-
-					destroyCryptoProviderInstance();
 				}
 
 				this.loaded = true;
 				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(conf);
 
+                destroyCryptoProviderInstance();
 				AbstractCryptoProvider newAbstractCryptoProvider = abstractCryptoProviderInstance.get();
 				cryptoProviderEvent.select(CryptoProviderEvent.Literal.INSTANCE).fire(newAbstractCryptoProvider);
 
@@ -423,6 +422,8 @@ public class ConfigurationFactory {
 	}
 
 	private void destroyCryptoProviderInstance() {
+	    log.trace("Destroyed crypto provider instance.");
+
 		AbstractCryptoProvider abstractCryptoProvider = abstractCryptoProviderInstance.get();
 		abstractCryptoProviderInstance.destroy(abstractCryptoProvider);
         CryptoProviderFactory.reset();
