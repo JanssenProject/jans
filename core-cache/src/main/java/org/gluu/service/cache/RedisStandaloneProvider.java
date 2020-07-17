@@ -22,7 +22,6 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     private static final Logger LOG = LoggerFactory.getLogger(RedisStandaloneProvider.class);
 
     private JedisPool pool;
-
     public RedisStandaloneProvider(RedisConfiguration redisConfiguratio) {
         super(redisConfiguratio);
     }
@@ -34,22 +33,21 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
             JedisPoolConfig poolConfig = createPoolConfig();
 
             HostAndPort hostAndPort = RedisClusterProvider.hosts(redisConfiguration.getServers()).iterator().next();
-            String password = StringUtils.isBlank(redisConfiguration.getDecryptedPassword()) ? null : redisConfiguration.getDecryptedPassword();
-
+            String password = redisConfiguration.getPassword();
             if (redisConfiguration.getUseSSL()) {
                 if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
-                    if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
+                    if (StringUtils.isBlank(password)) {
                         pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true,
                                 RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
                     } else {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), redisConfiguration.getDecryptedPassword(), true,
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password, true,
                                 RedisProviderFactory.createTrustStoreSslSocketFactory(new File(redisConfiguration.getSslTrustStoreFilePath())), new SSLParameters(), new DefaultHostnameVerifier());
                     }
                 } else {
-                    if (StringUtils.isBlank(redisConfiguration.getDecryptedPassword())) {
+                    if (StringUtils.isBlank(password)) {
                         pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), true);
                     } else {
-                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), redisConfiguration.getDecryptedPassword(), true);
+                        pool = new JedisPool(poolConfig, hostAndPort.getHost(), hostAndPort.getPort(), redisConfiguration.getConnectionTimeout(), password, true);
                     }
                 }
             } else {

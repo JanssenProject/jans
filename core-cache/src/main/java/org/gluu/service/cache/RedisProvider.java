@@ -42,13 +42,10 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
             RedisConfiguration redisConfiguration = cacheConfiguration.getRedisConfiguration();
             decryptPassword(redisConfiguration);
             log.debug("Starting RedisProvider ... configuration:" + redisConfiguration);
-
             defaultPutExpiration = redisConfiguration.getDefaultPutExpiration() > 0 ? redisConfiguration.getDefaultPutExpiration()
                     : DEFAULT_PUT_EXPIRATION_IN_SECONDS;
-
             redisProvider = RedisProviderFactory.create(cacheConfiguration.getRedisConfiguration());
             redisProvider.create();
-
             log.debug("RedisProvider started.");
         } catch (Exception e) {
             log.error("Failed to start RedisProvider.");
@@ -71,7 +68,7 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
         try {
             String encryptedPassword = redisConfiguration.getPassword();
             if (StringUtils.isNotBlank(encryptedPassword)) {
-                redisConfiguration.setDecryptedPassword(stringEncrypter.decrypt(encryptedPassword));
+                redisConfiguration.setPassword(stringEncrypter.decrypt(encryptedPassword));
                 log.trace("Decrypted redis password successfully.");
             }
         } catch (StringEncrypter.EncryptionException e) {
