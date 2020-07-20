@@ -60,7 +60,7 @@ if os_type == 'debian':
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora') and os_initdaemon == 'systemd') or deb_sysd_clone:
     service_path = shutil.which('systemctl')
-elif self.os_type in ['debian', 'ubuntu']:
+elif os_type in ['debian', 'ubuntu']:
     service_path = '/usr/sbin/service'
 else:
     service_path = '/sbin/service'
