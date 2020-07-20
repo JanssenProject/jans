@@ -47,7 +47,6 @@ public class ManualCouchbaseEntryManagerTest {
 
             Bucket sessionBucket = manager.getOperationService().getConnectionProvider().getBucketMapping("sessions").getBucket();
             final JsonDocument lookup = sessionBucket.get(key);
-            System.out.println("cas: " + lookup.cas());
             System.out.println("expiry: " + lookup.expiry());
 
             DocumentFragment<Lookup> ttl = sessionBucket.lookupIn(key).get("$document.exptime", new SubdocOptionsBuilder().xattr(true)).execute();
