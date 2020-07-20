@@ -27,6 +27,9 @@ from setup_app.pylib.jproperties import Properties
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
 
+snap = os.environ.get('$SNAP','')
+snap_common = snap_common_dir = os.environ('SNAP_COMMON','')
+
 re_split_host = re.compile(r'[^,\s,;]+')
 
 # Determine initdaemon
