@@ -1,6 +1,11 @@
 package org.gluu.couchbase.test;
 
+import com.couchbase.client.core.message.kv.subdoc.multi.Lookup;
+import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.subdoc.DocumentFragment;
+import com.couchbase.client.java.subdoc.SubdocOptionsBuilder;
+
 import org.gluu.couchbase.model.SimpleClient;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.persist.couchbase.impl.CouchbaseEntryManagerFactory;
@@ -40,8 +45,13 @@ public class ManualCouchbaseEntryManagerTest {
             final String key = "sessions_" + sessionId.getId();
             System.out.println("Key: " + key + ", ttl:" + sessionId.getTtl());
 
-            final JsonDocument lookup = manager.getOperationService().getConnectionProvider().getBucketMapping("sessions").getBucket().get(key);
+            Bucket sessionBucket = manager.getOperationService().getConnectionProvider().getBucketMapping("sessions").getBucket();
+            final JsonDocument lookup = sessionBucket.get(key);
+            System.out.println("cas: " + lookup.cas());
             System.out.println("expiry: " + lookup.expiry());
+
+            DocumentFragment<Lookup> ttl = sessionBucket.lookupIn(key).get("$document.exptime", new SubdocOptionsBuilder().xattr(true)).execute();
+            System.out.println("ttl: " + ttl.content("$document.exptime"));
 
             updateSession(sessionId);
             manager.merge(sessionId);
