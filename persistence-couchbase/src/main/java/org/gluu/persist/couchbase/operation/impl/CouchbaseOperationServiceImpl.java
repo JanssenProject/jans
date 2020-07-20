@@ -6,28 +6,27 @@
 
 package org.gluu.persist.couchbase.operation.impl;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
-
+import com.couchbase.client.core.CouchbaseException;
+import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
+import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.document.JsonDocument;
+import com.couchbase.client.java.document.json.JsonArray;
+import com.couchbase.client.java.document.json.JsonObject;
+import com.couchbase.client.java.query.*;
+import com.couchbase.client.java.query.consistency.ScanConsistency;
+import com.couchbase.client.java.query.dsl.Expression;
+import com.couchbase.client.java.query.dsl.Sort;
+import com.couchbase.client.java.query.dsl.path.*;
+import com.couchbase.client.java.subdoc.DocumentFragment;
+import com.couchbase.client.java.subdoc.MutateInBuilder;
+import com.couchbase.client.java.subdoc.MutationSpec;
 import org.gluu.persist.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.SearchReturnDataType;
 import org.gluu.persist.couchbase.operation.CouchbaseOperationService;
 import org.gluu.persist.couchbase.operation.watch.OperationDurationUtil;
 import org.gluu.persist.exception.extension.PersistenceExtension;
-import org.gluu.persist.exception.operation.DeleteException;
-import org.gluu.persist.exception.operation.DuplicateEntryException;
-import org.gluu.persist.exception.operation.EntryNotFoundException;
-import org.gluu.persist.exception.operation.PersistenceException;
-import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.persist.exception.operation.*;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
@@ -37,30 +36,10 @@ import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.couchbase.client.core.CouchbaseException;
-import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.document.JsonDocument;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.Delete;
-import com.couchbase.client.java.query.N1qlParams;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
-import com.couchbase.client.java.query.N1qlQueryRow;
-import com.couchbase.client.java.query.Select;
-import com.couchbase.client.java.query.Statement;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.Sort;
-import com.couchbase.client.java.query.dsl.path.GroupByPath;
-import com.couchbase.client.java.query.dsl.path.LimitPath;
-import com.couchbase.client.java.query.dsl.path.MutateLimitPath;
-import com.couchbase.client.java.query.dsl.path.OffsetPath;
-import com.couchbase.client.java.query.dsl.path.ReturningPath;
-import com.couchbase.client.java.subdoc.DocumentFragment;
-import com.couchbase.client.java.subdoc.MutateInBuilder;
-import com.couchbase.client.java.subdoc.MutationSpec;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Base service which performs all supported Couchbase operations
@@ -241,6 +220,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
             MutateInBuilder builder = bucketMapping.getBucket().mutateIn(key);
             if (expiration != null) {
             	bucketMapping.getBucket().touch(key, expiration);
+            	builder = builder.withExpiry(expiration);
             }
 
             return modifyEntry(builder, mods);

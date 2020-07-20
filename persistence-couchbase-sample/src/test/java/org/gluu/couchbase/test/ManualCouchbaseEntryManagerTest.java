@@ -47,7 +47,7 @@ public class ManualCouchbaseEntryManagerTest {
             manager.merge(sessionId);
 
             final JsonDocument lookup2 = manager.getOperationService().getConnectionProvider().getBucketMapping("sessions").getBucket().get(key);
-            System.out.println("expiry after udpate: " + lookup2.expiry());
+            System.out.println("expiry after update: " + lookup2.expiry());
 
         } finally {
             manager.destroy();
