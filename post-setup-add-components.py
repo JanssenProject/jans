@@ -65,8 +65,6 @@ if os.path.exists(ces_dir):
     os.system('mv {0} {0}.back'.format(ces_dir))
 
 ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/version_{}.zip'.format(gluu_version)
-ces_url = 'https://github.com/GluuFederation/community-edition-setup/archive/master.zip'
-
 
 print("Downloading Community Edition Setup {}".format(gluu_version))
 
