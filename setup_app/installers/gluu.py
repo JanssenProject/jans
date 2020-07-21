@@ -111,7 +111,8 @@ class GluuInstaller(SetupUtils):
     def configureSystem(self):
         self.logIt("Configuring system", 'gluu')
         self.customiseSystem()
-        self.createGroup('gluu')
+        if not base.snap:
+            self.createGroup('gluu')
         self.makeFolders()
 
         if Config.persistence_type == 'hybrid':
@@ -135,25 +136,26 @@ class GluuInstaller(SetupUtils):
 
 
     def customiseSystem(self):
-        if Config.os_initdaemon == 'init':
-            system_profile_update = Config.system_profile_update_init
-        else:
-            system_profile_update = Config.system_profile_update_systemd
+        if not base.snap:
+            if Config.os_initdaemon == 'init':
+                system_profile_update = Config.system_profile_update_init
+            else:
+                system_profile_update = Config.system_profile_update_systemd
 
-        # Render customized part
-        self.renderTemplate(system_profile_update)
-        renderedSystemProfile = self.readFile(system_profile_update)
+            # Render customized part
+            self.renderTemplate(system_profile_update)
+            renderedSystemProfile = self.readFile(system_profile_update)
 
-        # Read source file
-        currentSystemProfile = self.readFile(Config.sysemProfile)
+            # Read source file
+            currentSystemProfile = self.readFile(Config.sysemProfile)
 
-        # Write merged file
-        self.backupFile(Config.sysemProfile)
-        resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-        self.writeFile(Config.sysemProfile, resultSystemProfile)
+            # Write merged file
+            self.backupFile(Config.sysemProfile)
+            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+            self.writeFile(Config.sysemProfile, resultSystemProfile)
 
-        # Fix new file permissions
-        self.run([paths.cmd_chmod, '644', Config.sysemProfile])
+            # Fix new file permissions
+            self.run([paths.cmd_chmod, '644', Config.sysemProfile])
 
     def make_salt(self):
         if not Config.encode_salt:
@@ -251,11 +253,10 @@ class GluuInstaller(SetupUtils):
         if base.clone_type == 'rpm':
             for service in Config.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
-        else:
+        elif not base.snap:
             for service in Config.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
-                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
-
+                self.run([paths.cmd_update_rc , service, 'defaults'])
+                self.run([paths.cmd_update_rc, service, 'enable'])
 
 
     def copy_scripts(self):
@@ -266,7 +267,7 @@ class GluuInstaller(SetupUtils):
 
         self.logIt("Rendering encode.py")
         try:
-            encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))            
+            encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
             encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
         except:
