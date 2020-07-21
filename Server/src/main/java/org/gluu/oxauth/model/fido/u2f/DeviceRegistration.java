@@ -276,7 +276,12 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 			markCompromised();
 			throw new InvalidDeviceCounterException(this);
 		}
-		counter = clientCounter;
+		if (clientCounter == Integer.MAX_VALUE) {
+			// Handle special case when counter value is max positive integer value
+			counter = -1;
+		} else {
+			counter = clientCounter;
+		}
 	}
 
     public Date getExpirationDate() {
