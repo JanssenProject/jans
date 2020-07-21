@@ -54,7 +54,8 @@ class Config:
                 myDict[obj_name] = obj
 
         if dumpFile:
-            with open('config-'+time.ctime().replace(' ', '-'),'w') as w:
+            fn = os.path.join(self.install_dir, 'config-'+time.ctime().replace(' ', '-'))
+            with open(fn, 'w') as w:
                 w.write(pprint.pformat(myDict, indent=2))
         else:
             pp = pprint.PrettyPrinter(indent=2)
@@ -66,13 +67,17 @@ class Config:
 
         self.install_dir = install_dir
         self.thread_queue = None
-        
+
+        self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
+        if base.snap:
+            self.ldapBaseFolder = os.path.join(base.snap_common, 'opendj')
+
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(self.install_dir, 'logs', 'progress-bar.log')
         class DummyProgress:
 
             services = []
-            
+
             def register(self, installer):
                 pass
 
@@ -202,7 +207,7 @@ class Config:
         self.ldaps_port = '1636'
         self.ldap_admin_port = '4444'
 
-        self.ldap_user_home = '/home/ldap'
+        self.ldap_user_home = self.ldapBaseFolder
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
 
