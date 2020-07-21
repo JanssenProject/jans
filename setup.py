@@ -96,7 +96,7 @@ for key in setupOptions:
 gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
 
-
+"""
 Config.hostname = 'snap.gluu.org'
 Config.ip = '174.138.37.150'
 Config.oxtrust_admin_password = 'Top!Secret-20'
@@ -111,7 +111,7 @@ Config.installScimServer = False
 Config.installSaml = False
 Config.installOxd = False
 Config.installPassport = False
-
+"""
 
 if not GSA:
     print()
