@@ -1,35 +1,35 @@
 package org.gluu.oxauth.auth;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.security.Identity;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.service.CookieService;
-import org.gluu.oxauth.service.RequestParameterService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.slf4j.Logger;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.security.Identity;
+import org.gluu.oxauth.service.CookieService;
+import org.gluu.oxauth.service.RequestParameterService;
+import org.gluu.oxauth.service.SessionIdService;
+import org.slf4j.Logger;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 /**
  * @author Yuriy Zabrovarnyy
  */
 @RequestScoped
-@Named
 public class SelectAccountAction {
 
     private static final String FORM_ID = "selectForm";
@@ -119,7 +119,9 @@ public class SelectAccountAction {
         try {
             log.debug("Selected account: " + selectedSessionId);
             clearSessionIdCookie();
-            cookieService.createSessionIdCookie(currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny().get(), false);
+            SessionId selectedSession = currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny().get();
+            cookieService.createSessionIdCookie(selectedSession, false);
+            identity.setSessionId(selectedSession);
             authenticator.authenticateBySessionId(selectedSessionId);
             String uri = buildAuthorizationUrl();
             log.trace("RedirectTo: {}", uri);

@@ -122,7 +122,7 @@ public class AppConfiguration implements Configuration {
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
     private Boolean returnClientSecretOnRead = false;
     private Boolean rejectJwtWithNoneAlg = true;
-    private Boolean expirationNotificatorEnabled = true;
+    private Boolean expirationNotificatorEnabled = false;
     private int expirationNotificatorMapSizeLimit = 100000;
     private int expirationNotificatorIntervalInSeconds = 600;
 
@@ -233,7 +233,7 @@ public class AppConfiguration implements Configuration {
     private int cibaMaxExpirationTimeAllowedSec;
 
     public Boolean getExpirationNotificatorEnabled() {
-        if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = true;
+        if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = false;
         return expirationNotificatorEnabled;
     }
 
