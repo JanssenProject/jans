@@ -62,8 +62,6 @@ if not (os_type and os_version):
 os_name = os_type + os_version
 deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
 
-print("OS Name", os_name)
-
 if os_type == 'debian':
     os.environ['LC_ALL'] = 'C'
 
