@@ -20,7 +20,7 @@ from setup_app.config import Config
 from setup_app.utils.base import logIt as logOnly
 from setup_app.utils.base import logOSChanges as logOSChangesOnly
 from setup_app.utils.base import run as runOnly
-from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type, deb_sysd_clone
+from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type, deb_sysd_clone, snap
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
@@ -398,7 +398,7 @@ class SetupUtils(Crypto64):
         self.renderTemplateInOut(filePath, Config.templateFolder, Config.outputFolder)
 
     def createUser(self, userName, homeDir, shell='/bin/bash'):
-        
+
         try:
             useradd = '/usr/sbin/useradd'
             cmd = [useradd, '--system', '--user-group', '--shell', shell, userName]
@@ -433,6 +433,8 @@ class SetupUtils(Crypto64):
             self.logIt("Error adding group", True)
 
     def fix_init_scripts(self, serviceName, initscript_fn):
+        if snap:
+            return
 
         changeTo = None
 
@@ -450,7 +452,7 @@ class SetupUtils(Crypto64):
 
         with open(initscript_fn) as f:
             initscript = f.readlines()
-        
+
         for i,l in enumerate(initscript):
             if l.startswith('# Provides:'):
                 initscript[i] = '# Provides:          {0}\n'.format(serviceName)
