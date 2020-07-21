@@ -20,6 +20,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.codec.binary.Hex;
 import org.gluu.oxauth.crypto.random.ChallengeGenerator;
 import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
@@ -157,12 +158,17 @@ public class AuthenticationService extends RequestService {
         }
 
         ClientData clientData = response.getClientData();
+        log.debug("Client data HEX '{}'", Hex.encodeHexString(response.getClientDataRaw().getBytes()));
+        log.debug("Signature data HEX '{}'", Hex.encodeHexString(response.getSignatureData().getBytes()));
+
         clientDataValidationService.checkContent(clientData, RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, request.getChallenge(), facets);
 
         RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(response.getSignatureData());
         rawAuthenticationService.checkSignature(request.getAppId(), clientData, rawAuthenticateResponse,
                 Base64Util.base64urldecode(usedDeviceRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
         rawAuthenticateResponse.checkUserPresence();
+
+        log.debug("Counter in finish authentication request'{}', countr in database '{}'", rawAuthenticateResponse.getCounter(), usedDeviceRegistration.getCounter());
         usedDeviceRegistration.checkAndUpdateCounter(rawAuthenticateResponse.getCounter());
 
         usedDeviceRegistration.setLastAccessTime(new Date());
