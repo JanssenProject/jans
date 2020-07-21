@@ -20,6 +20,9 @@ tags:
   - name: Cache Configuration – Redis
   - name: Cache Configuration – in-Memory
   - name: Cache Configuration – Native-Persistence
+  - name: Configuration – Properties
+  - name: Configuration – SMTP
+  - name: Configuration – Library
   - name: Custom Scripts
   - name: Custom Scripts - Person Authentication
   - name: Custom Scripts - Consent Gathering
@@ -34,8 +37,12 @@ tags:
   - name: Database - LDAP configuration
   - name: Graphics - Logo
   - name: Graphics - Favicon
-  - name: Library
-  - name: Properties
+  - name: OAuth - Clients
+  - name: OAuth - Scopes
+  - name: OAuth - Sectoridentifier
+  - name: OAuth - UMA Scopes
+  - name: OAuth - UMA Resources
+  
 paths:
   /config/properties:
     get:      
@@ -43,7 +50,7 @@ paths:
       description: Gets all oxauth configuration properties.
       operationId: properties
       tags:
-        - Properties
+        - Configuration – Properties
       responses:
         '200':
           description: OK
@@ -1351,7 +1358,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2202,7 +2208,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2725,7 +2730,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
@@ -2749,7 +2753,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2788,8 +2791,7 @@ paths:
               $ref: '#/components/schemas/LdapConfiguration'
       responses:
         '200':
-          description: OK
-          content: {}            
+          description: OK          
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
@@ -2806,8 +2808,7 @@ paths:
               $ref: '#/components/schemas/LdapConfiguration'
       responses:
         '200':
-          description: OK
-          content: {}            
+          description: OK      
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2944,8 +2945,7 @@ paths:
               $ref: '#/components/schemas/CouchbaseConfiguration'
       responses:
         '200':
-          description: OK
-          content: {}            
+          description: OK         
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:
@@ -2962,8 +2962,7 @@ paths:
               $ref: '#/components/schemas/CouchbaseConfiguration'
       responses:
         '200':
-          description: OK
-          content: {}            
+          description: OK          
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -2987,7 +2986,7 @@ paths:
       description: Gets custom library.
       operationId: get-config-library      
       tags:
-        - Library
+        - Configuration – Library
       responses:
         '200':
           description: OK
@@ -3011,7 +3010,7 @@ paths:
       description: Uploads custom library.
       operationId: post-config-library
       tags:
-        - Library
+        - Configuration – Library
       parameters: []
       requestBody:
         content:
@@ -3028,7 +3027,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -3047,7 +3045,7 @@ paths:
       description: Gets custom library by name.
       operationId: get-config-library-by-name    
       tags:
-        - Library
+        - Configuration – Library
       responses:
         '200':
           description: OK
@@ -3070,7 +3068,7 @@ paths:
       description: Deletes custom library by name.
       operationId: delete-config-library-by-name
       tags:
-        - Library
+        - Configuration – Library
       responses:
         '200':
           description: OK
@@ -3366,7 +3364,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -3438,7 +3435,6 @@ paths:
       responses:
         '200':
           description: OK
-          content: {}
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -5722,7 +5718,430 @@ paths:
         '200':
           description: OK
         '500':
+          description: Internal Server Error
+  /config/smtp:
+    get:
+      summary: Returns SMTP server configuration.
+      description: Returns SMTP server configuration.
+      operationId: get-config-smtp
+      tags:
+        - Configuration – SMTP
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: SMTP configuration.
+                properties:
+                  host:
+                    description: Hostname of the SMTP server.
+                    type: string
+                    format: url
+                  port: 
+                    description: Port number of the SMTP server.
+                    type: integer
+                    multipleOf: 1
+                  requires-ssl:
+                    description: Boolean value with default value false. If true, SSL will be enabled.
+                    type: boolean
+                  trust-host:
+                    type: boolean
+                    description: Boolean value with default value false.
+                  from-name:
+                    description: Name of the sender.
+                    type: string
+                  from-email-address:
+                    description: Email Address of the Sender.
+                    type: string
+                  requires-authentication:
+                    description: Boolean value with default value false. It true it will enables sender authentication.
+                    type: boolean
+                  user-name:
+                    description: Username of the SMTP.
+                    type: string
+                  password:
+                    description: Password for the SMTP.
+                    type: string
+        '500':
+          description: Internal Server Error 
+    post:
+      summary: Adds SMTP server configuration.
+      description: Adds SMTP server configuration.
+      operationId: post-config-smtp
+      tags:
+        - Configuration – SMTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: SMTP configuration.
+              properties:
+                host:
+                  description: Hostname of the SMTP server.
+                  type: string
+                  format: url
+                port: 
+                  description: Port number of the SMTP server.
+                  type: integer
+                  multipleOf: 1
+                requires-ssl:
+                  description: Boolean value with default value false. If true, SSL will be enabled.
+                  type: boolean
+                trust-host:
+                  type: boolean
+                  description: Boolean value with default value false.
+                from-name:
+                  description: Name of the sender.
+                  type: string
+                from-email-address:
+                  description: Email Address of the Sender.
+                  type: string
+                requires-authentication:
+                  description: Boolean value with default value false. It true it will enables sender authentication.
+                  type: boolean
+                user-name:
+                  description: Username of the SMTP.
+                  type: string
+                password:
+                  description: Password for the SMTP.
+                  type: string
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error 
+    put:
+      summary: Updates SMTP server configuration.
+      description: Updates SMTP server configuration.
+      operationId: put-config-smtp
+      tags:
+        - Configuration – SMTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: SMTP configuration.
+              properties:
+                host:
+                  description: Hostname of the SMTP server.
+                  type: string
+                  format: url
+                port: 
+                  description: Port number of the SMTP server.
+                  type: integer
+                  multipleOf: 1
+                requires-ssl:
+                  description: Boolean value with default value false. If true, SSL will be enabled.
+                  type: boolean
+                trust-host:
+                  type: boolean
+                  description: Boolean value with default value false.
+                from-name:
+                  description: Name of the sender.
+                  type: string
+                from-email-address:
+                  description: Email Address of the Sender.
+                  type: string
+                requires-authentication:
+                  description: Boolean value with default value false. It true it will enables sender authentication.
+                  type: boolean
+                user-name:
+                  description: Username of the SMTP.
+                  type: string
+                password:
+                  description: Password for the SMTP.
+                  type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error   
+    delete:
+      summary: Deletes SMTP server configuration.
+      description: Deletes SMTP server configuration.
+      operationId: delete-config-smtp
+      tags:
+        - Configuration – SMTP      
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/uma/scopes:
+    get:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Gets list of UMA scope description.
+      description: Gets list of UMA scope description.
+      operationId: get-oauth-uma-scopes     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA scope description list.
+                description: List of UMA scope description.
+                type: array
+                items:
+                  type: object
+                  description: UmaScope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                      type: string
+                    authorizationPolicies:
+                      description: Policies associated with all scopes.
+                      type: array
+                      items:
+                        type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error     
+    post:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Adds UMA scope description.
+      description: Adds UMA scope description.
+      operationId: post-oauth-uma-scopes  
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UmaScope
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string                  
+                iconUrl:
+                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                  type: string
+                authorizationPolicies:
+                  description: Policies associated with all scopes.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    put:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Updates an UMA scope description.
+      description: Updates an UMA scope description.
+      operationId: put-oauth-uma-scopes    
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UmaScope
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string                  
+                iconUrl:
+                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                  type: string
+                authorizationPolicies:
+                  description: Policies associated with all scopes.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
           description: Internal Server Error            
+  /oauth/uma/scopes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Resource description ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Gets UMA scope description with specified id.
+      description: Gets UMA scope description with specified id.
+      operationId: get-oauth-uma-scopes-by-id     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UmaScope
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string                  
+                  iconUrl:
+                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                    type: string
+                  authorizationPolicies:
+                    description: Policies associated with all scopes.
+                    type: array
+                    items:
+                      type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Deletes UMA scope description with specified id.
+      description: Deletes UMA scope description with specified id.
+      operationId: delete-oauth-uma-scopes-by-id     
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/uma/scopes/search:
+    parameters:
+      - name: pattern
+        in: query
+        required: true
+        description: Serach pattern.
+        schema:
+          type: string
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - UMA Scopes    
+      summary: Searches UMA scope description by pattern, and specify the max size of the results to return.
+      description: Searches UMA scope description by pattern, and specify the max size of the results to return.
+      operationId: get-oauth-uma-scopes-by-pattern
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA scope description list.
+                description: List of UMA scope description.
+                type: array
+                items:
+                  type: object
+                  description: UmaScope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                      type: string
+                    authorizationPolicies:
+                      description: Policies associated with all scopes.
+                      type: array
+                      items:
+                        type: string
+        '500':
+          description: Internal Server Error
+  /oauth/uma/scopes/search-limit:
+    parameters:
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - UMA Scopes    
+      summary: Gets UMA scope description list with search result limited with specified max size.
+      description: Gets UMA scope description list with search result limited with specified max size.
+      operationId: get-oauth-uma-scopes-search-limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA scope description list.
+                description: List of UMA scope description.
+                type: array
+                items:
+                  type: object
+                  description: UmaScope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                      type: string
+                    authorizationPolicies:
+                      description: Policies associated with all scopes.
+                      type: array
+                      items:
+                        type: string
+        '500':
+          description: Internal Server Error           
 components:
   responses:
     Found:
