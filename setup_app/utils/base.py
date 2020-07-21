@@ -30,9 +30,6 @@ ces_dir = os.path.split(cur_dir)[0]
 snap = os.environ.get('SNAP','')
 snap_common = snap_common_dir = os.environ.get('SNAP_COMMON','')
 
-if snap and not os.path.join(snap, 'usr/lib/python3/dist-packages') in sys.path:
-    sys.path.append(os.path.join(snap, 'usr/lib/python3/dist-packages'))
-
 re_split_host = re.compile(r'[^,\s,;]+')
 
 # Determine initdaemon
