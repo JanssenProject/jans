@@ -31,7 +31,7 @@ class GluuInstaller(SetupUtils):
                 txt += 'state'.ljust(30) + Config.state.rjust(35) + "\n"
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
-                
+
                 txt += 'Install oxAuth'.ljust(30) + repr(Config.installOxAuth).rjust(35) + "\n"
                 txt += 'Install oxTrust'.ljust(30) + repr(Config.installOxTrust).rjust(35) + "\n"
 
@@ -129,9 +129,10 @@ class GluuInstaller(SetupUtils):
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
 
+
         self.run([paths.cmd_chown, '-R', 'root:gluu', Config.certFolder])
         self.run([paths.cmd_chmod, '551', Config.certFolder])
-        
+
 
     def customiseSystem(self):
         if Config.os_initdaemon == 'init':
