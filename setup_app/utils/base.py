@@ -27,8 +27,11 @@ from setup_app.pylib.jproperties import Properties
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 ces_dir = os.path.split(cur_dir)[0]
 
-snap = os.environ.get('$SNAP','')
+snap = os.environ.get('SNAP','')
 snap_common = snap_common_dir = os.environ.get('SNAP_COMMON','')
+
+if snap and not os.path.join(snap, 'usr/lib/python3/dist-packages') in sys.path:
+    sys.path.append(os.path.join(snap, 'usr/lib/python3/dist-packages'))
 
 re_split_host = re.compile(r'[^,\s,;]+')
 
@@ -47,6 +50,8 @@ with open("/etc/os-release") as f:
                 os_type = row[1].lower()
                 if os_type == 'rhel':
                     os_type = 'redhat'
+                elif 'ubuntu-core' in os_type:
+                    os_type = 'ubuntu'
             elif row[0] == 'VERSION_ID':
                 os_version = row[1].split('.')[0]
 
@@ -56,6 +61,8 @@ if not (os_type and os_version):
 
 os_name = os_type + os_version
 deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
+
+print("OS Name", os_name)
 
 if os_type == 'debian':
     os.environ['LC_ALL'] = 'C'
@@ -74,6 +81,9 @@ if os_type in ('centos', 'red', 'fedora'):
 else:
     clone_type = 'deb'
     httpd_name = 'apache2'
+
+if snap:
+    snapctl = shutil.which('snapctl')
 
 # resources
 current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
@@ -123,7 +133,7 @@ def check_resources():
         print(("{0}Warning: Available free disk space was determined to be {1} "
             "GB. This is less than the required disk space of {2} GB.{3}".format(
                                                         static.colors.WARNING,
-                                                        available_disk_space,
+                                                        current_free_disk_space,
                                                         static.suggested_free_disk_space,
                                                         static.colors.ENDC)))
 
@@ -179,7 +189,7 @@ def read_properties_file(fn):
 
         for k in p.keys():
             retDict[str(k)] = str(p[k].data)
-            
+
     return retDict
 
 def get_clean_args(args):
@@ -192,15 +202,18 @@ def get_clean_args(args):
     if '-m' in argsc:
         m = argsc.index('-m')
         argsc.pop(m)
-        
+
     return argsc
-        
+
 # args = command + args, i.e. ['ls', '-ltr']
 def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
+    if snap and args[0] in (paths.cmd_chown, paths.cmd_chmod):
+        return ''
+
     output = ''
     log_arg = ' '.join(args) if type(args) is list else args
     logIt('Running: %s' % log_arg)
-    
+
     if args[0] == paths.cmd_chown:
         argsc = get_clean_args(args)
         if not argsc[2].startswith('/opt'):
