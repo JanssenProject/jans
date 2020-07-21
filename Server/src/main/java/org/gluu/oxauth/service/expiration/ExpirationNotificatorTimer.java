@@ -118,7 +118,9 @@ public class ExpirationNotificatorTimer implements ExpirationListener<ExpId, Obj
 
     private void fillSessions(Date future) {
         final String baseDn = staticConfiguration.getBaseDn().getSessions();
-        final Filter filter = Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, future));
+        final Filter filter = Filter.createANDFilter(
+                Filter.createEqualityFilter("del", true),
+                Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, future)));
         final List<SessionId> sessions = persistenceEntryManager.findEntries(baseDn, SessionId.class, filter);
         if (sessions == null || sessions.isEmpty()) {
             return;

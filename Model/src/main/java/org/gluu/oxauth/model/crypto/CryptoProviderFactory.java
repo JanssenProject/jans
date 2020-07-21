@@ -59,4 +59,8 @@ public class CryptoProviderFactory {
 
         return keyStoreProvider = new OxAuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg());
     }
+
+    public static void reset() {
+        keyStoreProvider = null;
+    }
 }
