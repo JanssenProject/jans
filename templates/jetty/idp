@@ -4,6 +4,6 @@ JAVA_OPTIONS="-server -Xss24m -Xms%(idp_min_heap_mem)sm -Xmx%(idp_max_heap_mem)s
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/idp
-JETTY_USER=jetty
+JETTY_USER=%(jetty_user)s
 JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8086"
 TMPDIR=%(jetty_dist)s/temp

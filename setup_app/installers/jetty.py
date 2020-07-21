@@ -24,7 +24,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MONDATORY
         self.register_progess()
-        
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 
@@ -127,9 +126,12 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
         jettyModules = serviceConfiguration['jetty']['modules']
         jettyModulesList = jettyModules.split(',')
-
-        # we need this, because this method may be called externally
-        jettyArchive, jetty_dist = self.get_jetty_info()
+        
+        if base.snap:
+            Config.templateRenderingDict['jetty_dist'] = self.jetty_base
+        else:
+            # we need this, because this method may be called externally
+            jettyArchive, jetty_dist = self.get_jetty_info()
 
         self.logIt("Preparing %s service base folders" % serviceName)
         self.run([paths.cmd_mkdir, '-p', jettyServiceBase])
@@ -202,6 +204,11 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         # don't send header to server
         self.set_jetty_param(serviceName, 'jetty.httpConfig.sendServerVersion', 'false')
+
+        if base.snap:
+            run_dir = os.path.join(jettyServiceBase, 'run')
+            if not os.path.exists(run_dir):
+                self.run([paths.cmd_mkdir, '-p', run_dir])
 
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val):
 
