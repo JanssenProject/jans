@@ -29,15 +29,16 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.openDjschemaFiles = glob.glob(os.path.join(Config.install_dir, 'static/opendj/*.ldif'))
 
         self.opendj_service_centos7 = os.path.join(Config.install_dir, 'static/opendj/systemd/opendj.service')
-        self.ldapDsconfigCommand = os.path.join(Config.ldapBaseFolder, 'bin/dsconfig')
-        self.ldapDsCreateRcCommand = os.path.join(Config.ldapBaseFolder, 'bin/create-rc-script')
+        self.ldapDsconfigCommand = os.path.join(Config.ldapBinFolder, 'dsconfig')
+        self.ldapDsCreateRcCommand = os.path.join(Config.ldapBinFolder, 'create-rc-script')
 
 
     def install(self):
         self.logIt("Running WrenDS Setup")
 
-        Config.pbar.progress(self.service_name, "Extracting WrenDS", False)
-        self.extractOpenDJ()
+        if not base.snap:
+            Config.pbar.progress(self.service_name, "Extracting WrenDS", False)
+            self.extractOpenDJ()
 
         self.createLdapPw()
 
@@ -83,7 +84,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.post_install_opendj()
 
 
-    def extractOpenDJ(self):        
+    def extractOpenDJ(self):
 
         openDJArchive = max(glob.glob(os.path.join(Config.distFolder, 'app/opendj-server-*4*.zip')))
 
@@ -100,12 +101,16 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_ln, '-s', '/opt/opendj/template/config/', '/opt/opendj/config'])
 
     def create_user(self):
-        self.createUser('ldap', Config.ldap_user_home)
-        self.addUserToGroup('gluu', 'ldap')
-        self.addUserToGroup('adm', 'ldap')
+        if not base.snap:
+            self.createUser('ldap', Config.ldap_user_home)
+            self.addUserToGroup('gluu', 'ldap')
+            self.addUserToGroup('adm', 'ldap')
 
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
+
+        #if base.snap and not os.path.exists(Config.ldapBaseFolder):
+        #    self.run([paths.cmd_mkdir, Config.ldapBaseFolder])
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(Config.ldapBaseFolder, 'opendj-setup.properties')
@@ -113,24 +118,26 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         self.run([paths.cmd_chown, 'ldap:ldap', setupPropsFN])
 
-        try:
-            ldapSetupCommand = os.path.join(Config.ldapBaseFolder, 'setup')
-            setupCmd = " ".join([ldapSetupCommand,
+
+        ldapSetupCommand = os.path.join(os.path.dirname(Config.ldapBinFolder), 'setup')
+
+        setupCmd = " ".join([ldapSetupCommand,
                                 '--no-prompt',
                                 '--cli',
                                 '--propertiesFilePath',
                                 setupPropsFN,
                                 '--acceptLicense'])
+        if base.snap:
+            self.run(setupCmd, shell=True)
+        else:
             self.run(['/bin/su',
-                      'ldap',
-                      '-c',
-                      setupCmd],
-                      cwd='/opt/opendj',
+                          'ldap',
+                          '-c',
+                          setupCmd],
+                          cwd='/opt/opendj',
                       )
-        except:
-            self.logIt("Error running LDAP setup script", True)
 
-        #Append self.jre_home to OpenDj java.properties        
+        #Append self.jre_home to OpenDj java.properties
         opendj_java_properties_fn = os.path.join(Config.ldapBaseFolder, 'config/java.properties')
 
         self.logIt("append self.jre_home to OpenDj %s" % opendj_java_properties_fn)
@@ -139,8 +146,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         try:
             self.logIt('Stopping opendj server')
-            cmd = os.path.join(Config.ldapBaseFolder, 'bin/stop-ds')
-            self.run(['/bin/su','ldap', '-c', cmd], cwd='/opt/opendj/bin')
+            cmd = os.path.join(Config.ldapBinFolder, 'stop-ds')
+            self.run(cmd, shell=True)
         except:
             self.logIt("Error stopping opendj", True)
 
@@ -155,12 +162,12 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         backends = [
                     ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                     ]
-                          
+
         if Config.mappingLocations['site'] == 'ldap':
             backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
         for changes in backends:
-            cwd = os.path.join(Config.ldapBaseFolder, 'bin')
+            cwd = os.path.join(Config.ldapBinFolder)
             dsconfigCmd = " ".join([
                                     self.ldapDsconfigCommand,
                                     '--trustAll',
@@ -173,7 +180,10 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                                     '"%s"' % Config.ldap_binddn,
                                     '--bindPasswordFile',
                                     Config.ldapPassFn] + changes)
-            self.run(['/bin/su',
+            if base.snap:
+                self.run(dsconfigCmd, shell=True)
+            else:
+                self.run(['/bin/su',
                       'ldap',
                       '-c',
                       dsconfigCmd], cwd=cwd)
@@ -291,7 +301,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         self.run([paths.cmd_chmod, '-R', 'a+rX', Config.ldapBaseFolder])
         self.run([paths.cmd_chown, '-R', 'ldap:ldap', Config.ldapBaseFolder])
-        
+
         self.logIt("Re-starting OpenDj after schema update")
         self.stop()
         self.start()
@@ -325,7 +335,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     )
             self.insertLinesInFile("/etc/init.d/opendj", 1, lsb_str)
 
-            if self.os_type in ['ubuntu', 'debian']:
+            if not base.snap and base.os_type in ['ubuntu', 'debian']:
                 self.run(["/usr/sbin/update-rc.d", "-f", "opendj", "remove"])
 
             self.fix_init_scripts('opendj', init_script_fn)
