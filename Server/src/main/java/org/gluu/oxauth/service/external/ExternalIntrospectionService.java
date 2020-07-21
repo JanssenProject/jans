@@ -5,11 +5,9 @@ import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.introspection.IntrospectionType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
 import org.gluu.service.custom.script.ExternalScriptService;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -39,19 +37,34 @@ public class ExternalIntrospectionService extends ExternalScriptService {
     }
 
     @NotNull
-    private List<CustomScriptConfiguration> getScripts(@Nullable Client client) {
+    private List<CustomScriptConfiguration> getScripts(@NotNull ExternalIntrospectionContext context) {
         if (customScriptConfigurations == null) {
             return Lists.newArrayList();
         }
-        if (appConfiguration.getIntrospectionScriptBackwardCompatibility() || client == null) {
+        if (appConfiguration.getIntrospectionScriptBackwardCompatibility()) {
             return customScriptConfigurations;
         }
 
-        return getCustomScriptConfigurationsByDns(client.getAttributes().getIntrospectionScripts());
+        if (context.getGrantOfIntrospectionToken() != null && context.getGrantOfIntrospectionToken().getClient() != null) {
+            final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(context.getGrantOfIntrospectionToken().getClient().getAttributes().getIntrospectionScripts());
+            if (!scripts.isEmpty()) {
+                return scripts;
+            }
+        }
+
+        if (context.getTokenGrant() != null && context.getTokenGrant().getClient() != null) { // fallback to authorization grant
+            final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(context.getTokenGrant().getClient().getAttributes().getIntrospectionScripts());
+            if (!scripts.isEmpty()) {
+                return scripts;
+            }
+        }
+
+        log.trace("No introspection scripts associated with client which was used to obtain access_token.");
+        return Lists.newArrayList();
     }
 
     public boolean executeExternalModifyResponse(JSONObject responseAsJsonObject, ExternalIntrospectionContext context) {
-        final List<CustomScriptConfiguration> scripts = getScripts(context.getTokenGrant().getClient());
+        final List<CustomScriptConfiguration> scripts = getScripts(context);
         if (scripts.isEmpty()) {
             log.debug("There is no any external interception scripts defined.");
             return false;
