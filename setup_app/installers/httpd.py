@@ -105,7 +105,6 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
                     if not os.path.exists(target_fn):
                         os.symlink(conf_fn, target_fn)
 
-
         elif base.clone_type == 'rpm':
 
             for mod_load_fn in glob.glob('/etc/httpd/conf.modules.d/*'):

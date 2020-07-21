@@ -254,8 +254,8 @@ def do_installation():
 
             if not base.snap:
                 gluuInstaller.update_hostname()
+                gluuInstaller.set_ulimits()
 
-            gluuInstaller.set_ulimits()
             gluuInstaller.copy_output()
             gluuInstaller.setup_init_scripts()
 
