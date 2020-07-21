@@ -29,7 +29,9 @@ class BaseInstaller:
 
         self.check_for_download()
 
-        self.create_user()
+        if not base.snap:
+            self.create_user()
+
         self.create_folders()
 
         self.install()
