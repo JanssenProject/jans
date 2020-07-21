@@ -11,6 +11,8 @@ import shutil
 import traceback
 from queue import Queue
 
+#sys.path.append('/snap/gluu-server/x1/usr/lib/python3/dist-packages')
+
 #first import paths and make changes if necassary
 from setup_app import paths
 
@@ -96,22 +98,22 @@ for key in setupOptions:
 gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
 
-"""
-Config.hostname = 'c2.gluu.org'
-Config.ip = '159.89.43.71'
+
+Config.hostname = 'snap.gluu.org'
+Config.ip = '174.138.37.150'
 Config.oxtrust_admin_password = 'Top!Secret-20'
 Config.orgName = 'MyGluu'
 Config.countryCode = 'GC'
 Config.city = 'GluuCity'
 Config.state = 'GluuState'
 Config.admin_email = 'admin@mygluu.org'
-Config.installPassport = True
-Config.installFido2 = True
-Config.installScimServer = True
-Config.installSaml = True
-Config.installOxd = True
-Config.installPassport = True
-"""
+Config.installPassport = False
+Config.installFido2 = False
+Config.installScimServer = False
+Config.installSaml = False
+Config.installOxd = False
+Config.installPassport = False
+
 
 if not GSA:
     print()
@@ -232,10 +234,11 @@ def do_installation():
             oxauthInstaller.make_salt()
 
             jettyInstaller.calculate_selected_aplications_memory()
-            jreInstaller.start_installation()
-            jettyInstaller.start_installation()
-            jythonInstaller.start_installation()
-            nodeInstaller.start_installation()
+            if not base.snap:
+                jreInstaller.start_installation()
+                jettyInstaller.start_installation()
+                jythonInstaller.start_installation()
+                nodeInstaller.start_installation()
 
             gluuInstaller.copy_scripts()
             gluuInstaller.encode_passwords()
@@ -250,7 +253,9 @@ def do_installation():
             gluuInstaller.prepare_base64_extension_scripts()
             gluuInstaller.render_templates()
             gluuInstaller.render_configuration_template()
-            gluuInstaller.update_hostname()
+
+            if not base.snap:
+                gluuInstaller.update_hostname()
 
             gluuInstaller.set_ulimits()
             gluuInstaller.copy_output()

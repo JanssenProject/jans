@@ -63,16 +63,25 @@ class BaseInstaller:
                 if result:
                     setattr(Config, client_var_name, result[field_name])
                     self.logIt("{} was found in backend as {}".format(client_var_name, result[field_name]))
-            
+
             if not Config.get(client_var_name):
                 setattr(Config, client_var_name, client_id_prefix + str(uuid.uuid4()))
                 self.logIt("Client ID for {} was created as {}".format(client_var_name, Config.get(client_var_name)))
-            
+
     def run_service_command(self, operation, service):
         if not service:
             service = self.service_name
+
+        if base.snap:
+            service = os.environ['SNAP_NAME'] + '.' + self.service_name
+
         try:
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+            if base.snap:
+                cmd_list = [base.snapctl, operation, service]
+                if operation == 'start':
+                    cmd_list.insert(-1, '--enable')
+                self.run(cmd_list, None, None, True)
+            elif (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
                 self.run([base.service_path, operation, service], None, None, True)
             else:
                 self.run([base.service_path, service, operation], None, None, True)
@@ -80,7 +89,8 @@ class BaseInstaller:
             self.logIt("Error running operation {} for service {}".format(operation, service), True)
 
     def enable(self, service=None):
-        self.run_service_command('enable', service)
+        if not base.snap:
+            self.run_service_command('enable', service)
 
     def stop(self, service=None):
         self.run_service_command('stop', service)
@@ -93,12 +103,13 @@ class BaseInstaller:
         self.start(service)
 
     def reload_daemon(self, service=None):
-        if not service:
-            service = self.service_name
-        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-            self.run([base.service_path, 'daemon-reload'])
-        elif base.os_name == 'ubuntu16':
-            self.run([paths.cmd_update_rc, service, 'defaults'])
+        if not base.snap:
+            if not service:
+                service = self.service_name
+            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+                self.run([base.service_path, 'daemon-reload'])
+            elif base.os_name == 'ubuntu16':
+                self.run([paths.cmd_update_rc, service, 'defaults'])
 
     def generate_configuration(self):
         pass
