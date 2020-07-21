@@ -63,7 +63,7 @@ public class ErrorHandlerService {
 
     private void addMessage(Severity severity, String facesMessageId) {
         if (StringHelper.isNotEmpty(facesMessageId)) {
-            facesMessages.add(FacesMessage.SEVERITY_ERROR, String.format("#{msg['%s']}", facesMessageId));
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, String.format("#{msgs['%s']}", facesMessageId));
         }
     }
 
