@@ -191,14 +191,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         initscript_fn = os.path.join(self.jetty_home, 'bin/jetty.sh')
         self.fix_init_scripts(serviceName, initscript_fn)
 
-        tmpfiles_base = '/usr/lib/tmpfiles.d'
-        if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
-            self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
-            jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
-            jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
-            self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
-            self.run([paths.cmd_chown, 'root:root', jetty_tmpfiles_dst])
-            self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
+        if not base.snap:
+            tmpfiles_base = '/usr/lib/tmpfiles.d'
+            if Config.os_initdaemon == 'systemd' and os.path.exists(tmpfiles_base):
+                self.logIt("Creating 'jetty.conf' tmpfiles daemon file")
+                jetty_tmpfiles_src = '%s/jetty.conf.tmpfiles.d' % Config.templateFolder
+                jetty_tmpfiles_dst = '%s/jetty.conf' % tmpfiles_base
+                self.copyFile(jetty_tmpfiles_src, jetty_tmpfiles_dst)
+                self.run([paths.cmd_chown, 'root:root', jetty_tmpfiles_dst])
+                self.run([paths.cmd_chmod, '644', jetty_tmpfiles_dst])
 
         serviceConfiguration['installed'] = True
 
