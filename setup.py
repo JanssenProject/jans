@@ -11,8 +11,6 @@ import shutil
 import traceback
 from queue import Queue
 
-#sys.path.append('/snap/gluu-server/x1/usr/lib/python3/dist-packages')
-
 #first import paths and make changes if necassary
 from setup_app import paths
 
