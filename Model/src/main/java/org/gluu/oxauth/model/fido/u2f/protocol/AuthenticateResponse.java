@@ -56,6 +56,10 @@ public class AuthenticateResponse implements Serializable {
 		return clientDataRef;
 	}
 
+	public String getClientDataRaw() {
+		return clientData;
+	}
+
 	public String getSignatureData() {
 		return signatureData;
 	}
