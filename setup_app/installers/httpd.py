@@ -90,7 +90,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
             for em in os.listdir(mods_enabled_dir):
                 em_n, em_e = os.path.splitext(em)
-                if not em_n in mod_enable:
+                if not em_n in mods_enabled:
                     os.unlink(os.path.join(mods_enabled_dir, em))
 
             for m in mods_enabled:

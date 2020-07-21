@@ -67,10 +67,12 @@ class Config:
 
         self.install_dir = install_dir
         self.thread_queue = None
+        self.jetty_user = 'jetty'
 
         self.ldapBinFolder = os.path.join(self.ldapBaseFolder, 'bin')
         if base.snap:
             self.ldapBaseFolder = os.path.join(base.snap_common, 'opendj')
+            self.jetty_user = 'root'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(self.install_dir, 'logs', 'progress-bar.log')
