@@ -55,9 +55,7 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
         try {
             clientRequest.setHttpMethod(getHttpMethod());
             clientRequest.header("Content-Type", request.getContentType());
-            if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_BASIC && request.hasCredentials()) {
-                clientRequest.header("Authorization", "Basic " + request.getEncodedCredentials());
-            }
+            new ClientAuthnEnabler(clientRequest).exec(getRequest());
 
             final String scopesAsString = Util.listAsString(getRequest().getScopes());
 
@@ -100,8 +98,10 @@ public class DeviceAuthzClient extends BaseClient<DeviceAuthzRequest, DeviceAuth
 
             return getResponse();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             return null;
+        } finally {
+            closeConnection();
         }
     }
 }

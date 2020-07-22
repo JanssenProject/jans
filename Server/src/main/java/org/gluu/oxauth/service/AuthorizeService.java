@@ -237,7 +237,7 @@ public class AuthorizeService {
                 }
             }
         }
-        if (sessionAttribute.containsKey(AuthorizeRequestParam.USER_CODE)) {
+        if (sessionAttribute.containsKey(DeviceAuthorizationService.SESSION_USER_CODE)) {
             processDeviceAuthDeniedResponse(sessionAttribute);
         }
 
@@ -299,15 +299,13 @@ public class AuthorizeService {
     }
 
     private void processDeviceAuthDeniedResponse(Map<String, String> sessionAttribute) {
-        String userCode = sessionAttribute.get(AuthorizeRequestParam.USER_CODE);
+        String userCode = sessionAttribute.get(DeviceAuthorizationService.SESSION_USER_CODE);
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
 
-        if (cacheData != null) {
-            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
-                cacheData.setStatus(DeviceAuthorizationStatus.DENIED);
-                deviceAuthorizationService.saveInCache(cacheData, true, false);
-                deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, null);
-            }
+        if (cacheData != null && cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+            cacheData.setStatus(DeviceAuthorizationStatus.DENIED);
+            deviceAuthorizationService.saveInCache(cacheData, true, false);
+            deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, null);
         }
     }
 }

@@ -20,6 +20,8 @@ import org.gluu.oxauth.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.jwt.JwtHeaderName;
 import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.util.StringUtils;
+import org.gluu.oxauth.page.DeviceAuthzPage;
+import org.gluu.oxauth.page.LoginPage;
 import org.gluu.oxauth.page.PageConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -45,10 +47,6 @@ import static org.testng.Assert.*;
  * Test cases for device authorization page.
  */
 public class DeviceAuthzFlowHttpTest extends BaseTest {
-
-    private static final String FORM_USER_CODE_PART_1_ID = "deviceAuthzForm:userCodePart1";
-    private static final String FORM_USER_CODE_PART_2_ID = "deviceAuthzForm:userCodePart2";
-    private static final String FORM_CONTINUE_BUTTON_ID = "deviceAuthzForm:continueButton";
 
     /**
      * Device authorization complete flow.
@@ -81,7 +79,8 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // 3. Load device authz page, process user_code and authorization
         WebDriver currentDriver = initWebDriver(false, true);
-        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false, pageConfig);
         AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
 
         stopWebDriver(false, currentDriver);
@@ -139,8 +138,9 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // 3. Load device authz page, process user_code and authorization
         WebDriver currentDriver = initWebDriver(false, true);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
         AuthorizationResponse authorizationResponse = processDeviceAuthzDenyAccess(userId, userSecret,
-                response.getUserCode(), currentDriver, false);
+                response.getUserCode(), currentDriver, false, pageConfig);
 
         validateErrorResponse(authorizationResponse, AuthorizeErrorResponseType.ACCESS_DENIED);
 
@@ -159,10 +159,11 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         showTitle("deviceAuthzFlow");
 
         WebDriver currentDriver = initWebDriver(false, true);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
         List<WebElement> list = currentDriver.findElements(By.xpath("//*[contains(text(),'Too many failed attemps')]"));
         byte limit = 10;
         while (list.size() == 0 && limit > 0) {
-            processDeviceAuthzPutUserCodeAndPressContinue("ABCD-ABCD", currentDriver, false);
+            processDeviceAuthzPutUserCodeAndPressContinue("ABCD-ABCD", currentDriver, false, pageConfig);
             Thread.sleep(500);
             list = currentDriver.findElements(By.xpath("//*[contains(text(),'Too many failed attemps')]"));
             limit--;
@@ -243,7 +244,8 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // 3. Load device authz page, process user_code and authorization
         WebDriver currentDriver = initWebDriver(false, true);
-        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, false, pageConfig);
         AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
 
         stopWebDriver(false, currentDriver);
@@ -298,7 +300,8 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // 3. Load device authz page, process user_code and authorization
         WebDriver currentDriver = initWebDriver(false, true);
-        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, true);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
+        processDeviceAuthzPutUserCodeAndPressContinue(response.getUserCode(), currentDriver, true, pageConfig);
         AuthorizationResponse authorizationResponse = processAuthorization(userId, userSecret, currentDriver);
 
         stopWebDriver(false, currentDriver);
@@ -356,8 +359,9 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         // 3. Load device authz page, process user_code and authorization
         WebDriver currentDriver = initWebDriver(false, true);
+        final PageConfig pageConfig = newPageConfig(currentDriver);
         AuthorizationResponse authorizationResponse = processDeviceAuthzDenyAccess(userId, userSecret,
-                response.getUserCode(), currentDriver, true);
+                response.getUserCode(), currentDriver, true, pageConfig);
 
         validateErrorResponse(authorizationResponse, AuthorizeErrorResponseType.ACCESS_DENIED);
 
@@ -446,7 +450,6 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         tokenRequest.setDeviceCode(deviceCode);
 
         TokenClient tokenClient1 = newTokenClient(tokenRequest);
-        tokenClient1.setRequest(tokenRequest);
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
@@ -469,25 +472,20 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         assertNull(authorizationResponse.getErrorType());
     }
 
-    private void processDeviceAuthzPutUserCodeAndPressContinue(String userCode, WebDriver currentDriver, boolean complete) {
+    private void processDeviceAuthzPutUserCodeAndPressContinue(String userCode, WebDriver currentDriver,
+                                                               boolean complete, final PageConfig pageConfig) {
         String deviceAuthzPageUrl = deviceAuthzEndpoint.replace("/restv1/device_authorization", "/device_authorization.htm")
                 + (complete ? "?user_code=" + userCode : "");
-        System.out.println("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
+        output("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
 
         navigateToAuhorizationUrl(currentDriver, deviceAuthzPageUrl);
 
+        DeviceAuthzPage deviceAuthzPage = new DeviceAuthzPage(pageConfig);
         if (!complete) {
-            String[] userCodeParts = userCode.split("-");
-
-            WebElement userCodePart1 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_1_ID));
-            userCodePart1.sendKeys(userCodeParts[0]);
-
-            WebElement userCodePart2 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_2_ID));
-            userCodePart2.sendKeys(userCodeParts[1]);
+            deviceAuthzPage.fillUserCode(userCode);
         }
 
-        WebElement continueButton = currentDriver.findElement(By.id(FORM_CONTINUE_BUTTON_ID));
-        continueButton.click();
+        deviceAuthzPage.clickContinueButton();
     }
 
     private AuthorizationResponse processAuthorization(String userId, String userSecret, WebDriver currentDriver) {
@@ -519,30 +517,25 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         String deviceAuthzResponseStr = currentDriver.getCurrentUrl();
 
-        System.out.println("Device authz redirection response url: " + deviceAuthzResponseStr);
+        output("Device authz redirection response url: " + deviceAuthzResponseStr);
         return new AuthorizationResponse(deviceAuthzResponseStr);
     }
 
     private AuthorizationResponse processDeviceAuthzDenyAccess(String userId, String userSecret, String userCode,
-                                                               WebDriver currentDriver, boolean complete) {
+                                                               WebDriver currentDriver, boolean complete,
+                                                               final PageConfig pageConfig) {
         String deviceAuthzPageUrl = deviceAuthzEndpoint.replace("/restv1/device_authorization", "/device_authorization.htm")
                 + (complete ? "?user_code=" + userCode : "");
-        System.out.println("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
+        output("Device authz flow: page to navigate to put user_code:" + deviceAuthzPageUrl);
 
         navigateToAuhorizationUrl(currentDriver, deviceAuthzPageUrl);
 
+        DeviceAuthzPage deviceAuthzPage = new DeviceAuthzPage(pageConfig);
+
         if (!complete) {
-            final String[] userCodeParts = userCode.split("-");
-
-            WebElement userCodePart1 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_1_ID));
-            userCodePart1.sendKeys(userCodeParts[0]);
-
-            WebElement userCodePart2 = currentDriver.findElement(By.id(FORM_USER_CODE_PART_2_ID));
-            userCodePart2.sendKeys(userCodeParts[1]);
+            deviceAuthzPage.fillUserCode(userCode);
         }
-
-        WebElement continueButton = currentDriver.findElement(By.id(FORM_CONTINUE_BUTTON_ID));
-        continueButton.click();
+        deviceAuthzPage.clickContinueButton();
 
         Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)
                 .withTimeout(Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
@@ -551,15 +544,12 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
 
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
+
             WebElement loginButton = wait.until(d -> currentDriver.findElement(By.id(loginFormLoginButton)));
 
-            if (userId != null) {
-                WebElement usernameElement = currentDriver.findElement(By.id(loginFormUsername));
-                usernameElement.sendKeys(userId);
-            }
-
-            WebElement passwordElement = currentDriver.findElement(By.id(loginFormPassword));
-            passwordElement.sendKeys(userSecret);
+            LoginPage loginPage = new LoginPage(pageConfig);
+            loginPage.enterUsername(userId);
+            loginPage.enterPassword(userSecret);
 
             loginButton.click();
 
@@ -573,7 +563,7 @@ public class DeviceAuthzFlowHttpTest extends BaseTest {
         String deviceAuthzResponseStr = currentDriver.getCurrentUrl();
         stopWebDriver(false, currentDriver);
 
-        System.out.println("Device authz redirection response url: " + deviceAuthzResponseStr);
+        output("Device authz redirection response url: " + deviceAuthzResponseStr);
         return new AuthorizationResponse(deviceAuthzResponseStr);
     }
 
