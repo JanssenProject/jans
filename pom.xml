@@ -30,7 +30,7 @@
 		<jackson.version>2.10.1</jackson.version>
 		<jackson.databind.version>2.10.1</jackson.databind.version>
 		<json.version>20180813</json.version>
-		<log4j.version>2.13.2</log4j.version>
+		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 
 		<guava.version>27.1-jre</guava.version>
