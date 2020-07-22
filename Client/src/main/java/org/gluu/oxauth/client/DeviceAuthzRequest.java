@@ -7,6 +7,7 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.util.Util;
@@ -23,6 +24,8 @@ import java.util.Map;
  * Represents a device authorization request to send to the authorization server.
  */
 public class DeviceAuthzRequest extends ClientAuthnRequest {
+
+    private static final Logger LOG = Logger.getLogger(DeviceAuthzRequest.class);
 
     private String clientId;
     private List<String> scopes;
@@ -78,7 +81,7 @@ public class DeviceAuthzRequest extends ClientAuthnRequest {
                 parameters.put(key, getCustomParameters().get(key));
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
         return parameters;
@@ -104,7 +107,7 @@ public class DeviceAuthzRequest extends ClientAuthnRequest {
                 queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
             }
         } catch (UnsupportedEncodingException | JSONException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
 
         return queryStringBuilder.toString();

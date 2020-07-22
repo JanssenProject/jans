@@ -38,7 +38,6 @@ public interface AuthorizeRequestParam {
     String CODE_CHALLENGE_METHOD = "code_challenge_method";
     String CUSTOM_RESPONSE_HEADERS = "custom_response_headers";
     String AUTH_REQ_ID = "auth_req_id";
-    String USER_CODE = "user_code";
 
     /**
      * String that represents the End-User's login state at the OP.
