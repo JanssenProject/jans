@@ -18,7 +18,7 @@ class FidoInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                ('fido2.war', 'https://ox.gluu.org/maven/org/gluu/fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distGluuFolder, 'fido2.war'), 'https://ox.gluu.org/maven/org/gluu/fido2-server/{0}/fido2-server-{0}.war'.format(Config.oxVersion))
                 ]
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
@@ -29,13 +29,12 @@ class FidoInstaller(JettyInstaller):
         self.ldif_fido2 = os.path.join(self.output_folder, 'fido2.ldif')
 
     def install(self):
-        self.logIt("Copying fido.war into jetty webapps folder...")
-
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
+        self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(os.path.join(Config.distGluuFolder, 'fido2.war'), jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
         self.enable()
 
