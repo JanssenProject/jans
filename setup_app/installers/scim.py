@@ -30,8 +30,7 @@ class ScimInstaller(JettyInstaller):
         self.output_folder = os.path.join(Config.outputFolder, self.service_name)
 
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
-        src_war = os.path.join(Config.distGluuFolder, 'scim.war')
-        self.copyFile(src_war, jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
         self.oxtrust_config_fn = os.path.join(self.output_folder, 'oxtrust_config.json')
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
@@ -89,6 +88,4 @@ class ScimInstaller(JettyInstaller):
 
         self.dbUtils.add_client2script('2DAF-F9A5', Config.scim_rp_client_id)
         self.dbUtils.add_client2script('2DAF-F995', Config.scim_rp_client_id)
-        self.enable_service('gluuScimEnabled')
-                
-    
+        self.dbUtils.enable_service('gluuScimEnabled')

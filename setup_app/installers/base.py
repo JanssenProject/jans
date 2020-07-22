@@ -27,6 +27,7 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
+        self.nomrilize_source_files()
         self.check_for_download()
 
         if not base.snap:
@@ -135,10 +136,9 @@ class BaseInstaller:
     def download_files(self, force=False, downloads=[]):
         if hasattr(self, 'source_files'):
             for src, url in self.source_files:
-                if downloads and not src in downloads:
+                if downloads and not os.path.basename(src) in downloads:
                     continue
-                if not src.startswith('/'):
-                    src = os.path.join(Config.distGluuFolder, src)
+
                 if force or self.check_download_needed(src):
                     self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
                     self.run([paths.cmd_wget, url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
@@ -152,6 +152,15 @@ class BaseInstaller:
                     return LooseVersion(war_info['version']) < LooseVersion(Config.oxVersion)
 
         return True
+
+    def nomrilize_source_files(self):
+        if hasattr(self, 'source_files'):
+            for i, item in enumerate(self.source_files[:]):
+                src = item[0]
+                url = item[1]
+                if not src.startswith('/'):
+                    src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src)
+                    self.source_files[i] = (src, url)
 
     def create_user(self):
         pass
