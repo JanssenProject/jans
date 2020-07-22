@@ -85,7 +85,8 @@ current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
 current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
 current_mem_size = round(current_mem_bytes / (1024.**3), 1) #in GB
 current_number_of_cpu = multiprocessing.cpu_count()
-disk_st = os.statvfs('/')
+
+disk_st = os.statvfs(snap_common if snap else '/')
 current_free_disk_space = round(disk_st.f_bavail * disk_st.f_frsize / (1024 * 1024 *1024), 1)
 
 def check_resources():
