@@ -27,7 +27,6 @@ class BaseInstaller:
         if self.needdb:
             self.dbUtils.bind()
 
-        self.nomrilize_source_files()
         self.check_for_download()
 
         if not base.snap:
@@ -134,14 +133,22 @@ class BaseInstaller:
 
 
     def download_files(self, force=False, downloads=[]):
+        open('/opt/gluu/wgetrc').close()
+
         if hasattr(self, 'source_files'):
-            for src, url in self.source_files:
-                if downloads and not os.path.basename(src) in downloads:
+            for i, item in enumerate(self.source_files[:]):
+                src = item[0]
+                url = item[1]
+                src_name = os.path.basename(src)
+                if downloads and not src_name in downloads:
                     continue
+
+                src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src_name)
+                self.source_files[i] = (src, url)
 
                 if force or self.check_download_needed(src):
                     self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
-                    self.run([paths.cmd_wget, url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
+                    self.run([paths.cmd_wget, '--config=/opt/gluu/wgetrc', url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
 
     def check_download_needed(self, src):
         froot, fext = os.path.splitext(src)
@@ -153,14 +160,6 @@ class BaseInstaller:
 
         return True
 
-    def nomrilize_source_files(self):
-        if hasattr(self, 'source_files'):
-            for i, item in enumerate(self.source_files[:]):
-                src = item[0]
-                url = item[1]
-                if not src.startswith('/'):
-                    src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src)
-                    self.source_files[i] = (src, url)
 
     def create_user(self):
         pass
