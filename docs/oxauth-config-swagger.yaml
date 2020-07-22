@@ -1687,15 +1687,13 @@ paths:
                   properties:
                     inum:
                       type: string
-                      description: Unique id identifying the attribute
+                      description: Unique id identifying the attribute.
                     name:
                       type: string
                       description: Name of the attribute.
                       example: 'name, displayName,birthdate, email'
                     displayName:
                       type: string
-                      items:
-                        type: string
                     description:
                       type: string
                       description: User friendly descriptive detail of attribute.
@@ -2575,7 +2573,7 @@ paths:
     get:      
       summary: Searches attributes by pattern, and specify the max size of the results to return.
       description: Searches attributes by pattern, and specify the max size of the results to return.
-      operationId: get-attributes-by-pattern
+      operationId: get-attributes-search-by-pattern
       tags:
         - Attribute      
       responses:
@@ -5875,6 +5873,467 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error
+  /oauth/scopes:
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Gets list of scope description.
+      description: Gets list of scope description.
+      operationId: get-oauth-scopes     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope description list.
+                description: List of scope description.
+                type: array
+                items:
+                  type: object
+                  description: Scope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    dn:
+                      type: string
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    inum:
+                      description: Unique id identifying the attribute
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string
+                    description:
+                      description: A human-readable string describing the scope.
+                      type: string
+                    defaultScope:
+                      description: Boolean value to specify default scope.
+                      type: boolean
+                    scopeType:
+                      description: The scopes type associated with Access Tokens determine what resources will.
+                      type: string
+                      enum:
+                      - OpenID
+                      - Dynamic
+                      - OAuth
+                    claims:
+                      description: Claim attributes associated with the scope.
+                      type: array
+                      items:
+                        type: object
+                        title: GluuAttribute
+                        properties:
+                          inum:
+                            description: Unique id identifying the attribute.
+                            type: string                            
+                          name:
+                            description: Name of the attribute.
+                            type: string
+                            example: 'name, displayName,birthdate, email'
+                          displayName:
+                            description: A human-readable name of the attribute.
+                            type: string
+                          description:
+                            description: User friendly descriptive detail of attribute.
+                            type: string
+                          origin:
+                            description: Origin of claim attribute.
+                            type: string
+        '500':
+          description: Internal Server Error
+    post:
+      tags:
+        - OAuth - Scopes
+      summary: Adds new scope description.
+      description: Adds new scope description.
+      operationId: post-oauth-scopes     
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Scope
+              required:
+                - id
+                - name
+              properties:
+                dn:
+                  type: string
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                inum:
+                  description: Unique id identifying the attribute
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                description:
+                  description: A human-readable string describing the scope.
+                  type: string
+                defaultScope:
+                  description: Boolean value to specify default scope.
+                  type: boolean
+                scopeType:
+                  description: The scopes type associated with Access Tokens determine what resources will.
+                  type: string
+                  enum:
+                  - OpenID
+                  - Dynamic
+                  - OAuth
+                claims:
+                  description: Claim attributes associated with the scope.
+                  type: array
+                  items:
+                    type: object
+                    title: GluuAttribute
+                    properties:
+                      inum:
+                        description: Unique id identifying the attribute.
+                        type: string                            
+                      name:
+                        description: Name of the attribute.
+                        type: string
+                        example: 'name, displayName,birthdate, email'
+                      displayName:
+                        description: A human-readable name of the attribute.
+                        type: string
+                      description:
+                        description: User friendly descriptive detail of attribute.
+                        type: string
+                      origin:
+                        description: Origin of claim attribute.
+                        type: string
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error 
+    put:
+      tags:
+        - OAuth - Scopes
+      summary: Updates scope description.
+      description: Updates scope description.
+      operationId: put-oauth-scopes     
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Scope
+              required:
+                - id
+                - name
+              properties:
+                dn:
+                  type: string
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                inum:
+                  description: Unique id identifying the attribute
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                description:
+                  description: A human-readable string describing the scope.
+                  type: string
+                defaultScope:
+                  description: Boolean value to specify default scope.
+                  type: boolean
+                scopeType:
+                  description: The scopes type associated with Access Tokens determine what resources will.
+                  type: string
+                  enum:
+                  - OpenID
+                  - Dynamic
+                  - OAuth
+                claims:
+                  description: Claim attributes associated with the scope.
+                  type: array
+                  items:
+                    type: object
+                    title: GluuAttribute
+                    properties:
+                      inum:
+                        description: Unique id identifying the attribute.
+                        type: string                            
+                      name:
+                        description: Name of the attribute.
+                        type: string
+                        example: 'name, displayName,birthdate, email'
+                      displayName:
+                        description: A human-readable name of the attribute.
+                        type: string
+                      description:
+                        description: User friendly descriptive detail of attribute.
+                        type: string
+                      origin:
+                        description: Origin of claim attribute.
+                        type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/scopes/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Scope ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Gets scope description with specified id.
+      description: Gets scope description with specified id.
+      operationId: get-oauth-scopes-by-id     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope
+                required:
+                  - id
+                  - name
+                properties:
+                  dn:
+                    type: string
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  inum:
+                    description: Unique id identifying the attribute
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string
+                  description:
+                    description: A human-readable string describing the scope.
+                    type: string
+                  defaultScope:
+                    description: Boolean value to specify default scope.
+                    type: boolean
+                  scopeType:
+                    description: The scopes type associated with Access Tokens determine what resources will.
+                    type: string
+                    enum:
+                    - OpenID
+                    - Dynamic
+                    - OAuth
+                  claims:
+                    description: Claim attributes associated with the scope.
+                    type: array
+                    items:
+                      type: object
+                      title: GluuAttribute
+                      properties:
+                        inum:
+                          description: Unique id identifying the attribute.
+                          type: string                            
+                        name:
+                          description: Name of the attribute.
+                          type: string
+                          example: 'name, displayName,birthdate, email'
+                        displayName:
+                          description: A human-readable name of the attribute.
+                          type: string
+                        description:
+                          description: User friendly descriptive detail of attribute.
+                          type: string
+                        origin:
+                          description: Origin of claim attribute.
+                          type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - OAuth - Scopes
+      summary: Deletes scope description with specified id.
+      description: Deletes scope description with specified id.
+      operationId: delete-oauth-scopes-by-id      
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/scopes/search:
+    parameters:
+      - name: pattern
+        in: query
+        required: true
+        description: Serach pattern.
+        schema:
+          type: string
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - Scopes    
+      summary: Searches scope description by pattern, and specify the max size of the results to return.
+      description: Searches scope description by pattern, and specify the max size of the results to return.
+      operationId: get-oauth-scopes-search-by-pattern
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope description list.
+                description: List of scope description.
+                type: array
+                items:
+                  type: object
+                  description: Scope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    dn:
+                      type: string
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    inum:
+                      description: Unique id identifying the attribute
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string
+                    description:
+                      description: A human-readable string describing the scope.
+                      type: string
+                    defaultScope:
+                      description: Boolean value to specify default scope.
+                      type: boolean
+                    scopeType:
+                      description: The scopes type associated with Access Tokens determine what resources will.
+                      type: string
+                      enum:
+                      - OpenID
+                      - Dynamic
+                      - OAuth
+                    claims:
+                      description: Claim attributes associated with the scope.
+                      type: array
+                      items:
+                        type: object
+                        title: GluuAttribute
+                        properties:
+                          inum:
+                            description: Unique id identifying the attribute.
+                            type: string                            
+                          name:
+                            description: Name of the attribute.
+                            type: string
+                            example: 'name, displayName,birthdate, email'
+                          displayName:
+                            description: A human-readable name of the attribute.
+                            type: string
+                          description:
+                            description: User friendly descriptive detail of attribute.
+                            type: string
+                          origin:
+                            description: Origin of claim attribute.
+                            type: string
+        '500':
+          description: Internal Server Error
+  /oauth/scopes/search-limit:
+    parameters:
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - Scopes    
+      summary: Gets scope description list with search result limited with specified max size.
+      description: Gets scope description list with search result limited with specified max size.
+      operationId: get-oauth-scopes-search-limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope description list.
+                description: List of scope description.
+                type: array
+                items:
+                  type: object
+                  description: Scope
+                  required:
+                    - id
+                    - name
+                  properties:
+                    dn:
+                      type: string
+                    id:
+                      description: The base64url encoded id.
+                      type: string
+                    inum:
+                      description: Unique id identifying the attribute
+                      type: string
+                    displayName:
+                      description: A human-readable name of the scope.
+                      type: string
+                    description:
+                      description: A human-readable string describing the scope.
+                      type: string
+                    defaultScope:
+                      description: Boolean value to specify default scope.
+                      type: boolean
+                    scopeType:
+                      description: The scopes type associated with Access Tokens determine what resources will.
+                      type: string
+                      enum:
+                      - OpenID
+                      - Dynamic
+                      - OAuth
+                    claims:
+                      description: Claim attributes associated with the scope.
+                      type: array
+                      items:
+                        type: object
+                        title: GluuAttribute
+                        properties:
+                          inum:
+                            description: Unique id identifying the attribute.
+                            type: string                            
+                          name:
+                            description: Name of the attribute.
+                            type: string
+                            example: 'name, displayName,birthdate, email'
+                          displayName:
+                            description: A human-readable name of the attribute.
+                            type: string
+                          description:
+                            description: User friendly descriptive detail of attribute.
+                            type: string
+                          origin:
+                            description: Origin of claim attribute.
+                            type: string
+        '500':
+          description: Internal Server Error         
   /oauth/uma/scopes:
     get:
       tags:
@@ -5912,8 +6371,6 @@ paths:
                       type: array
                       items:
                         type: string
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error     
     post:
@@ -5948,8 +6405,6 @@ paths:
       responses:
         '200':
           description: OK
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error
     put:
@@ -6063,7 +6518,7 @@ paths:
         - OAuth - UMA Scopes    
       summary: Searches UMA scope description by pattern, and specify the max size of the results to return.
       description: Searches UMA scope description by pattern, and specify the max size of the results to return.
-      operationId: get-oauth-uma-scopes-by-pattern
+      operationId: get-oauth-uma-scopes-search-by-pattern
       responses:
         '200':
           description: OK
@@ -6141,7 +6596,330 @@ paths:
                       items:
                         type: string
         '500':
-          description: Internal Server Error           
+          description: Internal Server Error
+  /oauth/uma/resources:
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Gets list of UMA Resources.
+      description: Gets list of UMA Resources.
+      operationId: get-oauth-uma-resources    
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                type: array
+                items:
+                  type: object
+                  description: UMAResource
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: Resource id.
+                      type: string
+                    name:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the resource.
+                      type: string
+                    scopes:
+                      description: Applicable resource scopes.
+                      type: array
+                      items:
+                        type: string
+                    scopeExpression:
+                      description: List of resource scope expression.
+                      type: array
+                      items:
+                        type: string
+                    clients:
+                      description: List of associated clients.
+                      type: array
+                      items:
+                        type: string
+        '500':
+          description: Internal Server Error
+    post:
+      tags:
+        - OAuth - UMA Resources
+      summary: Adds an UMA Resource.
+      description: Adds an UMA Resource.
+      operationId: post-oauth-uma-resources 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UMAResource
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: Resource id.
+                  type: string
+                name:
+                  description: A human-readable name of the scope.
+                  type: string                  
+                iconUrl:
+                  description: A URL for a graphic icon representing the resource.
+                  type: string
+                scopes:
+                  description: Applicable resource scopes.
+                  type: array
+                  items:
+                    type: string
+                scopeExpression:
+                  description: List of resource scope expression.
+                  type: array
+                  items:
+                    type: string
+                clients:
+                  description: List of associated clients.
+                  type: array
+                  items:
+                    type: string              
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      tags:
+        - OAuth - UMA Resources
+      summary: Updates an UMA Resource.
+      description: Updates an UMA Resource.
+      operationId: put-oauth-uma-resources 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UMAResource
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: Resource id.
+                  type: string
+                name:
+                  description: A human-readable name of the scope.
+                  type: string                  
+                iconUrl:
+                  description: A URL for a graphic icon representing the resource.
+                  type: string
+                scopes:
+                  description: Applicable resource scopes.
+                  type: array
+                  items:
+                    type: string
+                scopeExpression:
+                  description: List of resource scope expression.
+                  type: array
+                  items:
+                    type: string
+                clients:
+                  description: List of associated clients.
+                  type: array
+                  items:
+                    type: string              
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/uma/resources/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Resource description ID.
+        schema:
+          type: string
+    get:
+      tags:
+        - OAuth - UMA Resources
+      summary: Gets a UMA Resource with specified id.
+      description: Gets a UMA Resource with specified id.
+      operationId: get-oauth-uma-resources-by-id     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMAResource
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: Resource id.
+                    type: string
+                  name:
+                    description: A human-readable name of the scope.
+                    type: string                  
+                  iconUrl:
+                    description: A URL for a graphic icon representing the resource.
+                    type: string
+                  scopes:
+                    description: Applicable resource scopes.
+                    type: array
+                    items:
+                      type: string
+                  scopeExpression:
+                    description: List of resource scope expression.
+                    type: array
+                    items:
+                      type: string
+                  clients:
+                    description: List of associated clients.
+                    type: array
+                    items:
+                      type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - OAuth - UMA Resources
+      summary: Deletes a UMA Resource with specified id.
+      description: Deletes a UMA Resource with specified id.
+      operationId: delete-oauth-uma-resources-by-id     
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /oauth/uma/resources/search:
+    parameters:
+      - name: pattern
+        in: query
+        required: true
+        description: Serach pattern.
+        schema:
+          type: string
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - UMA Resources    
+      summary: Searches UMA Resources by pattern, and specify the max size of the results to return.
+      description: Searches UMA Resources by pattern, and specify the max size of the results to return.
+      operationId: get-oauth-uma-resources-search-by-pattern
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                type: array
+                items:
+                  type: object
+                  description: UMAResource
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: Resource id.
+                      type: string
+                    name:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the resource.
+                      type: string
+                    scopes:
+                      description: Applicable resource scopes.
+                      type: array
+                      items:
+                        type: string
+                    scopeExpression:
+                      description: List of resource scope expression.
+                      type: array
+                      items:
+                        type: string
+                    clients:
+                      description: List of associated clients.
+                      type: array
+                      items:
+                        type: string
+        '500':
+          description: Internal Server Error
+  /oauth/uma/resources/search-limit:
+    parameters:
+      - name: size
+        in: query
+        required: true
+        description: Serach size -  max size of the results to return.
+        schema:
+          type: integer
+    get:  
+      tags:
+        - OAuth - UMA Resources    
+      summary: Gets UMA Resource list with search result limited with specified max size.
+      description: Gets UMA Resource list with search result limited with specified max size.
+      operationId: get-oauth-uma-resources-search-limit
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA Resource list.
+                description: List of UMA Resource.
+                type: array
+                items:
+                  type: object
+                  description: UMAResource
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      description: Resource id.
+                      type: string
+                    name:
+                      description: A human-readable name of the scope.
+                      type: string                  
+                    iconUrl:
+                      description: A URL for a graphic icon representing the resource.
+                      type: string
+                    scopes:
+                      description: Applicable resource scopes.
+                      type: array
+                      items:
+                        type: string
+                    scopeExpression:
+                      description: List of resource scope expression.
+                      type: array
+                      items:
+                        type: string
+                    clients:
+                      description: List of associated clients.
+                      type: array
+                      items:
+                        type: string
+        '500':
+          description: Internal Server Error            
 components:
   responses:
     Found:
