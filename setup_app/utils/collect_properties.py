@@ -119,8 +119,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if result:
 
             oxConfApplication = json.loads(result['oxConfApplication'])
-
-            Config.idpClient_pw =  self.unobscure(oxConfApplication['openIdClientPassword'])
+            Config.idpClient_encoded_pw = oxConfApplication['openIdClientPassword']
+            Config.idpClient_pw =  self.unobscure(Config.idpClient_encoded_pw)
+            
             Config.idp_client_id =  oxConfApplication['openIdClientId']
 
             if 'openIdClientPassword' in oxConfApplication:

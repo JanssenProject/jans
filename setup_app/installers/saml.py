@@ -20,9 +20,9 @@ class SamlInstaller(JettyInstaller):
         self.needdb = True
 
         self.source_files = [
-                ('idp.war', 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{0}/oxshibbolethIdp-{0}.war'.format(Config.oxVersion)),
-                ('idp3_cml_keygenerator.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
-                ('shibboleth-idp.jar', 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distGluuFolder,'idp.war'), 'https://ox.gluu.org/maven/org/gluu/oxshibbolethIdp/{0}/oxshibbolethIdp-{0}.war'.format(Config.oxVersion)),
+                (os.path.join(Config.distGluuFolder,'idp3_cml_keygenerator.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethKeyGenerator/{0}/oxShibbolethKeyGenerator-{0}.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distGluuFolder,'shibboleth-idp.jar'), 'https://ox.gluu.org/maven/org/gluu/oxShibbolethStatic/{0}/oxShibbolethStatic-{0}.jar'.format(Config.oxVersion)),
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'idp')
@@ -81,12 +81,14 @@ class SamlInstaller(JettyInstaller):
                               self.shib_crt_file
                               )
 
-        # Put latest SAML templates
-        identityWar = 'identity.war'
 
         # unpack IDP3 JAR with static configs
-        self.run([Config.cmd_jar, 'xf', os.path.join(Config.distGluuFolder, 'shibboleth-idp.jar')], '/opt')
-        self.removeDirs('/opt/META-INF')
+        tmpShibpDir = os.path.join('/tmp', os.urandom(5).hex())
+        self.logIt("Unpacking %s..." % self.source_files[2][0])
+        self.createDirs(tmpShibpDir)
+        self.run([Config.cmd_jar, 'xf', self.source_files[2][0]], tmpShibpDir)
+        self.copyTree(os.path.join(tmpShibpDir, 'shibboleth-idp'), '/opt/shibboleth-idp')
+        self.removeDirs(tmpShibpDir)
 
         if Config.mappingLocations['user'] == 'couchbase':
             Config.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
@@ -110,8 +112,7 @@ class SamlInstaller(JettyInstaller):
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
-        src_war = os.path.join(Config.distGluuFolder, 'idp.war')
-        self.copyFile(src_war, jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
         # Prepare libraries needed to for command line IDP3 utilities
         self.install_saml_libraries()
@@ -163,16 +164,12 @@ class SamlInstaller(JettyInstaller):
 
     def install_saml_libraries(self):
         # Unpack oxauth.war to get bcprov-jdk16.jar
-        idpWar = 'idp.war'
-        distIdpPath = os.path.join(Config.distGluuFolder, 'idp.war')
+        tmpIdpDir = os.path.join('/tmp', os.urandom(5).hex())
 
-        tmpIdpDir = os.path.join(Config.distFolder, 'tmp/tmp_idp')
-
-        self.logIt("Unpacking %s..." % idpWar)
-        self.removeDirs(tmpIdpDir)
+        self.logIt("Unpacking %s..." % self.source_files[0][0])
         self.createDirs(tmpIdpDir)
 
-        self.run([Config.cmd_jar, 'xf', distIdpPath], tmpIdpDir)
+        self.run([Config.cmd_jar, 'xf', self.source_files[0][0]], tmpIdpDir)
 
         # Copy libraries into webapp
         idp3WebappLibFolder = os.path.join(self.idp3WebappFolder, 'WEB-INF/lib')
