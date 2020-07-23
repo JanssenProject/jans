@@ -56,6 +56,9 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 	@Inject
 	private EndSessionAction endSessionAction;
 
+	@Inject
+	private DeviceAuthzAction deviceAuthzAction;
+
 	private String resource;
 	private String host;
 	private String rel;
@@ -115,6 +118,7 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 				userInfoAction.setUserInfoEndpoint(openIdConfigurationResponse.getUserInfoEndpoint());
 				checkSessionAction.setCheckSessionEndpoint(openIdConfigurationResponse.getCheckSessionIFrame());
 				endSessionAction.setEndSessionEndpoint(openIdConfigurationResponse.getEndSessionEndpoint());
+				deviceAuthzAction.setDeviceAuthzEndpoint(openIdConfigurationResponse.getDeviceAuthzEndpoint());
 			}
 		} catch (IllegalArgumentException e) {
 			log.error(e.getMessage(), e);
