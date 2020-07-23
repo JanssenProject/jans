@@ -18,8 +18,8 @@ class OxauthInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                    ('oxauth.war', 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
-                    ('oxauth-rp.war', 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
+                    (os.path.join(Config.distGluuFolder, 'oxauth.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-server/%s/oxauth-server-%s.war' % (Config.oxVersion, Config.oxVersion)),
+                    (os.path.join(Config.distGluuFolder, 'oxauth-rp.war'), 'https://ox.gluu.org/maven/org/gluu/oxauth-rp/%s/oxauth-rp-%s.war' % (Config.oxVersion, Config.oxVersion))
                     ]
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
@@ -40,8 +40,7 @@ class OxauthInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
-        src_war = os.path.join(Config.distGluuFolder, 'oxauth.war')
-        self.copyFile(src_war, jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
         self.enable()
 
     def generate_configuration(self):
@@ -87,8 +86,7 @@ class OxauthInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = os.path.join(self.jetty_base, jettyServiceName, 'webapps')
-        src_war = os.path.join(Config.distGluuFolder, self.source_files[1][0])
-        self.copyFile(src_war, jettyServiceWebapps)
+        self.copyFile(self.source_files[1][0], jettyServiceWebapps)
 
         self.enable('oxauth-rp')
 
