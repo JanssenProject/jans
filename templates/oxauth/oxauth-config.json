@@ -23,6 +23,7 @@
     "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
     "backchannelAuthenticationEndpoint":"https://%(hostname)s/oxauth/restv1/bc-authorize",
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/oxauth/restv1/bc-deviceRegistration",
+    "deviceAuthorizationEndpoint":"https://%(hostname)s/oxauth/restv1/device-authorization",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         ["code"],
@@ -44,7 +45,8 @@
         "password",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "subjectTypesSupported":[
         "public",
@@ -186,7 +188,8 @@
         "implicit",
         "client_credentials",
         "refresh_token",
-        "urn:ietf:params:oauth:grant-type:uma-ticket"
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -350,5 +353,8 @@
         "notificationUrl": "",
         "notificationKey": "",
         "publicVapidKey": ""
-    }
+    },
+    "deviceAuthzRequestExpiresIn": 1800,
+    "deviceAuthzTokenPollInterval": 5,
+    "deviceAuthzResponseTypeToProcessAuthz": "code"
 }
