@@ -21,8 +21,16 @@ JVM_ARGS=
 # user and group under which Gluu Radius 
 # will run
 #####################################################
-GLUU_RADIUS_USER=radius
-GLUU_RADIUS_GROUP=gluu
+if [ -z "$GLUU_RADIUS_USER" ]
+then
+    GLUU_RADIUS_USER=gluu
+fi
+
+if [ -z "$GLUU_RADIUS_GROUP" ]
+then
+    GLUU_RADIUS_GROUP=radius
+fi
+
 
 #####################################################
 # Gluu Radius PID file directory

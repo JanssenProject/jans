@@ -17,10 +17,7 @@ from urllib.parse import urlparse
 
 from setup_app import paths
 from setup_app.config import Config
-from setup_app.utils.base import logIt as logOnly
-from setup_app.utils.base import logOSChanges as logOSChangesOnly
-from setup_app.utils.base import run as runOnly
-from setup_app.utils.base import os_name, os_type, os_initdaemon, clone_type, deb_sysd_clone, snap
+from setup_app.utils import base
 from setup_app.static import InstallTypes
 from setup_app.utils.crypto64 import Crypto64
 
@@ -36,12 +33,12 @@ class SetupUtils(Crypto64):
 
     def run(self, *args, **kwargs):
         if kwargs:
-            return runOnly(*args, **kwargs)
+            return base.runOnly(*args, **kwargs)
         else:
-            return runOnly(*args)
+            return base.runOnly(*args)
 
     def logOSChanges(self, *args):
-        logOSChangesOnly(*args)
+        base.logOSChangesOnly(*args)
 
     def logIt(self, *args, **kwargs):
         #if pbar in args, pass to progress bar
@@ -50,7 +47,7 @@ class SetupUtils(Crypto64):
             msg = kwargs['msg'] if 'msg' in kwargs else args[0]
             Config.pbar.progress(ptype, msg)
 
-        logOnly(*args, **kwargs)
+        base.logOnly(*args, **kwargs)
 
 
     def backupFile(self, inFile, destFolder=None, move=False):
@@ -433,7 +430,7 @@ class SetupUtils(Crypto64):
             self.logIt("Error adding group", True)
 
     def fix_init_scripts(self, serviceName, initscript_fn):
-        if snap:
+        if base.snap:
             return
 
         changeTo = None
@@ -463,7 +460,7 @@ class SetupUtils(Crypto64):
             elif l.startswith('# chkconfig:'):
                 initscript[i] = '# chkconfig: 345 {0} {1}\n'.format(Config.service_requirements[serviceName][1], 100 - Config.service_requirements[serviceName][1])
 
-        if (clone_type == 'rpm' and os_initdaemon == 'systemd') or deb_sysd_clone:
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
             service_init_script_fn = os.path.join(Config.distFolder, 'scripts', serviceName)
         else:
             service_init_script_fn = os.path.join('/etc/init.d', serviceName)

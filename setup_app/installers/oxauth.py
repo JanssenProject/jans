@@ -78,8 +78,6 @@ class OxauthInstaller(JettyInstaller):
 
         Config.pbar.progress(self.service_name, "Installing OxAuthRP", False)
 
-        distOxAuthRpPath = os.path.join(Config.distGluuFolder, self.source_files[1][0])
-
         self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth-rp'
