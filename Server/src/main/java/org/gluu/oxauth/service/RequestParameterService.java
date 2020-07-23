@@ -60,7 +60,8 @@ public class RequestParameterService {
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
             AuthorizeRequestParam.CLAIMS,
-            AuthorizeRequestParam.AUTH_REQ_ID));
+            AuthorizeRequestParam.AUTH_REQ_ID,
+            DeviceAuthorizationService.SESSION_USER_CODE));
 
     @Inject
     private Logger log;
