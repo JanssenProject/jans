@@ -133,7 +133,7 @@ class BaseInstaller:
 
 
     def download_files(self, force=False, downloads=[]):
-        open('/opt/gluu/wgetrc').close()
+        open('/opt/gluu/wgetrc', 'w').close()
 
         if hasattr(self, 'source_files'):
             for i, item in enumerate(self.source_files[:]):
