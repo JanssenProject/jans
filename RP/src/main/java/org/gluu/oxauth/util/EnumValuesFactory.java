@@ -38,7 +38,8 @@ public class EnumValuesFactory {
                 GrantType.CLIENT_CREDENTIALS,
                 GrantType.REFRESH_TOKEN,
                 GrantType.OXAUTH_UMA_TICKET,
-                GrantType.CIBA
+                GrantType.CIBA,
+                GrantType.DEVICE_CODE
         };
     }
 

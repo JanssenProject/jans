@@ -46,6 +46,7 @@ public class AppConfiguration implements Configuration {
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
     private String introspectionEndpoint;
+    private String deviceAuthzEndpoint;
 
     private Boolean sessionAsJwt = false;
 
@@ -213,6 +214,9 @@ public class AppConfiguration implements Configuration {
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
     private Boolean keepAuthenticatorAttributesOnAcrChange = false;
+    private int deviceAuthzRequestExpiresIn;
+    private int deviceAuthzTokenPollInterval;
+    private String deviceAuthzResponseTypeToProcessAuthz;
 
     // CIBA
     private String backchannelClientId;
@@ -1850,5 +1854,37 @@ public class AppConfiguration implements Configuration {
 
     public void setClientRegDefaultToCodeFlowWithRefresh(Boolean clientRegDefaultToCodeFlowWithRefresh) {
         this.clientRegDefaultToCodeFlowWithRefresh = clientRegDefaultToCodeFlowWithRefresh;
+    }
+
+    public String getDeviceAuthzEndpoint() {
+        return deviceAuthzEndpoint;
+    }
+
+    public void setDeviceAuthzEndpoint(String deviceAuthzEndpoint) {
+        this.deviceAuthzEndpoint = deviceAuthzEndpoint;
+    }
+
+    public int getDeviceAuthzRequestExpiresIn() {
+        return deviceAuthzRequestExpiresIn;
+    }
+
+    public void setDeviceAuthzRequestExpiresIn(int deviceAuthzRequestExpiresIn) {
+        this.deviceAuthzRequestExpiresIn = deviceAuthzRequestExpiresIn;
+    }
+
+    public int getDeviceAuthzTokenPollInterval() {
+        return deviceAuthzTokenPollInterval;
+    }
+
+    public void setDeviceAuthzTokenPollInterval(int deviceAuthzTokenPollInterval) {
+        this.deviceAuthzTokenPollInterval = deviceAuthzTokenPollInterval;
+    }
+
+    public String getDeviceAuthzResponseTypeToProcessAuthz() {
+        return deviceAuthzResponseTypeToProcessAuthz;
+    }
+
+    public void setDeviceAuthzResponseTypeToProcessAuthz(String deviceAuthzResponseTypeToProcessAuthz) {
+        this.deviceAuthzResponseTypeToProcessAuthz = deviceAuthzResponseTypeToProcessAuthz;
     }
 }
