@@ -1,14 +1,22 @@
 SERVICE_NAME=oxd-server
 JAVA_HOME=/opt/jre
 JAVA=$JAVA_HOME/bin/java
-OXD_LOGS=/var/log/oxd-server
+if [ -z "$OXD_LOGS" ]
+then
+    OXD_LOGS=/var/log/oxd-server
+fi
+
 OXD_HOME=/opt/oxd-server
 OXD_CONF=$OXD_HOME/conf
-OXD_USER=jetty
+
+if [ -z "$OXD_USER" ]
+then
+    OXD_USER=jetty
+fi
 LIB=$OXD_HOME/lib
 OXD_RUN=$OXD_HOME
 OXD_PID_FILE=$OXD_RUN/oxd-server.pid
-OXD_STATE=/gluu/oxd-server/run/oxd-server.state
+OXD_STATE=$OXD_HOME/run/oxd-server.state
 OXD_INIT_LOG=$OXD_LOGS/oxd-server.log
 
 BCPROV=`ls $LIB/bcprov-jdk* -t | sort -r | head -n 1`
