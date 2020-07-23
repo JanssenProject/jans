@@ -20,8 +20,8 @@ class PassportInstaller(NodeInstaller):
 
         passport_version = Config.oxVersion.replace('-SNAPSHOT','')
         self.source_files = [
-                ('passport.tgz', 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
-                ('passport-node_modules.tar.gz', 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
+                (os.path.join(Config.distGluuFolder, 'passport.tgz'), 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
+                (os.path.join(Config.distGluuFolder, 'passport-node_modules.tar.gz'), 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
                 ]
 
         self.gluu_passport_base = os.path.join(self.node_base, 'passport')
@@ -52,17 +52,17 @@ class PassportInstaller(NodeInstaller):
         self.run([paths.cmd_mkdir, '-p', self.gluu_passport_base])
 
         # Extract package
-        passportArchive = 'passport.tgz'
         try:
-            self.logIt("Extracting {} into {}".format(passportArchive, self.gluu_passport_base))
-            self.run([paths.cmd_tar, '--strip', '1', '-xzf', os.path.join(Config.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting {} into {}".format(self.source_files[0][0], self.gluu_passport_base))
+            self.run([paths.cmd_tar, '--strip', '1', '-xzf', self.source_files[0][0], '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
-            self.logIt("Error encountered while extracting archive {}".format(passportArchive))
+            self.logIt("Error encountered while extracting archive {}".format(self.source_files[0][0]))
 
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
+        modules_source_dir = os.path.dirname(self.source_files[1][0])
         self.run([paths.cmd_mkdir, '-p', modules_target_dir])
 
-        node_modules_list = glob.glob(os.path.join(Config.distGluuFolder,  'passport*node_modules*'))
+        node_modules_list = glob.glob(os.path.join(modules_source_dir,  'passport*node_modules*'))
 
         if node_modules_list:
             passport_modules_archive = max(node_modules_list)

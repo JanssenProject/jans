@@ -21,8 +21,8 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
 
         self.source_files = [
-                ('super-gluu-radius-server.jar', 'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}.jar'.format(Config.oxVersion)),
-                ('gluu-radius-libs.zip',  'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}-distribution.zip'.format(Config.oxVersion))
+                (os.path.join(Config.distGluuFolder, 'super-gluu-radius-server.jar'), 'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}.jar'.format(Config.oxVersion)),
+                (os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip'),  'https://ox.gluu.org/maven/org/gluu/super-gluu-radius-server/{0}/super-gluu-radius-server-{0}-distribution.zip'.format(Config.oxVersion))
                 ]
 
         self.radius_dir = self.radius_dir = os.path.join(Config.gluuOptFolder, 'radius')
@@ -85,8 +85,8 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Can't find gluu_radius_client_id in database", True, True)
 
-        radius_libs = os.path.join(Config.distGluuFolder, 'gluu-radius-libs.zip')
-        radius_jar = os.path.join(Config.distGluuFolder, 'super-gluu-radius-server.jar')
+        radius_libs = self.source_files[1][0]
+        radius_jar = self.source_files[0][0]
         ldif_file_server = os.path.join(self.output_folder, 'gluu_radius_server.ldif')
         logs_dir = os.path.join(self.radius_dir,'logs')
 
