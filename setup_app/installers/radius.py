@@ -110,11 +110,12 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
         self.copyFile(os.path.join(self.source_dir, 'etc/gluu/conf/radius/gluu-radius-logging.xml'), self.conf_dir)
         self.copyFile(os.path.join(self.source_dir, 'scripts/gluu_common.py'), os.path.join(Config.gluuOptPythonFolder, 'libs'))
 
-        self.copyFile(os.path.join(self.source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
-        self.run([paths.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
+        if not base.snap:
+            self.copyFile(os.path.join(self.source_dir, 'etc/init.d/gluu-radius'), '/etc/init.d')
+            self.run([paths.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
         
-        if base.os_name != 'ubuntu16':
-            self.copyFile(os.path.join(self.source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+            if base.os_name != 'ubuntu16':
+                self.copyFile(os.path.join(self.source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
 
         #create empty gluu-radius.private-key.pem
         gluu_radius_private_key_fn = os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')
