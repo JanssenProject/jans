@@ -134,6 +134,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Inject
     private CibaRequestService cibaRequestService;
 
+    @Inject
+    private DeviceAuthorizationService deviceAuthorizationService;
+
     @Context
     private HttpServletRequest servletRequest;
 
@@ -215,7 +218,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             updateSessionForROPC(httpRequest, sessionUser);
 
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
-            redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state);
+            String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
+            redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
 
@@ -587,7 +591,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (StringUtils.isNotBlank(authReqId)) {
                 runCiba(authReqId, httpRequest, httpResponse);
             }
-
+            if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+                processDeviceAuthorization(deviceAuthzUserCode, user);
+            }
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
             log.error(e.getMessage(), e);
@@ -883,4 +889,23 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.error("Failed to update session_id '{}'", sessionId);
         }
     }
+
+    /**
+     * Processes an authorization granted for device code grant type.
+     * @param userCode User code used in the device code flow.
+     * @param user Authenticated user that is giving the permissions.
+     */
+    private void processDeviceAuthorization(String userCode, User user) {
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
+        if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
+            log.trace("User responded too late and the authorization {} has expired, {}", userCode, cacheData);
+            return;
+        }
+
+        deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, cacheData.getDeviceCode());
+        DeviceCodeGrant deviceCodeGrant = authorizationGrantList.createDeviceGrant(cacheData, user);
+
+        log.info("Granted device authorization request, user_code: {}, device_code: {}, grant_id: {}", userCode, cacheData.getDeviceCode(), deviceCodeGrant.getGrantId());
+    }
+
 }

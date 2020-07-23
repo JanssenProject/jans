@@ -63,7 +63,13 @@ public enum AuthorizationGrantType implements HasParamName {
 	/**
 	 * An extension grant for Client Initiated Backchannel Authentication.
 	 */
-	CIBA("urn:openid:params:grant-type:ciba");
+	CIBA("urn:openid:params:grant-type:ciba"),
+
+	/**
+	 * Device Authorization Grant Type for OAuth 2.0
+	 */
+	DEVICE_CODE("urn:ietf:params:oauth:grant-type:device_code"),
+	;
 
     private final String paramName;
 
