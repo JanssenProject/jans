@@ -1,6 +1,6 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms%(oxauth_min_heap_mem)sm -Xmx%(oxauth_max_heap_mem)sm -XX:MaxMetaspaceSize=%(oxauth_max_meta_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/oxauth -Dlog.base=%(jetty_base)s/oxauth -Dpython.home=%(jython_home)s"
+JAVA_OPTIONS="-server -Xms%(oxauth_min_heap_mem)sm -Xmx%(oxauth_max_heap_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dserver.base=%(jetty_base)s/oxauth -Dlog.base=%(jetty_base)s/oxauth -Dpython.home=%(jython_home)s"
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/oxauth
