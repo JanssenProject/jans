@@ -24,14 +24,21 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
     def install(self):
 
-        self.run(['tar', '-zxf', Config.oxd_package, '-C', '/opt'])
+        self.run(['tar', '-zxf', Config.oxd_package, '--strip-components=1', '-C', self.oxd_root])
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
         
-        service_file = os.path.join(self.oxd_root, 'oxd-server.service')
-        if os.path.exists(service_file):
-            self.run(['cp', service_file, '/lib/systemd/system'])
+        if base.snap:
+            self.log_dir = os.path.join(base.snap_common, 'gluu/oxd-server/log/')
         else:
-            self.run([Config.cmd_ln, service_file, '/etc/init.d/oxd-server'])
+            self.log_dir = '/var/log/oxd-server'
+            service_file = os.path.join(self.oxd_root, 'oxd-server.service')
+            if os.path.exists(service_file):
+                self.run(['cp', service_file, '/lib/systemd/system'])
+            else:
+                self.run([Config.cmd_ln, service_file, '/etc/init.d/oxd-server'])
+
+        if not os.path.exists(self.log_dir):
+            self.run([paths.cmd_mkdir, self.log_dir])
 
         self.run([
                 'cp', 
@@ -39,15 +46,12 @@ class OxdInstaller(SetupUtils, BaseInstaller):
                 os.path.join(Config.osDefault, 'oxd-server')
                 ])
 
-        log_dir = '/var/log/oxd-server'
-        if not os.path.exists(log_dir):
-            self.run([paths.cmd_mkdir, log_dir])
+        self.log_file = os.path.join(self.log_dir, 'oxd-server.log')
+        if not os.path.exists(self.log_file):
+            open(self.log_file, 'w').close()
 
-        log_file = os.path.join(log_dir, 'oxd-server.log')
-        if not os.path.exists(log_file):
-            open(log_file, 'w').close()
-
-        self.run(['chown', '-R', 'jetty:jetty', '/var/log/oxd-server'])
+        if not base.snap:
+            self.run(['chown', '-R', 'jetty:jetty', self.log_dir])
 
         for fn in glob.glob(os.path.join(self.oxd_root,'bin/*')):
             self.run([paths.cmd_chmod, '+x', fn])
@@ -74,13 +78,18 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
         if Config.get('oxd_use_gluu_storage'):
 
-
             oxd_yaml['storage_configuration'].pop('dbFileLocation')
             oxd_yaml['storage'] = 'gluu_server_configuration'
             oxd_yaml['storage_configuration']['baseDn'] = 'o=gluu'
             oxd_yaml['storage_configuration']['type'] = Config.gluu_properties_fn
             oxd_yaml['storage_configuration']['connection'] = Config.ox_ldap_properties if Config.mappingLocations['default'] == 'ldap' else Config.gluuCouchebaseProperties
             oxd_yaml['storage_configuration']['salt'] = os.path.join(Config.configFolder, "salt")
+
+        if base.snap:
+            for appenders in oxd_yaml['logging']['appenders']:
+                if appenders['type'] == 'file':
+                    appenders['currentLogFilename'] = self.log_file
+                    appenders['archivedLogFilenamePattern'] = os.path.join(base.snap_common, 'gluu/oxd-server/log/oxd-server/-%d{yyyy-MM-dd}-%i.log.gz')
 
         yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
         self.writeFile(self.oxd_server_yml_fn, yml_str)
@@ -129,30 +138,31 @@ class OxdInstaller(SetupUtils, BaseInstaller):
     def installed(self):
         return os.path.exists(self.oxd_server_yml_fn)
 
-
     def download_files(self, force=False):
         oxd_url = 'https://ox.gluu.org/maven/org/gluu/oxd-server/{0}/oxd-server-{0}-distribution.zip'.format(Config.oxVersion)
 
         self.logIt("Downloading {} and preparing package".format(os.path.basename(oxd_url)))
-        
+
         oxd_zip_fn = '/tmp/oxd-server.zip'
-        oxd_tmp_dir = '/tmp/oxd-server'
+        oxd_tgz_fn = '/tmp/oxd-server.tgz' if base.snap else os.path.join(Config.distGluuFolder, 'oxd-server.tgz')
+        tmp_dir = os.path.join('/tmp', os.urandom(5).hex())
+        oxd_tmp_dir = os.path.join(tmp_dir, 'oxd-server')
+        
+        self.run([paths.cmd_mkdir, '-p', oxd_tmp_dir])
+        self.download_file(oxd_url, oxd_zip_fn)
+        self.run([paths.cmd_unzip, '-qqo', oxd_zip_fn, '-d', oxd_tmp_dir])
+        self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir, 'data')])
+        
+        if not base.snap:
+            service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
+            service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(Config.oxVersion, service_file)
+            self.download_file(service_url, os.path.join(oxd_tmp_dir, service_file))
 
-        self.run([paths.cmd_wget, '-nv', oxd_url, '-O', oxd_zip_fn])
-        self.run([paths.cmd_unzip, '-qqo', '/tmp/oxd-server.zip', '-d', oxd_tmp_dir])
-        self.run([paths.cmd_mkdir, os.path.join(oxd_tmp_dir,'data')])
+        oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/master/debian/oxd-server'
+        self.download_file(oxd_server_sh_url, os.path.join(oxd_tmp_dir, 'bin/oxd-server'))
 
-        if base.deb_sysd_clone:
-            default_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server-default'.format(Config.oxVersion)
-            self.run([paths.cmd_wget, '-nv', default_url, '-O', os.path.join(oxd_tmp_dir, 'oxd-server-default')])
-
-        service_file = 'oxd-server.init.d' if base.deb_sysd_clone else 'oxd-server.service'
-        service_url = 'https://raw.githubusercontent.com/GluuFederation/community-edition-package/master/package/systemd/oxd-server.service'.format(Config.oxVersion, service_file)
-        self.run(['wget', '-nv', service_url, '-O', os.path.join(oxd_tmp_dir, service_file)])
-
-        oxd_server_sh_url = 'https://raw.githubusercontent.com/GluuFederation/oxd/version_{}/debian/oxd-server'.format(Config.oxVersion)
-        self.run([paths.cmd_wget, '-nv', oxd_server_sh_url, '-O', os.path.join(oxd_tmp_dir, 'bin/oxd-server')])
-
-        self.run(['tar', '-zcf', os.path.join(Config.distGluuFolder, 'oxd-server.tgz'), 'oxd-server'], cwd='/tmp')
-
-        self.oxd_package = os.path.join(Config.distGluuFolder, 'oxd-server.tgz')
+        self.run(['tar', '-zcf', oxd_tgz_fn, 'oxd-server'], cwd=tmp_dir)
+        #self.run(['rm', '-r', '-f', tmp_dir])
+        Config.oxd_package = oxd_tgz_fn
+        
+        

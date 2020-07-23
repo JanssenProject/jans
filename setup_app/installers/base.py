@@ -131,10 +131,12 @@ class BaseInstaller:
         elif Config.installed_instance:
             self.download_files()
 
+    def download_file(self, url, src):
+        open('/tmp/wgetrc', 'w').close()
+        self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
+        self.run([paths.cmd_wget, '--config=/tmp/wgetrc', url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
 
     def download_files(self, force=False, downloads=[]):
-        open('/opt/gluu/wgetrc', 'w').close()
-
         if hasattr(self, 'source_files'):
             for i, item in enumerate(self.source_files[:]):
                 src = item[0]
@@ -147,8 +149,7 @@ class BaseInstaller:
                 self.source_files[i] = (src, url)
 
                 if force or self.check_download_needed(src):
-                    self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
-                    self.run([paths.cmd_wget, '--config=/opt/gluu/wgetrc', url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
+                    base.download_file(url, src)
 
     def check_download_needed(self, src):
         froot, fext = os.path.splitext(src)
