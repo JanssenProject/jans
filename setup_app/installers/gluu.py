@@ -119,9 +119,6 @@ class GluuInstaller(SetupUtils):
             self.writeHybridProperties()
 
     def makeFolders(self):
-        # Allow write to /tmp
-        self.run([paths.cmd_chmod, 'ga+w', "/tmp"])
-
         # Create these folder on all instances
         for folder in (Config.gluuOptFolder, Config.gluuOptBinFolder, Config.gluuOptSystemFolder,
                         Config.gluuOptPythonFolder, Config.configFolder, Config.certFolder,
@@ -130,10 +127,10 @@ class GluuInstaller(SetupUtils):
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
 
-
-        self.run([paths.cmd_chown, '-R', 'root:gluu', Config.certFolder])
-        self.run([paths.cmd_chmod, '551', Config.certFolder])
-
+        if not base.snap:
+            self.run([paths.cmd_chown, '-R', 'root:gluu', Config.certFolder])
+            self.run([paths.cmd_chmod, '551', Config.certFolder])
+            self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
 
     def customiseSystem(self):
         if not base.snap:
