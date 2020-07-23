@@ -203,7 +203,7 @@ def get_clean_args(args):
 
 # args = command + args, i.e. ['ls', '-ltr']
 def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
-    if snap and args[0] in (paths.cmd_chown, paths.cmd_chmod):
+    if snap and args[0] in [paths.cmd_chown]:
         return ''
 
     output = ''
