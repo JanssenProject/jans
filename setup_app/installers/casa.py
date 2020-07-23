@@ -24,7 +24,7 @@ class CasaInstaller(JettyInstaller):
         self.register_progess()
         
         self.source_files = [
-                ('casa.war', 'https://ox.gluu.org/maven/org/gluu/casa/{0}/casa-{0}.war'.format(Config.oxVersion))
+                (os.path.join(Config.distGluuFolder, 'casa.war'), 'https://ox.gluu.org/maven/org/gluu/casa/{0}/casa-{0}.war'.format(Config.oxVersion))
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'casa')
@@ -41,11 +41,7 @@ class CasaInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration['casa'])
 
         jettyServiceWebapps = os.path.join(self.casa_jetty_dir, 'webapps')
-
-        self.copyFile(
-                    os.path.join(Config.distGluuFolder, 'casa.war'),
-                    jettyServiceWebapps
-                    )
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
         jettyServiceOxAuthCustomLibsPath = os.path.join(self.jetty_base,
                                                         "oxauth", 

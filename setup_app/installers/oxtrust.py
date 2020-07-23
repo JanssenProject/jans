@@ -17,7 +17,7 @@ class OxtrustInstaller(JettyInstaller):
         self.register_progess()
 
         self.source_files = [
-                ('identity.war', 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion))
+                (os.path.join(Config.distGluuFolder,'identity.war'), 'https://ox.gluu.org/maven/org/gluu/oxtrust-server/%s/oxtrust-server-%s.war' % (Config.oxVersion, Config.oxVersion))
                 ]
 
         self.templates_folder = os.path.join(Config.templateFolder, 'oxtrust')
@@ -54,8 +54,7 @@ class OxtrustInstaller(JettyInstaller):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        src_war = os.path.join(Config.distGluuFolder, 'identity.war')
-        self.copyFile(src_war, jettyServiceWebapps)
+        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
         self.enable()
 
