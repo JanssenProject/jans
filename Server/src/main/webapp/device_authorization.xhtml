@@ -1,0 +1,137 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
+	<f:metadata>
+		<f:viewParam name="user_code" value="#{deviceAuthorizationAction.userCode}" />
+		<f:viewParam name="code" value="#{deviceAuthorizationAction.code}" />
+		<f:viewParam name="session_id" value="#{deviceAuthorizationAction.sessionId}" />
+		<f:viewParam name="state" value="#{deviceAuthorizationAction.state}" />
+		<f:viewParam name="session_state" value="#{deviceAuthorizationAction.sessionState}" />
+		<f:viewParam name="error" value="#{deviceAuthorizationAction.error}" />
+		<f:viewParam name="error_description" value="#{deviceAuthorizationAction.errorDescription}" />
+		<f:viewAction action="#{deviceAuthorizationAction.pageLoaded}" />
+	</f:metadata>
+	<ui:define name="head">
+		<meta name="description" content="Gluu, Inc." />
+	</ui:define>
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['device.authorization.pageTitle']}" />
+	</ui:define>
+	<ui:define name="body">
+		<h:form id="deviceAuthzForm" style="padding:30px 15px;">
+			<div class="container">
+				<h:panelGroup rendered="#{deviceAuthorizationAction.newRequest}">
+					<div class="device-authz-container">
+						<div class="row no-margin">
+							<div class="col-12 device-authz-title">
+								<h:outputText value="#{msgs['device.authorization.title']}" />
+							</div>
+							<div class="col-12">
+								<h:messages class="text-center"
+											style="color:#8b0000; width: 100%"
+											id="messages"
+											infoClass="text-center" errorClass="text-center" />
+							</div>
+							<div class="col-12">
+								<h:outputText value="#{msgs['device.authorization.subtitle']}" />
+							</div>
+						</div>
+						<div class="row col-md-12 no-margin">
+							<div class="col-12 device-authz-label">
+								<h:outputText value="#{msgs['device.authorization.code.inputbox.label']}" />
+							</div>
+							<h:panelGroup layout="block" styleClass="col-12" rendered="#{!deviceAuthorizationAction.completeVerificationMode}">
+								<div class="row no-margin device-authz-input-container justify-content-center">
+									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
+										id="userCodePart1" name="userCodePart1" colMd="10"
+										labelColMd="2" autocomplete="off"
+										maxlength="4"
+										onkeydown="keyDownInput(event, 'userCodePart1', 'userCodePart2')"
+										styleClass="form-control device-authz-input-code"
+										value="#{deviceAuthorizationAction.userCodePart1}">
+									</h:inputText>
+									&nbsp;-&nbsp;
+									<h:inputText placeholder="#{msgs['device.authorization.code.inputbox.label']}"
+										 id="userCodePart2" name="userCodePart2" colMd="10"
+										 labelColMd="2" autocomplete="off"
+										 maxlength="4"
+										 onkeydown="keyDownInput(event, 'userCodePart2', null)"
+										 styleClass="form-control device-authz-input-code"
+										 value="#{deviceAuthorizationAction.userCodePart2}">
+									</h:inputText>
+								</div>
+							</h:panelGroup>
+							<h:panelGroup layout="block" styleClass="col-12" rendered="#{deviceAuthorizationAction.completeVerificationMode}">
+								<div class="col-12 device-authz-static-code no-margin">
+									<h:outputText value="#{deviceAuthorizationAction.userCode}" />
+								</div>
+							</h:panelGroup>
+						</div>
+						<div class="row device-authz-button justify-content-center">
+							<div class="col-sm-8 col-md-6">
+								<h:commandButton id="continueButton"
+									style="background-color: #00BE79; color:white;"
+									styleClass="btn col-sm-12" value="#{msgs['device.authorization.confirm.button']}"
+									iconAwesome="fa-sign-in">
+									<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.processUserCodeVerification}" />
+								</h:commandButton>
+							</div>
+						</div>
+					</div>
+				</h:panelGroup>
+
+				<h:panelGroup layout="block" styleClass="row col-12 justify-content-center"
+							  rendered="#{deviceAuthorizationAction.errorResponse || deviceAuthorizationAction.deviceAuthnCompleted}">
+					<h:outputLabel styleClass="col-12 device-authz-title" value="#{deviceAuthorizationAction.titleMsg}" />
+					<h:outputLabel styleClass="col-12 reg_link" value="#{deviceAuthorizationAction.descriptionMsg}" />
+					<h:commandButton id="newAuthn1"
+									 style="background-color: #00BE79; color:white;"
+									 styleClass="btn device-authz-init-btn" value="#{msgs['device.authorization.init.new.request.msg']}"
+									 iconAwesome="fa-sign-in" onclick="initNewRequest()">
+						<f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.initializeSession()}" />
+					</h:commandButton>
+				</h:panelGroup>
+			</div>
+		</h:form>
+		<script type="text/javascript">
+			function keyDownInput(event, component, switchToComponent) {
+				if (!isLetter(event.key)) {
+					return;
+				}
+				var inputComponent = document.getElementById("deviceAuthzForm:" + component);
+				if (inputComponent) {
+					var newValue = inputComponent.value + event.key;
+					if (newValue) {
+						if (newValue.length &lt; 5) {
+							newValue = newValue.toUpperCase();
+						} else {
+							newValue = newValue.substring(0, 4).toUpperCase();
+						}
+						inputComponent.value = newValue;
+						event.preventDefault();
+
+						if (newValue.length === 4 &amp;&amp; switchToComponent) {
+							var switchedComponent = document.getElementById("deviceAuthzForm:" + switchToComponent)
+							if (switchedComponent) {
+								switchedComponent.focus();
+							}
+						}
+					}
+				}
+			}
+
+			function initNewRequest() {
+				window.location = window.location.href.split("?")[0];
+			}
+
+			function isLetter(str) {
+				return str &amp;&amp; str.length === 1 &amp;&amp; str.match(/[a-z]/i);
+			}
+		</script>
+
+	</ui:define>
+</ui:composition>

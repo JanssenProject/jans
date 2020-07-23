@@ -61,6 +61,10 @@ public class AbstractPage implements Page {
         return driver().findElement(By.id(config(id)));
     }
 
+    public WebElement elementByElementId(String elementId) {
+        return driver().findElement(By.id(elementId));
+    }
+
     public String waitForPageSwitch(String previousUrl) {
         return waitForPageSwitch(driver(), previousUrl);
     }

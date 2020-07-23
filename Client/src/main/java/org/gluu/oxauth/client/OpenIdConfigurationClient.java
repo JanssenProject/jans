@@ -153,6 +153,9 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         if (jsonObj.has(INTROSPECTION_ENDPOINT)) {
             response.setIntrospectionEndpoint(jsonObj.getString(INTROSPECTION_ENDPOINT));
         }
+        if (jsonObj.has(DEVICE_AUTHZ_ENDPOINT)) {
+            response.setDeviceAuthzEndpoint(jsonObj.getString(DEVICE_AUTHZ_ENDPOINT));
+        }
         if (jsonObj.has(SCOPE_TO_CLAIMS_MAPPING)) {
             response.setScopeToClaimsMapping(OpenIdConfigurationResponse.parseScopeToClaimsMapping(jsonObj.getJSONArray(SCOPE_TO_CLAIMS_MAPPING)));
         }
