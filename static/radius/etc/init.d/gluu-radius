@@ -208,8 +208,12 @@ fi
 if [ -z "$RADIUS_RUN" ]
 then
   RADIUS_RUN=$(findDirectory -w /var/run /usr/var/run /tmp $GLUU_RADIUS_PID_DIR)/radius
-  [ -d "$RADIUS_RUN" ] || mkdir $RADIUS_RUN
+else
+  GLUU_RADIUS_PID_DIR=$RADIUS_RUN
 fi
+
+[ -d "$RADIUS_RUN" ] || mkdir $RADIUS_RUN
+
 
 #####################################################
 # define start log location
