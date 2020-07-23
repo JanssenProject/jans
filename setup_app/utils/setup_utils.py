@@ -33,12 +33,12 @@ class SetupUtils(Crypto64):
 
     def run(self, *args, **kwargs):
         if kwargs:
-            return base.runOnly(*args, **kwargs)
+            return base.run(*args, **kwargs)
         else:
-            return base.runOnly(*args)
+            return base.run(*args)
 
     def logOSChanges(self, *args):
-        base.logOSChangesOnly(*args)
+        base.logOSChanges(*args)
 
     def logIt(self, *args, **kwargs):
         #if pbar in args, pass to progress bar
@@ -47,7 +47,7 @@ class SetupUtils(Crypto64):
             msg = kwargs['msg'] if 'msg' in kwargs else args[0]
             Config.pbar.progress(ptype, msg)
 
-        base.logOnly(*args, **kwargs)
+        base.logIt(*args, **kwargs)
 
 
     def backupFile(self, inFile, destFolder=None, move=False):
