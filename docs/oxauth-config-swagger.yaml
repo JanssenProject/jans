@@ -23,6 +23,8 @@ tags:
   - name: Configuration – Properties
   - name: Configuration – SMTP
   - name: Configuration – Library
+  - name: Configuration – Logs
+  - name: Configuration – JWK - JSON Web Key Set (JWKs)
   - name: Custom Scripts
   - name: Custom Scripts - Person Authentication
   - name: Custom Scripts - Consent Gathering
@@ -41,7 +43,8 @@ tags:
   - name: OAuth - OpenID Connect - Scopes
   - name: OAuth - OpenID Connect - Sector Identifiers
   - name: OAuth - UMA Scopes
-  - name: OAuth - UMA Resources  
+  - name: OAuth - UMA Resources 
+ 
 paths:
   /config/properties:
     get:      
@@ -6330,7 +6333,349 @@ paths:
                             description: Origin of claim attribute.
                             type: string
         '500':
-          description: Internal Server Error  
+          description: Internal Server Error
+  /config/logs:
+    get:
+      tags:
+        - Configuration – Logs
+      summary: Returns oxAuth Log configuration.
+      description: Returns oxAuth Log configuration.
+      operationId: get-config-logs     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  type: object
+                  description: Log configuration.
+                  properties:
+                    log_location:
+                      description: External log location.
+                      type: string
+                    log_level:
+                      description:  Allows to filter the category of messages to be logged.
+                      type: string
+                      enum:
+                        - Trace - All messages
+                        - Debug - Debug level and above
+                        - Info - Informational level and above
+                        - Warn - Warning level and above
+                        - Error - Error level and above
+                        - Fatal - Only fatal errors
+                        - off - Logging is disabled
+                    log_layout:
+                      description: Defines the pattern of log format.
+                      type: string
+                      example: Date, time, spacing, line number, etc.
+                    http_logging_enabled:
+                      description: To enable/disable http logging.
+                      type: boolean
+                    jdk_logging_enabled:
+                      description: To enable/disable Jdk logging.
+                      type: boolean
+                    oauth_audit_logging_enabled:
+                      description: To enable/disable OAuth audit logging.
+                      type: boolean
+                    log_templates:
+                      description: Defines the log template to apply.
+                      type: array
+                      items: 
+                        type: object
+                        properties:
+                          value1:
+                            type: string
+                          value2:
+                            type: string
+                          description:
+                            type: string
+                          hide:
+                            type: boolean
+        '500':
+          description: Internal Server Error 
+    post:
+      tags:
+        - Configuration – Logs
+      summary: Adds oxAuth Log configuration.
+      description: Adds oxAuth Log configuration.
+      operationId: post-config-logs     
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                type: object
+                description: Log configuration.
+                properties:
+                  log_location:
+                    description: External log location.
+                    type: string
+                  log_level:
+                    description:  Allows to filter the category of messages to be logged.
+                    type: string
+                    enum:
+                      - Trace - All messages
+                      - Debug - Debug level and above
+                      - Info - Informational level and above
+                      - Warn - Warning level and above
+                      - Error - Error level and above
+                      - Fatal - Only fatal errors
+                      - off - Logging is disabled
+                  log_layout:
+                    description: Defines the pattern of log format.
+                    type: string
+                    example: Date, time, spacing, line number, etc.
+                  http_logging_enabled:
+                    description: To enable/disable http logging.
+                    type: boolean
+                  jdk_logging_enabled:
+                    description: To enable/disable Jdk logging.
+                    type: boolean
+                  oauth_audit_logging_enabled:
+                    description: To enable/disable OAuth audit logging.
+                    type: boolean
+                  log_templates:
+                    description: Defines the log template to apply.
+                    type: array
+                    items: 
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                        hide:
+                            type: boolean
+      responses:
+        '200':
+          description: OK
+        '500':
+          description: Internal Server Error
+    put:
+      tags:
+        - Configuration – Logs
+      summary: Updates oxAuth Log configuration.
+      description: Updates oxAuth Log configuration.
+      operationId: put-config-logs     
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                type: object
+                description: Log configuration.
+                properties:
+                  log_location:
+                    description: External log location.
+                    type: string
+                  log_level:
+                    description:  Allows to filter the category of messages to be logged.
+                    type: string
+                    enum:
+                      - Trace - All messages
+                      - Debug - Debug level and above
+                      - Info - Informational level and above
+                      - Warn - Warning level and above
+                      - Error - Error level and above
+                      - Fatal - Only fatal errors
+                      - off - Logging is disabled
+                  log_layout:
+                    description: Defines the pattern of log format.
+                    type: string
+                    example: Date, time, spacing, line number, etc.
+                  http_logging_enabled:
+                    description: To enable/disable http logging.
+                    type: boolean
+                  jdk_logging_enabled:
+                    description: To enable/disable Jdk logging.
+                    type: boolean
+                  oauth_audit_logging_enabled:
+                    description: To enable/disable OAuth audit logging.
+                    type: boolean
+                  log_templates:
+                    description: Defines the log template to apply.
+                    type: array
+                    items: 
+                      type: object
+                      properties:
+                        value1:
+                          type: string
+                        value2:
+                          type: string
+                        description:
+                          type: string
+                        hide:
+                            type: boolean
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+  /config/logs/all:
+    get:
+      tags:
+        - Configuration – Logs
+      summary: Gets all oxAuth log files.
+      description: Gets all oxAuth log files.
+      operationId: get-config-logs-all  
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    description: Log file.
+                    properties:
+                      log_file:
+                        type: string
+                        format: binary
+                      log_location:
+                        description: Log file location.
+                        type: string                    
+        '500':
+         description: Internal Server Error  
+  /config/logs/{name}:
+    parameters:
+     - schema:
+         type: string
+         minLength: 1
+       name: name
+       in: path
+       description: Name of the log file.
+       required: true  
+    get:
+      tags:
+        - Configuration – Logs
+      summary: Gets specified oxAuth log file by name.
+      description: Gets specified oxAuth log file by name.
+      operationId: get-config-logs-by-name   
+      responses:
+        '200':
+          description: OK
+          content:
+            image/x-icon:
+              schema:
+                items:
+                  type: object
+                  description: Log file.
+                  properties:
+                    log_file:
+                      type: string
+                      format: binary
+                    log_location:
+                      description: Log file location.
+                      type: string                    
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error 
+  /config/jwks:
+    get:
+      tags:
+        - Configuration – JWK - JSON Web Key Set (JWKs)
+      summary: Gets list of JSON Web Key (JWK) used by server.
+      description: Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+      operationId: get-config-jwks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: WebKeysConfiguration
+                required:
+                  - keys
+                type: object
+                description: JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.
+                properties:
+                  keys:
+                    type: array
+                    description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Configuration – JWK - JSON Web Key Set (JWKs)
+      summary: Adds a new JSON Web Key (JWK).
+      description: Adds a new JSON Web Key (JWK).
+      operationId: post-config-jwks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonWebKey'
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'    
+  /config/jwks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Key ID.
+        schema:
+          type: string 
+    get:
+      tags:
+        - Configuration – JWK - JSON Web Key Set (JWKs)
+      summary: Gets the specified JSON Web Key (JWK).
+      description: Gets the specified JSON Web Key (JWK).
+      operationId: get-config-jwks-by-id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonWebKey'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError' 
+    put:
+      tags:
+        - Configuration – JWK - JSON Web Key Set (JWKs)
+      summary: Updates JSON Web Key (JWK).
+      description: Updates JSON Web Key (JWK).
+      operationId: put-config-jwks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonWebKey'
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Configuration – JWK - JSON Web Key Set (JWKs)
+      summary: Deletes the specified JSON Web Key (JWK).
+      description: Deletes the specified JSON Web Key (JWK).
+      operationId: delete-config-jwks
+      responses:
+        '200':
+          description: OK
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'            
   /oauth/clients:
     get:
       tags:
