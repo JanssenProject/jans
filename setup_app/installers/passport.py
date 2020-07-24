@@ -197,9 +197,9 @@ class PassportInstaller(NodeInstaller):
 
     def create_folders(self):
         # Create logs folder
-        self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'server/logs')])
+        self.run([paths.cmd_mkdir, '-p', os.path.join(self.gluu_passport_base, 'logs')])
 
         #create empty log file unless exists
-        log_file = os.path.join(self.gluu_passport_base, 'server/logs/start.log')
+        log_file = os.path.join(self.gluu_passport_base, 'logs/start.log')
         if not os.path.exists(log_file):
             self.writeFile(log_file, '')
