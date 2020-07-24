@@ -1,4 +1,4 @@
-package org.gluu.oxauth.controller;
+package org.gluu.oxauth.ws.rs.controller;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
