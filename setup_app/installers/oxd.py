@@ -74,7 +74,10 @@ class OxdInstaller(SetupUtils, BaseInstaller):
                     break
             else:
                 i = 1
-            oxd_yaml.insert(i, 'bind_ip_addresses',  [Config.ip])
+            addr_list = [Config.ip]
+            if base.snap:
+                addr_list.append('127.0.0.1')
+            oxd_yaml.insert(i, 'bind_ip_addresses',  addr_list)
 
         if Config.get('oxd_use_gluu_storage'):
 
