@@ -470,7 +470,8 @@ class PropertiesUtils(SetupUtils):
                     oxd_server_https = input("oxd Server URL: ").lower()
 
                     if not oxd_server_https:
-                        Config.installOxd = True
+                        if Config.installed_instance and Config.installOxd:
+                            break
                         if Config.installed_instance:
                             Config.addPostSetupService.append('installOxd')
                         break
