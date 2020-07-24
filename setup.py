@@ -226,12 +226,13 @@ def do_installation():
         gluuProgress.start()
 
     try:
+        jettyInstaller.calculate_selected_aplications_memory()
+
         if not Config.installed_instance:
             gluuInstaller.configureSystem()
             gluuInstaller.make_salt()
             oxauthInstaller.make_salt()
 
-            jettyInstaller.calculate_selected_aplications_memory()
             if not base.snap:
                 jreInstaller.start_installation()
                 jettyInstaller.start_installation()
