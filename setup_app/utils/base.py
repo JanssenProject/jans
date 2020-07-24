@@ -16,6 +16,7 @@ import shutil
 import multiprocessing
 
 from collections import OrderedDict
+from urllib.request import urlretrieve
 
 from setup_app import paths
 from setup_app import static
@@ -275,3 +276,13 @@ def find_script_names(ldif_file):
                     name_list.append(result.groups()[0])
                 
     return name_list
+
+def download(url, dst):
+    pardir, fn = os.path.split(dst)
+    if not os.path.exists(pardir):
+        logIt("Creating driectory", pardir)
+        os.makedirs(pardir)
+    logIt("Downloading {} to {}".format(url, dst))
+    result = urlretrieve(url, dst)
+    f_size = result[1].get('Content-Length','0')
+    logIt("Download size: {} bytes".format(f_size))
