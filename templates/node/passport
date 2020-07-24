@@ -9,5 +9,9 @@ NODE_OPTIONS="PORT=8090 NODE_ENV=production HOSTNAME=localhost"
 NODE_ARGS="--max-old-space-size=%(passport_max_mem)s"
 APP_ARGS=""
 
-NODE_USER=node
+if [ -z "$NODE_USER" ]
+then
+    NODE_USER=node
+fi
+
 TMPDIR=%(node_home)s/temp
