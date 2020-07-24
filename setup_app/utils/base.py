@@ -14,9 +14,13 @@ import traceback
 import re
 import shutil
 import multiprocessing
+import ssl
 
 from collections import OrderedDict
 from urllib.request import urlretrieve
+
+# disable ssl certificate check
+ssl._create_default_https_context = ssl._create_unverified_context
 
 from setup_app import paths
 from setup_app import static
