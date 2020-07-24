@@ -472,6 +472,7 @@ class PropertiesUtils(SetupUtils):
                     if not oxd_server_https:
                         if Config.installed_instance and Config.installOxd:
                             break
+                        Config.installOxd = True
                         if Config.installed_instance:
                             Config.addPostSetupService.append('installOxd')
                         break
