@@ -18,7 +18,8 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'installNode'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MONDATORY
-        self.register_progess()
+        if not base.snap:
+            self.register_progess()
 
         self.node_initd_script = os.path.join(Config.install_dir, 'static/system/initd/node')
         self.node_user_home = '/home/node'

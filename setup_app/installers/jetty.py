@@ -23,7 +23,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'installJetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MONDATORY
-        self.register_progess()
+        if not base.snap:
+            self.register_progess()
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = os.path.join(self.jetty_user_home, 'lib')
 
