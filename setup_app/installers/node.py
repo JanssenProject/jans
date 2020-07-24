@@ -10,6 +10,7 @@ from setup_app.installers.base import BaseInstaller
 class NodeInstaller(BaseInstaller, SetupUtils):
 
     node_base = os.path.join(Config.gluuOptFolder, 'node')
+    templates_rendered = False
 
     def __init__(self):
         self.service_name = 'node'
@@ -22,7 +23,6 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         self.node_initd_script = os.path.join(Config.install_dir, 'static/system/initd/node')
         self.node_user_home = '/home/node'
 
-
     def install(self):
 
         node_archieve_list = glob.glob(os.path.join(Config.distAppFolder, 'node-*-linux-x64.tar.xz'))
@@ -30,8 +30,9 @@ class NodeInstaller(BaseInstaller, SetupUtils):
         if not node_archieve_list:
             self.logIt("Can't find node archive", True, True)
 
-        self.createUser('node', self.node_user_home)
-        self.addUserToGroup('gluu', 'node')
+        if not base.snap:
+            self.createUser('node', self.node_user_home)
+            self.addUserToGroup('gluu', 'node')
 
         nodeArchive = max(node_archieve_list)
 
@@ -63,7 +64,7 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
     def render_templates(self):
         self.logIt("Rendering node templates")
-
+        self.templates_rendered = True
         # make variables of this class accesible from Config
         self.update_rendering_dict()
         
@@ -72,6 +73,8 @@ class NodeInstaller(BaseInstaller, SetupUtils):
 
     def installNodeService(self, serviceName):
         self.logIt("Installing node service %s..." % serviceName)
+        if not self.templates_rendered:
+            self.render_templates()
 
         nodeServiceConfiguration = os.path.join(Config.outputFolder, 'node', serviceName)
         self.copyFile(nodeServiceConfiguration, Config.osDefault)
