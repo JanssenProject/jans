@@ -115,7 +115,7 @@ public class RegistrationAction implements Serializable {
             HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
             final URL aURL = new URL(request.getRequestURL().toString());
             redirectUris = aURL.getProtocol() + "://" + aURL.getAuthority() + "/oxauth-rp/home.htm";
-            backchannelClientNotificationEndpoint = aURL.getProtocol() + "://" + aURL.getAuthority() + "/api/cb";
+            backchannelClientNotificationEndpoint = aURL.getProtocol() + "://" + aURL.getAuthority() + "/restv1/cb";
         } catch (MalformedURLException e) {
             log.error("Problems processing oxAuth-RP url", e);
         }
