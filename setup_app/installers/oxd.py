@@ -23,7 +23,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.oxd_server_yml_fn = os.path.join(self.oxd_root, 'conf/oxd-server.yml')
 
     def install(self):
-
+        self.logIt("Installing", pbar=self.service_name)
         self.run(['tar', '-zxf', Config.oxd_package, '--strip-components=1', '-C', self.oxd_root])
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
         
@@ -62,7 +62,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         self.enable()
 
     def modify_config_yml(self):
-
+        self.logIt("Configuring", pbar=self.service_name)
         yml_str = self.readFile(self.oxd_server_yml_fn)
         oxd_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
 
@@ -99,6 +99,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
 
     def generate_keystore(self):
+        self.logIt("Generating certificate", pbar=self.service_name)
         # generate oxd-server.keystore for the hostname
         self.run([
             paths.cmd_openssl,
