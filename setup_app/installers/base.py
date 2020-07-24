@@ -132,9 +132,8 @@ class BaseInstaller:
             self.download_files()
 
     def download_file(self, url, src):
-        open('/tmp/wgetrc', 'w').close()
-        self.logIt("Downloading {}".format(os.path.basename(src)), pbar=self.service_name)
-        self.run([paths.cmd_wget, '--config=/tmp/wgetrc', url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', src])
+        Config.pbar.progress(self.service_name, "Downloading {}".format(os.path.basename(src)))
+        base.download(url, src)
 
     def download_files(self, force=False, downloads=[]):
         if hasattr(self, 'source_files'):
