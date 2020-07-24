@@ -1,4 +1,4 @@
-package org.gluu.scim.controller;
+package org.gluu.scim.ws.rs.controller;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
@@ -17,12 +17,12 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 public class HealthCheckController {
 
-    @GET
-    @POST
-    @Path("/health-check")
-    @Produces(MediaType.APPLICATION_JSON)
+	@GET
+	@POST
+	@Path("/health-check")
+	@Produces(MediaType.APPLICATION_JSON)
 	public String healthCheckController() {
-        return "{\"status\":\"running\"}";
+		return "{\"status\":\"running\"}";
 	}
 
 }
