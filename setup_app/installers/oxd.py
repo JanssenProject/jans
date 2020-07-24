@@ -24,7 +24,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
 
     def install(self):
         self.logIt("Installing", pbar=self.service_name)
-        self.run(['tar', '-zxf', Config.oxd_package, '--strip-components=1', '-C', self.oxd_root])
+        self.run(['tar', '-zxf', Config.oxd_package, '--no-same-owner', '--strip-components=1', '-C', self.oxd_root])
         self.run(['chown', '-R', 'jetty:jetty', self.oxd_root])
         
         if base.snap:
@@ -169,4 +169,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
         #self.run(['rm', '-r', '-f', tmp_dir])
         Config.oxd_package = oxd_tgz_fn
         
-        
+    def create_folders(self):
+        if not os.path.exists(self.oxd_root):
+            self.run([paths.cmd_mkdir, self.oxd_root])
+    
