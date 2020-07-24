@@ -149,7 +149,7 @@ class BaseInstaller:
                 self.source_files[i] = (src, url)
 
                 if force or self.check_download_needed(src):
-                    base.download_file(url, src)
+                    self.download_file(url, src)
 
     def check_download_needed(self, src):
         froot, fext = os.path.splitext(src)
