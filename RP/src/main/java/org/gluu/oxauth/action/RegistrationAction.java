@@ -53,6 +53,9 @@ public class RegistrationAction implements Serializable {
     @Inject
     private TokenAction tokenAction;
 
+    @Inject
+    private DeviceAuthzAction deviceAuthzAction;
+
     private String registrationEndpoint;
     private String redirectUris;
     private String claimsRedirectUris;
@@ -176,6 +179,9 @@ public class RegistrationAction implements Serializable {
                 backchannelAuthenticationAction.setClientId(response.getClientId());
                 backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
                 backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(request.getBackchannelTokenDeliveryMode());
+
+                deviceAuthzAction.setClientId(response.getClientId());
+                deviceAuthzAction.setClientSecret(response.getClientSecret());
             }
 
             showResults = true;
@@ -201,6 +207,8 @@ public class RegistrationAction implements Serializable {
 
             backchannelAuthenticationAction.setClientId(response.getClientId());
             backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
+            deviceAuthzAction.setClientId(response.getClientId());
+            deviceAuthzAction.setClientSecret(response.getClientSecret());
             if ( response.getClaims() != null && response.getClaims().containsKey(
                     RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()) ) {
                 backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(
