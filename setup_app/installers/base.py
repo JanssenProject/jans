@@ -75,7 +75,7 @@ class BaseInstaller:
             service = self.service_name
 
         if base.snap:
-            service = os.environ['SNAP_NAME'] + '.' + self.service_name
+            service = os.environ['SNAP_NAME'] + '.' + service
 
         try:
             if base.snap:
