@@ -21,6 +21,10 @@ tags:
   - name: Cache Configuration – in-Memory
   - name: Cache Configuration – Native-Persistence
   - name: Configuration – Properties
+  - name: Configuration – Backchannel
+  - name: Configuration – Dynamic Registration
+  - name: Configuration – IdToken
+  - name: Configuration – oxEleven
   - name: Configuration – SMTP
   - name: Configuration – Library
   - name: Configuration – Logs
@@ -50,7 +54,7 @@ paths:
     get:      
       summary: Gets all oxauth configuration properties.
       description: Gets all oxauth configuration properties.
-      operationId: properties
+      operationId: get-properties-all
       tags:
         - Configuration – Properties
       responses:
@@ -1296,6 +1300,517 @@ paths:
                       description: Specifies the CIBA token expiration time in seconds.
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /config/properties/backchannel:
+    get:      
+      summary: Gets oxauth backchannel configuration properties.
+      description: Gets oxauth backchannel configuration properties.
+      operationId: get-properties-backchannel
+      tags:
+        - Configuration – Backchannel
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: BackchannelConfiguration
+                items:
+                  type: object
+                  title: BackchannelConfiguration
+                  description: Backchannel configuration properties.
+                  required:
+                    - backchannelClientId
+                    - backchannelRedirectUri
+                    - backchannelAuthenticationEndpoint
+                    - backchannelDeviceRegistrationEndpoint
+                    - backchannelTokenDeliveryModesSupported
+                    - backchannelAuthenticationRequestSigningAlgValuesSupported
+                    - backchannelUserCodeParameterSupported
+                  properties:					
+                    backchannelClientId:
+                      type: string
+                      description: Backchannel Client Id.
+                      minLength: 0
+                    backchannelRedirectUri:
+                      type: string
+                      description: Backchannel Redirect Uri.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
+                    backchannelAuthenticationEndpoint:
+                      type: string
+                      description: Backchannel Authentication Endpoint.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
+                    backchannelDeviceRegistrationEndpoint:
+                      type: string
+                      description: Backchannel Device Registration Endpoint.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
+                    backchannelTokenDeliveryModesSupported:
+                      type: array
+                      description: Backchannel Token Delivery Modes Supported.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+                      format: select - poll - ping - push
+                    backchannelAuthenticationRequestSigningAlgValuesSupported:
+                      type: array
+                      description: Backchannel Authentication Request Signing Alg Values Supported.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+                      format: select - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                    backchannelUserCodeParameterSupported:
+                      type: boolean
+                      description: Backchannel User Code Parameter Supported
+                    backchannelBindingMessagePattern:
+                      type: string
+                      description: Backchannel Binding Message Pattern.
+                      minLength: 0
+                    backchannelAuthenticationResponseExpiresIn:
+                      type: integer
+                      description: Backchannel Authentication Response Expires In.
+                      multipleOf: 1
+                      minimum: 1
+                      maximum: 2147483647
+                      exclusiveMinimum: false
+                      exclusiveMaximum: false
+                    backchannelAuthenticationResponseInterval:
+                      type: integer
+                      description: Backchannel Authentication Response Interval.
+                      multipleOf: 1
+                      minimum: 1
+                      maximum: 2147483647
+                      exclusiveMinimum: false
+                      exclusiveMaximum: false
+                    backchannelLoginHintClaims:
+                      type: array
+                      description: Backchannel Login Hint Claims.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxauth backchannel configuration properties.
+      description: Updates oxauth backchannel configuration properties.
+      operationId: put-properties-backchannel
+      tags:
+        - Configuration – Backchannel
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: BackchannelConfiguration
+              items:
+                type: object
+                title: BackchannelConfiguration
+                description: Backchannel configuration properties.
+                required:
+                  - backchannelClientId
+                  - backchannelRedirectUri
+                  - backchannelAuthenticationEndpoint
+                  - backchannelDeviceRegistrationEndpoint
+                  - backchannelTokenDeliveryModesSupported
+                  - backchannelAuthenticationRequestSigningAlgValuesSupported
+                  - backchannelUserCodeParameterSupported
+                properties:					
+                  backchannelClientId:
+                    type: string
+                    description: Backchannel Client Id.
+                    minLength: 0
+                  backchannelRedirectUri:
+                    type: string
+                    description: Backchannel Redirect Uri.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
+                  backchannelAuthenticationEndpoint:
+                    type: string
+                    description: Backchannel Authentication Endpoint.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
+                  backchannelDeviceRegistrationEndpoint:
+                    type: string
+                    description: Backchannel Device Registration Endpoint.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
+                  backchannelTokenDeliveryModesSupported:
+                    type: array
+                    description: Backchannel Token Delivery Modes Supported.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                    format: select - poll - ping - push
+                  backchannelAuthenticationRequestSigningAlgValuesSupported:
+                    type: array
+                    description: Backchannel Authentication Request Signing Alg Values Supported.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                    format: select - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                  backchannelUserCodeParameterSupported:
+                    type: boolean
+                    description: Backchannel User Code Parameter Supported
+                  backchannelBindingMessagePattern:
+                    type: string
+                    description: Backchannel Binding Message Pattern.
+                    minLength: 0
+                  backchannelAuthenticationResponseExpiresIn:
+                    type: integer
+                    description: Backchannel Authentication Response Expires In.
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  backchannelAuthenticationResponseInterval:
+                    type: integer
+                    description: Backchannel Authentication Response Interval.
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  backchannelLoginHintClaims:
+                    type: array
+                    description: Backchannel Login Hint Claims.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                        type: string
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/dyn_registration:
+    get:      
+      summary: Gets oxauth dynamic configuration properties.
+      description: Gets oxauth dynamic configuration properties.
+      operationId: get-properties-dyn_registration
+      tags:
+        - Configuration – Dynamic Registration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: DynamicConfiguration
+                items:
+                  type: object
+                  title: DynamicConfiguration
+                  description: Dynamic Configuration properties.
+                  properties:					
+                    dynamicRegistrationEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable Dynamic Registration.
+                      default: 
+                    dynamicRegistrationPasswordGrantTypeEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
+                      default: false
+                    dynamicRegistrationPersistClientAuthorizations:
+                      type: boolean
+                      description: Boolean value specifying whether to persist client authorizations.
+                      default: false
+                    dynamicRegistrationScopesParamEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable scopes parameter in dynamic registration.
+                      default: false
+                    dynamicRegistrationExpirationTime:
+                      type: integer
+                      description: 'Expiration time in seconds for clients created with dynamic registration, -1 means never expire.'
+                      multipleOf: 1
+                      minimum: 0
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      default: -1
+                    legacyDynamicRegistrationScopeParam:
+                      type: boolean
+                      description: Legacy Dynamic Registration Scopes JSON Array Param.
+                    dynamicRegistrationCustomAttributes:
+                      type: array
+                      description: Custom attributes for the Dynamic registration.
+                      items:
+                        type: string
+                      enum:
+                        - oxAuthTrustedClient
+                    dynamicRegistrationCustomObjectClass:
+                      type: string
+                      description: LDAP custom object class for dynamic registration.
+                      minLength: 1
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxauth dynamic configuration properties.
+      description: Updates oxauth dynamic configuration properties.
+      operationId: put-properties-dyn_registration
+      tags:
+        - Configuration – Dynamic Registration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: DynamicConfiguration
+              items:
+                type: object
+                title: DynamicConfiguration
+                description: Dynamic Configuration properties.
+                properties:					
+                  dynamicRegistrationEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable Dynamic Registration.
+                    default: 
+                  dynamicRegistrationPasswordGrantTypeEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
+                    default: false
+                  dynamicRegistrationPersistClientAuthorizations:
+                    type: boolean
+                    description: Boolean value specifying whether to persist client authorizations.
+                    default: false
+                  dynamicRegistrationScopesParamEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable scopes parameter in dynamic registration.
+                    default: false
+                  dynamicRegistrationExpirationTime:
+                    type: integer
+                    description: 'Expiration time in seconds for clients created with dynamic registration, -1 means never expire.'
+                    multipleOf: 1
+                    minimum: 0
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    default: -1
+                  legacyDynamicRegistrationScopeParam:
+                    type: boolean
+                    description: Legacy Dynamic Registration Scopes JSON Array Param.
+                  dynamicRegistrationCustomAttributes:
+                    type: array
+                    description: Custom attributes for the Dynamic registration.
+                    items:
+                      type: string
+                    enum:
+                      - oxAuthTrustedClient
+                  dynamicRegistrationCustomObjectClass:
+                    type: string
+                    description: LDAP custom object class for dynamic registration.
+                    minLength: 1
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/idtoken:
+    get:      
+      summary: Gets oxauth IdToken configuration properties.
+      description: Gets oxauth IdToken configuration properties.
+      operationId: get-properties-idtoken
+      tags:
+        - Configuration – IdToken
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: IdTokenConfiguration
+                items:
+                  type: object
+                  title: IdToken
+                  description: IdToken configuration properties.
+                  properties:					
+                    idTokenSigningAlgValuesSupported:
+                      type: array
+                      description: A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - none
+                        - HS256
+                        - HS384
+                        - HS512
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                    idTokenEncryptionAlgValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - RSA1_5
+                        - RSA-OAEP
+                        - A128KW
+                        - A256KW
+                    idTokenEncryptionEncValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - A128CBC+HS256
+                        - A256CBC+HS512
+                        - A128GCM
+                        - A256GCM
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxauth IdToken configuration properties.
+      description: Updates oxauth IdToken configuration properties.
+      operationId: put-properties-idtoken
+      tags:
+        - Configuration – IdToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: IdTokenConfiguration
+              items:
+                type: object
+                title: IdToken
+                description: IdToken configuration properties.
+                properties:					
+                  idTokenSigningAlgValuesSupported:
+                    type: array
+                    description: A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                    items:
+                      type: string
+                    enum:
+                      - none
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  idTokenEncryptionAlgValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                    items:
+                      type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  idTokenEncryptionEncValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT.
+                    items:
+                      type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/ox-eleven:
+    get:      
+      summary: Gets oxauth oxEleven configuration properties.
+      description: Gets oxauth oxEleven configuration properties.
+      operationId: get-properties-ox-eleven
+      tags:
+        - Configuration – oxEleven
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: oxElevenConfiguration
+                items:
+                  type: object
+                  title: oxEleven
+                  description: oxEleven configuration properties.
+                  properties:					
+                    oxElevenGenerateKeyEndpoint:
+                      type: string
+                      description: URL for the oxEleven Generate Key Endpoint.
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/generateKey'
+                    oxElevenSignEndpoint:
+                      type: string
+                      description: URL for the oxEleven Sign Endpoint.
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/sign'
+                    oxElevenVerifySignatureEndpoint:
+                      type: string
+                      description: URL for the oxEleven Verify Signature Endpoint.
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/verifySignature'
+                    oxElevenDeleteKeyEndpoint:
+                      type: string
+                      description: URL for the oxEleven Delete Key Endpoint.
+                      example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
+                    oxElevenJwksEndpoint:
+                      type: string
+                      description: URL for the oxEleven JWKS Endpoint..
+                      example: null
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxauth oxEleven configuration properties.
+      description: Updates oxauth oxEleven configuration properties.
+      operationId: put-properties-ox-eleven
+      tags:
+        - Configuration – oxEleven
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: oxElevenConfiguration
+              items:
+                type: object
+                title: oxEleven
+                description: oxEleven configuration properties.
+                properties:					
+                  oxElevenGenerateKeyEndpoint:
+                    type: string
+                    description: URL for the oxEleven Generate Key Endpoint.
+                    example: 'https://server.example.com/oxeleven/rest/oxeleven/generateKey'
+                  oxElevenSignEndpoint:
+                    type: string
+                    description: URL for the oxEleven Sign Endpoint.
+                    example: 'https://server.example.com/oxeleven/rest/oxeleven/sign'
+                  oxElevenVerifySignatureEndpoint:
+                    type: string
+                    description: URL for the oxEleven Verify Signature Endpoint.
+                    example: 'https://server.example.com/oxeleven/rest/oxeleven/verifySignature'
+                  oxElevenDeleteKeyEndpoint:
+                    type: string
+                    description: URL for the oxEleven Delete Key Endpoint.
+                    example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
+                  oxElevenJwksEndpoint:
+                    type: string
+                    description: URL for the oxEleven JWKS Endpoint..
+                    example: null
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /config/graphics:
     get:      
       summary: Retrieves organization graphic configuration.
