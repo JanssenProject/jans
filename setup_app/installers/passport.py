@@ -18,7 +18,7 @@ class PassportInstaller(NodeInstaller):
         self.install_var = 'installPassport'
         self.register_progess()
 
-        passport_version = Config.oxVersion.replace('-SNAPSHOT','')
+        passport_version = Config.oxVersion.replace('-SNAPSHOT','').replace('.Final','')
         self.source_files = [
                 (os.path.join(Config.distGluuFolder, 'passport.tgz'), 'https://ox.gluu.org/npm/passport/passport-{}.tgz'.format(passport_version)),
                 (os.path.join(Config.distGluuFolder, 'passport-node_modules.tar.gz'), 'https://ox.gluu.org/npm/passport/passport-version_{}-node_modules.tar.gz'.format(passport_version))
@@ -47,7 +47,7 @@ class PassportInstaller(NodeInstaller):
 
 
     def install(self):
-
+        self.logIt("Installing passport", pbar=self.service_name)
         self.logIt("Preparing passport service base folders")
         self.run([paths.cmd_mkdir, '-p', self.gluu_passport_base])
 
