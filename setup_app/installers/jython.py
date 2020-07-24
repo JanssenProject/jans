@@ -3,6 +3,7 @@ import glob
 import re
 
 from setup_app import paths
+from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
