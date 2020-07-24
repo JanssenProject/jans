@@ -89,7 +89,7 @@ class OxdInstaller(SetupUtils, BaseInstaller):
             for appenders in oxd_yaml['logging']['appenders']:
                 if appenders['type'] == 'file':
                     appenders['currentLogFilename'] = self.log_file
-                    appenders['archivedLogFilenamePattern'] = os.path.join(base.snap_common, 'gluu/oxd-server/log/oxd-server/-%d{yyyy-MM-dd}-%i.log.gz')
+                    appenders['archivedLogFilenamePattern'] = os.path.join(base.snap_common, 'gluu/oxd-server/log/oxd-server-%d{yyyy-MM-dd}-%i.log.gz')
 
         yml_str = ruamel.yaml.dump(oxd_yaml, Dumper=ruamel.yaml.RoundTripDumper)
         self.writeFile(self.oxd_server_yml_fn, yml_str)
