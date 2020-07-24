@@ -90,7 +90,7 @@ class GluuInstaller(SetupUtils):
         if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
             oxauth_client_jar_url = 'https://ox.gluu.org/maven/org/gluu/oxauth-client/{0}/oxauth-client-{0}-jar-with-dependencies.jar'.format(Config.oxVersion)
             self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            self.run(['wget', '-nv', oxauth_client_jar_url, '-O', Config.non_setup_properties['oxauth_client_jar_fn']])
+            base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
 
         self.logIt("Determining key generator path")
         oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])

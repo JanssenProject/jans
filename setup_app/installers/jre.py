@@ -65,10 +65,9 @@ class JreInstaller(BaseInstaller, SetupUtils):
             Config.java_type = 'jre'
 
         if Config.java_type != 'jre':
-            
-            jdk_fn = os.path.basename(self.open_jdk_archive_link)            
+            jdk_fn = os.path.basename(self.open_jdk_archive_link)       
             self.logIt("Downloading " + jdk_fn, pbar=self.service_name)
             self.jreArchive = os.path.join(Config.distAppFolder, jdk_fn)
-            self.run([paths.cmd_wget, '-nv', self.open_jdk_archive_link, '-O', self.jreArchive])
+            base.download(self.open_jdk_archive_link, self.jreArchive)
         else:
             self.jreArchive = max(jre_arch_list)
