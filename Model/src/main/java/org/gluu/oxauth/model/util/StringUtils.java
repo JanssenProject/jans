@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.common.HasParamName;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -25,6 +26,7 @@ public class StringUtils {
 
     public static final String EMPTY_STRING = "";
     public static final String SPACE = " ";
+    public static final String EASY_TO_READ_CHARACTERS = "BCDFGHJKLMNPQRSTVWXZ";
 
     public static String nullToEmpty(String str) {
         if (str == null) {
@@ -171,4 +173,32 @@ public class StringUtils {
                     .append(URLEncoder.encode(value.toString(), Util.UTF8_STRING_ENCODING));
         }
     }
+
+    /**
+     * Generates a code using a base of 20 characters easy to read for users, using parametrized
+     * length separated by dashes with intervals of 4 characters.
+     */
+    public static String generateRandomReadableCode(byte length) {
+        StringBuilder sb = new StringBuilder();
+        SecureRandom sc = new SecureRandom();
+        for (int i = 0; i < length; i++) {
+            if (i % 4 == 0 && i > 0) {
+                sb.append('-');
+            }
+            char item = EASY_TO_READ_CHARACTERS.charAt(sc.nextInt(EASY_TO_READ_CHARACTERS.length()));
+            sb.append(item);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Generates a random code using a byte array as its seed.
+     * @param seedLength Length of the byte array
+     */
+    public static String generateRandomCode(byte seedLength) {
+        byte[] seed = new byte[seedLength];
+        new SecureRandom().nextBytes(seed);
+        return Util.byteArrayToHexString(seed);
+    }
+
 }
