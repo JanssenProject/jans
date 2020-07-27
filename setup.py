@@ -345,6 +345,7 @@ else:
     GSA.gluuInstaller = gluuInstaller
     GSA.jettyInstaller = jettyInstaller
     GSA.run()
+    print('\033c')
 
 # we need this for progress write last line
 time.sleep(2)
