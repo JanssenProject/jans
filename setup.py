@@ -320,6 +320,8 @@ def do_installation():
                     gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
                     service['object'].start('oxauth-rp')
 
+        gluuInstaller.post_setup()
+
         gluuProgress.progress(static.COMPLETED)
 
         if not GSA:
