@@ -59,7 +59,8 @@ import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseT
                 "/restv1/userinfo",
                 "/restv1/revoke",
                 "/restv1/revoke_session",
-                "/restv1/bc-authorize"},
+                "/restv1/bc-authorize",
+                "/restv1/device_authorization"},
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
@@ -122,6 +123,7 @@ public class AuthenticationFilter implements Filter {
             boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
             boolean tokenRevocationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenRevocationEndpoint());
             boolean backchannelAuthenticationEnpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getBackchannelAuthenticationEndpoint());
+            boolean deviceAuthorizationEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getDeviceAuthzEndpoint());
             boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             String authorizationHeader = httpRequest.getHeader("Authorization");
@@ -130,13 +132,13 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenRevocationEndpoint && clientService.isPublic(httpRequest.getParameter("client_id"))) {
-                log.trace("Skipped authentication for Token Revocation for public client.");
+            if ((tokenRevocationEndpoint || deviceAuthorizationEndpoint) && clientService.isPublic(httpRequest.getParameter("client_id"))) {
+                log.trace("Skipped authentication for {} for public client.", tokenRevocationEndpoint ? "Token Revocation" : "Device Authorization");
                 filterChain.doFilter(httpRequest, httpResponse);
                 return;
             }
 
-            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint) {
+            if (tokenEndpoint || umaTokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -318,7 +320,8 @@ public class AuthenticationFilter implements Filter {
                                 || servletRequest.getRequestURI().endsWith("/revoke")
                                 || servletRequest.getRequestURI().endsWith("/revoke_session")
                                 || servletRequest.getRequestURI().endsWith("/userinfo")
-                                || servletRequest.getRequestURI().endsWith("/bc-authorize")) {
+                                || servletRequest.getRequestURI().endsWith("/bc-authorize")
+                                || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                             Client client = clientService.getClient(username);
                             if (client == null
                                     || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {

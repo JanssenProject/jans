@@ -28,14 +28,7 @@ import org.gluu.oxauth.ciba.CIBAPushErrorService;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.ciba.PushErrorResponseType;
-import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.CibaRequestCacheControl;
-import org.gluu.oxauth.model.common.CibaRequestStatus;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
@@ -109,6 +102,9 @@ public class AuthorizeService {
 
     @Inject
     private CibaRequestService cibaRequestService;
+
+    @Inject
+    private DeviceAuthorizationService deviceAuthorizationService;
 
     public SessionId getSession() {
         return getSession(null);
@@ -241,6 +237,9 @@ public class AuthorizeService {
                 }
             }
         }
+        if (sessionAttribute.containsKey(DeviceAuthorizationService.SESSION_USER_CODE)) {
+            processDeviceAuthDeniedResponse(sessionAttribute);
+        }
 
         facesService.redirectToExternalURL(redirectUri.toString());
     }
@@ -297,5 +296,16 @@ public class AuthorizeService {
             log.error(e.getMessage(), e);
         }
         return false;
+    }
+
+    private void processDeviceAuthDeniedResponse(Map<String, String> sessionAttribute) {
+        String userCode = sessionAttribute.get(DeviceAuthorizationService.SESSION_USER_CODE);
+        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
+
+        if (cacheData != null && cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+            cacheData.setStatus(DeviceAuthorizationStatus.DENIED);
+            deviceAuthorizationService.saveInCache(cacheData, true, false);
+            deviceAuthorizationService.removeDeviceAuthRequestInCache(userCode, null);
+        }
     }
 }
