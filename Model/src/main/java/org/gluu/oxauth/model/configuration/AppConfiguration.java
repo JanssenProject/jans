@@ -208,7 +208,6 @@ public class AppConfiguration implements Configuration {
     private Boolean removeRefreshTokensForClientOnLogout  = true;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
-    private Boolean clientAuthorizationBackwardCompatibility = false; // search client authorization by filter (instead of key)
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
@@ -236,15 +235,6 @@ public class AppConfiguration implements Configuration {
     private int backchannelRequestsProcessorJobChunkSize;
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
-
-    public Boolean getClientAuthorizationBackwardCompatibility() {
-        if (clientAuthorizationBackwardCompatibility == null) clientAuthorizationBackwardCompatibility = false;
-        return clientAuthorizationBackwardCompatibility;
-    }
-
-    public void setClientAuthorizationBackwardCompatibility(Boolean clientAuthorizationBackwardCompatibility) {
-        this.clientAuthorizationBackwardCompatibility = clientAuthorizationBackwardCompatibility;
-    }
 
     public Boolean getExpirationNotificatorEnabled() {
         if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = false;
