@@ -94,6 +94,7 @@ public class OpenIdConfiguration extends HttpServlet {
             jsonObj.put(REGISTRATION_ENDPOINT, appConfiguration.getRegistrationEndpoint());
             jsonObj.put(ID_GENERATION_ENDPOINT, appConfiguration.getIdGenerationEndpoint());
             jsonObj.put(INTROSPECTION_ENDPOINT, appConfiguration.getIntrospectionEndpoint());
+            jsonObj.put(DEVICE_AUTHZ_ENDPOINT, appConfiguration.getDeviceAuthzEndpoint());
 
             JSONArray responseTypesSupported = new JSONArray();
             for (Set<ResponseType> responseTypes : appConfiguration.getResponseTypesSupported()) {

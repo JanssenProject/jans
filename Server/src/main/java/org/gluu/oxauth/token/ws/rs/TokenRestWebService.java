@@ -63,6 +63,8 @@ public interface TokenRestWebService {
             String rptCode,
             @FormParam("auth_req_id")
             String authReqId,
+            @FormParam("device_code")
+            String deviceCode,
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @Context SecurityContext sec);
