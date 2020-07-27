@@ -106,9 +106,6 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
     @Inject
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
-    @Inject
-    private Boolean isCibaEnabled;
-
     @Override
     public Response requestBackchannelAuthorizationPost(
             String clientId, String scope, String clientNotificationToken, String acrValues, String loginHintToken,
@@ -134,7 +131,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
 
         Response.ResponseBuilder builder = Response.ok();
 
-        if (!this.isCibaEnabled) {
+        if (!appConfiguration.getCibaEnabled()) {
             log.warn("Trying to register a CIBA request, however CIBA config is disabled.");
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
