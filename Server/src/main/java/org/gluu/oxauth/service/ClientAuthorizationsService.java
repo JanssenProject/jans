@@ -125,7 +125,7 @@ public class ClientAuthorizationsService {
             Set<String> set = new HashSet<>(scopes);
             set.addAll(Arrays.asList(clientAuthorization.getScopes()));
 
-            if (set.size() != scopes.size()) {
+            if (set.size() != clientAuthorization.getScopes().length) {
                 clientAuthorization.setScopes(set.toArray(new String[set.size()]));
                 ldapEntryManager.merge(clientAuthorization);
             }
