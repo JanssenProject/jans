@@ -107,9 +107,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private CibaRequestService cibaRequestService;
 
-    @Inject
-    private Boolean isCibaEnabled;
-
     private DeviceAuthorizationService deviceAuthorizationService;
 
     @Override
@@ -393,7 +390,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                 }
             } else if (gt == GrantType.CIBA) {
-                if (!this.isCibaEnabled) {
+                if (!appConfiguration.getCibaEnabled()) {
                     log.warn("Trying to get CIBA token, however CIBA config is disabled.");
                     return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Grant types are invalid."), oAuth2AuditLog);
                 }
