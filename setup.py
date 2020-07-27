@@ -341,6 +341,8 @@ if not GSA and proceed:
     msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(Config.hostname)
     print(msg_text)
     print('\n', static.colors.ENDC)
+    # we need this for progress write last line
+    time.sleep(2)
 else:
     Config.thread_queue = queue
     GSA.do_installation = do_installation
@@ -348,6 +350,7 @@ else:
     GSA.jettyInstaller = jettyInstaller
     GSA.run()
     print('\033c')
+    print()
+    for m in Config.post_messages:
+        print(m)
 
-# we need this for progress write last line
-time.sleep(2)
