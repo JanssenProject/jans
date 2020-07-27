@@ -174,7 +174,6 @@ public class AppInitializer {
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
 	private AuthenticationMode authenticationMode;
-	private Boolean isCibaEnabled;
 
 	private List<GluuLdapConfiguration> persistenceAuthConfigs;
 
@@ -191,7 +190,7 @@ public class AppInitializer {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode", "gluuCibaEnabled");
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
 
 		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 
@@ -221,11 +220,10 @@ public class AppInitializer {
 		keyGeneratorTimer.initTimer();
 		expirationNotificatorTimer.initTimer();
 		initTimer();
-		initCibaRequestsProcessor(newConfiguration);
+		initCibaRequestsProcessor();
 
-		// Set application config
+		// Set default authentication method after
 		setDefaultAuthenticationMethod(newConfiguration);
-		setIsCibaEnabled(newConfiguration);
 
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
@@ -293,7 +291,7 @@ public class AppInitializer {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
 
-		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode", "gluuCibaEnabled");
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "oxIDPAuthentication", "oxAuthenticationMode");
 
 		List<GluuLdapConfiguration> newPersistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 
@@ -306,7 +304,6 @@ public class AppInitializer {
 		}
 
 		setDefaultAuthenticationMethod(newConfiguration);
-		setIsCibaEnabled(newConfiguration);
 	}
 
 	/*
@@ -692,32 +689,15 @@ public class AppInitializer {
 	/**
 	 * Method to initialize CIBA requests processor job according to a json property which
 	 * should be more than 0 seconds of interval
-	 * @param newConfiguration
 	 */
-	private void initCibaRequestsProcessor(GluuConfiguration newConfiguration) {
-		if (!newConfiguration.getCibaEnabled()) {
-			return;
-		}
-		if (appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+	private void initCibaRequestsProcessor() {
+		if (appConfiguration.getCibaEnabled() && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
 			if (cibaRequestsProcessorJob != null) {
 				cibaRequestsProcessorJob.initTimer();
 			}
 		} else {
-			log.warn("Didn't start ciba requests processor job because the interval is not valid to run, value: {}",
+			log.warn("Ciba requests processor hasn't been started because the interval is not valid to run or this is disabled, value: {}",
 					appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
-		}
-	}
-
-	@Produces
-	public Boolean getIsCibaEnabled() {
-		return this.isCibaEnabled;
-	}
-
-	public void setIsCibaEnabled(GluuConfiguration configuration) {
-		if (configuration != null && configuration.getCibaEnabled() != null) {
-			this.isCibaEnabled = configuration.getCibaEnabled();
-		} else {
-			this.isCibaEnabled = false;
 		}
 	}
 

@@ -54,9 +54,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 	@AttributeName(name = "gluuPassportEnabled")
 	private Boolean passportEnabled;
 
-	@AttributeName(name = "gluuCibaEnabled")
-	private Boolean cibaEnabled;
-
 	public Boolean getPassportEnabled() {
 		return passportEnabled;
 	}
@@ -111,14 +108,6 @@ public class GluuConfiguration extends InumEntry implements Serializable {
 
 	public void setAuthenticationMode(String authenticationMode) {
 		this.authenticationMode = authenticationMode;
-	}
-
-	public Boolean getCibaEnabled() {
-		return cibaEnabled;
-	}
-
-	public void setCibaEnabled(Boolean cibaEnabled) {
-		this.cibaEnabled = cibaEnabled;
 	}
 
 	@Override
