@@ -61,9 +61,6 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
     @Inject
     private CIBADeviceRegistrationValidatorService cibaDeviceRegistrationValidatorService;
 
-    @Inject
-    private Boolean isCibaEnabled;
-
     @Override
     public Response requestBackchannelDeviceRegistrationPost(
             String idTokenHint, String deviceRegistrationToken,
@@ -79,7 +76,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
 
         Response.ResponseBuilder builder = Response.ok();
 
-        if (!this.isCibaEnabled) {
+        if (!appConfiguration.getCibaEnabled()) {
             log.warn("Trying to register a CIBA device, however CIBA config is disabled.");
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
