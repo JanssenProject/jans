@@ -333,3 +333,17 @@ class GluuInstaller(SetupUtils):
                     shutil.copyfile(output_fn, dest_fn)
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
+
+    def post_setup(self):
+        if base.snap:
+            #write post-install.py script
+            py3_cmd = shutil.which('python3')
+            self.logIt("Writing snap-post-setup.py", pbar='post-setup')
+            post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
+            post_setup_script = post_setup_script.replace('{{SNAP_NAME}}', os.environ['SNAP_NAME']).replace('{{SNAP_PY3}}', py3_cmd)
+            post_setup_script_fn = os.path.join(Config.install_dir, 'snap-post-setup.py')
+            with open(post_setup_script_fn, 'w') as w:
+                w.write(post_setup_script)
+            self.run([paths.cmd_chmod, '+x', post_setup_script_fn])
+
+            Config.post_messages.insert(0, "Please execute:\nsudo " + post_setup_script_fn)
