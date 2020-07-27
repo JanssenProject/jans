@@ -12,6 +12,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
@@ -71,8 +72,12 @@ public class ClientAuthorizationsService {
     public ClientAuthorization find(String userInum, String clientId) {
         prepareBranch();
 
+        final String id = createId(userInum, clientId);
         try {
-            return ldapEntryManager.find(ClientAuthorization.class, createDn(createId(userInum, clientId)));
+            return ldapEntryManager.find(ClientAuthorization.class, createDn(id));
+        } catch (EntryPersistenceException e) {
+            log.trace("Unable to find client persistence for {}", id);
+            return null;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
