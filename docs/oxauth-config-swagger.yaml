@@ -25,6 +25,16 @@ tags:
   - name: Configuration – Dynamic Registration
   - name: Configuration – IdToken
   - name: Configuration – oxEleven
+  - name: Configuration – Request Object
+  - name: Configuration – Responses Types
+  - name: Configuration – Responses Modes
+  - name: Configuration – User Info
+  - name: Configuration – UMA
+  - name: Configuration – Session ID
+  - name: Configuration – Pairwise
+  - name: Configuration – Fido2
+  - name: Configuration – CIBA
+  - name: Configuration – Cors Configuration Filter
   - name: Configuration – SMTP
   - name: Configuration – Library
   - name: Configuration – Logs
@@ -52,8 +62,8 @@ tags:
 paths:
   /config/properties:
     get:      
-      summary: Gets all oxauth configuration properties.
-      description: Gets all oxauth configuration properties.
+      summary: Gets all oxAuth configuration properties.
+      description: Gets all oxAuth configuration properties.
       operationId: get-properties-all
       tags:
         - Configuration – Properties
@@ -172,7 +182,7 @@ paths:
                       example: 'https://server.example.com/oxauth/restv1/jwks'
                     registrationEndpoint:
                       type: string
-                      description: URL of the Registration Enpoint.
+                      description: URL of the Registration Endpoint.
                       example: 'https://server.example.com/oxauth/restv1/register'
                     openIdDiscoveryEndpoint:
                       type: string
@@ -220,7 +230,7 @@ paths:
                       example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
                     oxElevenJwksEndpoint:
                       type: string
-                      description: URL for the oxEleven JWKS Endpoint..
+                      description: URL for the oxEleven JWKS Endpoint.
                       example: null
                     openidSubAttribute:
                       type: string
@@ -492,7 +502,7 @@ paths:
                       default: true
                     claimsParameterSupported:
                       type: boolean
-                      description: Specifies whether the OP supports use of the claims parameter.
+                      description: Specifies whether the OP supports use of the claim’s parameter.
                       default: false
                     requestParameterSupported:
                       type: boolean
@@ -543,7 +553,7 @@ paths:
                       example: 3600
                     accessTokenLifetime:
                       type: integer
-                      description: The lifetime of the short lived Access Token.
+                      description: The lifetime of the short-lived Access Token.
                       multipleOf: 1
                       minimum: 1
                       exclusiveMinimum: false
@@ -596,7 +606,7 @@ paths:
                       default: false
                     umaGrantAccessIfNoPolicies:
                       type: boolean
-                      description: Specify whether to grant access to resources if there is no any policies associated with scopes.
+                      description: Specifies whether to grant access to resources if there are no any policies associated with scopes.
                       default: false
                     umaRestrictResourceToAssociatedClient:
                       type: boolean
@@ -707,7 +717,7 @@ paths:
                       minLength: 1
                     personCustomObjectClassList:
                       type: array
-                      description: LDAP custom object class list for dynamic person enrollment.
+                      description: LDAP custom object class list for dynamic person enrolment.
                       uniqueItems: true
                       minItems: 0
                       items:
@@ -927,7 +937,7 @@ paths:
                       default: false
                     loggingLevel:
                       type: string
-                      description: Logging level for oxAuth logers.
+                      description: Logging level for oxAuth logger.
                       format: enum - TRACE - DEBUG - INFO - WARN - ERROR - FATAL - OFF
                     corsConfigurationFilters:
                       type: array
@@ -949,11 +959,11 @@ paths:
                             default: \*
                           corsAllowedMethods:
                             type: string
-                            default: 'GET,POST,HEAD,OPTIONS'
+                            default: 'GET, POST, HEAD, OPTIONS'
                           corsAllowedHeaders:
                             type: string
                             minLength: 1
-                            default: 'Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers'
+                            default: 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
                           corsExposedHeaders:
                             type: string
                             minLength: 1
@@ -1150,7 +1160,7 @@ paths:
                       default: false
                     forceIdTokenHintPrecense:
                       type: boolean
-                      description: Boolean value specifying whether force id_token_hint parameter precense (false by default).
+                      description: Boolean value specifying whether force id_token_hint parameter presence (false by default).
                       default: false
                     forceOfflineAccessScopeToEnableRefreshToken:
                       type: boolean
@@ -1302,8 +1312,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /config/properties/backchannel:
     get:      
-      summary: Gets oxauth backchannel configuration properties.
-      description: Gets oxauth backchannel configuration properties.
+      summary: Gets oxAuth backchannel configuration properties.
+      description: Gets oxAuth backchannel configuration properties.
       operationId: get-properties-backchannel
       tags:
         - Configuration – Backchannel
@@ -1395,8 +1405,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:      
-      summary: Updates oxauth backchannel configuration properties.
-      description: Updates oxauth backchannel configuration properties.
+      summary: Updates oxAuth backchannel configuration properties.
+      description: Updates oxAuth backchannel configuration properties.
       operationId: put-properties-backchannel
       tags:
         - Configuration – Backchannel
@@ -1490,8 +1500,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /config/properties/dyn_registration:
     get:      
-      summary: Gets oxauth dynamic configuration properties.
-      description: Gets oxauth dynamic configuration properties.
+      summary: Gets oxAuth dynamic configuration properties.
+      description: Gets oxAuth dynamic configuration properties.
       operationId: get-properties-dyn_registration
       tags:
         - Configuration – Dynamic Registration
@@ -1501,10 +1511,10 @@ paths:
           content:
             application/json:
               schema:
-                title: DynamicConfiguration
+                title: Dynamic Configuration
                 items:
                   type: object
-                  title: DynamicConfiguration
+                  title: Dynamic Configuration
                   description: Dynamic Configuration properties.
                   properties:					
                     dynamicRegistrationEnabled:
@@ -1549,8 +1559,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:      
-      summary: Updates oxauth dynamic configuration properties.
-      description: Updates oxauth dynamic configuration properties.
+      summary: Updates oxAuth dynamic configuration properties.
+      description: Updates oxAuth dynamic configuration properties.
       operationId: put-properties-dyn_registration
       tags:
         - Configuration – Dynamic Registration
@@ -1558,10 +1568,10 @@ paths:
         content:
           application/json:
             schema:
-              title: DynamicConfiguration
+              title: Dynamic Configuration
               items:
                 type: object
-                title: DynamicConfiguration
+                title: Dynamic Configuration
                 description: Dynamic Configuration properties.
                 properties:					
                   dynamicRegistrationEnabled:
@@ -1610,8 +1620,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /config/properties/idtoken:
     get:      
-      summary: Gets oxauth IdToken configuration properties.
-      description: Gets oxauth IdToken configuration properties.
+      summary: Gets oxAuth IdToken configuration properties.
+      description: Gets oxAuth IdToken configuration properties.
       operationId: get-properties-idtoken
       tags:
         - Configuration – IdToken
@@ -1621,7 +1631,7 @@ paths:
           content:
             application/json:
               schema:
-                title: IdTokenConfiguration
+                title: IdToken Configuration
                 items:
                   type: object
                   title: IdToken
@@ -1669,8 +1679,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:      
-      summary: Updates oxauth IdToken configuration properties.
-      description: Updates oxauth IdToken configuration properties.
+      summary: Updates oxAuth IdToken configuration properties.
+      description: Updates oxAuth IdToken configuration properties.
       operationId: put-properties-idtoken
       tags:
         - Configuration – IdToken
@@ -1678,7 +1688,7 @@ paths:
         content:
           application/json:
             schema:
-              title: IdTokenConfiguration
+              title: IdToken Configuration
               items:
                 type: object
                 title: IdToken
@@ -1730,8 +1740,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /config/properties/ox-eleven:
     get:      
-      summary: Gets oxauth oxEleven configuration properties.
-      description: Gets oxauth oxEleven configuration properties.
+      summary: Gets oxAuth oxEleven configuration properties.
+      description: Gets oxAuth oxEleven configuration properties.
       operationId: get-properties-ox-eleven
       tags:
         - Configuration – oxEleven
@@ -1741,7 +1751,7 @@ paths:
           content:
             application/json:
               schema:
-                title: oxElevenConfiguration
+                title: oxEleven Configuration
                 items:
                   type: object
                   title: oxEleven
@@ -1765,13 +1775,13 @@ paths:
                       example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
                     oxElevenJwksEndpoint:
                       type: string
-                      description: URL for the oxEleven JWKS Endpoint..
+                      description: URL for the oxEleven JWKS Endpoint.
                       example: null
         '500':
           $ref: '#/components/responses/InternalServerError'
     put:      
-      summary: Updates oxauth oxEleven configuration properties.
-      description: Updates oxauth oxEleven configuration properties.
+      summary: Updates oxAuth oxEleven configuration properties.
+      description: Updates oxAuth oxEleven configuration properties.
       operationId: put-properties-ox-eleven
       tags:
         - Configuration – oxEleven
@@ -1779,7 +1789,7 @@ paths:
         content:
           application/json:
             schema:
-              title: oxElevenConfiguration
+              title: oxEleven Configuration
               items:
                 type: object
                 title: oxEleven
@@ -1803,14 +1813,1299 @@ paths:
                     example: 'https://server.example.com/oxeleven/rest/oxeleven/deleteKey'
                   oxElevenJwksEndpoint:
                     type: string
-                    description: URL for the oxEleven JWKS Endpoint..
+                    description: URL for the oxEleven JWKS Endpoint.
                     example: null
       responses:
         '200':
           description: OK
         '500':
           $ref: '#/components/responses/InternalServerError'
-
+  /config/properties/request-object:
+    get:      
+      summary: Gets oxAuth Request object configuration properties.
+      description: Gets oxAuth Request object configuration properties.
+      operationId: get-properties-request-object
+      tags:
+        - Configuration – Request Object
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Request object configuration
+                items:
+                  type: object
+                  description: Request object configuration properties.
+                  properties:					
+                    requestObjectSigningAlgValuesSupported:
+                      type: array
+                      description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects.
+                      items:
+                        type: string
+                      enum:
+                        - none
+                        - HS256
+                        - HS384
+                        - HS512
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                    requestObjectEncryptionAlgValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects.
+                      items:
+                        type: string
+                      enum:
+                        - RSA1_5
+                        - RSA-OAEP
+                        - A128KW
+                        - A256KW
+                    requestObjectEncryptionEncValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects.
+                      items:
+                        type: string
+                      enum:
+                        - A128CBC+HS256
+                        - A256CBC+HS512
+                        - A128GCM
+                        - A256GCM
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Request object configuration properties.
+      description: Updates oxAuth Request object configuration properties.
+      operationId: put-properties-request-object
+      tags:
+        - Configuration – Request Object
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Request object configuration
+              items:
+                type: object
+                description: Request object configuration properties.
+                properties:					
+                  requestObjectSigningAlgValuesSupported:
+                    type: array
+                    description: A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects.
+                    items:
+                      type: string
+                    enum:
+                      - none
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  requestObjectEncryptionAlgValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects.
+                    items:
+                      type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  requestObjectEncryptionEncValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects.
+                    items:
+                      type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/response-type:
+    get:      
+      summary: Gets oxAuth Response Type configuration properties.
+      description: Gets oxAuth Response Type configuration properties.
+      operationId: get-properties-response-type
+      tags:
+        - Configuration – Responses Types
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Response Type configuration
+                items:
+                  type: object
+                  description: Response Type configuration properties.
+                  properties:					
+                    responseTypesSupported:
+                      type: array
+                      description: A list of the OAuth 2.0 response_type values that this OP supports.
+                      minItems: 1
+                      items:
+                        type: string
+                      enum:
+                        - code
+                        - token
+                        - id_token
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Response Type configuration properties.
+      description: Updates oxAuth Response Type configuration properties.
+      operationId: put-properties-response-type
+      tags:
+        - Configuration – Responses Types
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Response Type configuration
+              items:
+                type: object
+                description: Response Type configuration properties.
+                properties:					
+                  responseTypesSupported:
+                      type: array
+                      description: A list of the OAuth 2.0 response_type values that this OP supports.
+                      minItems: 1
+                      items:
+                        type: string
+                      enum:
+                        - code
+                        - token
+                        - id_token
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/response-mode:
+    get:      
+      summary: Gets oxAuth Response Mode configuration properties.
+      description: Gets oxAuth Response Mode configuration properties.
+      operationId: get-properties-response-mode
+      tags:
+        - Configuration – Responses Modes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Response Mode configuration
+                items:
+                  type: object
+                  description: Response Mode configuration properties.
+                  properties:					
+                    responseModesSupported:
+                      type: array
+                      description: A list of the OAuth 2.0 Response Mode values that this OP supports.
+                      items:
+                        type: string
+                      enum:
+                        - query
+                        - fragment
+                        - form_post
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Response Mode configuration properties.
+      description: Updates oxAuth Response Mode configuration properties.
+      operationId: put-properties-response-mode
+      tags:
+        - Configuration – Responses Modes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Response Mode configuration
+              items:
+                type: object
+                description: Response Mode configuration properties.
+                properties:					
+                  responseModesSupported:
+                      type: array
+                      description: A list of the OAuth 2.0 Response Mode values that this OP supports.
+                      items:
+                        type: string
+                      enum:
+                        - query
+                        - fragment
+                        - form_post
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/user-info:
+    get:      
+      summary: Gets oxAuth User Info configuration properties.
+      description: Gets oxAuth User Info configuration properties.
+      operationId: get-properties-user-info
+      tags:
+        - Configuration – User Info
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: User Info configuration
+                items:
+                  type: object
+                  description: User Info configuration properties.
+                  properties:
+                    userInfoEndpoint:
+                      type: string
+                      description: The User Info endpoint URL.
+                      example: 'https://server.example.com/oxauth/restv1/userinfo'                  
+                    userInfoSigningAlgValuesSupported:
+                      type: array
+                      description: A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - HS256
+                        - HS384
+                        - HS512
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                    userInfoEncryptionAlgValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - RSA1_5
+                        - RSA-OAEP
+                        - A128KW
+                        - A256KW
+                    userInfoEncryptionEncValuesSupported:
+                      type: array
+                      description: A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - A128CBC+HS256
+                        - A256CBC+HS512
+                        - A128GCM
+                        - A256GCM
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth User Info configuration properties.
+      description: Updates oxAuth User Info configuration properties.
+      operationId: put-properties-user-info
+      tags:
+        - Configuration – User Info
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: User Info configuration
+              items:
+                type: object
+                description: User Info configuration properties.
+                properties:
+                  userInfoEndpoint:
+                      type: string
+                      description: The User Info endpoint URL.
+                      example: 'https://server.example.com/oxauth/restv1/userinfo'				
+                  userInfoSigningAlgValuesSupported:
+                      type: array
+                      description: A list of the JWS signing algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                      items:
+                        type: string
+                      enum:
+                        - HS256
+                        - HS384
+                        - HS512
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                  userInfoEncryptionAlgValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (alg values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                    items:
+                      type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  userInfoEncryptionEncValuesSupported:
+                    type: array
+                    description: A list of the JWE encryption algorithms (enc values) JWA supported by the UserInfo Endpoint to encode the Claims in a JWT.
+                    items:
+                      type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/uma:
+    get:      
+      summary: Gets oxAuth UMA configuration properties.
+      description: Gets oxAuth UMA configuration properties.
+      operationId: get-properties-uma
+      tags:
+        - Configuration – UMA
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: UMA configuration
+                items:
+                  type: object
+                  description: UMA configuration properties.
+                  properties:					
+                    umaConfigurationEndpoint:
+                      type: string
+                      description: URL for the UMA Configuration Endpoint.
+                      example: 'https://server.example.com/oxauth/restv1/uma2-configuration'
+                    umaRptLifetime:
+                      type: integer
+                      description: UMA RPT lifetime.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 3600
+                    umaTicketLifetime:
+                      type: integer
+                      description: UMA ticket lifetime.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 3600
+                    umaPctLifetime:
+                      type: integer
+                      description: UMA PCT lifetime.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 3600
+                    umaResourceLifetime:
+                      type: integer
+                      description: UMA PCT lifetime.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 3600
+                    umaAddScopesAutomatically:
+                      type: boolean
+                      description: Add UMA scopes automatically if it is not registered yet.
+                      default: false
+                    umaValidateClaimToken:
+                      type: boolean
+                      description: Validate claim_token as id_token assuming it is issued by local idp.
+                      default: false
+                    umaGrantAccessIfNoPolicies:
+                      type: boolean
+                      description: Specifies whether to grant access to resources if there are no any policies associated with scopes.
+                      default: false
+                    umaRestrictResourceToAssociatedClient:
+                      type: boolean
+                      description: Restrict access to resource by associated client.
+                      default: false
+                    umaKeepClientDuringResourceSetRegistration:
+                      type: boolean
+                      description: Save client information during resource registration.
+                      default: false
+                    umaRptAsJwt:
+                      type: boolean
+                      description: Issue RPT as JWT or as random string.
+                      default: false
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth UMA configuration properties.
+      description: Updates oxAuth UMA configuration properties.
+      operationId: put-properties-uma
+      tags:
+        - Configuration – UMA
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UMA configuration
+              items:
+                type: object
+                description: UMA configuration properties.
+                properties:					
+                  umaConfigurationEndpoint:
+                      type: string
+                      description: URL for the UMA Configuration Endpoint.
+                      example: 'https://server.example.com/oxauth/restv1/uma2-configuration'
+                  umaRptLifetime:
+                    type: integer
+                    description: UMA RPT lifetime.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+                  umaTicketLifetime:
+                    type: integer
+                    description: UMA ticket lifetime.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+                  umaPctLifetime:
+                    type: integer
+                    description: UMA PCT lifetime.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+                  umaResourceLifetime:
+                    type: integer
+                    description: UMA PCT lifetime.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+                  umaAddScopesAutomatically:
+                    type: boolean
+                    description: Add UMA scopes automatically if it is not registered yet.
+                    default: false
+                  umaValidateClaimToken:
+                    type: boolean
+                    description: Validate claim_token as id_token assuming it is issued by local idp.
+                    default: false
+                  umaGrantAccessIfNoPolicies:
+                    type: boolean
+                    description: Specifies whether to grant access to resources if there are no any policies associated with scopes.
+                    default: false
+                  umaRestrictResourceToAssociatedClient:
+                    type: boolean
+                    description: Restrict access to resource by associated client.
+                    default: false
+                  umaKeepClientDuringResourceSetRegistration:
+                    type: boolean
+                    description: Save client information during resource registration.
+                    default: false
+                  umaRptAsJwt:
+                    type: boolean
+                    description: Issue RPT as JWT or as random string.
+                    default: false
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/sessionid:
+    get:      
+      summary: Gets oxAuth SessionId configuration properties.
+      description: Gets oxAuth SessionId configuration properties.
+      operationId: get-properties-sessionid
+      tags:
+        - Configuration – Session ID
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: SessionId configuration
+                items:
+                  type: object
+                  description: SessionId configuration properties.
+                  properties:					
+                    sessionIdUnusedLifetime:
+                      type: integer
+                      description: The lifetime for unused session states.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 86400
+                    sessionIdUnauthenticatedUnusedLifetime:
+                      type: integer
+                      description: The lifetime for unused unauthenticated session states.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      default: 120
+                      example: 800
+                    sessionIdLifetime:
+                      type: integer
+                      description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
+                      multipleOf: 1
+                      minimum: -1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      default: 86400
+                      example: 86400
+                    sessionIdEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable authentication by session_id.
+                      default: false
+                    changeSessionIdOnAuthentication:
+                      type: boolean
+                      description: Boolean value specifying whether to enable session_id HTTP request parameter.
+                      default: true
+                    sessionIdRequestParameterEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable session_id HTTP request parameter.
+                      default: false
+                    sessionIdPersistOnPromptNone:
+                      type: boolean
+                      description: Boolean value specifying whether to persist session ID on prompt none.
+                      default: false
+                    serverSessionIdLifetime:
+                      type: integer
+                      description: The sessionId lifetime in seconds for sessionId.
+                      default: 86400
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth SessionId configuration properties.
+      description: Updates oxAuth SessionId configuration properties.
+      operationId: put-properties-sessionid
+      tags:
+        - Configuration – Session ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: SessionId configuration
+              items:
+                type: object
+                description: SessionId configuration properties.
+                properties:
+                  sessionIdUnusedLifetime:
+                    type: integer
+                    description: The lifetime for unused session states.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 86400
+                  sessionIdUnauthenticatedUnusedLifetime:
+                    type: integer
+                    description: The lifetime for unused unauthenticated session states.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    default: 120
+                    example: 800
+                  sessionIdLifetime:
+                    type: integer
+                    description: The lifetime of session id in seconds. If 0 or -1 then expiration is not set. `session_id` cookie expires when browser session ends.
+                    multipleOf: 1
+                    minimum: -1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    default: 86400
+                    example: 86400
+                  sessionIdEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable authentication by session_id.
+                    default: false
+                  changeSessionIdOnAuthentication:
+                   type: boolean
+                   description: Boolean value specifying whether to enable session_id HTTP request parameter.
+                   default: true
+                  sessionIdRequestParameterEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable session_id HTTP request parameter.
+                    default: false
+                  sessionIdPersistOnPromptNone:
+                    type: boolean
+                    description: Boolean value specifying whether to persist session ID on prompt none.
+                    default: false
+                  serverSessionIdLifetime:
+                   type: integer
+                   description: The sessionId lifetime in seconds for sessionId.
+                   default: 86400				
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/pairwise:
+    get:      
+      summary: Gets oxAuth Pairwise configuration properties.
+      description: Gets oxAuth Pairwise configuration properties.
+      operationId: get-properties-pairwise
+      tags:
+        - Configuration – Pairwise
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Pairwise configuration
+                items:
+                  type: object
+                  description: Pairwise configuration properties.
+                  properties:					
+                    pairwiseIdType:
+                      type: string
+                      description: The pairwise ID type.
+                      items:
+                        type: string
+                      enum:
+                        - persistent
+                        - algorithmic
+                    pairwiseCalculationKey:
+                      type: string
+                      description: Key to calculate algorithmic pairwise IDs.
+                      minLength: 1
+                    pairwiseCalculationSalt:
+                      type: string
+                      description: Salt to calculate algorithmic pairwise IDs.
+                      minLength: 1
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Pairwise configuration properties.
+      description: Updates oxAuth Pairwise configuration properties.
+      operationId: put-properties-pairwise
+      tags:
+        - Configuration – Pairwise
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Pairwise configuration
+              items:
+                type: object
+                description: Pairwise configuration properties.
+                properties:
+                  pairwiseIdType:
+                    type: string
+                    description: The pairwise ID type.
+                    items:
+                      type: string
+                    enum:
+                      - persistent
+                      - algorithmic
+                  pairwiseCalculationKey:
+                    type: string
+                    description: Key to calculate algorithmic pairwise IDs.
+                    minLength: 1
+                  pairwiseCalculationSalt:
+                    type: string
+                    description: Salt to calculate algorithmic pairwise IDs.
+                    minLength: 1				
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/fido2:
+    get:      
+      summary: Gets oxAuth Fido2 configuration properties.
+      description: Gets oxAuth Fido2 configuration properties.
+      operationId: get-properties-fido2
+      tags:
+        - Configuration – Fido2
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Fido2 configuration
+                items:
+                  type: object
+                  description: Fido2 configuration properties.
+                  properties:
+                    authenticatorCertsFolder:
+                      description: Authenticators certificates fodler.
+                      type: string
+                      minLength: 1
+                    mdsAccessToken:
+                      description: MDS Access token.
+                      type: string
+                      minLength: 1
+                    mdsCertsFolder:
+                      description: MDS TOC root certificates folder.
+                      type: string
+                      minLength: 1
+                    mdsTocsFolder:
+                      description: MDS TOC files folder.
+                      type: string
+                      minLength: 1
+                    userAutoEnrollment:
+                      description: Allow to enroll users on enrollment/authentication requests.
+                      type: boolean
+                    unfinishedRequestExpiration:
+                      description: Expiration time in seconds for pending enrollment/authentication requests
+                      type: integer
+                      multipleOf: 1
+                      maximum: 2147483647
+                      minimum: 0
+                      exclusiveMaximum: false
+                      exclusiveMinimum: false
+                    authenticationHistoryExpiration:
+                      description: Expiration time in seconds for approved authentication requests.
+                      type: integer
+                      multipleOf: 1
+                      maximum: 2147483647
+                      minimum: 0
+                      exclusiveMaximum: false
+                      exclusiveMinimum: false
+                    serverMetadataFolder:
+                      description: Authenticators metadata in json format.
+                      type: string
+                      minLength: 1
+                      example: virtual devices
+                    disableFido2:
+                      description: Enable/Disable Fido2 endpoints.
+                      type: boolean
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Fido2 configuration properties.
+      description: Updates oxAuth Fido2 configuration properties.
+      operationId: put-properties-fido2
+      tags:
+        - Configuration – Fido2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Fido2 configuration
+              items:
+                type: object
+                description: Fido2 configuration properties.
+                properties:
+                  authenticatorCertsFolder:
+                    description: Authenticators certificates fodler.
+                    type: string
+                    minLength: 1
+                  mdsAccessToken:
+                    description: MDS Access token.
+                    type: string
+                    minLength: 1
+                  mdsCertsFolder:
+                    description: MDS TOC root certificates folder.
+                    type: string
+                    minLength: 1
+                  mdsTocsFolder:
+                    description: MDS TOC files folder.
+                    type: string
+                    minLength: 1
+                  userAutoEnrollment:
+                    description: Allow to enroll users on enrollment/authentication requests.
+                    type: boolean
+                  unfinishedRequestExpiration:
+                    description: Expiration time in seconds for pending enrollment/authentication requests
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 0
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  authenticationHistoryExpiration:
+                    description: Expiration time in seconds for approved authentication requests.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 0
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  serverMetadataFolder:
+                    description: Authenticators metadata in json format.
+                    type: string
+                    minLength: 1
+                    example: virtual devices
+                  disableFido2:
+                    description: Enable/Disable Fido2 endpoints.
+                    type: boolean				
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/ciba:
+    get:      
+      summary: Gets oxAuth CIBA configuration properties.
+      description: Gets oxAuth CIBA configuration properties.
+      operationId: get-properties-ciba
+      tags:
+        - Configuration – CIBA
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: CIBA configuration
+                items:
+                  type: object
+                  description: CIBA configuration properties.
+                  properties:
+                    backchannelClientId:
+                      type: string
+                      description: Backchannel Client Id.
+                      minLength: 0
+                    backchannelRedirectUri:
+                      type: string
+                      description: Backchannel Redirect Uri.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
+                    backchannelAuthenticationEndpoint:
+                      type: string
+                      description: Backchannel Authentication Endpoint.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
+                    backchannelDeviceRegistrationEndpoint:
+                      type: string
+                      description: Backchannel Device Registration Endpoint.
+                      minLength: 0
+                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
+                    backchannelTokenDeliveryModesSupported:
+                      type: array
+                      description: Backchannel Token Delivery Modes Supported.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+                      format: select
+                      enum:
+                      - poll
+                      - ping
+                      - push
+                    backchannelAuthenticationRequestSigningAlgValuesSupported:
+                      type: array
+                      description: Backchannel Authentication Request Signing Alg Values Supported.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+                      format: select
+                      enum:
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                    backchannelUserCodeParameterSupported:
+                      type: boolean
+                      description: Backchannel User Code Parameter Supported
+                    backchannelBindingMessagePattern:
+                      type: string
+                      description: Backchannel Binding Message Pattern.
+                      minLength: 0
+                    backchannelAuthenticationResponseExpiresIn:
+                      type: integer
+                      description: Backchannel Authentication Response Expires In.
+                      multipleOf: 1
+                      minimum: 1
+                      maximum: 2147483647
+                      exclusiveMinimum: false
+                      exclusiveMaximum: false
+                    backchannelAuthenticationResponseInterval:
+                      type: integer
+                      description: Backchannel Authentication Response Interval.
+                      multipleOf: 1
+                      minimum: 1
+                      maximum: 2147483647
+                      exclusiveMinimum: false
+                      exclusiveMaximum: false
+                    backchannelLoginHintClaims:
+                      type: array
+                      description: Backchannel Login Hint Claims.
+                      minItems: 0
+                      uniqueItems: true
+                      items:
+                        type: string
+                    cibaEndUserNotificationConfig:
+                      type: object
+                      description: CIBA End User Notification Config.
+                      required:
+                        - apiKey
+                        - authDomain
+                        - databaseURL
+                        - projectId
+                        - storageBucket
+                        - messagingSenderId
+                        - appId
+                        - notificationUrl
+                        - notificationKey
+                        - publicVapidKey
+                      properties:
+                        apiKey:
+                          type: string
+                          minLength: 1
+                        authDomain:
+                          type: string
+                          minLength: 1
+                        databaseURL:
+                          type: string
+                          minLength: 1
+                        projectId:
+                          type: string
+                          minLength: 1
+                        storageBucket:
+                          type: string
+                          minLength: 1
+                        messagingSenderId:
+                          type: string
+                          minLength: 1
+                        appId:
+                          type: string
+                          minLength: 1
+                        notificationUrl:
+                          type: string
+                          minLength: 1
+                        notificationKey:
+                          type: string
+                          minLength: 1
+                        publicVapidKey:
+                          type: string
+                          minLength: 1
+                    backchannelRequestsProcessorJobIntervalSec:
+                      type: integer
+                      description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
+                    backchannelRequestsProcessorJobChunkSize:
+                      type: integer
+                      description: Each backchannel request processor iteration fetches chunk of data to be processed.
+                    cibaGrantLifeExtraTimeSec:
+                      type: integer
+                      description: Specifies the CIBA Grant life extra time in seconds.
+                    cibaMaxExpirationTimeAllowedSec:
+                      type: integer
+                      description: Specifies the CIBA token expiration time in seconds.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth CIBA configuration properties.
+      description: Updates oxAuth CIBA configuration properties.
+      operationId: put-properties-ciba
+      tags:
+        - Configuration – CIBA
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: CIBA configuration
+              items:
+                type: object
+                description: CIBA configuration properties.
+                properties:
+                  backchannelClientId:
+                    type: string
+                    description: Backchannel Client Id.
+                    minLength: 0
+                  backchannelRedirectUri:
+                    type: string
+                    description: Backchannel Redirect Uri.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
+                  backchannelAuthenticationEndpoint:
+                    type: string
+                    description: Backchannel Authentication Endpoint.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
+                  backchannelDeviceRegistrationEndpoint:
+                    type: string
+                    description: Backchannel Device Registration Endpoint.
+                    minLength: 0
+                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
+                  backchannelTokenDeliveryModesSupported:
+                    type: array
+                    description: Backchannel Token Delivery Modes Supported.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                    format: select
+                    enum:
+                    - poll
+                    - ping
+                    - push
+                  backchannelAuthenticationRequestSigningAlgValuesSupported:
+                    type: array
+                    description: Backchannel Authentication Request Signing Alg Values Supported.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                    format: select
+                    enum:
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  backchannelUserCodeParameterSupported:
+                    type: boolean
+                    description: Backchannel User Code Parameter Supported
+                  backchannelBindingMessagePattern:
+                    type: string
+                    description: Backchannel Binding Message Pattern.
+                    minLength: 0
+                  backchannelAuthenticationResponseExpiresIn:
+                    type: integer
+                    description: Backchannel Authentication Response Expires In.
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  backchannelAuthenticationResponseInterval:
+                    type: integer
+                    description: Backchannel Authentication Response Interval.
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  backchannelLoginHintClaims:
+                    type: array
+                    description: Backchannel Login Hint Claims.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                  cibaEndUserNotificationConfig:
+                    type: object
+                    description: CIBA End User Notification Config.
+                    required:
+                      - apiKey
+                      - authDomain
+                      - databaseURL
+                      - projectId
+                      - storageBucket
+                      - messagingSenderId
+                      - appId
+                      - notificationUrl
+                      - notificationKey
+                      - publicVapidKey
+                    properties:
+                      apiKey:
+                        type: string
+                        minLength: 1
+                      authDomain:
+                        type: string
+                        minLength: 1
+                      databaseURL:
+                        type: string
+                        minLength: 1
+                      projectId:
+                        type: string
+                        minLength: 1
+                      storageBucket:
+                        type: string
+                        minLength: 1
+                      messagingSenderId:
+                        type: string
+                        minLength: 1
+                      appId:
+                        type: string
+                        minLength: 1
+                      notificationUrl:
+                        type: string
+                        minLength: 1
+                      notificationKey:
+                        type: string
+                        minLength: 1
+                      publicVapidKey:
+                        type: string
+                        minLength: 1
+                  backchannelRequestsProcessorJobIntervalSec:
+                    type: integer
+                    description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
+                  backchannelRequestsProcessorJobChunkSize:
+                    type: integer
+                    description: Each backchannel request processor iteration fetches chunk of data to be processed.
+                  cibaGrantLifeExtraTimeSec:
+                    type: integer
+                    description: Specifies the CIBA Grant life extra time in seconds.
+                  cibaMaxExpirationTimeAllowedSec:
+                    type: integer
+                    description: Specifies the CIBA token expiration time in seconds.
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /config/properties/cors:
+    get:      
+      summary: Gets oxAuth Cors configuration filter properties.
+      description: Gets oxAuth Cors configuration filter properties.
+      operationId: get-properties-cors
+      tags:
+        - Configuration – Cors Configuration Filter
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Cors configuration filter
+                items:
+                  type: object
+                  description: Cors configuration filter properties.
+                  properties:
+                    filterName:
+                      type: string
+                      minLength: 1
+                    corsEnabled:
+                      type: boolean
+                      default: true
+                    corsAllowedOrigins:
+                      type: string
+                      minLength: 1
+                      default: \*
+                    corsAllowedMethods:
+                      type: string
+                      default: 'GET, POST, HEAD, OPTIONS'
+                    corsAllowedHeaders:
+                      type: string
+                      minLength: 1
+                      default: 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+                    corsExposedHeaders:
+                      type: string
+                      minLength: 1
+                    corsSupportCredentials:
+                      type: boolean
+                      default: true
+                    corsLoggingEnabled:
+                      type: boolean
+                      default: false
+                    corsPreflightMaxAge:
+                      type: integer
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      default: 1800
+                    corsRequestDecorate:
+                      type: boolean
+                      default: true
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:      
+      summary: Updates oxAuth Cors configuration filter properties.
+      description: Updates oxAuth Cors configuration filter properties.
+      operationId: put-properties-cors
+      tags:
+        - Configuration – Cors Configuration Filter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Cors configuration filter
+              items:
+                type: object
+                description: Cors configuration filter properties.
+                properties:
+                  filterName:
+                    type: string
+                    minLength: 1
+                  corsEnabled:
+                    type: boolean
+                    default: true
+                  corsAllowedOrigins:
+                    type: string
+                    minLength: 1
+                    default: \*
+                  corsAllowedMethods:
+                    type: string
+                    default: 'GET, POST, HEAD, OPTIONS'
+                  corsAllowedHeaders:
+                    type: string
+                    minLength: 1
+                    default: 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers'
+                  corsExposedHeaders:
+                    type: string
+                    minLength: 1
+                  corsSupportCredentials:
+                    type: boolean
+                    default: true
+                  corsLoggingEnabled:
+                    type: boolean
+                    default: false
+                  corsPreflightMaxAge:
+                    type: integer
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    default: 1800
+                  corsRequestDecorate:
+                    type: boolean
+                    default: true			
+      responses:
+        '200':
+          description: OK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /config/graphics:
     get:      
       summary: Retrieves organization graphic configuration.
@@ -1824,7 +3119,7 @@ paths:
           content:
             image/x-icon:
               schema:
-                title: OrganizationConfiguration
+                title: Organization Configuration
                 description: Organization graphic configuration details.
                 type: object
                 required:
@@ -1852,7 +3147,7 @@ paths:
         content:
             multipart/form-data:
               schema:
-                title: OrganizationConfiguration
+                title: Organization Configuration
                 description: Organization graphic configuration details.
                 type: object
                 required:
@@ -1890,7 +3185,7 @@ paths:
         content:
             multipart/form-data:
               schema:
-                title: OrganizationConfiguration
+                title: Organization Configuration
                 description: Organization graphic configuration details.
                 type: object
                 required:
@@ -2178,8 +3473,8 @@ paths:
           description: Internal Server Error
   /attributes:
     get:
-      summary: Gets all  Gluu attributes, active as well as inactive.
-      description: Gets all  Gluu attributes, active as well as inactive.
+      summary: Gets all Gluu attributes, active as well as inactive.
+      description: Gets all Gluu attributes, active as well as inactive.
       operationId: get-attributes
       tags:
         - Attribute
@@ -2189,12 +3484,12 @@ paths:
           content:
             application/json:
               schema:
-                title: GluuAttributes
+                title: Gluu Attributes
                 description: List of all attribute.
                 type: array
                 items:
                   type: object
-                  title: GluuAttribute
+                  title: Gluu Attribute
                   required:
                     - inum
                     - name
@@ -2208,7 +3503,7 @@ paths:
                     name:
                       type: string
                       description: Name of the attribute.
-                      example: 'name, displayName,birthdate, email'
+                      example: 'name, displayName, birthdate, email'
                     displayName:
                       type: string
                     description:
@@ -2225,7 +3520,7 @@ paths:
                         - DATE
                     status:
                       type: string
-                      description: Distingusihed Name
+                      description: Distinguished Name
                     oxMultiValuedAttribute:
                       type: boolean
                       description: Boolean value indicating if the attribute is multi-value
@@ -2311,7 +3606,7 @@ paths:
                 name:
                   type: string
                   description: Name of the attribute.
-                  example: 'name, displayName,birthdate, email'
+                  example: 'name, displayName, birthdate, email'
                 displayName:
                   type: string
                   items:
@@ -2330,7 +3625,7 @@ paths:
                     - DATE
                 status:
                   type: string
-                  description: Distingusihed Name
+                  description: Distinguished Name
                 oxMultiValuedAttribute:
                   type: boolean
                   description: Boolean value indicating if the attribute is multi-value
@@ -2412,7 +3707,7 @@ paths:
                   name:
                     type: string
                     description: Name of the attribute.
-                    example: 'name, displayName,birthdate, email'
+                    example: 'name, displayName, birthdate, email'
                   displayName:
                     type: string
                     items:
@@ -2431,7 +3726,7 @@ paths:
                       - DATE
                   status:
                     type: string
-                    description: Distingusihed Name
+                    description: Distinguished Name
                   oxMultiValuedAttribute:
                     type: boolean
                     description: Boolean value indicating if the attribute is multi-value
@@ -2521,7 +3816,7 @@ paths:
                 name:
                   type: string
                   description: Name of the attribute.
-                  example: 'name, displayName,birthdate, email'
+                  example: 'name, displayName, birthdate, email'
                 displayName:
                   type: string
                   items:
@@ -2540,7 +3835,7 @@ paths:
                     - DATE
                 status:
                   type: string
-                  description: Distingusihed Name
+                  description: Distinguished Name
                 oxMultiValuedAttribute:
                   type: boolean
                   description: Boolean value indicating if the attribute is multi-value
@@ -2622,7 +3917,7 @@ paths:
                   name:
                     type: string
                     description: Name of the attribute.
-                    example: 'name, displayName,birthdate, email'
+                    example: 'name, displayName, birthdate, email'
                   displayName:
                     type: string
                     items:
@@ -2641,7 +3936,7 @@ paths:
                       - DATE
                   status:
                     type: string
-                    description: Distingusihed Name
+                    description: Distinguished Name
                   oxMultiValuedAttribute:
                     type: boolean
                     description: Boolean value indicating if the attribute is multi-value
@@ -2714,6 +4009,116 @@ paths:
         description: Attribute ID.
         schema:
           type: string
+    get:
+      summary: Gets attribute by inum.
+      description: Gets attribute based on inum.
+      operationId: get-attributes-by-inum
+      tags:
+        - Attribute     
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: GluuAttribute
+                description: Gluu Server attribute corresponding to the identifier{inum}
+                type: object
+                required:
+                  - inum
+                  - name
+                  - displayName
+                  - dataType
+                  - status
+                properties:
+                  inum:
+                    type: string
+                    description: Unique id identifying the attribute
+                  name:
+                    type: string
+                    description: Name of the attribute.
+                    example: 'name, displayName, birthdate, email'
+                  displayName:
+                    type: string
+                    items:
+                      type: string
+                  description:
+                    type: string
+                    description: User friendly descriptive detail of attribute.
+                  dataType:
+                    type: string
+                    description: Data Type of attribute.
+                    enum:
+                      - STRING
+                      - NUMERIC
+                      - BOOLEAN
+                      - BINARY
+                      - DATE
+                  status:
+                    type: string
+                    description: Distinguished Name
+                  oxMultiValuedAttribute:
+                    type: boolean
+                    description: Boolean value indicating if the attribute is multi-value
+                  lifetime:
+                    type: string
+                  sourceAttribute:
+                    type: string
+                  salt:
+                    type: string
+                  nameIdType:
+                    type: string
+                  origin:
+                    type: string
+                  editType:
+                    type: array
+                    description: GluuUserRole
+                    items:
+                      type: string
+                  viewType:
+                    type: array
+                    description: GluuUserRole
+                    items:
+                      type: string
+                  usageType:
+                    type: object
+                    description: GluuAttributeUsageType
+                    items:
+                      type: string
+                  oxAuthClaimName:
+                    type: string
+                  seeAlso:
+                    type: string
+                  saml1Uri:
+                    type: string
+                  saml2Uri:
+                    type: string
+                  urn:
+                    type: string
+                  oxSCIMCustomAttribute:
+                    type: boolean
+                    description: Boolean value indicating if the attribute is a SCIM custom attribute
+                  custom:
+                    type: boolean
+                    description: Boolean value indicating if the attribute is a custom attribute
+                  requred:
+                    type: boolean
+                    description: Boolean value indicating is a mandatory attribute
+                  attributeValidation:
+                    type: object
+                    description: Details of validations to be applied on the attribute
+                    properties:
+                      regexp:
+                        type: string
+                        description: Reguar expression to be used to validate the dataType.
+                      minLength:
+                        type: integer
+                      maxLength:
+                        type: integer
+                  gluuTooltip:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       summary: Deletes an attribute identified by inum.
       description: Deletes an attribute identified based on inum.
@@ -2741,7 +4146,7 @@ paths:
             application/json:
               schema:
                 title: GluuAttributes
-                description: List of active attribute.
+                description: List of active attributes.
                 type: array
                 items:
                   type: object
@@ -2759,7 +4164,7 @@ paths:
                     name:
                       type: string
                       description: Name of the attribute.
-                      example: 'name, displayName,birthdate, email'
+                      example: 'name, displayName, birthdate, email'
                     displayName:
                       type: string
                       items:
@@ -2778,7 +4183,7 @@ paths:
                         - DATE
                     status:
                       type: string
-                      description: Distingusihed Name
+                      description: Distinguished Name
                     oxMultiValuedAttribute:
                       type: boolean
                       description: Boolean value indicating if the attribute is multi-value
@@ -2873,7 +4278,7 @@ paths:
                     name:
                       type: string
                       description: Name of the attribute.
-                      example: 'name, displayName,birthdate, email'
+                      example: 'name, displayName, birthdate, email'
                     displayName:
                       type: string
                       items:
@@ -2892,7 +4297,7 @@ paths:
                         - DATE
                     status:
                       type: string
-                      description: Distingusihed Name
+                      description: Distinguished Name
                     oxMultiValuedAttribute:
                       type: boolean
                       description: Boolean value indicating if the attribute is multi-value
@@ -2955,136 +4360,18 @@ paths:
                       type: string
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /attributes/attribute/{inum}:
-    parameters:
-      - name: inum
-        in: path
-        required: true
-        description: Attribute ID.
-        schema:
-          type: string
-    get:
-      summary: Gets attribute by inum.
-      description: Gets attribute based on inum.
-      operationId: get-attributes-by-inum
-      tags:
-        - Attribute     
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: GluuAttribute
-                description: Gluu Server attribute corresponding to the identifier{inum}
-                type: object
-                required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
-                properties:
-                  inum:
-                    type: string
-                    description: Unique id identifying the attribute
-                  name:
-                    type: string
-                    description: Name of the attribute.
-                    example: 'name, displayName,birthdate, email'
-                  displayName:
-                    type: string
-                    items:
-                      type: string
-                  description:
-                    type: string
-                    description: User friendly descriptive detail of attribute.
-                  dataType:
-                    type: string
-                    description: Data Type of attribute.
-                    enum:
-                      - STRING
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE
-                  status:
-                    type: string
-                    description: Distingusihed Name
-                  oxMultiValuedAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is multi-value
-                  lifetime:
-                    type: string
-                  sourceAttribute:
-                    type: string
-                  salt:
-                    type: string
-                  nameIdType:
-                    type: string
-                  origin:
-                    type: string
-                  editType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  viewType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  usageType:
-                    type: object
-                    description: GluuAttributeUsageType
-                    items:
-                      type: string
-                  oxAuthClaimName:
-                    type: string
-                  seeAlso:
-                    type: string
-                  saml1Uri:
-                    type: string
-                  saml2Uri:
-                    type: string
-                  urn:
-                    type: string
-                  oxSCIMCustomAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a SCIM custom attribute
-                  custom:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a custom attribute
-                  requred:
-                    type: boolean
-                    description: Boolean value indicating is a mandatory attribute
-                  attributeValidation:
-                    type: object
-                    description: Details of validations to be applied on the attribute
-                    properties:
-                      regexp:
-                        type: string
-                        description: Reguar expression to be used to validate the dataType.
-                      minLength:
-                        type: integer
-                      maxLength:
-                        type: integer
-                  gluuTooltip:
-                    type: string
-        '500':
-          $ref: '#/components/responses/InternalServerError'
   /attributes/search:
     parameters:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:      
@@ -3119,7 +4406,7 @@ paths:
                     name:
                       type: string
                       description: Name of the attribute.
-                      example: 'name, displayName,birthdate, email'
+                      example: 'name, displayName, birthdate, email'
                     displayName:
                       type: string
                       items:
@@ -3138,7 +4425,7 @@ paths:
                         - DATE
                     status:
                       type: string
-                      description: Distingusihed Name
+                      description: Distinguished Name
                     oxMultiValuedAttribute:
                       type: boolean
                       description: Boolean value indicating if the attribute is multi-value
@@ -3381,7 +4668,7 @@ paths:
             application/json:
               schema:
                 title: ConnectionStatusDTO
-                description: LDAP ConnectionStatus object.
+                description: LDAP Connection Status object.
                 type: object
                 required:
                   - isUp
@@ -3412,7 +4699,7 @@ paths:
             application/json:
               schema:
                 title: ConnectionStatusDTO
-                description: LDAP ConnectionStatus object.
+                description: LDAP Connection Status object.
                 type: object
                 required:
                   - isUp
@@ -3515,7 +4802,7 @@ paths:
                     file:
                       format: binary
                       type: string
-                      description: List of custom libraray.
+                      description: List of custom libraries.
         '500':
           description: Internal Server Error
     post:
@@ -3551,7 +4838,7 @@ paths:
           minLength: 1
         name: name
         in: path
-        description: Name of the libraray.
+        description: Name of the library.
         required: true
     get:
       summary: Gets custom library by name.
@@ -5017,7 +6304,7 @@ paths:
                 description: Cache Configuration.
                 properties:
                   cacheProviderType:
-                    description: The cacheProvider Type.
+                    description: The cache Provider Type.
                     type: string
                     enum:
                     - IN_MEMORY
@@ -5107,7 +6394,7 @@ paths:
                         type: string
                         minLength: 1
                       useSSL: 
-                        description: Enable SSL communication between Gluu Server and Redis cache .
+                        description: Enable SSL communication between Gluu Server and Redis cache.
                         type: boolean
                       sslTrustStoreFilePath: 
                         description: Directory Path to Trust Store.
@@ -5115,7 +6402,7 @@ paths:
                         format: url
                         minLength: 1
                       maxIdleConnections: 
-                        description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                        description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
                         type: integer
                         multipleOf: 1
                         maximum: 2147483647
@@ -5147,7 +6434,7 @@ paths:
                         exclusiveMaximum: false
                         exclusiveMinimum: false
                       maxRetryAttempts: 
-                        description: Maximuma retry attepts in case of failure.
+                        description: Maximum retry attempts in case of failure.
                         type: integer
                         multipleOf: 1
                         maximum: 2147483647
@@ -5294,7 +6581,7 @@ paths:
                       type: string
                       minLength: 1
                     useSSL: 
-                      description: Enable SSL communication between Gluu Server and Redis cache .
+                      description: Enable SSL communication between Gluu Server and Redis cache.
                       type: boolean
                     sslTrustStoreFilePath: 
                       description: Directory Path to Trust Store.
@@ -5302,7 +6589,7 @@ paths:
                       format: url
                       minLength: 1
                     maxIdleConnections: 
-                      description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                      description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
                       type: integer
                       multipleOf: 1
                       maximum: 2147483647
@@ -5334,7 +6621,7 @@ paths:
                       exclusiveMaximum: false
                       exclusiveMinimum: false
                     maxRetryAttempts: 
-                      description: Maximuma retry attepts in case of failure.
+                      description: Maximum retry attempts in case of failure.
                       type: integer
                       multipleOf: 1
                       maximum: 2147483647
@@ -5484,7 +6771,7 @@ paths:
                       type: string
                       minLength: 1
                     useSSL: 
-                      description: Enable SSL communication between Gluu Server and Redis cache .
+                      description: Enable SSL communication between Gluu Server and Redis cache.
                       type: boolean
                     sslTrustStoreFilePath: 
                       description: Directory Path to Trust Store.
@@ -5492,7 +6779,7 @@ paths:
                       format: url
                       minLength: 1
                     maxIdleConnections: 
-                      description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                      description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
                       type: integer
                       multipleOf: 1
                       maximum: 2147483647
@@ -5524,7 +6811,7 @@ paths:
                       exclusiveMaximum: false
                       exclusiveMinimum: false
                     maxRetryAttempts: 
-                      description: Maximuma retry attepts in case of failure.
+                      description: Maximum retry attempts in case of failure.
                       type: integer
                       multipleOf: 1
                       maximum: 2147483647
@@ -5805,7 +7092,7 @@ paths:
                     type: string
                     minLength: 1
                   useSSL: 
-                    description: Enable SSL communication between Gluu Server and Redis cache .
+                    description: Enable SSL communication between Gluu Server and Redis cache.
                     type: boolean
                   sslTrustStoreFilePath: 
                     description: Directory Path to Trust Store.
@@ -5813,7 +7100,7 @@ paths:
                     format: url
                     minLength: 1
                   maxIdleConnections: 
-                    description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                    description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
                     type: integer
                     multipleOf: 1
                     maximum: 2147483647
@@ -5845,7 +7132,7 @@ paths:
                     exclusiveMaximum: false
                     exclusiveMinimum: false
                   maxRetryAttempts: 
-                    description: Maximuma retry attepts in case of failure.
+                    description: Maximum retry attempts in case of failure.
                     type: integer
                     multipleOf: 1
                     maximum: 2147483647
@@ -5898,7 +7185,7 @@ paths:
                   type: string
                   minLength: 1
                 useSSL: 
-                  description: Enable SSL communication between Gluu Server and Redis cache .
+                  description: Enable SSL communication between Gluu Server and Redis cache.
                   type: boolean
                 sslTrustStoreFilePath: 
                   description: Directory Path to Trust Store.
@@ -5906,7 +7193,7 @@ paths:
                   format: url
                   minLength: 1
                 maxIdleConnections: 
-                  description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                  description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max iIdle for heavily loaded system will vary but the default is a good starting point.
                   type: integer
                   multipleOf: 1
                   maximum: 2147483647
@@ -5938,7 +7225,7 @@ paths:
                   exclusiveMaximum: false
                   exclusiveMinimum: false
                 maxRetryAttempts: 
-                  description: Maximuma retry attepts in case of failure.
+                  description: Maximum retry attempts in case of failure.
                   type: integer
                   multipleOf: 1
                   maximum: 2147483647
@@ -5994,7 +7281,7 @@ paths:
                   type: string
                   minLength: 1
                 useSSL: 
-                  description: Enable SSL communication between Gluu Server and Redis cache .
+                  description: Enable SSL communication between Gluu Server and Redis cache.
                   type: boolean
                 sslTrustStoreFilePath: 
                   description: Directory Path to Trust Store.
@@ -6002,7 +7289,7 @@ paths:
                   format: url
                   minLength: 1
                 maxIdleConnections: 
-                  description: The cap on the number of \idle\ instances in the pool. If maxIdle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above maxIdle. The best value for maxIdle for heavily loaded system will vary but the default is a good starting point.
+                  description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
                   type: integer
                   multipleOf: 1
                   maximum: 2147483647
@@ -6034,7 +7321,7 @@ paths:
                   exclusiveMaximum: false
                   exclusiveMinimum: false
                 maxRetryAttempts: 
-                  description: Maximuma retry attepts in case of failure.
+                  description: Maximum retry attempts in case of failure.
                   type: integer
                   multipleOf: 1
                   maximum: 2147483647
@@ -6269,7 +7556,7 @@ paths:
                     description: Email Address of the Sender.
                     type: string
                   requires-authentication:
-                    description: Boolean value with default value false. It true it will enables sender authentication.
+                    description: Boolean value with default value false. It true it will enable sender authentication.
                     type: boolean
                   user-name:
                     description: Username of the SMTP.
@@ -6313,7 +7600,7 @@ paths:
                   description: Email Address of the Sender.
                   type: string
                 requires-authentication:
-                  description: Boolean value with default value false. It true it will enables sender authentication.
+                  description: Boolean value with default value false. It true it will enable sender authentication.
                   type: boolean
                 user-name:
                   description: Username of the SMTP.
@@ -6360,7 +7647,7 @@ paths:
                   description: Email Address of the Sender.
                   type: string
                 requires-authentication:
-                  description: Boolean value with default value false. It true it will enables sender authentication.
+                  description: Boolean value with default value false. It true it will enable sender authentication.
                   type: boolean
                 user-name:
                   description: Username of the SMTP.
@@ -6448,7 +7735,7 @@ paths:
                           name:
                             description: Name of the attribute.
                             type: string
-                            example: 'name, displayName,birthdate, email'
+                            example: 'name, displayName, birthdate, email'
                           displayName:
                             description: A human-readable name of the attribute.
                             type: string
@@ -6512,7 +7799,7 @@ paths:
                       name:
                         description: Name of the attribute.
                         type: string
-                        example: 'name, displayName,birthdate, email'
+                        example: 'name, displayName, birthdate, email'
                       displayName:
                         description: A human-readable name of the attribute.
                         type: string
@@ -6579,7 +7866,7 @@ paths:
                       name:
                         description: Name of the attribute.
                         type: string
-                        example: 'name, displayName,birthdate, email'
+                        example: 'name, displayName, birthdate, email'
                       displayName:
                         description: A human-readable name of the attribute.
                         type: string
@@ -6658,7 +7945,7 @@ paths:
                         name:
                           description: Name of the attribute.
                           type: string
-                          example: 'name, displayName,birthdate, email'
+                          example: 'name, displayName, birthdate, email'
                         displayName:
                           description: A human-readable name of the attribute.
                           type: string
@@ -6690,13 +7977,13 @@ paths:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -6758,7 +8045,7 @@ paths:
                           name:
                             description: Name of the attribute.
                             type: string
-                            example: 'name, displayName,birthdate, email'
+                            example: 'name, displayName, birthdate, email'
                           displayName:
                             description: A human-readable name of the attribute.
                             type: string
@@ -6775,7 +8062,7 @@ paths:
       - name: size
         in: query
         required: true
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -6837,7 +8124,7 @@ paths:
                           name:
                             description: Name of the attribute.
                             type: string
-                            example: 'name, displayName,birthdate, email'
+                            example: 'name, displayName, birthdate, email'
                           displayName:
                             description: A human-readable name of the attribute.
                             type: string
@@ -7524,7 +8811,7 @@ paths:
                       type: string
                       format: date
                     request_uris:
-                      description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
+                      description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
                       type: array
                       items:
                         type: string
@@ -7559,7 +8846,7 @@ paths:
                         tlsClientAuthSubjectDn:
                           type: string
                         runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                          description: Run Introspection Script Before Access Token As Jwt Creation And Include Claims. Default value is false.
+                          description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
                           type: boolean
                         keepClientAuthorizationAfterExpiration:
                           description: Keep Client Authorization After Expiration.
@@ -7578,7 +8865,7 @@ paths:
                         - PS384
                         - PS512
                     backchannel_token_delivery_mode:
-                      description: specifies how backchannel token will be deliveried.
+                      description: specifies how backchannel token will be delivered.
                       type: string
                     backchannel_client_notification_endpoint:
                       description: Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.
@@ -7591,8 +8878,8 @@ paths:
     post:
       tags:
         - OAuth - OpenID Connect - Clients
-      summary: Adds a OpenID connect client.
-      description: Adds a OpenID connect client.
+      summary: Adds an OpenID connect client.
+      description: Adds an OpenID connect client.
       operationId: post-oauth-openid-clients     
       requestBody:
         content:
@@ -7915,7 +9202,7 @@ paths:
                   type: string
                   format: date
                 request_uris:
-                  description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
+                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
                   type: array
                   items:
                     type: string
@@ -7950,7 +9237,7 @@ paths:
                     tlsClientAuthSubjectDn:
                       type: string
                     runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                      description: Run Introspection Script Before Access Token As Jwt Creation And Include Claims. Default value is false.
+                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
                       type: boolean
                     keepClientAuthorizationAfterExpiration:
                       description: Keep Client Authorization After Expiration.
@@ -7969,7 +9256,7 @@ paths:
                     - PS384
                     - PS512
                 backchannel_token_delivery_mode:
-                  description: specifies how backchannel token will be deliveried.
+                  description: specifies how backchannel token will be delivered.
                   type: string
                 backchannel_client_notification_endpoint:
                   description: Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.
@@ -8309,7 +9596,7 @@ paths:
                   type: string
                   format: date
                 request_uris:
-                  description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
+                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
                   type: array
                   items:
                     type: string
@@ -8344,7 +9631,7 @@ paths:
                     tlsClientAuthSubjectDn:
                       type: string
                     runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                      description: Run Introspection Script Before Access Token As Jwt Creation And Include Claims. Default value is false.
+                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
                       type: boolean
                     keepClientAuthorizationAfterExpiration:
                       description: Keep Client Authorization After Expiration.
@@ -8363,7 +9650,7 @@ paths:
                     - PS384
                     - PS512
                 backchannel_token_delivery_mode:
-                  description: specifies how backchannel token will be deliveried.
+                  description: specifies how backchannel token will be delivered.
                   type: string
                 backchannel_client_notification_endpoint:
                   description: Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.
@@ -8714,7 +10001,7 @@ paths:
                     type: string
                     format: date
                   request_uris:
-                    description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
+                    description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
                     type: array
                     items:
                       type: string
@@ -8749,7 +10036,7 @@ paths:
                       tlsClientAuthSubjectDn:
                         type: string
                       runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                        description: Run Introspection Script Before Access Token As Jwt Creation And Include Claims. Default value is false.
+                        description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
                         type: boolean
                       keepClientAuthorizationAfterExpiration:
                         description: Keep Client Authorization After Expiration.
@@ -8768,7 +10055,7 @@ paths:
                       - PS384
                       - PS512
                   backchannel_token_delivery_mode:
-                    description: specifies how backchannel token will be deliveried.
+                    description: specifies how backchannel token will be delivered.
                     type: string
                   backchannel_client_notification_endpoint:
                     description: Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.
@@ -8796,13 +10083,13 @@ paths:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:
@@ -9137,7 +10424,7 @@ paths:
                       type: string
                       format: date
                     request_uris:
-                      description: Provide a list of request_uri values that are pre-registered by the Client for use at the Authorization Server.
+                      description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
                       type: array
                       items:
                         type: string
@@ -9172,7 +10459,7 @@ paths:
                         tlsClientAuthSubjectDn:
                           type: string
                         runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                          description: Run Introspection Script Before Access Token As Jwt Creation And Include Claims. Default value is false.
+                          description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
                           type: boolean
                         keepClientAuthorizationAfterExpiration:
                           description: Keep Client Authorization After Expiration.
@@ -9191,7 +10478,7 @@ paths:
                         - PS384
                         - PS512
                     backchannel_token_delivery_mode:
-                      description: specifies how backchannel token will be deliveried.
+                      description: specifies how backchannel token will be delivered.
                       type: string
                     backchannel_client_notification_endpoint:
                       description: Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.
@@ -9382,13 +10669,13 @@ paths:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:
@@ -9601,13 +10888,13 @@ paths:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -9653,7 +10940,7 @@ paths:
       - name: size
         in: query
         required: true
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -9844,8 +11131,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Gets a UMA Resource with specified id.
-      description: Gets a UMA Resource with specified id.
+      summary: Gets an UMA Resource with specified id.
+      description: Gets an UMA Resource with specified id.
       operationId: get-oauth-uma-resources-by-id     
       responses:
         '200':
@@ -9889,8 +11176,8 @@ paths:
     delete:
       tags:
         - OAuth - UMA Resources
-      summary: Deletes a UMA Resource with specified id.
-      description: Deletes a UMA Resource with specified id.
+      summary: Deletes an UMA Resource with specified id.
+      description: Deletes an UMA Resource with specified id.
       operationId: delete-oauth-uma-resources-by-id     
       responses:
         '200':
@@ -9904,13 +11191,13 @@ paths:
       - name: pattern
         in: query
         required: true
-        description: Serach pattern.
+        description: Search pattern.
         schema:
           type: string
       - name: size
         in: query
         required: false
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -9966,7 +11253,7 @@ paths:
       - name: size
         in: query
         required: true
-        description: Serach size -  max size of the results to return.
+        description: Search size - max size of the results to return.
         schema:
           type: integer
     get:  
@@ -10053,7 +11340,7 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     InternalServerError:
-      description: Internal error occured. Please check log file for details.
+      description: Internal error occurred. Please check log file for details.
       content:
         application/json:
           schema:
@@ -10061,11 +11348,11 @@ components:
   schemas:
     ErrorResponse:
       required:
-        - error
+        - error_code
         - error_description
       type: object
       properties:
-        error:
+        error_code:
           type: string
         error_description:
           type: string
@@ -10278,7 +11565,7 @@ components:
           default: false
         mutationTokensEnabled:
           type: boolean
-          description: If mutation tokens are enabled, they can be used for advanced durability requirements,as well as optimized RYOW consistency.
+          description: If mutation tokens are enabled, they can be used for advanced durability requirements, as well as optimized RYOW consistency.
           default: false
         connectTimeout:
           type: integer
@@ -10286,7 +11573,7 @@ components:
         computationPoolSize:
           type: integer
           format: int32
-          description: Sets the pool size (number of threads to use) for all non blocking operations,default value is the number of CPUs.
+          description: Sets the pool size (number of threads to use) for all non-blocking operations, default value is the number of CPUs.
         useSSL:
           type: boolean
         sslTrustStoreFile:
