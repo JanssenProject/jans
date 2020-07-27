@@ -110,13 +110,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private Boolean isCibaEnabled;
 
+    private DeviceAuthorizationService deviceAuthorizationService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
                                        String ticket, String claimToken, String claimTokenFormat, String pctCode,
-                                       String rptCode, String authReqId,
+                                       String rptCode, String authReqId, String deviceCode,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
@@ -489,6 +491,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                     }
                 }
+            } else if (gt == GrantType.DEVICE_CODE) {
+                return processDeviceCodeGrantType(gt, client, deviceCode, scope, request, response, oAuth2AuditLog);
             }
         } catch (WebApplicationException e) {
             throw e;
@@ -498,6 +502,97 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         return response(builder, oAuth2AuditLog);
+    }
+
+    /**
+     * Processes token request for device code grant type.
+     * @param grantType Grant type used, should be device code.
+     * @param client Client in process.
+     * @param deviceCode Device code generated in device authn request.
+     * @param scope Scope registered in device authn request.
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param oAuth2AuditLog OAuth2AuditLog
+     */
+    private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
+                                                String scope, final HttpServletRequest request,
+                                                final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
+        if (!TokenParamsValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
+            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
+        }
+
+        log.debug("Attempting to find authorizationGrant by deviceCode: '{}'", deviceCode);
+        final DeviceCodeGrant deviceCodeGrant = authorizationGrantList.getDeviceCodeGrant(deviceCode);
+
+        log.trace("DeviceCodeGrant : '{}'", deviceCodeGrant);
+
+        if (deviceCodeGrant != null) {
+            if (!deviceCodeGrant.getClientId().equals(client.getClientId())) {
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog));
+            }
+            RefreshToken refToken = deviceCodeGrant.createRefreshToken();
+            log.debug("Issuing refresh token: {}", refToken.getCode());
+
+            AccessToken accessToken = deviceCodeGrant.createAccessToken(request.getHeader("X-ClientCert"), new ExecutionContext(request, response));
+            log.debug("Issuing access token: {}", accessToken.getCode());
+
+            IdToken idToken = deviceCodeGrant.createIdToken(
+                    null, null, accessToken, refToken,
+                    null, deviceCodeGrant, false, null);
+
+            RefreshToken reToken = null;
+            if (isRefreshTokenAllowed(client, deviceCodeGrant)) {
+                reToken = refToken;
+            }
+
+            if (scope != null && !scope.isEmpty()) {
+                scope = deviceCodeGrant.checkScopesPolicy(scope);
+            }
+            log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
+
+            oAuth2AuditLog.updateOAuth2AuditLog(deviceCodeGrant, true);
+
+            grantService.removeByCode(deviceCodeGrant.getDeviceCode());
+
+            return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
+                    accessToken.getExpiresIn(), reToken, scope, idToken)).build();
+        } else {
+            final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
+            log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);
+            if (cacheData == null) {
+                log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired."), oAuth2AuditLog));
+            }
+            if (!cacheData.getClient().getClientId().equals(client.getClientId())) {
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized."), oAuth2AuditLog));
+            }
+            long currentTime = new Date().getTime();
+            Long lastAccess = cacheData.getLastAccessControl();
+            if (lastAccess == null) {
+                lastAccess = currentTime;
+            }
+            cacheData.setLastAccessControl(currentTime);
+            deviceAuthorizationService.saveInCache(cacheData, true, true);
+
+            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                int intervalSeconds = appConfiguration.getBackchannelAuthenticationResponseInterval();
+                long timeFromLastAccess = currentTime - lastAccess;
+
+                if (timeFromLastAccess > intervalSeconds * 1000) {
+                    log.debug("Access hasn't been granted yet for deviceCode: '{}'", deviceCode);
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.AUTHORIZATION_PENDING, "User hasn't answered yet"), oAuth2AuditLog));
+                } else {
+                    log.debug("Slow down protection deviceCode: '{}'", deviceCode);
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.SLOW_DOWN, "Client is asking too fast the token."), oAuth2AuditLog));
+                }
+            }
+            if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
+                log.debug("The end-user denied the authorization request for deviceCode: '{}'", deviceCode);
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.ACCESS_DENIED, "The end-user denied the authorization request."), oAuth2AuditLog));
+            }
+            log.debug("The authentication request has expired for deviceCode: '{}'", deviceCode);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.EXPIRED_TOKEN, "The authentication request has expired"), oAuth2AuditLog));
+        }
     }
 
     private boolean isRefreshTokenAllowed(Client client, IAuthorizationGrant grant) {

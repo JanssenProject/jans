@@ -94,6 +94,7 @@ public abstract class BaseTest {
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
+    protected String deviceAuthzEndpoint;
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
@@ -102,11 +103,11 @@ public abstract class BaseTest {
     protected Map<String, String> allTestKeys = Maps.newHashMap();
 
     // Form Interaction
-    private String loginFormUsername;
-    private String loginFormPassword;
-    private String loginFormLoginButton;
+    protected String loginFormUsername;
+    protected String loginFormPassword;
+    protected String loginFormLoginButton;
     private String authorizeFormAllowButton;
-    private String authorizeFormDoNotAllowButton;
+    protected String authorizeFormDoNotAllowButton;
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
@@ -337,7 +338,7 @@ public abstract class BaseTest {
         return authorizationResponse;
     }
 
-    private WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
+    protected WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
         // Allow to run test in multi thread mode
     	HtmlUnitDriver currentDriver;
         if (useNewDriver) {
@@ -354,7 +355,7 @@ public abstract class BaseTest {
         return currentDriver;
     }
 
-    private void stopWebDriver(boolean useNewDriver, WebDriver currentDriver) {
+    protected void stopWebDriver(boolean useNewDriver, WebDriver currentDriver) {
         if (useNewDriver) {
             currentDriver.close();
             currentDriver.quit();
@@ -800,6 +801,7 @@ public abstract class BaseTest {
             registrationEndpoint = response.getRegistrationEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
+            deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
             backchannelAuthenticationEndpoint = response.getBackchannelAuthenticationEndpoint();
             revokeSessionEndpoint = response.getSessionRevocationEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();

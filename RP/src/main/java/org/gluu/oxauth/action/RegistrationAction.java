@@ -53,6 +53,9 @@ public class RegistrationAction implements Serializable {
     @Inject
     private TokenAction tokenAction;
 
+    @Inject
+    private DeviceAuthzAction deviceAuthzAction;
+
     private String registrationEndpoint;
     private String redirectUris;
     private String claimsRedirectUris;
@@ -112,7 +115,7 @@ public class RegistrationAction implements Serializable {
             HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
             final URL aURL = new URL(request.getRequestURL().toString());
             redirectUris = aURL.getProtocol() + "://" + aURL.getAuthority() + "/oxauth-rp/home.htm";
-            backchannelClientNotificationEndpoint = aURL.getProtocol() + "://" + aURL.getAuthority() + "/api/cb";
+            backchannelClientNotificationEndpoint = aURL.getProtocol() + "://" + aURL.getAuthority() + "/restv1/cb";
         } catch (MalformedURLException e) {
             log.error("Problems processing oxAuth-RP url", e);
         }
@@ -176,6 +179,9 @@ public class RegistrationAction implements Serializable {
                 backchannelAuthenticationAction.setClientId(response.getClientId());
                 backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
                 backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(request.getBackchannelTokenDeliveryMode());
+
+                deviceAuthzAction.setClientId(response.getClientId());
+                deviceAuthzAction.setClientSecret(response.getClientSecret());
             }
 
             showResults = true;
@@ -201,6 +207,8 @@ public class RegistrationAction implements Serializable {
 
             backchannelAuthenticationAction.setClientId(response.getClientId());
             backchannelAuthenticationAction.setClientSecret(response.getClientSecret());
+            deviceAuthzAction.setClientId(response.getClientId());
+            deviceAuthzAction.setClientSecret(response.getClientSecret());
             if ( response.getClaims() != null && response.getClaims().containsKey(
                     RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()) ) {
                 backchannelAuthenticationAction.setBackchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.fromString(

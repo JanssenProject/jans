@@ -33,7 +33,7 @@
 
 					<div class="actionButtons">
 						<h:commandButton value="Submit" action="#{openIdConnectDiscoveryAction.exec}">
-							<f:ajax execute="@form" render="discoveryResults registrationForm authorizationForm backchannelAuthenticationForm tokenForm userInfoForm checkSessionForm endSessionForm" />
+							<f:ajax execute="@form" render="discoveryResults registrationForm authorizationForm backchannelAuthenticationForm tokenForm userInfoForm checkSessionForm endSessionForm deviceAuthorizationForm" />
 						</h:commandButton>
 					</div>
 
@@ -411,7 +411,7 @@
 
 					<div class="actionButtons">
 						<h:commandButton value="Submit" action="#{registrationAction.execClientRead}" >
-							<f:ajax execute="@form" render="clientReadResults registrationResults clientReadForm authorizationForm backchannelAuthenticationForm tokenForm" />
+							<f:ajax execute="@form" render="clientReadResults registrationResults clientReadForm authorizationForm backchannelAuthenticationForm tokenForm deviceAuthorizationForm" />
 						</h:commandButton>
 					</div>
 
@@ -822,6 +822,8 @@
 				</b:panel>
 			</div>
 
+			<ui:include src="device_authorization.xhtml" />
+
 			<div>
 				<b:panel title="Token Endpoint" look="primary">
 					<h:panelGroup layout="block" id="tokenForm">
@@ -896,6 +898,11 @@
 								<h:outputLabel for="authReqId">Auth Req Id</h:outputLabel>
 								<h:inputText id="authReqId"
 											 value="#{tokenAction.authReqId}" size="40" />
+								<h:outputText></h:outputText>
+
+								<h:outputLabel for="deviceCode">Device Code</h:outputLabel>
+								<h:inputText id="deviceCode"
+											 value="#{tokenAction.deviceCode}" size="40" />
 								<h:outputText></h:outputText>
 							</h:panelGrid>
 						</div>
