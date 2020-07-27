@@ -1,7 +1,7 @@
 package org.gluu.oxauthconfigapi.util;
 
 public class ApiConstants {
-	
+
 	private ApiConstants() {
 	}
 
@@ -18,5 +18,9 @@ public class ApiConstants {
 	public static final String UMA = "/uma";
 	public static final String DYN_REGISTRATION = "/dyn_registration";
 	public static final String SESSIONID = "/sessionid";
+	public static final String CLIENTS = "/clients";
+
+	public static final String LIMIT = "limit";
+	public static final String PATTERN = "pattern";
 
 }
