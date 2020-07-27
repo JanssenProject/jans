@@ -17,6 +17,7 @@
     "openIdConfigurationEndpoint":"${config.oxauth.issuer}/.well-known/openid-configuration",
     "idGenerationEndpoint":"${config.oxauth.contextPath}/restv1/id",
     "introspectionEndpoint":"${config.oxauth.contextPath}/restv1/introspection",
+    "deviceAuthorizationEndpoint":"${config.oxauth.contextPath}/restv1/device_authorization",
     "umaConfigurationEndpoint":"${config.oxauth.contextPath}/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
     "oxElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
@@ -47,7 +48,8 @@
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:openid:params:grant-type:ciba"
+        "urn:openid:params:grant-type:ciba",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "subjectTypesSupported":[
         "public",
@@ -175,7 +177,8 @@
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:openid:params:grant-type:ciba"
+        "urn:openid:params:grant-type:ciba",
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "claimTypesSupported":[
         "normal"
@@ -329,5 +332,8 @@
         "notificationUrl": "https://fcm.googleapis.com/fcm/send",
         "notificationKey": "csyBj39m4uPHbs2oHeTw40KfgCiUbgxBKPPz6ZXgkpF4EMQvMOAHAoM7up1UlfHk9GD5QnqdMktzjpmEuKd5xlD2kRDhwMIJ8JYbTA5+Cv39CxuWOiFuuMPJZqg+VqT4X7Ne9sXvm3UtMe8PxmRAoXlSZ1kElT/AuQvC2+YyiqlmLpXoCU01waEtIajltap5TrFuXvAvkmYJjvCkFIdWsg==",
         "publicVapidKey": "BOH-FKi3U-7cr5Wv3WeS8RJXXaGpf1R7tlgKSOvYCbFrJRaJER4kI_0xCNG22erHLAmiC78PAW53neERb3eiIO0"
-    }
+    },
+    "deviceAuthzRequestExpiresIn": 1800,
+    "deviceAuthzTokenPollInterval": 5,
+    "deviceAuthzResponseTypeToProcessAuthz": "code"
 }

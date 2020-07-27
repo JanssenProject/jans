@@ -4,14 +4,12 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
+import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.service.RedirectUriResponse;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.util.RedirectUri;
@@ -51,6 +49,9 @@ public class AuthorizeRestWebServiceValidator {
 
     @Inject
     private RedirectionUriService redirectionUriService;
+
+    @Inject
+    private DeviceAuthorizationService deviceAuthorizationService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -251,8 +252,15 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, String state) {
-        redirectUri = redirectionUriService.validateRedirectionUri(client, redirectUri);
+    public String validateRedirectUri(@NotNull Client client, @Nullable String redirectUri, String state,
+                                      String deviceAuthzUserCode, HttpServletRequest httpRequest) {
+        if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
+            DeviceAuthorizationCacheControl deviceAuthorizationCacheControl = deviceAuthorizationService
+                    .getDeviceAuthzByUserCode(deviceAuthzUserCode);
+            redirectUri = deviceAuthorizationService.getDeviceAuthorizationPage(deviceAuthorizationCacheControl, client, state, httpRequest);
+        } else {
+            redirectUri = redirectionUriService.validateRedirectionUri(client, redirectUri);
+        }
         if (StringUtils.isNotBlank(redirectUri)) {
             return redirectUri;
         }
