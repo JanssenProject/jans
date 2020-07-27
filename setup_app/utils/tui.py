@@ -80,10 +80,12 @@ class GluuSetupForm(npyscreen.FormBaseNew):
         self.parentApp.my_counter = 0
         
         self.add_handlers({curses.KEY_F1: self.display_help})
-        self.add(npyscreen.MultiLineEdit, value='=' * (self.columns - 4), max_height=1, rely=self.lines-4, editable=False)
         self.marketing_label = self.add(npyscreen.MultiLineEdit, value='', max_height=1, rely=self.lines-3, editable=False)
 
         form_name = getClassName(self)
+
+        self.add(npyscreen.TitleFixedText, name=msg.version_label + ' ' + Config.oxVersion, rely=self.lines-5,  editable=False, labelColor='CONTROL')
+        self.add(npyscreen.MultiLineEdit, value='=' * (self.columns - 4), max_height=1, rely=self.lines-4, editable=False)
 
         if form_name != 'InstallStepsForm':
 
