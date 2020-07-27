@@ -107,6 +107,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private CibaRequestService cibaRequestService;
 
+    @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
 
     @Override
