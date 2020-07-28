@@ -359,5 +359,7 @@ class GluuInstaller(SetupUtils):
 
             for spath in ('gluu', 'etc/gluu/conf', 'opendj/db'):
                 for gpath in Path(os.path.join(base.snap_common, spath)).rglob('*'):
+                    if 'node_modules' in gpath.as_posix():
+                        continue
                     chm_mode = '0755' if os.path.isdir(gpath.as_posix()) else '0600'
                     self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
