@@ -3,6 +3,7 @@ package org.gluu.oxauth.service;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
@@ -34,6 +35,9 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     @Override
     public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws Exception {
         try {
+            if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
+                return null;
+            }
             final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
             if (!cryptoProvider.getKeys().contains(kid) && configurationFactory.reloadConfFromLdap()) {
                 return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
