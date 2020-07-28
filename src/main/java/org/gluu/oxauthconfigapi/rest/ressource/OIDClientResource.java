@@ -21,7 +21,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ClientService;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CLIENTS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class OIDClientResource {
+public class OIDClientResource extends BaseResource {
 	@Inject
 	Logger logger;
 
@@ -45,9 +45,10 @@ public class OIDClientResource {
 	@GET
 	@Operation(summary = "Gets list of OpenID connect clients")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = true))),
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
-	public Response getOpenIdConnectClients(@DefaultValue("100") @QueryParam(value = ApiConstants.LIMIT) int limit,
+	@ProtectedApi(scopes = { READ_ACCESS })
+	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
 			logger.info("OIDClientResource::getOpenIdConnectClients - Gets list of OpenID connect clients");
@@ -60,9 +61,7 @@ public class OIDClientResource {
 			return Response.ok(clients).build();
 		} catch (Exception ex) {
 			logger.error("Failed to openid connects clients", ex);
-			ApiError error = new ApiError(Response.Status.INTERNAL_SERVER_ERROR.toString(), "Server error",
-					ex.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+			return getServerError(ex);
 		}
 	}
 

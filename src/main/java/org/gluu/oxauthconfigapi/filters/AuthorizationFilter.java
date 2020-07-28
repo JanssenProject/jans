@@ -41,38 +41,35 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 		logger.info("=======================================================================");
 		logger.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP "
 				+ request.remoteAddress().toString());
-		logger.info("======PERFORMING AUTHORIZATION==========================================");
+		logger.info("======PERFORMING AUTHORIZATION=========================================");
 		String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 		if (!isTokenBasedAuthentication(authorizationHeader)) {
 			abortWithUnauthorized(context);
-			logger.info("======AUTHORIZATION FAILED, ABORTING THE REQUEST====================");
+			logger.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
 			return;
 		}
 		String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
 		try {
-			validateToken(token);
+			validateToken(token,context);
+			logger.info("======AUTHORIZATION  GRANTED===========================================");	
 		} catch (Exception e) {
 			abortWithUnauthorized(context);
+			logger.info("======INVALID AUTHORIZATION TOKEN======================================");
 		}
-
+        
 	}
 
 	private boolean isTokenBasedAuthentication(String authorizationHeader) {
-		// Check if the Authorization header is valid
-		// It must not be null and must be prefixed with "Bearer" plus a whitespace
-		// The authentication scheme comparison must be case-insensitive
 		return authorizationHeader != null
 				&& authorizationHeader.toLowerCase().startsWith(AUTHENTICATION_SCHEME.toLowerCase() + " ");
 	}
 
 	private void abortWithUnauthorized(ContainerRequestContext requestContext) {
-		// Abort the filter chain with a 401 status code response
-		// The WWW-Authenticate header is sent along with the response
 		requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
 				.header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
 	}
 
-	private void validateToken(String token) throws Exception {
+	private void validateToken(String token, ContainerRequestContext context) throws Exception {
 		// Check if the token was issued by the server and if it's not expired
 		// Throw an Exception if the token is invalid
 	}
