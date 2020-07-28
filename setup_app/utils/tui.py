@@ -299,6 +299,10 @@ class ServicesForm(GluuSetupForm):
 
         for service in self.services:
             cb_val = getattr(self, service).value
+
+            if cb_val and Config.installed_instance and not Config.get(service):
+                Config.addPostSetupService.append(service)
+
             setattr(Config, service, cb_val)
             if cb_val and service in service_enable_dict:
                 for attribute in service_enable_dict[service]:
