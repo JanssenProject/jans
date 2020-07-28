@@ -11,6 +11,7 @@ import json
 import string
 import random
 import hashlib
+import ruamel.yaml
 
 from pathlib import Path
 from urllib.parse import urlparse
@@ -501,3 +502,25 @@ class SetupUtils(Crypto64):
                 self.logIt("Writing rendered template {}".format(fullOutputFile))
                 fullOutputFile.write_text(rendered_text)
 
+    def add_yacron_job(self, command, schedule, name=None, args={}):
+        if not name:
+            name = command
+
+        yacron_yaml_fn = os.path.join(base.snap_common, 'etc/cron-jobs.yaml')
+
+        yml_str = self.readFile(yacron_yaml_fn)
+        yacron_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+
+        if not yacron_yaml:
+            yacron_yaml = {'jobs': []}
+
+        if 'jobs' not in yacron_yaml:
+            yacron_yaml['jobs'] = []
+
+        job = { 'command': command, 'schedule': schedule, 'name': name }
+        job.update(args)
+        
+        yacron_yaml['jobs'].append(job)
+
+        yml_str = ruamel.yaml.dump(yacron_yaml, Dumper=ruamel.yaml.RoundTripDumper)
+        self.writeFile(yacron_yaml_fn, yml_str)
