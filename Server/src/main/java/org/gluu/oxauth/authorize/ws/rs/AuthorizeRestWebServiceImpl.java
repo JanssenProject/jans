@@ -427,9 +427,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                         codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
             }
 
-            ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
-                    user.getAttribute("inum"),
-                    client.getClientId());
+            ClientAuthorization clientAuthorization = null;
+            boolean clientAuthorizationFetched = false;
             if (scopes.size() > 0) {
                 if (prompts.contains(Prompt.CONSENT)) {
                     return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
@@ -440,16 +439,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 if (client.getTrustedClient()) {
                     sessionUser.addPermission(clientId, true);
                     sessionIdService.updateSessionId(sessionUser);
-                } else if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                    log.trace("ClientAuthorization - scope: " + scope + ", dn: " + clientAuthorization.getDn() + ", requestedScope: " + scopes);
-                    if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
-                        sessionUser.addPermission(clientId, true);
-                        sessionIdService.updateSessionId(sessionUser);
-                    } else {
-                        return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
-                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+                } else {
+                    clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
+                    clientAuthorizationFetched = true;
+                    if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
+                        log.trace("ClientAuthorization - scope: " + scope + ", dn: " + clientAuthorization.getDn() + ", requestedScope: " + scopes);
+                        if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
+                            sessionUser.addPermission(clientId, true);
+                            sessionIdService.updateSessionId(sessionUser);
+                        } else {
+                            return redirectToAuthorizationPage(redirectUriResponse.getRedirectUri(), responseTypes, scope, clientId,
+                                    redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                    idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                    codeChallenge, codeChallengeMethod, sessionId, claims, authReqId, customParameters, oAuth2AuditLog, httpRequest);
+                        }
                     }
                 }
             }
@@ -470,8 +473,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             }
 
             if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
-                clientAuthorizationsService.clearAuthorizations(clientAuthorization,
-                        client.getPersistClientAuthorizations());
+                if (!clientAuthorizationFetched) {
+                    clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
+                }
+                clientAuthorizationsService.clearAuthorizations(clientAuthorization, client.getPersistClientAuthorizations());
 
                 prompts.remove(Prompt.CONSENT);
 
