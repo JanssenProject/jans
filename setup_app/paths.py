@@ -19,6 +19,7 @@ cmd_mkdir = '/bin/mkdir'
 cmd_rpm = '/bin/rpm'
 cmd_dpkg = '/usr/bin/dpkg'
 cmd_rm = '/bin/rm'
+cmd_py3 = shutil.which('python3')
 cmd_openssl = shutil.which('openssl')
 cmd_wget = shutil.which('wget')
 cmd_sed = shutil.which('sed')

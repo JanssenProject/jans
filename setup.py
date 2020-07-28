@@ -95,6 +95,7 @@ for key in setupOptions:
 
 gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
+gluuInstaller.radiusInstaller = radiusInstaller
 
 """
 Config.hostname = 'snap.gluu.org'
@@ -320,7 +321,7 @@ def do_installation():
                     gluuProgress.progress(PostSetup.service_name, "Starting Oxauth-rp")
                     service['object'].start('oxauth-rp')
 
-        gluuInstaller.post_setup()
+        gluuInstaller.post_install_tasks()
 
         gluuProgress.progress(static.COMPLETED)
 
