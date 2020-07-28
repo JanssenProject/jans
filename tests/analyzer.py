@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import json
@@ -32,16 +32,16 @@ if not args.dir:
     sys.exit()
 
 def sort_result(result):
-    
+
     descending = False
     order_by = args.sort
 
     if order_by[0] == 'D':
         order_by = order_by[1:]
         descending = True
-    
+
     result.sort(key=lambda mydic: mydic[order_by])
-    
+
     if descending:
         result.reverse()
 
@@ -58,84 +58,83 @@ def is_hidden(c):
         return True
 
 def print_result(result, k, heading):
-    
+
     columnsl = columns[:]
     columnsl.remove('operation')
-    
+
     sort_result(result)
 
     if args.type == 'text':
-    
-        print heading,':'
-        print '-'*(len(heading)+1)
-    
-        print '#'.rjust(3),
-    
+
+        print(heading,':')
+        print('-'*(len(heading)+1))
+
+        print('#'.rjust(3), end=' ')
+
         for c in columnsl:
             if not is_hidden(c):
-                
+
                 if c=='key':
-                    print '     '+k,
+                    print('     '+k, end=' ')
                 else:
-                    print c.rjust(8),
-        print
+                    print(c.rjust(8), end=' ')
+        print()
 
         footer = {'count':0, 't_sum':0, 't_avg':0}
 
         for ln, row in enumerate(result):
 
-                print str(ln+1).rjust(3),
+                print(str(ln+1).rjust(3), end=' ')
 
                 for c in columnsl:
                     if not is_hidden(c):
                         if c == 'key':
-                            print '    ',
-                        
-                        
-                        print get_formatted_str(row[c]),
+                            print('    ', end=' ')
+
+                        print(get_formatted_str(row[c]), end=' ')
                     if c in footer:
                         footer[c] += row[c]
 
-                print
+                print()
 
-        print '='*100
-        
-        print ' '.rjust(3),
+        print('='*100)
+
+        print(' '.rjust(3), end=' ')
         for c in columns[:-2]:
             if not is_hidden(c):
                 if c=='t_avg':
                     pp = footer[c] / len(result)
                 else:
                     pp = footer[c]
-                
-                print get_formatted_str(pp),
-                
-        print "     GRANT TOTAL"
-        print
-        print
+
+                print(get_formatted_str(pp), end=' ')
+
+        print("     GRANT TOTAL")
+        print()
+        print()
 
     if args.type == 'html':
 
-        print '<table>'
-        print '<caption><b>{0}</b></caption>'.format(heading)
+        print('<table>')
+        print('<caption><b>{0}</b></caption>'.format(heading))
 
-        print '<tr><td style="padding-right:10px; padding-left:10px">#</td>',
-    
+        print('<tr><td style="padding-right:10px; padding-left:10px">#</td>', end=' ')
+
         for c in columns:
             if not is_hidden(c):
-                
+
                 if c=='key':
                     td = k
                 else:
                     td = c
-                print '<td>{0}</td>'.format(td),
-        print '</tr>'
+                print('<td>{0}</td>'.format(td), end=' ')
+        print('</tr>')
 
         footer = {'count':0, 't_sum':0, 't_avg':0}
 
         for ln, row in enumerate(result):
 
-                print '<tr><td align="right">{0}</td>'.format(ln+1),
+                print('<tr><td align="right">{0}</td>'.format(ln+1), end=' ')
 
                 for c in columns:
                     if not is_hidden(c):
@@ -143,33 +142,33 @@ def print_result(result, k, heading):
                             align = ''
                         else:
                             align=' align="right"'
-                        print '<td {0}>{1}</td>'.format(align, get_formatted_str(row[c]).strip()),
-                        
+                        print('<td {0}>{1}</td>'.format(align, get_formatted_str(row[c]).strip()), end=' ')
+
                     if c in footer:
                         footer[c] += row[c]
 
-                print '</tr>'
-        
-        print '<tr><td></td>',
+                print('</tr>')
+
+        print('<tr><td></td>', end=' ')
         for c in columns[:-2]:
             if not is_hidden(c):
                 if c=='t_avg':
                     pp = footer[c] / len(result)
                 else:
                     pp = footer[c]
-                
-                print '<td align="right">{0}</td>'.format(get_formatted_str(pp).strip()),
-                
-        print '<td colspan="2"> GRANT TOTAL </td></tr>'
-        print '</table>\n'
-        print '<br><br>'
+
+                print('<td align="right">{0}</td>'.format(get_formatted_str(pp).strip()), end=' ')
+
+        print('<td colspan="2"> GRANT TOTAL </td></tr>')
+        print('</table>\n')
+        print('<br><br>')
 
 
 def http_log():
 
     fn = os.path.join(args.dir, 'http_request_response.log')
     if not os.path.exists(fn):
-        print "File {0} does not exists".format(fn)
+        print("File {0} does not exists".format(fn))
         return
 
     rdict = {}
@@ -187,7 +186,7 @@ def http_log():
                         rdict[data['path']] = [d]
 
     if not rdict:
-        print "\n *** NO HTTP LOG ANALYSES IS AVAILABLE ***"
+        print("\n *** NO HTTP LOG ANALYSES IS AVAILABLE ***")
         return
 
     sn = 0
@@ -203,7 +202,7 @@ def http_log():
         t = sum(data)
         st += t
         a= t/n
-        
+
         result.append({'count': n, 't_sum': t, 't_avg': a, 'key': path})
 
     print_result(result, 'path', "HTTP REQUEST LOG ANALYSES")
@@ -213,7 +212,7 @@ def durations():
 
     fn = os.path.join(args.dir,'oxauth_persistence_duration.log')
     if not os.path.exists(fn):
-        print "File {0} does not exists".format(fn)
+        print("File {0} does not exists".format(fn))
         return
 
     rdict = {}
@@ -222,17 +221,16 @@ def durations():
 
     for l in open(fn):
         ls = l.split(',')
-        
+
         operation = ls[1].split('operation: ')[1]
         bucket = ls[3].strip()[8:]
-        
+
         if not bucket in buckets:
             buckets[bucket] = []
-        
+
         if not operation in args.operation:
             continue
-        
-        
+
         ds = ls[2].strip()[12:-1]
         if 'M' in ds:
             m,s=ds.split('M')
@@ -245,7 +243,7 @@ def durations():
                 p = ls[5].strip()
             else:
                 p = ls[4].strip()
-     
+
             if p in rdict:
                 rdict[p].append(d)
             else:
@@ -255,7 +253,7 @@ def durations():
 
 
     if args.groupby == 'bucket':
-        print "Grouped by", args.groupby
+        print("Grouped by", args.groupby)
 
     sn = 0
     st = 0
@@ -265,7 +263,7 @@ def durations():
     for path in rdict:
 
         data = rdict[path]
-        n = len(data)        
+        n = len(data)
         sn += n
         t = sum(data)
         a = t/n
@@ -278,9 +276,9 @@ def durations():
 
 
 if args.type == 'html':
-    print '<!DOCTYPE html>\n<html>\n<head>'
-    print '<style>table, th, td {padding-right:10px; padding-left:10px; border: 1px solid black; border-collapse: collapse;} * {font-family: Arial, Helvetica, sans-serif;}</style>'
-    print '</head>\n<body>\n'
+    print('<!DOCTYPE html>\n<html>\n<head>')
+    print('<style>table, th, td {padding-right:10px; padding-left:10px; border: 1px solid black; border-collapse: collapse;} * {font-family: Arial, Helvetica, sans-serif;}</style>')
+    print('</head>\n<body>\n')
 
 if args.log in ('duration', 'all'):
     durations()
@@ -288,4 +286,4 @@ if args.log in ('http', 'all'):
     http_log()
 
 if args.type == 'html':
-    print '\n</body>\n</html>'
+    print('\n</body>\n</html>')
