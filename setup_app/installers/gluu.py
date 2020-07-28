@@ -19,6 +19,7 @@ from setup_app.utils import base
 class GluuInstaller(SetupUtils):
 
     install_var = 'installGluu'
+    radiusInstaller = None
 
     def __repr__(self):
         txt = ''
@@ -63,7 +64,7 @@ class GluuInstaller(SetupUtils):
             txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
             txt += 'Install Gluu Radius '.ljust(30) + repr(Config.installGluuRadius).rjust(35) + (' *' if 'installGluuRadius' in Config.addPostSetupService else '') + "\n"
             return txt
-        
+
         except:
             s = ""
             for key in list(Config.__dict__):
@@ -79,8 +80,7 @@ class GluuInstaller(SetupUtils):
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MONDATORY
         gluuProgress.register(self)
-        
-        
+
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
         if not os.path.exists(Config.distFolder):
             print("Please ensure that you are running this script inside Gluu container.")
@@ -263,15 +263,36 @@ class GluuInstaller(SetupUtils):
             self.copyFile(script, Config.gluuOptBinFolder)
 
         self.logIt("Rendering encode.py")
-        try:
-            encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
-            encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
-            self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
-        except:
-            self.logIt("Error rendering encode script", True)
+        encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
+        encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        self.writeFile(os.path.join(Config.gluuOptBinFolder, 'encode.py'), encode_script)
+        self.logIt("Error rendering encode script", True)
 
-        self.run([paths.cmd_chmod, '-R', '700', Config.gluuOptBinFolder])
+        super_gluu_lisence_renewer_fn = os.path.join(Config.staticFolder, 'scripts', 'super_gluu_license_renewer.py')
 
+        if base.snap:
+            target_fn = os.path.join(Config.gluuOptBinFolder, 'super_gluu_lisence_renewer.py')
+            self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+
+        else:
+            target_fn = '/etc/cron.daily/super_gluu_lisence_renewer'
+            self.run(['cp', '-f', super_gluu_lisence_renewer_fn, target_fn])
+            self.run([paths.cmd_chown, 'root:root', target_fn])
+            self.run([paths.cmd_chmod, '+x', target_fn])
+
+        for scr in Path(Config.gluuOptBinFolder).glob('*'):
+            scr_path = scr.as_posix()
+            print(scr, scr_path.endswith('.py'))
+            if base.snap and scr_path.endswith('.py'):
+                scr_content = self.readFile(scr_path).splitlines()
+                first_line = '#!' + paths.cmd_py3
+                if scr_content[0].startswith('#!'):
+                    scr_content[0] = first_line
+                else:
+                    scr_content.insert(0, first_line)
+                self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
+
+            self.run([paths.cmd_chmod, '700', scr_path])
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
@@ -334,16 +355,15 @@ class GluuInstaller(SetupUtils):
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
 
-    def post_setup(self):
+    def post_install_tasks(self):
 
         self.deleteLdapPw()
-        
+
         if base.snap:
             #write post-install.py script
-            py3_cmd = shutil.which('python3')
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
             post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
-            post_setup_script = post_setup_script.replace('{{SNAP_NAME}}', os.environ['SNAP_NAME']).replace('{{SNAP_PY3}}', py3_cmd)
+            post_setup_script = post_setup_script.replace('{{SNAP_NAME}}', os.environ['SNAP_NAME']).replace('{{SNAP_PY3}}', paths.cmd_py3)
             post_setup_script_fn = os.path.join(Config.install_dir, 'snap-post-setup.py')
             with open(post_setup_script_fn, 'w') as w:
                 w.write(post_setup_script)
@@ -363,3 +383,8 @@ class GluuInstaller(SetupUtils):
                         continue
                     chm_mode = '0755' if os.path.isdir(gpath.as_posix()) else '0600'
                     self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
+
+        else:
+            if not Config.installed_instance:
+                cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
+                self.radiusInstaller.restart(cron_service)
