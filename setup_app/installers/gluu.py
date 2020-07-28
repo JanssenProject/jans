@@ -349,7 +349,8 @@ class GluuInstaller(SetupUtils):
                 w.write(post_setup_script)
             self.run([paths.cmd_chmod, '+x', post_setup_script_fn])
 
-            Config.post_messages.insert(0, "Please execute:\nsudo " + post_setup_script_fn)
+            if not Config.installed_instance:
+                Config.post_messages.insert(0, "Please execute:\nsudo " + post_setup_script_fn)
 
             self.logIt("Setting permissions", pbar='post-setup')
 
