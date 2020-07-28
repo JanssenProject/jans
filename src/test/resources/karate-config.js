@@ -22,6 +22,10 @@ function() {
     var config = {
 	    env: env,
 	    
+	    // default accessToken
+	    
+	    accessToken: 'c8dd2445-4734-4119-8dd1-4dbe91976202',
+	    
 	   //#1 - health endpoint
 	    healthUrl: baseUrl + ':' + port + '/health',
 	    
@@ -33,6 +37,9 @@ function() {
 
 	    //#11 - sessionId endpoint
 	    sessionidUrl: baseUrl + ':' + port + '/api/v1/oxauth/sessionid',
+	    
+	    // OpenIdConnect Clients Endpoint
+	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
 	    };
 

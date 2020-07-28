@@ -6,6 +6,7 @@ Background:
   @backchannel-get
   Scenario: Retrieve backchannel configuration
     Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     #And print response
@@ -29,12 +30,14 @@ Background:
    @backchannel-put
    Scenario: Update backchannel configuration
    Given url  mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    When method GET
    Then status 200
    #And print response
    Then def first_response = response 
    #And print first_response
    Given url  mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    And request first_response
    When method PUT
    Then status 200
@@ -44,11 +47,13 @@ Background:
    @error
    Scenario: Error case while updating backchannel configuration
    Given url  mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    When method GET
    Then status 200
    Then def first_response = response 
    Then set first_response.backchannelAuthenticationResponseExpiresIn = 0
    Given url mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    And request first_response
    When method PUT
    Then status 400
@@ -58,11 +63,13 @@ Background:
    @error
    Scenario: Error case while updating backchannel configuration
    Given url  mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    When method GET
    Then status 200
    Then def first_response = response 
    Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483647
    Given url mainUrl
+   And  header Authorization = 'Bearer ' + accessToken
    And request first_response
    When method PUT
    Then status 400
