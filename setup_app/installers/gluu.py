@@ -335,6 +335,9 @@ class GluuInstaller(SetupUtils):
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
 
     def post_setup(self):
+
+        self.deleteLdapPw()
+        
         if base.snap:
             #write post-install.py script
             py3_cmd = shutil.which('python3')
