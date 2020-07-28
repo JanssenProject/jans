@@ -272,14 +272,14 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	}
 
 	public void checkAndUpdateCounter(long clientCounter) throws InvalidDeviceCounterException {
-		if (clientCounter <= counter) {
-			markCompromised();
-			throw new InvalidDeviceCounterException(this);
-		}
 		if (clientCounter == Integer.MAX_VALUE) {
 			// Handle special case when counter value is max positive integer value
 			counter = -1;
 		} else {
+			if (clientCounter <= counter) {
+				markCompromised();
+				throw new InvalidDeviceCounterException(this);
+			}
 			counter = clientCounter;
 		}
 	}
