@@ -153,7 +153,7 @@ class SetupUtils(Crypto64):
 
         return inFilePathText
 
-    def writeFile(self, outFilePath, text):
+    def writeFile(self, outFilePath, text, backup=True):
         self.logIt("Writing file %s" % outFilePath)
 
         dir_name = os.path.dirname(outFilePath)
@@ -161,7 +161,8 @@ class SetupUtils(Crypto64):
             self.run([paths.cmd_mkdir, '-p', dir_name])
 
         inFilePathText = None
-        self.backupFile(outFilePath)
+        if backup:
+            self.backupFile(outFilePath)
         try:
             with open(outFilePath, 'w') as w:
                 w.write(text)
