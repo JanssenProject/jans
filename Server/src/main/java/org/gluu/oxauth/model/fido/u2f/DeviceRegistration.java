@@ -273,6 +273,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public void checkAndUpdateCounter(long clientCounter) throws InvalidDeviceCounterException {
 		if (clientCounter == Integer.MAX_VALUE) {
+			// TODO: Remove in 6.0.It's enough period to migrate broken iOS counter
 			// Handle special case when counter value is max positive integer value
 			counter = -1;
 		} else {
