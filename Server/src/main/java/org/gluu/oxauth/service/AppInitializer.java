@@ -222,7 +222,7 @@ public class AppInitializer {
 		initTimer();
 		initCibaRequestsProcessor();
 
-		// Set default authentication method after 
+		// Set default authentication method after
 		setDefaultAuthenticationMethod(newConfiguration);
 
 		// Notify plugins about finish application initialization
@@ -691,12 +691,12 @@ public class AppInitializer {
 	 * should be more than 0 seconds of interval
 	 */
 	private void initCibaRequestsProcessor() {
-		if (appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
+		if (appConfiguration.getCibaEnabled() && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
 			if (cibaRequestsProcessorJob != null) {
 				cibaRequestsProcessorJob.initTimer();
 			}
 		} else {
-			log.warn("Didn't start ciba requests processor job because the interval is not valid to run, value: {}",
+			log.warn("Ciba requests processor hasn't been started because the interval is not valid to run or this is disabled, value: {}",
 					appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
 		}
 	}
