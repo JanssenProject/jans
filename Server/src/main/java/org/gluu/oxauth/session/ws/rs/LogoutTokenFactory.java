@@ -2,7 +2,7 @@ package org.gluu.oxauth.session.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.claims.Audience;
-import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JsonWebResponse;
@@ -41,30 +41,28 @@ public class LogoutTokenFactory {
     @Inject
     private SectorIdentifierService sectorIdentifierService;
 
-    public JsonWebResponse createLogoutToken(IAuthorizationGrant grant, String sessionId) {
+    public JsonWebResponse createLogoutToken(Client rpClient, String sessionId, User user) {
         try {
-            Preconditions.checkNotNull(grant);
-            Preconditions.checkNotNull(grant.getClient());
+            Preconditions.checkNotNull(rpClient);
 
-            JsonWebResponse jwr = jwrService.createJwr(grant.getClient());
+            JsonWebResponse jwr = jwrService.createJwr(rpClient);
 
-            fillClaims(jwr, grant, sessionId);
+            fillClaims(jwr, rpClient, sessionId, user);
 
-            jwrService.encode(jwr, grant.getClient());
+            jwrService.encode(jwr, rpClient);
             return jwr;
         } catch (Exception e) {
-            log.error("Failed to create logout_token for client:" + grant.getClient().getClientId());
+            log.error("Failed to create logout_token for client:" + rpClient.getClientId());
             return null;
         }
     }
 
-    private void fillClaims(JsonWebResponse jwr, IAuthorizationGrant grant, String sessionId) {
+    private void fillClaims(JsonWebResponse jwr, Client client, String sessionId, User user) {
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
         Date expiration = calendar.getTime();
-        Client client = grant.getClient();
 
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
@@ -77,7 +75,7 @@ public class LogoutTokenFactory {
             jwr.getClaims().setClaim("sid", sessionId);
         }
 
-        final String sub = grant.getSub();
+        final String sub = sectorIdentifierService.getSub(client, user, false);
         if (StringUtils.isNotBlank(sub)) {
             jwr.getClaims().setSubjectIdentifier(sub);
         }
