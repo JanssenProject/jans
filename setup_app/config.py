@@ -240,7 +240,6 @@ class Config:
         self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
         self.ldif_configuration = os.path.join(self.outputFolder, 'configuration.ldif')
 
-        self.encode_script = os.path.join(self.gluuOptFolder, 'bin/encode.py')
         self.system_profile_update_init = os.path.join(self.outputFolder, 'system_profile_init')
         self.system_profile_update_systemd = os.path.join(self.outputFolder, 'system_profile_systemd')
 
