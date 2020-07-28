@@ -27,12 +27,7 @@ import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.URLPatternList;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.oxauth.service.ClientService;
-import org.gluu.oxauth.service.CookieService;
-import org.gluu.oxauth.service.GrantService;
-import org.gluu.oxauth.service.RedirectionUriService;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalEndSessionService;
 import org.gluu.oxauth.service.external.context.EndSessionContext;
@@ -195,7 +190,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         final ExecutorService executorService = EndSessionUtils.getExecutorService();
         for (final Map.Entry<String, Client> entry : backchannelUris.entrySet()) {
-            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(grant, sessionId);
+            final JsonWebResponse logoutToken = logoutTokenFactory.createLogoutToken(entry.getValue(), sessionId, grant.getUser());
             if (logoutToken == null) {
                 log.error("Failed to create logout_token for client: " + entry.getValue().getClientId());
                 return;
