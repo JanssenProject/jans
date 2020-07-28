@@ -299,7 +299,7 @@ class GluuInstaller(SetupUtils):
 
                 w.write('{}\t{}\n'.format(Config.ip, Config.hostname))
 
-        self.run(['/bin/chmod', '-R', '644', Config.etc_hosts])
+        self.run([paths.cmd_chmod, '-R', '644', Config.etc_hosts])
 
     def set_ulimits(self):
         self.logIt("Setting ulimist")
@@ -347,3 +347,13 @@ class GluuInstaller(SetupUtils):
             self.run([paths.cmd_chmod, '+x', post_setup_script_fn])
 
             Config.post_messages.insert(0, "Please execute:\nsudo " + post_setup_script_fn)
+
+            self.logIt("Setting permissions", pbar='post-setup')
+
+            for crt_fn in Path(os.path.join(base.snap_common, 'etc/certs')).glob('*'):
+                self.run([paths.cmd_chmod, '0600', crt_fn.as_posix()])
+
+            for spath in ('gluu', 'etc/gluu/conf', 'opendj/db'):
+                for gpath in Path(os.path.join(base.snap_common, spath)).rglob('*'):
+                    chm_mode = '0755' if os.path.isdir(gpath.as_posix()) else '0600'
+                    self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
