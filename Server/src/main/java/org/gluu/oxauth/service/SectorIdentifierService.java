@@ -75,6 +75,7 @@ public class SectorIdentifierService {
     public String getSub(IAuthorizationGrant grant) {
         Client client = grant.getClient();
         User user = grant.getUser();
+
         if (user == null) {
             log.trace("User is null, return blank sub");
             return "";
@@ -88,8 +89,20 @@ public class SectorIdentifierService {
             return user.getUserId();
         }
 
+        return getSub(client, user, grant instanceof CIBAGrant);
+    }
+
+    public String getSub(Client client, User user, boolean isCibaGrant) {
+        if (user == null) {
+            log.trace("User is null, return blank sub");
+            return "";
+        }
+        if (client == null) {
+            log.trace("Client is null, return blank sub.");
+            return "";
+        }
+
         final boolean isClientPairwise = SubjectType.PAIRWISE.equals(SubjectType.fromString(client.getSubjectType()));
-        final boolean isCibaGrant = grant instanceof CIBAGrant;
         if (isClientPairwise) {
             final String sectorIdentifierUri;
 
@@ -132,5 +145,4 @@ public class SectorIdentifierService {
         }
         return user.getAttribute(openidSubAttribute);
     }
-
 }
