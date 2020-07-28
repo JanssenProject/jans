@@ -390,6 +390,8 @@ class GluuInstaller(SetupUtils):
                     args={'captureStderr': True}
                     )
 
+            self.radiusInstaller.restart('yacron')
+
         else:
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
