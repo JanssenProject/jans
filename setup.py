@@ -353,4 +353,3 @@ else:
     print()
     for m in Config.post_messages:
         print(m)
-
