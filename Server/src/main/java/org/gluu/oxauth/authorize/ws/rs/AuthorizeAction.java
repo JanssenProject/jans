@@ -355,8 +355,10 @@ public class AuthorizeAction {
             facesContext.responseComplete();
         }
 
-        final User user = sessionIdService.getUser(session);
-        log.trace("checkPermissionGranted, user = " + user);
+        if (log.isTraceEnabled()) {
+            final User user = sessionIdService.getUser(session);
+            log.trace("checkPermissionGranted, user = " + user);
+        }
 
         if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
             Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
@@ -385,6 +387,7 @@ public class AuthorizeAction {
                 return;
             }
 
+            final User user = sessionIdService.getUser(session);
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
                     client.getClientId());
