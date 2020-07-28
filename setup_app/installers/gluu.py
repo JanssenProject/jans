@@ -282,7 +282,6 @@ class GluuInstaller(SetupUtils):
 
         for scr in Path(Config.gluuOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
-            print(scr, scr_path.endswith('.py'))
             if base.snap and scr_path.endswith('.py'):
                 scr_content = self.readFile(scr_path).splitlines()
                 first_line = '#!' + paths.cmd_py3
@@ -379,10 +378,17 @@ class GluuInstaller(SetupUtils):
 
             for spath in ('gluu', 'etc/gluu/conf', 'opendj/db'):
                 for gpath in Path(os.path.join(base.snap_common, spath)).rglob('*'):
-                    if 'node_modules' in gpath.as_posix():
+                    if ('node_modules' in gpath.as_posix()) or ('gluu/bin' in gpath.as_posix()):
                         continue
                     chm_mode = '0755' if os.path.isdir(gpath.as_posix()) else '0600'
                     self.run([paths.cmd_chmod, chm_mode, gpath.as_posix()])
+
+            self.add_yacron_job(
+                    command = os.path.join(Config.gluuOptBinFolder, 'super_gluu_lisence_renewer.py'), 
+                    schedule = '0 2 * * *', # everyday at 2 am
+                    name='super-gluu-license-renewer', 
+                    args={'captureStderr': True}
+                    )
 
         else:
             if not Config.installed_instance:
