@@ -171,8 +171,6 @@ casaInstaller = CasaInstaller()
 passportInstaller = PassportInstaller()
 radiusInstaller = RadiusInstaller()
 
-gluuInstaller.radiusInstaller = radiusInstaller
-
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
                         oxauthInstaller, passportInstaller, scimInstaller, 
