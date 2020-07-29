@@ -57,7 +57,8 @@ def get_setup_options():
     parser.add_argument('--oxd-use-gluu-storage', help="Use Gluu Storage for Oxd Server", action='store_true')
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='gluu')
     parser.add_argument('--generate-oxd-certificate', help="Generate certificate for oxd based on hostname", action='store_true')
-
+    parser.add_argument('--shell', help="Drop into interactive shell before starting installation", action='store_true')
+    
     argsp = parser.parse_args()
 
     setupOptions = {
