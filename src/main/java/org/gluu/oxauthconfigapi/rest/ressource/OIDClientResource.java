@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,9 +25,11 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ClientService;
+import org.gluu.oxtrust.service.EncryptionService;
 import org.slf4j.Logger;
 
 /**
@@ -42,6 +46,9 @@ public class OIDClientResource extends BaseResource {
 
 	@Inject
 	ClientService clientService;
+
+	@Inject
+	EncryptionService encryptionService;
 
 	@GET
 	@Operation(summary = "Get list of OpenID connect clients")
@@ -78,11 +85,41 @@ public class OIDClientResource extends BaseResource {
 			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Client by Inum");
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client == null) {
-				return getNotFoundError();
+				ApiError apiError = new ApiError(Response.Status.NOT_FOUND.toString(), "Entity not found",
+						"Failed to find the requested entry");
+				return Response.ok(apiError.toString()).build();
 			}
 			return Response.ok(client).build();
 		} catch (Exception ex) {
 			logger.error("Failed to fetch  openId Client " + inum, ex);
+			return getServerError(ex);
+		}
+	}
+
+	@POST
+	@Operation(summary = "Create new openId connect client")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = true))),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response createOpenIdConnect(@Valid OxAuthClient client) {
+		try {
+			logger.info("OIDClientResource::createOpenIdConnect - Create new openid connect client");
+			String inum = clientService.generateInumForNewClient();
+			client.setInum(inum);
+			if (client.getOxAuthClientSecret() != null) {
+				client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
+			}
+			client.setDn(clientService.getDnForClient(inum));
+			client.setDeletable(client.getExp() != null);
+			clientService.addClient(client);
+			OxAuthClient result = clientService.getClientByInum(inum);
+			if (result.getEncodedClientSecret() != null) {
+				result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
+			}
+			return Response.ok(result).build();
+		} catch (Exception ex) {
+			logger.error("Failed to create new openid connect client");
 			return getServerError(ex);
 		}
 	}

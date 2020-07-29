@@ -3,12 +3,18 @@
  */
 package org.gluu.oxauthconfigapi.rest.model;
 
+import java.io.Serializable;
+
 /**
  * @author Mougang T.Gasmyr
  *
  */
-public class ApiError {
+public class ApiError implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3836623519481821884L;
 	String code;
 	String message;
 	String description;

@@ -3,6 +3,7 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
@@ -25,7 +26,7 @@ public class BaseResource {
 	protected Response getNotFoundError() {
 		ApiError error = new ApiError(Response.Status.NOT_FOUND.toString(), "Entity not found",
 				"Failed to find the requested entry");
-		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+		return Response.status(Response.Status.NOT_FOUND).entity(error).type(MediaType.APPLICATION_JSON).build();
 	}
 
 }
