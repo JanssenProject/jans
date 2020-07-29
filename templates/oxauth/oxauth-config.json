@@ -342,6 +342,7 @@
     "cibaGrantLifeExtraTimeSec": 180,
     "cibaMaxExpirationTimeAllowedSec": 1800,
     "backchannelLoginHintClaims": ["inum", "uid", "mail"],
+    "cibaEnabled": false,
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
         "authDomain": "",
