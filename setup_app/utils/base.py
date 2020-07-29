@@ -50,8 +50,8 @@ with open("/etc/os-release") as f:
         if row:
             if row[0] == 'ID':
                 os_type = row[1].lower()
-                if os_type == 'rhel':
-                    os_type = 'redhat'
+                if os_type in  ('rhel', 'redhat'):
+                    os_type = 'red'
                 elif 'ubuntu-core' in os_type:
                     os_type = 'ubuntu'
             elif row[0] == 'VERSION_ID':
