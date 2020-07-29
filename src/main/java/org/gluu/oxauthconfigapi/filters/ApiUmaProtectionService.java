@@ -99,7 +99,7 @@ public class ApiUmaProtectionService extends BaseUmaProtectionService implements
 				authorizationResponse = processTestModeAuthorization(authorization);
 			} else if (isEnabled()) {
 				logger.info("================OXAUTH-CONFIG-API is protected by UMA");
-				authorizationResponse = processUmaAuthorization(authorization, resourceInfo);
+				//authorizationResponse = processUmaAuthorization(authorization, resourceInfo);
 			} else {
 				logger.info(
 						"Please activate UMA or test mode to protect your API endpoints. Read the Gluu API docs to learn more");

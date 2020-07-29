@@ -22,4 +22,10 @@ public class BaseResource {
 		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
 	}
 
+	protected Response getNotFoundError() {
+		ApiError error = new ApiError(Response.Status.NOT_FOUND.toString(), "Entity not found",
+				"Failed to find the requested entry");
+		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+	}
+
 }

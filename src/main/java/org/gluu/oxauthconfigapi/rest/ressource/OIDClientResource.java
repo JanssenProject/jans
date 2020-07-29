@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -43,7 +44,7 @@ public class OIDClientResource extends BaseResource {
 	ClientService clientService;
 
 	@GET
-	@Operation(summary = "Gets list of OpenID connect clients")
+	@Operation(summary = "Get list of OpenID connect clients")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
@@ -51,7 +52,7 @@ public class OIDClientResource extends BaseResource {
 	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
-			logger.info("OIDClientResource::getOpenIdConnectClients - Gets list of OpenID connect clients");
+			logger.info("OIDClientResource::getOpenIdConnectClients - Get list of OpenID connect clients");
 			List<OxAuthClient> clients = new ArrayList<OxAuthClient>();
 			if (!pattern.isEmpty() && pattern.length() >= 2) {
 				clients = clientService.searchClients(pattern, limit);
@@ -61,6 +62,27 @@ public class OIDClientResource extends BaseResource {
 			return Response.ok(clients).build();
 		} catch (Exception ex) {
 			logger.error("Failed to openid connects clients", ex);
+			return getServerError(ex);
+		}
+	}
+
+	@GET
+	@Operation(summary = "Get OpenId Connect Client by Inum")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
+	@Path("{inum}")
+	public Response getOpenIdClientByInum(@PathParam("inum") String inum) {
+		try {
+			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Client by Inum");
+			OxAuthClient client = clientService.getClientByInum(inum);
+			if (client == null) {
+				return getNotFoundError();
+			}
+			return Response.ok(client).build();
+		} catch (Exception ex) {
+			logger.error("Failed to fetch  openId Client " + inum, ex);
 			return getServerError(ex);
 		}
 	}
