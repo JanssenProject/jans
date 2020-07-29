@@ -141,13 +141,13 @@ class BaseInstaller:
                 src = item[0]
                 url = item[1]
                 src_name = os.path.basename(src)
+
                 if downloads and not src_name in downloads:
                     continue
 
-                src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src_name)
-                self.source_files[i] = (src, url)
-
                 if force or self.check_download_needed(src):
+                    src = os.path.join('/tmp' if base.snap else Config.distGluuFolder, src_name)
+                    self.source_files[i] = (src, url)
                     self.download_file(url, src)
 
     def check_download_needed(self, src):
