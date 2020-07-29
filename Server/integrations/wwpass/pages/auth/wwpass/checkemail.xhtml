@@ -152,13 +152,12 @@
         </div>
       </h:panelGroup>
       <script>
-        /* <![CDATA[ */
         // 90% of session lifetime
-        const timeout = #{identity.getWorkingParameter('sessionLifetime')} * 900;
+        var timeout = 0#{identity.getWorkingParameter('sessionLifetime')} * 900;
         // Prevent session timeout while the tab is open
-        setInterval(() => {fetch(window.location.href)}, timeout);
+        setInterval(function(){fetch(window.location.href)}, timeout);
         /* ]]> */
-        </script>
+      </script>
     </ui:define>
 
 </ui:composition>
