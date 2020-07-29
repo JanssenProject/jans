@@ -10,16 +10,16 @@ from pathlib import Path
 
 from setup_app import paths
 from setup_app import static
+from setup_app.utils import base
 from setup_app.static import InstallTypes, AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.progress import gluuProgress
-from setup_app.utils import base
+from setup_app.installers.base import BaseInstaller
 
-class GluuInstaller(SetupUtils):
+class GluuInstaller(BaseInstaller, SetupUtils):
 
     install_var = 'installGluu'
-    radiusInstaller = None
 
     def __repr__(self):
         txt = ''
@@ -390,9 +390,9 @@ class GluuInstaller(SetupUtils):
                     args={'captureStderr': True}
                     )
 
-            self.radiusInstaller.restart('yacron')
+            self.restart('yacron')
 
         else:
             if not Config.installed_instance:
                 cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
-                self.radiusInstaller.restart(cron_service)
+                self.restart(cron_service)
