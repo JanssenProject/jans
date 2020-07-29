@@ -134,8 +134,8 @@ class MAIN(GluuSetupForm):
         
         self.description_label = self.add(npyscreen.MultiLineEdit, value='\n'.join(desc_wrap), max_height=6, rely=2, editable=False)
         self.description_label.autowrap = True
-
-        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=base.os_name, editable=False)
+        os_string = "{} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version)
+        self.os_type = self.add(npyscreen.TitleFixedText, name=msg.os_type_label, begin_entry_at=18, value=os_string, editable=False)
         self.init_type = self.add(npyscreen.TitleFixedText, name=msg.init_type_label, begin_entry_at=18, value=base.os_initdaemon, editable=False)
         self.httpd_type = self.add(npyscreen.TitleFixedText, name=msg.httpd_type_label, begin_entry_at=18, value=base.httpd_name, field_width=40, editable=False)
         self.license_confirm = self.add(npyscreen.Checkbox, scroll_exit=True, name=msg.acknowledge_lisence)  
