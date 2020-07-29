@@ -9,6 +9,8 @@ import inspect
 import zipfile
 import shutil
 import traceback
+import code
+
 from queue import Queue
 
 #first import paths and make changes if necassary
@@ -220,6 +222,11 @@ class PostSetup:
 
 gluuProgress.register(PostSetup)
 gluuProgress.queue = queue
+
+
+if argsp.shell:
+    code.interact(local=locals())
+    sys.exit()
 
 def do_installation():
 
