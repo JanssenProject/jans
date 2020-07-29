@@ -265,20 +265,21 @@
         };
       </script>
       <script>
-      /* <![CDATA[ */
-      const isMobile = function isMobile() {
-        return navigator && ('userAgent' in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i) || navigator.maxTouchPoints > 1 && navigator.platform === 'MacIntel');
-      };
+        /* <![CDATA[ */
+        function isMobile() { return navigator && (
+          ('userAgent' in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i))
+          || (navigator.maxTouchPoints > 1 && !navigator.userAgent.match(/Windows/i))
+        ) && !window.MSStream;};
 
-      if (isMobile()) {
-        const qrcode = document.querySelector(`#qrcode`);
-        qrcode.classList.add(`qrcode--tap`);
-      }
-      // 90% of session lifetime
-      const timeout = #{identity.getWorkingParameter('sessionLifetime')} * 900;
-      // Prevent session timeout while the tab is open
-      setInterval(() => {fetch(window.location.href)}, timeout);
-      /* ]]> */
+        if (isMobile()) {
+          var qrcode = document.querySelector(`#qrcode`);
+          qrcode.classList.add(`qrcode--tap`);
+        }
+        // 90% of session lifetime
+        var timeout = 0#{identity.getWorkingParameter('sessionLifetime')} * 900;
+        // Prevent session timeout while the tab is open
+        setInterval(function(){fetch(window.location.href)}, timeout);
+        /* ]]> */
       </script>
     </ui:define>
 
