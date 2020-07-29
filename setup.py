@@ -95,7 +95,6 @@ for key in setupOptions:
 
 gluuInstaller = GluuInstaller()
 gluuInstaller.initialize()
-gluuInstaller.radiusInstaller = radiusInstaller
 
 """
 Config.hostname = 'snap.gluu.org'
@@ -117,7 +116,7 @@ Config.installPassport = False
 if not GSA:
     print()
     print("Installing Gluu Server...\n\nFor more info see:\n  {}  \n  {}\n".format(paths.LOG_FILE, paths.LOG_ERROR_FILE))
-    print("Detected OS     :  {} {}".format(base.os_type, base.os_version))
+    print("Detected OS     :  {} {} {}".format('snap' if base.snap else '', base.os_type, base.os_version))
     print("Gluu Version    :  {}".format(Config.oxVersion))
     print("Detected init   :  {}".format(base.os_initdaemon))
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
@@ -169,6 +168,8 @@ oxdInstaller = OxdInstaller()
 casaInstaller = CasaInstaller()
 passportInstaller = PassportInstaller()
 radiusInstaller = RadiusInstaller()
+
+gluuInstaller.radiusInstaller = radiusInstaller
 
 if Config.installed_instance:
     for installer in (openDjInstaller, couchbaseInstaller, httpdinstaller, 
