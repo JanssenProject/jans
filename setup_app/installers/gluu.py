@@ -280,6 +280,10 @@ class GluuInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, 'root:root', target_fn])
             self.run([paths.cmd_chmod, '+x', target_fn])
 
+            print_version_scr_fn = os.path.join(Config.install_dir, 'setup_app/utils/printVersion.py')
+            self.run(['cp', '-f', print_version_scr_fn , Config.gluuOptBinFolder])
+            self.run([paths.cmd_ln, '-s', 'printVersion.py' , 'show_version.py'], cwd=Config.gluuOptBinFolder)
+
         for scr in Path(Config.gluuOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
             if base.snap and scr_path.endswith('.py'):
