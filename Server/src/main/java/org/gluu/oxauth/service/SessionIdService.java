@@ -252,7 +252,7 @@ public class SessionIdService {
         }
     }
 
-    public void resetToStep(SessionId session, int resetToStep) {
+    public SessionId resetToStep(SessionId session, int resetToStep) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
         int currentStep = 1;
@@ -270,7 +270,10 @@ public class SessionIdService {
         boolean updateResult = updateSessionId(session, true, true, true);
         if (!updateResult) {
             log.debug("Failed to update session entry: '{}'", session.getId());
+            return null;
         }
+        
+        return session;
     }
 
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
