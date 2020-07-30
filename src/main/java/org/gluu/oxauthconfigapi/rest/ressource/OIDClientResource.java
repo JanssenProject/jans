@@ -12,6 +12,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -97,7 +98,7 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create new openId connect client")
+	@Operation(summary = "Create new OpenId connect client")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Server error") })
@@ -117,10 +118,47 @@ public class OIDClientResource extends BaseResource {
 			if (result.getEncodedClientSecret() != null) {
 				result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
 			}
-			return Response.ok(result).build();
+			return Response.status(Response.Status.CREATED).entity(result).build();
 		} catch (Exception ex) {
 			logger.error("Failed to create new openid connect client");
 			return getServerError(ex);
+		}
+	}
+
+	@PUT
+	@Operation(summary = "Update OpenId Connect client", description = "Update openidconnect client")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class)), description = "Success"),
+			@APIResponse(responseCode = "404", description = "Not Found"),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response updateClient(@Valid OxAuthClient client) {
+		try {
+			logger.info("OIDClientResource::updateOpenIdConnect - Update openid connect client");
+			String inum = client.getInum();
+			if(inum ==null) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+			OxAuthClient existingClient = clientService.getClientByInum(inum);
+			if (existingClient != null) {
+				client.setInum(existingClient.getInum());
+				client.setBaseDn(clientService.getDnForClient(inum));
+				client.setDeletable(client.getExp() != null);
+				if (client.getOxAuthClientSecret() != null) {
+					client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
+				}
+				clientService.updateClient(client);
+				OxAuthClient result = clientService.getClientByInum(existingClient.getInum());
+				if (result.getEncodedClientSecret() != null) {
+					result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
+				}
+				return Response.ok(result).build();
+			} else {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to update openid connect client", e);
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
