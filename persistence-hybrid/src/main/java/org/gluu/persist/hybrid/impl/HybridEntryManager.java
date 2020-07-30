@@ -343,7 +343,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
     @Override
-    public <T> T merge(T entry) {
+    public Void merge(Object entry) {
 		Class<?> entryClass = entry.getClass();
 		Object dnValue = getDNValue(entry, entryClass);
 

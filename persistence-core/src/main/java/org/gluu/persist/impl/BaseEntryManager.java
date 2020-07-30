@@ -201,7 +201,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> T merge(T entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
+	protected Void merge(Object entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
 			throw new MappingException("Entry to persist is null");
 		}
@@ -247,7 +247,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 		merge(dnValue.toString(), attributeDataModifications, expirationValue);
 
-		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations, propertiesAnnotationsMap);
+		return null;
 	}
 
 	protected abstract <T> void updateMergeChanges(String baseDn, T entry, boolean isConfigurationUpdate, Class<?> entryClass,
