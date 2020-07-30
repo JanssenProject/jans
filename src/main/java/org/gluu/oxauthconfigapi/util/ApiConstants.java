@@ -19,8 +19,24 @@ public class ApiConstants {
 	public static final String DYN_REGISTRATION = "/dyn_registration";
 	public static final String SESSIONID = "/sessionid";
 	public static final String CLIENTS = "/clients";
+	public static final String INUM_PATH = "{inum}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
+	public static final String INUM = "inum";
+	
+	
+	public static final String MISSING_INUM_MESSAGE ="The inum property is required.";
+	
+	
+	
+	
+	
+	
+	
+	
+	//Custom CODE
+	public static final String MISSING_INUM_CODE ="OCA001";
+	
 
 }

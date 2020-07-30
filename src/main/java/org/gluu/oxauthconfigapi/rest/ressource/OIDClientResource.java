@@ -8,7 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -26,7 +28,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ClientService;
@@ -52,7 +53,7 @@ public class OIDClientResource extends BaseResource {
 	EncryptionService encryptionService;
 
 	@GET
-	@Operation(summary = "Get list of OpenID connect clients")
+	@Operation(summary = "Get list of OpenID Connect clients")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
@@ -70,7 +71,7 @@ public class OIDClientResource extends BaseResource {
 			return Response.ok(clients).build();
 		} catch (Exception ex) {
 			logger.error("Failed to openid connects clients", ex);
-			return getServerError(ex);
+			return getInternalServerError(ex);
 		}
 	}
 
@@ -80,20 +81,18 @@ public class OIDClientResource extends BaseResource {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
-	@Path("{inum}")
-	public Response getOpenIdClientByInum(@PathParam("inum") String inum) {
+	@Path(ApiConstants.INUM_PATH)
+	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) String inum) {
 		try {
 			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Client by Inum");
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client == null) {
-				ApiError apiError = new ApiError(Response.Status.NOT_FOUND.toString(), "Entity not found",
-						"Failed to find the requested entry");
-				return Response.ok(apiError.toString()).build();
+				return getResourceNotFoundError();
 			}
 			return Response.ok(client).build();
 		} catch (Exception ex) {
 			logger.error("Failed to fetch  openId Client " + inum, ex);
-			return getServerError(ex);
+			return getInternalServerError(ex);
 		}
 	}
 
@@ -120,8 +119,8 @@ public class OIDClientResource extends BaseResource {
 			}
 			return Response.status(Response.Status.CREATED).entity(result).build();
 		} catch (Exception ex) {
-			logger.error("Failed to create new openid connect client");
-			return getServerError(ex);
+			logger.error("Failed to create new openid connect client", ex);
+			return getInternalServerError(ex);
 		}
 	}
 
@@ -136,8 +135,8 @@ public class OIDClientResource extends BaseResource {
 		try {
 			logger.info("OIDClientResource::updateOpenIdConnect - Update openid connect client");
 			String inum = client.getInum();
-			if(inum ==null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
+			if (inum == null) {
+				return getMissingInumError();
 			}
 			OxAuthClient existingClient = clientService.getClientByInum(inum);
 			if (existingClient != null) {
@@ -154,11 +153,34 @@ public class OIDClientResource extends BaseResource {
 				}
 				return Response.ok(result).build();
 			} else {
-				return Response.status(Response.Status.NOT_FOUND).build();
+				return getResourceNotFoundError();
 			}
-		} catch (Exception e) {
-			logger.error("Failed to update openid connect client", e);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+		} catch (Exception ex) {
+			logger.error("Failed to update OpenId Connect client", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@DELETE
+	@Path(ApiConstants.INUM_PATH)
+	@Operation(summary = "Delete OpenId Connect client ", description = "Delete an OpenId Connect client")
+	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
+			@APIResponse(responseCode = "404", description = "Not found"),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+		logger.info("OIDClientResource::deleteOpenIdConnect - Delete OpenID Connect client");
+		try {
+			OxAuthClient client = clientService.getClientByInum(inum);
+			if (client != null) {
+				clientService.removeClient(client);
+				return Response.ok().build();
+			} else {
+				return getResourceNotFoundError();
+			}
+		} catch (Exception ex) {
+			logger.error("Failed to Delete OpenId Connect client", ex);
+			return getInternalServerError(ex);
 		}
 	}
 
