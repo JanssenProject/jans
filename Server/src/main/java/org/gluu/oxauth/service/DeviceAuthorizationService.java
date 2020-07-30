@@ -53,6 +53,9 @@ public class DeviceAuthorizationService implements Serializable {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private SessionIdService sessionIdService;
+
     /**
      * Saves data in cache, it could be saved with two identifiers used by Token endpoint or device_authorization page.
      * @param data Data to be saved.
@@ -167,8 +170,10 @@ public class DeviceAuthorizationService implements Serializable {
 
     /**
      * Uses an HttpServletRequest, process it and return userCode in the session whether it exists.
+     * @param httpRequest Request received from an user agent.
      */
-    public String getUserCodeFromSession(SessionId sessionId) {
+    public String getUserCodeFromSession(HttpServletRequest httpRequest) {
+        SessionId sessionId = sessionIdService.getSessionId(httpRequest);
         if (sessionId != null) {
             final Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
             if (sessionAttributes.containsKey(SESSION_USER_CODE)) {
