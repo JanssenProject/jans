@@ -7,7 +7,6 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -44,6 +43,7 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -78,6 +78,7 @@ public class SessionIdService {
     public static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
+    private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
 
     @Inject
     private Logger log;
@@ -121,7 +122,8 @@ public class SessionIdService {
     @Inject
     private Identity identity;
 
-    private final Map<String, SessionId> localCache = Maps.newConcurrentMap();
+    @Inject
+    private LocalCacheService localCacheService;
 
     private String buildDn(String sessionId) {
         return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -552,7 +554,7 @@ public class SessionIdService {
                 sessionId.setTtl(expiration.getSecond());
                 log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
                 persistenceEntryManager.persist(sessionId);
-                localCache.put(sessionId.getDn(), sessionId);
+                localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
                 return true;
             }
         } catch (Exception e) {
@@ -667,7 +669,7 @@ public class SessionIdService {
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
                 persistenceEntryManager.merge(sessionId);
-                localCache.put(sessionId.getDn(), sessionId);
+                localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
                 externalEvent(new SessionEvent(SessionEventType.UPDATED, sessionId));
                 return;
             } catch (EntryPersistenceException ex) {
@@ -713,18 +715,18 @@ public class SessionIdService {
             return null;
         }
 
-        final SessionId localCopy = localCache.get(dn);
-        if (localCopy != null) {
-            if (isSessionValid(localCopy)) {
-                return localCopy;
+        final Object localCopy = localCacheService.get(dn);
+        if (localCopy instanceof SessionId) {
+            if (isSessionValid((SessionId) localCopy)) {
+                return (SessionId) localCopy;
             } else {
-                localCache.remove(dn);
+                localCacheService.remove(dn);
             }
         }
 
         try {
             final SessionId sessionId = persistenceEntryManager.find(SessionId.class, dn);
-            localCache.put(dn, sessionId);
+            localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
             return sessionId;
         } catch (Exception e) {
             log.error("Failed to get session by dn: " + dn, e);
@@ -773,7 +775,7 @@ public class SessionIdService {
     public boolean remove(SessionId sessionId) {
         try {
             persistenceEntryManager.remove(sessionId.getDn());
-            localCache.remove(sessionId.getDn());
+            localCacheService.remove(sessionId.getDn());
             externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
             return true;
         } catch (Exception e) {
