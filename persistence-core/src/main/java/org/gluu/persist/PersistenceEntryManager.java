@@ -38,7 +38,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void persist(Object entry);
 
-	<T> T merge(T entry);
+	Void merge(Object entry);
 
 	@Deprecated
 	boolean contains(Object entity);
