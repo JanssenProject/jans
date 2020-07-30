@@ -10,14 +10,15 @@ Given url openidclients_url
 And  header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+And assert response.length != null
 
-Scenario: Fetch the first two openidconnect clients
+Scenario: Fetch the first three openidconnect clients
 Given url openidclients_url
 And  header Authorization = 'Bearer ' + accessToken
-And param limit = 2
+And param limit = 3
 When method GET
 Then status 200
-And assert response.length == 2
+And assert response.length == 3
 
 Scenario: Search openid connect clients given a serach pattern
 Given url openidclients_url
@@ -25,6 +26,7 @@ And  header Authorization = 'Bearer ' + accessToken
 And param pattern = 'oxTrust'
 When method GET
 Then status 200
+And assert response.length == 1
 
 
 Scenario: Get an openid connect client by inum(unexisting client)
@@ -34,7 +36,37 @@ When method GET
 Then status 404
 
 Scenario: Get an openid connect client by inum
-Given url openidclients_url + '/1402.aa2b6d33-8ad5-473e-a749-d54b72dc525e'
+Given url openidclients_url
 And  header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+Given url openidclients_url + '/' +response[0].inum
+And  header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+
+Scenario: Create new OpenId Connect Client
+Given url openidclients_url
+And  header Authorization = 'Bearer ' + accessToken
+And request read('classpath:add_client.json')
+When method POST
+Then status 201
+#Update client
+#Delete open id connect existing openId Connect Client
+Given url openidclients_url + '/' +response.inum
+And  header Authorization = 'Bearer ' + accessToken
+When method DELETE
+Then status 204
+
+
+Scenario: Delete a non-existion openid connect client by inum
+Given url openidclients_url + '/1402.66633-8675-473e-a749'
+And  header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 404
+
+Scenario: Delete an openid connect client by inum
+Given url openidclients_url + '/1402.66633-8675-473e-a749'
+And  header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 404

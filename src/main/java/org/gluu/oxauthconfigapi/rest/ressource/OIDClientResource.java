@@ -28,6 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ClientService;
@@ -79,6 +80,7 @@ public class OIDClientResource extends BaseResource {
 	@Operation(summary = "Get OpenId Connect Client by Inum")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
@@ -165,8 +167,8 @@ public class OIDClientResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	@Operation(summary = "Delete OpenId Connect client ", description = "Delete an OpenId Connect client")
 	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", description = "Not found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		logger.info("OIDClientResource::deleteOpenIdConnect - Delete OpenID Connect client");
@@ -174,7 +176,7 @@ public class OIDClientResource extends BaseResource {
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client != null) {
 				clientService.removeClient(client);
-				return Response.ok().build();
+				return Response.noContent().build();
 			} else {
 				return getResourceNotFoundError();
 			}

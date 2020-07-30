@@ -1,0 +1,53 @@
+{
+    "accessTokenAsJwt": false,
+    "attributes": {
+        "additionalAudience": [],
+        "allowSpontaneousScopes": false,
+        "backchannelLogoutSessionRequired": false,
+        "backchannelLogoutUri": [],
+        "consentGatheringScripts": [],
+        "introspectionScripts": [],
+        "keepClientAuthorizationAfterExpiration": false,
+        "postAuthnScripts": [],
+        "rptClaimsScripts": [],
+        "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+        "spontaneousScopeScriptDns": [],
+        "spontaneousScopes": []
+    },
+    "claimRedirectURI": [
+        "https://gluu.gasmyr.com/oxauth/restv1/uma/gather_claims"
+    ],
+    "deletable": false,
+    "disabled": false,
+    "displayName": "QAAddedClient",
+    "descrition":"OpenId Client added by client",
+    "encodedClientSecret": "+d4yRu09OtNxCT7++E0FAA==",
+    "exp": "2120-09-28T23:00:00Z[UTC]",
+    "grantTypes": [
+        "AUTHORIZATION_CODE"
+    ],
+    "idTokenSignedResponseAlg": "HS256",
+    "logoutSessionRequired": true,
+    "logoutUri": [
+        "https://gluu.gasmyr.com/identity/ssologout.htm"
+    ],
+    "oxAuthAppType": "WEB",
+    "oxAuthPersistClientAuthorizations": false,
+    "oxAuthPostLogoutRedirectURIs": [
+        "https://gluu.gasmyr.com/identity/finishlogout.htm"
+    ],
+    "oxAuthRedirectURIs": [
+        "https://gluu.gasmyr.com/identity/uri1"
+    ],
+    "oxAuthScopes": [
+        "inum=F0C4,ou=scopes,o=gluu"
+    ],
+    "oxAuthTrustedClient": true,
+    "oxIncludeClaimsInIdToken": false,
+    "responseTypes": [
+        "CODE"
+    ],
+    "rptAsJwt": false,
+    "subjectType": "PUBLIC",
+    "tokenEndpointAuthMethod": "CLIENT_SECRET_BASIC"
+}
