@@ -111,7 +111,9 @@ public abstract class UserService {
 
     public User updateUser(User user) {
         user.setUpdatedAt(new Date());
-		return persistenceEntryManager.merge(user);
+		persistenceEntryManager.merge(user);
+
+		return getUserByDn(user.getDn());
 	}
 
     public User addDefaultUser(String uid) {
