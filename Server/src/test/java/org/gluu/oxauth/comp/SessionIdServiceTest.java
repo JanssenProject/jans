@@ -6,17 +6,6 @@
 
 package org.gluu.oxauth.comp;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
@@ -25,6 +14,13 @@ import org.gluu.oxauth.service.common.UserService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,7 +56,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
 
         m_service.updateSessionId(newId);
 
-        final SessionId fresh = m_service.getSessionById(newId.getId());
+        final SessionId fresh = m_service.getSessionId(newId.getId());
         Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
         Assert.assertTrue(fresh.getSessionAttributes().containsKey("k1"));
         Assert.assertTrue(fresh.getSessionAttributes().containsValue("v1"));
@@ -70,7 +66,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     @Test
     public void testUpdateLastUsedDate(String userInum) {
         SessionId m_sessionId = generateSession(userInum);
-        final SessionId fromLdap1 = m_service.getSessionById(m_sessionId.getId());
+        final SessionId fromLdap1 = m_service.getSessionId(m_sessionId.getId());
         final Date createdDate = m_sessionId.getLastUsedAt();
         System.out.println("Created date = " + createdDate);
         Assert.assertEquals(createdDate, fromLdap1.getLastUsedAt());
@@ -78,7 +74,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         sleepSeconds(1);
         m_service.updateSessionId(m_sessionId);
 
-        final SessionId fromLdap2 = m_service.getSessionById(m_sessionId.getId());
+        final SessionId fromLdap2 = m_service.getSessionId(m_sessionId.getId());
         System.out.println("Updated date = " + fromLdap2.getLastUsedAt());
         Assert.assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
     }
@@ -88,7 +84,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
     public void testUpdateAttributes(String userInum) {
         SessionId m_sessionId = generateSession(userInum);
         final String clientId = "testClientId";
-        final SessionId fromLdap1 = m_service.getSessionById(m_sessionId.getId());
+        final SessionId fromLdap1 = m_service.getSessionId(m_sessionId.getId());
         final Date createdDate = m_sessionId.getLastUsedAt();
         assertEquals(createdDate, fromLdap1.getLastUsedAt());
         assertFalse(fromLdap1.isPermissionGrantedForClient(clientId));
@@ -98,7 +94,7 @@ public class SessionIdServiceTest extends BaseComponentTest {
         m_sessionId.addPermission(clientId, true);
         m_service.updateSessionId(m_sessionId);
 
-        final SessionId fromLdap2 = m_service.getSessionById(m_sessionId.getId());
+        final SessionId fromLdap2 = m_service.getSessionId(m_sessionId.getId());
         assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
         assertNotNull(fromLdap2.getAuthenticationTime());
         assertTrue(fromLdap2.isPermissionGrantedForClient(clientId));

@@ -356,8 +356,7 @@ public class AuthorizeAction {
         }
 
         if (log.isTraceEnabled()) {
-            final User user = sessionIdService.getUser(session);
-            log.trace("checkPermissionGranted, user = " + user);
+            log.trace("checkPermissionGranted, userDn = " + session.getUserDn());
         }
 
         if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
