@@ -218,7 +218,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             updateSessionForROPC(httpRequest, sessionUser);
 
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
-            String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(sessionUser);
+            String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
