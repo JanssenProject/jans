@@ -7,6 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -119,6 +120,8 @@ public class SessionIdService {
 
     @Inject
     private Identity identity;
+
+    private final Map<String, SessionId> localCache = Maps.newConcurrentMap();
 
     private String buildDn(String sessionId) {
         return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -300,8 +303,6 @@ public class SessionIdService {
 
         return currentSessionAttributes;
     }
-
-
 
     public SessionId getSessionId() {
         String sessionId = cookieService.getSessionIdFromCookie();
@@ -548,6 +549,7 @@ public class SessionIdService {
                 sessionId.setTtl(expiration.getSecond());
                 log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
                 persistenceEntryManager.persist(sessionId);
+                localCache.put(sessionId.getDn(), sessionId);
                 return true;
             }
         } catch (Exception e) {
@@ -662,6 +664,7 @@ public class SessionIdService {
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
                 persistenceEntryManager.merge(sessionId);
+                localCache.put(sessionId.getDn(), sessionId);
                 externalEvent(new SessionEvent(SessionEventType.UPDATED, sessionId));
                 return;
             } catch (EntryPersistenceException ex) {
@@ -698,17 +701,7 @@ public class SessionIdService {
 
     @Nullable
     public SessionId getSessionById(@Nullable String sessionId, boolean silently) {
-        if (StringUtils.isBlank(sessionId)) {
-            return null;
-        }
-        try {
-            return persistenceEntryManager.find(SessionId.class, buildDn(sessionId));
-        } catch (Exception e) {
-            if (!silently) {
-                log.error("Failed to get session by id: " + sessionId, e);
-            }
-        }
-        return null;
+        return getSessionByDn(buildDn(sessionId));
     }
 
     @Nullable
@@ -716,8 +709,20 @@ public class SessionIdService {
         if (StringUtils.isBlank(dn)) {
             return null;
         }
+
+        final SessionId localCopy = localCache.get(dn);
+        if (localCopy != null) {
+            if (isSessionValid(localCopy)) {
+                return localCopy;
+            } else {
+                localCache.remove(dn);
+            }
+        }
+
         try {
-            return persistenceEntryManager.find(SessionId.class, dn);
+            final SessionId sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            localCache.put(dn, sessionId);
+            return sessionId;
         } catch (Exception e) {
             log.error("Failed to get session by dn: " + dn, e);
         }
@@ -765,6 +770,7 @@ public class SessionIdService {
     public boolean remove(SessionId sessionId) {
         try {
             persistenceEntryManager.remove(sessionId.getDn());
+            localCache.remove(sessionId.getDn());
             externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
             return true;
         } catch (Exception e) {
