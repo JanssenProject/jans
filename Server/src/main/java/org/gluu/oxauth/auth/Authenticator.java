@@ -105,6 +105,7 @@ public class Authenticator {
 	private Integer authStep;
 
 	private String lastResult;
+	private SessionId curentSessionId;
 
 	/**
 	 * Tries to authenticate an user, returns <code>true</code> if the
@@ -115,7 +116,7 @@ public class Authenticator {
 	public boolean authenticate() {
 		HttpServletRequest servletRequest = (HttpServletRequest) facesContext.getExternalContext().getRequest();
 
-		final SessionId sessionId = sessionIdService.getSessionId(servletRequest);
+		final SessionId sessionId = getSessionId(servletRequest);
 		if (sessionIdService.isSessionIdAuthenticated(sessionId)) {
 			// #1029 : session is already authenticated, we run into second authorization
 			// request
@@ -201,7 +202,7 @@ public class Authenticator {
 				}
 			} else {
 				if (interactive) {
-					result = userAuthenticationInteractive();
+					result = userAuthenticationInteractive(servletRequest);
 				} else {
 					boolean authenticated = userAuthenticationService();
 					if (authenticated) {
@@ -277,8 +278,8 @@ public class Authenticator {
 		logger.info(sb.toString());
 	}
 
-	private String userAuthenticationInteractive() {
-		SessionId sessionId = sessionIdService.getSessionId();
+	private String userAuthenticationInteractive(HttpServletRequest servletRequest) {
+		SessionId sessionId = getSessionId(servletRequest);
 		Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
 			logger.error("Failed to get session attributes");
@@ -779,6 +780,14 @@ public class Authenticator {
 	public void addMessage(Severity severity, String summary) {
 		String message = languageBean.getMessage(summary);
 		facesMessages.add(severity, message);
+	}
+
+	private SessionId getSessionId(HttpServletRequest servletRequest) {
+		if (this.curentSessionId == null) {
+			this.curentSessionId = sessionIdService.getSessionId(servletRequest);
+		}
+		
+		return this.curentSessionId;
 	}
 
 	public String getMaskedNumber() {
