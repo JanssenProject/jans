@@ -110,7 +110,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    public <T> T merge(T entry) {
+    public Void merge(Object entry) {
         Class<?> entryClass = entry.getClass();
         checkEntryClass(entryClass, true);
         if (isSchemaEntry(entryClass)) {
