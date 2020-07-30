@@ -430,8 +430,10 @@ public class AuthorizeAction {
                 String remoteIp = networkService.getRemoteIp();
                 session.getSessionAttributes().put(Constants.REMOTE_IP, remoteIp);
 
-                sessionIdService.updateSessionId(session);
-                sessionIdService.reinitLogin(session, false);
+                final boolean isSessionPersisted = sessionIdService.reinitLogin(session, false);
+                if (!isSessionPersisted) {
+                    sessionIdService.updateSessionId(session);
+                }
             }
         }
         return session;

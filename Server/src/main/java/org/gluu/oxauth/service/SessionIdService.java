@@ -219,7 +219,13 @@ public class SessionIdService {
         return !copyCurrentSessionAttributes.equals(copySessionAttributes);
     }
 
-    public void reinitLogin(SessionId session, boolean force) {
+    /**
+     *
+     * @param session
+     * @param force
+     * @return returns whether session was updated
+     */
+    public boolean reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
 
@@ -249,7 +255,9 @@ public class SessionIdService {
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
             }
+            return updateResult;
         }
+        return false;
     }
 
     public void resetToStep(SessionId session, int resetToStep) {
