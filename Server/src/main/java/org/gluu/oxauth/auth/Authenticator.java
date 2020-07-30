@@ -356,10 +356,16 @@ public class Authenticator {
 			if (overridenNextStep > -1) {
 				overrideCurrentStep = true;
 				// Reload session id
+/*
+ * TODO: Remove after 6.0. Check if this will not led to external script problems.
 				sessionId = sessionIdService.getSessionId();
+*/
 
 				// Reset to specified step
-				sessionIdService.resetToStep(sessionId, overridenNextStep);
+				sessionId = sessionIdService.resetToStep(sessionId, overridenNextStep);
+				if (sessionId == null) {
+					return Constants.RESULT_AUTHENTICATION_FAILED;
+				}
 
 				this.authStep = overridenNextStep;
 				logger.info("Authentication reset to step : '{}'", this.authStep);
@@ -372,10 +378,12 @@ public class Authenticator {
 			// Determine count authentication methods
 			int countAuthenticationSteps = externalAuthenticationService
 					.executeExternalGetCountAuthenticationSteps(customScriptConfiguration);
-
+/*
+ * TODO: Remove after 6.0. Check if this will not led to external script problems.
 			// Reload from LDAP to make sure that we are updating latest session
 			// attributes
 			sessionId = sessionIdService.getSessionId();
+*/
 			sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 
 			// Prepare for next step
