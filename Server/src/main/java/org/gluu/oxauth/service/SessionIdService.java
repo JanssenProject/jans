@@ -689,11 +689,6 @@ public class SessionIdService {
     }
 
     @Nullable
-    public SessionId getSessionById(@Nullable String sessionId) {
-        return getSessionId(sessionId, false);
-    }
-
-    @Nullable
     public SessionId getSessionById(@Nullable String sessionId, boolean silently) {
         if (StringUtils.isBlank(sessionId)) {
             return null;
@@ -804,22 +799,11 @@ public class SessionIdService {
         return Prompt.fromString(promptParam, " ");
     }
 
-
-    public boolean isSessionIdAuthenticated() {
-        SessionId sessionId = getSessionId();
-
-        return isSessionIdAuthenticated(sessionId);
-    }
-
     public boolean isSessionIdAuthenticated(SessionId sessionId) {
         if (sessionId == null) {
             return false;
         }
         return SessionIdState.AUTHENTICATED.equals(sessionId.getState());
-    }
-
-    public boolean isNotSessionIdAuthenticated() {
-        return !isSessionIdAuthenticated();
     }
 
     /**
