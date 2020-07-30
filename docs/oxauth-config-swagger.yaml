@@ -30,11 +30,14 @@ tags:
   - name: Configuration – Responses Modes
   - name: Configuration – User Info
   - name: Configuration – UMA
+  - name: Configuration – OAuth2 Discovery
   - name: Configuration – Session ID
   - name: Configuration – Pairwise
   - name: Configuration – Fido2
   - name: Configuration – CIBA
   - name: Configuration – Cors Configuration Filter
+  - name: Configuration – Grant Type
+  - name: Configuration – Endpoints 
   - name: Configuration – SMTP
   - name: Configuration – Library
   - name: Configuration – Logs
@@ -2826,134 +2829,36 @@ paths:
                   type: object
                   description: CIBA configuration properties.
                   properties:
-                    backchannelClientId:
+                    apiKey:
                       type: string
-                      description: Backchannel Client Id.
-                      minLength: 0
-                    backchannelRedirectUri:
+                      minLength: 1
+                    authDomain:
                       type: string
-                      description: Backchannel Redirect Uri.
-                      minLength: 0
-                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
-                    backchannelAuthenticationEndpoint:
+                      minLength: 1
+                    databaseURL:
                       type: string
-                      description: Backchannel Authentication Endpoint.
-                      minLength: 0
-                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
-                    backchannelDeviceRegistrationEndpoint:
+                      minLength: 1
+                    projectId:
                       type: string
-                      description: Backchannel Device Registration Endpoint.
-                      minLength: 0
-                      example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
-                    backchannelTokenDeliveryModesSupported:
-                      type: array
-                      description: Backchannel Token Delivery Modes Supported.
-                      minItems: 0
-                      uniqueItems: true
-                      items:
-                        type: string
-                      format: select
-                      enum:
-                        - poll
-                        - ping
-                        - push
-                    backchannelAuthenticationRequestSigningAlgValuesSupported:
-                      type: array
-                      description: Backchannel Authentication Request Signing Alg Values Supported.
-                      minItems: 0
-                      uniqueItems: true
-                      items:
-                        type: string
-                      format: select
-                      enum:
-                        - RS512
-                        - ES256
-                        - ES384
-                        - ES512
-                        - PS256
-                        - PS384
-                        - PS512
-                    backchannelUserCodeParameterSupported:
-                      type: boolean
-                      description: Backchannel User Code Parameter Supported
-                    backchannelBindingMessagePattern:
+                      minLength: 1
+                    storageBucket:
                       type: string
-                      description: Backchannel Binding Message Pattern.
-                      minLength: 0
-                    backchannelAuthenticationResponseExpiresIn:
-                      type: integer
-                      description: Backchannel Authentication Response Expires In.
-                      multipleOf: 1
-                      minimum: 1
-                      maximum: 2147483647
-                      exclusiveMinimum: false
-                      exclusiveMaximum: false
-                    backchannelAuthenticationResponseInterval:
-                      type: integer
-                      description: Backchannel Authentication Response Interval.
-                      multipleOf: 1
-                      minimum: 1
-                      maximum: 2147483647
-                      exclusiveMinimum: false
-                      exclusiveMaximum: false
-                    backchannelLoginHintClaims:
-                      type: array
-                      description: Backchannel Login Hint Claims.
-                      minItems: 0
-                      uniqueItems: true
-                      items:
-                        type: string
-                    cibaEndUserNotificationConfig:
-                      type: object
-                      description: CIBA End User Notification Config.
-                      required:
-                        - apiKey
-                        - authDomain
-                        - databaseURL
-                        - projectId
-                        - storageBucket
-                        - messagingSenderId
-                        - appId
-                        - notificationUrl
-                        - notificationKey
-                        - publicVapidKey
-                      properties:
-                        apiKey:
-                          type: string
-                          minLength: 1
-                        authDomain:
-                          type: string
-                          minLength: 1
-                        databaseURL:
-                          type: string
-                          minLength: 1
-                        projectId:
-                          type: string
-                          minLength: 1
-                        storageBucket:
-                          type: string
-                          minLength: 1
-                        messagingSenderId:
-                          type: string
-                          minLength: 1
-                        appId:
-                          type: string
-                          minLength: 1
-                        notificationUrl:
-                          type: string
-                          minLength: 1
-                        notificationKey:
-                          type: string
-                          minLength: 1
-                        publicVapidKey:
-                          type: string
-                          minLength: 1
-                    backchannelRequestsProcessorJobIntervalSec:
-                      type: integer
-                      description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
-                    backchannelRequestsProcessorJobChunkSize:
-                      type: integer
-                      description: Each backchannel request processor iteration fetches chunk of data to be processed.
+                      minLength: 1
+                    messagingSenderId:
+                      type: string
+                      minLength: 1
+                    appId:
+                      type: string
+                      minLength: 1
+                    notificationUrl:
+                      type: string
+                      minLength: 1
+                    notificationKey:
+                      type: string
+                      minLength: 1
+                    publicVapidKey:
+                      type: string
+                      minLength: 1
                     cibaGrantLifeExtraTimeSec:
                       type: integer
                       description: Specifies the CIBA Grant life extra time in seconds.
@@ -2982,135 +2887,37 @@ paths:
                 type: object
                 description: CIBA configuration properties.
                 properties:
-                  backchannelClientId:
+                  apiKey:
                     type: string
-                    description: Backchannel Client Id.
-                    minLength: 0
-                  backchannelRedirectUri:
+                    minLength: 1
+                  authDomain:
                     type: string
-                    description: Backchannel Redirect Uri.
-                    minLength: 0
-                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelRedirectUri'
-                  backchannelAuthenticationEndpoint:
+                    minLength: 1
+                  databaseURL:
                     type: string
-                    description: Backchannel Authentication Endpoint.
-                    minLength: 0
-                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()'
-                  backchannelDeviceRegistrationEndpoint:
+                    minLength: 1
+                  projectId:
                     type: string
-                    description: Backchannel Device Registration Endpoint.
-                    minLength: 0
-                    example: 'https://server.example.com/oxeleven/rest/backchannel/backchannelDeviceRegistrationEndpoint'
-                  backchannelTokenDeliveryModesSupported:
-                    type: array
-                    description: Backchannel Token Delivery Modes Supported.
-                    minItems: 0
-                    uniqueItems: true
-                    items:
-                      type: string
-                    format: select
-                    enum:
-                      - poll
-                      - ping
-                      - push
-                  backchannelAuthenticationRequestSigningAlgValuesSupported:
-                    type: array
-                    description: Backchannel Authentication Request Signing Alg Values Supported.
-                    minItems: 0
-                    uniqueItems: true
-                    items:
-                      type: string
-                    format: select
-                    enum:
-                      - RS512
-                      - ES256
-                      - ES384
-                      - ES512
-                      - PS256
-                      - PS384
-                      - PS512
-                  backchannelUserCodeParameterSupported:
-                    type: boolean
-                    description: Backchannel User Code Parameter Supported
-                  backchannelBindingMessagePattern:
+                    minLength: 1
+                  storageBucket:
                     type: string
-                    description: Backchannel Binding Message Pattern.
-                    minLength: 0
-                  backchannelAuthenticationResponseExpiresIn:
-                    type: integer
-                    description: Backchannel Authentication Response Expires In.
-                    multipleOf: 1
-                    minimum: 1
-                    maximum: 2147483647
-                    exclusiveMinimum: false
-                    exclusiveMaximum: false
-                  backchannelAuthenticationResponseInterval:
-                    type: integer
-                    description: Backchannel Authentication Response Interval.
-                    multipleOf: 1
-                    minimum: 1
-                    maximum: 2147483647
-                    exclusiveMinimum: false
-                    exclusiveMaximum: false
-                  backchannelLoginHintClaims:
-                    type: array
-                    description: Backchannel Login Hint Claims.
-                    minItems: 0
-                    uniqueItems: true
-                    items:
-                      type: string
-                  cibaEndUserNotificationConfig:
-                    type: object
-                    description: CIBA End User Notification Config.
-                    required:
-                      - apiKey
-                      - authDomain
-                      - databaseURL
-                      - projectId
-                      - storageBucket
-                      - messagingSenderId
-                      - appId
-                      - notificationUrl
-                      - notificationKey
-                      - publicVapidKey
-                    properties:
-                      apiKey:
-                        type: string
-                        minLength: 1
-                      authDomain:
-                        type: string
-                        minLength: 1
-                      databaseURL:
-                        type: string
-                        minLength: 1
-                      projectId:
-                        type: string
-                        minLength: 1
-                      storageBucket:
-                        type: string
-                        minLength: 1
-                      messagingSenderId:
-                        type: string
-                        minLength: 1
-                      appId:
-                        type: string
-                        minLength: 1
-                      notificationUrl:
-                        type: string
-                        minLength: 1
-                      notificationKey:
-                        type: string
-                        minLength: 1
-                      publicVapidKey:
-                        type: string
-                        minLength: 1
-                  backchannelRequestsProcessorJobIntervalSec:
-                    type: integer
-                    description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
-                  backchannelRequestsProcessorJobChunkSize:
-                    type: integer
-                    description: Each backchannel request processor iteration fetches chunk of data to be processed.
-                  cibaGrantLifeExtraTimeSec:
+                    minLength: 1
+                  messagingSenderId:
+                    type: string
+                    minLength: 1
+                  appId:
+                    type: string
+                    minLength: 1
+                  notificationUrl:
+                    type: string
+                    minLength: 1
+                  notificationKey:
+                    type: string
+                    minLength: 1
+                  publicVapidKey:
+                    type: string
+                    minLength: 1
+                  cibGrantLifeExtraTimeSec:
                     type: integer
                     description: Specifies the CIBA Grant life extra time in seconds.
                   cibaMaxExpirationTimeAllowedSec:
@@ -3240,6 +3047,642 @@ paths:
                   corsRequestDecorate:
                     type: boolean
                     default: true
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/grant-type:
+    get:
+      summary: Gets supported oxAuth Grant Type configuration properties.
+      description: Gets supported oxAuth Grant Type configuration properties.
+      operationId: get-properties-grant-type
+      tags:
+        - Configuration – Grant Type
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Grant Type configuration
+                items:
+                  type: object
+                  description: Grant Type configuration properties.
+                  properties:
+                    grantTypesSupported:
+                      type: array
+                      description: A list of the OAuth 2.0 Grant Type values that this OP supports.
+                      minItems: 1
+                      items:
+                        type: string
+                      enum:
+                        - authorization_code
+                        - implicit
+                        - password
+                        - client_credentials
+                        - refresh_token
+                        - urn:ietf:params:oauth:grant-type:uma-ticket
+                        - urn:openid:params:grant-type:ciba
+                        - urn:ietf:params:oauth:grant-type:device_code
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates supported oxAuth Grant Type configuration properties.
+      description: Updates supported oxAuth Grant Type configuration properties.
+      operationId: put-properties-grant-type
+      tags:
+        - Configuration – Grant Type
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Grant Type configuration
+              items:
+                type: object
+                description: Grant Type configuration properties.
+                properties:
+                  grantTypesSupported:
+                    type: array
+                    description: A list of the OAuth 2.0 Grant Type values that this OP supports.
+                    minItems: 1
+                    items:
+                      type: string
+                    enum:
+                      - authorization_code
+                      - implicit
+                      - password
+                      - client_credentials
+                      - refresh_token
+                      - urn:ietf:params:oauth:grant-type:uma-ticket
+                      - urn:openid:params:grant-type:ciba
+                      - urn:ietf:params:oauth:grant-type:device_code
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/endpoints:
+    get:
+      summary: Gets available oxAuth endpoints configuration properties.
+      description: Gets available oxAuth endpoints configuration properties.
+      operationId: get-properties-endpoints
+      tags:
+        - Configuration – Endpoints
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: oxAuth available endpoints
+                items:
+                  type: object
+                  description: oxAuth available endpoints.
+                  required:
+                    - baseEndpoint
+                    - authorizationEndpoint
+                    - tokenEndpoint
+                    - tokenRevocationEndpoint
+                    - userInfoEndpoint
+                    - clientInfoEndpoint
+                    - endSessionEndpoint
+                    - registrationEndpoint
+                    - openIdDiscoveryEndpoint
+                    - openIdConfigurationEndpoint
+                    - idGenerationEndpoint
+                    - introspectionEndpoint
+                    - umaConfigurationEndpoint
+                    - sectorIdentifierEndpoint
+                    - oxElevenGenerateKeyEndpoint
+                    - backchannelAuthenticationEndpoint
+                    - backchannelDeviceRegistrationEndpoint				  
+                  properties:
+                    baseEndpoint:
+                      description: Base URL of the Endpoints.
+                      type: string
+                      format: url
+                      minLength: 1
+                    authorizationEndpoint:
+                      description: The URL of the Authorization Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    tokenEndpoint:
+                      description: The URL of the Token Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    tokenRevocationEndpoint:
+                      description: The URL of the Token (access_token or refresh_token) Revocation Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    userInfoEndpoint:
+                      description: The URL of the User Info Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    clientInfoEndpoint:
+                      description: The URL of the Client Info Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    endSessionEndpoint:
+                      description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
+                      type: string
+                      format: url
+                      minLength: 1
+                    registrationEndpoint:
+                      description: URL of the Registration Enpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    openIdDiscoveryEndpoint:
+                      description: URL for the Discovery Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    openIdConfigurationEndpoint:
+                      description: URL for the Open ID Connect Configuration Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    idGenerationEndpoint:
+                      description: URL for the ID Generation Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    introspectionEndpoint:
+                      description: URL for the Introspection Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    umaConfigurationEndpoint:
+                      description: URL for the UMA Configuration Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    sectorIdentifierEndpoint:
+                      description: URL for the Sector Identifier Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    oxElevenGenerateKeyEndpoint:
+                      description: URL for the oxEleven Generate Key Endpoint.
+                      type: string
+                      format: url
+                      minLength: 1
+                    backchannelAuthenticationEndpoint:
+                      description: Backchannel Authentication Endpoint.
+                      type: string
+                      minLength: 0
+                    backchannelDeviceRegistrationEndpoint:
+                      description: Backchannel Device Registration Endpoint.
+                      type: string
+                      minLength: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates available oxAuth endpoints configuration properties.
+      description: Updates available oxAuth endpoints configuration properties.
+      operationId: put-properties-endpoints
+      tags:
+        - Configuration – Endpoints
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: oxAuth available endpoints
+              items:
+                type: object
+                description: oxAuth available endpoints.
+                required:
+                  - baseEndpoint
+                  - authorizationEndpoint
+                  - tokenEndpoint
+                  - tokenRevocationEndpoint
+                  - userInfoEndpoint
+                  - clientInfoEndpoint
+                  - endSessionEndpoint
+                  - registrationEndpoint
+                  - openIdDiscoveryEndpoint
+                  - openIdConfigurationEndpoint
+                  - idGenerationEndpoint
+                  - introspectionEndpoint
+                  - umaConfigurationEndpoint
+                  - sectorIdentifierEndpoint
+                  - oxElevenGenerateKeyEndpoint
+                  - backchannelAuthenticationEndpoint
+                  - backchannelDeviceRegistrationEndpoint				  
+                properties:
+                  baseEndpoint:
+                    description: Base URL of the Endpoints.
+                    type: string
+                    format: url
+                    minLength: 1
+                  authorizationEndpoint:
+                    description: The URL of the Authorization Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  tokenEndpoint:
+                    description: The URL of the Token Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  tokenRevocationEndpoint:
+                    description: The URL of the Token (access_token or refresh_token) Revocation Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  userInfoEndpoint:
+                    description: The URL of the User Info Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  clientInfoEndpoint:
+                    description: The URL of the Client Info Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  endSessionEndpoint:
+                    description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
+                    type: string
+                    format: url
+                    minLength: 1
+                  registrationEndpoint:
+                    description: URL of the Registration Enpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  openIdDiscoveryEndpoint:
+                    description: URL for the Discovery Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  openIdConfigurationEndpoint:
+                    description: URL for the Open ID Connect Configuration Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  idGenerationEndpoint:
+                    description: URL for the ID Generation Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  introspectionEndpoint:
+                    description: URL for the Introspection Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  umaConfigurationEndpoint:
+                    description: URL for the UMA Configuration Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  sectorIdentifierEndpoint:
+                    description: URL for the Sector Identifier Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  oxElevenGenerateKeyEndpoint:
+                    description: URL for the oxEleven Generate Key Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  backchannelAuthenticationEndpoint:
+                    description: Backchannel Authentication Endpoint.
+                    type: string
+                    minLength: 0
+                  backchannelDeviceRegistrationEndpoint:
+                    description: Backchannel Device Registration Endpoint.
+                    type: string
+                    minLength: 0
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/oauth2:
+    get:
+      summary: Gets OAuth2 Discovery configuration properties.
+      description: Gets OAuth2 Discovery configuration properties.
+      operationId: get-properties-oauth2
+      tags:
+        - Configuration – OAuth2 Discovery
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: OAuth2 Discovery configuration.
+                type: object
+                description: OAuth2 Discovery configuration.
+                required:
+                  - issuer
+                  - authorizationEndpoint
+                  - tokenEndpoint
+                  - responseTypesSupported
+                properties:
+                  issuer:
+                    type: string
+                    description: URL using the https scheme that OP asserts as Issuer identifier.
+                    example: 'https://server.example.com/'
+                  baseEndpoint:
+                    type: string
+                    description: The base URL for endpoints.
+                    example: 'https://server.example.com/oxauth/restv1'
+                  authorizationEndpoint:
+                    type: string
+                    description: The authorization endpoint URL.
+                    example: 'https://server.example.com/oxauth/restv1/authorize'
+                  tokenEndpoint:
+                    type: string
+                    description: The token endpoint URL.
+                    example: 'https://server.example.com/oxauth/restv1/token'
+                  tokenRevocationEndpoint:
+                    type: string
+                    description: The URL for the access_token or refresh_token revocation endpoint.
+                    example: 'https://server.example.com/oxauth/restv1/revoke'
+                  jwksUri:
+                    type: string
+                    description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
+                    example: 'https://server.example.com/oxauth/restv1/jwks'
+                  registrationEndpoint:
+                    type: string
+                    description: URL of the Registration Endpoint.
+                    example: 'https://server.example.com/oxauth/restv1/register'
+                  openIdDiscoveryEndpoint:
+                    type: string
+                    description: URL for the Discovery Endpoint.
+                    example: 'https://server.example.com/.well-known/webfinger'
+                  openIdConfigurationEndpoint:
+                    type: string
+                    description: URL for the Open ID Connect Configuration Endpoint.
+                    example: 'https://server.example.com/.well-known/openid-configuration'
+                  responseTypesSupported:
+                    type: array
+                    description: A list of the OAuth 2.0 response_type values that this OP supports.
+                    minItems: 1
+                    items:
+                      type: string
+                    enum:
+                      - code
+                      - token
+                      - id_token
+                  responseModesSupported:
+                    type: array
+                    description: A list of the OAuth 2.0 Response Mode values that this OP supports.
+                    items:
+                      type: string
+                    enum:
+                      - query
+                      - fragment
+                      - form_post
+                  grantTypesSupported:
+                    type: array
+                    description: A list of the OAuth 2.0 Grant Type values that this OP supports.
+                    items:
+                      type: string
+                    enum:
+                      - authorization_code
+                      - implicit
+                      - password
+                      - client_credentials
+                      - refresh_token
+                      - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
+                      - '\urn\:openid\:params\:grant-type\:ciba'
+                  tokenEndpointAuthMethodsSupported:
+                    type: array
+                    description: A list of Client Authentication methods supported by this Token Endpoint.
+                    items:
+                      type: string
+                    enum:
+                      - client_secret_basic
+                      - client_secret_post
+                      - client_secret_jwt
+                      - private_key_jwt
+                  tokenEndpointAuthSigningAlgValuesSupported:
+                    type: array
+                    description: A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                    items:
+                      type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  serviceDocumentation:
+                    type: string
+                    description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider.
+                    items:
+                      type: string
+                    format: url
+                    example: 'http://gluu.org/docs'
+                  uiLocalesSupported:
+                    type: array
+                    description: Languages and scripts supported for the user interface.
+                    items:
+                      type: string
+                    enum:
+                      - en
+                      - es
+                  opPolicyUri:
+                    type: string
+                    description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.
+                    example: 'http://ox.gluu.org/doku.php?id=oxauth:policy'
+                  opTosUri:
+                    type: string
+                    description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
+                    example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
+                  introspectionEndpoint:
+                    type: string
+                    description: URL for the Introspection Endpoint.
+                    example: 'https://server.example.com/oxauth/restv1/introspection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates OAuth2 Discovery configuration properties.
+      description: Updates OAuth2 Discovery configuration properties.
+      operationId: put-properties-oauth2
+      tags:
+        - Configuration – OAuth2 Discovery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: OAuth2 Discovery configuration.
+              type: object
+              description: OAuth2 Discovery configuration.
+              required:
+                - issuer
+                - authorizationEndpoint
+                - tokenEndpoint
+                - responseTypesSupported
+              properties:
+                issuer:
+                  type: string
+                  description: URL using the https scheme that OP asserts as Issuer identifier.
+                  example: 'https://server.example.com/'
+                baseEndpoint:
+                  type: string
+                  description: The base URL for endpoints.
+                  example: 'https://server.example.com/oxauth/restv1'
+                authorizationEndpoint:
+                  type: string
+                  description: The authorization endpoint URL.
+                  example: 'https://server.example.com/oxauth/restv1/authorize'
+                tokenEndpoint:
+                  type: string
+                  description: The token endpoint URL.
+                  example: 'https://server.example.com/oxauth/restv1/token'
+                tokenRevocationEndpoint:
+                  type: string
+                  description: The URL for the access_token or refresh_token revocation endpoint.
+                  example: 'https://server.example.com/oxauth/restv1/revoke'
+                jwksUri:
+                  type: string
+                  description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
+                  example: 'https://server.example.com/oxauth/restv1/jwks'
+                registrationEndpoint:
+                  type: string
+                  description: URL of the Registration Endpoint.
+                  example: 'https://server.example.com/oxauth/restv1/register'
+                openIdDiscoveryEndpoint:
+                  type: string
+                  description: URL for the Discovery Endpoint.
+                  example: 'https://server.example.com/.well-known/webfinger'
+                openIdConfigurationEndpoint:
+                  type: string
+                  description: URL for the Open ID Connect Configuration Endpoint.
+                  example: 'https://server.example.com/.well-known/openid-configuration'
+                responseTypesSupported:
+                  type: array
+                  description: A list of the OAuth 2.0 response_type values that this OP supports.
+                  minItems: 1
+                  items:
+                    type: string
+                  enum:
+                    - code
+                    - token
+                    - id_token
+                responseModesSupported:
+                  type: array
+                  description: A list of the OAuth 2.0 Response Mode values that this OP supports.
+                  items:
+                    type: string
+                  enum:
+                    - query
+                    - fragment
+                    - form_post
+                grantTypesSupported:
+                  type: array
+                  description: A list of the OAuth 2.0 Grant Type values that this OP supports.
+                  items:
+                    type: string
+                  enum:
+                    - authorization_code
+                    - implicit
+                    - password
+                    - client_credentials
+                    - refresh_token
+                    - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
+                    - '\urn\:openid\:params\:grant-type\:ciba'
+                tokenEndpointAuthMethodsSupported:
+                  type: array
+                  description: A list of Client Authentication methods supported by this Token Endpoint.
+                  items:
+                    type: string
+                  enum:
+                    - client_secret_basic
+                    - client_secret_post
+                    - client_secret_jwt
+                    - private_key_jwt
+                tokenEndpointAuthSigningAlgValuesSupported:
+                  type: array
+                  description: A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                  items:
+                    type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                serviceDocumentation:
+                  type: string
+                  description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider.
+                  items:
+                    type: string
+                  format: url
+                  example: 'http://gluu.org/docs'
+                uiLocalesSupported:
+                  type: array
+                  description: Languages and scripts supported for the user interface.
+                  items:
+                    type: string
+                  enum:
+                    - en
+                    - es
+                opPolicyUri:
+                  type: string
+                  description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP.
+                  example: 'http://ox.gluu.org/doku.php?id=oxauth:policy'
+                opTosUri:
+                  type: string
+                  description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
+                  example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
+                introspectionEndpoint:
+                  type: string
+                  description: URL for the Introspection Endpoint.
+                  example: 'https://server.example.com/oxauth/restv1/introspection'
       responses:
         '200':
           description: OK
@@ -5162,6 +5605,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
   '/config/library/{name}':
     parameters:
       - schema:
@@ -6010,39 +6456,6 @@ paths:
       security:
         - oxAuth:
             - read
-  '/scripts/uma_rpt/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-        description: Script name.
-    get:
-      summary: Gets UMA RPT policy scripts by name.
-      description: Gets UMA RPT policy script based on name.
-      operationId: get-scripts-uma_rpt-by-name
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-        - oxAuth: []
   /scripts/uma_gather:
     get:
       summary: Gets all UMA claims gathering scripts.
@@ -6193,38 +6606,6 @@ paths:
       summary: Gets all UMA claims gathering scripts by type.
       description: Gets all UMA claims gathering scripts based on type.
       operationId: get-scripts-uma_gather-by-type
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  '/scripts/uma_gather/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-        description: Script name.
-    get:
-      summary: Gets UMA claims gathering scripts by name.
-      description: Gets UMA claims gathering script based on name.
-      operationId: get-scripts-uma_gather-by-name
       tags:
         - Custom Scripts - UMA Claims Gathering
       responses:
@@ -6415,38 +6796,6 @@ paths:
       security:
         - oxAuth:
             - read
-  '/scripts/introspection/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-        description: Script name.
-    get:
-      summary: Gets introspection scripts by name.
-      description: Gets introspection script based on name.
-      operationId: get-scripts-introspection-by-name
-      tags:
-        - Custom Scripts - Introspection
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
   /scripts/ropw:
     get:
       summary: Gets all Resource Owner Password Credentials scripts.
@@ -6597,38 +6946,6 @@ paths:
       summary: Gets all Resource Owner Password Credentials scripts by type.
       description: Gets all Resource Owner Password Credentials scripts based on type.
       operationId: get-scripts-ropw-by-type
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  '/scripts/ropw/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-        description: Script name.
-    get:
-      summary: Gets Resource Owner Password Credentials scripts by name.
-      description: Gets Resource Owner Password Credentials script based on name.
-      operationId: get-scripts-ropw-by-name
       tags:
         - Custom Scripts - Resource Owner Password Credentials
       responses:
@@ -6819,50 +7136,18 @@ paths:
       security:
         - oxAuth:
             - read
-  '/scripts/app_session/{name}':
+  '/config/scripts/{inum}':
     parameters:
       - schema:
           type: string
-        name: name
+        name: inum
         in: path
         required: true
-        description: Script name.
+        description: Script identifier.
     get:
-      summary: Gets Application session scripts by name.
-      description: Gets Application session script based on name.
-      operationId: get-scripts-app_session-by-name
-      tags:
-        - Custom Scripts - Application Session
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  '/config/scripts/{name}':
-    parameters:
-      - schema:
-          type: string
-        name: name
-        in: path
-        required: true
-        description: Script name.
-    get:
-      summary: Gets script details by name.
-      description: Gets script details based on name.
-      operationId: get-config-scripts-by-name
+      summary: Gets script details by unique identifier.
+      description: Gets script details based on unique identifier.
+      operationId: get-config-scripts-by-inum
       tags:
         - Custom Scripts
       responses:
@@ -6883,18 +7168,18 @@ paths:
       security:
         - oxAuth:
             - read
-  '/config/scripts/{name}/property':
+  '/config/scripts/{inum}/property':
     parameters:
       - schema:
           type: string
-        name: name
+        name: inum
         in: path
         required: true
-        description: Script name.
+        description: Script identifier.
     get:
-      summary: Gets script property by name.
-      description: Gets script property based on name.
-      operationId: get-config-scripts-property-by-name
+      summary: Gets script property by unique identifier.
+      description: Gets script property based on  unique identifier.
+      operationId: get-config-scripts-property-by-inum
       tags:
         - Custom Scripts
       responses:
@@ -6916,9 +7201,9 @@ paths:
         - oxAuth:
             - read
     post:
-      summary: Adds script property by name.
-      description: Adds script property by name.
-      operationId: post-config-scripts-property-by-name
+      summary: Adds script property by unique identifier.
+      description: Adds script property by unique identifier.
+      operationId: post-config-scripts-property-by-inum
       tags:
         - Custom Scripts
       requestBody:
@@ -6939,9 +7224,9 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Updates script property by name.
-      description: Updates script property by name.
-      operationId: put-config-scripts-property-by-name
+      summary: Updates script property by unique identifier.
+      description: Updates script property by unique identifier.
+      operationId: put-config-scripts-property-by-inum
       tags:
         - Custom Scripts
       requestBody:
@@ -6962,9 +7247,9 @@ paths:
         - oxAuth:
             - write
     delete:
-      summary: Deletes script property by name.
-      description: Deletes script property by name.
-      operationId: delete-config-scripts-property-by-name
+      summary: Deletes script property by unique identifier.
+      description: Deletes script property by unique identifier.
+      operationId: delete-config-scripts-property-by-inum
       tags:
         - Custom Scripts
       responses:
@@ -8975,10 +9260,7 @@ paths:
                   type: object
                   description: Log configuration.
                   properties:
-                    log_location:
-                      description: External log location.
-                      type: string
-                    log_level:
+                    loggingLevel:
                       description: Allows to filter the category of messages to be logged.
                       type: string
                       enum:
@@ -8989,20 +9271,31 @@ paths:
                         - Error - Error level and above
                         - Fatal - Only fatal errors
                         - off - Logging is disabled
-                    log_layout:
+                    loggingLayout:
                       description: Defines the pattern of log format.
                       type: string
                       example: 'Date, time, spacing, line number, etc.'
-                    http_logging_enabled:
-                      description: To enable/disable http logging.
+                    httpLoggingEnabled:
+                      description: To enable http request/response logging.
                       type: boolean
-                    jdk_logging_enabled:
+                    disableJdkLogger:
                       description: To enable/disable Jdk logging.
                       type: boolean
-                    oauth_audit_logging_enabled:
+                    enabledOAuthAuditLogging:
                       description: To enable/disable OAuth audit logging.
                       type: boolean
-                    log_templates:
+                    externalLoggerConfiguration:
+                      description: Path to external log4j2 configuration file. 
+                      type: string
+                    httpLoggingExludePaths:
+                      description: List of paths to exclude from logger.
+                      type: array
+                      items: 
+                        type: string
+                      example:
+                        - '/oxauth/img'
+                        - '/oxauth/stylesheet'                        
+                    logTemplates:
                       description: Defines the log template to apply.
                       type: array
                       items:
@@ -9037,10 +9330,7 @@ paths:
                 type: object
                 description: Log configuration.
                 properties:
-                  log_location:
-                    description: External log location.
-                    type: string
-                  log_level:
+                  loggingLevel:
                     description: Allows to filter the category of messages to be logged.
                     type: string
                     enum:
@@ -9051,20 +9341,31 @@ paths:
                       - Error - Error level and above
                       - Fatal - Only fatal errors
                       - off - Logging is disabled
-                  log_layout:
+                  loggingLayout:
                     description: Defines the pattern of log format.
                     type: string
                     example: 'Date, time, spacing, line number, etc.'
-                  http_logging_enabled:
-                    description: To enable/disable http logging.
+                  httpLoggingEnabled:
+                    description: To enable http request/response logging.
                     type: boolean
-                  jdk_logging_enabled:
+                  disableJdkLogger:
                     description: To enable/disable Jdk logging.
                     type: boolean
-                  oauth_audit_logging_enabled:
+                  enabledOAuthAuditLogging:
                     description: To enable/disable OAuth audit logging.
                     type: boolean
-                  log_templates:
+                  externalLoggerConfiguration:
+                    description: Path to external log4j2 configuration file. 
+                    type: string
+                  httpLoggingExludePaths:
+                    description: List of paths to exclude from logger.
+                    type: array
+                    items: 
+                      type: string
+                    example:
+                      - '/oxauth/img'
+                      - '/oxauth/stylesheet'                        
+                  logTemplates:
                     description: Defines the log template to apply.
                     type: array
                     items:
@@ -9102,10 +9403,7 @@ paths:
                 type: object
                 description: Log configuration.
                 properties:
-                  log_location:
-                    description: External log location.
-                    type: string
-                  log_level:
+                  loggingLevel:
                     description: Allows to filter the category of messages to be logged.
                     type: string
                     enum:
@@ -9116,20 +9414,31 @@ paths:
                       - Error - Error level and above
                       - Fatal - Only fatal errors
                       - off - Logging is disabled
-                  log_layout:
+                  loggingLayout:
                     description: Defines the pattern of log format.
                     type: string
                     example: 'Date, time, spacing, line number, etc.'
-                  http_logging_enabled:
-                    description: To enable/disable http logging.
+                  httpLoggingEnabled:
+                    description: To enable http request/response logging.
                     type: boolean
-                  jdk_logging_enabled:
+                  disableJdkLogger:
                     description: To enable/disable Jdk logging.
                     type: boolean
-                  oauth_audit_logging_enabled:
+                  enabledOAuthAuditLogging:
                     description: To enable/disable OAuth audit logging.
                     type: boolean
-                  log_templates:
+                  externalLoggerConfiguration:
+                    description: Path to external log4j2 configuration file. 
+                    type: string
+                  httpLoggingExludePaths:
+                    description: List of paths to exclude from logger.
+                    type: array
+                    items: 
+                      type: string
+                    example:
+                      - '/oxauth/img'
+                      - '/oxauth/stylesheet'                        
+                  logTemplates:
                     description: Defines the log template to apply.
                     type: array
                     items:
