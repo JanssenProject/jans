@@ -24,9 +24,8 @@ public class ApiConstants {
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
 	public static final String INUM = "inum";
-	
-	
-	public static final String MISSING_INUM_MESSAGE ="The inum property is required.";
+		
+	public static final String MISSING_ATTRIBUTE_MESSAGE ="A required attribute is missing.";
 	
 	
 	
@@ -36,7 +35,7 @@ public class ApiConstants {
 	
 	
 	//Custom CODE
-	public static final String MISSING_INUM_CODE ="OCA001";
+	public static final String MISSING_ATTRIBUTE_CODE ="OCA001";
 	
 
 }

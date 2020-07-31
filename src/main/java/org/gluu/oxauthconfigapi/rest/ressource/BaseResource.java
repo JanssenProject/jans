@@ -29,10 +29,12 @@ public class BaseResource {
 		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
 	}
 
-	protected Response getMissingInumError() {
-		ApiError error = new ApiError(ApiConstants.MISSING_INUM_CODE, ApiConstants.MISSING_INUM_MESSAGE,
-				"The attribute inuml is required from this operation");
-		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+	
+
+	protected Response getMissingAttributeError(String attributeName) {
+		ApiError error = new ApiError(ApiConstants.MISSING_ATTRIBUTE_CODE, ApiConstants.MISSING_ATTRIBUTE_MESSAGE,
+				"The attribute " + attributeName + " is required for this operation");
+		return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
 	}
 
 }

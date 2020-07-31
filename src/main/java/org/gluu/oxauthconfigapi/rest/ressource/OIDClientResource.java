@@ -30,7 +30,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
+import org.gluu.oxtrust.model.OxAuthApplicationType;
 import org.gluu.oxtrust.model.OxAuthClient;
+import org.gluu.oxtrust.model.OxAuthSubjectType;
 import org.gluu.oxtrust.service.ClientService;
 import org.gluu.oxtrust.service.EncryptionService;
 import org.slf4j.Logger;
@@ -102,15 +104,24 @@ public class OIDClientResource extends BaseResource {
 	@Operation(summary = "Create new OpenId connect client")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createOpenIdConnect(@Valid OxAuthClient client) {
 		try {
 			logger.info("OIDClientResource::createOpenIdConnect - Create new openid connect client");
 			String inum = clientService.generateInumForNewClient();
 			client.setInum(inum);
+			if (client.getDisplayName() == null) {
+				return getMissingAttributeError("displayName");
+			}
 			if (client.getOxAuthClientSecret() != null) {
 				client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
+			}
+			if (client.getOxAuthAppType() == null) {
+				client.setOxAuthAppType(OxAuthApplicationType.WEB);
+			}
+			if (client.getSubjectType() == null) {
+				client.setSubjectType(OxAuthSubjectType.PUBLIC);
 			}
 			client.setDn(clientService.getDnForClient(inum));
 			client.setDeletable(client.getExp() != null);
@@ -130,15 +141,19 @@ public class OIDClientResource extends BaseResource {
 	@Operation(summary = "Update OpenId Connect client", description = "Update openidconnect client")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class)), description = "Success"),
+			@APIResponse(responseCode = "400", description = "Bad Request"),
 			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateClient(@Valid OxAuthClient client) {
 		try {
 			logger.info("OIDClientResource::updateOpenIdConnect - Update openid connect client");
 			String inum = client.getInum();
 			if (inum == null) {
-				return getMissingInumError();
+				return getMissingAttributeError("inum");
+			}
+			if (client.getDisplayName() == null) {
+				return getMissingAttributeError("displayName");
 			}
 			OxAuthClient existingClient = clientService.getClientByInum(inum);
 			if (existingClient != null) {
