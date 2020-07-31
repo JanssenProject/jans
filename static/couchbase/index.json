@@ -79,6 +79,9 @@
     "attributes":[
     ],
     "static" : [
+        [["grtId"], "objectClass = \"token\""],
+        [["ssnId"], "objectClass = \"token\""],
+        [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
@@ -88,9 +91,6 @@
       ["oxAuthUserDN"]
     ],
     "static" : [
-      [["grtId"], "objectClass = \"token\""],
-      [["ssnId"], "objectClass = \"token\""],
-      [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
