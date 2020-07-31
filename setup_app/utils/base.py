@@ -44,7 +44,11 @@ with open('/proc/1/status', 'r') as f:
 # Determine os_type and os_version
 os_type, os_version = '', ''
 
-with open("/etc/os-release") as f:
+os_release_fn = '/usr/lib/os-release'
+if not os.path.exists(os_release_fn):
+    os_release_fn = '/etc/os-release'
+
+with open(os_release_fn) as f:
     reader = csv.reader(f, delimiter="=")
     for row in reader:
         if row:
