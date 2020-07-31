@@ -77,20 +77,20 @@
 
   "!bucket_prefix!_cache": {
     "attributes":[
+        ["oxAuthUserDN"]
     ],
     "static" : [
-        [["grtId"], "objectClass = \"token\""],
-        [["ssnId"], "objectClass = \"token\""],
         [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
   "!bucket_prefix!_token": {
     "attributes": [
-      ["authzCode"],
-      ["oxAuthUserDN"]
+      ["authzCode"]
     ],
     "static" : [
+        [["grtId"], "objectClass = \"token\""],
+        [["ssnId"], "objectClass = \"token\""]
     ]
   },
 
