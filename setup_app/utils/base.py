@@ -64,9 +64,6 @@ if not (os_type and os_version):
 os_name = os_type + os_version
 deb_sysd_clone = os_name in ('ubuntu18', 'ubuntu20', 'debian9', 'debian10')
 
-if os_type == 'debian':
-    os.environ['LC_ALL'] = 'C'
-
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora') and os_initdaemon == 'systemd') or deb_sysd_clone:
     service_path = shutil.which('systemctl')
