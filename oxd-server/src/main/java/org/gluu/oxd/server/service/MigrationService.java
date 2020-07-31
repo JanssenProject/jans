@@ -44,7 +44,7 @@ public class MigrationService {
     }
 
     public void migrateChildren(File parentFolder) {
-        final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(parentFolder));
+        final List<File> files = Lists.newArrayList(Files.fileTraverser().breadthFirst(parentFolder));
         for (File file : files) {
             migrateRpFile(file);
         }
