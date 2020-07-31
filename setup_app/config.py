@@ -313,7 +313,7 @@ class Config:
 
                         ('cache',    {   'ldif': [],
                                         'memory_allocation': 300,
-                                        'mapping': 'cache',
+                                        'mapping': 'cache, sessions',
                                         'document_key_prefix': ['cache_'],
                                     }),
 
@@ -325,7 +325,7 @@ class Config:
 
                         ('token',   { 'ldif': [],
                                       'memory_allocation': 300,
-                                      'mapping': 'tokens, sessions',
+                                      'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
                                     }),
 
