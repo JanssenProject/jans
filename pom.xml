@@ -19,7 +19,7 @@
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
-        <guava.version>20.0</guava.version>
+        <guava.version>[24.1.1,)</guava.version>
         <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
         <selenium.version>2.53.1</selenium.version>
     </properties>
