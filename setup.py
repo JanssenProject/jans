@@ -13,6 +13,8 @@ import code
 
 from queue import Queue
 
+os.environ['LC_ALL'] = 'C'
+
 #first import paths and make changes if necassary
 from setup_app import paths
 
