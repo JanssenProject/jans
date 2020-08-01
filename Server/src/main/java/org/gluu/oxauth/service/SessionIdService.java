@@ -669,8 +669,7 @@ public class SessionIdService {
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
 
-                String usePersistInsteadOfMergeEnv = System.getenv("usePersistInsteadOfMerge");
-                boolean usePersistInsteadOfMerge = StringHelper.isNotEmpty(usePersistInsteadOfMergeEnv) && "couchbase".equals(persistenceEntryManager.getPersistenceType(sessionId.getDn()));
+                boolean usePersistInsteadOfMerge = "couchbase".equals(persistenceEntryManager.getPersistenceType(sessionId.getDn()));
                 if (usePersistInsteadOfMerge) {
                     // normally we would like to merge but in CB merge means: get/lookup, compare and then push.
                     // Thus it is optimization which allows us to avoid one get/lookup per merge/modification for Couchbase and perform full replacement.
