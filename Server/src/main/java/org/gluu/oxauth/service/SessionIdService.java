@@ -668,16 +668,7 @@ public class SessionIdService {
         EntryPersistenceException lastException = null;
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
-
-                boolean usePersistInsteadOfMerge = "couchbase".equals(persistenceEntryManager.getPersistenceType(sessionId.getDn()));
-                if (usePersistInsteadOfMerge) {
-                    // normally we would like to merge but in CB merge means: get/lookup, compare and then push.
-                    // Thus it is optimization which allows us to avoid one get/lookup per merge/modification for Couchbase and perform full replacement.
-                    persistenceEntryManager.persist(sessionId);
-                } else {
-                    persistenceEntryManager.merge(sessionId);
-                }
-
+                persistenceEntryManager.merge(sessionId);
                 localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
                 externalEvent(new SessionEvent(SessionEventType.UPDATED, sessionId));
                 return;
