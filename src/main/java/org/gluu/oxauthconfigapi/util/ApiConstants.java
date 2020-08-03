@@ -19,6 +19,7 @@ public class ApiConstants {
 	public static final String DYN_REGISTRATION = "/dyn_registration";
 	public static final String SESSIONID = "/sessionid";
 	public static final String CLIENTS = "/clients";
+	public static final String SCOPES = "/scopes";
 	public static final String INUM_PATH = "{inum}";
 
 	public static final String LIMIT = "limit";

@@ -20,7 +20,7 @@
     "deletable": false,
     "disabled": false,
     "displayName": "QAAddedClient",
-    "descrition":"OpenId Client added by client",
+    "description":"OpenId Client added by client",
     "encodedClientSecret": "+d4yRu09OtNxCT7++E0FAA==",
     "exp": "2120-09-28T23:00:00Z[UTC]",
     "grantTypes": [
