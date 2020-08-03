@@ -21,8 +21,8 @@ Background:
 	backchannelAuthenticationRequestSigningAlgValuesSupported: '##[] #string',
 	backchannelUserCodeParameterSupported: '##boolean',
 	backchannelBindingMessagePattern: '##string',
-	backchannelAuthenticationResponseExpiresIn: '#number? _ >= 1 && _ <= 2147483647',
-	backchannelAuthenticationResponseInterval: '#number? _ >= 1 && _ <= 2147483647',
+	backchannelAuthenticationResponseExpiresIn: '#number? _ >= 1 || _ <= 2147483647',
+	backchannelAuthenticationResponseInterval: '#number? _ >= 1 || _ <= 2147483647',
 	backchannelLoginHintClaims: '##[] #string'
   }
   """
