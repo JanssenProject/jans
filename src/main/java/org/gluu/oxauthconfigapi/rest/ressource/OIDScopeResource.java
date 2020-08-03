@@ -14,6 +14,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -122,6 +123,34 @@ public class OIDScopeResource extends BaseResource {
 			return getInternalServerError(e);
 		}
 
+	}
+
+	@PUT
+	@Operation(summary = "Update existing OpenId Connect Scope")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class)), description = "Success"),
+			@APIResponse(responseCode = "400", description = "Bad Request"),
+			@APIResponse(responseCode = "404", description = "Not Found"),
+			@APIResponse(responseCode = "500", description = "Server Error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response updateOpenIdConnectScope(@Valid Scope scope) {
+		try {
+			String inum = scope.getInum();
+			if (inum == null) {
+				return getResourceNotFoundError();
+			}
+			Scope existingScope = scopeService.getScopeByInum(inum);
+			if (existingScope == null) {
+				return getResourceNotFoundError();
+			}
+			scope.setInum(existingScope.getInum());
+			scope.setBaseDn(scopeService.getDnForScope(inum));
+			scopeService.updateScope(scope);
+			Scope result = scopeService.getScopeByInum(inum);
+			return Response.ok(result).build();
+		} catch (Exception e) {
+			return getInternalServerError(e);
+		}
 	}
 
 	@DELETE
