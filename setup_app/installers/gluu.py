@@ -209,7 +209,7 @@ class GluuInstaller(BaseInstaller, SetupUtils):
                 break
 
         storages = set(Config.mappingLocations.values())
-        
+
         gluu_hybrid_roperties = [
                         'storages: {0}'.format(', '.join(storages)),
                         'storage.default: {0}'.format(default_mapping),
@@ -366,7 +366,15 @@ class GluuInstaller(BaseInstaller, SetupUtils):
             #write post-install.py script
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
             post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
-            post_setup_script = post_setup_script.replace('{{SNAP_NAME}}', os.environ['SNAP_NAME']).replace('{{SNAP_PY3}}', paths.cmd_py3)
+            
+            for key, val in (('{{SNAP_NAME}}', os.environ['SNAP_NAME']),
+                             ('{{SNAP_PY3}}', paths.cmd_py3),
+                             ('{{SNAP}}', base.snap),
+                             ('{{SNAP_COMMON}}', base.snap_common)
+                             ):
+            
+                post_setup_script = post_setup_script.replace(key, val)
+
             post_setup_script_fn = os.path.join(Config.install_dir, 'snap-post-setup.py')
             with open(post_setup_script_fn, 'w') as w:
                 w.write(post_setup_script)
@@ -395,6 +403,8 @@ class GluuInstaller(BaseInstaller, SetupUtils):
                     )
 
             self.restart('yacron')
+
+            self.writeFile(os.path.join(base.snap_common, 'etc/hosts.gluu'), Config.ip + '\t' + Config.hostname)
 
         else:
             if not Config.installed_instance:

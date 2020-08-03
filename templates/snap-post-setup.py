@@ -2,7 +2,28 @@
 
 import os
 
-snap_name = "{{SNAP_NAME}}"
+snap_name = '{{SNAP_NAME}}'
+snap_dir = '{{SNAP}}'
+snap_common_dir = '{{SNAP_COMMON}}'
+
+
+snap_hosts_gluu_fn = os.path.join(snap_common_dir, 'etc/hosts.gluu')
+if os.path.exists(snap_hosts_gluu_fn):
+    with open(snap_hosts_gluu_fn) as f:
+        gluu_ip, gluu_host = f.read().strip().split()
+
+    with open('/etc/hosts') as f:
+        hosts = f.read()
+
+    for l in hosts.splitlines():
+        ls = l.strip().split()
+        if ls and ls[0] == gluu_ip and gluu_host in ls:
+            break
+    else:
+        print("Adding {} to /etc/hosts".format(gluu_host))
+        endl = '' if hosts.endswith('\n') else '\n'
+        with open('/etc/hosts', 'a') as w:
+            w.write('{}{}\t{}\n'.format(endl, gluu_ip, gluu_host))
 
 snap_plugs = ['mount-observe', 'system-observe', 'network-observe']
 
