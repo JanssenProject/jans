@@ -94,9 +94,10 @@
         </classes>
     </test>
 
-    <test name="Additional tests" enabled="false">
+    <test name="Additional tests" enabled="true">
         <classes>
-            <class name="gluu.scim2.client.SampleTest" />
+        	<class name="gluu.scim2.client.multipleresource.UpdatedUsersTest" />
+            <!--class name="gluu.scim2.client.SampleTest" /-->
         </classes>
     </test>
 

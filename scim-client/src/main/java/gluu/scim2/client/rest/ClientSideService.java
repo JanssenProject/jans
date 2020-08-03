@@ -129,4 +129,20 @@ public interface ClientSideService extends ClientSideUserService, ClientSideGrou
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     Response processBulkOperations(String requestJson);
 
+    /**
+     * Obtains user entries that have been updated or added in the local Gluu database after a specified 
+     * timestamp. This is NOT part of SCIM spec. See class org.gluu.oxtrust.ws.rs.scim2.ScimResourcesUpdatedWebService
+     * See the doc <a href="https://www.gluu.org/docs/gluu-server/user-management/idm-sync/">page</a>.
+     * @param isoDate Represents a timestamp in ISO format (eg. 2019-12-24T12:00:03-05:00) 
+     * @param start Integer offset from which results are output
+     * @param itemsPerPage Maximum number of results to retrieve
+     * @return An json object representing the results of the query. See the doc page for more information
+     */    
+    @Path("/scim/UpdatedUsers")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
+    Response usersChangedAfter(@QueryParam("timeStamp") String isoDate,
+                                      @QueryParam("start") int start,
+                                      @QueryParam("pageSize") int itemsPerPage);
+    
 }
