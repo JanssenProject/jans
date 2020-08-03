@@ -1,16 +1,16 @@
 package org.gluu.oxauth.model.common;
 
+import com.google.common.base.Preconditions;
+import org.gluu.util.StringHelper;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.gluu.util.StringHelper;
-
-import com.google.common.base.Preconditions;
-
 /**
  * @author yuriyz
  */
+@Deprecated // scheduled for removing
 public class SessionTokens implements Serializable {
 
     private String sessionDn;
