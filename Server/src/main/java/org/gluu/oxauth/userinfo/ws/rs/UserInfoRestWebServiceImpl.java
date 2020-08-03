@@ -355,7 +355,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (value instanceof Boolean) {
                         jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
                     } else if (value instanceof Date) {
-                        jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime());
+                        jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime() / 1000);
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
                     }
