@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -22,6 +25,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.oxauth.persistence.model.Scope;
 import org.gluu.oxtrust.service.ScopeService;
@@ -61,7 +65,30 @@ public class OIDScopeResource extends BaseResource {
 			}
 			return Response.ok(clients).build();
 		} catch (Exception ex) {
-			logger.error("Failed to openid connects clients", ex);
+			logger.error("Failed to fetch openid connects scopes", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@DELETE
+	@Path(ApiConstants.INUM_PATH)
+	@Operation(summary = "Delete OpenId Connect Scope ", description = "Delete an OpenId Connect Scope")
+	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+		logger.info("OIDScopeResource::deleteScope - Delete OpenID Connect Scope");
+		try {
+			Scope scope = scopeService.getScopeByInum(inum);
+			if (scope != null) {
+				scopeService.removeScope(scope);
+				return Response.noContent().build();
+			} else {
+				return getResourceNotFoundError();
+			}
+		} catch (Exception ex) {
+			logger.error("Failed to delete OpenId Connect scope", ex);
 			return getInternalServerError(ex);
 		}
 	}
