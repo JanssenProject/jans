@@ -67,7 +67,7 @@ Background:
    When method GET
    Then status 200
    Then def first_response = response 
-   Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483647
+   Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483648
    Given url mainUrl
    And  header Authorization = 'Bearer ' + accessToken
    And request first_response
