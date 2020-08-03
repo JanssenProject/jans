@@ -30,6 +30,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
+import org.gluu.oxauthconfigapi.util.AttributeNames;
 import org.gluu.oxtrust.model.OxAuthApplicationType;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.model.OxAuthSubjectType;
@@ -112,7 +113,7 @@ public class OIDClientResource extends BaseResource {
 			String inum = clientService.generateInumForNewClient();
 			client.setInum(inum);
 			if (client.getDisplayName() == null) {
-				return getMissingAttributeError("displayName");
+				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
 			}
 			if (client.getOxAuthClientSecret() != null) {
 				client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));

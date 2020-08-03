@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -24,12 +26,14 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
-import org.oxauth.persistence.model.Scope;
+import org.gluu.oxauthconfigapi.util.AttributeNames;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ScopeService;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
 /**
@@ -56,7 +60,6 @@ public class OIDScopeResource extends BaseResource {
 	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
-			logger.info(getClass().getName() + "::Get list of OpenID Connect scopes");
 			List<Scope> clients = new ArrayList<Scope>();
 			if (!pattern.isEmpty() && pattern.length() >= 2) {
 				clients = scopeService.searchScopes(pattern, limit);
@@ -80,7 +83,6 @@ public class OIDScopeResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdScopeByInum(@PathParam(ApiConstants.INUM) String inum) {
 		try {
-			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Scope by Inum");
 			Scope scope = scopeService.getScopeByInum(inum);
 			if (scope == null) {
 				return getResourceNotFoundError();
@@ -92,6 +94,36 @@ public class OIDScopeResource extends BaseResource {
 		}
 	}
 
+	@POST
+	@Operation(summary = "Create OpenId Connect Scope")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = true))),
+			@APIResponse(responseCode = "500", description = "Internal Server Error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response updateOpenidScope(@Valid Scope scope) {
+		try {
+			if (scope.getId() == null) {
+				return getMissingAttributeError(AttributeNames.ID);
+			}
+			if (scope.getDisplayName() == null) {
+				scope.setDisplayName(scope.getId());
+			}
+			String inum = scopeService.generateInumForNewScope();
+			scope.setInum(inum);
+			scope.setDn(scopeService.getDnForScope(inum));
+			if (scope.getScopeType() == null) {
+				scope.setScopeType(ScopeType.OAUTH);
+			}
+			scopeService.addScope(scope);
+			Scope result = scopeService.getScopeByInum(inum);
+			return Response.status(Response.Status.CREATED).entity(result).build();
+		} catch (Exception e) {
+			logger.error("Failed to create Connect scope", e);
+			return getInternalServerError(e);
+		}
+
+	}
+
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@Operation(summary = "Delete OpenId Connect Scope ", description = "Delete an OpenId Connect Scope")
@@ -100,7 +132,6 @@ public class OIDScopeResource extends BaseResource {
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		logger.info("OIDScopeResource::deleteScope - Delete OpenID Connect Scope");
 		try {
 			Scope scope = scopeService.getScopeByInum(inum);
 			if (scope != null) {

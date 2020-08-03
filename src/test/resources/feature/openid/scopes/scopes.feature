@@ -32,7 +32,7 @@ And assert response.length == 1
 Scenario: Create new OpenId Connect Scope
 Given url openidscopes_url
 And header Authorization = 'Bearer ' + accessToken
-And request read('classpath:add_scope.json')
+And request read('classpath:scope.json')
 When method POST
 Then status 201
 Then def result = response
