@@ -21,11 +21,11 @@ import io.quarkus.arc.AlternativePriority;
 public class ConfigurationFactory extends org.gluu.service.config.ConfigurationFactory<LdapOxTrustConfiguration> {
 
 	@Inject
-	private Logger log;
+	Logger logger;
 
 	@Inject
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+	Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
 	private AppConfiguration appConfiguration;
 
@@ -69,7 +69,7 @@ public class ConfigurationFactory extends org.gluu.service.config.ConfigurationF
 					LdapOxTrustConfiguration.class, returnAttributes);
 			return conf;
 		} catch (BasePersistenceException ex) {
-			log.error("Failed to load configuration from LDAP", ex);
+			logger.error("Failed to load configuration from LDAP", ex);
 		}
 		return null;
 	}

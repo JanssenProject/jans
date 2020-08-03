@@ -77,7 +77,7 @@ public class OxauthConfigApiApplication {
 				.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory
 				.createEntryManager(connectionProperties);
-		logger.info("Created {}: {} with operation service: {}",
+		logger.debug("Created {}: {} with operation service: {}",
 				new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager,
 						persistenceEntryManager.getOperationService() });
 		return persistenceEntryManager;
@@ -120,7 +120,7 @@ public class OxauthConfigApiApplication {
 		closePersistenceEntryManager(oldLdapEntryManager, persistenceEntryManagerName);
 		PersistenceEntryManager ldapEntryManager = instance.get();
 		instance.destroy(ldapEntryManager);
-		logger.info("Recreated instance {}: {} with operation service: {}", persistenceEntryManagerName,
+		logger.debug("Recreated instance {}: {} with operation service: {}", persistenceEntryManagerName,
 				ldapEntryManager, ldapEntryManager.getOperationService());
 	}
 

@@ -30,19 +30,21 @@ And assert response.length == 1
 
 @CreateUpdateDelete
 Scenario: Create new OpenId Connect Scope
-#Given url openidscopes_url
-#And header Authorization = 'Bearer ' + accessToken
-#And request read('classpath:add_scope.json')
-#When method POST
-#Then status 201
-#Then def result = response
-#Then set result.displayName = 'UpdatedQAAdddedScope'
+Given url openidscopes_url
+And header Authorization = 'Bearer ' + accessToken
+And request read('classpath:add_scope.json')
+When method POST
+Then status 201
+Then def result = response
+Then set result.displayName = 'UpdatedQAAddedScope'
+Then def inum_before = result.inum
 Given url openidscopes_url
 And header Authorization = 'Bearer ' + accessToken
 And request result
 When method PUT
 Then status 200
-And assert response.displayName == 'UpdatedQAAdddedScope'
+And assert response.displayName == 'UpdatedQAAddedScope'
+And assert response.inum == inum_before
 Given url openidscopes_url + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
 When method DELETE
@@ -53,3 +55,20 @@ Given url openidscopes_url + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
+
+
+Scenario: Get an openid connect scope by inum(unexisting scope)
+Given url openidscopes_url + '/53553532727272772'
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 404
+
+Scenario: Get an openid connect client by inum
+Given url openidscopes_url
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+Given url openidscopes_url + '/' +response[0].inum
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200

@@ -28,6 +28,7 @@ import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.oxauth.persistence.model.Scope;
+import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ScopeService;
 import org.slf4j.Logger;
 
@@ -55,9 +56,8 @@ public class OIDScopeResource extends BaseResource {
 	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
-			logger.info("OIDScopeResource::getOpenIdConnectScopes - Get list of OpenID connect scopes");
+			logger.info(getClass().getName() + "::Get list of OpenID Connect scopes");
 			List<Scope> clients = new ArrayList<Scope>();
-
 			if (!pattern.isEmpty() && pattern.length() >= 2) {
 				clients = scopeService.searchScopes(pattern, limit);
 			} else {
@@ -66,6 +66,28 @@ public class OIDScopeResource extends BaseResource {
 			return Response.ok(clients).build();
 		} catch (Exception ex) {
 			logger.error("Failed to fetch openid connects scopes", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@GET
+	@Operation(summary = "Get OpenId Connect Scope by Inum")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
+	@Path(ApiConstants.INUM_PATH)
+	public Response getOpenIdScopeByInum(@PathParam(ApiConstants.INUM) String inum) {
+		try {
+			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Scope by Inum");
+			Scope scope = scopeService.getScopeByInum(inum);
+			if (scope == null) {
+				return getResourceNotFoundError();
+			}
+			return Response.ok(scope).build();
+		} catch (Exception ex) {
+			logger.error("Failed to fetch  OpenId Connect Scope " + inum, ex);
 			return getInternalServerError(ex);
 		}
 	}

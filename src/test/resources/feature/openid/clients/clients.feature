@@ -49,17 +49,17 @@ Then status 200
 Scenario: Create new OpenId Connect Client
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
-And request read('classpath:add_client.json')
+And request read('classpath:client.json')
 When method POST
 Then status 201
 Then def result = response
-Then set result.displayName = 'UpdatedQAAdddedClient'
+Then set result.displayName = 'UpdatedQAAddedClient'
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
 And request result
 When method PUT
 Then status 200
-And assert response.displayName == 'UpdatedQAAdddedClient'
+And assert response.displayName == 'UpdatedQAAddedClient'
 Given url openidclients_url + '/' +response.inum
 And header Authorization = 'Bearer ' + accessToken
 When method DELETE
