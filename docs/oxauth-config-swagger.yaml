@@ -30,14 +30,17 @@ tags:
   - name: Configuration – Responses Modes
   - name: Configuration – User Info
   - name: Configuration – UMA
-  - name: Configuration – OAuth2 Discovery
+  - name: Configuration – OpenID Connect (OIDC)
   - name: Configuration – Session ID
   - name: Configuration – Pairwise
   - name: Configuration – Fido2
   - name: Configuration – CIBA
   - name: Configuration – Cors Configuration Filter
   - name: Configuration – Grant Type
-  - name: Configuration – Endpoints 
+  - name: Configuration – Subject Details
+  - name: Configuration – Token
+  - name: Configuration – Server
+  - name: Configuration – Endpoints
   - name: Configuration – SMTP
   - name: Configuration – Library
   - name: Configuration – Logs
@@ -1573,6 +1576,10 @@ paths:
                       type: string
                       description: LDAP custom object class for dynamic registration.
                       minLength: 1
+                    trustedClientEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether a client is trusted and no authorization is required.
+                      default: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1635,6 +1642,10 @@ paths:
                     type: string
                     description: LDAP custom object class for dynamic registration.
                     minLength: 1
+                  trustedClientEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether a client is trusted and no authorization is required.
+                    default: false
       responses:
         '200':
           description: OK
@@ -1703,6 +1714,19 @@ paths:
                         - A256CBC+HS512
                         - A128GCM
                         - A256GCM
+                    persistIdTokenInLdap:
+                      type: boolean
+                      description: Specifies whether to persist id_token into LDAP (otherwise saves into cache).
+                      default: false
+                    idTokenLifetime:
+                      type: integer
+                      description: The lifetime of the ID Token.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 3600
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1765,6 +1789,19 @@ paths:
                       - A256CBC+HS512
                       - A128GCM
                       - A256GCM
+                  persistIdTokenInLdap:
+                    type: boolean
+                    description: Specifies whether to persist id_token into LDAP (otherwise saves into cache).
+                    default: false
+                  idTokenLifetime:
+                    type: integer
+                    description: The lifetime of the ID Token.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
       responses:
         '200':
           description: OK
@@ -3057,11 +3094,11 @@ paths:
       security:
         - oxAuth:
             - write
-  /config/properties/grant-type:
+  /config/properties/grant:
     get:
-      summary: Gets supported oxAuth Grant Type configuration properties.
-      description: Gets supported oxAuth Grant Type configuration properties.
-      operationId: get-properties-grant-type
+      summary: Gets oxAuth Grant configuration properties.
+      description: Gets oxAuth Grant configuration properties.
+      operationId: get-properties-grant
       tags:
         - Configuration – Grant Type
       responses:
@@ -3090,6 +3127,19 @@ paths:
                         - urn:ietf:params:oauth:grant-type:uma-ticket
                         - urn:openid:params:grant-type:ciba
                         - urn:ietf:params:oauth:grant-type:device_code
+                    dynamicGrantTypeDefault:
+                      type: array
+                      description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
+                      items:
+                        type: string
+                      enum:
+                        - authorization_code
+                        - implicit
+                        - password
+                        - client_credentials
+                        - refresh_token
+                        - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+                        - 'urn:openid:params:grant-type:ciba'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3098,9 +3148,9 @@ paths:
         - oxAuth:
             - read
     put:
-      summary: Updates supported oxAuth Grant Type configuration properties.
-      description: Updates supported oxAuth Grant Type configuration properties.
-      operationId: put-properties-grant-type
+      summary: Updates oxAuth Grant configuration properties.
+      description: Updates oxAuth Grant configuration properties.
+      operationId: put-properties-grant
       tags:
         - Configuration – Grant Type
       requestBody:
@@ -3127,6 +3177,19 @@ paths:
                       - urn:ietf:params:oauth:grant-type:uma-ticket
                       - urn:openid:params:grant-type:ciba
                       - urn:ietf:params:oauth:grant-type:device_code
+                  dynamicGrantTypeDefault:
+                    type: array
+                    description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
+                    items:
+                      type: string
+                    enum:
+                      - authorization_code
+                      - implicit
+                      - password
+                      - client_credentials
+                      - refresh_token
+                      - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+                      - 'urn:openid:params:grant-type:ciba'
       responses:
         '200':
           description: OK
@@ -3389,22 +3452,22 @@ paths:
       security:
         - oxAuth:
             - write
-  /config/properties/oauth2:
+  /config/properties/openid:
     get:
-      summary: Gets OAuth2 Discovery configuration properties.
-      description: Gets OAuth2 Discovery configuration properties.
-      operationId: get-properties-oauth2
+      summary: Gets OpenID Connect configuration properties.
+      description: Gets OpenID Connect configuration properties.
+      operationId: get-properties-openid
       tags:
-        - Configuration – OAuth2 Discovery
+        - Configuration – OpenID Connect (OIDC)
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                title: OAuth2 Discovery configuration.
+                title: OpenId configuration.
                 type: object
-                description: OAuth2 Discovery configuration.
+                description: OpenId configuration.
                 required:
                   - issuer
                   - authorizationEndpoint
@@ -3534,6 +3597,79 @@ paths:
                     type: string
                     description: URL for the Introspection Endpoint.
                     example: 'https://server.example.com/oxauth/restv1/introspection'
+                  clientInfoEndpoint:
+                    description: The URL of the Client Info Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  checkSessionIFrame:
+                    type: string
+                    description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
+                    example: 'https://server.example.com/oxauth/opiframe.htm'
+                  endSessionEndpoint:
+                    description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
+                    type: string
+                    format: url
+                    minLength: 1
+                  idGenerationEndpoint:
+                    description: URL for the ID Generation Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  deviceAuthzEndpoint:
+                    description: URL for Device Authorization Endpoint.
+                    type: string
+                    format: url
+                    minLength: 1
+                  introspectionAccessTokenMustHaveUmaProtectionScope:
+                    type: boolean
+                    description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
+                    default: false
+                  displayValuesSupported:
+                    type: array
+                    description: A list of the display parameter values that the OpenID Provider supports.
+                    items:
+                      type: string
+                    enum:
+                      - page
+                      - popup
+                  claimTypesSupported:
+                    type: array
+                    description: A list of the Claim Types that the OpenID Provider supports.
+                    items:
+                      type: string
+                    enum:
+                      - normal
+                  claimsLocalesSupported:
+                    type: array
+                    description: Languages and scripts supported for values in Claims being returned.
+                    items:
+                      type: string
+                    enum:
+                      - en
+                  idTokenTokenBindingCnfValuesSupported:
+                    type: array
+                    description: 'Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.'
+                    items:
+                      type: string
+                    enum:
+                      - tbh
+                  claimsParameterSupported:
+                    type: boolean
+                    description: Specifies whether the OP supports use of the claim’s parameter.
+                    default: false
+                  requestParameterSupported:
+                    type: boolean
+                    description: Boolean value specifying whether the OP supports use of the request parameter.
+                    default: false
+                  requestUriParameterSupported:
+                    type: boolean
+                    description: Boolean value specifying whether the OP supports use of the request_uri parameter.
+                    default: false
+                  requireRequestUriRegistration:
+                    type: boolean
+                    description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
+                    default: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3542,18 +3678,18 @@ paths:
         - oxAuth:
             - read
     put:
-      summary: Updates OAuth2 Discovery configuration properties.
-      description: Updates OAuth2 Discovery configuration properties.
-      operationId: put-properties-oauth2
+      summary: Updates OpenID Connect configuration properties.
+      description: Updates OpenID Connect configuration properties.
+      operationId: put-properties-openid
       tags:
-        - Configuration – OAuth2 Discovery
+        - Configuration – OpenID Connect (OIDC)
       requestBody:
         content:
           application/json:
             schema:
-              title: OAuth2 Discovery configuration.
+              title: OpenId configuration.
               type: object
-              description: OAuth2 Discovery configuration.
+              description: OpenId configuration.
               required:
                 - issuer
                 - authorizationEndpoint
@@ -3683,6 +3819,481 @@ paths:
                   type: string
                   description: URL for the Introspection Endpoint.
                   example: 'https://server.example.com/oxauth/restv1/introspection'
+                clientInfoEndpoint:
+                  description: The URL of the Client Info Endpoint.
+                  type: string
+                  format: url
+                  minLength: 1
+                checkSessionIFrame:
+                  type: string
+                  description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
+                  example: 'https://server.example.com/oxauth/opiframe.htm'
+                endSessionEndpoint:
+                  description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
+                  type: string
+                  format: url
+                  minLength: 1
+                idGenerationEndpoint:
+                  description: URL for the ID Generation Endpoint.
+                  type: string
+                  format: url
+                  minLength: 1
+                deviceAuthzEndpoint:
+                  description: URL for Device Authorization Endpoint.
+                  type: string
+                  format: url
+                  minLength: 1
+                introspectionAccessTokenMustHaveUmaProtectionScope:
+                  type: boolean
+                  description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
+                  default: false
+                displayValuesSupported:
+                  type: array
+                  description: A list of the display parameter values that the OpenID Provider supports.
+                  items:
+                    type: string
+                  enum:
+                    - page
+                    - popup
+                claimTypesSupported:
+                  type: array
+                  description: A list of the Claim Types that the OpenID Provider supports.
+                  items:
+                    type: string
+                  enum:
+                    - normal
+                claimsLocalesSupported:
+                  type: array
+                  description: Languages and scripts supported for values in Claims being returned.
+                  items:
+                    type: string
+                  enum:
+                    - en
+                idTokenTokenBindingCnfValuesSupported:
+                  type: array
+                  description: 'Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens.'
+                  items:
+                    type: string
+                  enum:
+                    - tbh
+                claimsParameterSupported:
+                  type: boolean
+                  description: Specifies whether the OP supports use of the claim’s parameter.
+                  default: false
+                requestParameterSupported:
+                  type: boolean
+                  description: Boolean value specifying whether the OP supports use of the request parameter.
+                  default: false
+                requestUriParameterSupported:
+                  type: boolean
+                  description: Boolean value specifying whether the OP supports use of the request_uri parameter.
+                  default: false
+                requireRequestUriRegistration:
+                  type: boolean
+                  description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
+                  default: false
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/subject:
+    get:
+      summary: Gets Subject configuration properties.
+      description: Gets Subject configuration properties.
+      operationId: get-properties-subject
+      tags:
+        - Configuration – Subject Details
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Subject configuration.
+                type: object
+                description: Subject configuration.
+                properties:
+                  defaultSubjectType:
+                    type: string
+                    description: Default Subject Type used for Dynamic Client Registration.
+                    items:
+                      type: string
+                    enum:
+                      - public
+                      - pairwise
+                  openidSubAttribute:
+                    type: string
+                    description: Specifies which LDAP attribute is used for the subject identifier claim.
+                    example: inum
+                  subjectTypesSupported:
+                    type: array
+                    description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
+                    items:
+                      type: string
+                    enum:
+                      - public
+                      - pairwise
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Subject configuration properties.
+      description: Updates Subject configuration properties.
+      operationId: put-properties-subject
+      tags:
+        - Configuration – Subject Details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Subject configuration.
+              type: object
+              description: Subject configuration.
+              properties:
+                defaultSubjectType:
+                  type: string
+                  description: Default Subject Type used for Dynamic Client Registration.
+                  items:
+                    type: string
+                  enum:
+                    - public
+                    - pairwise
+                openidSubAttribute:
+                  type: string
+                  description: Specifies which LDAP attribute is used for the subject identifier claim.
+                  example: inum
+                subjectTypesSupported:
+                  type: array
+                  description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
+                  items:
+                    type: string
+                  enum:
+                    - public
+                    - pairwise
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/token:
+    get:
+      summary: Gets Token configuration properties.
+      description: Gets Token configuration properties.
+      operationId: get-properties-token
+      tags:
+        - Configuration – Token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Token configuration.
+                type: object
+                description: Token configuration.
+                properties:
+                  persistRefreshTokenInLdap:
+                    type: boolean
+                    description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).
+                    default: true
+                  authorizationCodeLifetime:
+                    type: integer
+                    description: The lifetime of the Authorization Code.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 60
+                  refreshTokenLifetime:
+                    type: integer
+                    description: The lifetime of the Refresh Token.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 14400
+                  accessTokenLifetime:
+                    type: integer
+                    description: The lifetime of the short-lived Access Token.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Token configuration properties.
+      description: Updates Token configuration properties.
+      operationId: put-properties-token
+      tags:
+        - Configuration – Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Token configuration.
+              type: object
+              description: Token configuration.
+              properties:
+                persistRefreshTokenInLdap:
+                  type: boolean
+                  description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).
+                  default: true
+                authorizationCodeLifetime:
+                  type: integer
+                  description: The lifetime of the Authorization Code.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 60
+                refreshTokenLifetime:
+                  type: integer
+                  description: The lifetime of the Refresh Token.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 14400
+                accessTokenLifetime:
+                  type: integer
+                  description: The lifetime of the short-lived Access Token.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 3600
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/server:
+    get:
+      summary: Gets Server's common configuration properties.
+      description: Gets Server's common configuration properties.
+      operationId: get-properties-server
+      tags:
+        - Configuration – Server
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Common configuration.
+                type: object
+                description: Common configuration.
+                properties:
+                  expirationNotificatorEnabled:
+                    type: boolean
+                    description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
+                    default: true
+                  cleanerService:
+                    type: object
+                    description: Server Clean up configuration.
+                    properties:
+                      cleanServiceInterval:
+                        type: integer
+                        description: Time interval for the Clean Service in seconds.
+                        multipleOf: 1
+                        minimum: 1
+                        exclusiveMinimum: false
+                        maximum: 2147483647
+                        exclusiveMaximum: false
+                        example: 60
+                      cleanServiceBaseDns:
+                        type: array
+                        description: List of additional base dns under which AS will look up for expired entities.
+                        items:
+                          type: string
+                        minItems: 0
+                        uniqueItems: true
+                        example:
+                          - ssn
+                      cleanServiceBatchChunkSize:
+                        type: integer
+                        description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
+                        multipleOf: 1
+                        minimum: 1
+                        exclusiveMinimum: false
+                        maximum: 2147483647
+                        exclusiveMaximum: false
+                        example: 10000
+                  keysGenerationConfig:
+                    description: key regeneration details.
+                    type: object
+                    properties:
+                      keyRegenerationEnabled:
+                        type: boolean
+                        description: Boolean value specifying whether to regenerate keys.
+                        default: false
+                      keyRegenerationInterval:
+                        type: integer
+                        description: The interval for key regeneration in hours.
+                        multipleOf: 1
+                        minimum: 1
+                        exclusiveMinimum: false
+                        maximum: 2147483647
+                        exclusiveMaximum: false
+                        example: 48
+                      defaultSignatureAlgorithm:
+                        type: string
+                        description: The default signature algorithm to sign ID Tokens.
+                        items:
+                          type: string
+                        enum:
+                          - HS256
+                          - HS384
+                          - HS512
+                          - RS256
+                          - RS384
+                          - RS512
+                          - ES256
+                          - ES384
+                          - ES512
+                  oxOpenIdConnectVersion:
+                    type: string
+                    description: OpenID Connect Version.
+                    minLength: 1
+                    example: openidconnect-1.0
+                  oxId:
+                    type: string
+                    description: URL for the Inum generator Service.
+                    format: url
+                    minLength: 1
+                    example: 'https://server.example.com/oxid/service/gluu/inum'                                    
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Server's common configuration properties.
+      description: Updates Server's common configuration properties.
+      operationId: put-properties-server
+      tags: 
+        - Configuration – Server
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Common configuration.
+              type: object
+              description: Common configuration.
+              properties:
+                expirationNotificatorEnabled:
+                  type: boolean
+                  description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
+                  default: true
+                cleanerService:
+                  type: object
+                  description: Server Clean up configuration.
+                  properties:
+                    cleanServiceInterval:
+                      type: integer
+                      description: Time interval for the Clean Service in seconds.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 60
+                    cleanServiceBaseDns:
+                      type: array
+                      description: List of additional base dns under which AS will look up for expired entities.
+                      items:
+                        type: string
+                      minItems: 0
+                      uniqueItems: true
+                      example:
+                        - ssn
+                    cleanServiceBatchChunkSize:
+                      type: integer
+                      description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 10000
+                keysGenerationConfig:
+                  description: key regeneration details.
+                  type: object
+                  properties:
+                    keyRegenerationEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to regenerate keys.
+                      default: false
+                    keyRegenerationInterval:
+                      type: integer
+                      description: The interval for key regeneration in hours.
+                      multipleOf: 1
+                      minimum: 1
+                      exclusiveMinimum: false
+                      maximum: 2147483647
+                      exclusiveMaximum: false
+                      example: 48
+                    defaultSignatureAlgorithm:
+                      type: string
+                      description: The default signature algorithm to sign ID Tokens.
+                      items:
+                        type: string
+                      enum:
+                        - HS256
+                        - HS384
+                        - HS512
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                oxOpenIdConnectVersion:
+                  type: string
+                  description: OpenID Connect Version.
+                  minLength: 1
+                  example: openidconnect-1.0
+                oxId:
+                  type: string
+                  description: URL for the Inum generator Service.
+                  format: url
+                  minLength: 1
+                  example: 'https://server.example.com/oxid/service/gluu/inum'
       responses:
         '200':
           description: OK
@@ -9559,7 +10170,7 @@ paths:
                     type: array
                     description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
                     items:
-                      $ref: '#/components/schemas/JsonWebKey'
+                      $ref: '#/components/schemas/JsonWebKey'                      
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
