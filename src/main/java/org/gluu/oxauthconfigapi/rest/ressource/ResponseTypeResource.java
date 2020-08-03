@@ -91,7 +91,7 @@ public class ResponseTypeResource {
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
 			for (Set<org.gluu.oxauthconfigapi.rest.model.ResponseType> types : responseTypeSet) {
-				responseTypes = new HashSet();
+				responseTypes = new HashSet<ResponseType>();
 				for(org.gluu.oxauthconfigapi.rest.model.ResponseType type : types) {
 					ResponseType responseType = ResponseType.fromString(type.getCode());
 					responseTypes.add(responseType);
