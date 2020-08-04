@@ -142,6 +142,7 @@ public class AppConfiguration implements Configuration {
     private Boolean sessionIdPersistOnPromptNone;
     private Boolean sessionIdRequestParameterEnabled = false; // #1195
     private Boolean changeSessionIdOnAuthentication = true;
+    private Boolean sessionIdPersistInCache = false;
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
@@ -306,6 +307,15 @@ public class AppConfiguration implements Configuration {
 
     public void setForceOfflineAccessScopeToEnableRefreshToken(Boolean forceOfflineAccessScopeToEnableRefreshToken) {
         this.forceOfflineAccessScopeToEnableRefreshToken = forceOfflineAccessScopeToEnableRefreshToken;
+    }
+
+    public Boolean getSessionIdPersistInCache() {
+        if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
+        return sessionIdPersistInCache;
+    }
+
+    public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
+        this.sessionIdPersistInCache = sessionIdPersistInCache;
     }
 
     public Boolean getChangeSessionIdOnAuthentication() {

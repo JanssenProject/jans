@@ -43,6 +43,7 @@ import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.search.filter.Filter;
+import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
 import org.gluu.util.StringHelper;
 import org.jetbrains.annotations.Nullable;
@@ -124,6 +125,9 @@ public class SessionIdService {
 
     @Inject
     private LocalCacheService localCacheService;
+
+    @Inject
+    private CacheService cacheService;
 
     private String buildDn(String sessionId) {
         return String.format("oxId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
@@ -553,7 +557,11 @@ public class SessionIdService {
                 sessionId.setExpirationDate(expiration.getFirst());
                 sessionId.setTtl(expiration.getSecond());
                 log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
-                persistenceEntryManager.persist(sessionId);
+                if (appConfiguration.getSessionIdPersistInCache()) {
+                    cacheService.put(expiration.getSecond(), sessionId.getDn(), sessionId);
+                } else {
+                    persistenceEntryManager.persist(sessionId);
+                }
                 localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
                 return true;
             }
@@ -668,7 +676,11 @@ public class SessionIdService {
         EntryPersistenceException lastException = null;
         for (int i = 1; i <= MAX_MERGE_ATTEMPTS; i++) {
             try {
-                persistenceEntryManager.merge(sessionId);
+                if (appConfiguration.getSessionIdPersistInCache()) {
+                    cacheService.put(expiration.getSecond(), sessionId.getDn(), sessionId);
+                } else {
+                    persistenceEntryManager.merge(sessionId);
+                }
                 localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
                 externalEvent(new SessionEvent(SessionEventType.UPDATED, sessionId));
                 return;
@@ -725,7 +737,12 @@ public class SessionIdService {
         }
 
         try {
-            final SessionId sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            final SessionId sessionId;
+            if (appConfiguration.getSessionIdPersistInCache()) {
+                sessionId = (SessionId) cacheService.get(dn);
+            } else {
+                sessionId = persistenceEntryManager.find(SessionId.class, dn);
+            }
             localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
             return sessionId;
         } catch (Exception e) {
@@ -774,7 +791,11 @@ public class SessionIdService {
 
     public boolean remove(SessionId sessionId) {
         try {
-            persistenceEntryManager.remove(sessionId.getDn());
+            if (appConfiguration.getSessionIdPersistInCache()) {
+                cacheService.remove(sessionId.getDn());
+            } else {
+                persistenceEntryManager.remove(sessionId.getDn());
+            }
             localCacheService.remove(sessionId.getDn());
             externalEvent(new SessionEvent(SessionEventType.GONE, sessionId));
             return true;
@@ -885,6 +906,9 @@ public class SessionIdService {
     }
 
     public List<SessionId> findByUser(String userDn) {
+        if (appConfiguration.getSessionIdPersistInCache()) {
+            throw new UnsupportedOperationException("Operation is not supported with sessionIdPersistInCache=true. Set it to false to avoid this exception.");
+        }
         Filter filter = Filter.createEqualityFilter("oxAuthUserDN", userDn);
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
     }
