@@ -13482,13 +13482,13 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/openid/sectoridentifier:
+  /oauth/openid/sectors:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Gets list of OpenID Connect Sector Identifiers.
       description: Gets list of OpenID Connect Sector Identifiers.
-      operationId: get-oauth-openid-sectoridentifier
+      operationId: get-oauth-openid-sectors
       responses:
         '200':
           description: OK
@@ -13533,7 +13533,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Adds an OpenID Connect Sector Identifier.
       description: Adds an OpenID Connect Sector Identifier.
-      operationId: post-oauth-openid-sectoridentifier
+      operationId: post-oauth-openid-sectors
       requestBody:
         content:
           application/json:
@@ -13575,7 +13575,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Updates an OpenID Connect Sector Identifier.
       description: Updates an OpenID Connect Sector Identifier.
-      operationId: put-oauth-openid-sectoridentifier
+      operationId: put-oauth-openid-sectors
       requestBody:
         content:
           application/json:
@@ -13614,7 +13614,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/openid/sectoridentifier/{id}':
+  '/oauth/openid/sectors/{id}':
     parameters:
       - name: id
         in: path
@@ -13627,7 +13627,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Gets an OpenID Connect Sector Identifier with specified id.
       description: Gets an OpenID Connect Sector Identifier with specified id.
-      operationId: get-oauth-openid-sectoridentifier-by-id
+      operationId: get-oauth-openid-sectors-by-id
       responses:
         '200':
           description: OK
@@ -13670,7 +13670,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Deletes an OpenID Connect Sector Identifier with specified id.
       description: Deletes an OpenID Connect Sector Identifier with specified id.
-      operationId: delete-oauth-openid-sectoridentifier-by-id
+      operationId: delete-oauth-openid-sectors-by-id
       responses:
         '200':
           description: OK
@@ -13683,7 +13683,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/openid/sectoridentifier/search:
+  /oauth/openid/sectors/search:
     parameters:
       - name: pattern
         in: query
@@ -13702,7 +13702,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Searches OpenID Sector Identifiers by pattern.
       description: Searches OpenID Sector Identifiers by pattern.
-      operationId: get-oauth-openid-sectoridentifier-search-by-pattern
+      operationId: get-oauth-openid-sectors-search-by-pattern
       responses:
         '200':
           description: OK
