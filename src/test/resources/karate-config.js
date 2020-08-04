@@ -41,8 +41,11 @@ function() {
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
-	 // OpenIdConnect Clients Endpoint
+	    // OpenIdConnect Scopes Endpoint
 	    openidscopes_url: baseUrl + ':' + port + '/api/v1/oxauth/scopes',
+	    
+	    // OpenIdConnect Sectors Endpoint
+	    openidsectors_url: baseUrl + ':' + port + '/api/v1/oxauth/openid/sectoridentifiers',
 	    
 	    };
 

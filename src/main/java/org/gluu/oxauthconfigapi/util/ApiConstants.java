@@ -19,24 +19,18 @@ public class ApiConstants {
 	public static final String DYN_REGISTRATION = "/dyn_registration";
 	public static final String SESSIONID = "/sessionid";
 	public static final String CLIENTS = "/clients";
+	public static final String OPENID = "/openid";
 	public static final String SCOPES = "/scopes";
+	public static final String SECTORS = "/sectoridentifiers";
 	public static final String INUM_PATH = "{inum}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
 	public static final String INUM = "inum";
-		
-	public static final String MISSING_ATTRIBUTE_MESSAGE ="A required attribute is missing.";
-	
-	
-	
-	
-	
-	
-	
-	
-	//Custom CODE
-	public static final String MISSING_ATTRIBUTE_CODE ="OCA001";
-	
+
+	public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
+
+	// Custom CODE
+	public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
 
 }

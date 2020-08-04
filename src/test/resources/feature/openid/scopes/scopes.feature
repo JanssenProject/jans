@@ -1,4 +1,4 @@
-Feature: Openid connect clients
+Feature: Openid connect Scopes
 
 Scenario: Fetch all openid connect scopes without bearer token
 Given url openidscopes_url

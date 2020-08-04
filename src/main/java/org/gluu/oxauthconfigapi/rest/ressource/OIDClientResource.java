@@ -59,13 +59,12 @@ public class OIDClientResource extends BaseResource {
 	@GET
 	@Operation(summary = "Get list of OpenID Connect clients")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient[].class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
-			logger.info("OIDClientResource::getOpenIdConnectClients - Get list of OpenID connect clients");
 			List<OxAuthClient> clients = new ArrayList<OxAuthClient>();
 			if (!pattern.isEmpty() && pattern.length() >= 2) {
 				clients = clientService.searchClients(pattern, limit);
@@ -89,7 +88,6 @@ public class OIDClientResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) String inum) {
 		try {
-			logger.info("OIDClientResource::getOpenIdClientByInum - Get OpenId Connect Client by Inum");
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client == null) {
 				return getResourceNotFoundError();
@@ -109,7 +107,6 @@ public class OIDClientResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createOpenIdConnect(@Valid OxAuthClient client) {
 		try {
-			logger.info("OIDClientResource::createOpenIdConnect - Create new openid connect client");
 			String inum = clientService.generateInumForNewClient();
 			client.setInum(inum);
 			if (client.getDisplayName() == null) {
@@ -148,13 +145,12 @@ public class OIDClientResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateClient(@Valid OxAuthClient client) {
 		try {
-			logger.info("OIDClientResource::updateOpenIdConnect - Update openid connect client");
 			String inum = client.getInum();
 			if (inum == null) {
-				return getMissingAttributeError("inum");
+				return getMissingAttributeError(AttributeNames.INUM);
 			}
 			if (client.getDisplayName() == null) {
-				return getMissingAttributeError("displayName");
+				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
 			}
 			OxAuthClient existingClient = clientService.getClientByInum(inum);
 			if (existingClient != null) {
@@ -187,7 +183,6 @@ public class OIDClientResource extends BaseResource {
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		logger.info("OIDClientResource::deleteOpenIdConnect - Delete OpenID Connect client");
 		try {
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client != null) {
