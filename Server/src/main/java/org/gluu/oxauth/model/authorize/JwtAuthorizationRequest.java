@@ -418,7 +418,8 @@ public class JwtAuthorizationRequest {
     }
 
     @Nullable
-    private static String queryRequest(@Nullable String requestUri, @Nullable RedirectUriResponse redirectUriResponse) {
+    private static String queryRequest(@Nullable String requestUri, @Nullable RedirectUriResponse redirectUriResponse,
+                                       AppConfiguration appConfiguration) {
         if (StringUtils.isBlank(requestUri)) {
             return null;
         }
@@ -438,7 +439,7 @@ public class JwtAuthorizationRequest {
             if (status == 200) {
                 request = clientResponse.getEntity(String.class);
 
-                if (StringUtils.isBlank(reqUriHash)) {
+                if (StringUtils.isBlank(reqUriHash) || !appConfiguration.getRequestUriHashVerificationEnabled()) {
                     validRequestUri = true;
                 } else {
                     String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
@@ -459,7 +460,7 @@ public class JwtAuthorizationRequest {
     }
 
     public static JwtAuthorizationRequest createJwtRequest(String request, String requestUri, Client client, RedirectUriResponse redirectUriResponse, AbstractCryptoProvider cryptoProvider, AppConfiguration appConfiguration) {
-        final String requestFromClient = queryRequest(requestUri, redirectUriResponse);
+        final String requestFromClient = queryRequest(requestUri, redirectUriResponse, appConfiguration);
         if (StringUtils.isNotBlank(requestFromClient)) {
             request = requestFromClient;
         }
