@@ -47,7 +47,12 @@ function() {
 	    // OpenIdConnect Sectors Endpoint
 	    openidsectors_url: baseUrl + ':' + port + '/api/v1/oxauth/openid/sectoridentifiers',
 	    
+	    // Uma scope
+	    umascopes_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/scopes',
+	    
 	    };
+    
+    
 
     
     karate.configure('connectTimeout', 30000);

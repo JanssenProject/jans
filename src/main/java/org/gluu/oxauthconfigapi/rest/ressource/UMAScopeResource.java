@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -29,11 +28,9 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
-import org.gluu.oxtrust.model.OxAuthClient;
-import org.gluu.oxtrust.service.ScopeService;
+import org.gluu.oxtrust.service.uma.UmaScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
@@ -42,137 +39,135 @@ import org.slf4j.Logger;
  *
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.SCOPES)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.SCOPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class OIDScopeResource extends BaseResource {
+public class UMAScopeResource extends BaseResource {
+
 	@Inject
 	Logger logger;
 
 	@Inject
-	ScopeService scopeService;
+	UmaScopeService umaScopeService;
 
 	@GET
-	@Operation(summary = "List of OpenID Connect Scopes")
+	@Operation(summary = "List of Uma Scopes")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope[].class, required = false))),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
+	public Response getAllUmaScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		try {
 			List<Scope> scopes = new ArrayList<Scope>();
-			if (!pattern.isEmpty() && pattern.length() >= 2) {
-				scopes = scopeService.searchScopes(pattern, limit);
+			if (!pattern.isEmpty()) {
+				scopes = umaScopeService.findUmaScopes(pattern, limit);
 			} else {
-				scopes = scopeService.getAllScopesList(limit);
+				scopes = umaScopeService.getAllUmaScopes(limit);
 			}
 			return Response.ok(scopes).build();
-		} catch (Exception ex) {
-			logger.error("Failed to fetch openid connects scopes", ex);
-			return getInternalServerError(ex);
+		} catch (Exception e) {
+			logger.info("Failed to fetch Uma Scopes");
+			return getInternalServerError(e);
 		}
 	}
 
 	@GET
-	@Operation(summary = "Get OpenId Connect Scope by Inum")
+	@Path(ApiConstants.INUM_PATH)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
+			@APIResponse(responseCode = "404", description = "Resource Not Found"),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
-	@Path(ApiConstants.INUM_PATH)
-	public Response getOpenIdScopeByInum(@PathParam(ApiConstants.INUM) String inum) {
+	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) String inum) {
 		try {
-			Scope scope = scopeService.getScopeByInum(inum);
+			Scope scope = umaScopeService.getUmaScopeByInum(inum);
 			if (scope == null) {
 				return getResourceNotFoundError();
 			}
 			return Response.ok(scope).build();
-		} catch (Exception ex) {
-			logger.error("Failed to fetch  OpenId Connect Scope " + inum, ex);
-			return getInternalServerError(ex);
+		} catch (Exception e) {
+			logger.error("Failed to retrieve uma scope", e);
+			return getInternalServerError(e);
 		}
 	}
 
 	@POST
-	@Operation(summary = "Create OpenId Connect Scope")
+	@Operation(summary = "Create Uma Scope")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = true))),
 			@APIResponse(responseCode = "500", description = "Internal Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createOpenidScope(@Valid Scope scope) {
+	public Response createUmaScope(@Valid Scope scope) {
 		try {
 			if (scope.getId() == null) {
 				return getMissingAttributeError(AttributeNames.ID);
 			}
 			if (scope.getDisplayName() == null) {
-				scope.setDisplayName(scope.getId());
+				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
 			}
-			String inum = scopeService.generateInumForNewScope();
+			String inum = umaScopeService.generateInumForNewScope();
 			scope.setInum(inum);
-			scope.setDn(scopeService.getDnForScope(inum));
+			scope.setDn(umaScopeService.getDnForScope(inum));
 			if (scope.getScopeType() == null) {
 				scope.setScopeType(ScopeType.OAUTH);
 			}
-			scopeService.addScope(scope);
-			Scope result = scopeService.getScopeByInum(inum);
+			umaScopeService.addUmaScope(scope);
+			Scope result = umaScopeService.getUmaScopeByInum(inum);
 			return Response.status(Response.Status.CREATED).entity(result).build();
 		} catch (Exception e) {
-			logger.error("Failed to create Connect scope", e);
+			logger.error("Failed to create uma scope", e);
 			return getInternalServerError(e);
 		}
 
 	}
 
 	@PUT
-	@Operation(summary = "Update existing OpenId Connect Scope")
+	@Operation(summary = "Update existing Uma Scope")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class)), description = "Success"),
 			@APIResponse(responseCode = "400", description = "Bad Request"),
 			@APIResponse(responseCode = "404", description = "Not Found"),
 			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateOpenIdConnectScope(@Valid Scope scope) {
+	public Response updateUmaScope(@Valid Scope scope) {
 		try {
 			String inum = scope.getInum();
 			if (inum == null) {
 				return getResourceNotFoundError();
 			}
-			Scope existingScope = scopeService.getScopeByInum(inum);
+			Scope existingScope = umaScopeService.getUmaScopeByInum(inum);
 			if (existingScope == null) {
 				return getResourceNotFoundError();
 			}
 			scope.setInum(existingScope.getInum());
-			scope.setBaseDn(scopeService.getDnForScope(inum));
-			scopeService.updateScope(scope);
-			Scope result = scopeService.getScopeByInum(inum);
+			scope.setBaseDn(umaScopeService.getDnForScope(inum));
+			umaScopeService.updateUmaScope(scope);
+			Scope result = umaScopeService.getUmaScopeByInum(inum);
 			return Response.ok(result).build();
 		} catch (Exception e) {
+			logger.error("Failed to update uma scope", e);
 			return getInternalServerError(e);
 		}
 	}
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@Operation(summary = "Delete OpenId Connect Scope ", description = "Delete an OpenId Connect Scope")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+	@APIResponses(value = {
+			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
+			@APIResponse(responseCode = "404", description = "Resource Not Found"),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
+	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) String inum) {
 		try {
-			Scope scope = scopeService.getScopeByInum(inum);
-			if (scope != null) {
-				scopeService.removeScope(scope);
-				return Response.noContent().build();
-			} else {
+			Scope scope = umaScopeService.getUmaScopeByInum(inum);
+			if (scope == null) {
 				return getResourceNotFoundError();
 			}
-		} catch (Exception ex) {
-			logger.error("Failed to delete OpenId Connect scope", ex);
-			return getInternalServerError(ex);
+			umaScopeService.removeUmaScope(scope);
+			return Response.status(Response.Status.NO_CONTENT).build();
+		} catch (Exception e) {
+			return getInternalServerError(e);
 		}
 	}
-
 }
