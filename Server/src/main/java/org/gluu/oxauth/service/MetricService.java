@@ -12,6 +12,7 @@ import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.ConfigurationService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.metric.inject.ReportMetric;
+import org.gluu.service.net.NetworkService;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 
 import javax.ejb.DependsOn;
@@ -45,6 +46,9 @@ public class MetricService extends org.gluu.service.metric.MetricService {
 
 	@Inject
     private StaticConfiguration staticConfiguration;
+
+	@Inject
+    private NetworkService networkService;
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
@@ -82,5 +86,10 @@ public class MetricService extends org.gluu.service.metric.MetricService {
     public PersistenceEntryManager getEntryManager() {
         return ldapEntryManager;
     }
+
+	@Override
+	public String getNodeIndetifier() {
+		return networkService.getMacAdress();
+	}
 
 }
