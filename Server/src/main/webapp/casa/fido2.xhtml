@@ -42,21 +42,30 @@
 					console.error('Authentication failed', err);
 
 					if (err.name === 'InvalidStateError') {
-						addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+						addMessage('#{msgs['casa.fido2.invalid_state_error']}');
 					} else if (err.name === 'AbortError') {
-						addMessage('This operation is canceled by user.');
-					} else if (err.message) {
-						addMessage(err.name + ': ' + err.message);
-					} else if (err.messages) {
-						addMessages(err.messages);
+						addMessage('#{msgs['casa.fido2.abort_error']}');
+					} else {
+						addMessage('#{msgs['casa.fido2.generic_error']}');
+						
+						if (err.message) {
+							console.log(err.name + ': ' + err.message);
+						} else if (err.messages) {
+							console.log(err.messages);
+						}
 					}
 
 					return false;
 				});
 			}
+			function retry() {
+				$("#messages").children().remove()
+				startAssertion()
+			}
 			window.onload = function() {
 				if (assertion_request != null) {
-					setTimeout(startAssertion(), 1000);
+					setTimeout(startAssertion(), 1000)
+					$("#retry").show()
 				}
 			}
 
@@ -69,7 +78,7 @@
 
 		<section class="pa4 shadow-4 bg-blank gray cust-section" id="fido2_section">
 			<h2 class="f3 dark-blue2">#{msgs['casa.snd_step']}</h2>
-			<div id="messages" class="list dark-red tc pv2 ph0 ma0 f5" />
+			<div id="messages" class="list dark-red pv2 ph0 ma0 f7-cust mw5" />
 			
 			<div class="flex flex-column items-center pa3">
 				<p class="f4 tc">#{msgs['casa.securitykey.insert']}</p>
@@ -77,7 +86,11 @@
 				<div class="db w5 tc f7-cust pv3">#{msgs['casa.securitykey.tap']}</div>
 			</div>
 
-			<a href="javascript:showAlternative('fido2_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
+			<div class="flex justify-between f7-cust">
+				<a href="javascript:showAlternative('fido2_section')" class="green hover-green">#{msgs['casa.alternative']}</a>
+
+				<a id="retry" href="javascript:retry()" class="green hover-green f7-cust pl3 dn">#{msgs['casa.fido2.retry_key']}</a>
+			</div>
 		</section>
 		<ui:include src="/casa/casa.xhtml" />
 	</ui:define>
