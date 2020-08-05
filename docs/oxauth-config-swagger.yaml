@@ -40,6 +40,14 @@ tags:
   - name: Configuration – Subject Details
   - name: Configuration – Token
   - name: Configuration – Server
+  - name: Configuration – Server Clean up
+  - name: Configuration – Key Regeneration
+  - name: Configuration – Expiration Notificator
+  - name: Configuration – Crypto Provider
+  - name: Configuration – Metric
+  - name: Configuration – User Management
+  - name: Configuration – Application Audit Logger
+  - name: Configuration – Authentication Protection Configuration
   - name: Configuration – Endpoints
   - name: Configuration – SMTP
   - name: Configuration – Library
@@ -946,7 +954,14 @@ paths:
                     loggingLevel:
                       type: string
                       description: Logging level for oxAuth logger.
-                      format: enum - TRACE - DEBUG - INFO - WARN - ERROR - FATAL - OFF
+                      enum:
+                        - TRACE
+                        - DEBUG
+                        - INFO
+                        - WARN
+                        - ERROR
+                        - FATAL
+                        - OFF
                     corsConfigurationFilters:
                       type: array
                       description: CORS Configuration filters.
@@ -1039,7 +1054,7 @@ paths:
                       example: /identity/logviewer/configure
                     disableU2fEndpoint:
                       type: boolean
-                      description: Path to external log4j2 logging configuration.
+                      description: Enable/Disable U2F endpoints.
                       default: false
                     disableJdkLogger:
                       type: boolean
@@ -1053,7 +1068,7 @@ paths:
                       type: string
                       description: JMS Password.
                       minLength: 1
-                    jmsBrokerURISetjmsBrokerURISet:
+                    jmsBrokerURISet:
                       type: array
                       description: JMS Broker URI Set.
                       format: select
@@ -1116,7 +1131,18 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
-                      format: select - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512 - RSA1_5 - RSA-OAEP
+                      enum:
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                        - RSA1_5
+                        - RSA-OAEP
                     dynamicRegistrationPasswordGrantTypeEnabled:
                       type: boolean
                       description: Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
@@ -1161,7 +1187,10 @@ paths:
                       description: Sets cookie domain for all cookies created by OP.
                     loggingLayout:
                       type: string
-                      description: Sets the layout of logging.
+                      description: Logging layout used for oxAuth loggers.
+                      enum:
+                      - text
+                      - json
                     fapiCompatibility:
                       type: boolean
                       description: Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
@@ -1412,6 +1441,12 @@ paths:
                       uniqueItems: true
                       items:
                         type: string
+                    backchannelRequestsProcessorJobIntervalSec:
+                      type: integer
+                      description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
+                    backchannelRequestsProcessorJobChunkSize:
+                      type: integer
+                      description: Each backchannel request processor iteration fetches chunk of data to be processed.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1508,6 +1543,12 @@ paths:
                     uniqueItems: true
                     items:
                       type: string
+                  backchannelRequestsProcessorJobIntervalSec:
+                    type: integer
+                    description: Specifies the allowable elapsed time in seconds backchannel request processor executes.
+                  backchannelRequestsProcessorJobChunkSize:
+                    type: integer
+                    description: Each backchannel request processor iteration fetches chunk of data to be processed.
       responses:
         '200':
           description: OK
@@ -1580,6 +1621,10 @@ paths:
                       type: boolean
                       description: Boolean value specifying whether a client is trusted and no authorization is required.
                       default: false
+                    returnClientSecretOnRead:
+                      type: boolean
+                      description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.
+                      default: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1645,6 +1690,10 @@ paths:
                   trustedClientEnabled:
                     type: boolean
                     description: Boolean value specifying whether a client is trusted and no authorization is required.
+                    default: false
+                  returnClientSecretOnRead:
+                    type: boolean
+                    description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.
                     default: false
       responses:
         '200':
@@ -1851,6 +1900,10 @@ paths:
                       type: string
                       description: URL for the oxEleven JWKS Endpoint.
                       example: null
+                    oxElevenTestModeToken:
+                      type: string
+                      description: oxEleven Test Mode Token.
+                      minLength: 1
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1894,6 +1947,10 @@ paths:
                     type: string
                     description: URL for the oxEleven JWKS Endpoint.
                     example: null
+                  oxElevenTestModeToken:
+                    type: string
+                    description: oxEleven Test Mode Token.
+                    minLength: 1
       responses:
         '200':
           description: OK
@@ -3474,6 +3531,11 @@ paths:
                   - tokenEndpoint
                   - responseTypesSupported
                 properties:
+                  oxOpenIdConnectVersion:
+                    type: string
+                    description: OpenID Connect Version.
+                    minLength: 1
+                    example: openidconnect-1.0
                   issuer:
                     type: string
                     description: URL using the https scheme that OP asserts as Issuer identifier.
@@ -3670,6 +3732,99 @@ paths:
                     type: boolean
                     description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
                     default: false
+                  forceIdTokenHintPrecense:
+                    type: boolean
+                    description: Boolean value specifying whether force id_token_hint parameter presence (false by default).
+                    default: false
+                  forceOfflineAccessScopeToEnableRefreshToken:
+                    type: boolean
+                    description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true.
+                    default: true
+                  allowPostLogoutRedirectWithoutValidation:
+                    type: boolean
+                    description: Allows post logout redirect without validation for End Session Endpoint.
+                    default: false
+                  removeRefreshTokensForClientOnLogout:
+                    type: boolean
+                    description: Boolean value specifying whether to remove refresh tokens on logout. Default value is true.
+                    default: true
+                  spontaneousScopeLifetime:
+                    type: integer
+                    description: The lifetime of spontaneous scope in seconds.
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  endSessionWithAccessToken:
+                    type: boolean
+                    description: Accept access token to call end_session endpoint.
+                  clientWhiteList:
+                    type: array
+                    description: White List for Client Redirection URIs.
+                    uniqueItems: true
+                    minItems: 0
+                    items:
+                      type: string
+                  clientBlackList:
+                    type: array
+                    description: Black List for Client Redirection URIs.
+                    uniqueItems: true
+                    minItems: 0
+                    items:
+                      type: string
+                  legacyIdTokenClaims:
+                    type: boolean
+                    description: Include Claims in ID Token.
+                  customHeadersWithAuthorizationResponse:
+                    type: boolean
+                    description: Boolean value specifying whether to enable Custom Response Header parameter to return custom headers with the Authorization Response.
+                  frontChannelLogoutSessionSupported:
+                    type: boolean
+                    description: Boolean value to specify support for front channel logout session.
+                  useCacheForAllImplicitFlowObjects:
+                    type: boolean
+                    description: Boolean value to specify whether to persist all objects into cache during Implicit Flow.
+                    default: false
+                  invalidateSessionCookiesAfterAuthorizationFlow:
+                    type: boolean
+                    description: Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.
+                    default: false
+                  openidScopeBackwardCompatibility:
+                    type: boolean
+                    description: 'Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.'
+                    default: false
+                  skipAuthorizationForOpenIdScopeAndPairwiseId:
+                    type: boolean
+                    description: 'If a client has only openid scope and pairwise id, person should not have to authorize.'
+                    default: false
+                  keepAuthenticatorAttributesOnAcrChange:
+                    type: boolean
+                    description: Boolean value specifying whether to keep authenticator attributes on ACR change.
+                    default: false
+                  deviceAuthzRequestExpiresIn:
+                    description: Expiration time given for device authorization requests.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  deviceAuthzTokenPollInterval:
+                    description: Default interval returned to the client to process device token requests.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 3600
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  deviceAuthzResponseTypeToProcessAuthz:
+                    description: Response type used to process device authz requests
+                    type: string
+                    minLength: 0
+                  cookieDomain:
+                    type: string
+                    description: Sets cookie domain for all cookies created by OP.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3696,6 +3851,11 @@ paths:
                 - tokenEndpoint
                 - responseTypesSupported
               properties:
+                oxOpenIdConnectVersion:
+                  type: string
+                  description: OpenID Connect Version.
+                  minLength: 1
+                  example: openidconnect-1.0
                 issuer:
                   type: string
                   description: URL using the https scheme that OP asserts as Issuer identifier.
@@ -3892,6 +4052,99 @@ paths:
                   type: boolean
                   description: Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter.
                   default: false
+                forceIdTokenHintPrecense:
+                  type: boolean
+                  description: Boolean value specifying whether force id_token_hint parameter presence (false by default).
+                  default: false
+                forceOfflineAccessScopeToEnableRefreshToken:
+                  type: boolean
+                  description: Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true.
+                  default: true
+                allowPostLogoutRedirectWithoutValidation:
+                  type: boolean
+                  description: Allows post logout redirect without validation for End Session Endpoint.
+                  default: false
+                removeRefreshTokensForClientOnLogout:
+                  type: boolean
+                  description: Boolean value specifying whether to remove refresh tokens on logout. Default value is true.
+                  default: true
+                spontaneousScopeLifetime:
+                  type: integer
+                  description: The lifetime of spontaneous scope in seconds.
+                  multipleOf: 1
+                  minimum: 1
+                  maximum: 2147483647
+                  exclusiveMinimum: false
+                  exclusiveMaximum: false
+                endSessionWithAccessToken:
+                  type: boolean
+                  description: Accept access token to call end_session endpoint.
+                clientWhiteList:
+                  type: array
+                  description: White List for Client Redirection URIs.
+                  uniqueItems: true
+                  minItems: 0
+                  items:
+                    type: string
+                clientBlackList:
+                  type: array
+                  description: Black List for Client Redirection URIs.
+                  uniqueItems: true
+                  minItems: 0
+                  items:
+                    type: string
+                legacyIdTokenClaims:
+                  type: boolean
+                  description: Include Claims in ID Token.
+                customHeadersWithAuthorizationResponse:
+                  type: boolean
+                  description: Boolean value specifying whether to enable Custom Response Header parameter to return custom headers with the Authorization Response.
+                frontChannelLogoutSessionSupported:
+                  type: boolean
+                  description: Boolean value to specify support for front channel logout session.
+                useCacheForAllImplicitFlowObjects:
+                  type: boolean
+                  description: Boolean value to specify whether to persist all objects into cache during Implicit Flow.
+                  default: false
+                invalidateSessionCookiesAfterAuthorizationFlow:
+                  type: boolean
+                  description: Boolean value to specify whether to invalidate `session_id` and `consent_session_id` cookies right after successful or unsuccessful authorization.
+                  default: false
+                openidScopeBackwardCompatibility:
+                  type: boolean
+                  description: 'Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.'
+                  default: false
+                skipAuthorizationForOpenIdScopeAndPairwiseId:
+                  type: boolean
+                  description: 'If a client has only openid scope and pairwise id, person should not have to authorize.'
+                  default: false
+                keepAuthenticatorAttributesOnAcrChange:
+                  type: boolean
+                  description: Boolean value specifying whether to keep authenticator attributes on ACR change.
+                  default: false
+                deviceAuthzRequestExpiresIn:
+                  description: Expiration time given for device authorization requests.
+                  type: integer
+                  multipleOf: 1
+                  maximum: 2147483647
+                  minimum: 1
+                  exclusiveMaximum: false
+                  exclusiveMinimum: false
+                deviceAuthzTokenPollInterval:
+                  description: Default interval returned to the client to process device token requests.
+                  type: integer
+                  multipleOf: 1
+                  maximum: 3600
+                  minimum: 1
+                  exclusiveMaximum: false
+                  exclusiveMinimum: false
+                deviceAuthzResponseTypeToProcessAuthz:
+                  description: Response type used to process device authz requests
+                  type: string
+                  minLength: 0
+                cookieDomain:
+                  type: string
+                  description: Sets cookie domain for all cookies created by OP.
       responses:
         '200':
           description: OK
@@ -3939,6 +4192,10 @@ paths:
                     enum:
                       - public
                       - pairwise
+                  shareSubjectIdBetweenClientsWithSameSectorId:
+                    type: boolean
+                    description: Share Subject ID between clients with same Sector ID.
+                    default: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3980,6 +4237,10 @@ paths:
                   enum:
                     - public
                     - pairwise
+                shareSubjectIdBetweenClientsWithSameSectorId:
+                  type: boolean
+                  description: Share Subject ID between clients with same Sector ID.
+                  default: false
       responses:
         '200':
           description: OK
@@ -4100,11 +4361,11 @@ paths:
       security:
         - oxAuth:
             - write
-  /config/properties/server:
+  /config/properties/server-config:
     get:
       summary: Gets Server's common configuration properties.
       description: Gets Server's common configuration properties.
-      operationId: get-properties-server
+      operationId: get-properties-server-config
       tags:
         - Configuration – Server
       responses:
@@ -4117,84 +4378,89 @@ paths:
                 type: object
                 description: Common configuration.
                 properties:
-                  expirationNotificatorEnabled:
-                    type: boolean
-                    description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
-                    default: true
-                  cleanerService:
-                    type: object
-                    description: Server Clean up configuration.
-                    properties:
-                      cleanServiceInterval:
-                        type: integer
-                        description: Time interval for the Clean Service in seconds.
-                        multipleOf: 1
-                        minimum: 1
-                        exclusiveMinimum: false
-                        maximum: 2147483647
-                        exclusiveMaximum: false
-                        example: 60
-                      cleanServiceBaseDns:
-                        type: array
-                        description: List of additional base dns under which AS will look up for expired entities.
-                        items:
-                          type: string
-                        minItems: 0
-                        uniqueItems: true
-                        example:
-                          - ssn
-                      cleanServiceBatchChunkSize:
-                        type: integer
-                        description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-                        multipleOf: 1
-                        minimum: 1
-                        exclusiveMinimum: false
-                        maximum: 2147483647
-                        exclusiveMaximum: false
-                        example: 10000
-                  keysGenerationConfig:
-                    description: key regeneration details.
-                    type: object
-                    properties:
-                      keyRegenerationEnabled:
-                        type: boolean
-                        description: Boolean value specifying whether to regenerate keys.
-                        default: false
-                      keyRegenerationInterval:
-                        type: integer
-                        description: The interval for key regeneration in hours.
-                        multipleOf: 1
-                        minimum: 1
-                        exclusiveMinimum: false
-                        maximum: 2147483647
-                        exclusiveMaximum: false
-                        example: 48
-                      defaultSignatureAlgorithm:
-                        type: string
-                        description: The default signature algorithm to sign ID Tokens.
-                        items:
-                          type: string
-                        enum:
-                          - HS256
-                          - HS384
-                          - HS512
-                          - RS256
-                          - RS384
-                          - RS512
-                          - ES256
-                          - ES384
-                          - ES512
-                  oxOpenIdConnectVersion:
-                    type: string
-                    description: OpenID Connect Version.
-                    minLength: 1
-                    example: openidconnect-1.0
                   oxId:
                     type: string
                     description: URL for the Inum generator Service.
                     format: url
                     minLength: 1
-                    example: 'https://server.example.com/oxid/service/gluu/inum'                                    
+                    example: 'https://server.example.com/oxid/service/gluu/inum'
+                  introspectionScriptBackwardCompatibility:
+                    type: boolean
+                    description: Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false.
+                    default: false
+                  personCustomObjectClassList:
+                    type: array
+                    description: LDAP custom object class list for dynamic person enrolment.
+                    uniqueItems: true
+                    minItems: 0
+                    items:
+                      type: string
+                    enum:
+                      - gluuCustomPerson
+                      - gluuPerson
+                  clientRegDefaultToCodeFlowWithRefresh:
+                    type: boolean
+                    description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.                      
+                  fapiCompatibility:
+                    type: boolean
+                    description: Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
+                    default: false
+                  consentGatheringScriptBackwardCompatibility:
+                    type: boolean
+                    description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration.
+                    default: false
+                  errorReasonEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false.
+                    default: false
+                  configurationUpdateInterval:
+                    type: integer
+                    description: The interval for configuration update in seconds.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 3600
+                  cssLocation:
+                    type: string
+                    description: The location for CSS files.
+                    minLength: 1
+                  jsLocation:
+                    type: string
+                    description: The location for JavaScript files.
+                    minLength: 1
+                  imgLocation:
+                    type: string
+                    description: The location for image files.
+                    minLength: 1
+                  logClientIdOnClientAuthentication:
+                    type: boolean
+                    description: Boolean value to specify if application should log the Client ID on client authentication.
+                  logClientNameOnClientAuthentication:
+                    type: boolean
+                    description: Boolean value to specify if application should log the Client Name on client authentication.
+                  authorizationRequestCustomAllowedParameters:
+                    type: array
+                    description: Authorization Request Custom Allowed Parameters.
+                    minItems: 0
+                    uniqueItems: true
+                    items:
+                      type: string
+                  disableU2fEndpoint:
+                    type: boolean
+                    description: Enable/Disable U2F endpoints.
+                  errorHandlingMethod:
+                    type: string
+                    description: A list of possible error handling methods.
+                    format: enum - internal - remote
+                  useLocalCache:
+                    type: boolean
+                    description: 'Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.'
+                    default: false
+                  cibaEnabled:
+                    description: Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.
+                    type: boolean
         '401':    
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -4205,7 +4471,7 @@ paths:
     put:
       summary: Updates Server's common configuration properties.
       description: Updates Server's common configuration properties.
-      operationId: put-properties-server
+      operationId: put-properties-server-config
       tags: 
         - Configuration – Server
       requestBody:
@@ -4216,88 +4482,937 @@ paths:
               type: object
               description: Common configuration.
               properties:
-                expirationNotificatorEnabled:
-                  type: boolean
-                  description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
-                  default: true
-                cleanerService:
-                  type: object
-                  description: Server Clean up configuration.
-                  properties:
-                    cleanServiceInterval:
-                      type: integer
-                      description: Time interval for the Clean Service in seconds.
-                      multipleOf: 1
-                      minimum: 1
-                      exclusiveMinimum: false
-                      maximum: 2147483647
-                      exclusiveMaximum: false
-                      example: 60
-                    cleanServiceBaseDns:
-                      type: array
-                      description: List of additional base dns under which AS will look up for expired entities.
-                      items:
-                        type: string
-                      minItems: 0
-                      uniqueItems: true
-                      example:
-                        - ssn
-                    cleanServiceBatchChunkSize:
-                      type: integer
-                      description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
-                      multipleOf: 1
-                      minimum: 1
-                      exclusiveMinimum: false
-                      maximum: 2147483647
-                      exclusiveMaximum: false
-                      example: 10000
-                keysGenerationConfig:
-                  description: key regeneration details.
-                  type: object
-                  properties:
-                    keyRegenerationEnabled:
-                      type: boolean
-                      description: Boolean value specifying whether to regenerate keys.
-                      default: false
-                    keyRegenerationInterval:
-                      type: integer
-                      description: The interval for key regeneration in hours.
-                      multipleOf: 1
-                      minimum: 1
-                      exclusiveMinimum: false
-                      maximum: 2147483647
-                      exclusiveMaximum: false
-                      example: 48
-                    defaultSignatureAlgorithm:
-                      type: string
-                      description: The default signature algorithm to sign ID Tokens.
-                      items:
-                        type: string
-                      enum:
-                        - HS256
-                        - HS384
-                        - HS512
-                        - RS256
-                        - RS384
-                        - RS512
-                        - ES256
-                        - ES384
-                        - ES512
-                oxOpenIdConnectVersion:
-                  type: string
-                  description: OpenID Connect Version.
-                  minLength: 1
-                  example: openidconnect-1.0
                 oxId:
                   type: string
                   description: URL for the Inum generator Service.
                   format: url
                   minLength: 1
                   example: 'https://server.example.com/oxid/service/gluu/inum'
+                introspectionScriptBackwardCompatibility:
+                  type: boolean
+                  description: Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false.
+                  default: false 
+                personCustomObjectClassList:
+                  type: array
+                  description: LDAP custom object class list for dynamic person enrolment.
+                  uniqueItems: true
+                  minItems: 0
+                  items:
+                    type: string
+                  enum:
+                    - gluuCustomPerson
+                    - gluuPerson
+                clientRegDefaultToCodeFlowWithRefresh:
+                  type: boolean
+                  description: Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.                      
+                fapiCompatibility:
+                  type: boolean
+                  description: Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
+                  default: false
+                consentGatheringScriptBackwardCompatibility:
+                  type: boolean
+                  description: Boolean value specifying whether turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration.
+                  default: false
+                errorReasonEnabled:
+                  type: boolean
+                  description: Boolean value specifying whether to return detailed reason of the error from AS. Default value is false.
+                  default: false
+                configurationUpdateInterval:
+                  type: integer
+                  description: The interval for configuration update in seconds.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 3600
+                cssLocation:
+                  type: string
+                  description: The location for CSS files.
+                  minLength: 1
+                jsLocation:
+                  type: string
+                  description: The location for JavaScript files.
+                  minLength: 1
+                imgLocation:
+                  type: string
+                  description: The location for image files.
+                  minLength: 1
+                logClientIdOnClientAuthentication:
+                  type: boolean
+                  description: Boolean value to specify if application should log the Client ID on client authentication.
+                logClientNameOnClientAuthentication:
+                  type: boolean
+                  description: Boolean value to specify if application should log the Client Name on client authentication.
+                authorizationRequestCustomAllowedParameters:
+                  type: array
+                  description: Authorization Request Custom Allowed Parameters.
+                  minItems: 0
+                  uniqueItems: true
+                  items:
+                    type: string
+                disableU2fEndpoint:
+                  type: boolean
+                  description: Enable/Disable U2F endpoints.
+                errorHandlingMethod:
+                  type: string
+                  description: A list of possible error handling methods.
+                  format: enum - internal - remote
+                useLocalCache:
+                  type: boolean
+                  description: 'Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration.'
+                  default: false
+                cibaEnabled:
+                  description: Boolean value specifying whether turn on CIBA. If true AS will process CIBA requests.
+                  type: boolean
       responses:
         '200':
           description: OK
         '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/clean-up:
+    get:
+      summary: Gets Server's clean up configuration.
+      description: Gets Server's clean up configuration.
+      operationId: get-properties-clean-up
+      tags:
+        - Configuration – Server Clean up
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Server Clean up configuration.
+                type: object
+                description: Server Clean up configuration.
+                properties:
+                  cleanServiceInterval:
+                    type: integer
+                    description: Time interval for the Clean Service in seconds.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 60
+                  cleanServiceBaseDns:
+                    type: array
+                    description: List of additional base dns under which AS will look up for expired entities.
+                    items:
+                      type: string
+                    minItems: 0
+                    uniqueItems: true
+                    example:
+                      - ssn
+                  cleanServiceBatchChunkSize:
+                    type: integer
+                    description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 10000
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Server's clean up configuration.
+      description: Updates Server's clean up configuration.
+      operationId: put-properties-clean-up
+      tags:
+        - Configuration – Server Clean up
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Server Clean up configuration.
+              type: object
+              description: Server Clean up configuration.
+              properties:
+                cleanServiceInterval:
+                  type: integer
+                  description: Time interval for the Clean Service in seconds.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 60
+                cleanServiceBaseDns:
+                  type: array
+                  description: List of additional base dns under which AS will look up for expired entities.
+                  items:
+                    type: string
+                  minItems: 0
+                  uniqueItems: true
+                  example:
+                    - ssn
+                cleanServiceBatchChunkSize:
+                  type: integer
+                  description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 10000
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/key-reg:
+    get:
+      summary: Gets Key regeneration configuration.
+      description: Gets Key regeneration configuration.
+      operationId: get-properties-key-reg
+      tags:
+        - Configuration – Key Regeneration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Key regeneration configuration
+                type: object
+                description: Key regeneration configuration
+                properties:
+                  keyRegenerationEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to regenerate keys.
+                    default: false
+                  keyRegenerationInterval:
+                    type: integer
+                    description: The interval for key regeneration in hours.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 48
+                  defaultSignatureAlgorithm:
+                    type: string
+                    description: The default signature algorithm to sign ID Tokens.
+                    items:
+                      type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Key regeneration configuration.
+      description: Updates Key regeneration configuration.
+      operationId: put-properties-key-reg
+      tags:
+        - Configuration – Key Regeneration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Key regeneration configuration
+              type: object
+              description: Key regeneration configuration
+              properties:
+                keyRegenerationEnabled:
+                  type: boolean
+                  description: Boolean value specifying whether to regenerate keys.
+                  default: false
+                keyRegenerationInterval:
+                  type: integer
+                  description: The interval for key regeneration in hours.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 48
+                defaultSignatureAlgorithm:
+                  type: string
+                  description: The default signature algorithm to sign ID Tokens.
+                  items:
+                    type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/expiration:
+    get:
+      summary: Gets Expiration Notificator configuration.
+      description: Gets Expiration Notificator configuration.
+      operationId: get-properties-expiration
+      tags:
+        - Configuration – Expiration Notificator
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Expiration Notificator configuration
+                type: object
+                description: Expiration Notificator configuration
+                properties:
+                  expirationNotificatorEnabled:
+                    type: boolean
+                    description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
+                    default: true
+                  expirationNotificatorMapSizeLimit:
+                    type: integer
+                    description: The expiration notificator maximum size limit.
+                    default: 100000
+                  expirationNotificatorIntervalInSeconds:
+                    type: integer
+                    description: The expiration notificator interval in seconds.
+                    default: 600
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Expiration Notificator configuration.
+      description: Updates Expiration Notificator configuration.
+      operationId: put-properties-expiration
+      tags:
+        - Configuration – Expiration Notificator
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Expiration Notificator configuration
+              type: object
+              description: Expiration Notificator configuration
+              properties:
+                expirationNotificatorEnabled:
+                  type: boolean
+                  description: 'Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).'
+                  default: true
+                expirationNotificatorMapSizeLimit:
+                  type: integer
+                  description: The expiration notificator maximum size limit.
+                  default: 100000
+                expirationNotificatorIntervalInSeconds:
+                  type: integer
+                  description: The expiration notificator interval in seconds.
+                  default: 600
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/crypto-keys:
+    get:
+      summary: Gets Crypto Provider configuration.
+      description: Gets Crypto Provider configuration.
+      operationId: get-properties-crypto-keys
+      tags:
+        - Configuration – Crypto Provider
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Crypto Provider configuration
+                type: object
+                description: Crypto Provider configuration
+                properties:
+                  rejectJwtWithNoneAlg:
+                    type: boolean
+                    description: Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true.
+                    default: true
+                  webKeysStorage:
+                    type: string
+                    description: Web Key Storage Type.
+                    format: enum - keystore - pkcs11
+                  dnName:
+                    type: string
+                    description: DN of certificate issuer.
+                    minLength: 1
+                    example: CN=oxAuth CA Certificates
+                  keyStoreFile:
+                    type: string
+                    description: The Key Store File (JKS).
+                    minLength: 1
+                    example: /etc/certs/oxauth-keys.jks
+                  keyStoreSecret:
+                    type: string
+                    description: The password of the Key Store.
+                    minLength: 1
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Crypto Provider configuration.
+      description: Updates Crypto Provider configuration.
+      operationId: put-properties-crypto-keys
+      tags:
+        - Configuration – Crypto Provider
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Crypto Provider configuration
+              type: object
+              description: Crypto Provider configuration
+              properties:
+                rejectJwtWithNoneAlg:
+                  type: boolean
+                  description: Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true.
+                  default: true
+                webKeysStorage:
+                  type: string
+                  description: Web Key Storage Type.
+                  format: enum - keystore - pkcs11
+                dnName:
+                  type: string
+                  description: DN of certificate issuer.
+                  minLength: 1
+                  example: CN=oxAuth CA Certificates
+                keyStoreFile:
+                  type: string
+                  description: The Key Store File (JKS).
+                  minLength: 1
+                  example: /etc/certs/oxauth-keys.jks
+                keyStoreSecret:
+                  type: string
+                  description: The password of the Key Store.
+                  minLength: 1
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/auth-filter:
+    get:
+      summary: Gets Authentication filters configuration.
+      description: Gets Authentication filters configuration.
+      operationId: get-properties-auth-filter
+      tags:
+        - Configuration – Authentication Filters
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Authentication filters configuration
+                type: object
+                description: Authentication filters configuration
+                properties:
+                  authenticationFiltersEnabled:
+                      type: boolean
+                      description: Boolean value specifying whether to enable user authentication filters.
+                      default: false
+                  clientAuthenticationFiltersEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable client authentication filters.
+                    default: false
+                  authenticationFilters:
+                    type: array
+                    description: User authentication filters.
+                    uniqueItems: false
+                    minItems: 1
+                    items:
+                      type: object
+                      properties:
+                        filter:
+                          type: string
+                          example: '(&(mail=*{0}*)(inum={1}))'
+                        bind:
+                          type: boolean
+                          default: false
+                        bind-password-attribute:
+                          type: string
+                        base-dn:
+                          type: string
+                          example: 'ou=people,o=gluu'
+                  clientAuthenticationFilters:
+                    type: array
+                    description: Client authentication filters.
+                    uniqueItems: false
+                    minItems: 1
+                    items:
+                      type: object
+                      properties:
+                        filter:
+                          type: string
+                          example: 'myCustomAttr1={0}'
+                        bind:
+                          type: boolean
+                          default: false
+                        bind-password-attribute:
+                          type: string
+                        base-dn:
+                          type: string
+                          example: 'ou=clients,o=gluu'
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Authentication filters configuration.
+      description: Updates Authentication filters configuration.
+      operationId: put-properties-auth-filter
+      tags:
+        - Configuration – Authentication Filters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Authentication filters configuration
+              type: object
+              description: Authentication filters configuration
+              properties:
+                authenticationFiltersEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable user authentication filters.
+                    default: false
+                clientAuthenticationFiltersEnabled:
+                  type: boolean
+                  description: Boolean value specifying whether to enable client authentication filters.
+                  default: false
+                authenticationFilters:
+                  type: array
+                  description: User authentication filters.
+                  uniqueItems: false
+                  minItems: 1
+                  items:
+                    type: object
+                    properties:
+                      filter:
+                        type: string
+                        example: '(&(mail=*{0}*)(inum={1}))'
+                      bind:
+                        type: boolean
+                        default: false
+                      bind-password-attribute:
+                        type: string
+                      base-dn:
+                        type: string
+                        example: 'ou=people,o=gluu'
+                clientAuthenticationFilters:
+                  type: array
+                  description: Client authentication filters.
+                  uniqueItems: false
+                  minItems: 1
+                  items:
+                    type: object
+                    properties:
+                      filter:
+                        type: string
+                        example: 'myCustomAttr1={0}'
+                      bind:
+                        type: boolean
+                        default: false
+                      bind-password-attribute:
+                        type: string
+                      base-dn:
+                        type: string
+                        example: 'ou=clients,o=gluu'
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/metric:
+    get:
+      summary: Gets Metric configuration.
+      description: Gets Metric configuration.
+      operationId: get-properties-metric
+      tags:
+        - Configuration – Metric
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Metric configuration
+                type: object
+                description: Metric configuration
+                properties:
+                  metricReporterInterval:
+                    type: integer
+                    description: The interval for metric reporter in seconds.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 300
+                  metricReporterKeepDataDays:
+                    type: integer
+                    description: The days to keep metric reported data.
+                    multipleOf: 1
+                    minimum: 1
+                    exclusiveMinimum: false
+                    maximum: 2147483647
+                    exclusiveMaximum: false
+                    example: 15
+                  metricReporterEnabled:
+                    type: boolean
+                    description: Boolean value specifying whether to enable Metric Reporter.
+                    default: true
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Metric configuration.
+      description: Updates Metric configuration.
+      operationId: put-properties-metric
+      tags:
+        - Configuration – Metric
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Metric configuration
+              type: object
+              description: Metric configuration
+              properties:
+                metricReporterInterval:
+                  type: integer
+                  description: The interval for metric reporter in seconds.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 300
+                metricReporterKeepDataDays:
+                  type: integer
+                  description: The days to keep metric reported data.
+                  multipleOf: 1
+                  minimum: 1
+                  exclusiveMinimum: false
+                  maximum: 2147483647
+                  exclusiveMaximum: false
+                  example: 15
+                metricReporterEnabled:
+                  type: boolean
+                  description: Boolean value specifying whether to enable Metric Reporter.
+                  default: true
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/user:
+    get:
+      summary: Gets User Management configuration.
+      description: Gets User Management configuration.
+      operationId: get-properties-user
+      tags:
+        - Configuration – User Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: User Management configuration
+                type: object
+                description: User Management configuration
+                properties:
+                  updateUserLastLogonTime:
+                    type: boolean
+                    description: Boolean value to specify if application should update oxLastLogonTime attribute on user authentication.
+                    default: false
+                  updateClientAccessTime:
+                    type: boolean
+                    description: Boolean value to specify if application should update oxLastAccessTime/oxLastLogonTime attributes on client authentication.
+                    default: false
+                  enableClientGrantTypeUpdate:
+                    type: boolean
+                    description: Boolean value to specify if client can update Grant Type values.
+                    default: false
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates User Management configuration.
+      description: Updates User Management configuration.
+      operationId: put-properties-user
+      tags:
+        - Configuration – User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: User Management configuration
+              type: object
+              description: User Management configuration
+              properties:
+                updateUserLastLogonTime:
+                  type: boolean
+                  description: Boolean value to specify if application should update oxLastLogonTime attribute on user authentication.
+                  default: false
+                updateClientAccessTime:
+                  type: boolean
+                  description: Boolean value to specify if application should update oxLastAccessTime/oxLastLogonTime attributes on client authentication.
+                  default: false
+                enableClientGrantTypeUpdate:
+                  type: boolean
+                  description: Boolean value to specify if client can update Grant Type values.
+                  default: false
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/app-audit:
+    get:
+      summary: Gets Application Audit Logger configuration.
+      description: Gets Application Audit Logger configuration.
+      operationId: get-properties-app-audit
+      tags:
+        - Configuration – Application Audit Logger
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Application Audit Logger configuration
+                type: object
+                description: Application Audit Logger configuration
+                properties:
+                  jmsUserName:
+                    type: string
+                    description: JMS UserName.
+                    minLength: 1
+                  jmsPassword:
+                    type: string
+                    description: JMS Password.
+                    minLength: 1
+                  jmsBrokerURISet:
+                    type: array
+                    description: JMS Broker URI Set.
+                    format: select
+                    items:
+                      type: string
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Application Audit Logger configuration.
+      description: Updates Application Audit Logger configuration.
+      operationId: put-properties-app-audit
+      tags:
+        - Configuration – Application Audit Logger
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Application Audit Logger configuration
+              type: object
+              description: Application Audit Logger configuration
+              properties:
+                jmsUserName:
+                  type: string
+                  description: JMS UserName.
+                  minLength: 1
+                jmsPassword:
+                  type: string
+                  description: JMS Password.
+                  minLength: 1
+                jmsBrokerURISet:
+                  type: array
+                  description: JMS Broker URI Set.
+                  format: select
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - write
+  /config/properties/auth-protection:
+    get:
+      summary: Gets Authentication protection configuration.
+      description: Gets Authentication protection configuration.
+      operationId: get-properties-auth-protection
+      tags:
+        - Configuration – Authentication Protection Configuration
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Authentication protection configuration
+                type: object
+                description: Authentication protection configuration
+                properties:
+                  attemptExpiration:
+                    type: integer
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  maximumAllowedAttemptsWithoutDelay:
+                    type: integer
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  delayTime:
+                    type: integer
+                    multipleOf: 1
+                    minimum: 1
+                    maximum: 2147483647
+                    exclusiveMinimum: false
+                    exclusiveMaximum: false
+                  bruteForceProtectionEnabled:
+                    type: boolean
+        '401':    
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    put:
+      summary: Updates Authentication protection configuration.
+      description: Updates Authentication protection configuration.
+      operationId: put-properties-auth-protection
+      tags:
+        - Configuration – Authentication Protection Configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Authentication protection configuration
+              type: object
+              description: Authentication protection configuration
+              properties:
+                attemptExpiration:
+                  type: integer
+                  multipleOf: 1
+                  minimum: 1
+                  maximum: 2147483647
+                  exclusiveMinimum: false
+                  exclusiveMaximum: false
+                maximumAllowedAttemptsWithoutDelay:
+                  type: integer
+                  multipleOf: 1
+                  minimum: 1
+                  maximum: 2147483647
+                  exclusiveMinimum: false
+                  exclusiveMaximum: false
+                delayTime:
+                  type: integer
+                  multipleOf: 1
+                  minimum: 1
+                  maximum: 2147483647
+                  exclusiveMinimum: false
+                  exclusiveMaximum: false
+                bruteForceProtectionEnabled:
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+        '401':    
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -9872,20 +10987,22 @@ paths:
                   description: Log configuration.
                   properties:
                     loggingLevel:
-                      description: Allows to filter the category of messages to be logged.
                       type: string
+                      description: Logging level for oxAuth logger.
                       enum:
-                        - Trace - All messages
-                        - Debug - Debug level and above
-                        - Info - Informational level and above
-                        - Warn - Warning level and above
-                        - Error - Error level and above
-                        - Fatal - Only fatal errors
-                        - off - Logging is disabled
+                        - TRACE
+                        - DEBUG
+                        - INFO
+                        - WARN
+                        - ERROR
+                        - FATAL
+                        - OFF
                     loggingLayout:
-                      description: Defines the pattern of log format.
                       type: string
-                      example: 'Date, time, spacing, line number, etc.'
+                      description: Logging layout used for oxAuth loggers.
+                      enum:
+                      - text
+                      - json
                     httpLoggingEnabled:
                       description: To enable http request/response logging.
                       type: boolean
@@ -9942,20 +11059,22 @@ paths:
                 description: Log configuration.
                 properties:
                   loggingLevel:
-                    description: Allows to filter the category of messages to be logged.
                     type: string
+                    description: Logging level for oxAuth logger.
                     enum:
-                      - Trace - All messages
-                      - Debug - Debug level and above
-                      - Info - Informational level and above
-                      - Warn - Warning level and above
-                      - Error - Error level and above
-                      - Fatal - Only fatal errors
-                      - off - Logging is disabled
+                      - TRACE
+                      - DEBUG
+                      - INFO
+                      - WARN
+                      - ERROR
+                      - FATAL
+                      - OFF
                   loggingLayout:
-                    description: Defines the pattern of log format.
                     type: string
-                    example: 'Date, time, spacing, line number, etc.'
+                    description: Logging layout used for oxAuth loggers.
+                    enum:
+                    - text
+                    - json
                   httpLoggingEnabled:
                     description: To enable http request/response logging.
                     type: boolean
@@ -10015,20 +11134,22 @@ paths:
                 description: Log configuration.
                 properties:
                   loggingLevel:
-                    description: Allows to filter the category of messages to be logged.
                     type: string
+                    description: Logging level for oxAuth logger.
                     enum:
-                      - Trace - All messages
-                      - Debug - Debug level and above
-                      - Info - Informational level and above
-                      - Warn - Warning level and above
-                      - Error - Error level and above
-                      - Fatal - Only fatal errors
-                      - off - Logging is disabled
+                      - TRACE
+                      - DEBUG
+                      - INFO
+                      - WARN
+                      - ERROR
+                      - FATAL
+                      - OFF
                   loggingLayout:
-                    description: Defines the pattern of log format.
                     type: string
-                    example: 'Date, time, spacing, line number, etc.'
+                    description: Logging layout used for oxAuth loggers.
+                    enum:
+                    - text
+                    - json
                   httpLoggingEnabled:
                     description: To enable http request/response logging.
                     type: boolean
@@ -10170,7 +11291,26 @@ paths:
                     type: array
                     description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
                     items:
-                      $ref: '#/components/schemas/JsonWebKey'                      
+                      $ref: '#/components/schemas/JsonWebKey' 
+                  jwksAlgorithmsSupported:
+                      type: array
+                      description: A list of algorithms that will be used in JWKS endpoint.
+                      minItems: 1
+                      uniqueItems: true
+                      items:
+                        type: string
+                      enum:
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                        - RSA1_5
+                        - RSA-OAEP                      
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -10188,7 +11328,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JsonWebKey'
+              title: WebKeysConfiguration
+              required:
+                - keys
+              type: object
+              description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
+              properties:
+                keys:
+                  type: array
+                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey' 
+                jwksAlgorithmsSupported:
+                    type: array
+                    description: A list of algorithms that will be used in JWKS endpoint.
+                    minItems: 1
+                    uniqueItems: true
+                    items:
+                      type: string
+                    enum:
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                      - RSA1_5
+                      - RSA-OAEP   
       responses:
         '200':
           description: OK
@@ -10219,7 +11388,36 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonWebKey'
+                title: WebKeysConfiguration
+                required:
+                  - keys
+                type: object
+                description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
+                properties:
+                  keys:
+                    type: array
+                    description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey' 
+                  jwksAlgorithmsSupported:
+                      type: array
+                      description: A list of algorithms that will be used in JWKS endpoint.
+                      minItems: 1
+                      uniqueItems: true
+                      items:
+                        type: string
+                      enum:
+                        - RS256
+                        - RS384
+                        - RS512
+                        - ES256
+                        - ES384
+                        - ES512
+                        - PS256
+                        - PS384
+                        - PS512
+                        - RSA1_5
+                        - RSA-OAEP   
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -10239,7 +11437,36 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JsonWebKey'
+              title: WebKeysConfiguration
+              required:
+                - keys
+              type: object
+              description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
+              properties:
+                keys:
+                  type: array
+                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey' 
+                jwksAlgorithmsSupported:
+                    type: array
+                    description: A list of algorithms that will be used in JWKS endpoint.
+                    minItems: 1
+                    uniqueItems: true
+                    items:
+                      type: string
+                    enum:
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                      - RSA1_5
+                      - RSA-OAEP   
       responses:
         '200':
           description: OK
@@ -12255,13 +13482,13 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/openid/sectoridentifier:
+  /oauth/openid/sectors:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Gets list of OpenID Connect Sector Identifiers.
       description: Gets list of OpenID Connect Sector Identifiers.
-      operationId: get-oauth-openid-sectoridentifier
+      operationId: get-oauth-openid-sectors
       responses:
         '200':
           description: OK
@@ -12306,7 +13533,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Adds an OpenID Connect Sector Identifier.
       description: Adds an OpenID Connect Sector Identifier.
-      operationId: post-oauth-openid-sectoridentifier
+      operationId: post-oauth-openid-sectors
       requestBody:
         content:
           application/json:
@@ -12348,7 +13575,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Updates an OpenID Connect Sector Identifier.
       description: Updates an OpenID Connect Sector Identifier.
-      operationId: put-oauth-openid-sectoridentifier
+      operationId: put-oauth-openid-sectors
       requestBody:
         content:
           application/json:
@@ -12387,7 +13614,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/openid/sectoridentifier/{id}':
+  '/oauth/openid/sectors/{id}':
     parameters:
       - name: id
         in: path
@@ -12400,7 +13627,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Gets an OpenID Connect Sector Identifier with specified id.
       description: Gets an OpenID Connect Sector Identifier with specified id.
-      operationId: get-oauth-openid-sectoridentifier-by-id
+      operationId: get-oauth-openid-sectors-by-id
       responses:
         '200':
           description: OK
@@ -12443,7 +13670,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Deletes an OpenID Connect Sector Identifier with specified id.
       description: Deletes an OpenID Connect Sector Identifier with specified id.
-      operationId: delete-oauth-openid-sectoridentifier-by-id
+      operationId: delete-oauth-openid-sectors-by-id
       responses:
         '200':
           description: OK
@@ -12456,7 +13683,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/openid/sectoridentifier/search:
+  /oauth/openid/sectors/search:
     parameters:
       - name: pattern
         in: query
@@ -12475,7 +13702,7 @@ paths:
         - OAuth - OpenID Connect - Sector Identifiers
       summary: Searches OpenID Sector Identifiers by pattern.
       description: Searches OpenID Sector Identifiers by pattern.
-      operationId: get-oauth-openid-sectoridentifier-search-by-pattern
+      operationId: get-oauth-openid-sectors-search-by-pattern
       responses:
         '200':
           description: OK
