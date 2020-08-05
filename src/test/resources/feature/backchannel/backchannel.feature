@@ -9,23 +9,9 @@ Background:
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
-    #And print response
-    And match response == 
-     """
-  { 
-    backchannelClientId: '##string',
-	backchannelRedirectUri: '##string',
-    backchannelAuthenticationEndpoint: '##string',
-	backchannelDeviceRegistrationEndpoint: '##string',
-	backchannelTokenDeliveryModesSupported: '##[] #string',
-	backchannelAuthenticationRequestSigningAlgValuesSupported: '##[] #string',
-	backchannelUserCodeParameterSupported: '##boolean',
-	backchannelBindingMessagePattern: '##string',
-	backchannelAuthenticationResponseExpiresIn: '#number? _ >= 1 || _ <= 2147483647',
-	backchannelAuthenticationResponseInterval: '#number? _ >= 1 || _ <= 2147483647',
-	backchannelLoginHintClaims: '##[] #string'
-  }
-  """
+    And print response
+    And assert response.length != null
+
    
    @backchannel-put
    Scenario: Update backchannel configuration
@@ -45,7 +31,7 @@ Background:
    
    
    @error
-   Scenario: Error case while updating backchannel configuration
+   Scenario: Error case while updating backchannel configuration min validation
    Given url  mainUrl
    And  header Authorization = 'Bearer ' + accessToken
    When method GET
@@ -60,19 +46,4 @@ Background:
    And print response
    
    
-   @error
-   Scenario: Error case while updating backchannel configuration
-   Given url  mainUrl
-   And  header Authorization = 'Bearer ' + accessToken
-   When method GET
-   Then status 200
-   Then def first_response = response 
-   Then set first_response.backchannelAuthenticationResponseExpiresIn = 2147483648
-   Given url mainUrl
-   And  header Authorization = 'Bearer ' + accessToken
-   And request first_response
-   When method PUT
-   Then status 400
-   And print response
-  
-	
+   
