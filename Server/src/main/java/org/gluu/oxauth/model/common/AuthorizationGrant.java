@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
@@ -25,6 +26,7 @@ import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.GrantService;
+import org.gluu.oxauth.service.MetricService;
 import org.gluu.oxauth.service.SectorIdentifierService;
 import org.gluu.oxauth.service.external.ExternalIntrospectionService;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
@@ -73,6 +75,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Inject
     private SectorIdentifierService sectorIdentifierService;
+
+	@Inject
+	private MetricService metricService;
 
     private boolean isCachedWithNoPersistence = false;
 
@@ -177,6 +182,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             if (accessToken.getExpiresIn() > 0) {
                 persist(asToken(accessToken));
             }
+
+            metricService.incCounter(MetricType.OXAUTH_TOKEN_ACCESS_TOKEN_COUNT);
+
             return accessToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -238,6 +246,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             if (refreshToken.getExpiresIn() > 0) {
                 persist(asToken(refreshToken));
             }
+
+            metricService.incCounter(MetricType.OXAUTH_TOKEN_REFRESH_TOKEN_COUNT);
+
             return refreshToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -263,6 +274,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             setAcrValues(acrValues);
             setSessionDn(sessionDn);
+
+            metricService.incCounter(MetricType.OXAUTH_TOKEN_ID_TOKEN_COUNT);
+
             return idToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
