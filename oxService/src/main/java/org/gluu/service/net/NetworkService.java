@@ -5,6 +5,7 @@
  */
 package org.gluu.service.net;
 
+import org.gluu.net.InetAddressUtility;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -65,4 +66,9 @@ public class NetworkService implements Serializable {
 
         return serverUri;
     }
+
+	public String getMacAdress() {
+		return InetAddressUtility.getMACAddressOrNull();
+	}
+
 }

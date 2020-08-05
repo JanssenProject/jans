@@ -390,5 +390,7 @@ public abstract class MetricService implements Serializable {
 
     public abstract ApplicationType getApplicationType();
 
+    public abstract String getNodeIndetifier();
+
     public abstract PersistenceEntryManager getEntryManager();
 }
