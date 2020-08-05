@@ -51,9 +51,18 @@ Then status 404
 Scenario: Get an openid connect sector by inum
 Given url openidsectors_url
 And header Authorization = 'Bearer ' + accessToken
+And request read('classpath:sector.json')
+When method POST
+Then status 201
+Given url openidsectors_url
+And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
 Given url openidsectors_url + '/' +response[0].id
 And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
+Given url openidsectors_url + '/' +response.id
+And header Authorization = 'Bearer ' + accessToken
+When method DELETE
+Then status 204
