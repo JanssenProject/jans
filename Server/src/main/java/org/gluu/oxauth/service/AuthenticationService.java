@@ -126,7 +126,8 @@ public class AuthenticationService {
 		boolean authenticated = false;
 		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
-		com.codahale.metrics.Timer.Context timerContext = metricService
+		com.codahale.metrics.Timer.Context timerContext = null;
+		timerContext = metricService
 				.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
 		try {
 			if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
@@ -294,7 +295,7 @@ public class AuthenticationService {
 			}
 
 			boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
-					localPrimaryKey);
+					localPrimaryKey, false);
 			if (authenticated) {
 				return authenticated;
 			}
@@ -319,7 +320,7 @@ public class AuthenticationService {
 				PersistenceEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
 
 				authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey,
-						localPrimaryKey);
+						localPrimaryKey, false);
 				if (authenticated) {
 					break;
 				}
@@ -355,14 +356,30 @@ public class AuthenticationService {
 	 */
 	public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
 			String keyValue, String password, String primaryKey, String localPrimaryKey) {
+		
+		return authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey, true);
+	}
+
+	/*
+	 * Utility method which can be used in custom scripts
+	 */
+	public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, PersistenceEntryManager ldapAuthEntryManager,
+			String keyValue, String password, String primaryKey, String localPrimaryKey, boolean updateMetrics) {
 		boolean authenticated = false;
 		boolean protectionServiceEnabled = authenticationProtectionService.isEnabled();
 
-		com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+		com.codahale.metrics.Timer.Context timerContext = null;
+		
+		if (updateMetrics) {
+			timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
+		}
+
 		try {
 			authenticated = authenticateImpl(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
 		} finally {
-			timerContext.stop();
+			if (updateMetrics) {
+				timerContext.stop();
+			}
 		}
 
 		String userId = keyValue;
@@ -371,14 +388,16 @@ public class AuthenticationService {
 		}
 		setAuthenticatedUserSessionAttribute(userId, authenticated);
 
-		MetricType metricType;
-		if (authenticated) {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
-		} else {
-			metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+		if (updateMetrics) {
+			MetricType metricType;
+			if (authenticated) {
+				metricType = MetricType.OXAUTH_USER_AUTHENTICATION_SUCCESS;
+			} else {
+				metricType = MetricType.OXAUTH_USER_AUTHENTICATION_FAILURES;
+			}
+	
+			metricService.incCounter(metricType);
 		}
-
-		metricService.incCounter(metricType);
 
 		if (protectionServiceEnabled) {
 			authenticationProtectionService.storeAttempt(userId, authenticated);
