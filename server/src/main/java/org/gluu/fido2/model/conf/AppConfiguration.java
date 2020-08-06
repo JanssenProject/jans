@@ -36,7 +36,7 @@ public class AppConfiguration implements Configuration {
 
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private boolean metricReporterEnabled = true;
+    private boolean metricReporterEnabled;
 
     private List<String> personCustomObjectClassList;
 
