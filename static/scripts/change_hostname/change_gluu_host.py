@@ -2,11 +2,9 @@ import sys
 import os
 import json
 import argparse
+import uuid
 
-
-from ldap3 import Server, Connection, SUBTREE, BASE, LEVEL, \
-    MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE
-
+import ldap3
 
 def modify_etc_hosts(host_ip, old_hosts, old_host):
 
@@ -188,11 +186,11 @@ class ChangeGluuHostname:
         self.gluu_version = gluu_version
         self.local = local
         self.logger_tid = None
-
+        self.new_host_sa = False
 
     def startup(self):
-        ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
-        self.conn = Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
+        ldap_server = ldap3.Server("ldaps://{}:1636".format(self.server), use_ssl=True)
+        self.conn = ldap3.Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
         r = self.conn.bind()
         if not r:
             print "Can't conect to LDAP Server"
@@ -214,7 +212,7 @@ class ChangeGluuHostname:
 
         self.conn.modify(
             'ou=configuration,o=gluu', 
-             {'gluuHostname': [MODIFY_REPLACE, self.new_host]}
+             {'gluuHostname': [ldap3.MODIFY_REPLACE, self.new_host]}
             )
 
         sdns = [
@@ -226,10 +224,39 @@ class ChangeGluuHostname:
                 ]
 
         for sdn in sdns:
-            self.conn.search(search_base=sdn, search_scope=SUBTREE, search_filter='(objectclass=*)', attributes=['*'])
-
+            self.conn.search(search_base=sdn, search_scope=ldap3.SUBTREE, search_filter='(objectclass=*)', attributes=['*'])
             for entry in self.conn.response:
-                
+
+                dn = entry['dn']
+
+                if self.new_host_sa:
+                    if 'oxAuthClient' in entry['attributes']['objectClass'] and entry['attributes']['inum'][0].startswith('1001.'):
+                        self.oxauth_client_inum = 'NEW-1001.' + str(uuid.uuid4())
+                        dn = dn.replace(entry['attributes']['inum'][0], self.oxauth_client_inum)
+                        entry['attributes']['inum'][0] = self.oxauth_client_inum
+                        self.conn.add(dn, attributes=entry['attributes'])
+
+                    elif 'oxAuthClient' in entry['attributes']['objectClass'] and entry['attributes']['inum'][0].startswith('1101.'):
+                        self.openIdClientId_inum = 'NEW-1101.' + str(uuid.uuid4())
+                        dn = dn.replace(entry['attributes']['inum'][0], self.openIdClientId_inum)
+                        entry['attributes']['inum'][0] = self.openIdClientId_inum
+                        self.conn.add(dn, attributes=entry['attributes'])
+
+                    elif dn=='ou=oxauth,ou=configuration,o=gluu':
+                        dn = 'ou=oxauth_sa,ou=configuration,o=gluu'
+                        entry['attributes']['ou'][0] = 'oxauth_sa'
+                        self.conn.add(dn, attributes=entry['attributes'])
+
+                    elif dn=='ou=oxtrust,ou=configuration,o=gluu':
+                        dn = 'ou=oxtrust_sa,ou=configuration,o=gluu'
+                        entry['attributes']['ou'][0] = 'oxtrust_sa'
+                        self.conn.add(dn, attributes=entry['attributes'])
+
+                    elif dn=='ou=oxidp,ou=configuration,o=gluu':
+                        dn = 'ou=oxidp_sa,ou=configuration,o=gluu'
+                        entry['attributes']['ou'][0] = 'oxidp_sa'
+                        self.conn.add(dn, attributes=entry['attributes'])
+
                 for field in entry['attributes']:
                     changeAttr = False
                     for i, e in enumerate(entry['attributes'][field]):
@@ -237,11 +264,30 @@ class ChangeGluuHostname:
                             entry['attributes'][field][i] = e.replace(self.old_host, self.new_host)
                             changeAttr = True
 
-                    if changeAttr:
+                    if changeAttr:                
                         self.conn.modify(
-                                entry['dn'], 
-                                {field: [MODIFY_REPLACE, entry['attributes'][field]]}
-                                )
+                                dn, 
+                               {field: [ldap3.MODIFY_REPLACE, entry['attributes'][field]]}
+                               )
+
+        if self.new_host_sa:
+            self.conn.search(search_base='ou=oxtrust_sa,ou=configuration,o=gluu', search_scope=ldap3.BASE, search_filter='(objectclass=*)', attributes=['oxTrustConfApplication'])
+            oxTrustConfApplication = json.loads(self.conn.response[0]['attributes']['oxTrustConfApplication'][0])
+            oxTrustConfApplication['oxAuthClientId'] = self.oxauth_client_inum
+
+            self.conn.modify(
+                self.conn.response[0]['dn'], 
+                {'oxTrustConfApplication': [ldap3.MODIFY_REPLACE, json.dumps(oxTrustConfApplication, indent=2)]}
+                )
+
+            self.conn.search(search_base='ou=oxidp_sa,ou=configuration,o=gluu', search_scope=ldap3.BASE, search_filter='(objectclass=*)', attributes=['oxConfApplication'])
+            oxConfApplication = json.loads(self.conn.response[0]['attributes']['oxConfApplication'][0])
+            oxConfApplication['openIdClientId'] = self.openIdClientId_inum
+
+            self.conn.modify(
+                self.conn.response[0]['dn'], 
+                {'oxConfApplication': [ldap3.MODIFY_REPLACE, json.dumps(oxConfApplication, indent=2)]}
+                )
 
     def change_httpd_conf(self):
         print "Changing httpd configurations"
