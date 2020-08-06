@@ -154,7 +154,7 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
-    private Boolean metricReporterEnabled = true;
+    private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
 
     @JsonProperty("ScimProperties")
