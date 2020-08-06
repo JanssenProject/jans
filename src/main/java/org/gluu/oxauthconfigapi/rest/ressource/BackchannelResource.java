@@ -25,6 +25,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.Backchannel;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -35,7 +37,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.BACKCHANNEL)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class BackchannelResource {
+public class BackchannelResource extends BaseResource {
 
 	@Inject
 	Logger log;
@@ -46,11 +48,12 @@ public class BackchannelResource {
 	@GET
 	@Operation(summary = "Retrieve oxAuth Backchannel configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Backchannel.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Backchannel.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getBackchannelConfiguration() {
 		try {
-			log.info("BackchannelResource::getBackchannelConfiguration() - Retrieve oxAuth Backchannel configuration");
+			log.debug("BackchannelResource::getBackchannelConfiguration() - Retrieve oxAuth Backchannel configuration");
 			Backchannel backchannel = new Backchannel();
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			backchannel.setBackchannelClientId(appConfiguration.getBackchannelClientId());
@@ -69,18 +72,20 @@ public class BackchannelResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve oxAuth Backchannel configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);		
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update oxAuth Backchannel configuration")
 	@APIResponses( value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response  updateBackchannelConfiguration(@Valid Backchannel backchannel ) {
 		try {
-			log.info("BackchannelResource::updateBackchannelConfiguration() - Update oxAuth Backchannel configuration");
+			log.debug("BackchannelResource::updateBackchannelConfiguration() - Update oxAuth Backchannel configuration");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
 			appConfiguration.setBackchannelClientId(backchannel.getBackchannelClientId());
@@ -101,7 +106,7 @@ public class BackchannelResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth Backchannel configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);
 			
 		}
 	}

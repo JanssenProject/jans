@@ -25,6 +25,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.Metrics;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -36,7 +38,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.METRICS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class MetricsResource {
+public class MetricsResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -47,11 +49,12 @@ public class MetricsResource {
 	@GET
 	@Operation(summary = "Retrieve oxAuth metric configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Metrics.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Metrics.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getMetricsConfiguration() {
 		try {
-			log.info("MetricsResource::getMetricsConfiguration() - Retrieve oxAuth metric configuration");
+			log.debug("MetricsResource::getMetricsConfiguration() - Retrieve oxAuth metric configuration");
 			Metrics metrics = new Metrics();
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			if (appConfiguration != null) {
@@ -63,18 +66,20 @@ public class MetricsResource {
 			return Response.ok(metrics).build();
 		}catch(Exception ex) {
 			log.error("Failed to retrieve oxAuth metric configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);		
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update oxAuth metric configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateMetricsConfiguration(@Valid Metrics metrics) {		
 		try {
-			log.info("MetricsResource::updateMetricsConfiguration() - Update oxAuth metric configuration");
+			log.debug("MetricsResource::updateMetricsConfiguration() - Update oxAuth metric configuration");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			appConfiguration.setMetricReporterEnabled(metrics.getMetricReporterEnabled());
 			appConfiguration.setMetricReporterKeepDataDays(metrics.getMetricReporterKeepDataDays());
@@ -86,7 +91,7 @@ public class MetricsResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth metric  configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);		
 		}
 	}
 	

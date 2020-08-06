@@ -25,6 +25,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.RequestObject;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -35,7 +37,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.REQUEST_OBJECT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class RequestObjectResource {
+public class RequestObjectResource extends BaseResource {
 
 	@Inject
 	Logger log;
@@ -46,8 +48,9 @@ public class RequestObjectResource {
 	@GET
 	@Operation(summary = "Retrieve request object configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RequestObject.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RequestObject.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getRequestObjectConfiguration() {
 		try {
 			log.debug("RequestObjectResource::getRequestObjectConfiguration() - Retrieve request object settings");
@@ -62,15 +65,17 @@ public class RequestObjectResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve request object settings", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);					
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update request object configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateRequestObjectConfiguration(@Valid RequestObject requestObject) {
 		try {
 			log.debug("RequestObjectResource::updateRequestObjectConfiguration() - Update request object settings");
@@ -86,7 +91,7 @@ public class RequestObjectResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update request object settings", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 }

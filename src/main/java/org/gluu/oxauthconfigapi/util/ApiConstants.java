@@ -22,6 +22,7 @@ public class ApiConstants {
 	public static final String OPENID = "/openid";
 	public static final String SCOPES = "/scopes";
 	public static final String SECTORS = "/sectoridentifiers";
+	public static final String PAIRWISE = "/pairwise";
 	public static final String RESOURCES = "/resources";
 	public static final String INUM_PATH = "{inum}";
 
