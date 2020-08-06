@@ -26,17 +26,20 @@ function() {
 	    
 	    accessToken: 'c8dd2445-4734-4119-8dd1-4dbe91976202',
 	    
-	   //#1 - health endpoint
+	    // health endpoint
 	    healthUrl: baseUrl + ':' + port + '/health',
 	    
-	   //#2 - backchannel
+	    // backchannel endpoint
 	    backchannelUrl: baseUrl + ':' + port + '/api/v1/oxauth/backchannel',
 	    
-	    //#1 - metrics endpoint
+	    // Metrics endpoint
 	    metricsUrl: baseUrl + ':' + port + '/api/v1/oxauth/metrics',
 
-	    //#11 - sessionId endpoint
+	    // sessionId endpoint
 	    sessionidUrl: baseUrl + ':' + port + '/api/v1/oxauth/sessionid',
+	    
+	    // pairwise configuration endpoint
+	    pairwiseUrl: baseUrl + ':' + port + '/api/v1/oxauth/pairwise',
 	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',

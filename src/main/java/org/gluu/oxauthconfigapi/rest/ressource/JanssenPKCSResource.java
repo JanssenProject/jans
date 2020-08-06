@@ -25,6 +25,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.JanssenPKCS;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -36,7 +38,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.JANSSENPKCS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class JanssenPKCSResource {
+public class JanssenPKCSResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -47,12 +49,13 @@ public class JanssenPKCSResource {
 	@GET
 	@Operation(summary = "Retrieve oxAuth PKCS #11 configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JanssenPKCS.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JanssenPKCS.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getJanssenPKCSConfiguration() {
 		try {		
 			
-			log.info("JanssenPKCSResource::getJanssenPKCSConfiguration() - Retrieve oxAuth JanssenPKCS configuration");
+			log.debug("JanssenPKCSResource::getJanssenPKCSConfiguration() - Retrieve oxAuth JanssenPKCS configuration");
 			JanssenPKCS janssenPKCS = new JanssenPKCS();
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
@@ -66,7 +69,7 @@ public class JanssenPKCSResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve oxAuth JanssenPKCS configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);		
 		}
 	}
 
@@ -74,12 +77,14 @@ public class JanssenPKCSResource {
 	@PUT
 	@Operation(summary = "Update oxAuth PKCS #11 configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateJanssenPKCSConfiguration(@Valid JanssenPKCS janssenPKCS) {
 		
 		try {
-			log.info("JanssenPKCSResource::updateJanssenPKCSConfiguration() - Update oxAuth JanssenPKCS configuration");
+			log.debug("JanssenPKCSResource::updateJanssenPKCSConfiguration() - Update oxAuth JanssenPKCS configuration");
 			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
@@ -97,7 +102,7 @@ public class JanssenPKCSResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth JanssenPKCS configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);			
 		}
 		
 	}

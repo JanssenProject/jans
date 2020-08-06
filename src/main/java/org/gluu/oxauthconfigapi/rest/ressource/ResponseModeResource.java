@@ -30,6 +30,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.common.ResponseMode;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 //import org.gluu.oxauthconfigapi.rest.model.ResponseMode;
 
@@ -41,7 +43,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.RESPONSES_MODES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ResponseModeResource {
+public class ResponseModeResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -52,12 +54,13 @@ public class ResponseModeResource {
 	@GET
 	@Operation(summary = "Retrieve oxAuth supported response modes")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = org.gluu.oxauthconfigapi.rest.model.ResponseMode.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = org.gluu.oxauthconfigapi.rest.model.ResponseMode.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSupportedResponseMode() {
 		Set<String> responseModesSupported = Sets.newHashSet();
 		try {
-			log.info("ResponseTypeResource::getSupportedResponseMode() - Retrieve oxAuth supported response modes");
+			log.debug("ResponseTypeResource::getSupportedResponseMode() - Retrieve oxAuth supported response modes");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		
 			for(ResponseMode responseMode : appConfiguration.getResponseModesSupported()) {
@@ -69,19 +72,22 @@ public class ResponseModeResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve oxAuth supported response modes", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);		
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update oxAuth supported response modes")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSupportedResponseMode(@Valid Set<org.gluu.oxauthconfigapi.rest.model.ResponseMode> responseModes) {
 		
 		try {
-			log.info("ResponseTypeResource::updateSupportedResponseMode() - Update oxAuth supported response modes");
+			log.debug("ResponseTypeResource::updateSupportedResponseMode() - Update oxAuth supported response modes");
+			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			Set<ResponseMode> responseModesSupported = Sets.newHashSet();
 			for(org.gluu.oxauthconfigapi.rest.model.ResponseMode mode : responseModes){
@@ -97,7 +103,7 @@ public class ResponseModeResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth supported response modes", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);		
 		}
 	}
 	

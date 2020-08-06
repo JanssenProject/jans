@@ -31,6 +31,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 //import org.gluu.oxauthconfigapi.rest.model.ResponseType;
 
@@ -41,7 +43,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.RESPONSES_TYPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ResponseTypeResource {
+public class ResponseTypeResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -52,13 +54,15 @@ public class ResponseTypeResource {
 	@GET
 	@Operation(summary = "Retrieve oxAuth supported response types")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = org.gluu.oxauthconfigapi.rest.model.ResponseType.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = org.gluu.oxauthconfigapi.rest.model.ResponseType.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSupportedResponseTypes() {
 		Set<Set<String>> responseTypesSupportedSet = Sets.newHashSet();
 		Set<String> responseTypes = null;
 		try {
-			log.info("ResponseTypeResource::getSupportedResponseTypes() - Retrieve oxAuth supported response types");
+			log.debug("ResponseTypeResource::getSupportedResponseTypes() - Retrieve oxAuth supported response types");
+			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		
 			for (Set<ResponseType> typeSet : appConfiguration.getResponseTypesSupported()) {
@@ -74,20 +78,22 @@ public class ResponseTypeResource {
 			return Response.ok(responseTypesSupportedSet).build();
 		}catch(Exception ex) {
 			log.error("Failed to retrieve oxAuth supported response types", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);	
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update oxAuth supported response types")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSupportedResponseTypes(@Valid Set<Set<org.gluu.oxauthconfigapi.rest.model.ResponseType>> responseTypeSet) {
 		Set<Set<ResponseType>> responseTypesSupportedSet = Sets.newHashSet();
 		Set<ResponseType> responseTypes = null;
 		try {
-			log.info("ResponseTypeResource::updateSupportedResponseTypes() - Update oxAuth supported response types");
+			log.debug("ResponseTypeResource::updateSupportedResponseTypes() - Update oxAuth supported response types");
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			
 			for (Set<org.gluu.oxauthconfigapi.rest.model.ResponseType> types : responseTypeSet) {
@@ -107,7 +113,7 @@ public class ResponseTypeResource {
 			return Response.ok(ResponseStatus.SUCCESS).build();
 		}catch(Exception ex) {
 			log.error("Failed to update oxAuth supported response types", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			return getInternalServerError(ex);	
 		}
 	}
 

@@ -24,13 +24,15 @@ import org.slf4j.Logger;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.DynamicConfiguration;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.DYN_REGISTRATION)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class DynamicConfigurationResource {
+public class DynamicConfigurationResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -41,8 +43,9 @@ public class DynamicConfigurationResource {
 	@GET
 	@Operation(summary = "Retrieve dynamic client registration configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DynamicConfiguration.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DynamicConfiguration.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getDynamicConfiguration() {
 		try {
 			log.debug("DynamicConfigurationResource::getDynamicConfiguration() - Retrieve dynamic client registration configuration");
@@ -64,19 +67,22 @@ public class DynamicConfigurationResource {
 					dynamicGrantTypeDefault.add(grantType.getValue());
 				dynamicConfiguration.setDynamicGrantTypeDefault(dynamicGrantTypeDefault);
 			}
+			
         	return Response.ok(dynamicConfiguration).build();
 						
 		}catch(Exception ex) {
 			log.error("Failed to retrieve dynamic client registration configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);			
 		}
 	}
 	
 	@PUT
 	@Operation(summary = "Update dynamic client registration configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateDynamicConfiguration(@Valid DynamicConfiguration dynamicConfiguration) {
 		try {
 			log.debug("DynamicConfigurationResource::updateDynamicConfiguration() - Update dynamic client registration configuration");
@@ -106,9 +112,10 @@ public class DynamicConfigurationResource {
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 			
 			return Response.ok(dynamicConfiguration).build();
+			
 		}catch(Exception ex) {
 			log.error("Failed to update dynamic client registration configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);			
 		}
 	}
 	
