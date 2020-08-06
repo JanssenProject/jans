@@ -153,6 +153,12 @@ class PropertiesUtils(SetupUtils):
             self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
             p['ldap_type'] = 'opendj'
 
+        if p.get('cb_install') == '0':
+           p['cb_install'] = InstallTypes.NONE
+
+        if p.get('wrends_install') == '0':
+            p['wrends_install'] = InstallTypes.NONE
+
         properties_list = list(p.keys())
 
         for prop in properties_list:
