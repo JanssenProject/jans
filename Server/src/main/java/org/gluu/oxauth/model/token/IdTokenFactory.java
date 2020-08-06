@@ -307,7 +307,9 @@ public class IdTokenFactory {
             if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                 if (ldapName.equals("uid")) {
                     attribute = user.getUserId();
-                } else if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                } else if (ldapName.equals("updatedAt")) {
+                    attribute = user.getUpdatedAt();
+                } if (AttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                     attribute = Boolean.parseBoolean(String.valueOf(user.getAttribute(gluuAttribute.getName(), true, gluuAttribute.getOxMultiValuedAttribute())));
                 } else if (AttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                     SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
