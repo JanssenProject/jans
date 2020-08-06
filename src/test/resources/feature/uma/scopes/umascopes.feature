@@ -63,7 +63,7 @@ And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
 
-Scenario: Get an uma client by inum
+Scenario: Get an uma scope by inum
 Given url umascopes_url
 And header Authorization = 'Bearer ' + accessToken
 When method GET

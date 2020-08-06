@@ -47,8 +47,11 @@ function() {
 	    // OpenIdConnect Sectors Endpoint
 	    openidsectors_url: baseUrl + ':' + port + '/api/v1/oxauth/openid/sectoridentifiers',
 	    
-	    // Uma scope
+	    // Uma scopes
 	    umascopes_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/scopes',
+	    
+	   // Uma resources
+	    umaresources_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/resources',
 	    
 	    };
     
