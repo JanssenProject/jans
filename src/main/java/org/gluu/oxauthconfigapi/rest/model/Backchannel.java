@@ -38,6 +38,7 @@ public class Backchannel implements Serializable {
 	
 	private Boolean backchannelUserCodeParameterSupported;
 	
+	@Size(min=0)
 	private String backchannelBindingMessagePattern;
 	
 	@Min(value = 1, message = "Backchannel Authentication Response Expires In should not be less than 1")

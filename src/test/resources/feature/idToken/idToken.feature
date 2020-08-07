@@ -1,10 +1,19 @@
-Feature: Verify Pairwise configuration endpoint
+Feature: Verify idToken configuration endpoint
 
   	Background:
-  	* def mainUrl = pairwiseUrl
+  	* def mainUrl = idTokenUrl
+  	
+  	@idtoken-put-json
+  	Scenario: Update idToken configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request read('idToken.json')
+    When method PUT
+    Then status 200
+    And print response
 
- 	@pairwise-get
-  	Scenario: Retrieve pairwise configuration
+ 	@idtoken-get
+  	Scenario: Retrieve idToken configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -13,8 +22,8 @@ Feature: Verify Pairwise configuration endpoint
     And assert response.length != null
     
     
-    @pairwise-put
-  	Scenario: Update pairwise configuration
+    @idtoken-put
+  	Scenario: Update idToken configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -22,9 +31,6 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    #Then set result.pairwiseIdType = 'algorithmic'
-    #Then set result.pairwiseCalculationKey = 'YQmxW1ciznJW0SojsddI5ksk'
-    #Then set result.pairwiseCalculationSalt = 'xewqsr9U3bO7HRAJYmu25'
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -33,7 +39,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseIdType configuration cannot be null
+  	Scenario: idTokenSigningAlgValuesSupported configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -41,7 +47,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseIdType = null
+    Then set result.idTokenSigningAlgValuesSupported = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -50,7 +56,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseIdType configuration cannot be other than persistent or algorithmic
+  	Scenario: idTokenEncryptionAlgValuesSupported configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -58,7 +64,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseIdType = 'xyz'
+    Then set result.idTokenEncryptionAlgValuesSupported = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -66,25 +72,9 @@ Feature: Verify Pairwise configuration endpoint
     Then status 400
     And print response
     
-    @error
-  	Scenario: pairwiseCalculationKey configuration cannot be null
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    When method GET
-    Then status 200
-    And print response
-    And assert response.length != null
-    Then def result = response 
-    Then set result.pairwiseCalculationKey = null
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request result
-    When method PUT
-    Then status 400
-    And print response
     
     @error
-  	Scenario: pairwiseCalculationSalt configuration cannot be null
+  	Scenario: idTokenEncryptionEncValuesSupported configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -92,7 +82,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseCalculationSalt = null
+    Then set result.idTokenEncryptionEncValuesSupported = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result

@@ -8,9 +8,11 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.validation.constraints.Pattern;
 
-public class DynamicConfiguration  implements Serializable {
+public class DynamicRegistration  implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,6 +25,8 @@ public class DynamicConfiguration  implements Serializable {
 	@NotBlank
 	@Size(min=1)
 	private String dynamicRegistrationCustomObjectClass;
+	
+	@Pattern(regexp ="public|pairwise")
 	private String defaultSubjectType;
 	
 	@Min(value=0)
@@ -30,9 +34,11 @@ public class DynamicConfiguration  implements Serializable {
 	@Digits(integer = 10 , fraction = 0)
 	private int dynamicRegistrationExpirationTime = -1;
 	
+	@NotNull
 	@Size(min=1)
 	private Set<String> dynamicGrantTypeDefault;
 	
+	@NotNull
 	@Size(min=1)
 	private List<String> dynamicRegistrationCustomAttributes;
 

@@ -4,17 +4,21 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.constraints.Size;
+import javax.validation.constraints.NotNull;
 
 public class IdToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	 @NotNull
 	 @Size(min=1)
 	 private List<String> idTokenSigningAlgValuesSupported;
 	 
+	 @NotNull
 	 @Size(min=1)
 	 private List<String> idTokenEncryptionAlgValuesSupported;
 	 
+	 @NotNull
 	 @Size(min=1)
 	 private List<String> idTokenEncryptionEncValuesSupported;
 	 

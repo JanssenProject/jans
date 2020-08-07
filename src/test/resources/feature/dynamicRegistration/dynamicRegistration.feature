@@ -1,10 +1,20 @@
-Feature: Verify Pairwise configuration endpoint
+Feature: Verify DynamicRegistration configuration endpoint
 
   	Background:
-  	* def mainUrl = pairwiseUrl
+  	* def mainUrl = dynamicRegistrationUrl
+  	
+  	@dynamicRegistration-put-json
+  	Scenario: Update Dynamic Registration configuration
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request read('dynamicRegistration.json')
+    When method PUT
+    Then status 200
+    And print response
+    And assert response.length != null
 
- 	@pairwise-get
-  	Scenario: Retrieve pairwise configuration
+ 	@dynamicRegistration-get
+  	Scenario: Retrieve Dynamic Registration configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -13,8 +23,8 @@ Feature: Verify Pairwise configuration endpoint
     And assert response.length != null
     
     
-    @pairwise-put
-  	Scenario: Update pairwise configuration
+    @dynamicRegistration-put
+  	Scenario: Update Dynamic Registration configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -22,9 +32,6 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    #Then set result.pairwiseIdType = 'algorithmic'
-    #Then set result.pairwiseCalculationKey = 'YQmxW1ciznJW0SojsddI5ksk'
-    #Then set result.pairwiseCalculationSalt = 'xewqsr9U3bO7HRAJYmu25'
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -33,7 +40,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseIdType configuration cannot be null
+  	Scenario: dynamicRegistrationCustomObjectClass configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -41,7 +48,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseIdType = null
+    Then set result.dynamicRegistrationCustomObjectClass = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -50,7 +57,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseIdType configuration cannot be other than persistent or algorithmic
+  	Scenario: defaultSubjectType configuration cannot be other than public or pairwise
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -58,7 +65,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseIdType = 'xyz'
+    Then set result.defaultSubjectType = 'abc'
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -67,7 +74,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseCalculationKey configuration cannot be null
+  	Scenario: dynamicRegistrationExpirationTime configuration should be int and not decimal
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -75,7 +82,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseCalculationKey = null
+    Then set result.dynamicRegistrationExpirationTime = 20.5
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -84,7 +91,7 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     
     @error
-  	Scenario: pairwiseCalculationSalt configuration cannot be null
+  	Scenario: dynamicGrantTypeDefault configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -92,7 +99,25 @@ Feature: Verify Pairwise configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.pairwiseCalculationSalt = null
+    Then set result.dynamicGrantTypeDefault = null
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request result
+    When method PUT
+    Then status 400
+    And print response
+
+    
+    @error
+  	Scenario: dynamicRegistrationCustomAttributes configuration cannot be null
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 200
+    And print response
+    And assert response.length != null
+    Then def result = response 
+    Then set result.dynamicRegistrationCustomAttributes = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result

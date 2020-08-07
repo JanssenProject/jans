@@ -1,0 +1,19 @@
+{
+
+	"defaultSubjectType":"pairwise",
+	"dynamicGrantTypeDefault":["refresh_token",
+							   "implicit",
+							   "client_credentials",
+							   "authorization_code",
+							   "urn:ietf:params:oauth:grant-type:uma-ticket"],
+	"dynamicRegistrationCustomAttributes":["oxAuthTrustedClient"],
+	"dynamicRegistrationCustomObjectClass":"MyDynamicRegistrationCustomObject",
+	"dynamicRegistrationEnabled":true,
+	"dynamicRegistrationExpirationTime":10,
+	"dynamicRegistrationPasswordGrantTypeEnabled":false,
+	"dynamicRegistrationPersistClientAuthorizations":true,
+	"dynamicRegistrationScopesParamEnabled":true,
+	"legacyDynamicRegistrationScopeParam":false
+
+}
+
