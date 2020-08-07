@@ -593,6 +593,13 @@
 				<version>2.3.1</version>
 			</dependency>
 
+			<!-- Velocity -->
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-engine-core</artifactId>
+				<version>2.2</version>
+			</dependency>
+
 			<!-- Tests -->
 			<dependency>
 				<groupId>org.testng</groupId>
