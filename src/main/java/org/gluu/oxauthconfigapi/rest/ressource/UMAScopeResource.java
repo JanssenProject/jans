@@ -109,9 +109,7 @@ public class UMAScopeResource extends BaseResource {
 			String inum = umaScopeService.generateInumForNewScope();
 			scope.setInum(inum);
 			scope.setDn(umaScopeService.getDnForScope(inum));
-			if (scope.getScopeType() == null) {
-				scope.setScopeType(ScopeType.OAUTH);
-			}
+			scope.setScopeType(ScopeType.UMA);
 			umaScopeService.addUmaScope(scope);
 			Scope result = umaScopeService.getUmaScopeByInum(inum);
 			return Response.status(Response.Status.CREATED).entity(result).build();
@@ -142,6 +140,7 @@ public class UMAScopeResource extends BaseResource {
 			}
 			scope.setInum(existingScope.getInum());
 			scope.setBaseDn(umaScopeService.getDnForScope(inum));
+			scope.setScopeType(ScopeType.UMA);
 			umaScopeService.updateUmaScope(scope);
 			Scope result = umaScopeService.getUmaScopeByInum(inum);
 			return Response.ok(result).build();

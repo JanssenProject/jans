@@ -109,10 +109,14 @@ public class OIDScopeResource extends BaseResource {
 			if (scope.getDisplayName() == null) {
 				scope.setDisplayName(scope.getId());
 			}
+
 			String inum = scopeService.generateInumForNewScope();
 			scope.setInum(inum);
 			scope.setDn(scopeService.getDnForScope(inum));
 			if (scope.getScopeType() == null) {
+				scope.setScopeType(ScopeType.OAUTH);
+			}
+			if (ScopeType.UMA.getValue().equalsIgnoreCase(scope.getScopeType().getValue())) {
 				scope.setScopeType(ScopeType.OAUTH);
 			}
 			scopeService.addScope(scope);
@@ -142,6 +146,12 @@ public class OIDScopeResource extends BaseResource {
 			Scope existingScope = scopeService.getScopeByInum(inum);
 			if (existingScope == null) {
 				return getResourceNotFoundError();
+			}
+			if (scope.getScopeType() == null) {
+				scope.setScopeType(ScopeType.OAUTH);
+			}
+			if (ScopeType.UMA.getValue().equalsIgnoreCase(scope.getScopeType().getValue())) {
+				scope.setScopeType(ScopeType.OAUTH);
 			}
 			scope.setInum(existingScope.getInum());
 			scope.setBaseDn(scopeService.getDnForScope(inum));
