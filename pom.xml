@@ -13,8 +13,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<resteasy.version>3.11.2.Final</resteasy.version>
-		<resteasy.jaxrs.version>3.11.2.Final</resteasy.jaxrs.version>
+		<resteasy.version>3.13.0.Final</resteasy.version>
+		<resteasy.jaxrs.version>3.13.0.Final</resteasy.jaxrs.version>
 
 		<httpcore.version>4.4.13</httpcore.version>
 		<httpclient.version>4.5.12</httpclient.version>
@@ -27,15 +27,16 @@
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
-		<jackson.version>2.10.1</jackson.version>
-		<jackson.databind.version>2.10.1</jackson.databind.version>
-		<json.version>20180813</json.version>
+		<jackson.version>2.11.2</jackson.version>
+		<jackson.databind.version>2.11.2</jackson.databind.version>
+		<json.version>20200518</json.version>
+
 		<log4j.version>2.13.3</log4j.version>
 		<slf4j.version>1.7.30</slf4j.version>
 
-		<guava.version>27.1-jre</guava.version>
+		<guava.version>29.0-jre</guava.version>
 
-		<aws.sns.version>1.11.300</aws.sns.version>
+		<aws.sns.version>1.11.836</aws.sns.version>
 	</properties>
 
 	<repositories>
@@ -192,17 +193,17 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.64</version>
+				<version>1.66</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.64</version>
+				<version>1.66</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>8.2</version>
+				<version>8.20</version>
 			</dependency>
 
 			<!-- Weld -->
@@ -290,7 +291,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.6</version>
+				<version>2.7</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-lang</groupId>
@@ -300,7 +301,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.12</version>
+				<version>1.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -315,7 +316,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.6</version>
+				<version>1.9</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-beanutils</groupId>
@@ -425,12 +426,12 @@
         		 <dependency>
 			        <groupId>org.apache.jackrabbit</groupId>
 		        	<artifactId>jackrabbit-core</artifactId>
-			        <version>2.21.0</version>
+			        <version>2.21.3</version>
 			 </dependency>
 			 <dependency>
 			    	<groupId>org.apache.jackrabbit</groupId>
 			    	<artifactId>jackrabbit-jcr-rmi</artifactId>
-			    	<version>2.21.0</version>
+			    	<version>2.21.3</version>
 			 </dependency>
 
 			<!-- RestEasy -->
@@ -535,21 +536,21 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>4.0.14</version>
+				<version>5.1.0</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>2.7.11</version>
+				<version>2.7.16</version>
 			</dependency>
 
 			<!-- Metrics -->
 			<dependency>
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
-				<version>4.0.5</version>
+				<version>4.1.11</version>
 			</dependency>
 
 			<!-- Jetty -->
@@ -578,7 +579,7 @@
 			<dependency>
 				<groupId>org.reflections</groupId>
 				<artifactId>reflections</artifactId>
-				<version>0.9.11</version>
+				<version>0.9.12</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -602,7 +603,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>4.13</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -611,7 +612,7 @@
 			<dependency>
 				<groupId>com.beust</groupId>
 				<artifactId>jcommander</artifactId>
-				<version>1.72</version>
+				<version>1.78</version>
 				<scope>test</scope>
 			</dependency>
 
