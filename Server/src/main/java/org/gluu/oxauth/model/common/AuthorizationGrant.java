@@ -96,9 +96,10 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public IdToken createIdToken(
             IAuthorizationGrant grant, String nonce,
             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
+            Void> preProcessing, String claims) throws Exception {
         JsonWebResponse jwr = idTokenFactory.createJwr(grant, nonce, authorizationCode, accessToken, refreshToken,
-                state, scopes, includeIdTokenClaims, preProcessing);
+                state, scopes, includeIdTokenClaims, preProcessing, claims);
         return new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
     }
@@ -262,7 +263,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             String state, AuthorizationGrant authorizationGrant, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) {
         try {
             final IdToken idToken = createIdToken(this, nonce, authorizationCode, accessToken, refreshToken,
-                    state, getScopes(), includeIdTokenClaims, preProcessing);
+                    state, getScopes(), includeIdTokenClaims, preProcessing, this.getClaims());
             final String acrValues = authorizationGrant.getAcrValues();
             final String sessionDn = authorizationGrant.getSessionDn();
             if (idToken.getExpiresIn() > 0) {
