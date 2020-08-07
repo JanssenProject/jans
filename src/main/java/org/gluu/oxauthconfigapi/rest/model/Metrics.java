@@ -24,14 +24,14 @@ public class Metrics implements Serializable {
 	 */
 	@Positive
 	@Min(value=1)
-	private Integer metricReporterKeepDataDays;
+	private int metricReporterKeepDataDays;
 	
 	/**
 	 * The interval for metric reporter in seconds
 	 */
 	@Positive
 	@Min(value=1)
-	private Integer metricReporterInterval;
+	private int metricReporterInterval;
 	
 	
 	public Boolean getMetricReporterEnabled() {
@@ -42,19 +42,19 @@ public class Metrics implements Serializable {
 		this.metricReporterEnabled = metricReporterEnabled;
 	}
 	
-	public Integer getMetricReporterKeepDataDays() {
+	public int getMetricReporterKeepDataDays() {
 		return metricReporterKeepDataDays;
 	}
 	
-	public void setMetricReporterKeepDataDays(Integer metricReporterKeepDataDays) {
+	public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
 		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
 	}
 	
-	public Integer getMetricReporterInterval() {
+	public int getMetricReporterInterval() {
 		return metricReporterInterval;
 	}
 	
-	public void setMetricReporterInterval(Integer metricReporterInterval) {
+	public void setMetricReporterInterval(int metricReporterInterval) {
 		this.metricReporterInterval = metricReporterInterval;
 	}
 	

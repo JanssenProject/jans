@@ -34,6 +34,12 @@ function() {
 	    
 	    // Metrics endpoint
 	    metricsUrl: baseUrl + ':' + port + '/api/v1/oxauth/metrics',
+	    
+	    // DynamicRegistration endpoint
+	    dynamicRegistrationUrl: baseUrl + ':' + port + '/api/v1/oxauth/dyn_registration',
+	    
+	    // idToken endpoint
+	    idTokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/idtoken',
 
 	    // sessionId endpoint
 	    sessionidUrl: baseUrl + ':' + port + '/api/v1/oxauth/sessionid',

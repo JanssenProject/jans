@@ -44,6 +44,5 @@ Background:
    When method PUT
    Then status 400
    And print response
-   
-   
+
    
