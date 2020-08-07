@@ -30,6 +30,7 @@ import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.oxauth.persistence.model.Scope;
 
 import javax.ejb.Stateless;
@@ -105,7 +106,8 @@ public class IdTokenFactory {
     private void fillClaims(JsonWebResponse jwr,
                             IAuthorizationGrant authorizationGrant, String nonce,
                             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+                            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
+                            Void> preProcessing, String requestedClaims) throws Exception {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         Audience.setAudience(jwr.getClaims(), authorizationGrant.getClient());
@@ -204,6 +206,7 @@ public class IdTokenFactory {
         }
 
         setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
+        setClaimsFromRequestedClaims(requestedClaims, jwr, user);
         jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -213,6 +216,42 @@ public class IdTokenFactory {
         }
 
         processCiba(jwr, authorizationGrant, refreshToken);
+    }
+
+    /**
+     * Process requested claims in the authorization request.
+     * @param requestedClaims Json containing all claims listed in authz request.
+     * @param jwr Json that contains all claims that should go in id_token.
+     * @param user Authenticated user.
+     */
+    private void setClaimsFromRequestedClaims(String requestedClaims, JsonWebResponse jwr, User user)
+            throws InvalidClaimException {
+        if (requestedClaims != null) {
+            JSONObject claimsObj = new JSONObject(requestedClaims);
+            if (claimsObj.has("id_token")) {
+                JSONObject idTokenObj = claimsObj.getJSONObject("id_token");
+                for (Iterator<String> it = idTokenObj.keys(); it.hasNext(); ) {
+                    String claimName = it.next();
+                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claimName);
+
+                    if (gluuAttribute != null) {
+                        String ldapClaimName = gluuAttribute.getName();
+
+                        Object attribute = user.getAttribute(ldapClaimName, false, gluuAttribute.getOxMultiValuedAttribute());
+
+                        if (attribute instanceof List) {
+                            jwr.getClaims().setClaim(claimName, (List) attribute);
+                        } else if (attribute instanceof Boolean) {
+                            jwr.getClaims().setClaim(claimName, (Boolean) attribute);
+                        } else if (attribute instanceof Date) {
+                            jwr.getClaims().setClaim(claimName, ((Date) attribute).getTime());
+                        } else {
+                            jwr.setClaim(claimName, (String) attribute);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void processCiba(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant, RefreshToken refreshToken) {
@@ -254,12 +293,14 @@ public class IdTokenFactory {
     public JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce,
             AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
-            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse, Void> preProcessing) throws Exception {
+            String state, Set<String> scopes, boolean includeIdTokenClaims, Function<JsonWebResponse,
+            Void> preProcessing, String claims) throws Exception {
 
         final Client client = grant.getClient();
 
         JsonWebResponse jwr = jwrService.createJwr(client);
-        fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes, includeIdTokenClaims, preProcessing);
+        fillClaims(jwr, grant, nonce, authorizationCode, accessToken, refreshToken, state, scopes,
+                includeIdTokenClaims, preProcessing, claims);
         return jwrService.encode(jwr, client);
     }
 
