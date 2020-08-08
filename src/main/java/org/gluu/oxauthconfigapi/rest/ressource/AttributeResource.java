@@ -63,18 +63,20 @@ public class AttributeResource extends BaseResource {
 			List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
 			if (status.equalsIgnoreCase(ApiConstants.ALL)) {
 				if (!pattern.isEmpty() && pattern.length() >= 2) {
-
+					attributes = attributeService.getAllAttributes();
 				} else {
-
+					attributes = attributeService.getAllAttributes();
 				}
 
 			} else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
+				attributes = attributeService.getAllAttributes();
 
 			} else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
 
 			}
 			return Response.ok(attributes).build();
 		} catch (Exception e) {
+			logger.error("Failed to fetch attributes " + e);
 			return getInternalServerError(e);
 		}
 	}
@@ -95,7 +97,7 @@ public class AttributeResource extends BaseResource {
 			}
 			return Response.ok(attribute).build();
 		} catch (Exception ex) {
-			logger.error("Failed to fetch  OpenId Connect Scope " + inum, ex);
+			logger.error("Failed to fetch  attribute by inum " + inum, ex);
 			return getInternalServerError(ex);
 		}
 	}
@@ -111,11 +113,9 @@ public class AttributeResource extends BaseResource {
 			if (attribute.getName() == null) {
 				return getMissingAttributeError(AttributeNames.NAME);
 			}
-
 			if (attribute.getDisplayName() == null) {
 				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
 			}
-
 			String inum = attributeService.generateInumForNewAttribute();
 			attribute.setInum(inum);
 			attribute.setDn(attributeService.getDnForAttribute(inum));
