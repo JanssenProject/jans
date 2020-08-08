@@ -97,6 +97,7 @@ public class AppConfiguration implements Configuration {
     private int authorizationCodeLifetime;
     private int refreshTokenLifetime;
     private int idTokenLifetime;
+    private Boolean idTokenFilterClaimsBasedOnAccessToken;
     private int accessTokenLifetime;
 
     private int cleanServiceInterval;
@@ -1917,5 +1918,13 @@ public class AppConfiguration implements Configuration {
 
     public void setRequestUriHashVerificationEnabled(Boolean requestUriHashVerificationEnabled) {
         this.requestUriHashVerificationEnabled = requestUriHashVerificationEnabled;
+    }
+
+    public Boolean getIdTokenFilterClaimsBasedOnAccessToken() {
+        return idTokenFilterClaimsBasedOnAccessToken != null ? idTokenFilterClaimsBasedOnAccessToken : false;
+    }
+
+    public void setIdTokenFilterClaimsBasedOnAccessToken(Boolean idTokenFilterClaimsBasedOnAccessToken) {
+        this.idTokenFilterClaimsBasedOnAccessToken = idTokenFilterClaimsBasedOnAccessToken;
     }
 }
