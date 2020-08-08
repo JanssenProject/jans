@@ -21,6 +21,7 @@ import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
 import org.gluu.oxauth.model.jwt.JwtClaimName;
+import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.AttributeService;
@@ -207,6 +208,7 @@ public class IdTokenFactory {
 
         setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
         setClaimsFromRequestedClaims(requestedClaims, jwr, user);
+        filterClaimsBasedOnAccessToken(jwr, accessToken);
         jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -216,6 +218,22 @@ public class IdTokenFactory {
         }
 
         processCiba(jwr, authorizationGrant, refreshToken);
+    }
+
+    /**
+     * Filters some claims from id_token based on if access_token is issued or not.
+     * openid-connect-core-1_0.html Section 5.4
+     * @param jwr Json object that contains all claims used in the id_token.
+     * @param accessToken Access token issued for this authorization.
+     */
+    private void filterClaimsBasedOnAccessToken(JsonWebResponse jwr, AccessToken accessToken) {
+        if (accessToken != null && appConfiguration.getIdTokenFilterClaimsBasedOnAccessToken()) {
+            JwtClaims claims = jwr.getClaims();
+            claims.removeClaim(JwtClaimName.PROFILE);
+            claims.removeClaim(JwtClaimName.EMAIL);
+            claims.removeClaim(JwtClaimName.ADDRESS);
+            claims.removeClaim(JwtClaimName.PHONE_NUMBER);
+        }
     }
 
     /**
