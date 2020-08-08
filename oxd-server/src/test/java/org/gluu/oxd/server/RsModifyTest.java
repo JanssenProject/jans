@@ -1,7 +1,6 @@
 package org.gluu.oxd.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.assertj.core.util.Lists;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.common.params.RsModifyParams;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
@@ -9,6 +8,7 @@ import org.gluu.oxd.common.response.RsModifyResponse;
 import org.gluu.oxd.rs.protect.RsResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
 import java.io.IOException;
 import java.util.List;

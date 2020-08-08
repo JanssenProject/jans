@@ -3,7 +3,6 @@ package org.gluu.oxd.server.service;
 import com.google.inject.Inject;
 import io.dropwizard.configuration.ConfigurationException;
 import io.dropwizard.testing.ResourceHelpers;
-import org.assertj.core.util.Lists;
 import org.gluu.oxd.common.ErrorResponseCode;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.server.HttpException;
@@ -11,6 +10,7 @@ import org.gluu.oxd.server.TestUtils;
 import org.gluu.oxd.server.guice.GuiceModule;
 import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.testng.annotations.*;
+import org.testng.collections.Lists;
 
 import java.io.IOException;
 import java.util.UUID;
