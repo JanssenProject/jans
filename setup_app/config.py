@@ -311,22 +311,28 @@ class Config:
                                         'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
                                     }),
 
-                        ('cache',    {   'ldif': [],
-                                        'memory_allocation': 300,
-                                        'mapping': 'cache, sessions',
-                                        'document_key_prefix': ['cache_'],
-                                    }),
-
                         ('site',     {   'ldif': [self.ldif_site],
                                         'memory_allocation': 100,
                                         'mapping': 'cache-refresh',
                                         'document_key_prefix': ['site_', 'cache-refresh_'],
                                     }),
 
+                        ('cache',    {   'ldif': [],
+                                        'memory_allocation': 100,
+                                        'mapping': 'cache',
+                                        'document_key_prefix': ['cache_'],
+                                    }),
+
                         ('token',   { 'ldif': [],
                                       'memory_allocation': 300,
                                       'mapping': 'tokens',
                                       'document_key_prefix': ['tokens_'],
+                                    }),
+
+                        ('session',   { 'ldif': [],
+                                      'memory_allocation': 200,
+                                      'mapping': 'sessions',
+                                      'document_key_prefix': [],
                                     }),
 
                     ))
