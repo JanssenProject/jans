@@ -1,15 +1,14 @@
 package org.gluu.oxauth.model.util;
 
+import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
 public class HashUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(HashUtil.class);
+    private final static Logger log = Logger.getLogger(HashUtil.class);
 
     private HashUtil() {
     }
