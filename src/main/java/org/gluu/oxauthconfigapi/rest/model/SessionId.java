@@ -2,17 +2,35 @@ package org.gluu.oxauthconfigapi.rest.model;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Positive;
+
 public class SessionId implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	@Positive
+    @Min(value=1)
+    @Max(value=2147483647)
 	private int sessionIdUnusedLifetime;
+	
+	@Positive
+    @Min(value=1)
+    @Max(value=2147483647)
 	private int sessionIdUnauthenticatedUnusedLifetime;
-	private Integer sessionIdLifetime ;
+	
+	@Min(value=-1)
+    @Max(value=2147483647)
+	private int sessionIdLifetime;
+	
 	private Boolean sessionIdEnabled;
 	private Boolean changeSessionIdOnAuthentication;
 	private Boolean sessionIdRequestParameterEnabled;
 	private Boolean sessionIdPersistOnPromptNone;
+	
+	@Min(value=-1)
+    @Max(value=2147483647)
 	private Integer serverSessionIdLifetime;
 		
 	public int getSessionIdUnusedLifetime() {

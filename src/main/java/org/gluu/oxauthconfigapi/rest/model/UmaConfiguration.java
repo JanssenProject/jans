@@ -6,6 +6,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Size;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
 
 public class UmaConfiguration implements Serializable{
 	
@@ -15,10 +16,12 @@ public class UmaConfiguration implements Serializable{
 	@Size(min=1)
 	private String umaConfigurationEndpoint;
 	
+	@Positive
     @Min(value=1)
     @Max(value=2147483647)
 	private int umaRptLifetime;
     
+	@Positive
     @Min(value=1)
     @Max(value=2147483647)
     private int umaTicketLifetime;
@@ -27,6 +30,7 @@ public class UmaConfiguration implements Serializable{
     @Max(value=2147483647)
     private int umaPctLifetime;
     
+    @Positive
     @Min(value=1)
     @Max(value=2147483647)
     private int umaResourceLifetime;
