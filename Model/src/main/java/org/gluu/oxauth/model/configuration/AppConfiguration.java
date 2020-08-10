@@ -208,6 +208,7 @@ public class AppConfiguration implements Configuration {
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled  = false;
     private Boolean removeRefreshTokensForClientOnLogout  = true;
+    private Boolean skipRefreshTokenDuringRefreshing  = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
 
@@ -238,6 +239,16 @@ public class AppConfiguration implements Configuration {
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
+
+    public Boolean getSkipRefreshTokenDuringRefreshing() {
+        if (skipRefreshTokenDuringRefreshing == null) skipRefreshTokenDuringRefreshing = false;
+        return skipRefreshTokenDuringRefreshing;
+    }
+
+    public void setSkipRefreshTokenDuringRefreshing(Boolean skipRefreshTokenDuringRefreshing) {
+        this.skipRefreshTokenDuringRefreshing = skipRefreshTokenDuringRefreshing;
+    }
+
 
     public Boolean getExpirationNotificatorEnabled() {
         if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = false;
