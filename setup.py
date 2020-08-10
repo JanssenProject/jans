@@ -355,8 +355,8 @@ if not GSA and proceed:
 else:
     Config.thread_queue = queue
     GSA.do_installation = do_installation
-    GSA.gluuInstaller = gluuInstaller
     GSA.jettyInstaller = jettyInstaller
+    GSA.setup_loaded = setup_loaded
     GSA.run()
     print('\033c')
     print()
