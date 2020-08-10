@@ -2,6 +2,7 @@ package org.gluu.oxauth.model.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
@@ -10,8 +11,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.util.encoders.Base64;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -24,7 +23,7 @@ import java.security.cert.X509Certificate;
  */
 public class CertUtils {
 
-    private final static Logger log = LoggerFactory.getLogger(CertUtils.class);
+    private final static Logger log = Logger.getLogger(CertUtils.class);
 
     private CertUtils() {
     }
