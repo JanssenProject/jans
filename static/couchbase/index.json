@@ -77,10 +77,8 @@
 
   "!bucket_prefix!_cache": {
     "attributes":[
-        ["oxAuthUserDN"]
     ],
     "static" : [
-        [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
@@ -91,6 +89,15 @@
     "static" : [
         [["grtId"], "objectClass = \"token\""],
         [["ssnId"], "objectClass = \"token\""]
+    ]
+  },
+
+  "!bucket_prefix!_session": {
+    "attributes": [
+      ["oxAuthUserDN"]
+    ],
+    "static" : [
+        [["exp"], "objectClass = \"oxAuthSessionId\""]
     ]
   },
 
