@@ -53,14 +53,16 @@ class GluuSetupApp(npyscreen.StandardApp):
     exit_reason = str()
     my_counter = 0
     do_notify = True
-    gluuInstaller = None
     installed_instance = None
     jettyInstaller = None
+    setup_loaded = {}
 
     def onStart(self):
 
         if Config.installed_instance: 
             self.addForm('MAIN', ServicesForm, name=msg.MAIN_label)
+        elif self.setup_loaded:
+            self.addForm('MAIN', DisplaySummaryForm, name=msg.DisplaySummaryForm_label)
         else:
             self.addForm('MAIN', MAIN, name=msg.ServicesForm_label)
             self.addForm('ServicesForm', ServicesForm, name=msg.ServicesForm_label)
@@ -245,7 +247,7 @@ class HostForm(GluuSetupForm):
 
     def do_beforeEditing(self):
         if not Config.hostname:
-            Config.hostname = self.parentApp.gluuInstaller.detect_hostname()
+            Config.hostname = self.parentApp.jettyInstaller.detect_hostname()
 
         for k in self.myfields_:
             f = getattr(self, k)
@@ -692,6 +694,10 @@ class DisplaySummaryForm(GluuSetupForm):
                         w.value += ' *'
                         w.labelColor = 'STANDOUT'
             w.update()
+
+        if self.parentApp.setup_loaded:
+            self.button_back.hidden=True
+            self.button_back.update()
 
     def backButtonPressed(self):
         if Config.installed_instance:
