@@ -25,11 +25,17 @@ public class ApiConstants {
 	public static final String PAIRWISE = "/pairwise";
 	public static final String FIDO2 = "/fido2";
 	public static final String RESOURCES = "/resources";
+	public static final String ATTRIBUTES = "/attributes";
 	public static final String INUM_PATH = "{inum}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
+	public static final String STATUS = "status";
 	public static final String INUM = "inum";
+
+	public static final String ALL = "all";
+	public static final String ACTIVE = "active";
+	public static final String INACTIVE = "inactive";
 
 	public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
 

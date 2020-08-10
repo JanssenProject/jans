@@ -80,8 +80,11 @@ function() {
 	    // Uma scopes
 	    umascopes_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/scopes',
 	    
-	   // Uma resources
+	    // Uma resources
 	    umaresources_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/resources',
+	    
+	    // Uma resources
+	    attributes_url: baseUrl + ':' + port + '/api/v1/oxauth/attributes',
 	    
 	    };
     
