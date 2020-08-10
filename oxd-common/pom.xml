@@ -85,6 +85,10 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>uma-rs-resteasy</artifactId>
         </dependency>
@@ -99,6 +103,10 @@
         <dependency>
             <groupId>org.gluu</groupId>
             <artifactId>oxcore-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxcore-persistence-annotation</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
@@ -165,6 +173,14 @@
         <dependency>
             <groupId>net.sourceforge.htmlunit</groupId>
             <artifactId>htmlunit-cssparser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxb-provider</artifactId>
         </dependency>
     </dependencies>
 
