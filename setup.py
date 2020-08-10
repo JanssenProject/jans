@@ -58,8 +58,6 @@ from setup_app.installers.oxd import OxdInstaller
 from setup_app.installers.casa import CasaInstaller
 
 
-
-
 # initialize config object
 Config.init(paths.INSTALL_DIR)
 Config.determine_version()
@@ -149,7 +147,7 @@ if os.path.exists(Config.gluu_properties_fn):
         sys.exit()
 
 
-if not Config.noPrompt and not GSA and not Config.installed_instance:
+if not Config.noPrompt and not GSA and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 
 if not GSA:
