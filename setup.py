@@ -126,7 +126,7 @@ if not GSA:
     print("Detected Apache :  {}".format(base.determineApacheVersion()))
     print()
 
-
+setup_loaded = {}
 if setupOptions['setup_properties']:
     base.logIt('%s Properties found!\n' % setupOptions['setup_properties'])
     setup_loaded = propertiesUtils.load_properties(setupOptions['setup_properties'])

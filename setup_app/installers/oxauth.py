@@ -92,9 +92,11 @@ class OxauthInstaller(JettyInstaller):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
-    def make_salt(self):
-        Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
-        Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
+    def make_salt(self, enforce=False):
+        if not Config.get('pairwiseCalculationKey') or enforce:
+            Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        if not Config.get('pairwiseCalculationSalt') or enforce:
+            Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def copy_static(self):
         self.copyFile(
