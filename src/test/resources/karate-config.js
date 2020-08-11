@@ -86,6 +86,9 @@ function() {
 	    // Uma resources
 	    attributes_url: baseUrl + ':' + port + '/api/v1/oxauth/attributes',
 	    
+	    // Person Scripts
+	    personscripts_url: baseUrl + ':' + port + '/api/v1/oxauth/scripts/person_authn',
+	    
 	    };
     
     

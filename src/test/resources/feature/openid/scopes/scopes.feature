@@ -50,7 +50,7 @@ And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
 
-Scenario: Delete a non-existion openid connect scope by inum
+Scenario: Delete a non-existing openid connect scope by inum
 Given url openidscopes_url + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
 When method GET
@@ -63,7 +63,7 @@ And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 404
 
-Scenario: Get an openid connect client by inum
+Scenario: Get an openid connect scopes by inum
 Given url openidscopes_url
 And header Authorization = 'Bearer ' + accessToken
 When method GET
