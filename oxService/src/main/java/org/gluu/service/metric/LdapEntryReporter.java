@@ -226,14 +226,18 @@ public final class LdapEntryReporter extends ScheduledReporter {
 
     private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries,
             Date creationTime) {
+        String nodeIndetifier = metricService.getNodeIndetifier();
+        ApplicationType applicationType = metricService.getApplicationType();
+
         for (MetricEntry metricEntry : metricEntries) {
-            String id = metricService.getuUiqueIdentifier();
-            String dn = metricService.buildDn(id, creationTime, ApplicationType.OX_AUTH);
+            String id = metricService.getUiqueIdentifier();
+            String dn = metricService.buildDn(id, creationTime, applicationType);
 
             metricEntry.setId(id);
             metricEntry.setDn(dn);
 
-            metricEntry.setApplicationType(ApplicationType.OX_AUTH);
+            metricEntry.setApplicationType(applicationType);
+            metricEntry.setNodeIndetifier(nodeIndetifier);
 
             metricEntry.setStartDate(startTime);
             metricEntry.setEndDate(endTime);
