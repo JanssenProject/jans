@@ -25,6 +25,8 @@ public class ApiConstants {
 	public static final String PAIRWISE = "/pairwise";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
+	public static final String SCRIPTS = "/scripts";
+	public static final String PERSON_AUTH = "/person_authn";
 	public static final String INUM_PATH = "{inum}";
 
 	public static final String LIMIT = "limit";
