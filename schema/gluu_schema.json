@@ -5873,7 +5873,8 @@
                 "creationDate", 
                 "del", 
                 "exp", 
-                "oxData"
+                "oxData",
+                "oxHost"
             ], 
             "must": [
                 "objectclass"
