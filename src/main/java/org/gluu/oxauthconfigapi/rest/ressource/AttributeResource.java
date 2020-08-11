@@ -58,21 +58,28 @@ public class AttributeResource extends BaseResource {
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAttributes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-			@DefaultValue("all") @QueryParam(value = ApiConstants.STATUS) String status) {
+			@DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) {
 		try {
 			List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
 			if (status.equalsIgnoreCase(ApiConstants.ALL)) {
 				if (!pattern.isEmpty() && pattern.length() >= 2) {
-					attributes = attributeService.getAllAttributes();
+					attributes = attributeService.searchAttributes(pattern, limit);
 				} else {
-					attributes = attributeService.getAllAttributes();
+					attributes = attributeService.searchAttributes(limit);
+				}
+			} else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
+				if (!pattern.isEmpty() && pattern.length() >= 2) {
+					attributes = attributeService.findAttributes(pattern, limit, true);
+				} else {
+					attributes = attributeService.searchAttributes(limit, false);
 				}
 
-			} else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
-				attributes = attributeService.getAllAttributes();
-
 			} else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
-
+				if (!pattern.isEmpty() && pattern.length() >= 2) {
+					attributes = attributeService.findAttributes(pattern, limit, false);
+				} else {
+					attributes = attributeService.searchAttributes(limit, false);
+				}
 			}
 			return Response.ok(attributes).build();
 		} catch (Exception e) {
