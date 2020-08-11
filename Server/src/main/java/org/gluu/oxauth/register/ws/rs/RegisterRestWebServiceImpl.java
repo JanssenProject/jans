@@ -7,6 +7,7 @@
 package org.gluu.oxauth.register.ws.rs;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
@@ -561,6 +562,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         List<String> scopes = requestObject.getScope();
+        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+            scopes = Lists.newArrayList(scopes);
+            scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
+        }
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
