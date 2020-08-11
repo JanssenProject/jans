@@ -27,6 +27,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
@@ -111,6 +112,7 @@ public class PersonAuthResource extends BaseResource {
 			String inum = INumGenerator.generate(2);
 			customScript.setInum(inum);
 			customScript.setDn(customScriptService.buildDn(inum));
+			customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
 			customScriptService.add(customScript);
 			CustomScript result = customScriptService.getScriptByInum(inum);
 			return Response.status(Response.Status.CREATED).entity(result).build();
@@ -148,6 +150,7 @@ public class PersonAuthResource extends BaseResource {
 			customScript.setInum(existingScript.getInum());
 			customScript.setDn(existingScript.getDn());
 			customScript.setBaseDn(existingScript.getBaseDn());
+			customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
 			customScriptService.update(customScript);
 			CustomScript result = customScriptService.getScriptByInum(inum);
 			return Response.ok(result).build();
