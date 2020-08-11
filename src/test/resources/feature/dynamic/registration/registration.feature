@@ -7,7 +7,7 @@ Feature: Verify DynamicRegistration configuration endpoint
   	Scenario: Update Dynamic Registration configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    And request read('dynamicRegistration.json')
+    And request read('registration.json')
     When method PUT
     Then status 200
     And print response

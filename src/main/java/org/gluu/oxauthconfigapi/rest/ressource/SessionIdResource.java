@@ -22,13 +22,15 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.SessionId;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.SESSIONID)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class SessionIdResource {
+public class SessionIdResource extends BaseResource {
 	
 	@Inject
 	Logger log;
@@ -40,7 +42,8 @@ public class SessionIdResource {
 	@Operation(summary = "Retrieve session id config settings")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SessionId.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSessionIdConfiguration() {
 		try {
 			log.debug("SessionIdResource::getSessionIdConfiguration() - Retrieve session id config settings");
@@ -60,7 +63,7 @@ public class SessionIdResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve session id config settings", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 	
@@ -68,8 +71,10 @@ public class SessionIdResource {
 	@PUT
 	@Operation(summary = "Retrieve session id config settings")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSessionIdConfiguration(@Valid SessionId sessionId) {
 		try {
 			log.debug("SessionIdResource::Update() - Update session id config settings");
@@ -91,7 +96,7 @@ public class SessionIdResource {
 						
 		}catch(Exception ex) {
 			log.error("Failed to retrieve session id config settings", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 }

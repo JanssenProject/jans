@@ -26,6 +26,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.UmaConfiguration;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -36,7 +38,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.UMA)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class UmaConfigurationResource {
+public class UmaConfigurationResource extends BaseResource {
 	
 	@Inject 
 	Logger log;
@@ -48,7 +50,8 @@ public class UmaConfigurationResource {
 	@Operation(summary = "Retrieve UMA configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UmaConfiguration.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getUMAConfiguration() {
 		try {
 			log.debug("UmaConfigurationResource::getUMAConfiguration() - Retrieve UMA configuration");
@@ -70,7 +73,7 @@ public class UmaConfigurationResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve UMA configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 	
@@ -78,8 +81,10 @@ public class UmaConfigurationResource {
 	@PUT
 	@Operation(summary = "Update UMA configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateUMAConfiguration(@Valid UmaConfiguration umaConfiguration) {
 		try {
 			log.debug("UmaConfigurationResource::updateUMAConfiguration() - Update UMA configuration");
@@ -102,7 +107,7 @@ public class UmaConfigurationResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update UMA configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 }

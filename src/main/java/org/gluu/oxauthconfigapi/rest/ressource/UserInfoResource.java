@@ -25,6 +25,8 @@ import com.couchbase.client.core.message.ResponseStatus;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.UserInfo;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
@@ -35,7 +37,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.USER_INFO)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class UserInfoResource {
+public class UserInfoResource extends BaseResource {
 
 	@Inject
 	Logger log;
@@ -47,7 +49,8 @@ public class UserInfoResource {
 	@Operation(summary = "Retrieve user info configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserInfo.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getUserInfoConfiguration() {
 		try {		
 			
@@ -63,7 +66,7 @@ public class UserInfoResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to retrieve user info configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);					
 		}
 	}
 	
@@ -71,8 +74,10 @@ public class UserInfoResource {
 	@PUT
 	@Operation(summary = "Update user info configuration")
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
+			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })	
 	public Response updateUserInfoConfiguration(@Valid UserInfo userInfo) {
 		try {
 			log.debug("UserInfoResource::updateUserInfoConfiguration() - Update user info configuration");
@@ -90,7 +95,7 @@ public class UserInfoResource {
 			
 		}catch(Exception ex) {
 			log.error("Failed to update user info configuration", ex);
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();			
+			return getInternalServerError(ex);				
 		}
 	}
 		

@@ -1,19 +1,19 @@
-Feature: Verify SessionId configuration endpoint
+Feature: Verify UserInfo configuration endpoint
 
   	Background:
-  	* def mainUrl = sessionIdUrl
+  	* def mainUrl = userInfoUrl
 
- 	@sessionid-get
-  	Scenario: Retrieve SessionId configuration
+ 	@userInfo-get
+  	Scenario: Retrieve UserInfo configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
     Then status 200
     And print response
     And assert response.length != null
-    
-    @sessionid-put
-  	Scenario: Update SessionId configuration
+        
+    @userInfo-put
+  	Scenario: Update UserInfo configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -28,8 +28,8 @@ Feature: Verify SessionId configuration endpoint
     Then status 200
     And print response
     
-    @sessionid-error
-  	Scenario: sessionIdUnusedLifetime configuration cannot be less than 1 (one)
+    @userInfo-error
+    Scenario: userInfoSigningAlgValuesSupported configuration is null or empty
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -37,7 +37,7 @@ Feature: Verify SessionId configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response
-    Then set result.sessionIdUnusedLifetime = -8 
+    Then set result.userInfoSigningAlgValuesSupported = '' 
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -45,8 +45,8 @@ Feature: Verify SessionId configuration endpoint
     Then status 400
     And print response
     
-    @sessionid-error
-  	Scenario: sessionIdUnusedLifetime configuration cannot be less than 1 (one)
+    @userInfo-error
+    Scenario: userInfoEncryptionAlgValuesSupported configuration is null or empty
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -54,7 +54,7 @@ Feature: Verify SessionId configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response
-    Then set result.sessionIdUnauthenticatedUnusedLifetime = -2 
+    Then set result.userInfoEncryptionAlgValuesSupported = '' 
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -62,8 +62,8 @@ Feature: Verify SessionId configuration endpoint
     Then status 400
     And print response
     
-    @sessionid-error
-  	Scenario: sessionIdLifetime configuration cannot be less than -1 (minus one)
+    @userInfo-error
+    Scenario: userInfoEncryptionEncValuesSupported configuration is null or empty
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -71,7 +71,7 @@ Feature: Verify SessionId configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response
-    Then set result.sessionIdUnauthenticatedUnusedLifetime = -3 
+    Then set result.userInfoEncryptionEncValuesSupported = '' 
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result
@@ -79,20 +79,5 @@ Feature: Verify SessionId configuration endpoint
     Then status 400
     And print response
     
-    @sessionid-error
-  	Scenario: serverSessionIdLifetime configuration cannot be less than -1 (minus one)
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    When method GET
-    Then status 200
-    And print response
-    And assert response.length != null
-    Then def result = response
-    Then set result.serverSessionIdLifetime = -5 
-    Given url  mainUrl
-    And  header Authorization = 'Bearer ' + accessToken
-    And request result
-    When method PUT
-    Then status 400
-    And print response
     
+   

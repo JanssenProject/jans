@@ -38,14 +38,35 @@ function() {
 	    // DynamicRegistration endpoint
 	    dynamicRegistrationUrl: baseUrl + ':' + port + '/api/v1/oxauth/dyn_registration',
 	    
+	    // ResponsesTypes endpoint
+	    responsesTypesUrl: baseUrl + ':' + port + '/api/v1/oxauth/responses_types',
+	    
+	    // ResponseMode endpoint
+	    responseModeUrl: baseUrl + ':' + port + '/api/v1/oxauth/responses_modes',
+	    
+	    // JanssenPKCS endpoint
+	    janssenPKCSUrl: baseUrl + ':' + port + '/api/v1/oxauth/janssenpkcs',
+	    
+	    // UserInfo endpoint
+	    userInfoUrl: baseUrl + ':' + port + '/api/v1/oxauth/user_info',
+	    
+	    // RequestObject endpoint
+	    requestObjectUrl: baseUrl + ':' + port + '/api/v1/oxauth/request_object',
+	    
+	    // UmaConfiguration endpoint
+	    umaConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/uma',
+	    
 	    // idToken endpoint
 	    idTokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/idtoken',
 
-	    // sessionId endpoint
-	    sessionidUrl: baseUrl + ':' + port + '/api/v1/oxauth/sessionid',
+	    // SessionId endpoint
+	    sessionIdUrl: baseUrl + ':' + port + '/api/v1/oxauth/sessionid',
 	    
 	    // pairwise configuration endpoint
 	    pairwiseUrl: baseUrl + ':' + port + '/api/v1/oxauth/pairwise',
+	    
+	    // fido2 configuration endpoint
+	    fido2Url: baseUrl + ':' + port + '/api/v1/oxauth/fido2',
 	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
