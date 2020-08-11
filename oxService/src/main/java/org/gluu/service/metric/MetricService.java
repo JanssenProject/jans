@@ -331,7 +331,7 @@ public abstract class MetricService implements Serializable {
         return metricDns;
     }
 
-    public String getuUiqueIdentifier() {
+    public String getUiqueIdentifier() {
         return UUID.randomUUID().toString();
     }
 

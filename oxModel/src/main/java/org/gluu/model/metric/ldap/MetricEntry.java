@@ -44,6 +44,9 @@ public class MetricEntry {
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
+    @AttributeName(name = "oxHost")
+    private String nodeIndetifier;
+
     @AttributeName(name = "exp")
     private Date expirationDate;
     @AttributeName(name = "del")
@@ -114,7 +117,15 @@ public class MetricEntry {
         this.creationDate = creationDate;
     }
 
-    public Date getExpirationDate() {
+    public String getNodeIndetifier() {
+		return nodeIndetifier;
+	}
+
+	public void setNodeIndetifier(String nodeIndetifier) {
+		this.nodeIndetifier = nodeIndetifier;
+	}
+
+	public Date getExpirationDate() {
         return expirationDate;
     }
 
@@ -130,19 +141,10 @@ public class MetricEntry {
         this.deletable = deletable;
     }
 
-
     @Override
-    public String toString() {
-        return "MetricEntry{" +
-                "dn='" + dn + '\'' +
-                ", id='" + id + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", applicationType=" + applicationType +
-                ", metricType=" + metricType +
-                ", creationDate=" + creationDate +
-                ", expirationDate=" + expirationDate +
-                ", deletable=" + deletable +
-                '}';
-    }
+	public String toString() {
+		return "MetricEntry [dn=" + dn + ", id=" + id + ", startDate=" + startDate + ", endDate=" + endDate + ", applicationType="
+				+ applicationType + ", metricType=" + metricType + ", creationDate=" + creationDate + ", nodeIndetifier=" + nodeIndetifier
+				+ ", expirationDate=" + expirationDate + ", deletable=" + deletable + "]";
+	}
 }
