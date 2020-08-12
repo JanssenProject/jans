@@ -98,7 +98,8 @@ function() {
 
     
     karate.configure('connectTimeout', 30000);
-    karate.configure('readTimeout', 60000);
+    karate.configure('readTimeout', 60000); 
+   
     
     return config;
 }

@@ -112,8 +112,8 @@ public class OIDClientResource extends BaseResource {
 			if (client.getDisplayName() == null) {
 				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
 			}
-			if (client.getOxAuthClientSecret() != null) {
-				client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
+			if (client.getEncodedClientSecret() != null) {
+				client.setEncodedClientSecret(encryptionService.encrypt(client.getEncodedClientSecret()));
 			}
 			if (client.getOxAuthAppType() == null) {
 				client.setOxAuthAppType(OxAuthApplicationType.WEB);
@@ -125,9 +125,6 @@ public class OIDClientResource extends BaseResource {
 			client.setDeletable(client.getExp() != null);
 			clientService.addClient(client);
 			OxAuthClient result = clientService.getClientByInum(inum);
-			if (result.getEncodedClientSecret() != null) {
-				result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
-			}
 			return Response.status(Response.Status.CREATED).entity(result).build();
 		} catch (Exception ex) {
 			logger.error("Failed to create new openid connect client", ex);
