@@ -23,7 +23,7 @@
 		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.20</jsf-api.version>
-		<jsf-impl.version>2.4.0</jsf-impl.version>
+		<jsf-impl.version>2.3.14</jsf-impl.version>
 		<uel-api.version>2.2.1-b04</uel-api.version>
 		<uel-impl.version>2.2.1-b05</uel-impl.version>
 
@@ -248,7 +248,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
-				<artifactId>javax.faces</artifactId>
+				<artifactId>jakarta.faces</artifactId>
 				<version>${jsf-impl.version}</version>
 			</dependency>
 			<dependency>
