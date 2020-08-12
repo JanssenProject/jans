@@ -252,7 +252,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 // The authorization server MAY issue a new refresh token, in which case
                 // the client MUST discard the old refresh token and replace it with the new refresh token.
-                RefreshToken reToken = authorizationGrant.createRefreshToken();
+                RefreshToken reToken = null;
+                if (!appConfiguration.getSkipRefreshTokenDuringRefreshing()) {
+                    reToken = authorizationGrant.createRefreshToken();
+                }
                 grantService.removeByCode(refreshToken);
 
                 if (scope != null && !scope.isEmpty()) {
