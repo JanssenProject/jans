@@ -1,6 +1,6 @@
 # BioID Web Service
 ## Overview
-[BioID Web Service](https://www.bioid.com) is a Biometrics as a service provider. This document will explain how to use Gluu's [BioID  interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) to configure the Gluu Server for a two-step authentication process with username and password as the first step, and BioID's biometric authentication as the second step. 
+[BioID Web Service](https://www.bioid.com) is a "Biometrics as a service" provider. This document will explain how to use Gluu's [BioID  interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) to configure the Gluu Server for a two-step authentication process with username and password as the first step, and BioID's biometric authentication as the second step. 
 
 In order to use this authentication mechanism your organization will need to register for a BioID account. 
 
