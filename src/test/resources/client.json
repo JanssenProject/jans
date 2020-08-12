@@ -21,7 +21,7 @@
     "disabled": false,
     "displayName": "QAAddedClient",
     "description":"OpenId Client added by client",
-    "encodedClientSecret": "+d4yRu09OtNxCT7++E0FAA==",
+    "encodedClientSecret": "qaclientPassword",
     "exp": "2120-09-28T23:00:00Z[UTC]",
     "grantTypes": [
         "AUTHORIZATION_CODE"
