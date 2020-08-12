@@ -24,6 +24,7 @@ public class ApiConstants {
 	public static final String SECTORS = "/sectoridentifiers";
 	public static final String PAIRWISE = "/pairwise";
 	public static final String FIDO2 = "/fido2";
+	public static final String CIBA = "/ciba";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
 	public static final String SCRIPTS = "/scripts";

@@ -1,6 +1,6 @@
 # Eclipse
 .project
-oxauth-config-api-access.log
+oxauth-config-api-access*.log
 .classpath
 .settings/
 bin/
