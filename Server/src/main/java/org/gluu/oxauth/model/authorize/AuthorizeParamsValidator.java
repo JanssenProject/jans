@@ -35,8 +35,10 @@ public class AuthorizeParamsValidator {
             return false;
         }
 
-        if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
-            if (StringUtils.isBlank(nonce)) {
+        boolean existsNonce = StringUtils.isNotBlank(nonce);
+
+        if (!existsNonce && responseTypes.contains(ResponseType.CODE)) {
+            if (responseTypes.contains(ResponseType.ID_TOKEN) || !responseTypes.contains(ResponseType.TOKEN)) {
                 return false;
             }
         }
