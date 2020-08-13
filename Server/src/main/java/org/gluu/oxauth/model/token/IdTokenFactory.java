@@ -208,7 +208,7 @@ public class IdTokenFactory {
 
         setClaimsFromJwtAuthorizationRequest(jwr, authorizationGrant, scopes);
         setClaimsFromRequestedClaims(requestedClaims, jwr, user);
-        filterClaimsBasedOnAccessToken(jwr, accessToken);
+        filterClaimsBasedOnAccessToken(jwr, accessToken, authorizationCode);
         jwrService.setSubjectIdentifier(jwr, authorizationGrant);
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -225,9 +225,10 @@ public class IdTokenFactory {
      * openid-connect-core-1_0.html Section 5.4
      * @param jwr Json object that contains all claims used in the id_token.
      * @param accessToken Access token issued for this authorization.
+     * @param authorizationCode Code issued for this authorization.
      */
-    private void filterClaimsBasedOnAccessToken(JsonWebResponse jwr, AccessToken accessToken) {
-        if (accessToken != null && appConfiguration.getIdTokenFilterClaimsBasedOnAccessToken()) {
+    private void filterClaimsBasedOnAccessToken(JsonWebResponse jwr, AccessToken accessToken, AuthorizationCode authorizationCode) {
+        if ((accessToken != null || authorizationCode != null) && appConfiguration.getIdTokenFilterClaimsBasedOnAccessToken()) {
             JwtClaims claims = jwr.getClaims();
             claims.removeClaim(JwtClaimName.PROFILE);
             claims.removeClaim(JwtClaimName.EMAIL);
