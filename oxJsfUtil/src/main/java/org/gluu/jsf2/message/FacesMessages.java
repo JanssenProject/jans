@@ -16,6 +16,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.gluu.service.el.ExpressionEvaluator;
 
 /**
@@ -53,7 +54,8 @@ public class FacesMessages implements Serializable {
         }
 
         String evaluatedMessage = evalAsString(message);
-        FacesMessage facesMessage = new FacesMessage(severity, evaluatedMessage, evaluatedMessage);
+        String encodedMessage = StringEscapeUtils.escapeHtml4(evaluatedMessage);
+        FacesMessage facesMessage = new FacesMessage(severity, encodedMessage, encodedMessage);
         facesContext.addMessage(clientId, facesMessage);
         
         messages.put(clientId, facesMessage);

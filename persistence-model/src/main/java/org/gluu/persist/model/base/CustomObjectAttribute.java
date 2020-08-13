@@ -78,8 +78,10 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
 		return multiValued;
 	}
 
-	public void setMultiValued(boolean multiValued) {
+	public CustomObjectAttribute setMultiValued(boolean multiValued) {
 		this.multiValued = multiValued;
+		
+		return this;
 	}
 
 	public String getDisplayValue() {
