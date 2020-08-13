@@ -109,7 +109,7 @@ public abstract class ExternalScriptService implements Serializable {
 
     public int executeExternalGetApiVersion(CustomScriptConfiguration customScriptConfiguration) {
         try {
-            log.debug("Executing python 'getApiVersion' authenticator method");
+            log.trace("Executing python 'getApiVersion' authenticator method");
             BaseExternalType externalAuthenticator = (BaseExternalType) customScriptConfiguration.getExternalType();
             return externalAuthenticator.getApiVersion();
         } catch (Exception ex) {
