@@ -37,9 +37,9 @@ Scenario: Fetch the first three active attributes
 	When method GET 
 	Then status 200 
 	And assert response.length == 3 
-	And assert response[0].status == 'active'
-	And assert response[1].status == 'active'
-	And assert response[2].status == 'active'	
+	And assert response[0].status == 'ACTIVE'
+	And assert response[1].status == 'ACTIVE'
+	And assert response[2].status == 'ACTIVE'	
 	
 Scenario: Fetch the first three inactive attributes 
 	Given url attributes_url 
@@ -49,9 +49,9 @@ Scenario: Fetch the first three inactive attributes
 	When method GET 
 	Then status 200 
 	And assert response.length == 3 
-	And assert response[0].status == 'inactive'
-	And assert response[1].status == 'inactive'
-	And assert response[2].status == 'inactive'		
+	And assert response[0].status == 'INACTIVE'
+	And assert response[1].status == 'INACTIVE'
+	And assert response[2].status == 'INACTIVE'		
 	
 @CreateUpdateDelete 
 Scenario: Create new attribute 

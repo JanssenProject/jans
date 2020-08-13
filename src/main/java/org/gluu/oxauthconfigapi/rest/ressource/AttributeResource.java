@@ -6,6 +6,7 @@ package org.gluu.oxauthconfigapi.rest.ressource;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.ATTRIBUTES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@ApplicationScoped
 public class AttributeResource extends BaseResource {
 
 	@Inject
@@ -71,7 +73,7 @@ public class AttributeResource extends BaseResource {
 				if (!pattern.isEmpty() && pattern.length() >= 2) {
 					attributes = attributeService.findAttributes(pattern, limit, true);
 				} else {
-					attributes = attributeService.searchAttributes(limit, false);
+					attributes = attributeService.searchAttributes(limit, true);
 				}
 
 			} else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
