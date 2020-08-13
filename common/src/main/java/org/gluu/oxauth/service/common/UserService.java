@@ -187,7 +187,7 @@ public abstract class UserService {
         	filter.multiValued(multiValued);
         }
 
-        List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, filter);
+        List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, filter, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
@@ -260,7 +260,7 @@ public abstract class UserService {
 			searchFiler = Filter.createORFilter(filters);
 		}
 
-		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes);
+		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
 		log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
 
 		if (entries.size() > 0) {
