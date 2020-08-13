@@ -379,6 +379,10 @@ public abstract class UserService {
     }
 
     public User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue) {
+    	return replaceUserAttribute(userId, attributeName, oldAttributeValue, newAttributeValue, null);
+    }
+
+    public User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue, Boolean multiValued) {
         log.debug("Replace user attribute in LDAP: attributeName = '{}', oldAttributeValue = '{}', newAttributeValue = '{}'", attributeName, oldAttributeValue, newAttributeValue);
 
         User user = getUser(userId);
@@ -401,6 +405,10 @@ public abstract class UserService {
         	}
 
         	customAttribute.setValues(newAttributeValues);
+        }
+        
+        if (multiValued) {
+        	customAttribute.setMultiValued(multiValued);
         }
 
 		return updateUser(user);
