@@ -22,6 +22,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.common.InumService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.StringHelper;
@@ -233,6 +234,10 @@ public abstract class UserService {
 	}
 
 	public User getUserByAttributes(String attributeValue, String[] attributeNames, String... returnAttributes) {
+		return getUserByAttributes(attributeValue, attributeNames, null, returnAttributes);
+	}
+
+	public User getUserByAttributes(String attributeValue, String[] attributeNames, Boolean multiValued, String... returnAttributes) {
 		if (ArrayHelper.isEmpty(attributeNames)) {
 			return null;
 		}
@@ -242,6 +247,9 @@ public abstract class UserService {
 		List<Filter> filters = new ArrayList<Filter>(); 
 		for (String attributeName : attributeNames) {
 			Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attributeName), StringHelper.toLowerCase(attributeValue));
+	        if (multiValued != null) {
+	        	filter.multiValued(multiValued);
+	        }
 			filters.add(filter);
 		}
 
@@ -288,8 +296,12 @@ public abstract class UserService {
         return updateUser(user);
     	
     }
-    
+
     public User addUserAttribute(String userId, String attributeName, String attributeValue) {
+    	return addUserAttribute(userId, attributeName, attributeValue, null);
+    }
+    
+    public User addUserAttribute(String userId, String attributeName, String attributeValue, Boolean multiValued) {
         log.debug("Add user attribute to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
@@ -298,7 +310,7 @@ public abstract class UserService {
         	return null;
         }
         
-        boolean result = addUserAttribute(user, attributeName, attributeValue);
+        boolean result = addUserAttribute(user, attributeName, attributeValue, multiValued);
         if (!result) {
         	// We uses this result in Person Authentication Scripts
         	return null;
@@ -308,7 +320,11 @@ public abstract class UserService {
     }
 
     public boolean addUserAttribute(User user, String attributeName, String attributeValue) {
-		CustomAttribute customAttribute = getCustomAttribute(user, attributeName);
+    	return addUserAttribute(user, attributeName, attributeValue, null);
+    }
+
+    public boolean addUserAttribute(User user, String attributeName, String attributeValue, Boolean multiValued) {
+    	CustomAttribute customAttribute = getCustomAttribute(user, attributeName);
         if (customAttribute == null) {
         	customAttribute = new CustomAttribute(attributeName, attributeValue);
             user.getCustomAttributes().add(customAttribute);
@@ -325,6 +341,10 @@ public abstract class UserService {
         	}
         	
         	customAttribute.setValues(newAttributeValues);
+        }
+
+        if (multiValued != null) {
+        	customAttribute.setMultiValued(multiValued);
         }
         
         return true;
