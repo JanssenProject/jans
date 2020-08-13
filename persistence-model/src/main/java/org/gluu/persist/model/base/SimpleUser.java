@@ -43,7 +43,7 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @CustomObjectClass
