@@ -35,7 +35,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
  * @author Puja Sharma
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.JANSSENPKCS)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.JANSSENPKCS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class JanssenPKCSResource extends BaseResource {

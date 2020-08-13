@@ -38,7 +38,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
  * @author Puja Sharma
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.RESPONSES_TYPES)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.RESPONSES_TYPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ResponseTypeResource extends BaseResource {

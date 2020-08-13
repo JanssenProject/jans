@@ -34,7 +34,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
  * @author Puja Sharma
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.USER_INFO)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.USER_INFO)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserInfoResource extends BaseResource {

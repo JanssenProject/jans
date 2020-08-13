@@ -34,7 +34,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
  * @author Puja Sharma
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.IDTOKEN)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES +  ApiConstants.IDTOKEN)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class IdTokenResource extends BaseResource {

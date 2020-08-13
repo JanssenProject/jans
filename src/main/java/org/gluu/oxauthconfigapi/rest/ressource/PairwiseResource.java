@@ -27,7 +27,7 @@ import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.Pairwise;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.PAIRWISE)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.PAIRWISE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class PairwiseResource extends BaseResource {

@@ -29,7 +29,7 @@ import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.DynamicRegistration;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.DYN_REGISTRATION)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.DYN_REGISTRATION)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class DynamicRegistrationResource extends BaseResource {

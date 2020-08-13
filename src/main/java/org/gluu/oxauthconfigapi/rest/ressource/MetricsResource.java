@@ -35,7 +35,7 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
  *
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.METRICS)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.METRICS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class MetricsResource extends BaseResource {

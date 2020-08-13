@@ -6,6 +6,8 @@ public class ApiConstants {
 	}
 
 	public static final String BASE_API_URL = "/oxauth";
+	public static final String CONFIG = "/config";
+	public static final String PROPERTIES = "/properties";
 	public static final String LOGGING = "/logging";
 	public static final String METRICS = "/metrics";
 	public static final String BACKCHANNEL = "/backchannel";
@@ -25,6 +27,7 @@ public class ApiConstants {
 	public static final String PAIRWISE = "/pairwise";
 	public static final String FIDO2 = "/fido2";
 	public static final String CIBA = "/ciba";
+	public static final String CORS = "/cors";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
 	public static final String SCRIPTS = "/scripts";
