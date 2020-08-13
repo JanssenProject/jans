@@ -75,9 +75,9 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public boolean authorize(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'authorize' method, script: " + script.getName());
+            log.trace("Executing python 'authorize' method, script: " + script.getName());
             boolean result = consentScript(script).authorize(step, context);
-            log.debug("python 'authorize' result: " + result);
+            log.trace("python 'authorize' result: " + result);
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
@@ -88,9 +88,9 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public int getNextStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'getNextStep' method, script: " + script.getName());
+            log.trace("Executing python 'getNextStep' method, script: " + script.getName());
             int result = consentScript(script).getNextStep(step, context);
-            log.debug("python 'getNextStep' result: " + result);
+            log.trace("python 'getNextStep' result: " + result);
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getNextStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
@@ -101,9 +101,9 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public boolean prepareForStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'prepareForStep' method, script: " + script.getName());
+            log.trace("Executing python 'prepareForStep' method, script: " + script.getName());
             boolean result = consentScript(script).prepareForStep(step, context);
-            log.debug("python 'prepareForStep' result: " + result);
+            log.trace("python 'prepareForStep' result: " + result);
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'prepareForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
@@ -114,9 +114,9 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public int getStepsCount(CustomScriptConfiguration script, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'getStepsCount' method, script: " + script.getName());
+            log.trace("Executing python 'getStepsCount' method, script: " + script.getName());
             int result = consentScript(script).getStepsCount(context);
-            log.debug("python 'getStepsCount' result: " + result);
+            log.trace("python 'getStepsCount' result: " + result);
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getStepsCount' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
@@ -127,9 +127,9 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public String getPageForStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'getPageForStep' method, script: " + script.getName());
+            log.trace("Executing python 'getPageForStep' method, script: " + script.getName());
             String result = consentScript(script).getPageForStep(step, context);
-            log.debug("python 'getPageForStep' result: " + result);
+            log.trace("python 'getPageForStep' result: " + result);
             return result;
         } catch (Exception ex) {
             log.error("Failed to execute python 'getPageForStep' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);

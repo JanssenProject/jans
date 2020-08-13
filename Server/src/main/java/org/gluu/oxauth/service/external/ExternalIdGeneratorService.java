@@ -36,7 +36,7 @@ public class ExternalIdGeneratorService extends ExternalScriptService {
 
 	public String executeExternalGenerateIdMethod(CustomScriptConfiguration customScriptConfiguration, String appId, String idType, String idPrefix) {
 		try {
-			log.debug("Executing python 'generateId' method");
+			log.trace("Executing python 'generateId' method");
 			IdGeneratorType externalType = (IdGeneratorType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
 			return externalType.generateId(appId, idType, idPrefix, configurationAttributes);

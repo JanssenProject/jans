@@ -38,7 +38,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
     public boolean executeExternalCreateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
         try {
-            log.debug("Executing python 'createClient' method");
+            log.trace("Executing python 'createClient' method");
             ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
             return externalClientRegistrationType.createClient(registerRequest, client, configurationAttributes);
@@ -66,7 +66,7 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
 	public boolean executeExternalUpdateClientMethod(CustomScriptConfiguration customScriptConfiguration, RegisterRequest registerRequest, Client client) {
 		try {
-			log.debug("Executing python 'updateClient' method");
+			log.trace("Executing python 'updateClient' method");
 			ClientRegistrationType externalClientRegistrationType = (ClientRegistrationType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
 			return externalClientRegistrationType.updateClient(registerRequest, client, configurationAttributes);

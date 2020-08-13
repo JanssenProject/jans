@@ -66,7 +66,7 @@ public class ExternalIntrospectionService extends ExternalScriptService {
     public boolean executeExternalModifyResponse(JSONObject responseAsJsonObject, ExternalIntrospectionContext context) {
         final List<CustomScriptConfiguration> scripts = getScripts(context);
         if (scripts.isEmpty()) {
-            log.debug("There is no any external interception scripts defined.");
+            log.trace("There is no any external interception scripts defined.");
             return false;
         }
 
@@ -82,13 +82,13 @@ public class ExternalIntrospectionService extends ExternalScriptService {
 
     private boolean executeExternalModifyResponse(CustomScriptConfiguration scriptConf, JSONObject responseAsJsonObject, ExternalIntrospectionContext context) {
         try {
-            log.debug("Executing external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}",
+            log.trace("Executing external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}",
                     scriptConf.getName(), responseAsJsonObject, context);
 
             IntrospectionType script = (IntrospectionType) scriptConf.getExternalType();
             context.setScript(scriptConf);
             final boolean result = script.modifyResponse(responseAsJsonObject, context);
-            log.debug("Finished external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}, result: {}",
+            log.trace("Finished external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}, result: {}",
                     scriptConf.getName(), responseAsJsonObject, context, result);
             return result;
         } catch (Exception ex) {
