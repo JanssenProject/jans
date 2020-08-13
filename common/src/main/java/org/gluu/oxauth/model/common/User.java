@@ -24,20 +24,47 @@ public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;
 
+    @Deprecated
 	public void setAttribute(String attributeName, String attributeValue) {
+		setAttribute(attributeName, attributeValue, null);
+	}
+
+	public void setAttribute(String attributeName, String attributeValue, Boolean multiValued) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValue);
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
+    @Deprecated
 	public void setAttribute(String attributeName, String[] attributeValues) {
+    	setAttribute(attributeName, attributeValues, null);
+	}
+
+	public void setAttribute(String attributeName, String[] attributeValues, Boolean multiValued) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, Arrays.asList(attributeValues));
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
+    @Deprecated
 	public void setAttribute(String attributeName, List<String> attributeValues) {
+		setAttribute(attributeName, attributeValues, null);
+	}
+
+	public void setAttribute(String attributeName, List<String> attributeValues, Boolean multiValued) {
 		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValues);
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
