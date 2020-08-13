@@ -73,7 +73,7 @@ tags:
   - name: OAuth - UMA Scopes
   - name: OAuth - UMA Resources
 paths:
-  /oxauth/config/properties:
+  /api/v1/oxauth/config/properties:
     get:
       summary: Gets all oxAuth configuration properties.
       description: Gets all oxAuth configuration properties.
@@ -1349,7 +1349,7 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /oxauth/config/properties/backchannel:
+  /api/v1/oxauth/config/properties/backchannel:
     get:
       summary: Gets oxAuth backchannel configuration properties.
       description: Gets oxAuth backchannel configuration properties.
@@ -1560,7 +1560,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/dyn_registration:
+  /api/v1/oxauth/config/properties/dyn_registration:
     get:
       summary: Gets oxAuth dynamic configuration properties.
       description: Gets oxAuth dynamic configuration properties.
@@ -1707,7 +1707,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/idtoken:
+  /api/v1/oxauth/config/properties/idtoken:
     get:
       summary: Gets oxAuth IdToken configuration properties.
       description: Gets oxAuth IdToken configuration properties.
@@ -1864,7 +1864,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/ox-eleven:
+  /api/v1/oxauth/config/properties/ox-eleven:
     get:
       summary: Gets oxAuth oxEleven configuration properties.
       description: Gets oxAuth oxEleven configuration properties.
@@ -1965,7 +1965,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/request-object:
+  /api/v1/oxauth/config/properties/request-object:
     get:
       summary: Gets oxAuth Request object configuration properties.
       description: Gets oxAuth Request object configuration properties.
@@ -2094,7 +2094,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/response-type:
+  /api/v1/oxauth/config/properties/response-type:
     get:
       summary: Gets oxAuth Response Type configuration properties.
       description: Gets oxAuth Response Type configuration properties.
@@ -2165,7 +2165,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/response-mode:
+  /api/v1/oxauth/config/properties/response-mode:
     get:
       summary: Gets oxAuth Response Mode configuration properties.
       description: Gets oxAuth Response Mode configuration properties.
@@ -2234,7 +2234,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/user-info:
+  /api/v1/oxauth/config/properties/user-info:
     get:
       summary: Gets oxAuth User Info configuration properties.
       description: Gets oxAuth User Info configuration properties.
@@ -2369,7 +2369,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/uma:
+  /api/v1/oxauth/config/properties/uma:
     get:
       summary: Gets oxAuth UMA configuration properties.
       description: Gets oxAuth UMA configuration properties.
@@ -2548,7 +2548,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/sessionid:
+  /api/v1/oxauth/config/properties/sessionid:
     get:
       summary: Gets oxAuth SessionId configuration properties.
       description: Gets oxAuth SessionId configuration properties.
@@ -2697,7 +2697,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/pairwise:
+  /api/v1/oxauth/config/properties/pairwise:
     get:
       summary: Gets oxAuth Pairwise configuration properties.
       description: Gets oxAuth Pairwise configuration properties.
@@ -2917,7 +2917,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/ciba:
+  /api/v1/oxauth/config/properties/ciba:
     get:
       summary: Gets oxAuth CIBA configuration properties.
       description: Gets oxAuth CIBA configuration properties.
@@ -3040,7 +3040,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/cors:
+  /api/v1/oxauth/config/properties/cors:
     get:
       summary: Retrieves list of oxAuth Cors configuration filters.
       description: Retrieves list of oxAuth Cors configuration filters.
@@ -3165,7 +3165,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/grant:
+  /api/v1/oxauth/config/properties/grant:
     get:
       summary: Gets oxAuth Grant configuration properties.
       description: Gets oxAuth Grant configuration properties.
@@ -3272,7 +3272,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/endpoints:
+  /api/v1/oxauth/config/properties/endpoints:
     get:
       summary: Gets available oxAuth endpoints configuration properties.
       description: Gets available oxAuth endpoints configuration properties.
@@ -3525,7 +3525,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/openid:
+  /api/v1/oxauth/config/properties/openid:
     get:
       summary: Gets OpenID Connect configuration properties.
       description: Gets OpenID Connect configuration properties.
@@ -4172,7 +4172,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/subject:
+  /api/v1/oxauth/config/properties/subject:
     get:
       summary: Gets Subject configuration properties.
       description: Gets Subject configuration properties.
@@ -4269,7 +4269,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/token:
+  /api/v1/oxauth/config/properties/token:
     get:
       summary: Gets Token configuration properties.
       description: Gets Token configuration properties.
@@ -4380,7 +4380,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/server-config:
+  /api/v1/oxauth/config/properties/server-config:
     get:
       summary: Gets Server's common configuration properties.
       description: Gets Server's common configuration properties.
@@ -4595,7 +4595,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/clean-up:
+  /api/v1/oxauth/config/properties/clean-up:
     get:
       summary: Gets Server's clean up configuration.
       description: Gets Server's clean up configuration.
@@ -4698,7 +4698,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/key-reg:
+  /api/v1/oxauth/config/properties/key-reg:
     get:
       summary: Gets Key regeneration configuration.
       description: Gets Key regeneration configuration.
@@ -4803,7 +4803,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/expiration:
+  /api/v1/oxauth/config/properties/expiration:
     get:
       summary: Gets Expiration Notificator configuration.
       description: Gets Expiration Notificator configuration.
@@ -4876,7 +4876,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/crypto-keys:
+  /api/v1/oxauth/config/properties/crypto-keys:
     get:
       summary: Gets Crypto Provider configuration.
       description: Gets Crypto Provider configuration.
@@ -4969,7 +4969,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/auth-filter:
+  /api/v1/oxauth/config/properties/auth-filter:
     get:
       summary: Gets Authentication filters configuration.
       description: Gets Authentication filters configuration.
@@ -5110,7 +5110,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/metric:
+  /api/v1/oxauth/config/properties/metric:
     get:
       summary: Gets Metric configuration.
       description: Gets Metric configuration.
@@ -5203,7 +5203,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/user:
+  /api/v1/oxauth/config/properties/user:
     get:
       summary: Gets User Management configuration.
       description: Gets User Management configuration.
@@ -5276,7 +5276,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/app-audit:
+  /api/v1/oxauth/config/properties/app-audit:
     get:
       summary: Gets Application Audit Logger configuration.
       description: Gets Application Audit Logger configuration.
@@ -5353,7 +5353,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/properties/auth-protection:
+  /api/v1/oxauth/config/properties/auth-protection:
     get:
       summary: Gets Authentication protection configuration.
       description: Gets Authentication protection configuration.
@@ -5448,7 +5448,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/graphics/logo:
+  /api/v1/oxauth/config/graphics/logo:
     get:
       summary: Retrieves organization logo graphic details.
       description: Retrieves organization logo graphic details.
@@ -5560,7 +5560,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/graphics/favicon:
+  /api/v1/oxauth/config/graphics/favicon:
     get:
       summary: Gets organization favicon graphic details.
       description: Gets organization favicon graphic details.
@@ -5672,7 +5672,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/attributes:
+  /api/v1/oxauth/attributes:
     get:
       summary: Gets all attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
@@ -6236,7 +6236,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oxauth/attributes/{inum}':
+  '/api/v1/oxauth/attributes/{inum}':
     parameters:
       - name: inum
         in: path
@@ -6377,7 +6377,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oxauth/acrs:
+  /api/v1/oxauth/acrs:
     get:
       summary: Gets default authentication method.
       description: Gets default authentication method.
@@ -6464,7 +6464,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/database/ldap:
+  /api/v1/oxauth/config/database/ldap:
     get:
       summary: Gets list of existing LDAP configuration.
       description: Gets list of existing LDAP configuration. Optionally status and name of the LDAP config can be provided.
@@ -6548,7 +6548,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oxauth/config/database/ldap/{name}':
+  '/api/v1/oxauth/config/database/ldap/{name}':
     parameters:
       - name: name
         in: path
@@ -6574,7 +6574,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oxauth/config/database/couchbase:
+  /api/v1/oxauth/config/database/couchbase:
     get:
       summary: Gets Couchbase configuration.
       description: Gets Couchbase configuration.
@@ -6664,7 +6664,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/library:
+  /api/v1/oxauth/config/library:
     get:
       summary: Gets custom library.
       description: Gets custom library. Optionally library name can be provided.
@@ -6732,7 +6732,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oxauth/config/library/{name}':
+  '/api/v1/oxauth/config/library/{name}':
     parameters:
       - schema:
           type: string
@@ -6759,7 +6759,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/scripts/person_authn:
+  /api/v1/oxauth/scripts/person_authn:
     get:
       summary: Gets list of person authentication script.
       description: Gets list of person authentication script. Optionally scripts type can be provided to fetch specific types of script.
@@ -6836,7 +6836,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/person_authn/{inum}':
+  '/api/v1/oxauth/scripts/person_authn/{inum}':
     parameters:
       - schema:
           type: string
@@ -6884,7 +6884,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/consent:
+  /api/v1/oxauth/scripts/consent:
     get:
       summary: Gets list of consent gathering script.
       description: Gets list of consent gathering script. Optionally scripts type can be provided to fetch specific types of script.
@@ -6961,7 +6961,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/consent/{inum}':
+  '/api/v1/oxauth/scripts/consent/{inum}':
     parameters:
       - schema:
           type: string
@@ -7009,7 +7009,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/client_reg:
+  /api/v1/oxauth/scripts/client_reg:
     get:
       summary: Gets list of client registration script.
       description: Gets list of client registration script. Optionally scripts type can be provided to fetch specific types of script.
@@ -7092,7 +7092,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/client_reg/{inum}':
+  '/api/v1/oxauth/scripts/client_reg/{inum}':
     parameters:
       - name: inum
         in: path
@@ -7140,7 +7140,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/scripts/dyn_scopes:
+  /api/v1/oxauth/scripts/dyn_scopes:
     get:
       summary: Gets list of dynamic scope scripts.
       description: Gets list of dynamic scope scripts. Optionally scripts type can be provided to fetch specific types of script.
@@ -7217,7 +7217,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/dyn_scopes/{inum}':
+  '/api/v1/oxauth/scripts/dyn_scopes/{inum}':
     parameters:
       - schema:
           type: string
@@ -7265,7 +7265,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/uma_rpt:
+  /api/v1/oxauth/scripts/uma_rpt:
     get:
       summary: Gets list of UMA RPT Policy scripts.
       description: Gets list of UMA RPT Policy scripts. Optionally scripts type can be provided to fetch specific types of script.
@@ -7342,7 +7342,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/uma_rpt/{inum}':
+  '/api/v1/oxauth/scripts/uma_rpt/{inum}':
     parameters:
       - schema:
           type: string
@@ -7390,7 +7390,7 @@ paths:
       security:
         - oxAuth:
             - read
-  '/oauth/scripts/uma_rpt/{type}':
+  '/api/v1/oxauth/scripts/uma_rpt/{type}':
     parameters:
       - schema:
           type: string
@@ -7422,7 +7422,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/uma_gather:
+  /api/v1/oxauth/scripts/uma_gather:
     get:
       summary: Gets list of UMA claims gathering scripts.
       description: Gets list of UMA claims gathering scripts. Optionally scripts type can be provided to fetch specific types of script.
@@ -7499,7 +7499,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/uma_gather/{inum}':
+  '/api/v1/oxauth/scripts/uma_gather/{inum}':
     parameters:
       - schema:
           type: string
@@ -7547,7 +7547,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/introspection:
+  /api/v1/oxauth/scripts/introspection:
     get:
       summary: Gets list of introspection scripts.
       description: Gets list of introspection scripts. Optionally scripts type can be provided to fetch specific types of script.
@@ -7624,7 +7624,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/introspection/{inum}':
+  '/api/v1/oxauth/scripts/introspection/{inum}':
     parameters:
       - schema:
           type: string
@@ -7672,7 +7672,7 @@ paths:
       security:
         - oxAuth:
             - read
-  '/oauth/scripts/introspection/{type}':
+  '/api/v1/oxauth/scripts/introspection/{type}':
     parameters:
       - schema:
           type: string
@@ -7704,7 +7704,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/ropw:
+  /api/v1/oxauth/scripts/ropw:
     get:
       summary: Gets list of Resource Owner Password Credentials scripts.
       description: Gets list of Resource Owner Password Credentials scripts. Optionally script type can be provided to fetch specific types of script.
@@ -7774,7 +7774,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/ropw/{inum}':
+  '/api/v1/oxauth/scripts/ropw/{inum}':
     parameters:
       - schema:
           type: string
@@ -7822,7 +7822,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oauth/scripts/app_session:
+  /api/v1/oxauth/scripts/app_session:
     get:
       summary: Gets list of all application session scripts.
       description: Gets list of application session scripts. Optionally script type can be provided to fetch specific types of script.
@@ -7923,7 +7923,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/scripts/app_session/{inum}':
+  '/api/v1/oxauth/scripts/app_session/{inum}':
     parameters:
       - schema:
           type: string
@@ -7971,7 +7971,7 @@ paths:
       security:
         - oxAuth:
             - read
-  '/oxauth/config/scripts/{inum}':
+  '/api/v1/oxauth/config/scripts/{inum}':
     parameters:
       - schema:
           type: string
@@ -8016,6 +8016,9 @@ paths:
       description: Deletes a custom script by inum.
       tags:
         - Custom Scripts
+      security:
+        - oxAuth:
+            - write
     put:
       summary: Updates a custom scripts by inum.
       operationId: put-oxauth-config-scripts-by-inum
@@ -8035,7 +8038,10 @@ paths:
       description: Updates a custom scripts by inum.
       tags:
         - Custom Scripts
-  '/oxauth/config/scripts/{type}':
+      security:
+        - oxAuth:
+            - write
+  '/api/v1/oxauth/config/scripts/{type}':
     parameters:
       - schema:
           type: string
@@ -8141,7 +8147,10 @@ paths:
       description: Creates a new custom script of a specific type.
       tags:
         - Custom Scripts
-  /oxauth/config/cache:
+      security:
+        - oxAuth:
+            - write
+  /api/v1/oxauth/config/cache:
     get:
       summary: Returns cache configuration.
       description: Returns cache configuration.
@@ -8727,7 +8736,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/cache/memcached:
+  /api/v1/oxauth/config/cache/memcached:
     get:
       summary: Returns a Memcached cache configuration.
       description: Returns a Memcached cache configuration.
@@ -8931,7 +8940,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/cache/redis:
+  /api/v1/oxauth/config/cache/redis:
     get:
       summary: Returns Redis cache configuration.
       description: Returns Redis cache configuration.
@@ -9235,7 +9244,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/cache/in-memory:
+  /api/v1/oxauth/config/cache/in-memory:
     get:
       summary: Returns in-Memory cache configuration.
       description: Returns in-Memory cache configuration.
@@ -9329,7 +9338,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/cache/native-persistence:
+  /api/v1/oxauth/config/cache/native-persistence:
     get:
       summary: Returns native persistence cache configuration.
       description: Returns native persistence cache configuration.
@@ -9453,7 +9462,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/smtp:
+  /api/v1/oxauth/config/smtp:
     get:
       summary: Returns SMTP server configuration.
       description: Returns SMTP server configuration.
@@ -9630,7 +9639,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oauth/openid/scopes:
+  /api/v1/oxauth/openid/scopes:
     get:
       tags:
         - OAuth - OpenID Connect - Scopes
@@ -9866,7 +9875,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oauth/openid/scopes/{inum}':
+  '/api/v1/oxauth/openid/scopes/{inum}':
     parameters:
       - schema:
           type: string
@@ -9964,7 +9973,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oxauth/config/logs:
+  /api/v1/oxauth/config/logs:
     get:
       tags:
         - Configuration – Logs
@@ -10192,7 +10201,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /oxauth/config/logs/all:
+  /api/v1/oxauth/config/logs/all:
     get:
       tags:
         - Configuration – Logs
@@ -10225,7 +10234,7 @@ paths:
         - oxAuth:
             - read
     parameters: []
-  '/oxauth/config/logs/{name}':
+  '/api/v1/oxauth/config/logs/{name}':
     parameters:
       - schema:
           type: string
@@ -10265,7 +10274,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /oxauth/config/jwks:
+  /api/v1/oxauth/config/jwks:
     get:
       tags:
         - Configuration – JWK - JSON Web Key Set (JWKs)
@@ -10366,7 +10375,7 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  '/oxauth/config/jwks/{id}':
+  '/api/v1/oxauth/config/jwks/{id}':
     parameters:
       - name: id
         in: path
@@ -10495,7 +10504,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/openid/clients:
+  /api/v1/oxauth/openid/clients:
     get:
       tags:
         - OAuth - OpenID Connect - Clients
@@ -11676,7 +11685,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/openid/clients/{inum}':
+  '/api/v1/oxauth/openid/clients/{inum}':
     parameters:
       - schema:
           type: string
@@ -12088,7 +12097,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/openid/sectors:
+  /api/v1/oxauth/openid/sectors:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
@@ -12220,7 +12229,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/openid/sectors/{inum}':
+  '/api/v1/oxauth/openid/sectors/{inum}':
     parameters:
       - name: inum
         in: path
@@ -12289,7 +12298,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/uma/scopes:
+  /api/v1/oxauth/uma/scopes:
     get:
       tags:
         - OAuth - UMA Scopes
@@ -12413,7 +12422,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/uma/scopes/{inum}':
+  '/api/v1/oxauth/uma/scopes/{inum}':
     parameters:
       - name: inum
         in: path
@@ -12479,7 +12488,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/uma/resources:
+  /api/v1/oxauth/uma/resources:
     get:
       tags:
         - OAuth - UMA Resources
@@ -12633,7 +12642,7 @@ paths:
       security:
         - oxAuth:
             - write
-  '/oauth/uma/resources/{inum}':
+  '/api/v1/oxauth/uma/resources/{inum}':
     parameters:
       - name: inum
         in: path
@@ -12709,7 +12718,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /oauth/uma/resources/search:
+  /api/v1/oxauth/uma/resources/search:
     parameters:
       - name: pattern
         in: query
