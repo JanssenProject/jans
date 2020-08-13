@@ -31,13 +31,13 @@ public class ExternalCibaEndUserNotificationService extends ExternalScriptServic
 
     public boolean executeExternalNotifyEndUser(ExternalCibaEndUserNotificationContext context) {
         if (customScriptConfigurations == null || customScriptConfigurations.isEmpty()) {
-            log.debug("There is no any external interception scripts defined.");
+            log.trace("There is no any external interception scripts defined.");
             return false;
         }
 
         for (CustomScriptConfiguration script : customScriptConfigurations) {
             if (!executeExternalNotifyEndUser(script, context)) {
-                log.debug("Stopped running external interception scripts because script {} returns false.", script.getName());
+                log.trace("Stopped running external interception scripts because script {} returns false.", script.getName());
                 return false;
             }
         }
@@ -47,12 +47,12 @@ public class ExternalCibaEndUserNotificationService extends ExternalScriptServic
     private boolean executeExternalNotifyEndUser(CustomScriptConfiguration customScriptConfiguration,
                                                  ExternalCibaEndUserNotificationContext context) {
         try {
-            log.debug("Executing external 'executeExternalNotifyEndUser' method, script name: {}, context: {}",
+            log.trace("Executing external 'executeExternalNotifyEndUser' method, script name: {}, context: {}",
                     customScriptConfiguration.getName(), context);
 
             EndUserNotificationType script = (EndUserNotificationType) customScriptConfiguration.getExternalType();
             final boolean result = script.notifyEndUser(context);
-            log.debug("Finished external 'executeExternalNotifyEndUser' method, script name: {}, context: {}, result: {}",
+            log.trace("Finished external 'executeExternalNotifyEndUser' method, script name: {}, context: {}, result: {}",
                     customScriptConfiguration.getName(), context, result);
             return result;
         } catch (Exception ex) {
