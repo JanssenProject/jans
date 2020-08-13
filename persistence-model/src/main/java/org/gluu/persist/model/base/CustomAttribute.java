@@ -19,6 +19,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
     private static final long serialVersionUID = 1468450094325306154L;
 
     private String name;
+    private boolean multiValued;
     private List<String> values;
 
     public CustomAttribute() {
@@ -31,6 +32,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
     public CustomAttribute(String name, String value) {
         this.name = name;
         setValue(value);
+        this.multiValued = false;
     }
 
     public CustomAttribute(String name, List<String> values) {
@@ -53,6 +55,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
     public void setValue(String value) {
         this.values = new ArrayList<String>();
         this.values.add(value);
+        this.multiValued = false;
     }
 
     public List<String> getValues() {
@@ -61,6 +64,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
 
     public void setValues(List<String> values) {
         this.values = values;
+        this.multiValued = (values != null) && (values.size() > 1); 
     }
 
     public final String getName() {
@@ -70,6 +74,16 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
     public final void setName(String name) {
         this.name = name;
     }
+
+    public boolean isMultiValued() {
+		return multiValued;
+	}
+
+	public CustomAttribute setMultiValued(boolean multiValued) {
+		this.multiValued = multiValued;
+		
+		return this;
+	}
 
     public String getDisplayValue() {
         if (values == null) {
@@ -113,7 +127,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
 
     @Override
     public String toString() {
-        return String.format("Attribute [name=%s, values=%s]", name, values);
+        return String.format("Attribute [name=%s, multiValued=%s, value=%s]", name, multiValued, values);
     }
 
     public int compareTo(CustomAttribute o) {
