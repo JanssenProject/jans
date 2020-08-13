@@ -171,21 +171,22 @@ public abstract class UserService {
 	}
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
+        return getUserByAttribute(attributeName, attributeValue, null);
+    }
+
+    public User getUserByAttribute(String attributeName, String attributeValue, Boolean multiValued) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
         
         if (StringHelper.isEmpty(attributeName) || StringHelper.isEmpty(attributeValue)) {
         	return null;
         }
 
-        User user = new User();
-        user.setDn(getPeopleBaseDn());
+        Filter filter = Filter.createEqualityFilter(attributeName, attributeName);
+        if (multiValued != null) {
+        	filter.multiValued(multiValued);
+        }
 
-        List<CustomAttribute> customAttributes =  new ArrayList<CustomAttribute>();
-        customAttributes.add(new CustomAttribute(attributeName, attributeValue));
-
-        user.setCustomAttributes(customAttributes);
-
-        List<User> entries = persistenceEntryManager.findEntries(user, 1);
+        List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, filter);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
