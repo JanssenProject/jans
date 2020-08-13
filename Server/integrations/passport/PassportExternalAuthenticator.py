@@ -490,7 +490,7 @@ class PersonAuthentication(PersonAuthenticationType):
         externalUid = "passport-%s:%s" % (provider, uid)
 
         userService = CdiUtil.bean(UserService)
-        userByUid = userService.getUserByAttribute("oxExternalUid", externalUid)
+        userByUid = userService.getUserByAttribute("oxExternalUid", externalUid, True)
 
         email = None
         if "mail" in user_profile:
@@ -539,7 +539,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 tmpList = userByMail.getAttributeValues("oxExternalUid")
                 tmpList = ArrayList() if tmpList == None else ArrayList(tmpList)
                 tmpList.add(externalUid)
-                userByMail.setAttribute("oxExternalUid", tmpList)
+                userByMail.setAttribute("oxExternalUid", tmpList, True)
 
                 userByUid = userByMail
                 print "External user supplying mail %s will be linked to existing account '%s'" % (email, userByMail.getUserId())
@@ -592,7 +592,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         newUser = User()
         #Fill user attrs
-        newUser.setAttribute("oxExternalUid", externalUid)
+        newUser.setAttribute("oxExternalUid", externalUid, True)
         self.fillUser(newUser, profile)
         newUser = userService.addUser(newUser, True)
         return newUser
