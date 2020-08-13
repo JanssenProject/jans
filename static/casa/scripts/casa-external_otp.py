@@ -420,7 +420,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -433,7 +433,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     otp_user_external_uid = "totp:%s" % otp_secret_key_encoded
 
                     # Add otp_user_external_uid to user's external GUID list
-                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid)
+                    find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, True)
                     if find_user_by_external_uid != None:
                         return True
 
@@ -465,7 +465,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         new_otp_user_external_uid = "hotp:%s;%s" % ( otp_secret_key_encoded, validation_result["movingFactor"] )
 
                         # Update moving factor in user entry
-                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid)
+                        find_user_by_external_uid = userService.replaceUserAttribute(user_name, "oxExternalUid", otp_user_external_uid, new_otp_user_external_uid, True)
                         if find_user_by_external_uid != None:
                             return True
 
