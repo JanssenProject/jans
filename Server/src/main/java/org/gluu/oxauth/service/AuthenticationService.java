@@ -6,11 +6,32 @@
 
 package org.gluu.oxauth.service;
 
+import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
+
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.model.GluuStatus;
 import org.gluu.model.SimpleProperty;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.model.metric.MetricType;
 import org.gluu.model.security.Credentials;
@@ -31,24 +52,12 @@ import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.util.ArrayHelper;
 import org.gluu.util.Pair;
 import org.gluu.util.StringHelper;
 import org.json.JSONException;
 import org.slf4j.Logger;
-
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods
@@ -257,7 +266,8 @@ public class AuthenticationService {
 	}
 
 	private Pair<Boolean, User> localAuthenticate(String nameValue, String password, String ... nameAttributes) {
-		User user = userService.getUserByAttributes(nameValue, nameAttributes, new String[] {"uid", "gluuStatus"});
+		String lowerNameValue = StringHelper.toString(nameValue);
+		User user = userService.getUserByAttributes(lowerNameValue, nameAttributes, new String[] {"uid", "gluuStatus"});
 		if (user != null) {
 			if (!checkUserStatus(user)) {
 				return new Pair<Boolean, User>(false, user);
@@ -522,8 +532,8 @@ public class AuthenticationService {
 		SimpleUser sampleUser = new SimpleUser();
 		sampleUser.setDn(baseDn);
 
-		List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
-		customAttributes.add(new CustomAttribute(attributeName, attributeValue));
+		List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
+		customAttributes.add(new CustomObjectAttribute(attributeName, attributeValue));
 
 		sampleUser.setCustomAttributes(customAttributes);
 
@@ -541,9 +551,9 @@ public class AuthenticationService {
 	}
 
 	private boolean checkUserStatus(User user) {
-		CustomAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
+		CustomObjectAttribute userStatus = userService.getCustomAttribute(user, "gluuStatus");
 
-		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(userStatus.getValue()))) {
+		if ((userStatus != null) && GluuStatus.ACTIVE.equals(GluuStatus.getByValue(StringHelper.toString(userStatus.getValue())))) {
 			return true;
 		}
 
