@@ -22,8 +22,8 @@ public interface ClientRegistrationType extends BaseExternalType {
 
     public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
 
-    String getHmacSecret(Object context);
+    String getSoftwareStatementHmacSecret(Object context);
 
-    String getJwks(Object context);
+    String getSoftwareStatementJwks(Object context);
 
 }
