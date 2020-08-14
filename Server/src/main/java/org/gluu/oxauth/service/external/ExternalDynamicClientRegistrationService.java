@@ -6,19 +6,22 @@
 
 package org.gluu.oxauth.service.external;
 
-import java.util.Map;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
-
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.client.ClientRegistrationType;
 import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.service.external.context.DynamicClientRegistrationContext;
 import org.gluu.service.custom.script.ExternalScriptService;
+import org.json.JSONObject;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external dynamic client registration extension
@@ -30,7 +33,7 @@ import org.gluu.service.custom.script.ExternalScriptService;
 @Named
 public class ExternalDynamicClientRegistrationService extends ExternalScriptService {
 
-	private static final long serialVersionUID = 1416361273036208685L;
+	private static final long serialVersionUID = 1416361273036208686L;
 
 	public ExternalDynamicClientRegistrationService() {
 		super(CustomScriptType.CLIENT_REGISTRATION);
@@ -90,4 +93,39 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		return result;
 	}
 
+    public JSONObject getSoftwareStatementJwks(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        try {
+            log.trace("Executing python 'getSoftwareStatementJwks' method");
+
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
+            context.setSoftwareStatement(softwareStatement);
+
+            ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
+            final String result = externalType.getSoftwareStatementJwks(context);
+            log.trace("Result of python 'getSoftwareStatementJwks' method: " + result);
+            return new JSONObject(result);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
+            return null;
+        }
+    }
+
+    public String getSoftwareStatementHmacSecret(HttpServletRequest httpRequest, JSONObject registerRequest, Jwt softwareStatement) {
+        try {
+            log.trace("Executing python 'getSoftwareStatementHmacSecret' method");
+
+            DynamicClientRegistrationContext context = new DynamicClientRegistrationContext(httpRequest, registerRequest, defaultExternalCustomScript);
+            context.setSoftwareStatement(softwareStatement);
+
+            ClientRegistrationType externalType = (ClientRegistrationType) defaultExternalCustomScript.getExternalType();
+            final String result = externalType.getSoftwareStatementHmacSecret(context);
+            log.trace("Result of python 'getSoftwareStatementHmacSecret' method: " + result);
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(defaultExternalCustomScript.getCustomScript(), ex);
+            return "";
+        }
+    }
 }
