@@ -185,45 +185,63 @@ public abstract class AbstractCryptoProvider {
         java.security.PublicKey publicKey = null;
 
         JSONArray webKeys = jwks.getJSONArray(JSON_WEB_KEY_SET);
+        if (alias == null) {
+            if (webKeys.length() == 1) {
+                JSONObject key = webKeys.getJSONObject(0);
+                return processKey(requestedAlgorithm, alias, key);
+            } else {
+                return null;
+            }
+        }
         for (int i = 0; i < webKeys.length(); i++) {
             JSONObject key = webKeys.getJSONObject(i);
             if (alias.equals(key.getString(KEY_ID))) {
-                AlgorithmFamily family = null;
-                if (key.has(ALGORITHM)) {
-                    Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
-
-                    if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
-                        LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
-                        continue;
-                    }
-                    family = algorithm.getFamily();
-                } else if (key.has(KEY_TYPE)) {
-                    family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
-                }
-
-                if (AlgorithmFamily.RSA.equals(family)) {
-                    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                    RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
-                            new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
-                            new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
-                    publicKey = keyFactory.generatePublic(pubKeySpec);
-                } else if (AlgorithmFamily.EC.equals(family)) {
-                    ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
-                    AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
-                    parameters.init(new ECGenParameterSpec(curve.getAlias()));
-                    ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
-
-                    publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
-                            new ECPoint(
-                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
-                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
-                            ), ecParameters));
-                }
-
-                if (key.has(EXPIRATION_TIME)) {
-                    checkKeyExpiration(alias, key.getLong(EXPIRATION_TIME));
+                publicKey = processKey(requestedAlgorithm, alias, key);
+                if (publicKey != null) {
+                    return publicKey;
                 }
             }
+        }
+
+        return null;
+    }
+
+    private PublicKey processKey(Algorithm requestedAlgorithm, String alias, JSONObject key) throws Exception {
+        PublicKey publicKey = null;
+        AlgorithmFamily family = null;
+        if (key.has(ALGORITHM)) {
+            Algorithm algorithm = Algorithm.fromString(key.optString(ALGORITHM));
+
+            if (requestedAlgorithm != null && algorithm != requestedAlgorithm) {
+                LOG.trace("kid matched but algorithm does not match. kid algorithm:" + algorithm + ", requestedAlgorithm:" + requestedAlgorithm + ", kid:" + alias);
+                return null;
+            }
+            family = algorithm.getFamily();
+        } else if (key.has(KEY_TYPE)) {
+            family = AlgorithmFamily.fromString(key.getString(KEY_TYPE));
+        }
+
+        if (AlgorithmFamily.RSA.equals(family)) {
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(
+                    new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
+                    new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
+            publicKey = keyFactory.generatePublic(pubKeySpec);
+        } else if (AlgorithmFamily.EC.equals(family)) {
+            ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
+            AlgorithmParameters parameters = AlgorithmParameters.getInstance(AlgorithmFamily.EC.toString());
+            parameters.init(new ECGenParameterSpec(curve.getAlias()));
+            ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+
+            publicKey = KeyFactory.getInstance(AlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
+                    new ECPoint(
+                            new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
+                            new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
+                    ), ecParameters));
+        }
+
+        if (key.has(EXPIRATION_TIME)) {
+            checkKeyExpiration(alias, key.getLong(EXPIRATION_TIME));
         }
 
         return publicKey;
