@@ -175,9 +175,6 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         String softwareId = UUID.randomUUID().toString();
         String softwareVersion = "version_3.1.5";
 
-        JwkClient jwkClient = new JwkClient(clientJwksUri);
-        JwkResponse jwkResponse = jwkClient.exec();
-
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         SoftwareStatement softwareStatement = new SoftwareStatement(SignatureAlgorithm.RS256, cryptoProvider);
         softwareStatement.setKeyId(keyId);
@@ -189,7 +186,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         softwareStatement.getClaims().put(LOGO_URI.toString(), "http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         softwareStatement.getClaims().put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), AuthenticationMethod.CLIENT_SECRET_JWT);
         softwareStatement.getClaims().put(POLICY_URI.toString(), "http://www.gluu.org/policy");
-        softwareStatement.getClaims().put(JWKS.toString(), jwkResponse.getJwks().toString());
+        softwareStatement.getClaims().put(JWKS_URI.toString(), clientJwksUri);
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Arrays.asList("http://www.gluu.org/request"));
