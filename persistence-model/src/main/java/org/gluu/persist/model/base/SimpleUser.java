@@ -44,7 +44,7 @@ public class SimpleUser implements Serializable {
     private String[] oxAuthPersistentJwt;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
-    protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    protected List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -89,19 +89,25 @@ public class SimpleUser implements Serializable {
         this.createdAt = createdAt;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
-    public String getAttribute(String ldapAttribute) {
-        String attribute = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (customAttribute.getName().equals(ldapAttribute)) {
+    public String getAttribute(String attributeName) {
+        Object objectAttribute = getObjectAttribute(attributeName);
+
+        return StringHelper.toString(objectAttribute);
+    }
+
+    public Object getObjectAttribute(String attributeName) {
+    	Object attribute = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (customAttribute.getName().equals(attributeName)) {
                     attribute = customAttribute.getValue();
                     break;
                 }
@@ -111,11 +117,25 @@ public class SimpleUser implements Serializable {
         return attribute;
     }
 
-    public List<String> getAttributeValues(String ldapAttribute) {
-        List<String> values = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
+    public List<String> getAttributeValues(String attributeName) {
+    	List<Object> objectValues = getAttributeObjectValues(attributeName);
+    	if (objectValues == null) {
+    		return null;
+    	}
+
+    	List<String> values = new ArrayList<String>(objectValues.size());
+    	for (Object objectValue : objectValues) {
+    		values.add(StringHelper.toString(objectValue));
+    	}
+
+        return values;
+    }
+
+    public List<Object> getAttributeObjectValues(String attributeName) {
+        List<Object> values = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
                     values = customAttribute.getValues();
                     break;
                 }
