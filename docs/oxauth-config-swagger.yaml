@@ -14,7 +14,7 @@ tags:
   - name: developers
     description: oxauth-config enables access to the features available via the existing oxAuth API.
   - name: Attribute
-  - name: Authentication
+  - name: Default Authentication Method
   - name: Cache Configuration
   - name: Cache Configuration – Memcached
   - name: Cache Configuration – Redis
@@ -6383,7 +6383,7 @@ paths:
       description: Gets default authentication method.
       operationId: get-acrs
       tags:
-        - Authentication
+        - Default Authentication Method
       responses:
         '200':
           description: OK
@@ -6405,40 +6405,12 @@ paths:
       security:
         - oxAuth:
             - read
-    post:
-      summary: Adds authentication method.
-      description: Adds default authentication method.
-      operationId: post-acrs
-      tags:
-        - Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: AuthenticationMethod
-              description: Authentication method to be added as default.
-              type: object
-              properties:
-                defaultAcr:
-                  type: string
-                oxtrustAcr:
-                  type: string
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
     put:
       summary: Updates default authentication method.
       description: Updates default authentication method.
       operationId: put-acrs
       tags:
-        - Authentication
+        - Default Authentication Method
       requestBody:
         content:
           application/json:
@@ -6456,8 +6428,6 @@ paths:
           description: OK
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
