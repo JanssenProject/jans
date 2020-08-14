@@ -74,6 +74,9 @@ function() {
 	    // CORS configuration filter endpoint
 	    corsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/cors',
 	    
+	    // ACRS - Default Authentication Mode configuration filter endpoint
+	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    

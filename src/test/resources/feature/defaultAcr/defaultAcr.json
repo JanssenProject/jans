@@ -1,0 +1,4 @@
+{
+  "defaultAcr": "simple_password_auth",
+  "oxtrustAcr": "simple_password_auth"
+}
