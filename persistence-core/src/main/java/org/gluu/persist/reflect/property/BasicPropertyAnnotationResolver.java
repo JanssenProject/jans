@@ -61,14 +61,14 @@ public class BasicPropertyAnnotationResolver implements PropertyAnnotationResolv
 
         Class<?> thisClass = theClass;
         while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
-            Field[] fileds = thisClass.getDeclaredFields();
-            for (Field filed : fileds) {
-                List<Annotation> annotations = getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
+            Field[] fields = thisClass.getDeclaredFields();
+            for (Field field : fields) {
+                List<Annotation> annotations = getOnlyAllowedAnntotations(field.getAnnotations(), allowedAnnotations);
                 if ((annotations == null) || (annotations.size() == 0)) {
                     continue;
                 }
 
-                result.put(filed.getName(), annotations);
+                result.put(field.getName(), annotations);
             }
             thisClass = thisClass.getSuperclass();
         }
