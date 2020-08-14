@@ -44,12 +44,12 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
 	}
 
     @Override
-    public String getHmacSecret(Object context) {
+    public String getSoftwareStatementHmacSecret(Object context) {
         return "";
     }
 
     @Override
-    public String getJwks(Object context) {
+    public String getSoftwareStatementJwks(Object context) {
         return "";
     }
 }
