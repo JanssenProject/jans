@@ -98,12 +98,12 @@ public class SimpleUser implements Serializable {
     }
 
     public String getAttribute(String attributeName) {
-        Object objectAttribute = getObjectAttribute(attributeName);
+        Object objectAttribute = getAttributeObject(attributeName);
 
         return StringHelper.toString(objectAttribute);
     }
 
-    public Object getObjectAttribute(String attributeName) {
+    public Object getAttributeObject(String attributeName) {
     	Object attribute = null;
         if (attributeName != null && !attributeName.isEmpty()) {
             for (CustomObjectAttribute customAttribute : customAttributes) {
