@@ -8,10 +8,7 @@ package org.gluu.oxauth.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.WebKeyStorage;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 
 import java.util.ArrayList;
@@ -213,6 +210,9 @@ public class AppConfiguration implements Configuration {
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
 
+    private String softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+    private String softwareStatementValidationClaimName;
+
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
@@ -240,6 +240,23 @@ public class AppConfiguration implements Configuration {
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
+
+    public String getSoftwareStatementValidationType() {
+        if (softwareStatementValidationType == null) return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+        return softwareStatementValidationType;
+    }
+
+    public String getSoftwareStatementValidationClaimName() {
+        return softwareStatementValidationClaimName;
+    }
+
+    public void setSoftwareStatementValidationType(String softwareStatementValidationType) {
+        this.softwareStatementValidationType = softwareStatementValidationType;
+    }
+
+    public void setSoftwareStatementValidationClaimName(String softwareStatementValidationClaimName) {
+        this.softwareStatementValidationClaimName = softwareStatementValidationClaimName;
+    }
 
     public Boolean getSkipRefreshTokenDuringRefreshing() {
         if (skipRefreshTokenDuringRefreshing == null) skipRefreshTokenDuringRefreshing = false;
