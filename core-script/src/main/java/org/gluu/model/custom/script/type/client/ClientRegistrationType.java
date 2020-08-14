@@ -6,10 +6,10 @@
 
 package org.gluu.model.custom.script.type.client;
 
-import java.util.Map;
-
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.type.BaseExternalType;
+
+import java.util.Map;
 
 /**
  * Base interface for external custom client registration python script
@@ -21,5 +21,9 @@ public interface ClientRegistrationType extends BaseExternalType {
     public boolean createClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
 
     public boolean updateClient(Object registerRequest, Object client, Map<String, SimpleCustomProperty> configurationAttributes);
+
+    String getHmacSecret(Object context);
+
+    String getJwks(Object context);
 
 }

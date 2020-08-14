@@ -4,10 +4,10 @@
  * Copyright (c) 2014, Gluu
  */package org.gluu.model.custom.script.type.client;
 
-import java.util.Map;
-
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.model.CustomScript;
+
+import java.util.Map;
 /**
  * Dummy implementation of interface ClientRegistrationType
  *
@@ -43,4 +43,13 @@ public class DummyClientRegistrationType implements ClientRegistrationType {
 		return false;
 	}
 
+    @Override
+    public String getHmacSecret(Object context) {
+        return "";
+    }
+
+    @Override
+    public String getJwks(Object context) {
+        return "";
+    }
 }
