@@ -1336,8 +1336,10 @@ public class RegisterRequest extends BaseRequest {
     }
 
     public static RegisterRequest fromJson(String p_json, boolean authorizationRequestCustomAllowedParameters) throws JSONException {
-        final JSONObject requestObject = new JSONObject(p_json);
+        return fromJson(new JSONObject(p_json), authorizationRequestCustomAllowedParameters);
+    }
 
+    public static RegisterRequest fromJson(JSONObject requestObject, boolean authorizationRequestCustomAllowedParameters) throws JSONException {
         final List<String> redirectUris = new ArrayList<String>();
         if (requestObject.has(REDIRECT_URIS.toString())) {
             JSONArray redirectUrisJsonArray = requestObject.getJSONArray(REDIRECT_URIS.toString());
