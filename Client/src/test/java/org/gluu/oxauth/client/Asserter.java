@@ -25,7 +25,7 @@ public class Asserter {
         assertNotNull(registerResponse.getClientSecretExpiresAt());
     }
 
-    public static void assertIdToken(Jwt idToken) {
+    public static void assertIdToken(Jwt idToken, String... claimsPresence) {
         assertNotNull(idToken);
         assertNotNull(idToken.getHeader().getClaimAsString(JwtHeaderName.TYPE));
         assertNotNull(idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
@@ -34,10 +34,17 @@ public class Asserter {
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE));
         assertNotNull(idToken.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES));
+
+        if (claimsPresence == null) {
+            return;
+        }
+
+        for (String claim : claimsPresence) {
+            assertNotNull(claim, "Claim " + claim + " is not found in id_token. ");
+        }
     }
 }
