@@ -143,13 +143,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
             final JSONObject requestObject = new JSONObject(requestParams);
-            final Optional<String> softwareStatementParams = validateSoftwareStatement(httpRequest, requestObject);
-            if (softwareStatementParams.isPresent()) {
-                log.trace("Override parameters from software_statement");
-                requestParams = softwareStatementParams.get();
+            final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
+            if (softwareStatement != null) {
+                log.trace("Override request parameters by software_statement");
+                for (String key : softwareStatement.keySet()) {
+                    requestObject.putOpt(key, softwareStatement.get(key));
+                }
             }
 
-            final RegisterRequest r = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            final RegisterRequest r = RegisterRequest.fromJson(requestObject, appConfiguration.getLegacyDynamicRegistrationScopeParam());
             if (requestObject.has(SOFTWARE_STATEMENT.toString())) {
                 r.setSoftwareStatement(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             }
@@ -328,9 +330,9 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private Optional<String> validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
+    private JSONObject validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
         if (!requestObject.has(SOFTWARE_STATEMENT.toString())) {
-            return Optional.empty();
+            return null;
         }
 
         try {
@@ -340,13 +342,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
             if (validationType == SoftwareStatementValidationType.NONE) {
                 log.trace("software_statement validation was skipped due to `softwareStatementValidationType` configuration property set to none. (Not recommended.)");
-                return Optional.of(softwareStatement.getClaims().toJsonObject().toString());
+                return softwareStatement.getClaims().toJsonObject();
             }
 
             if (validationType == SoftwareStatementValidationType.SCRIPT) {
                 if (!externalDynamicClientRegistrationService.isEnabled()) {
                     log.error("Server is mis-configured. softwareStatementValidationType=script but there is no any Dynamic Client Registration script enabled.");
-                    return Optional.empty();
+                    return null;
                 }
 
                 if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
@@ -357,11 +359,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
                     }
 
-                    if (!cryptoProvider.verifySignature(softwareStatement.getSigningInput(), softwareStatement.getEncodedSignature(),null, null, hmacSecret, signatureAlgorithm)) {
+                    if (!cryptoProvider.verifySignature(softwareStatement.getSigningInput(), softwareStatement.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm)) {
                         throw new InvalidJwtException("Invalid signature in the software statement");
                     }
 
-                    return Optional.of(softwareStatement.getClaims().toJsonObject().toString());
+                    return softwareStatement.getClaims().toJsonObject();
                 }
 
                 final JSONObject softwareStatementJwks = externalDynamicClientRegistrationService.getSoftwareStatementJwks(httpServletRequest, requestObject, softwareStatement);
@@ -374,7 +376,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     throw new InvalidJwtException("Invalid signature in the software statement");
                 }
 
-                return Optional.of(softwareStatement.getClaims().toJsonObject().toString());
+                return softwareStatement.getClaims().toJsonObject();
             }
 
             if ((validationType == SoftwareStatementValidationType.JWKS_URI ||
@@ -412,7 +414,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
             }
 
-            return Optional.of(softwareStatement.getClaims().toJsonObject().toString());
+            return softwareStatement.getClaims().toJsonObject();
         } catch (Exception e) {
             final String msg = "Invalid software_statement.";
             log.error(msg, e);
@@ -459,7 +461,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> grantTypeSet = new HashSet<>();
         grantTypeSet.addAll(requestObject.getGrantTypes());
 
-        if(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
+        if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
             if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
                 responseTypeSet.add(ResponseType.CODE);
             }
