@@ -72,7 +72,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.glassfish</groupId>
-                    <artifactId>javax.faces</artifactId>
+                    <artifactId>jakarta.faces</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
