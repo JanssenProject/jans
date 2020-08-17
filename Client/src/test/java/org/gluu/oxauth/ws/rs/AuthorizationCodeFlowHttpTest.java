@@ -91,16 +91,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
+        Asserter.assertIdToken(jwt);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -309,16 +300,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
+        Asserter.assertIdToken(jwt);
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
