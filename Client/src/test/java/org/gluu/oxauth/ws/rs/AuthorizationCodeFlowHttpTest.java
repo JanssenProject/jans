@@ -91,7 +91,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 4. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -300,7 +300,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
