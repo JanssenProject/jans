@@ -3274,8 +3274,8 @@ paths:
     parameters: []
   /api/v1/oxauth/config/properties/endpoints:
     get:
-      summary: Gets available oxAuth endpoints configuration properties.
-      description: Gets available oxAuth endpoints configuration properties.
+      summary: Gets oxAuth available endpoints.
+      description: Gets oxAuth available endpoints.
       operationId: get-properties-endpoints
       tags:
         - Configuration – Endpoints
@@ -3399,8 +3399,8 @@ paths:
         - oxAuth:
             - read
     put:
-      summary: Updates available oxAuth endpoints configuration properties.
-      description: Updates available oxAuth endpoints configuration properties.
+      summary: Updates oxAuth available endpoints.
+      description: Updates oxAuth available endpoints.
       operationId: put-properties-endpoints
       tags:
         - Configuration – Endpoints

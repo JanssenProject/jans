@@ -77,6 +77,9 @@ function() {
 	    // ACRS - Default Authentication Mode configuration filter endpoint
 	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',
 	    
+	    // Endpoints - available oxAuth endpoints.
+	    endpointsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/endpoints',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    

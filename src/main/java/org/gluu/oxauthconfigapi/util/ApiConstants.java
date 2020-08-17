@@ -29,6 +29,7 @@ public class ApiConstants {
 	public static final String CIBA = "/ciba";
 	public static final String CORS = "/cors";
 	public static final String ACRS = "/acrs";
+	public static final String ENDPOINTS = "/endpoints";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
 	public static final String SCRIPTS = "/scripts";
