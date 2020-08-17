@@ -506,7 +506,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setClaims(claims);
 
                 // Store acr_values
-                authorizationGrant.setAcrValues(acrValuesStr);
+                authorizationGrant.setAcrValues(StringUtils.isNotBlank(acrValuesStr) ? acrValuesStr : sessionIdService.getAcr(sessionUser));
                 authorizationGrant.setSessionDn(sessionUser.getDn());
                 authorizationGrant.save(); // call save after object modification!!!
 
@@ -526,7 +526,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setClaims(claims);
 
                     // Store acr_values
-                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setAcrValues(StringUtils.isNotBlank(acrValuesStr) ? acrValuesStr : sessionIdService.getAcr(sessionUser));
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification!!!
                 }
@@ -549,7 +549,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setClaims(claims);
 
                     // Store authentication acr values
-                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setAcrValues(StringUtils.isNotBlank(acrValuesStr) ? acrValuesStr : sessionIdService.getAcr(sessionUser));
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                 }
