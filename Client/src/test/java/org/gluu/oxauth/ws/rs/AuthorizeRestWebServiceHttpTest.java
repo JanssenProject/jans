@@ -755,7 +755,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 2. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -842,7 +842,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 2. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -928,7 +928,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 4. Validate code and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -1014,7 +1014,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 4. Validate code and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -1248,7 +1248,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 4. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -1339,7 +1339,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 4. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -2994,6 +2994,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 2. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
+        Asserter.assertIdToken(jwt, JwtClaimName.ACCESS_TOKEN_HASH);
     }
 }
