@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -20,6 +22,7 @@ import org.gluu.model.GluuStatus;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.ArrayHelper;
@@ -260,6 +263,41 @@ public abstract class UserService {
 
 		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
 		log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+
+		if (entries.size() > 0) {
+			return entries.get(0);
+		} else {
+			return null;
+		}
+	}
+
+	public User getUserByAttributes(List<CustomAttribute> attributes, boolean andFilter, String... returnAttributes) {
+		if (attributes == null) {
+			return null;
+		}
+
+		log.debug("Getting user information using next attributes '{}'", attributes);
+
+		List<Filter> filters = new ArrayList<Filter>(); 
+		for (CustomAttribute attribute : attributes) {
+			Filter filter = Filter.createEqualityFilter(attribute.getName(), attribute.getValues());
+        	filter.multiValued(attribute.isMultiValued());
+			filters.add(filter);
+		}
+
+		Filter searchFiler;
+		if (filters.size() == 1) {
+			searchFiler = filters.get(0);
+		} else {
+			if (andFilter) {
+				searchFiler = Filter.createANDFilter(filters);
+			} else {
+				searchFiler = Filter.createORFilter(filters);
+			}
+		}
+
+		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
+		log.debug("Found '{}' entries for user by next attributes '{}'", entries.size(), attributes);
 
 		if (entries.size() > 0) {
 			return entries.get(0);
