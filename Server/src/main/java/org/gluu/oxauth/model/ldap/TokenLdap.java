@@ -63,7 +63,7 @@ public class TokenLdap implements Serializable {
     private String tokenBindingHash;
 
     @AttributeName(name = "acr")
-    private String acr;
+    private String authMode;
 
     @AttributeName(name = "ssnId", consistency = true)
     private String sessionDn;
@@ -237,11 +237,11 @@ public class TokenLdap implements Serializable {
     }
 
     public String getAuthMode() {
-        return acr;
+        return authMode;
     }
 
     public void setAuthMode(String authMode) {
-        this.acr = authMode;
+        this.authMode = authMode;
     }
 
     public String getCodeChallenge() {
