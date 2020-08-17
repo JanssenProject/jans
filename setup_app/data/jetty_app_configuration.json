@@ -95,7 +95,7 @@
       "ratio": 0.08
     },
     "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp"
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
     },
     "installed": false,
     "name": "scim"
