@@ -259,7 +259,7 @@ public class ServerUtil {
     }
 
     public static boolean isSameRequestPath(String url1, String url2) throws MalformedURLException {
-    	if ((url1 == null) || (url2 == null)) {
+        if (StringUtils.isBlank(url1) || StringUtils.isBlank(url2)) {
     		return false;
     	}
     	
