@@ -50,8 +50,6 @@ import javax.ws.rs.core.SecurityContext;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-
 /**
  * Provides interface for token REST web services
  *
@@ -247,16 +245,27 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
 
                 if (authorizationGrant == null) {
+                    log.trace("Grant object is not found by refresh token.");
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find grant object by refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
+                }
+
+                final RefreshToken refreshTokenObject = authorizationGrant.getRefreshToken(refreshToken);
+                if (refreshTokenObject == null || !refreshTokenObject.isValid()) {
+                    log.trace("Invalid refresh token.");
+                    return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Unable to find refresh token or otherwise token type or client does not match."), oAuth2AuditLog);
                 }
 
                 // The authorization server MAY issue a new refresh token, in which case
                 // the client MUST discard the old refresh token and replace it with the new refresh token.
                 RefreshToken reToken = null;
                 if (!appConfiguration.getSkipRefreshTokenDuringRefreshing()) {
-                    reToken = authorizationGrant.createRefreshToken();
+                    if (appConfiguration.getRefreshTokenExtendLifetimeOnRotation()) {
+                        reToken = authorizationGrant.createRefreshToken(); // extend lifetime
+                    } else {
+                        reToken = authorizationGrant.createRefreshToken(refreshTokenObject.getExpirationDate()); // do not extend lifetime
+                    }
+                    grantService.removeByCode(refreshToken);
                 }
-                grantService.removeByCode(refreshToken);
 
                 if (scope != null && !scope.isEmpty()) {
                     scope = authorizationGrant.checkScopesPolicy(scope);
