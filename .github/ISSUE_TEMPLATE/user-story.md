@@ -28,7 +28,7 @@ This allows us to assign a risk level to the user story, which represents the le
 
 #### Priority.
 
- This allows us to assign a priority to the user story from 1 (Low Priority) to 5 (Very High Priority)
+ This allows us to assign a priority to the user story.
 <details>
 	<summary>Priority</summary>
 	<ul>
