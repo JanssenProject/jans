@@ -9,6 +9,7 @@ oxId: openid
 inum: F0C4
 defaultScope: true
 description: Authenticate using OpenID Connect.
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=43F1,ou=scopes,o=gluu
@@ -33,6 +34,7 @@ oxAuthClaim: inum=A901,ou=attributes,o=gluu
 oxAuthClaim: inum=36D9,ou=attributes,o=gluu
 oxAuthClaim: inum=BE64,ou=attributes,o=gluu
 oxAuthClaim: inum=6493,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=764C,ou=scopes,o=gluu
@@ -44,6 +46,7 @@ defaultScope: false
 description: View your email address.
 oxAuthClaim: inum=8F88,ou=attributes,o=gluu
 oxAuthClaim: inum=CAE3,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=C17A,ou=scopes,o=gluu
@@ -62,6 +65,7 @@ oxAuthClaim: inum=D90B,ou=attributes,o=gluu
 oxAuthClaim: inum=E6B8,ou=attributes,o=gluu
 oxAuthClaim: inum=E999,ou=attributes,o=gluu
 oxAuthGroupClaims: true
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=D491,ou=scopes,o=gluu
@@ -73,6 +77,7 @@ description: View your phone number.
 defaultScope: false
 oxAuthClaim: inum=B17A,ou=attributes,o=gluu
 oxAuthClaim: inum=0C18,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=341A,ou=scopes,o=gluu
@@ -84,6 +89,7 @@ oxId: clientinfo
 inum: 341A
 oxAuthClaim: inum=2B29,ou=attributes,o=gluu
 oxAuthClaim: inum=29DA,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=10B2,ou=scopes,o=gluu
@@ -94,6 +100,7 @@ inum: 10B2
 description: View your local username in the Gluu Server.
 defaultScope: false
 oxAuthClaim: inum=42E0,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=6D99,ou=scopes,o=gluu
@@ -104,6 +111,7 @@ oxId: uma_protection
 inum: 6D99
 objectClass: oxAuthCustomScope
 objectClass: top
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=6D90,ou=scopes,o=gluu
@@ -114,6 +122,7 @@ displayName: oxd
 inum: 6D90
 objectClass: oxAuthCustomScope
 objectClass: top
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=7D90,ou=scopes,o=gluu
@@ -124,6 +133,7 @@ displayName: revoke_session
 inum: 7D90
 objectClass: oxAuthCustomScope
 objectClass: top
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=8A01,ou=scopes,o=gluu
@@ -134,6 +144,7 @@ inum: 8A01
 description: View your mobile phone number.
 defaultScope: false
 oxAuthClaim: inum=6DA6,ou=attributes,o=gluu
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScopeType: openid
 
 dn: inum=C4F5,ou=scopes,o=gluu
@@ -144,4 +155,5 @@ description: View your user permission and roles.
 oxId: permission
 inum: C4F5
 oxScopeType: dynamic
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 oxScriptDn: inum=CB5B-3211,ou=scripts,o=gluu
