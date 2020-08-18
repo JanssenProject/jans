@@ -29,14 +29,6 @@ This allows us to assign a risk level to the user story, which represents the le
 #### Priority.
 
  This allows us to assign a priority to the user story from 1 (Low Priority) to 5 (Very High Priority)
-<details>
-	<summary>Priority</summary>
-	<ul>
-		<li>HIGH</li>
-		<li>MEDIUM</li>
-		<li>LOW</li>
-	</ul>
-</details>
 
 ### Description.
  This is the core of the user story. It should be relatively short (3 to 5 lines) and should describe the high-level requirement or requirements of the feature. For example:
