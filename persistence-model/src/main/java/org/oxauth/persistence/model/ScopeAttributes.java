@@ -20,8 +20,8 @@ public class ScopeAttributes implements Serializable {
     @JsonProperty("spontaneousClientScopes")
     private List<String> spontaneousClientScopes;
 
-    @JsonProperty("notShowInDiscovery")
-    private boolean notShowInDiscovery;
+    @JsonProperty("showInConfigurationEndpoint")
+    private boolean showInConfigurationEndpoint;
 
     public String getSpontaneousClientId() {
         return spontaneousClientId;
@@ -39,12 +39,12 @@ public class ScopeAttributes implements Serializable {
         this.spontaneousClientScopes = spontaneousClientScopes;
     }
 
-    public boolean isNotShowInDiscovery() {
-        return notShowInDiscovery;
+    public boolean isShowInConfigurationEndpoint() {
+        return showInConfigurationEndpoint;
     }
 
-    public void setNotShowInDiscovery(boolean notShowInDiscovery) {
-        this.notShowInDiscovery = notShowInDiscovery;
+    public void setShowInConfigurationEndpoint(boolean showInConfigurationEndpoint) {
+        this.showInConfigurationEndpoint = showInConfigurationEndpoint;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ScopeAttributes implements Serializable {
         return "ScopeAttributes{" +
                 "spontaneousClientId='" + spontaneousClientId + '\'' +
                 "spontaneousClientScopes='" + spontaneousClientScopes + '\'' +
-                "notShowInDiscovery='" + notShowInDiscovery + '\'' +
+                "showInConfigurationEndpoint='" + showInConfigurationEndpoint + '\'' +
                 '}';
     }
 }
