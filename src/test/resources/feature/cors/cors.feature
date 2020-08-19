@@ -4,7 +4,7 @@ Feature: Verify Cors configuration filter endpoint
   	* def mainUrl = corsUrl
 
  	@cors-get
-  	Scenario: Retrieve ResponseMode configuration
+  	Scenario: Retrieve Cors configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -14,7 +14,7 @@ Feature: Verify Cors configuration filter endpoint
     
     
     @cors-put
-  	Scenario: Update ResponseMode configuration
+  	Scenario: Update Cors configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request read('cors.json')

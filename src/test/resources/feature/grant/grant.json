@@ -1,0 +1,17 @@
+ {
+  "grantTypesSupported": [
+    "IMPLICIT",
+    "AUTHORIZATION_CODE",
+    "REFRESH_TOKEN",
+    "RESOURCE_OWNER_PASSWORD_CREDENTIALS",
+    "OXAUTH_UMA_TICKET",
+    "CLIENT_CREDENTIALS"
+  ],
+  "dynamicGrantTypeDefault": [
+    "IMPLICIT",
+    "AUTHORIZATION_CODE",
+    "REFRESH_TOKEN",
+    "OXAUTH_UMA_TICKET",
+    "CLIENT_CREDENTIALS"
+  ]
+}

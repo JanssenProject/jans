@@ -79,6 +79,9 @@ function() {
 	    
 	    // Endpoints - available oxAuth endpoints.
 	    endpointsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/endpoints',
+
+	    // Grant Type - Supported oxAuth Grant Type endpoints.
+	    grantUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/grant',
 	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',

@@ -51,18 +51,11 @@ tags:
   - name: Configuration – Endpoints
   - name: Configuration – SMTP
   - name: Configuration – Library
-  - name: Configuration – Logs
-  - name: Configuration – JWK - JSON Web Key Set (JWKs)
+  - name: Configuration – Logging
+  - name: Configuration – Log File
+  - name: Configuration – JWK - JSON Web Key (JWK)
   - name: Custom Scripts
   - name: Custom Scripts - Person Authentication
-  - name: Custom Scripts - Consent Gathering
-  - name: Custom Scripts - Client Registration
-  - name: Custom Scripts - Dynamic Scopes
-  - name: Custom Scripts - UMA RPT Policies
-  - name: Custom Scripts - UMA Claims Gathering
-  - name: Custom Scripts - Introspection
-  - name: Custom Scripts - Resource Owner Password Credentials
-  - name: Custom Scripts - Application Session
   - name: Database - Couchbase
   - name: Database - LDAP configuration
   - name: Graphics - Logo
@@ -90,7 +83,7 @@ paths:
             application/json:
               schema:
                 title: AppConfiguration
-                description: List of all oxauth-config properties.
+                description: oxAuth config properties.
                 items:
                   type: object
                   title: AppConfiguration
@@ -6854,1093 +6847,6 @@ paths:
       security:
         - oxAuth:
             - read
-  /api/v1/oxauth/scripts/consent:
-    get:
-      summary: Gets list of consent gathering script.
-      description: Gets list of consent gathering script. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-consent
-      tags:
-        - Custom Scripts - Consent Gathering
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new consent gathering script.
-      description: Adds a new consent gathering script.
-      operationId: post-scripts-consent
-      tags:
-        - Custom Scripts - Consent Gathering
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of consent gathering script.
-      description: Updates list of consent gathering script.
-      operationId: put-scripts-consent
-      tags:
-        - Custom Scripts - Consent Gathering
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/consent/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes consent gathering script by inum.
-      description: Deletes consent gathering script by inum.
-      operationId: delete-scripts-consent-by-inum
-      tags:
-        - Custom Scripts - Consent Gathering
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets consent gathering script by inum.
-      description: Gets consent gathering script identified by inum.
-      operationId: get-scripts-consent-by-inum
-      tags:
-        - Custom Scripts - Consent Gathering
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/client_reg:
-    get:
-      summary: Gets list of client registration script.
-      description: Gets list of client registration script. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-client_reg
-      tags:
-        - Custom Scripts - Client Registration
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: CustomScript
-                description: Provides list of client custom scripts.
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script Type
-    post:
-      summary: Adds a new client registration script.
-      description: Adds a new client registration script.
-      operationId: post-scripts-client_reg
-      tags:
-        - Custom Scripts - Client Registration
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of client registration script.
-      description: Updates list of client registration script.
-      operationId: put-scripts-client_reg
-      tags:
-        - Custom Scripts - Client Registration
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/client_reg/{inum}':
-    parameters:
-      - name: inum
-        in: path
-        required: true
-        description: Authentication script ID.
-        schema:
-          type: string
-    get:
-      summary: Gets client registration script by inum.
-      description: Gets client registration script by inum.
-      operationId: get-scripts-client_reg-by-inum
-      tags:
-        - Custom Scripts - Client Registration
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-    delete:
-      summary: Deletes client registration script.
-      description: Deletes client registration script.
-      operationId: delete-scripts-client_reg
-      tags:
-        - Custom Scripts - Client Registration
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-  /api/v1/oxauth/scripts/dyn_scopes:
-    get:
-      summary: Gets list of dynamic scope scripts.
-      description: Gets list of dynamic scope scripts. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-dyn_scopes
-      tags:
-        - Custom Scripts - Dynamic Scopes
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new dynamic scope script.
-      description: Adds a new dynamic scope script.
-      operationId: post-scripts-dyn_scopes
-      tags:
-        - Custom Scripts - Dynamic Scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of dynamic scope script.
-      description: Updates list of dynamic scope script.
-      operationId: put-scripts-dyn_scopes
-      tags:
-        - Custom Scripts - Dynamic Scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/dyn_scopes/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes dynamic scope script.
-      description: Deletes dynamic scope script.
-      operationId: delete-scripts-dyn_scopes-by-inum
-      tags:
-        - Custom Scripts - Dynamic Scopes
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets dynamic scope script by inum.
-      description: Gets dynamic scope script identified by inum.
-      operationId: get-scripts-dyn_scopes-by-inum
-      tags:
-        - Custom Scripts - Dynamic Scopes
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/uma_rpt:
-    get:
-      summary: Gets list of UMA RPT Policy scripts.
-      description: Gets list of UMA RPT Policy scripts. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-uma_rpt
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new UMA RPT policy script.
-      description: Adds a new custom UMA RPT policy script.
-      operationId: post-scripts-uma_rpt
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of UMA RPT policy script.
-      description: Updates list of UMA RPT policy script.
-      operationId: put-scripts-uma_rpt
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/uma_rpt/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes UMA RPT policy script.
-      description: Deletes UMA RPT policy script.
-      operationId: delete-scripts-uma_rpt-by-inum
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets UMA RPT policy script by inum.
-      description: Gets UMA RPT policy script identified by inum.
-      operationId: get-scripts-uma_rpt-by-inum
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  '/api/v1/oxauth/scripts/uma_rpt/{type}':
-    parameters:
-      - schema:
-          type: string
-        name: type
-        in: path
-        required: true
-        description: Script type.
-    get:
-      summary: Gets all UMA RPT policy scripts by type.
-      description: Gets all UMA RPT policy scripts based on type.
-      operationId: get-scripts-uma_rpt-by-type
-      tags:
-        - Custom Scripts - UMA RPT Policies
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/uma_gather:
-    get:
-      summary: Gets list of UMA claims gathering scripts.
-      description: Gets list of UMA claims gathering scripts. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-uma_gather
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new UMA claims gathering script.
-      description: Adds a new UMA claims gathering script.
-      operationId: post-scripts-uma_gather
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of UMA claims gathering script.
-      description: Updates list of UMA claims gathering script.
-      operationId: put-scripts-uma_gather
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/uma_gather/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes UMA claims gathering script.
-      description: Deletes UMA claims gathering script.
-      operationId: delete-scripts-uma_gather-by-inum
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets UMA claims gathering script by inum.
-      description: Gets UMA claims gathering script identified by inum.
-      operationId: get-scripts-uma_gather-by-inum
-      tags:
-        - Custom Scripts - UMA Claims Gathering
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/introspection:
-    get:
-      summary: Gets list of introspection scripts.
-      description: Gets list of introspection scripts. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-introspection
-      tags:
-        - Custom Scripts - Introspection
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new introspection script.
-      description: Adds a new custom introspection script.
-      operationId: post-scripts-introspection
-      tags:
-        - Custom Scripts - Introspection
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of introspection script.
-      description: Updates list of introspection script.
-      operationId: put-scripts-introspection
-      tags:
-        - Custom Scripts - Introspection
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/introspection/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes introspection script.
-      description: Deletes introspection script.
-      operationId: delete-scripts-introspection-by-inum
-      tags:
-        - Custom Scripts - Introspection
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets introspection script by inum.
-      description: Gets introspection script by inum.
-      operationId: get-scripts-introspection-by-inum
-      tags:
-        - Custom Scripts - Introspection
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  '/api/v1/oxauth/scripts/introspection/{type}':
-    parameters:
-      - schema:
-          type: string
-        name: type
-        in: path
-        required: true
-        description: Script type.
-    get:
-      summary: Gets all introspection scripts by type.
-      description: Gets all introspection scripts based on type.
-      operationId: get-scripts-introspection-by-type
-      tags:
-        - Custom Scripts - Introspection
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/ropw:
-    get:
-      summary: Gets list of Resource Owner Password Credentials scripts.
-      description: Gets list of Resource Owner Password Credentials scripts. Optionally script type can be provided to fetch specific types of script.
-      operationId: get-scripts-ropw
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-    post:
-      summary: Adds a new Resource Owner Password Credentials script.
-      description: Adds a new Resource Owner Password Credentials script.
-      operationId: post-scripts-ropw
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of Resource Owner Password Credentials script.
-      description: Updates list of Resource Owner Password Credentials script.
-      operationId: put-scripts-ropw
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/ropw/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes Resource Owner Password Credentials script.
-      description: Deletes Resource Owner Password Credentials script.
-      operationId: delete-scripts-ropw-by-inum
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets Resource Owner Password Credentials script by inum.
-      description: Gets Resource Owner Password Credentials script by inum.
-      operationId: get-scripts-ropw-by-inum
-      tags:
-        - Custom Scripts - Resource Owner Password Credentials
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/scripts/app_session:
-    get:
-      summary: Gets list of all application session scripts.
-      description: Gets list of application session scripts. Optionally script type can be provided to fetch specific types of script.
-      operationId: get-scripts-app_session
-      tags:
-        - Custom Scripts - Application Session
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-            enum:
-              - '- person_authentication'
-              - '- introspection'
-              - '- resource_owner_password_credentials'
-              - '- application_session'
-              - '- cache_refresh'
-              - '- update_user'
-              - '- user_registration'
-              - '- client_registration'
-              - '- id_generator'
-              - '- uma_rpt_policy'
-              - '- uma_rpt_claims'
-              - '- uma_claims_gathering'
-              - '- consent_gathering'
-              - '- dynamic_scope'
-              - '- spontaneous_scope'
-              - '- end_session'
-              - '- post_authn'
-              - '- scim'
-              - '- ciba_end_user_notification'
-              - '- persistence_extension'
-              - '- idp'
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new application session script.
-      description: Adds a new application session script.
-      operationId: post-scripts-app_session
-      tags:
-        - Custom Scripts - Application Session
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of application session script.
-      description: Updates list of application session script.
-      operationId: put-scripts-app_session
-      tags:
-        - Custom Scripts - Application Session
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/app_session/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes application session script.
-      description: Deletes application session script.
-      operationId: delete-scripts-app_session-by-inum
-      tags:
-        - Custom Scripts - Application Session
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets application session script by inum.
-      description: Gets application session script by inum.
-      operationId: get-scripts-app_session-by-inum
-      tags:
-        - Custom Scripts - Application Session
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
   '/api/v1/oxauth/config/scripts/{inum}':
     parameters:
       - schema:
@@ -7974,6 +6880,8 @@ paths:
     delete:
       summary: Deletes a custom script by inum.
       operationId: delete-oxauth-config-scripts-by-inum
+      tags:
+        - Custom Scripts
       responses:
         '200':
           description: OK
@@ -7984,14 +6892,14 @@ paths:
         '500':
           description: Internal Server Error
       description: Deletes a custom script by inum.
-      tags:
-        - Custom Scripts
       security:
         - oxAuth:
             - write
     put:
       summary: Updates a custom scripts by inum.
       operationId: put-oxauth-config-scripts-by-inum
+      tags:
+        - Custom Scripts
       responses:
         '200':
           description: OK
@@ -8006,8 +6914,6 @@ paths:
         '500':
           description: Internal Server Error
       description: Updates a custom scripts by inum.
-      tags:
-        - Custom Scripts
       security:
         - oxAuth:
             - write
@@ -8103,6 +7009,8 @@ paths:
     post:
       summary: Creates a new custom script of a specific type.
       operationId: post-oxauth-config-scripts-type
+      tags:
+        - Custom Scripts
       responses:
         '200':
           description: OK
@@ -8115,8 +7023,6 @@ paths:
         '500':
           description: Internal Server Error
       description: Creates a new custom script of a specific type.
-      tags:
-        - Custom Scripts
       security:
         - oxAuth:
             - write
@@ -9943,13 +8849,161 @@ paths:
       security:
         - oxAuth:
             - write
-  /api/v1/oxauth/config/logs:
+    put:
+      tags:
+        - OAuth - OpenID Connect - Scopes
+      summary: Update existing OpenId Connect Scope by Inum.
+      description: Update existing OpenId Connect Scope by Inum.
+      operationId: put-oauth-openid-scopes-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Scope
+              required:
+                - id
+                - name
+              properties:
+                dn:
+                  type: string
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                inum:
+                  description: Unique id identifying the attribute
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                description:
+                  description: A human-readable string describing the scope.
+                  type: string
+                defaultScope:
+                  description: Boolean value to specify default scope.
+                  type: boolean
+                scopeType:
+                  description: The scopes type associated with Access Tokens determine what resources will.
+                  type: string
+                  enum:
+                    - OpenID
+                    - Dynamic
+                    - OAuth
+                claims:
+                  description: Claim attributes associated with the scope.
+                  type: array
+                  items:
+                    type: object
+                    title: GluuAttribute
+                    properties:
+                      inum:
+                        description: Unique id identifying the attribute.
+                        type: string
+                      name:
+                        description: Name of the attribute.
+                        type: string
+                        example: 'name, displayName, birthdate, email'
+                      displayName:
+                        description: A human-readable name of the attribute.
+                        type: string
+                      description:
+                        description: User friendly descriptive detail of attribute.
+                        type: string
+                      origin:
+                        description: Origin of claim attribute.
+                        type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    patch:
+      tags:
+        - OAuth - OpenID Connect - Scopes
+      summary: Update modified attributes of existing OpenId Connect Scope by Inum.
+      description: Update modified attributes of existing OpenId Connect Scope by Inum.
+      operationId: patch-oauth-openid-scopes-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: Scope
+              required:
+                - id
+                - name
+              properties:
+                dn:
+                  type: string
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                inum:
+                  description: Unique id identifying the attribute
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                description:
+                  description: A human-readable string describing the scope.
+                  type: string
+                defaultScope:
+                  description: Boolean value to specify default scope.
+                  type: boolean
+                scopeType:
+                  description: The scopes type associated with Access Tokens determine what resources will.
+                  type: string
+                  enum:
+                    - OpenID
+                    - Dynamic
+                    - OAuth
+                claims:
+                  description: Claim attributes associated with the scope.
+                  type: array
+                  items:
+                    type: object
+                    title: GluuAttribute
+                    properties:
+                      inum:
+                        description: Unique id identifying the attribute.
+                        type: string
+                      name:
+                        description: Name of the attribute.
+                        type: string
+                        example: 'name, displayName, birthdate, email'
+                      displayName:
+                        description: A human-readable name of the attribute.
+                        type: string
+                      description:
+                        description: User friendly descriptive detail of attribute.
+                        type: string
+                      origin:
+                        description: Origin of claim attribute.
+                        type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+  /api/v1/oxauth/config/logging:
     get:
       tags:
-        - Configuration – Logs
-      summary: Returns oxAuth Log configuration.
-      description: Returns oxAuth Log configuration.
-      operationId: get-config-logs
+        - Configuration – Logging
+      summary: Returns oxAuth logging settings.
+      description: Returns oxAuth logging settings.
+      operationId: get-config-logging
       responses:
         '200':
           description: OK
@@ -9996,109 +9050,20 @@ paths:
                         type: string
                       example:
                         - /oxauth/img
-                        - /oxauth/stylesheet
-                    logTemplates:
-                      description: Defines the log template to apply.
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          value1:
-                            type: string
-                          value2:
-                            type: string
-                          description:
-                            type: string
-                          hide:
-                            type: boolean
+                        - /oxauth/stylesheet                 
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           description: Internal Server Error
       security:
         - oxAuth:
-            - read
-    post:
-      tags:
-        - Configuration – Logs
-      summary: Adds oxAuth Log configuration.
-      description: Adds oxAuth Log configuration.
-      operationId: post-config-logs
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                type: object
-                description: Log configuration.
-                properties:
-                  loggingLevel:
-                    type: string
-                    description: Logging level for oxAuth logger.
-                    enum:
-                      - TRACE
-                      - DEBUG
-                      - INFO
-                      - WARN
-                      - ERROR
-                      - FATAL
-                      - 'OFF'
-                  loggingLayout:
-                    type: string
-                    description: Logging layout used for oxAuth loggers.
-                    enum:
-                      - text
-                      - json
-                  httpLoggingEnabled:
-                    description: To enable http request/response logging.
-                    type: boolean
-                  disableJdkLogger:
-                    description: To enable/disable Jdk logging.
-                    type: boolean
-                  enabledOAuthAuditLogging:
-                    description: To enable/disable OAuth audit logging.
-                    type: boolean
-                  externalLoggerConfiguration:
-                    description: Path to external log4j2 configuration file.
-                    type: string
-                  httpLoggingExludePaths:
-                    description: List of paths to exclude from logger.
-                    type: array
-                    items:
-                      type: string
-                    example:
-                      - /oxauth/img
-                      - /oxauth/stylesheet
-                  logTemplates:
-                    description: Defines the log template to apply.
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
+            - read   
     put:
       tags:
-        - Configuration – Logs
-      summary: Updates oxAuth Log configuration.
-      description: Updates oxAuth Log configuration.
-      operationId: put-config-logs
+        - Configuration – Logging
+      summary: Updates oxAuth logging settings.
+      description: Updates oxAuth logging settings.
+      operationId: put-config-logging
       requestBody:
         content:
           application/json:
@@ -10144,20 +9109,6 @@ paths:
                     example:
                       - /oxauth/img
                       - /oxauth/stylesheet
-                  logTemplates:
-                    description: Defines the log template to apply.
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        value1:
-                          type: string
-                        value2:
-                          type: string
-                        description:
-                          type: string
-                        hide:
-                          type: boolean
       responses:
         '200':
           description: OK
@@ -10171,13 +9122,26 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/logs/all:
+  /api/v1/oxauth/config/logs:
     get:
       tags:
-        - Configuration – Logs
-      summary: Gets all oxAuth log files.
-      description: Gets all oxAuth log files.
-      operationId: get-config-logs-all
+        - Configuration – Log File
+      summary: Gets all oxAuth log files. Optionally a log file name and limit for line count can be provided.
+      description: Gets all oxAuth log files. Optionally a log file name and limit for line count can be provided.
+      operationId: get-config-logs
+      parameters:
+        - schema:
+            type: string
+            default: null
+          in: query
+          name: name
+          description: Log file name.
+        - schema:
+            type: integer
+            default: 400
+          in: query
+          name: limit
+          description: Display last lines count.
       responses:
         '200':
           description: OK
@@ -10203,51 +9167,11 @@ paths:
       security:
         - oxAuth:
             - read
-    parameters: []
-  '/api/v1/oxauth/config/logs/{name}':
-    parameters:
-      - schema:
-          type: string
-          minLength: 1
-        name: name
-        in: path
-        description: Name of the log file.
-        required: true
-    get:
-      tags:
-        - Configuration – Logs
-      summary: Gets specified oxAuth log file by name.
-      description: Gets specified oxAuth log file by name.
-      operationId: get-config-logs-by-name
-      responses:
-        '200':
-          description: OK
-          content:
-            image/x-icon:
-              schema:
-                items:
-                  type: object
-                  description: Log file.
-                  properties:
-                    log_file:
-                      type: string
-                      format: binary
-                    log_location:
-                      description: Log file location.
-                      type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
+    parameters: []  
   /api/v1/oxauth/config/jwks:
     get:
       tags:
-        - Configuration – JWK - JSON Web Key Set (JWKs)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Gets list of JSON Web Key (JWK) used by server.
       description: 'Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].'
       operationId: get-config-jwks
@@ -10296,7 +9220,7 @@ paths:
             - read
     post:
       tags:
-        - Configuration – JWK - JSON Web Key Set (JWKs)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Adds a new JSON Web Key (JWK).
       description: Adds a new JSON Web Key (JWK).
       operationId: post-config-jwks
@@ -10355,7 +9279,7 @@ paths:
           type: string
     get:
       tags:
-        - Configuration – JWK - JSON Web Key Set (JWKs)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Gets the JSON Web Key (JWK).
       description: Gets the JSON Web Key (JWK).
       operationId: get-config-jwks-by-id
@@ -10406,7 +9330,7 @@ paths:
             - read
     put:
       tags:
-        - Configuration – JWK - JSON Web Key Set (JWKs)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Updates JSON Web Key (JWK).
       description: Updates JSON Web Key (JWK).
       operationId: put-config-jwks
@@ -10458,7 +9382,7 @@ paths:
             - write
     delete:
       tags:
-        - Configuration – JWK - JSON Web Key Set (JWKs)
+        - Configuration – JWK - JSON Web Key (JWK)
       summary: Deletes the specified JSON Web Key (JWK).
       description: Deletes the specified JSON Web Key (JWK).
       operationId: delete-config-jwks
@@ -10887,8 +9811,8 @@ paths:
         content:
           application/json:
             schema:
-              title: Client Details.
-              description: List of clients.
+              title: OpenID Connect Client Details.
+              description: OpenID Connect Client Details.
               type: object
               properties:
                 inum:
@@ -11275,8 +10199,8 @@ paths:
         content:
           application/json:
             schema:
-              title: Client Details.
-              description: List of clients.
+              title: OpenID Connect Client Details.
+              description: OpenID Connect Client Details.
               type: object
               properties:
                 inum:
@@ -12067,6 +10991,786 @@ paths:
       security:
         - oxAuth:
             - write
+    put:
+      tags:
+        - OAuth - OpenID Connect - Clients
+      summary: Update OpenId Connect client by Inum.
+      description: Update OpenId Connect client by Inum.
+      operationId: put-oauth-openid-clients-by-inum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: OpenID Connect Client Details.
+              description: OpenID Connect Client Details.
+              type: object
+              properties:
+                inum:
+                  description: XRI i-number. Client Identifier to uniquely identify the client.
+                  type: string
+                display_Name:
+                  description: A human-readable name of the client.
+                  type: string
+                description:
+                  description: A human-readable string describing the client.
+                  type: string
+                application_type:
+                  description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
+                  type: string
+                  enum:
+                    - Web
+                    - Native
+                contacts:
+                  description: e-mail addresses of people responsible for this Client.
+                  type: array
+                  items:
+                    type: string
+                redirect_uris:
+                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/cb'
+                post_logout_redirect_uris:
+                  description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/logout/page1'
+                    - 'https://client.example.org/logout/page2'
+                    - 'https://client.example.org/logout/page3'
+                scope:
+                  description: Provide list of scopes granted to the client.
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - read write dolphin
+                claims:
+                  description: Provide list of claims granted to the client.
+                  type: array
+                  items:
+                    type: string
+                    description: String containing a space-separated list of claims that can be requested individually.
+                client_secret:
+                  type: string
+                  description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+                password:
+                  type: string
+                  description: User password.
+                associated_persons:
+                  description: List of associated persons.
+                  type: array
+                  items:
+                    type: string
+                    description: Reference the DN of a person.
+                trusted_client:
+                  description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
+                  type: boolean
+                response_types:
+                  description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - CODE
+                      - TOKEN
+                      - ID_TOKEN
+                grant_types:
+                  description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - AUTHORIZATION_CODE
+                      - IMPLICIT
+                      - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+                      - CLIENT_CREDENTIALS
+                      - REFRESH_TOKEN
+                      - OXAUTH_UMA_TICKET
+                      - CIBA
+                      - DEVICE_CODE
+                logo_uri:
+                  description: URL that references a logo for the Client application.
+                  type: string
+                client_uri:
+                  description: URL of the home page of the Client. The value of this field must point to a valid Web page.
+                  type: string
+                policy_uri:
+                  description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                  type: string
+                tos_uri:
+                  description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+                  type: string
+                jwks_uri:
+                  description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
+                  type: string
+                jwks:
+                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey'
+                  example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
+                sector_identifier_uri:
+                  description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
+                  type: string
+                subject_type:
+                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  type: string
+                  enum:
+                    - PAIRWISE
+                    - PUBLIC
+                id_token_token_binding_cnf:
+                  description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
+                  type: string
+                rpt_as_jwt:
+                  description: Specifies whether RPT should be return as signed JWT.
+                  type: boolean
+                access_token_as_jwt:
+                  description: Specifies whether access token as signed JWT.
+                  type: boolean
+                access_token_signing_alg:
+                  description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                id_token_signed_response_alg:
+                  description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                id_token_encrypted_response_alg:
+                  description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                id_token_encrypted_response_enc:
+                  description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                userinfo_signed_response_alg:
+                  description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                userinfo_encrypted_response_alg:
+                  description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                userinfo_encrypted_response_enc:
+                  description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                request_object_signing_alg:
+                  description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                request_object_encryption_alg:
+                  description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                request_object_encryption_enc:
+                  description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                token_endpoint_auth_method:
+                  description: Requested Client Authentication method for the Token Endpoint.
+                  type: string
+                  enum:
+                    - client_secret_basic
+                    - client_secret_post
+                    - client_secret_jwt
+                    - private_key_jwt
+                    - none
+                token_endpoint_auth_signing_alg:
+                  description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                default_max_age:
+                  description: Specifies the Default Maximum Authentication Age.
+                  type: integer
+                  format: int32
+                  example: 1000000
+                require_auth_time:
+                  description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
+                  type: boolean
+                claims_redirect_uri:
+                  description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
+                  type: array
+                  items:
+                    type: string
+                logout_uri:
+                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                  type: array
+                  items:
+                    type: string
+                logout_session_required:
+                  description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
+                  type: boolean
+                persist_client_authorizations:
+                  description: Specifies if the client authorization details are to be persisted. Default value is true.
+                  type: boolean
+                include_claims_in_id_token:
+                  description: 'If true then claims are included in token id, default value is false.'
+                  type: boolean
+                refresh_token_lifetime:
+                  description: Specifies the Client-specific refresh token expiration.
+                  type: integer
+                  format: int32
+                  example: 100000000
+                access_token_lifetime:
+                  description: Specifies the Client-specific access token expiration.
+                  type: integer
+                  format: int32
+                  example: 100000000
+                default_acr_values:
+                  description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
+                  type: array
+                  items:
+                    type: string
+                initiate_login_uri:
+                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                  type: string
+                exp:
+                  description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+                  type: string
+                  format: date
+                request_uris:
+                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+                  type: array
+                  items:
+                    type: string
+                authorized_origins:
+                  description: Specifies authorized JavaScript origins.
+                  type: array
+                  items:
+                    type: string
+                software_id:
+                  description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                  type: string
+                  example: 4NRB1-0XZABZI9E6-5SM3R
+                software_version:
+                  description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                  type: string
+                  example: '2.1'
+                software_statement:
+                  description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+                  type: string
+                disabled:
+                  description: Specifies whether client is disabled.
+                  type: boolean
+                oxId:
+                  description: oxAuth Attribute Scope Id.
+                  type: string
+                deletable:
+                  description: Specifies whether client is deletable.
+                  type: boolean
+                client_attributes:
+                  type: object
+                  properties:
+                    tlsClientAuthSubjectDn:
+                      type: string
+                    runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+                      type: boolean
+                    keepClientAuthorizationAfterExpiration:
+                      description: Keep Client Authorization After Expiration.
+                      type: boolean
+                backchannel_authentication_request_signing_alg:
+                  description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
+                  type: string
+                  enum:
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                backchannel_token_delivery_mode:
+                  description: specifies how backchannel token will be delivered.
+                  type: string
+                backchannel_client_notification_endpoint:
+                  description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
+                  type: string
+                backchannel_user_code_parameter:
+                  description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    patch:
+      tags:
+        - OAuth - OpenID Connect - Clients
+      summary: Update modified properties of OpenId Connect client by Inum.
+      description: Update modified properties of OpenId Connect client by Inum.
+      operationId: patch-oauth-openid-clients-by-inum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: OpenID Connect Client Details.
+              description: OpenID Connect Client Details.
+              type: object
+              properties:
+                inum:
+                  description: XRI i-number. Client Identifier to uniquely identify the client.
+                  type: string
+                display_Name:
+                  description: A human-readable name of the client.
+                  type: string
+                description:
+                  description: A human-readable string describing the client.
+                  type: string
+                application_type:
+                  description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
+                  type: string
+                  enum:
+                    - Web
+                    - Native
+                contacts:
+                  description: e-mail addresses of people responsible for this Client.
+                  type: array
+                  items:
+                    type: string
+                redirect_uris:
+                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/cb'
+                post_logout_redirect_uris:
+                  description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/logout/page1'
+                    - 'https://client.example.org/logout/page2'
+                    - 'https://client.example.org/logout/page3'
+                scope:
+                  description: Provide list of scopes granted to the client.
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - read write dolphin
+                claims:
+                  description: Provide list of claims granted to the client.
+                  type: array
+                  items:
+                    type: string
+                    description: String containing a space-separated list of claims that can be requested individually.
+                client_secret:
+                  type: string
+                  description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+                password:
+                  type: string
+                  description: User password.
+                associated_persons:
+                  description: List of associated persons.
+                  type: array
+                  items:
+                    type: string
+                    description: Reference the DN of a person.
+                trusted_client:
+                  description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
+                  type: boolean
+                response_types:
+                  description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - CODE
+                      - TOKEN
+                      - ID_TOKEN
+                grant_types:
+                  description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - AUTHORIZATION_CODE
+                      - IMPLICIT
+                      - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+                      - CLIENT_CREDENTIALS
+                      - REFRESH_TOKEN
+                      - OXAUTH_UMA_TICKET
+                      - CIBA
+                      - DEVICE_CODE
+                logo_uri:
+                  description: URL that references a logo for the Client application.
+                  type: string
+                client_uri:
+                  description: URL of the home page of the Client. The value of this field must point to a valid Web page.
+                  type: string
+                policy_uri:
+                  description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                  type: string
+                tos_uri:
+                  description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+                  type: string
+                jwks_uri:
+                  description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
+                  type: string
+                jwks:
+                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/JsonWebKey'
+                  example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
+                sector_identifier_uri:
+                  description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
+                  type: string
+                subject_type:
+                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                  type: string
+                  enum:
+                    - PAIRWISE
+                    - PUBLIC
+                id_token_token_binding_cnf:
+                  description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
+                  type: string
+                rpt_as_jwt:
+                  description: Specifies whether RPT should be return as signed JWT.
+                  type: boolean
+                access_token_as_jwt:
+                  description: Specifies whether access token as signed JWT.
+                  type: boolean
+                access_token_signing_alg:
+                  description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                id_token_signed_response_alg:
+                  description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                id_token_encrypted_response_alg:
+                  description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                id_token_encrypted_response_enc:
+                  description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                userinfo_signed_response_alg:
+                  description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                userinfo_encrypted_response_alg:
+                  description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                userinfo_encrypted_response_enc:
+                  description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                request_object_signing_alg:
+                  description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                request_object_encryption_alg:
+                  description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - RSA1_5
+                    - RSA-OAEP
+                    - A128KW
+                    - A256KW
+                request_object_encryption_enc:
+                  description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                  type: string
+                  enum:
+                    - A128CBC+HS256
+                    - A256CBC+HS512
+                    - A128GCM
+                    - A256GCM
+                token_endpoint_auth_method:
+                  description: Requested Client Authentication method for the Token Endpoint.
+                  type: string
+                  enum:
+                    - client_secret_basic
+                    - client_secret_post
+                    - client_secret_jwt
+                    - private_key_jwt
+                    - none
+                token_endpoint_auth_signing_alg:
+                  description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                  type: string
+                  enum:
+                    - HS256
+                    - HS384
+                    - HS512
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                default_max_age:
+                  description: Specifies the Default Maximum Authentication Age.
+                  type: integer
+                  format: int32
+                  example: 1000000
+                require_auth_time:
+                  description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
+                  type: boolean
+                claims_redirect_uri:
+                  description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
+                  type: array
+                  items:
+                    type: string
+                logout_uri:
+                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                  type: array
+                  items:
+                    type: string
+                logout_session_required:
+                  description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
+                  type: boolean
+                persist_client_authorizations:
+                  description: Specifies if the client authorization details are to be persisted. Default value is true.
+                  type: boolean
+                include_claims_in_id_token:
+                  description: 'If true then claims are included in token id, default value is false.'
+                  type: boolean
+                refresh_token_lifetime:
+                  description: Specifies the Client-specific refresh token expiration.
+                  type: integer
+                  format: int32
+                  example: 100000000
+                access_token_lifetime:
+                  description: Specifies the Client-specific access token expiration.
+                  type: integer
+                  format: int32
+                  example: 100000000
+                default_acr_values:
+                  description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
+                  type: array
+                  items:
+                    type: string
+                initiate_login_uri:
+                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                  type: string
+                exp:
+                  description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+                  type: string
+                  format: date
+                request_uris:
+                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+                  type: array
+                  items:
+                    type: string
+                authorized_origins:
+                  description: Specifies authorized JavaScript origins.
+                  type: array
+                  items:
+                    type: string
+                software_id:
+                  description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                  type: string
+                  example: 4NRB1-0XZABZI9E6-5SM3R
+                software_version:
+                  description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                  type: string
+                  example: '2.1'
+                software_statement:
+                  description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+                  type: string
+                disabled:
+                  description: Specifies whether client is disabled.
+                  type: boolean
+                oxId:
+                  description: oxAuth Attribute Scope Id.
+                  type: string
+                deletable:
+                  description: Specifies whether client is deletable.
+                  type: boolean
+                client_attributes:
+                  type: object
+                  properties:
+                    tlsClientAuthSubjectDn:
+                      type: string
+                    runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+                      type: boolean
+                    keepClientAuthorizationAfterExpiration:
+                      description: Keep Client Authorization After Expiration.
+                      type: boolean
+                backchannel_authentication_request_signing_alg:
+                  description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
+                  type: string
+                  enum:
+                    - RS256
+                    - RS384
+                    - RS512
+                    - ES256
+                    - ES384
+                    - ES512
+                    - PS256
+                    - PS384
+                    - PS512
+                backchannel_token_delivery_mode:
+                  description: specifies how backchannel token will be delivered.
+                  type: string
+                backchannel_client_notification_endpoint:
+                  description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
+                  type: string
+                backchannel_user_code_parameter:
+                  description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
+                  type: boolean
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
   /api/v1/oxauth/openid/sectors:
     get:
       tags:
@@ -12268,6 +11972,94 @@ paths:
       security:
         - oxAuth:
             - write
+    put:
+      tags:
+        - OAuth - OpenID Connect - Sector Identifiers
+      summary: Update OpenId Connect Sector by Inum.
+      description: Update OpenId Connect Sector by Inum.
+      operationId: put-oauth-openid-sectors-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Sector Identifier Details.
+              properties:
+                id:
+                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
+                  type: string
+                description:
+                  description: A human-readable string describing the sector.
+                  type: string
+                redirect_uris:
+                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/cb'
+                client_id:
+                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
+                  type: array
+                  items:
+                    type: string
+                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    patch:
+      tags:
+        - OAuth - OpenID Connect - Sector Identifiers
+      summary: Partially update OpenId Connect Sector by Inum.
+      description: Partially update OpenId Connect Sector by Inum.
+      operationId: patch-oauth-openid-sectors-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Sector Identifier Details.
+              properties:
+                id:
+                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
+                  type: string
+                description:
+                  description: A human-readable string describing the sector.
+                  type: string
+                redirect_uris:
+                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - 'https://client.example.org/cb'
+                client_id:
+                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
+                  type: array
+                  items:
+                    type: string
+                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
   /api/v1/oxauth/uma/scopes:
     get:
       tags:
@@ -12446,6 +12238,88 @@ paths:
       summary: Deletes an Uma Scopes.
       description: Deletes an Uma Scopes.
       operationId: delete-oauth-uma-scopes-by-id
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    put:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Update existing Uma Scope by Inum.
+      description: Update existing Uma Scope by Inum.
+      operationId: put-oauth-uma-scopes-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UmaScope
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                iconUrl:
+                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                  type: string
+                authorizationPolicies:
+                  description: Policies associated with all scopes.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    patch:
+      tags:
+        - OAuth - UMA Scopes
+      summary: Partially update existing Uma Scope by Inum.
+      description: Partially update existing Uma Scope by Inum.
+      operationId: patch-oauth-uma-scopes-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UmaScope
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: The base64url encoded id.
+                  type: string
+                displayName:
+                  description: A human-readable name of the scope.
+                  type: string
+                iconUrl:
+                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                  type: string
+                authorizationPolicies:
+                  description: Policies associated with all scopes.
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
           description: OK
@@ -12688,73 +12562,108 @@ paths:
       security:
         - oxAuth:
             - write
-  /api/v1/oxauth/uma/resources/search:
-    parameters:
-      - name: pattern
-        in: query
-        required: true
-        description: Search pattern.
-        schema:
-          type: string
-      - name: size
-        in: query
-        required: false
-        description: Search size - max size of the results to return.
-        schema:
-          type: integer
-    get:
+    put:
       tags:
         - OAuth - UMA Resources
-      summary: Searches UMA Resources by pattern.
-      description: Searches UMA Resources by pattern.
-      operationId: get-oauth-uma-resources-search-by-pattern
+      summary: Updates an UMA resource by Inum.
+      description: Updates an UMA resource by Inum.
+      operationId: put-oauth-uma-resources-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UMAResource
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: Resource id.
+                  type: string
+                name:
+                  description: A human-readable name of the scope.
+                  type: string
+                iconUrl:
+                  description: A URL for a graphic icon representing the resource.
+                  type: string
+                scopes:
+                  description: Applicable resource scopes.
+                  type: array
+                  items:
+                    type: string
+                scopeExpression:
+                  description: List of resource scope expression.
+                  type: array
+                  items:
+                    type: string
+                clients:
+                  description: List of associated clients.
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                title: UMA Resource list.
-                description: List of UMA Resource.
-                type: array
-                items:
-                  type: object
-                  description: UMAResource
-                  required:
-                    - id
-                    - name
-                  properties:
-                    id:
-                      description: Resource id.
-                      type: string
-                    name:
-                      description: A human-readable name of the scope.
-                      type: string
-                    iconUrl:
-                      description: A URL for a graphic icon representing the resource.
-                      type: string
-                    scopes:
-                      description: Applicable resource scopes.
-                      type: array
-                      items:
-                        type: string
-                    scopeExpression:
-                      description: List of resource scope expression.
-                      type: array
-                      items:
-                        type: string
-                    clients:
-                      description: List of associated clients.
-                      type: array
-                      items:
-                        type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           description: Internal Server Error
       security:
         - oxAuth:
-            - read
+            - write
+    patch:
+      tags:
+        - OAuth - UMA Resources
+      summary: Partially updates an UMA resource by Inum.
+      description: Partially updates an UMA resource by Inum.
+      operationId: patch-oauth-uma-resources-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UMAResource
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  description: Resource id.
+                  type: string
+                name:
+                  description: A human-readable name of the scope.
+                  type: string
+                iconUrl:
+                  description: A URL for a graphic icon representing the resource.
+                  type: string
+                scopes:
+                  description: Applicable resource scopes.
+                  type: array
+                  items:
+                    type: string
+                scopeExpression:
+                  description: List of resource scope expression.
+                  type: array
+                  items:
+                    type: string
+                clients:
+                  description: List of associated clients.
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
 components:
   securitySchemes:
     oxAuth:
