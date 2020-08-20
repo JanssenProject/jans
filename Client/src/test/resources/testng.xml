@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="oxAuthClient" parallel="tests" thread-count="2">
+<suite name="oxAuthClient" parallel="tests" thread-count="16">
 
     <test name="JsonApplier Client test" enabled="true">
         <classes>
