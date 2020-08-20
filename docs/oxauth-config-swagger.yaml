@@ -3534,11 +3534,6 @@ paths:
                 title: OpenId configuration.
                 type: object
                 description: OpenId configuration.
-                required:
-                  - issuer
-                  - authorizationEndpoint
-                  - tokenEndpoint
-                  - responseTypesSupported
                 properties:
                   oxOpenIdConnectVersion:
                     type: string
@@ -3549,70 +3544,10 @@ paths:
                     type: string
                     description: URL using the https scheme that OP asserts as Issuer identifier.
                     example: 'https://server.example.com/'
-                  baseEndpoint:
-                    type: string
-                    description: The base URL for endpoints.
-                    example: 'https://server.example.com/oxauth/restv1'
-                  authorizationEndpoint:
-                    type: string
-                    description: The authorization endpoint URL.
-                    example: 'https://server.example.com/oxauth/restv1/authorize'
-                  tokenEndpoint:
-                    type: string
-                    description: The token endpoint URL.
-                    example: 'https://server.example.com/oxauth/restv1/token'
-                  tokenRevocationEndpoint:
-                    type: string
-                    description: The URL for the access_token or refresh_token revocation endpoint.
-                    example: 'https://server.example.com/oxauth/restv1/revoke'
                   jwksUri:
                     type: string
                     description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
                     example: 'https://server.example.com/oxauth/restv1/jwks'
-                  registrationEndpoint:
-                    type: string
-                    description: URL of the Registration Endpoint.
-                    example: 'https://server.example.com/oxauth/restv1/register'
-                  openIdDiscoveryEndpoint:
-                    type: string
-                    description: URL for the Discovery Endpoint.
-                    example: 'https://server.example.com/.well-known/webfinger'
-                  openIdConfigurationEndpoint:
-                    type: string
-                    description: URL for the Open ID Connect Configuration Endpoint.
-                    example: 'https://server.example.com/.well-known/openid-configuration'
-                  responseTypesSupported:
-                    type: array
-                    description: A list of the OAuth 2.0 response_type values that this OP supports.
-                    minItems: 1
-                    items:
-                      type: string
-                    enum:
-                      - code
-                      - token
-                      - id_token
-                  responseModesSupported:
-                    type: array
-                    description: A list of the OAuth 2.0 Response Mode values that this OP supports.
-                    items:
-                      type: string
-                    enum:
-                      - query
-                      - fragment
-                      - form_post
-                  grantTypesSupported:
-                    type: array
-                    description: A list of the OAuth 2.0 Grant Type values that this OP supports.
-                    items:
-                      type: string
-                    enum:
-                      - authorization_code
-                      - implicit
-                      - password
-                      - client_credentials
-                      - refresh_token
-                      - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
-                      - '\urn\:openid\:params\:grant-type\:ciba'
                   tokenEndpointAuthMethodsSupported:
                     type: array
                     description: A list of Client Authentication methods supported by this Token Endpoint.
@@ -3664,34 +3599,14 @@ paths:
                     type: string
                     description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
                     example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
-                  introspectionEndpoint:
-                    type: string
-                    description: URL for the Introspection Endpoint.
-                    example: 'https://server.example.com/oxauth/restv1/introspection'
-                  clientInfoEndpoint:
-                    description: The URL of the Client Info Endpoint.
-                    type: string
-                    format: url
-                    minLength: 1
                   checkSessionIFrame:
                     type: string
                     description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
                     example: 'https://server.example.com/oxauth/opiframe.htm'
-                  endSessionEndpoint:
-                    description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
-                    type: string
-                    format: url
-                    minLength: 1
-                  idGenerationEndpoint:
-                    description: URL for the ID Generation Endpoint.
-                    type: string
-                    format: url
-                    minLength: 1
                   deviceAuthzEndpoint:
-                    description: URL for Device Authorization Endpoint.
                     type: string
-                    format: url
-                    minLength: 1
+                    description: URL for device authorization requests.
+                    format: url               
                   introspectionAccessTokenMustHaveUmaProtectionScope:
                     type: boolean
                     description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
@@ -3854,11 +3769,6 @@ paths:
               title: OpenId configuration.
               type: object
               description: OpenId configuration.
-              required:
-                - issuer
-                - authorizationEndpoint
-                - tokenEndpoint
-                - responseTypesSupported
               properties:
                 oxOpenIdConnectVersion:
                   type: string
@@ -3869,70 +3779,10 @@ paths:
                   type: string
                   description: URL using the https scheme that OP asserts as Issuer identifier.
                   example: 'https://server.example.com/'
-                baseEndpoint:
-                  type: string
-                  description: The base URL for endpoints.
-                  example: 'https://server.example.com/oxauth/restv1'
-                authorizationEndpoint:
-                  type: string
-                  description: The authorization endpoint URL.
-                  example: 'https://server.example.com/oxauth/restv1/authorize'
-                tokenEndpoint:
-                  type: string
-                  description: The token endpoint URL.
-                  example: 'https://server.example.com/oxauth/restv1/token'
-                tokenRevocationEndpoint:
-                  type: string
-                  description: The URL for the access_token or refresh_token revocation endpoint.
-                  example: 'https://server.example.com/oxauth/restv1/revoke'
                 jwksUri:
                   type: string
                   description: URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP.
                   example: 'https://server.example.com/oxauth/restv1/jwks'
-                registrationEndpoint:
-                  type: string
-                  description: URL of the Registration Endpoint.
-                  example: 'https://server.example.com/oxauth/restv1/register'
-                openIdDiscoveryEndpoint:
-                  type: string
-                  description: URL for the Discovery Endpoint.
-                  example: 'https://server.example.com/.well-known/webfinger'
-                openIdConfigurationEndpoint:
-                  type: string
-                  description: URL for the Open ID Connect Configuration Endpoint.
-                  example: 'https://server.example.com/.well-known/openid-configuration'
-                responseTypesSupported:
-                  type: array
-                  description: A list of the OAuth 2.0 response_type values that this OP supports.
-                  minItems: 1
-                  items:
-                    type: string
-                  enum:
-                    - code
-                    - token
-                    - id_token
-                responseModesSupported:
-                  type: array
-                  description: A list of the OAuth 2.0 Response Mode values that this OP supports.
-                  items:
-                    type: string
-                  enum:
-                    - query
-                    - fragment
-                    - form_post
-                grantTypesSupported:
-                  type: array
-                  description: A list of the OAuth 2.0 Grant Type values that this OP supports.
-                  items:
-                    type: string
-                  enum:
-                    - authorization_code
-                    - implicit
-                    - password
-                    - client_credentials
-                    - refresh_token
-                    - '\urn\:ietf\:params\:oauth\:grant-type\:uma-ticket'
-                    - '\urn\:openid\:params\:grant-type\:ciba'
                 tokenEndpointAuthMethodsSupported:
                   type: array
                   description: A list of Client Authentication methods supported by this Token Endpoint.
@@ -3984,34 +3834,14 @@ paths:
                   type: string
                   description: URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service.
                   example: 'http://ox.gluu.org/doku.php?id=oxauth:tos'
-                introspectionEndpoint:
-                  type: string
-                  description: URL for the Introspection Endpoint.
-                  example: 'https://server.example.com/oxauth/restv1/introspection'
-                clientInfoEndpoint:
-                  description: The URL of the Client Info Endpoint.
-                  type: string
-                  format: url
-                  minLength: 1
                 checkSessionIFrame:
                   type: string
                   description: URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API.
                   example: 'https://server.example.com/oxauth/opiframe.htm'
-                endSessionEndpoint:
-                  description: URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP.
-                  type: string
-                  format: url
-                  minLength: 1
-                idGenerationEndpoint:
-                  description: URL for the ID Generation Endpoint.
-                  type: string
-                  format: url
-                  minLength: 1
                 deviceAuthzEndpoint:
-                  description: URL for Device Authorization Endpoint.
-                  type: string
-                  format: url
-                  minLength: 1
+                    type: string
+                    description: URL for device authorization requests.
+                    format: url
                 introspectionAccessTokenMustHaveUmaProtectionScope:
                   type: boolean
                   description: Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
