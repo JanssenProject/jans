@@ -77,6 +77,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
                      if m in gluu_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
                          Config.mappingLocations[ml] = storage
 
+        if not Config.get('couchbase_bucket_prefix'):
+            Config.couchbase_bucket_prefix = 'gluu'
+
         # It is time to bind database
         dbUtils.bind()
 
