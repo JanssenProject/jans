@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
  */
 public class UpdatedUsersTest extends UserBaseTest {
 	
-	private static final int MAX_USERS = 10;
+	private static final int MAX_USERS = 9;
 	
 	private int N;
 	private List<String> inums;
@@ -41,20 +41,23 @@ public class UpdatedUsersTest extends UserBaseTest {
 	public void creatingUsers() throws Exception {
 		
 		String isoDate = null;
-		
-		//pick a rand number i in [1, N-1]
-		int i = 1 + randInt (N - 1);
+		//pick a rand number in [0, N-1]
+		int i = randInt(N);
 		
 		//Create N random users
+		logger.info("Creating {} users", N);
 		for (int j = 0; j < N; j++) {
-			if (j == i) {
-				isoDate = ZonedDateTime.now(ZoneOffset.UTC).toString();
-			}
 			UserResource user = getDummyPatient();
-			Response response = client.createUser(user, "id", null);
+			Response response = client.createUser(user, "meta.created", null);
 			
             assertEquals(response.getStatus(), CREATED.getStatusCode());
-            inums.add(response.readEntity(usrClass).getId());
+            user = response.readEntity(usrClass); 
+            inums.add(user.getId());
+            
+            if (j == i) {
+            	isoDate = user.getMeta().getCreated();
+            	//logger.info("{}-indexed user created at '{}'", j, isoDate);
+			}
 		}
 		
 		logger.info("Querying created users after '{}'", isoDate);
@@ -84,13 +87,15 @@ public class UpdatedUsersTest extends UserBaseTest {
 		
 		UserResource u = new UserResource();
 		u.setActive(true);
-		String isoDate = ZonedDateTime.now(ZoneOffset.UTC).toString();
 		
 		//Update active attribute for the chosen users
-		Response response = client.updateUser(u, A, null, null);
+		Response response = client.updateUser(u, A, "meta.lastModified", null);
 		assertEquals(response.getStatus(), OK.getStatusCode());
 		
-		response = client.updateUser(u, B, null, null);
+		String isoDate = response.readEntity(usrClass).getMeta().getLastModified();
+		logger.info("User {} updated at '{}'", A, isoDate);
+		
+		response = client.updateUser(u, B, "id", null);
 		assertEquals(response.getStatus(), OK.getStatusCode());
 
 		logger.info("Querying updated users after '{}'", isoDate);
@@ -101,13 +106,11 @@ public class UpdatedUsersTest extends UserBaseTest {
 		//Convert response into an opaque map
     	Map<String, Object> map = mapper.readValue(json, new TypeReference<Map<String, Object>>(){});		
 		Set<String> foundInums = getFoundInums(map);
-	
-		assertTrue(foundInums.contains(A));
-		assertTrue(foundInums.contains(B));
+
+		assertTrue(foundInums.remove(A));
+		assertTrue(A.equals(B) || foundInums.remove(B));
 		
 		//Ensure there are no false positives
-		foundInums.remove(A);
-		foundInums.remove(B);
 		assertTrue(foundInums.isEmpty());
 		
     }
@@ -138,7 +141,7 @@ public class UpdatedUsersTest extends UserBaseTest {
 
     private Set<String> getFoundInums(Map<String, Object> map) throws Exception {
 		
-		Set<String> foundInums = new HashSet<>();
+		Set<String> foundInums = new TreeSet<>();
 		List<Map<String, Object>> results = mapper.convertValue(map.get("results"), 
 			new TypeReference<List<Map<String, Object>>>(){});
 
@@ -151,7 +154,7 @@ public class UpdatedUsersTest extends UserBaseTest {
 		
 	}
     
-    //Returns a random integer in [0, n - 1]
+    //Returns a random integer in [0, n - 1], n >= 1
     private int randInt(int n) {
     	return Double.valueOf(Math.random() * n).intValue();
     }
