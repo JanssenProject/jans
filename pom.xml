@@ -20,7 +20,7 @@
 		<httpclient.version>4.5.12</httpclient.version>
 
 		<weld.version>3.1.4.Final</weld.version>
-		<richfaces.version>4.5.17-gluu.Final</richfaces.version>
+		<richfaces.version>4.5.18-gluu.Final</richfaces.version>
 
 		<jsf-api.version>2.2.20</jsf-api.version>
 		<jsf-impl.version>2.3.14</jsf-impl.version>
