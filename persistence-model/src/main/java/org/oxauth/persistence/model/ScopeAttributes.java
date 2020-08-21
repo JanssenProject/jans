@@ -12,47 +12,45 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ScopeAttributes implements Serializable {
 
-    private static final long serialVersionUID = 213428216911083393L;
+	private static final long serialVersionUID = 213428216911083393L;
 
-    @JsonProperty("spontaneousClientId")
-    private String spontaneousClientId;
+	@JsonProperty("spontaneousClientId")
+	private String spontaneousClientId;
 
-    @JsonProperty("spontaneousClientScopes")
-    private List<String> spontaneousClientScopes;
+	@JsonProperty("spontaneousClientScopes")
+	private List<String> spontaneousClientScopes;
 
-    @JsonProperty("showInConfigurationEndpoint")
-    private boolean showInConfigurationEndpoint;
+	@JsonProperty("showInConfigurationEndpoint")
+	private boolean showInConfigurationEndpoint = true;
 
-    public String getSpontaneousClientId() {
-        return spontaneousClientId;
-    }
+	public String getSpontaneousClientId() {
+		return spontaneousClientId;
+	}
 
-    public void setSpontaneousClientId(String spontaneousClientId) {
-        this.spontaneousClientId = spontaneousClientId;
-    }
+	public void setSpontaneousClientId(String spontaneousClientId) {
+		this.spontaneousClientId = spontaneousClientId;
+	}
 
-    public List<String> getSpontaneousClientScopes() {
-        return spontaneousClientScopes;
-    }
+	public List<String> getSpontaneousClientScopes() {
+		return spontaneousClientScopes;
+	}
 
-    public void setSpontaneousClientScopes(List<String> spontaneousClientScopes) {
-        this.spontaneousClientScopes = spontaneousClientScopes;
-    }
+	public void setSpontaneousClientScopes(List<String> spontaneousClientScopes) {
+		this.spontaneousClientScopes = spontaneousClientScopes;
+	}
 
-    public boolean isShowInConfigurationEndpoint() {
-        return showInConfigurationEndpoint;
-    }
+	public boolean isShowInConfigurationEndpoint() {
+		return showInConfigurationEndpoint;
+	}
 
-    public void setShowInConfigurationEndpoint(boolean showInConfigurationEndpoint) {
-        this.showInConfigurationEndpoint = showInConfigurationEndpoint;
-    }
+	public void setShowInConfigurationEndpoint(boolean showInConfigurationEndpoint) {
+		this.showInConfigurationEndpoint = showInConfigurationEndpoint;
+	}
 
-    @Override
-    public String toString() {
-        return "ScopeAttributes{" +
-                "spontaneousClientId='" + spontaneousClientId + '\'' +
-                "spontaneousClientScopes='" + spontaneousClientScopes + '\'' +
-                "showInConfigurationEndpoint='" + showInConfigurationEndpoint + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "ScopeAttributes{" + "spontaneousClientId='" + spontaneousClientId + '\'' + "spontaneousClientScopes='"
+				+ spontaneousClientScopes + '\'' + "showInConfigurationEndpoint='" + showInConfigurationEndpoint + '\''
+				+ '}';
+	}
 }
