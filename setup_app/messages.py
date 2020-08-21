@@ -129,5 +129,5 @@ class msg:
     installation_description_scripts = "Interception scripts can be used to implement custom business logic for authentication, authorization and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code."
     
     
-    installation_error = "The following error was occurred while installing Gluu Server:"
+    installation_error = "The following error occurred while installing Gluu Server:"
     exit_post_setup = "No service was selected to install. Exit now?"
