@@ -1619,6 +1619,27 @@ paths:
                       type: boolean
                       description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.
                       default: false
+                    dynamicGrantTypeDefault:
+                      type: array
+                      description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
+                      items:
+                        type: string
+                      enum:
+                        - authorization_code
+                        - implicit
+                        - password
+                        - client_credentials
+                        - refresh_token
+                        - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+                        - 'urn:openid:params:grant-type:ciba'
+                    defaultSubjectType:
+                      type: string
+                      description: Default Subject Type used for Dynamic Client Registration.
+                      items:
+                        type: string
+                      enum:
+                        - public
+                        - pairwise
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1689,6 +1710,27 @@ paths:
                     type: boolean
                     description: Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to false by default which means to not return secret.
                     default: false
+                  dynamicGrantTypeDefault:
+                    type: array
+                    description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
+                    items:
+                      type: string
+                    enum:
+                      - authorization_code
+                      - implicit
+                      - password
+                      - client_credentials
+                      - refresh_token
+                      - 'urn:ietf:params:oauth:grant-type:uma-ticket'
+                      - 'urn:openid:params:grant-type:ciba'
+                  defaultSubjectType:
+                    type: string
+                    description: Default Subject Type used for Dynamic Client Registration.
+                    items:
+                      type: string
+                    enum:
+                      - public
+                      - pairwise                      
       responses:
         '200':
           description: OK
@@ -3190,20 +3232,7 @@ paths:
                         - refresh_token
                         - 'urn:ietf:params:oauth:grant-type:uma-ticket'
                         - 'urn:openid:params:grant-type:ciba'
-                        - 'urn:ietf:params:oauth:grant-type:device_code'
-                    dynamicGrantTypeDefault:
-                      type: array
-                      description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
-                      items:
-                        type: string
-                      enum:
-                        - authorization_code
-                        - implicit
-                        - password
-                        - client_credentials
-                        - refresh_token
-                        - 'urn:ietf:params:oauth:grant-type:uma-ticket'
-                        - 'urn:openid:params:grant-type:ciba'
+                        - 'urn:ietf:params:oauth:grant-type:device_code'                    
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3241,19 +3270,6 @@ paths:
                       - 'urn:ietf:params:oauth:grant-type:uma-ticket'
                       - 'urn:openid:params:grant-type:ciba'
                       - 'urn:ietf:params:oauth:grant-type:device_code'
-                  dynamicGrantTypeDefault:
-                    type: array
-                    description: list of the OAuth 2.0 Grant Type values that it's possible to set via client registration API..
-                    items:
-                      type: string
-                    enum:
-                      - authorization_code
-                      - implicit
-                      - password
-                      - client_credentials
-                      - refresh_token
-                      - 'urn:ietf:params:oauth:grant-type:uma-ticket'
-                      - 'urn:openid:params:grant-type:ciba'
       responses:
         '200':
           description: OK
@@ -3749,6 +3765,10 @@ paths:
                   cookieDomain:
                     type: string
                     description: Sets cookie domain for all cookies created by OP.
+                  openidSubAttribute:
+                    type: string
+                    description: Specifies which LDAP attribute is used for the subject identifier claim.
+                    example: inum
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3984,6 +4004,10 @@ paths:
                 cookieDomain:
                   type: string
                   description: Sets cookie domain for all cookies created by OP.
+                openidSubAttribute:
+                  type: string
+                  description: Specifies which LDAP attribute is used for the subject identifier claim.
+                  example: inum                
       responses:
         '200':
           description: OK
@@ -4012,18 +4036,6 @@ paths:
                 type: object
                 description: Subject configuration.
                 properties:
-                  defaultSubjectType:
-                    type: string
-                    description: Default Subject Type used for Dynamic Client Registration.
-                    items:
-                      type: string
-                    enum:
-                      - public
-                      - pairwise
-                  openidSubAttribute:
-                    type: string
-                    description: Specifies which LDAP attribute is used for the subject identifier claim.
-                    example: inum
                   subjectTypesSupported:
                     type: array
                     description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
@@ -4057,18 +4069,6 @@ paths:
               type: object
               description: Subject configuration.
               properties:
-                defaultSubjectType:
-                  type: string
-                  description: Default Subject Type used for Dynamic Client Registration.
-                  items:
-                    type: string
-                  enum:
-                    - public
-                    - pairwise
-                openidSubAttribute:
-                  type: string
-                  description: Specifies which LDAP attribute is used for the subject identifier claim.
-                  example: inum
                 subjectTypesSupported:
                   type: array
                   description: A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.

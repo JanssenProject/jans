@@ -204,3 +204,15 @@ Feature: Verify OpenId configuration endpoint
     And print response
     
     
+    @error
+    Scenario: Error case for openidSubAttribute configuration validation
+ 	Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    Then def request_json = read('config.json') 
+    Then set request_json.openidSubAttribute = null
+    And request request_json
+    When method PUT
+    Then status 400
+    And print response
+    
+    

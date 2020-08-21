@@ -3,7 +3,7 @@ Feature: Verify DynamicRegistration configuration endpoint
   	Background:
   	* def mainUrl = dynamicRegistrationUrl
   	
-  	@dynamicRegistration-put-json
+   	@dynamicRegistration-put-json
   	Scenario: Update Dynamic Registration configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken

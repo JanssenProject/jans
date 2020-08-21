@@ -1,8 +1,5 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-import java.util.Set;
-import java.util.HashSet;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -22,12 +19,16 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.slf4j.Logger;
 
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxtrust.service.JsonConfigurationService;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.rest.model.DynamicRegistration;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
+
+/**
+ * @author Puja Sharma
+ *
+ */
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES + ApiConstants.DYN_REGISTRATION)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -49,6 +50,7 @@ public class DynamicRegistrationResource extends BaseResource {
 	public Response getDynamicRegistration() {
 		try {
 			log.debug("DynamicRegistrationResource::getDynamicRegistration() - Retrieve dynamic client registration configuration");
+			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			DynamicRegistration dynamicRegistration = new DynamicRegistration();
 			dynamicRegistration.setDynamicRegistrationEnabled(appConfiguration.getDynamicRegistrationEnabled());
@@ -59,14 +61,10 @@ public class DynamicRegistrationResource extends BaseResource {
 			dynamicRegistration.setDynamicRegistrationCustomObjectClass(appConfiguration.getDynamicRegistrationCustomObjectClass());
 			dynamicRegistration.setDefaultSubjectType(appConfiguration.getDefaultSubjectType());
 			dynamicRegistration.setDynamicRegistrationExpirationTime(appConfiguration.getDynamicRegistrationExpirationTime());
-			//dynamicRegistration.setDynamicGrantTypeDefault(appConfiguration.getDynamicGrantTypeDefault());
+			dynamicRegistration.setDynamicGrantTypeDefault(appConfiguration.getDynamicGrantTypeDefault());
 			dynamicRegistration.setDynamicRegistrationCustomAttributes(appConfiguration.getDynamicRegistrationCustomAttributes());
-			if(appConfiguration.getDynamicGrantTypeDefault() != null && !appConfiguration.getDynamicGrantTypeDefault().isEmpty()) {
-				Set<String> dynamicGrantTypeDefault = new HashSet<String>();
-				for(GrantType grantType : appConfiguration.getDynamicGrantTypeDefault() )
-					dynamicGrantTypeDefault.add(grantType.getValue());
-				dynamicRegistration.setDynamicGrantTypeDefault(dynamicGrantTypeDefault);
-			}
+			dynamicRegistration.setTrustedClientEnabled(appConfiguration.getTrustedClientEnabled());
+			dynamicRegistration.setReturnClientSecretOnRead(appConfiguration.getReturnClientSecretOnRead());			
 			
         	return Response.ok(dynamicRegistration).build();
 						
@@ -96,18 +94,11 @@ public class DynamicRegistrationResource extends BaseResource {
 			appConfiguration.setDynamicRegistrationCustomObjectClass(dynamicRegistration.getDynamicRegistrationCustomObjectClass());
 			appConfiguration.setDefaultSubjectType(dynamicRegistration.getDefaultSubjectType());
 			appConfiguration.setDynamicRegistrationExpirationTime(dynamicRegistration.getDynamicRegistrationExpirationTime());
-			//appConfiguration.setDynamicGrantTypeDefault(dynamicRegistration.getDynamicGrantTypeDefault());
+			appConfiguration.setDynamicGrantTypeDefault(dynamicRegistration.getDynamicGrantTypeDefault());
 			appConfiguration.setDynamicRegistrationCustomAttributes(dynamicRegistration.getDynamicRegistrationCustomAttributes());
-			if(dynamicRegistration.getDynamicGrantTypeDefault() != null && !dynamicRegistration.getDynamicGrantTypeDefault().isEmpty()) {
-				Set<GrantType> dynamicGrantTypeDefault = new HashSet<GrantType>();
-				for(String strType : dynamicRegistration.getDynamicGrantTypeDefault() ) {
-					GrantType grantType = GrantType.getByValue(strType);
-					dynamicGrantTypeDefault.add(grantType);
-				}
-					
-				appConfiguration.setDynamicGrantTypeDefault(dynamicGrantTypeDefault);
-			}
-			
+			appConfiguration.setTrustedClientEnabled(dynamicRegistration.getTrustedClientEnabled());
+			appConfiguration.setReturnClientSecretOnRead(dynamicRegistration.getReturnClientSecretOnRead());
+						
 			//Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 			

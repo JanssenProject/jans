@@ -96,8 +96,8 @@ public class OpenIdConfigurationResource extends BaseResource {
 			openIdConfiguration.setDeviceAuthzTokenPollInterval(appConfiguration.getDeviceAuthzTokenPollInterval());
 			openIdConfiguration.setDeviceAuthzResponseTypeToProcessAuthz(appConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
 			openIdConfiguration.setCookieDomain(appConfiguration.getCookieDomain());
-			
-			
+			openIdConfiguration.setOpenidSubAttribute(appConfiguration.getOpenidSubAttribute());
+						
 			return Response.ok(openIdConfiguration).build();
 			
 		}catch(Exception ex) {
@@ -159,6 +159,7 @@ public class OpenIdConfigurationResource extends BaseResource {
 			appConfiguration.setDeviceAuthzTokenPollInterval(openIdConfiguration.getDeviceAuthzTokenPollInterval());
 			appConfiguration.setDeviceAuthzResponseTypeToProcessAuthz(openIdConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
 			appConfiguration.setCookieDomain(openIdConfiguration.getCookieDomain());
+			appConfiguration.setOpenidSubAttribute(openIdConfiguration.getOpenidSubAttribute());
 			
 			//Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);

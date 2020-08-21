@@ -40,18 +40,4 @@ Feature: Verify supported Grant Type configuration endpoint
    And print response
    
    
-    @error
-   Scenario: Error case while updating dynamicGrantTypeDefault configuration min validation
-   Given url  mainUrl
-   And  header Authorization = 'Bearer ' + accessToken
-   When method GET
-   Then status 200
-   Then def first_response = response 
-   Then set first_response.dynamicGrantTypeDefault = null
-   Given url mainUrl
-   And  header Authorization = 'Bearer ' + accessToken
-   And request first_response
-   When method PUT
-   Then status 400
-   And print response
    

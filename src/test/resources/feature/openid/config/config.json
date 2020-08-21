@@ -1,4 +1,5 @@
 {
+  "openidSubAttribute": "inum",
   "tokenEndpointAuthSigningAlgValuesSupported": [
     "HS256",
     "HS384",
