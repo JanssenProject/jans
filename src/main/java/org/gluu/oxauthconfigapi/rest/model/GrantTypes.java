@@ -17,24 +17,13 @@ public class GrantTypes implements Serializable {
     @Size(min = 1)
 	private Set<GrantType> grantTypesSupported;
     
-    @NotEmpty
-    @Size(min = 1)
-	private Set<GrantType> dynamicGrantTypeDefault;
-	
 	public Set<GrantType> getGrantTypesSupported() {
 		return grantTypesSupported;
 	}
 	
+	
 	public void setGrantTypesSupported(Set<GrantType> grantTypesSupported) {
 		this.grantTypesSupported = grantTypesSupported;
-	}
-	
-	public Set<GrantType> getDynamicGrantTypeDefault() {
-		return dynamicGrantTypeDefault;
-	}
-	
-	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
 	}
 	
 }

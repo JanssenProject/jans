@@ -8,9 +8,12 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.validation.constraints.Pattern;
+
+import org.gluu.oxauth.model.common.GrantType;
 
 public class DynamicRegistration  implements Serializable {
 
@@ -21,6 +24,7 @@ public class DynamicRegistration  implements Serializable {
 	private Boolean dynamicRegistrationPersistClientAuthorizations;
 	private Boolean dynamicRegistrationScopesParamEnabled;
 	private Boolean legacyDynamicRegistrationScopeParam;
+	
 	
 	@NotBlank
 	@Size(min=1)
@@ -34,13 +38,16 @@ public class DynamicRegistration  implements Serializable {
 	@Digits(integer = 10 , fraction = 0)
 	private int dynamicRegistrationExpirationTime = -1;
 	
-	@NotNull
-	@Size(min=1)
-	private Set<String> dynamicGrantTypeDefault;
-	
+	@NotEmpty
+    @Size(min = 1)
+	private Set<GrantType> dynamicGrantTypeDefault;	
+
 	@NotNull
 	@Size(min=1)
 	private List<String> dynamicRegistrationCustomAttributes;
+	
+	private Boolean trustedClientEnabled;	
+	private Boolean returnClientSecretOnRead = false;
 
 	public Boolean getDynamicRegistrationEnabled() {
 		return dynamicRegistrationEnabled;
@@ -106,11 +113,11 @@ public class DynamicRegistration  implements Serializable {
 		this.dynamicRegistrationExpirationTime = dynamicRegistrationExpirationTime;
 	}
 
-	public Set<String> getDynamicGrantTypeDefault() {
+	public Set<GrantType> getDynamicGrantTypeDefault() {
 		return dynamicGrantTypeDefault;
 	}
-
-	public void setDynamicGrantTypeDefault(Set<String> dynamicGrantTypeDefault) {
+	
+	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
 		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
 	}
 
@@ -120,6 +127,22 @@ public class DynamicRegistration  implements Serializable {
 
 	public void setDynamicRegistrationCustomAttributes(List<String> dynamicRegistrationCustomAttributes) {
 		this.dynamicRegistrationCustomAttributes = dynamicRegistrationCustomAttributes;
+	}
+
+	public Boolean getTrustedClientEnabled() {
+		return trustedClientEnabled;
+	}
+
+	public void setTrustedClientEnabled(Boolean trustedClientEnabled) {
+		this.trustedClientEnabled = trustedClientEnabled;
+	}
+
+	public Boolean getReturnClientSecretOnRead() {
+		return returnClientSecretOnRead;
+	}
+
+	public void setReturnClientSecretOnRead(Boolean returnClientSecretOnRead) {
+		this.returnClientSecretOnRead = returnClientSecretOnRead;
 	}
 	
 }

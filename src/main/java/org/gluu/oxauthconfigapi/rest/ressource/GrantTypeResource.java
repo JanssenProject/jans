@@ -56,8 +56,6 @@ public class GrantTypeResource extends BaseResource {
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			GrantTypes grantTypes = new GrantTypes();
 			grantTypes.setGrantTypesSupported(appConfiguration.getGrantTypesSupported());
-			grantTypes.setDynamicGrantTypeDefault(appConfiguration.getDynamicGrantTypeDefault());
-			
 			
 			return Response.ok(grantTypes).build();			
 			
@@ -80,8 +78,7 @@ public class GrantTypeResource extends BaseResource {
 						
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			appConfiguration.setGrantTypesSupported(grantTypes.getGrantTypesSupported());
-			appConfiguration.setDynamicGrantTypeDefault(grantTypes.getDynamicGrantTypeDefault());
-			
+						
 			//Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 			

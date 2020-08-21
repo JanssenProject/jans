@@ -1,19 +1,22 @@
 {
-
-	"defaultSubjectType":"pairwise",
-	"dynamicGrantTypeDefault":["refresh_token",
-							   "implicit",
-							   "client_credentials",
-							   "authorization_code",
-							   "urn:ietf:params:oauth:grant-type:uma-ticket"],
-	"dynamicRegistrationCustomAttributes":["oxAuthTrustedClient"],
-	"dynamicRegistrationCustomObjectClass":"MyDynamicRegistrationCustomObject",
-	"dynamicRegistrationEnabled":true,
-	"dynamicRegistrationExpirationTime":10,
-	"dynamicRegistrationPasswordGrantTypeEnabled":false,
-	"dynamicRegistrationPersistClientAuthorizations":true,
-	"dynamicRegistrationScopesParamEnabled":true,
-	"legacyDynamicRegistrationScopeParam":false
-
+  "dynamicRegistrationExpirationTime": 10,
+  "dynamicRegistrationScopesParamEnabled": true,
+  "dynamicRegistrationPersistClientAuthorizations": true,
+  "returnClientSecretOnRead": false,
+  "dynamicRegistrationPasswordGrantTypeEnabled": false,
+  "dynamicRegistrationEnabled": true,
+  "trustedClientEnabled": true,
+  "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject",
+  "dynamicGrantTypeDefault": [
+    "REFRESH_TOKEN",
+    "OXAUTH_UMA_TICKET",
+    "IMPLICIT",
+    "CLIENT_CREDENTIALS",
+    "AUTHORIZATION_CODE"
+  ],
+  "dynamicRegistrationCustomAttributes": [
+    "oxAuthTrustedClient"
+  ],
+  "defaultSubjectType": "pairwise",
+  "legacyDynamicRegistrationScopeParam": false
 }
-

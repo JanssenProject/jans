@@ -86,6 +86,9 @@ function() {
 	    // OpenId - OpenID Connect configuration endpoints.
 	    openidUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/openid',
 	    
+	    // Subject - Subject configuration endpoints.
+	    subjectUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/subject',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    

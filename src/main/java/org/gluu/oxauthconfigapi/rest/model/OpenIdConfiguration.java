@@ -102,6 +102,10 @@ public class OpenIdConfiguration implements Serializable {
 	private String deviceAuthzResponseTypeToProcessAuthz;
 	private String cookieDomain;
 	
+	@NotBlank
+	@Size(min = 1)
+	private String openidSubAttribute;
+	
 	
 	public String getOxOpenIdConnectVersion() {
 		return oxOpenIdConnectVersion;
@@ -423,5 +427,13 @@ public class OpenIdConfiguration implements Serializable {
 	public void setCookieDomain(String cookieDomain) {
 		this.cookieDomain = cookieDomain;
 	}	
+	
+	public String getOpenidSubAttribute() {
+		return openidSubAttribute;
+	}
+	
+	public void setOpenidSubAttribute(String openidSubAttribute) {
+		this.openidSubAttribute = openidSubAttribute;
+	}
 	
 }
