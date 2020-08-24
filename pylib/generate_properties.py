@@ -103,7 +103,7 @@ if not os.path.exists(prop_path):
     os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/jproperties.py -O ' + prop_path)
 
 cbm_path = os.path.join(cur_dir, 'cbm.py')
-if not os.path.exists('cbm.py'):
+if not os.path.exists(cbm_path):
     os.system('wget -nv https://raw.githubusercontent.com/GluuFederation/community-edition-setup/master/pylib/cbm.py -O' + cbm_path)
 
 if needs_restart:
