@@ -46,6 +46,7 @@ public class AuthenticationMethodResource extends BaseResource {
 	@Operation(summary = "Returns default authentication method.")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AuthenticationMethod.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = true, description = "Unauthorized"))),
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
     public Response getDefaultAuthenticationMethod() {
