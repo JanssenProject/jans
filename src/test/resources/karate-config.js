@@ -89,6 +89,9 @@ function() {
 	    // Subject - Subject configuration endpoints.
 	    subjectUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/subject',
 	    
+	    // Token - Token configuration endpoints.
+	    tokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/token',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    

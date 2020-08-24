@@ -42,10 +42,11 @@ public class EndpointResource extends BaseResource {
 	@Operation(summary = "Gets oxAuth available endpoints.")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Endpoint.class, required = true, description = "Success"))),
+			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAvailableEndpoints() {
-		log.debug("BackchannelResource::getAvailableEndpoints() - Retrieve oxAuth available endpoints.");
+		log.debug("EndpointResource::getAvailableEndpoints() - Retrieve oxAuth available endpoints.");
 		try {
 			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
@@ -84,7 +85,7 @@ public class EndpointResource extends BaseResource {
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateAvailableEndpoints(@Valid Endpoint endpoint) {
-		log.debug("BackchannelResource::updateAvailableEndpoints() - Update oxAuth available endpoints.");
+		log.debug("EndpointResource::updateAvailableEndpoints() - Update oxAuth available endpoints.");
 		try {
 			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
