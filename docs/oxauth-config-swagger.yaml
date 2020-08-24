@@ -4203,11 +4203,11 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/properties/server-config:
+  /api/v1/oxauth/config/properties/server:
     get:
       summary: Gets Server's common configuration properties.
       description: Gets Server's common configuration properties.
-      operationId: get-properties-server-config
+      operationId: get-properties-server
       tags:
         - Configuration – Server
       responses:
@@ -4313,7 +4313,7 @@ paths:
     put:
       summary: Updates Server's common configuration properties.
       description: Updates Server's common configuration properties.
-      operationId: put-properties-server-config
+      operationId: put-properties-server
       tags:
         - Configuration – Server
       requestBody:
