@@ -98,6 +98,9 @@ function() {
 	    // Server-cleanup - Server cleanup configuration endpoints.
 	    serverCleanupUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server-cleanup',
 	    
+	    // Key Regeneration configuration endpoints.
+	    keyRegenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/key-regen',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
