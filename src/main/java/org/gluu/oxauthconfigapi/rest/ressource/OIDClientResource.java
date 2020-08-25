@@ -6,7 +6,14 @@ package org.gluu.oxauthconfigapi.rest.ressource;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -36,6 +43,8 @@ import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.model.OxAuthSubjectType;
 import org.gluu.oxtrust.service.ClientService;
 import org.gluu.oxtrust.service.EncryptionService;
+import org.gluu.oxtrust.service.ScopeService;
+import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
 /**
@@ -46,12 +55,16 @@ import org.slf4j.Logger;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CLIENTS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@ApplicationScoped
 public class OIDClientResource extends BaseResource {
 	@Inject
 	Logger logger;
 
 	@Inject
 	ClientService clientService;
+
+	@Inject
+	ScopeService scopeService;
 
 	@Inject
 	EncryptionService encryptionService;
@@ -163,6 +176,53 @@ public class OIDClientResource extends BaseResource {
 					result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
 				}
 				return Response.ok(result).build();
+			} else {
+				return getResourceNotFoundError();
+			}
+		} catch (Exception ex) {
+			logger.error("Failed to update OpenId Connect client", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@PUT
+	@Operation(summary = "Add scopes to existing client", description = "Add scopes to existing client")
+	@APIResponses(value = { @APIResponse(responseCode = "200"),
+			@APIResponse(responseCode = "400", description = "Bad Request"),
+			@APIResponse(responseCode = "404", description = "Not Found"),
+			@APIResponse(responseCode = "500", description = "Server Error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES)
+	public Response addScopesToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
+			@NotNull JsonObject object) {
+		try {
+			if (inum == null) {
+				return getMissingAttributeError(AttributeNames.INUM);
+			}
+			JsonArray scopeInums = object.getJsonArray("scopes");
+			if (scopeInums == null || scopeInums.isEmpty()) {
+				return getMissingAttributeError(AttributeNames.INUM);
+			}
+			OxAuthClient existingClient = clientService.getClientByInum(inum);
+			JsonObjectBuilder builder = Json.createObjectBuilder();
+			if (existingClient != null) {
+				List<String> oxAuthScopes = existingClient.getOxAuthScopes();
+				if (oxAuthScopes == null) {
+					oxAuthScopes = new ArrayList<String>();
+				}
+				for (JsonValue scopeInum : scopeInums) {
+					String inumScope = ((JsonString) scopeInum).getString();
+					Scope scope = scopeService.getScopeByInum(inumScope);
+					if (scope != null) {
+						builder.add(inumScope, Response.Status.OK.getStatusCode());
+						oxAuthScopes.add(scope.getDn());
+					} else {
+						builder.add(inumScope, Response.Status.NOT_FOUND.getStatusCode());
+					}
+				}
+				existingClient.setOxAuthScopes(oxAuthScopes);
+				clientService.updateClient(existingClient);
+				return Response.ok(builder.build()).build();
 			} else {
 				return getResourceNotFoundError();
 			}
