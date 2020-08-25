@@ -442,6 +442,9 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 rp.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
                 rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
                 rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
+            } else {
+                rp.setClientId(params.getClientId());
+                rp.setClientSecret(params.getClientSecret());
             }
 
             getRpService().create(rp);
