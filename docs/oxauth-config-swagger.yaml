@@ -4521,11 +4521,11 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/properties/key-reg:
+  /api/v1/oxauth/config/properties/key-regen:
     get:
       summary: Gets Key regeneration configuration.
       description: Gets Key regeneration configuration.
-      operationId: get-properties-key-reg
+      operationId: get-properties-key-regen
       tags:
         - Configuration – Key Regeneration
       responses:
@@ -4576,7 +4576,7 @@ paths:
     put:
       summary: Updates Key regeneration configuration.
       description: Updates Key regeneration configuration.
-      operationId: put-properties-key-reg
+      operationId: put-properties-key-regen
       tags:
         - Configuration – Key Regeneration
       requestBody:

@@ -1,0 +1,5 @@
+{
+  "defaultSignatureAlgorithm": "RS256",
+  "keyRegenerationInterval": 48,
+  "keyRegenerationEnabled": true
+}
