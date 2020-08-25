@@ -92,8 +92,11 @@ function() {
 	    // Token - Token configuration endpoints.
 	    tokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/token',
 	    
-	    // Server - Server configuration endpoints.
-	    serverUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server',
+	    // Server-config - Server configuration endpoints.
+	    serverConfigUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server-config',
+	    
+	    // Server-cleanup - Server cleanup configuration endpoints.
+	    serverCleanupUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server-cleanup',
 	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',

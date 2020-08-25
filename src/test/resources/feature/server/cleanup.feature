@@ -1,10 +1,10 @@
-Feature: Verify Server configuration endpoint
+Feature: Verify Server cleanup configuration endpoint
 
   	Background:
-  	* def mainUrl = serverUrl
+  	* def mainUrl = serverCleanupUrl
 
  	@server-get
-  	Scenario: Retrieve Server configuration
+  	Scenario: Retrieve Server cleanup configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -13,21 +13,21 @@ Feature: Verify Server configuration endpoint
     And assert response.length != null
     
     @server-put
-  	Scenario: Update Server configuration
+  	Scenario: Update Server cleanup configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    And request read('server.json')
+    And request read('cleanup.json')
     When method PUT
     Then status 200
     And print response
     And assert response.length != null
     
     @error
-  	Scenario: Error case for oxId configuration validation
+  	Scenario: Error case for cleanServiceInterval configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('server.json') 
-    Then set request_json.oxId = null
+    Then def request_json = read('cleanup.json') 
+    Then set request_json.cleanServiceInterval = 0
     #And print request_json
     And request request_json
     When method PUT
@@ -35,11 +35,11 @@ Feature: Verify Server configuration endpoint
     And print response
     
     @error
-  	Scenario: Error case for configurationUpdateInterval configuration validation
+  	Scenario: Error case for cleanServiceBatchChunkSize configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('server.json') 
-    Then set request_json.configurationUpdateInterval = 0
+    Then def request_json = read('cleanup.json') 
+    Then set request_json.cleanServiceBatchChunkSize = 0
      #And print request_json
     And request request_json
     When method PUT
