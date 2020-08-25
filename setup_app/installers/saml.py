@@ -81,14 +81,7 @@ class SamlInstaller(JettyInstaller):
                               self.shib_crt_file
                               )
 
-
-        # unpack IDP3 JAR with static configs
-        tmpShibpDir = os.path.join('/tmp', os.urandom(5).hex())
-        self.logIt("Unpacking %s..." % self.source_files[2][0])
-        self.createDirs(tmpShibpDir)
-        self.run([Config.cmd_jar, 'xf', self.source_files[2][0]], tmpShibpDir)
-        self.copyTree(os.path.join(tmpShibpDir, 'shibboleth-idp'), '/opt/shibboleth-idp')
-        self.removeDirs(tmpShibpDir)
+        self.unpack_idp3()
 
         if Config.mappingLocations['user'] == 'couchbase':
             Config.templateRenderingDict['idp_attribute_resolver_ldap.search_filter'] = '(&(|(lower(uid)=$requestContext.principalName)(mail=$requestContext.principalName))(objectClass=gluuPerson))'
@@ -138,6 +131,14 @@ class SamlInstaller(JettyInstaller):
 
         self.enable()
 
+    def unpack_idp3(self):
+        # unpack IDP3 JAR with static configs
+        tmpShibpDir = os.path.join('/tmp', os.urandom(5).hex())
+        self.logIt("Unpacking %s..." % self.source_files[2][0])
+        self.createDirs(tmpShibpDir)
+        self.run([Config.cmd_jar, 'xf', self.source_files[2][0]], tmpShibpDir)
+        self.copyTree(os.path.join(tmpShibpDir, 'shibboleth-idp'), '/opt/shibboleth-idp')
+        self.removeDirs(tmpShibpDir)
 
     def generate_configuration(self):
         self.check_clients([('idp_client_id', '1101.')])
