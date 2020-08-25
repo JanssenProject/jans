@@ -33,7 +33,8 @@ public class ApiConstants {
 	public static final String GRANT = "/grant";
 	public static final String SUBJECT = "/subject";
 	public static final String TOKEN = "/token";
-	public static final String SERVER = "/server";
+	public static final String SERVER_CONFIG = "/server-config";
+	public static final String SERVER_CLEANUP = "/server-cleanup";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
 	public static final String SCRIPTS = "/scripts";
