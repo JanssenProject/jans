@@ -83,7 +83,7 @@ public class Utils {
         if (StringUtils.isNotBlank(url)) {
             try {
                 if (url.contains("#")) {
-                    throw new HttpException(ErrorResponseCode.URI_HAS_FRAGMENT_COMPONENT);
+                    throw new HttpException(ErrorResponseCode.REDIRECT_URI_HAS_FRAGMENT_COMPONENT);
                 }
                 new URL(url);
                 return true;
