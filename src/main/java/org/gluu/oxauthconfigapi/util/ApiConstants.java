@@ -33,6 +33,7 @@ public class ApiConstants {
 	public static final String GRANT = "/grant";
 	public static final String SUBJECT = "/subject";
 	public static final String TOKEN = "/token";
+	public static final String SEPARATOR = "/";
 	public static final String SERVER_CONFIG = "/server-config";
 	public static final String SERVER_CLEANUP = "/server-cleanup";
 	public static final String KEY_REGENERATION = "/key-regen";
@@ -42,11 +43,13 @@ public class ApiConstants {
 	public static final String SMTP = "/smtp";
 	public static final String PERSON_AUTH = "/person_authn";
 	public static final String INUM_PATH = "{inum}";
+	public static final String SCOPE_INUM_PATH = "{scope_inum}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
 	public static final String STATUS = "status";
 	public static final String INUM = "inum";
+	public static final String SCOPE_INUM = "scope_inum";
 
 	public static final String ALL = "all";
 	public static final String ACTIVE = "active";
