@@ -5,19 +5,13 @@
  */package org.gluu.service;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -27,8 +21,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.gluu.model.GluuImage;
-import org.gluu.model.TrustContact;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 import org.w3c.dom.Document;
@@ -42,128 +34,12 @@ import org.xml.sax.SAXException;
  * @author Yuriy Movchan Date: 01.11.2011
  */
 @ApplicationScoped
-@Named
-public class XmlService implements Serializable {
+public class XmlService {
 
     private static final long serialVersionUID = -4805285557592935972L;
 
     @Inject
     private Logger log;
-
-    private JAXBContext jaxbContext;
-    private Marshaller jaxbMarshaller;
-    private Unmarshaller jaxbUnmarshaller;
-
-    @PostConstruct
-    public void init() {
-        try {
-            this.jaxbContext = JAXBContext.newInstance(GluuImage.class, TrustContact.class);
-            this.jaxbMarshaller = this.jaxbContext.createMarshaller();
-            this.jaxbUnmarshaller = this.jaxbContext.createUnmarshaller();
-        } catch (JAXBException ex) {
-            log.error("Failed to create JAXB marshaller and unmarshaller", ex);
-        }
-    }
-
-    public String getXMLFromGluuImage(GluuImage photo) {
-        if (photo == null) {
-            return null;
-        }
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            this.jaxbMarshaller.marshal(photo, bos);
-            return new String(bos.toByteArray(), "UTF-8");
-        } catch (Exception ex) {
-            log.error("Failed to convert GluuImage {} to XML", ex, photo);
-        }
-
-        return null;
-    }
-
-    public GluuImage getGluuImageFromXML(String xml) {
-        if (xml == null) {
-            return null;
-        }
-
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-            return (GluuImage) this.jaxbUnmarshaller.unmarshal(bis);
-        } catch (Exception ex) {
-            log.error("Failed to create GluuImage from XML {}", ex, xml);
-        }
-
-        return null;
-    }
-
-    public TrustContact getTrustContactFromXML(String xml) {
-        if (xml == null) {
-            return null;
-        }
-
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-            return (TrustContact) this.jaxbUnmarshaller.unmarshal(bis);
-        } catch (Exception ex) {
-            log.error("Failed to create TrustContact from XML {}", ex, xml);
-        }
-
-        return null;
-    }
-
-    // public String
-    // getXMLFromDeconstructedTrustRelationship(DeconstructedTrustRelationship
-    // deconstructedTR) {
-    // if (deconstructedTR == null) {
-    // return null;
-    // }
-    //
-    // ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    // try {
-    // this.jaxbMarshaller.marshal(deconstructedTR, bos);
-    // return new String(bos.toByteArray(), "UTF-8");
-    // } catch (Exception ex) {
-    // log.error("Failed to convert DeconstructedTrustRelationship {} to XML",
-    // ex, deconstructedTR);
-    // }
-    //
-    // return null;
-    // }
-    //
-    // public DeconstructedTrustRelationship
-    // getDeconstructedTrustRelationshipFromXML(String xml) {
-    // if (xml == null) {
-    // return null;
-    // }
-    //
-    // try {
-    // ByteArrayInputStream bis = new
-    // ByteArrayInputStream(xml.getBytes("UTF-8"));
-    // return (DeconstructedTrustRelationship)
-    // this.jaxbUnmarshaller.unmarshal(bis);
-    // } catch (Exception ex) {
-    // log.error("Failed to create DeconstructedTrustRelationship from XML {}",
-    // ex, xml);
-    // }
-    //
-    // return null;
-    // }
-
-    public String getXMLFromTrustContact(TrustContact contact) {
-        if (contact == null) {
-            return null;
-        }
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            this.jaxbMarshaller.marshal(contact, bos);
-            return new String(bos.toByteArray(), "UTF-8");
-        } catch (Exception ex) {
-            log.error("Failed to convert TrustContact {} to XML", ex, contact);
-        }
-
-        return null;
-    }
 
     public Document getXmlDocument(byte[] xmlDocumentBytes) throws SAXException, IOException, ParserConfigurationException {
         return getXmlDocument(xmlDocumentBytes, false);
