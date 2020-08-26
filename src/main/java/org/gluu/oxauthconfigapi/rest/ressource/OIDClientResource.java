@@ -255,10 +255,10 @@ public class OIDClientResource extends BaseResource {
 					clientService.updateClient(client);
 					return Response.ok().build();
 				} else {
-					return getResourceNotFoundError();
+					return getResourceNotFoundError("scope");
 				}
 			} else {
-				return getResourceNotFoundError();
+				return getResourceNotFoundError("client");
 			}
 		} catch (Exception ex) {
 			logger.error("Failed to Delete OpenId Connect client", ex);
