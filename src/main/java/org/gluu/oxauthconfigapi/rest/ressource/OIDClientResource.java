@@ -201,7 +201,7 @@ public class OIDClientResource extends BaseResource {
 			}
 			JsonArray scopeInums = object.getJsonArray("scopes");
 			if (scopeInums == null || scopeInums.isEmpty()) {
-				return getMissingAttributeError(AttributeNames.INUM);
+				return getMissingAttributeError(AttributeNames.SCOPES);
 			}
 			OxAuthClient existingClient = clientService.getClientByInum(inum);
 			JsonObjectBuilder builder = Json.createObjectBuilder();
@@ -235,7 +235,7 @@ public class OIDClientResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@Operation(summary = "Delete OpenId Connect client ", description = "Delete an OpenId Connect client")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
+	@APIResponses(value = { @APIResponse(responseCode = "204", description = "Success"),
 			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
 			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })

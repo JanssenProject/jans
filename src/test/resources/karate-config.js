@@ -122,6 +122,9 @@ function() {
 	    // Person Scripts
 	    personscripts_url: baseUrl + ':' + port + '/api/v1/oxauth/scripts/person_authn',
 	    
+	    // Person Scripts
+	    smtp_url: baseUrl + ':' + port + '/api/v1/oxauth/config/smtp',
+	    
 	    };
     
     
