@@ -240,7 +240,7 @@ public class OIDClientResource extends BaseResource {
 			@APIResponse(responseCode = "404", description = "Not Found"),
 			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES)
+	@Path(ApiConstants.INUM_PATH + ApiConstants.GRANT_TYPES)
 	public Response addGrantTypeToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
 			@NotNull JsonObject object) {
 		try {
