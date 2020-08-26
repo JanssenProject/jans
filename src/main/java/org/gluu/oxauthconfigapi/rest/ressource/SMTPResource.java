@@ -9,7 +9,9 @@ import javax.json.JsonObjectBuilder;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -33,7 +35,7 @@ import org.gluu.service.MailService;
  * @author Mougang T.Gasmyr
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.SMTP)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.SMTP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SMTPResource extends BaseResource {
@@ -66,18 +68,43 @@ public class SMTPResource extends BaseResource {
 		}
 	}
 
+	@POST
+	@Operation(summary = "Create smtp configuration", description = "Create smtp configuration")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"
+					+ ""),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response setupSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
+		try {
+			String password = smtpConfiguration.getPassword();
+			if (password != null && !password.isEmpty()) {
+				smtpConfiguration.setPassword(encryptionService.encrypt(password));
+				password = null;
+			}
+			GluuConfiguration configurationUpdate = configurationService.getConfiguration();
+			configurationUpdate.setSmtpConfiguration(smtpConfiguration);
+			configurationService.updateConfiguration(configurationUpdate);
+			return Response.status(Response.Status.CREATED)
+					.entity(configurationService.getConfiguration().getSmtpConfiguration()).build();
+		} catch (Exception e) {
+			return getInternalServerError(e);
+		}
+	}
+
 	@PUT
 	@Operation(summary = "Update smtp configuration", description = "Update smtp configuration")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"
 					+ ""),
-			@APIResponse(responseCode = "404", description = "Not found"),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
 		try {
-			if (smtpConfiguration.getPassword() != null && !smtpConfiguration.getPassword().isEmpty()) {
-				configurationService.encryptedSmtpPassword(smtpConfiguration);
+			String password = smtpConfiguration.getPassword();
+			if (password != null && !password.isEmpty()) {
+				smtpConfiguration.setPassword(encryptionService.encrypt(password));
+				password = null;
 			}
 			GluuConfiguration configurationUpdate = configurationService.getConfiguration();
 			configurationUpdate.setSmtpConfiguration(smtpConfiguration);
@@ -106,8 +133,23 @@ public class SMTPResource extends BaseResource {
 			JsonObjectBuilder builder = Json.createObjectBuilder();
 			builder.add("service", "SMTP SERVER CONFIGURATION TEST");
 			builder.add("status", result ? "OKAY" : "FAILED");
+			return Response.ok(builder.build()).build();
+		} catch (Exception e) {
+			return getInternalServerError(e);
+		}
+	}
 
-			return Response.ok(result ? true : false).build();
+	@DELETE
+	@Operation(summary = "Remove smtp configuration", description = "Remove smtp configuration")
+	@APIResponses(value = { @APIResponse(responseCode = "204"),
+			@APIResponse(responseCode = "500", description = "Server error") })
+	@ProtectedApi(scopes = { READ_ACCESS })
+	public Response removeSmtpConfiguration() {
+		try {
+			GluuConfiguration configurationUpdate = configurationService.getConfiguration();
+			configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());
+			configurationService.updateConfiguration(configurationUpdate);
+			return Response.noContent().build();
 		} catch (Exception e) {
 			return getInternalServerError(e);
 		}
