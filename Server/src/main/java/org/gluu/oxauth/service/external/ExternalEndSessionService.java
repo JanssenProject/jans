@@ -41,12 +41,12 @@ public class ExternalEndSessionService extends ExternalScriptService {
 
     private String getFrontchannelHtml(CustomScriptConfiguration scriptConf, EndSessionContext context) {
         try {
-            log.debug("Executing external 'getFrontchannelHtml' method, script name: {}, context: {}", scriptConf.getName(), context);
+            log.trace("Executing external 'getFrontchannelHtml' method, script name: {}, context: {}", scriptConf.getName(), context);
             EndSessionType script = (EndSessionType) scriptConf.getExternalType();
             context.setScript(scriptConf);
 
             final String html = script.getFrontchannelHtml(context);
-            log.debug("Finished external 'getFrontchannelHtml' method, script name: {}, context {}, html: {}", scriptConf.getName(), context, html);
+            log.trace("Finished external 'getFrontchannelHtml' method, script name: {}, context {}, html: {}", scriptConf.getName(), context, html);
 
             return html;
         } catch (Exception ex) {

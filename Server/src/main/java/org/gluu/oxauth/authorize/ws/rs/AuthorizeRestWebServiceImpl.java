@@ -506,7 +506,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setClaims(claims);
 
                 // Store acr_values
-                authorizationGrant.setAcrValues(acrValuesStr);
+                authorizationGrant.setAcrValues(getAcrForGrant(acrValuesStr, sessionUser));
                 authorizationGrant.setSessionDn(sessionUser.getDn());
                 authorizationGrant.save(); // call save after object modification!!!
 
@@ -526,7 +526,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setClaims(claims);
 
                     // Store acr_values
-                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setAcrValues(getAcrForGrant(acrValuesStr, sessionUser));
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification!!!
                 }
@@ -549,7 +549,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     authorizationGrant.setClaims(claims);
 
                     // Store authentication acr values
-                    authorizationGrant.setAcrValues(acrValuesStr);
+                    authorizationGrant.setAcrValues(getAcrForGrant(acrValuesStr, sessionUser));
                     authorizationGrant.setSessionDn(sessionUser.getDn());
                     authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                 }
@@ -627,6 +627,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    private String getAcrForGrant(String acrValuesStr, SessionId sessionUser) {
+        final String acr = sessionIdService.getAcr(sessionUser);
+        return StringUtils.isNotBlank(acr) ? acr : acrValuesStr;
     }
 
     private void runCiba(String authReqId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {

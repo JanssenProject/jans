@@ -10,9 +10,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.util.StringHelper;
 
 /**
@@ -24,26 +24,53 @@ public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;
 
+    @Deprecated
 	public void setAttribute(String attributeName, String attributeValue) {
-		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValue);
+		setAttribute(attributeName, attributeValue, null);
+	}
+
+	public void setAttribute(String attributeName, String attributeValue, Boolean multiValued) {
+		CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
+    @Deprecated
 	public void setAttribute(String attributeName, String[] attributeValues) {
-		CustomAttribute attribute = new CustomAttribute(attributeName, Arrays.asList(attributeValues));
+    	setAttribute(attributeName, attributeValues, null);
+	}
+
+	public void setAttribute(String attributeName, String[] attributeValues, Boolean multiValued) {
+		CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, Arrays.asList(attributeValues));
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 
+    @Deprecated
 	public void setAttribute(String attributeName, List<String> attributeValues) {
-		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValues);
+		setAttribute(attributeName, attributeValues, null);
+	}
+
+	public void setAttribute(String attributeName, List<String> attributeValues, Boolean multiValued) {
+		CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValues);
+		if (multiValued != null) {
+			attribute.setMultiValued(multiValued);
+		}
+
 		removeAttribute(attributeName);
 		getCustomAttributes().add(attribute);
 	}
 	
 	public void removeAttribute(String attributeName) {
-		for (Iterator<CustomAttribute> it = getCustomAttributes().iterator(); it.hasNext();) {
+		for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext();) {
 			if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
 				it.remove();
 				break;
