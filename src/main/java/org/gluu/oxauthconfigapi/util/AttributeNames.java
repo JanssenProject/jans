@@ -17,5 +17,6 @@ public class AttributeNames {
 	public static final String DISPLAY_NAME = "displayName";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
+	public static final String SCOPES = "scopes";
 
 }
