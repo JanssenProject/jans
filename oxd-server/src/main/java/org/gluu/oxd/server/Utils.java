@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
+import org.gluu.oxd.common.ErrorResponseCode;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -81,6 +82,9 @@ public class Utils {
     public static boolean isValidUrl(String url) {
         if (StringUtils.isNotBlank(url)) {
             try {
+                if (url.contains("#")) {
+                    throw new HttpException(ErrorResponseCode.REDIRECT_URI_HAS_FRAGMENT_COMPONENT);
+                }
                 new URL(url);
                 return true;
             } catch (MalformedURLException e) {
