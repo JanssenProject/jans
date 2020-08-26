@@ -16,34 +16,47 @@ Feature: Verify Server config configuration endpoint
   	Scenario: Update Server config configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    And request read('config.json')
+    When method GET
+    Then status 200
+    #And print response
+    Then def first_response = response 
+    #And print first_response
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 200
     And print response
-    And assert response.length != null
     
     @error
   	Scenario: Error case for oxId configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('config.json') 
-    Then set request_json.oxId = null
-    #And print request_json
-    And request request_json
+    When method GET
+    Then status 200
+    Then def first_response = response 
+    Then set first_response.oxId = null
+    Given url mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 400
     And print response
+  	
     
     @error
   	Scenario: Error case for configurationUpdateInterval configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('config.json') 
-    Then set request_json.configurationUpdateInterval = 0
-     #And print request_json
-    And request request_json
+    When method GET
+    Then status 200
+    Then def first_response = response 
+    Then set first_response.configurationUpdateInterval = 0
+    Given url mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 400
     And print response
-     
+        
     

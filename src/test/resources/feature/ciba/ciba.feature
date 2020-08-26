@@ -3,6 +3,7 @@ Feature: Verify CIBA configuration endpoint
 	Background:
   	* def mainUrl = cibaUrl
   	
+	@ignore
   	@ciba-put-json
   	Scenario: Update CIBA configuration
     Given url  mainUrl

@@ -8,6 +8,8 @@ public class ApiConstants {
 	public static final String BASE_API_URL = "/oxauth";
 	public static final String CONFIG = "/config";
 	public static final String PROPERTIES = "/properties";
+	public static final String JSON_KEY_PATH = "{json_key}";
+	public static final String JSON_KEY = "json_key";
 	public static final String LOGGING = "/logging";
 	public static final String METRICS = "/metrics";
 	public static final String BACKCHANNEL = "/backchannel";
