@@ -439,8 +439,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
             log.trace("Looking for the refresh token: " + refreshTokenCode + " for an authorization grant of type: "
                     + getAuthorizationGrantType());
         }
-
-        return refreshTokens.get(refreshTokenCode);
+        return refreshTokens.get(TokenHashUtil.hash(refreshTokenCode));
     }
 
     /**

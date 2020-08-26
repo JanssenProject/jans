@@ -707,7 +707,7 @@
 				</dependency>
 				<dependency>
 				    <groupId>org.glassfish</groupId>
-				    <artifactId>javax.faces</artifactId>
+				    <artifactId>jakarta.faces</artifactId>
 				</dependency>
 
 				<dependency>

@@ -282,7 +282,7 @@ public class Authenticator {
 		SessionId sessionId = getSessionId(servletRequest);
 		Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
-			logger.error("Failed to get session attributes");
+			logger.debug("Unable to get session attributes");
 			return Constants.RESULT_EXPIRED;
 		}
 
@@ -581,7 +581,7 @@ public class Authenticator {
 	public String prepareAuthenticationForStep(SessionId sessionId) {
 		Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
-			logger.error("Failed to get attributes from session");
+			logger.debug("Unable to get attributes from session");
 			return Constants.RESULT_EXPIRED;
 		}
 
