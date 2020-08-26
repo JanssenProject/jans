@@ -8,10 +8,7 @@ package org.gluu.oxauth.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.WebKeyStorage;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 
 import java.util.ArrayList;
@@ -116,6 +113,7 @@ public class AppConfiguration implements Configuration {
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private Boolean dynamicRegistrationPasswordGrantTypeEnabled = false;
+    private List<String> dynamicRegistrationAllowedPasswordGrantScopes;
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
 
@@ -209,8 +207,13 @@ public class AppConfiguration implements Configuration {
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
     private Boolean errorReasonEnabled  = false;
     private Boolean removeRefreshTokensForClientOnLogout  = true;
+    private Boolean skipRefreshTokenDuringRefreshing  = false;
+    private Boolean refreshTokenExtendLifetimeOnRotation  = false;
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+
+    private String softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+    private String softwareStatementValidationClaimName;
 
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
@@ -239,6 +242,41 @@ public class AppConfiguration implements Configuration {
     private int cibaGrantLifeExtraTimeSec;
     private int cibaMaxExpirationTimeAllowedSec;
     private Boolean cibaEnabled;
+
+    public String getSoftwareStatementValidationType() {
+        if (softwareStatementValidationType == null) return softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+        return softwareStatementValidationType;
+    }
+
+    public String getSoftwareStatementValidationClaimName() {
+        return softwareStatementValidationClaimName;
+    }
+
+    public void setSoftwareStatementValidationType(String softwareStatementValidationType) {
+        this.softwareStatementValidationType = softwareStatementValidationType;
+    }
+
+    public void setSoftwareStatementValidationClaimName(String softwareStatementValidationClaimName) {
+        this.softwareStatementValidationClaimName = softwareStatementValidationClaimName;
+    }
+
+    public Boolean getSkipRefreshTokenDuringRefreshing() {
+        if (skipRefreshTokenDuringRefreshing == null) skipRefreshTokenDuringRefreshing = false;
+        return skipRefreshTokenDuringRefreshing;
+    }
+
+    public void setSkipRefreshTokenDuringRefreshing(Boolean skipRefreshTokenDuringRefreshing) {
+        this.skipRefreshTokenDuringRefreshing = skipRefreshTokenDuringRefreshing;
+    }
+
+    public Boolean getRefreshTokenExtendLifetimeOnRotation() {
+        if (refreshTokenExtendLifetimeOnRotation == null) refreshTokenExtendLifetimeOnRotation = false;
+        return refreshTokenExtendLifetimeOnRotation;
+    }
+
+    public void setRefreshTokenExtendLifetimeOnRotation(Boolean refreshTokenExtendLifetimeOnRotation) {
+        this.refreshTokenExtendLifetimeOnRotation = refreshTokenExtendLifetimeOnRotation;
+    }
 
     public Boolean getExpirationNotificatorEnabled() {
         if (expirationNotificatorEnabled == null) expirationNotificatorEnabled = false;
@@ -1808,6 +1846,15 @@ public class AppConfiguration implements Configuration {
 
     public void setCibaEndUserNotificationConfig(CIBAEndUserNotificationConfig cibaEndUserNotificationConfig) {
         this.cibaEndUserNotificationConfig = cibaEndUserNotificationConfig;
+    }
+
+    public List<String> getDynamicRegistrationAllowedPasswordGrantScopes() {
+        if (dynamicRegistrationAllowedPasswordGrantScopes == null) dynamicRegistrationAllowedPasswordGrantScopes = Lists.newArrayList();
+        return dynamicRegistrationAllowedPasswordGrantScopes;
+    }
+
+    public void setDynamicRegistrationAllowedPasswordGrantScopes(List<String> dynamicRegistrationAllowedPasswordGrantScopes) {
+        this.dynamicRegistrationAllowedPasswordGrantScopes = dynamicRegistrationAllowedPasswordGrantScopes;
     }
 
     /**

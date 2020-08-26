@@ -95,15 +95,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
+        Asserter.assertIdToken(jwt);
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -147,15 +139,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         // 5. Validate id_token
         Jwt jwt2 = Jwt.parse(idToken2);
-        assertNotNull(jwt2.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt2.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
+        Asserter.assertIdToken(jwt2);
 
         RSAPublicKey publicKey2 = JwkClient.getRSAPublicKey(
                 jwksUri,

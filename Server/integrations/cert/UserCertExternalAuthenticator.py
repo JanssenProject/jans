@@ -169,7 +169,7 @@ class PersonAuthentication(PersonAuthenticationType):
             cert_user_external_uid = "cert:%s" % x509CertificateFingerprint
             print "Cert. Authenticate for step 2. Attempting to find user by oxExternalUid attribute value %s" % cert_user_external_uid
 
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid, True)
             if find_user_by_external_uid == None:
                 print "Cert. Authenticate for step 2. Failed to find user"
                 
@@ -213,10 +213,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Double check just to make sure. We did checking in previous step
             # Check if there is user which has cert_user_external_uid
             # Avoid mapping user cert to more than one IDP account
-            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid)
+            find_user_by_external_uid = userService.getUserByAttribute("oxExternalUid", cert_user_external_uid, True)
             if find_user_by_external_uid == None:
                 # Add cert_user_external_uid to user's external GUID list
-                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
+                find_user_by_external_uid = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid, True)
                 if find_user_by_external_uid == None:
                     print "Cert. Authenticate for step 3. Failed to update current user"
                     return False

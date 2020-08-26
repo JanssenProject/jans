@@ -44,7 +44,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 
 	public boolean executeExternalUpdateMethod(CustomScriptConfiguration customScriptConfiguration, DynamicScopeExternalContext dynamicScopeContext) {
 		try {
-			log.debug("Executing python 'update' method");
+			log.trace("Executing python 'update' method");
 			DynamicScopeType dynamicScopeType = (DynamicScopeType) customScriptConfiguration.getExternalType();
 			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
 			return dynamicScopeType.update(dynamicScopeContext, configurationAttributes);
@@ -61,7 +61,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
         
         if (apiVersion > 1) {
             try {
-                log.debug("Executing python 'get supported claims' method");
+                log.trace("Executing python 'get supported claims' method");
                 DynamicScopeType dynamicScopeType = (DynamicScopeType) customScriptConfiguration.getExternalType();
                 Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
                 return dynamicScopeType.getSupportedClaims(configurationAttributes);
