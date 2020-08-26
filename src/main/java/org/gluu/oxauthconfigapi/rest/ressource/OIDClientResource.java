@@ -233,6 +233,40 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@DELETE
+	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES + ApiConstants.SEPARATOR + ApiConstants.SCOPE_INUM_PATH)
+	@Operation(summary = "Remove an scope from openId Connect client", description = "Remove an scope from openId Connect client")
+	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response removeScopeFromClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
+			@PathParam(ApiConstants.SCOPE_INUM) @NotNull String scopeInum) {
+		try {
+			OxAuthClient client = clientService.getClientByInum(inum);
+			Scope scope = scopeService.getScopeByInum(scopeInum);
+			if (client != null) {
+				if (scope != null) {
+					List<String> oxAuthScopes = client.getOxAuthScopes();
+					if (oxAuthScopes == null) {
+						oxAuthScopes = new ArrayList<String>();
+					}
+					oxAuthScopes.remove(scope.getDn());
+					client.setOxAuthScopes(oxAuthScopes);
+					clientService.updateClient(client);
+					return Response.ok().build();
+				} else {
+					return getResourceNotFoundError();
+				}
+			} else {
+				return getResourceNotFoundError();
+			}
+		} catch (Exception ex) {
+			logger.error("Failed to Delete OpenId Connect client", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@Operation(summary = "Delete OpenId Connect client ", description = "Delete an OpenId Connect client")
 	@APIResponses(value = { @APIResponse(responseCode = "204", description = "Success"),
