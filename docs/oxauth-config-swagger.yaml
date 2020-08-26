@@ -8345,6 +8345,25 @@ paths:
         - oxAuth:
             - write
     parameters: []
+  /api/v1/oxauth/config/smtp/status:
+    get:
+      summary: Test SMTP server configuration.
+      description: Test SMTP server configuration.
+      operationId: get-oxauth-config-smtp-status
+      tags:
+        - Configuration – SMTP
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - read
   /api/v1/oxauth/openid/scopes:
     get:
       tags:

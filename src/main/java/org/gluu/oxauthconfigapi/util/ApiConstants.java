@@ -36,6 +36,7 @@ public class ApiConstants {
 	public static final String SERVER_CONFIG = "/server-config";
 	public static final String SERVER_CLEANUP = "/server-cleanup";
 	public static final String KEY_REGENERATION = "/key-regen";
+	public static final String EXPIRATION = "/expiration";
 	public static final String RESOURCES = "/resources";
 	public static final String ATTRIBUTES = "/attributes";
 	public static final String SCRIPTS = "/scripts";

@@ -101,6 +101,9 @@ function() {
 	    // Key Regeneration configuration endpoints.
 	    keyRegenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/key-regen',
 	    
+	    // Expiration Notificator configuration endpoints.
+	    expirationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/expiration',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
