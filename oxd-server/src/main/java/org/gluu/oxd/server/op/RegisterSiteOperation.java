@@ -13,7 +13,6 @@ import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
