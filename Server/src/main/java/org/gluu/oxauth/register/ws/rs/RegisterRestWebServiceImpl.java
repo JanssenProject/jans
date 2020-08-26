@@ -7,6 +7,7 @@
 package org.gluu.oxauth.register.ws.rs;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.metric.MetricType;
@@ -17,13 +18,11 @@ import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorService;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SubjectType;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
@@ -41,7 +40,7 @@ import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.MetricService;
 import org.gluu.oxauth.service.ScopeService;
-import org.gluu.oxauth.service.common.*;
+import org.gluu.oxauth.service.common.InumService;
 import org.gluu.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
@@ -59,7 +58,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.*;
 
@@ -141,40 +143,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
             final JSONObject requestObject = new JSONObject(requestParams);
-            if (requestParams != null && requestObject.has(SOFTWARE_STATEMENT.toString())) {
-                try {
-                    Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
-
-                    // Validate the crypto segment
-                    String keyId = softwareStatement.getHeader().getKeyId();
-                    final String jwksUriClaim = softwareStatement.getClaims().getClaimAsString(JWKS_URI.toString());
-                    final String jwksClaim = softwareStatement.getClaims().getClaimAsString(JWKS.toString());
-                    if (StringUtils.isBlank(jwksUriClaim) && StringUtils.isBlank(jwksClaim)) {
-                        final String msg = "software_statement does not contain jwks and jwks_uri claim and thus is considered as invalid.";
-                        log.error(msg);
-                        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
-                    }
-
-                    JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
-                            new JSONObject(jwksClaim) :
-                            JwtUtil.getJSONWebKeys(jwksUriClaim);
-                    boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
-                            softwareStatement.getEncodedSignature(),
-                            keyId, jwks, null, softwareStatement.getHeader().getSignatureAlgorithm());
-
-                    if (!validSignature) {
-                        throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
-                    }
-
-                    requestParams = softwareStatement.getClaims().toJsonObject().toString();
-                } catch (Exception e) {
-                    final String msg = "Invalid software_statement.";
-                    log.error(msg, e);
-                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+            final JSONObject softwareStatement = validateSoftwareStatement(httpRequest, requestObject);
+            if (softwareStatement != null) {
+                log.trace("Override request parameters by software_statement");
+                for (String key : softwareStatement.keySet()) {
+                    requestObject.putOpt(key, softwareStatement.get(key));
                 }
             }
 
-            final RegisterRequest r = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
+            final RegisterRequest r = RegisterRequest.fromJson(requestObject, appConfiguration.getLegacyDynamicRegistrationScopeParam());
             if (requestObject.has(SOFTWARE_STATEMENT.toString())) {
                 r.setSoftwareStatement(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             }
@@ -353,6 +330,98 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
+    private JSONObject validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
+        if (!requestObject.has(SOFTWARE_STATEMENT.toString())) {
+            return null;
+        }
+
+        try {
+            Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
+            final SignatureAlgorithm signatureAlgorithm = softwareStatement.getHeader().getSignatureAlgorithm();
+
+            final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
+            if (validationType == SoftwareStatementValidationType.NONE) {
+                log.trace("software_statement validation was skipped due to `softwareStatementValidationType` configuration property set to none. (Not recommended.)");
+                return softwareStatement.getClaims().toJsonObject();
+            }
+
+            if (validationType == SoftwareStatementValidationType.SCRIPT) {
+                if (!externalDynamicClientRegistrationService.isEnabled()) {
+                    log.error("Server is mis-configured. softwareStatementValidationType=script but there is no any Dynamic Client Registration script enabled.");
+                    return null;
+                }
+
+                if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
+
+                    final String hmacSecret = externalDynamicClientRegistrationService.getSoftwareStatementHmacSecret(httpServletRequest, requestObject, softwareStatement);
+                    if (StringUtils.isBlank(hmacSecret)) {
+                        log.error("No hmacSecret provided in Dynamic Client Registration script (method getSoftwareStatementHmacSecret didn't return actual secret). ");
+                        throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
+                    }
+
+                    if (!cryptoProvider.verifySignature(softwareStatement.getSigningInput(), softwareStatement.getEncodedSignature(), null, null, hmacSecret, signatureAlgorithm)) {
+                        throw new InvalidJwtException("Invalid signature in the software statement");
+                    }
+
+                    return softwareStatement.getClaims().toJsonObject();
+                }
+
+                final JSONObject softwareStatementJwks = externalDynamicClientRegistrationService.getSoftwareStatementJwks(httpServletRequest, requestObject, softwareStatement);
+                if (softwareStatementJwks == null) {
+                    log.error("No jwks provided in Dynamic Client Registration script (method getSoftwareStatementJwks didn't return actual jwks). ");
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "");
+                }
+
+                if (!cryptoProvider.verifySignature(softwareStatement.getSigningInput(), softwareStatement.getEncodedSignature(), softwareStatement.getHeader().getKeyId(), softwareStatementJwks, null, signatureAlgorithm)) {
+                    throw new InvalidJwtException("Invalid signature in the software statement");
+                }
+
+                return softwareStatement.getClaims().toJsonObject();
+            }
+
+            if ((validationType == SoftwareStatementValidationType.JWKS_URI ||
+                    validationType == SoftwareStatementValidationType.JWKS) &&
+                    StringUtils.isBlank(appConfiguration.getSoftwareStatementValidationClaimName())) {
+                log.error("softwareStatementValidationClaimName configuration property is not specified. Please specify claim name from software_statement which points to jwks (or jwks_uri).");
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "Failed to validate software statement");
+            }
+
+            String jwksUriClaim = null;
+            if (validationType == SoftwareStatementValidationType.JWKS_URI) {
+                jwksUriClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
+            }
+
+            String jwksClaim = null;
+            if (validationType == SoftwareStatementValidationType.JWKS) {
+                jwksClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
+            }
+
+            if (StringUtils.isBlank(jwksUriClaim) && StringUtils.isBlank(jwksClaim)) {
+                final String msg = String.format("software_statement does not contain `%s` claim and thus is considered as invalid.", appConfiguration.getSoftwareStatementValidationClaimName());
+                log.error(msg);
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+            }
+
+            JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
+                    new JSONObject(jwksClaim) :
+                    JwtUtil.getJSONWebKeys(jwksUriClaim);
+
+            boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
+                    softwareStatement.getEncodedSignature(),
+                    softwareStatement.getHeader().getKeyId(), jwks, null, signatureAlgorithm);
+
+            if (!validSignature) {
+                throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
+            }
+
+            return softwareStatement.getClaims().toJsonObject();
+        } catch (Exception e) {
+            final String msg = "Invalid software_statement.";
+            log.error(msg, e);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+        }
+    }
+
     private Response.ResponseBuilder internalErrorResponse(String reason) {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON_TYPE)
@@ -392,7 +461,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Set<GrantType> grantTypeSet = new HashSet<>();
         grantTypeSet.addAll(requestObject.getGrantTypes());
 
-        if(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
+        if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
             if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
                 responseTypeSet.add(ResponseType.CODE);
             }
@@ -561,6 +630,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         List<String> scopes = requestObject.getScope();
+        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+            scopes = Lists.newArrayList(scopes);
+            scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
+        }
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
