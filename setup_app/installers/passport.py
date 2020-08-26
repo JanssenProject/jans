@@ -51,6 +51,22 @@ class PassportInstaller(NodeInstaller):
         self.logIt("Preparing passport service base folders")
         self.run([paths.cmd_mkdir, '-p', self.gluu_passport_base])
 
+        self.extract_passport()
+        self.extract_modules()
+
+        # Copy init.d script
+        self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
+        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
+
+        # Install passport system service script
+        self.installNodeService('passport')
+
+        self.run([paths.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
+
+        # enable service at startup
+        self.enable()
+
+    def extract_passport(self):
         # Extract package
         try:
             self.logIt("Extracting {} into {}".format(self.source_files[0][0], self.gluu_passport_base))
@@ -58,6 +74,8 @@ class PassportInstaller(NodeInstaller):
         except:
             self.logIt("Error encountered while extracting archive {}".format(self.source_files[0][0]))
 
+    def extract_modules(self):
+        
         modules_target_dir = os.path.join(self.gluu_passport_base, 'node_modules')
         modules_source_dir = os.path.dirname(self.source_files[1][0])
         self.run([paths.cmd_mkdir, '-p', modules_target_dir])
@@ -79,17 +97,6 @@ class PassportInstaller(NodeInstaller):
             except:
                 self.logIt("Error encountered running npm install in {}".format(self.gluu_passport_base))
 
-        # Copy init.d script
-        self.copyFile(self.passport_initd_script, Config.gluuOptSystemFolder)
-        self.run([paths.cmd_chmod, '-R', "755", os.path.join(Config.gluuOptSystemFolder, 'passport')])
-
-        # Install passport system service script
-        self.installNodeService('passport')
-
-        self.run([paths.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
-
-        # enable service at startup
-        self.enable()
 
     def installed(self):
         return os.path.exists(self.gluu_passport_base)
