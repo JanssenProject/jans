@@ -104,6 +104,9 @@ function() {
 	    // Expiration Notificator configuration endpoints.
 	    expirationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/expiration',
 	    
+	    // Auth configuration endpoints.
+	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
