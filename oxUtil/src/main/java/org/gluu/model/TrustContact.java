@@ -6,9 +6,6 @@
 
 package org.gluu.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class TrustContact implements java.io.Serializable {
 
     private static final long serialVersionUID = -3268590744030750954L;
