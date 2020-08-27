@@ -41,7 +41,6 @@ import org.gluu.oxtrust.service.ClientService;
 import org.gluu.oxtrust.service.EncryptionService;
 import org.gluu.oxtrust.service.ScopeService;
 import org.oxauth.persistence.model.Scope;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 /**
@@ -256,7 +255,6 @@ public class OIDClientResource extends BaseResource {
 			GrantType mGrantType = GrantType.fromString(grantTypeName);
 			return mGrantType;
 		} catch (Exception e) {
-			Log.info("++++++++++++++++++++++++++++++++++");
 			return null;
 		}
 
