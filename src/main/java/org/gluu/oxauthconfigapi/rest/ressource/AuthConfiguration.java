@@ -1,13 +1,6 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -20,16 +13,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
-
 import org.json.JSONObject;
-
 import javax.json.Json;
 import javax.json.JsonPatchBuilder;
 import javax.json.JsonPatch;
 import javax.json.JsonReader;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
 import org.slf4j.Logger;
@@ -59,7 +48,7 @@ public class AuthConfiguration extends BaseResource {
 		try {
 		
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		JsonObject jsonObject =  createAppConfigurationJson(appConfiguration);
+		JsonObject jsonObject =  createJsonObject(appConfiguration);
 		return Response.ok(jsonObject).build();
 		
 		}catch(Exception ex) {
@@ -78,21 +67,23 @@ public class AuthConfiguration extends BaseResource {
 		
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		JsonObject appConfigJsonObject =  createJsonObject(appConfiguration);
-		log.info("\n\n appConfigJsonObject = "+appConfigJsonObject+"\n\n");
-		//boolean isPresent = jsonObject.containsKey(jsonKey);
-		//log.info("\n\n isPresent = "+isPresent+"\n\n");
 		JsonValue jsonValue = getJsonValue(jsonKey,jsonObject);
+		
+		log.info("\n\n appConfigJsonObject_before = "+appConfigJsonObject+"\n\n");
 		log.info("\n\n jsonValue = "+jsonValue+"\n\n");
+		
+		//Apply patch 
 		JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
 		JsonPatch jsonPatch = jsonPatchBuilder
 				.replace("/"+jsonKey,jsonValue)
 				.build();
 		appConfigJsonObject = jsonPatch.apply(appConfigJsonObject);
 		
-		log.info("\n\n appConfigJsonObject_2 = "+appConfigJsonObject+"\n\n");
+		log.info("\n\n appConfigJsonObject_after = "+appConfigJsonObject+"\n\n");
 		log.info("=======================================================================");
-		//Update
-		//Convert jsonPatch to 
+		
+		
+		//Update App Configuration
 		//this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration)
 		
 			return Response.ok(jsonObject).build();
@@ -104,19 +95,6 @@ public class AuthConfiguration extends BaseResource {
 	}
 	
 	/* ---------------------------------------------------------------------------------------------------------*/
-	private JsonObject createAppConfigurationJson(AppConfiguration appConfiguration) throws Exception {
-		JSONObject json = new JSONObject(appConfiguration);
-		String jsonStr = json.toString();
-		InputStream inputStream = new
-		ByteArrayInputStream(jsonStr.getBytes(StandardCharsets.UTF_8)); 
-		JsonReader jsonReader = Json.createReader(inputStream); 
-		JsonObject jsonObject = jsonReader.readObject(); 
-		jsonReader.close(); 
-		inputStream.close();
-		return jsonObject;
-
-	}
-	
 	private JsonObject createJsonObject(AppConfiguration appConfiguration) throws Exception {
 		JSONObject json = new JSONObject(appConfiguration);
 		String jsonStr = json.toString();
