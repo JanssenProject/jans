@@ -29,14 +29,18 @@ random_marketing_strings = [
     'Having trouble? Open a ticket: https://support.gluu.org',
     'Cluster your Gluu Server: https://gluu.org/docs/cm',
     'oxd exposes simple, static APIs web application developers https://gluu.org/docs/oxd',
-    'Gluu Gateway https://gluu.org/docs/gg',
-    'Super Gluu (2FA) https://gluu.org/docs/supergluu',
-    'Gluu Casa (self-service web portal) https://gluu.org/docs/casa',
-    "Let's discuss your project https://www.gluu.org/booking",
-    'Gluu has both a social and a business mission.',
+    'Gluu Gateway helps you secure APIs with OAuth, OpenID and UMA. See https://gateway.gluu.org',
+    'Super Gluu is free mobile 2FA applications that uses push notifications and FIDO authentication https://super.gluu.org',
+    'Gluu Casa is a self-service web portal that enables end users to manage their 2FA credentials https://casa.gluu.org',
+    "Interested in VIP support? Schedule a Zoom meeting https://www.gluu.org/booking",
+    'Gluu only uses open source components to build the Gluu Server.',
     'Consider Gluu VIP Platform Subscription https://gluu.org/contact',
-    "Deploy Gluu using Kubernetes: https://gluu.org/docs/de",
-    'Evaluate our commercial offerings: https://gluu.org/pricing',
+    "Gluu Cloud Edition uses Kubernetes, Helm and other cloud native components to enable auto-scaling.",
+    'Interested in Open Source startups? Listen to Open Source Underdogs: https://opensourceunderdogs.com',
+    'Confused about OpenID? Read "Securing the Perimeter" by Gluu CEO Mike Schwartz: https://gluu.co/book',
+    'The Gluu Server is one of the most advanced OpenID Providers. Compare at https://openid.net/certification',
+    'Installing the Gluu Server is a SNAP. Search for Gluu on https://snapcraft.io',
+    'Search the Digital Ocean Marketplace for a quick way to install the Gluu Server: https://marketplace.digitalocean.com/'
     ]
 
 marketing_text_period = 20 

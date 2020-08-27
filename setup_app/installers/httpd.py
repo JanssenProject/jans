@@ -39,23 +39,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.logIt(self.pbar_text, pbar=self.service_name)
         self.stop()
 
-        self.update_rendering_dict()
-        for tmp in (self.apache2_conf, self.apache2_ssl_conf, self.apache2_24_conf, self.apache2_ssl_24_conf):
-            self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
-
-        # CentOS 7.* + systemd + apache 2.4
-        if self.service_name == 'httpd' and self.apache_version == "2.4":
-            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
-
-        if base.clone_type == 'rpm' and base.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
-
-        if base.clone_type == 'deb':
-            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
-            self.run([paths.cmd_ln, '-s', self.https_gluu_fn,
-                      '/etc/apache2/sites-enabled/https_gluu.conf'])
+        self.write_httpd_config()
 
         self.writeFile('/var/www/html/index.html', 'OK')
 
@@ -150,6 +134,26 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
 
         self.enable()
         self.start()
+
+    def write_httpd_config(self):
+        
+        self.update_rendering_dict()
+        for tmp in (self.apache2_conf, self.apache2_ssl_conf, self.apache2_24_conf, self.apache2_ssl_24_conf):
+            self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
+
+        # CentOS 7.* + systemd + apache 2.4
+        if self.service_name == 'httpd' and self.apache_version == "2.4":
+            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
+
+        if base.clone_type == 'rpm' and base.os_initdaemon == 'init':
+            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+
+        if base.clone_type == 'deb':
+            self.copyFile(self.apache2_ssl_conf, self.https_gluu_fn)
+            self.run([paths.cmd_ln, '-s', self.https_gluu_fn,
+                      '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def installed(self):
         return os.path.exists(self.https_gluu_fn)
