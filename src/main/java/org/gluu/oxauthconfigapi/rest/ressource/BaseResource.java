@@ -29,7 +29,11 @@ public class BaseResource {
 		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
 	}
 
-	
+	protected Response getResourceNotFoundError(String object) {
+		ApiError error = new ApiError(String.valueOf(Response.Status.NOT_FOUND.getStatusCode()), "Resource not found!",
+				"The requested " + object + " doesn't exist");
+		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+	}
 
 	protected Response getMissingAttributeError(String attributeName) {
 		ApiError error = new ApiError(ApiConstants.MISSING_ATTRIBUTE_CODE, ApiConstants.MISSING_ATTRIBUTE_MESSAGE,

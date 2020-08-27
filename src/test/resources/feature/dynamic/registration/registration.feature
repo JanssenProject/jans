@@ -3,6 +3,7 @@ Feature: Verify DynamicRegistration configuration endpoint
   	Background:
   	* def mainUrl = dynamicRegistrationUrl
   	
+  	@ignore
    	@dynamicRegistration-put-json
   	Scenario: Update Dynamic Registration configuration
     Given url  mainUrl

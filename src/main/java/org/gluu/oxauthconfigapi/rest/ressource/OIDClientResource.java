@@ -34,6 +34,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
@@ -227,7 +228,83 @@ public class OIDClientResource extends BaseResource {
 				return getResourceNotFoundError();
 			}
 		} catch (Exception ex) {
-			logger.error("Failed to update OpenId Connect client", ex);
+			logger.error("Failed to add scopes to openId connect client", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@PUT
+	@Operation(summary = "Add grant types to existing client", description = "Add grant types to existing client")
+	@APIResponses(value = { @APIResponse(responseCode = "200"),
+			@APIResponse(responseCode = "400", description = "Bad Request"),
+			@APIResponse(responseCode = "404", description = "Not Found"),
+			@APIResponse(responseCode = "500", description = "Server Error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH + ApiConstants.GRANT_TYPES)
+	public Response addGrantTypeToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
+			@NotNull JsonObject object) {
+		try {
+			if (inum == null) {
+				return getMissingAttributeError(AttributeNames.INUM);
+			}
+			JsonArray grantTypesValues = object.getJsonArray("grant-types");
+			if (grantTypesValues == null || grantTypesValues.isEmpty()) {
+				return getMissingAttributeError(AttributeNames.GRANT_TYPES);
+			}
+			OxAuthClient existingClient = clientService.getClientByInum(inum);
+			JsonObjectBuilder builder = Json.createObjectBuilder();
+			if (existingClient != null) {
+				GrantType[] grantTypes = existingClient.getGrantTypes();
+				if (grantTypes == null) {
+					grantTypes = new GrantType[] {};
+				}
+				for (JsonValue grantType : grantTypesValues) {
+					builder.add(((JsonString) grantType).getString(), Response.Status.OK.getStatusCode());
+				}
+				existingClient.setGrantTypes(grantTypes);
+				clientService.updateClient(existingClient);
+				return Response.ok(builder.build()).build();
+			} else {
+				return getResourceNotFoundError();
+			}
+		} catch (
+
+		Exception ex) {
+			logger.error("Failed to add grand typpes to openId connect client", ex);
+			return getInternalServerError(ex);
+		}
+	}
+
+	@DELETE
+	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES + ApiConstants.SEPARATOR + ApiConstants.SCOPE_INUM_PATH)
+	@Operation(summary = "Remove an scope from openId Connect client", description = "Remove an scope from openId Connect client")
+	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
+			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
+			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response removeScopeFromClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
+			@PathParam(ApiConstants.SCOPE_INUM) @NotNull String scopeInum) {
+		try {
+			OxAuthClient client = clientService.getClientByInum(inum);
+			Scope scope = scopeService.getScopeByInum(scopeInum);
+			if (client != null) {
+				if (scope != null) {
+					List<String> oxAuthScopes = client.getOxAuthScopes();
+					if (oxAuthScopes == null) {
+						oxAuthScopes = new ArrayList<String>();
+					}
+					oxAuthScopes.remove(scope.getDn());
+					client.setOxAuthScopes(oxAuthScopes);
+					clientService.updateClient(client);
+					return Response.ok().build();
+				} else {
+					return getResourceNotFoundError("scope");
+				}
+			} else {
+				return getResourceNotFoundError("client");
+			}
+		} catch (Exception ex) {
+			logger.error("Failed to Delete OpenId Connect client", ex);
 			return getInternalServerError(ex);
 		}
 	}
