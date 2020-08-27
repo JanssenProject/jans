@@ -32,14 +32,14 @@ public class AuthorizeParamsValidator {
      * @return Returns <code>true</code> when all the parameters are valid.
      */
     public static boolean validateParams(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce,
-                                         boolean fapiCompatibility, ResponseMode responseMode) {
+                                         boolean fapiCompatibility) {
         if (fapiCompatibility && responseTypes.size() == 1 && responseTypes.contains(ResponseType.CODE)) {
             return false;
         }
 
         boolean existsNonce = StringUtils.isNotBlank(nonce);
 
-        if (!existsNonce && responseTypes.contains(ResponseType.CODE) && responseMode != ResponseMode.FORM_POST
+        if (!existsNonce && responseTypes.contains(ResponseType.CODE)
                 && (responseTypes.contains(ResponseType.ID_TOKEN) || !responseTypes.contains(ResponseType.TOKEN))) {
             return false;
         }
