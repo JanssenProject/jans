@@ -4,6 +4,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -29,14 +30,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
 import org.gluu.oxtrust.model.OxAuthApplicationType;
@@ -46,6 +41,7 @@ import org.gluu.oxtrust.service.ClientService;
 import org.gluu.oxtrust.service.EncryptionService;
 import org.gluu.oxtrust.service.ScopeService;
 import org.oxauth.persistence.model.Scope;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 /**
@@ -71,10 +67,6 @@ public class OIDClientResource extends BaseResource {
 	EncryptionService encryptionService;
 
 	@GET
-	@Operation(summary = "Get list of OpenID Connect clients")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient[].class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -93,11 +85,6 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@GET
-	@Operation(summary = "Get OpenId Connect Client by Inum")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) String inum) {
@@ -114,10 +101,6 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create new OpenId connect client")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createOpenIdConnect(@Valid OxAuthClient client) {
 		try {
@@ -147,12 +130,6 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update OpenId Connect client", description = "Update openidconnect client")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateClient(@Valid OxAuthClient client) {
 		try {
@@ -187,11 +164,6 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Add scopes to existing client", description = "Add scopes to existing client")
-	@APIResponses(value = { @APIResponse(responseCode = "200"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES)
 	public Response addScopesToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
@@ -234,11 +206,6 @@ public class OIDClientResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Add grant types to existing client", description = "Add grant types to existing client")
-	@APIResponses(value = { @APIResponse(responseCode = "200"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH + ApiConstants.GRANT_TYPES)
 	public Response addGrantTypeToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
@@ -258,14 +225,23 @@ public class OIDClientResource extends BaseResource {
 				if (grantTypes == null) {
 					grantTypes = new GrantType[] {};
 				}
+				List<GrantType> myList = new ArrayList<GrantType>(Arrays.asList(grantTypes));
 				for (JsonValue grantType : grantTypesValues) {
-					builder.add(((JsonString) grantType).getString(), Response.Status.OK.getStatusCode());
+					String grantTypeName = ((JsonString) grantType).getString();
+					GrantType mGrantType = getGrantTypeFromName(grantTypeName);
+					if (mGrantType != null) {
+						builder.add(grantTypeName, Response.Status.OK.getStatusCode());
+						myList.add(mGrantType);
+					} else {
+						builder.add(grantTypeName, Response.Status.NOT_FOUND.getStatusCode());
+					}
 				}
-				existingClient.setGrantTypes(grantTypes);
+				GrantType[] types = new GrantType[myList.size()];
+				existingClient.setGrantTypes(myList.toArray(types));
 				clientService.updateClient(existingClient);
 				return Response.ok(builder.build()).build();
 			} else {
-				return getResourceNotFoundError();
+				return getResourceNotFoundError("openid client");
 			}
 		} catch (
 
@@ -275,12 +251,19 @@ public class OIDClientResource extends BaseResource {
 		}
 	}
 
+	private GrantType getGrantTypeFromName(String grantTypeName) {
+		try {
+			GrantType mGrantType = GrantType.fromString(grantTypeName);
+			return mGrantType;
+		} catch (Exception e) {
+			Log.info("++++++++++++++++++++++++++++++++++");
+			return null;
+		}
+
+	}
+
 	@DELETE
 	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES + ApiConstants.SEPARATOR + ApiConstants.SCOPE_INUM_PATH)
-	@Operation(summary = "Remove an scope from openId Connect client", description = "Remove an scope from openId Connect client")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response removeScopeFromClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
 			@PathParam(ApiConstants.SCOPE_INUM) @NotNull String scopeInum) {
@@ -311,10 +294,6 @@ public class OIDClientResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@Operation(summary = "Delete OpenId Connect client ", description = "Delete an OpenId Connect client")
-	@APIResponses(value = { @APIResponse(responseCode = "204", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {
