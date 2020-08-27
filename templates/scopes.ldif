@@ -145,3 +145,13 @@ oxId: permission
 inum: C4F5
 oxScopeType: dynamic
 oxScriptDn: inum=CB5B-3211,ou=scripts,o=gluu
+
+dn: inum=C4F6,ou=scopes,o=gluu
+objectClass: top
+objectClass: oxAuthCustomScope
+oxId: offline_access
+inum: C4F6
+description: This scope value requests that an OAuth 2.0 Refresh Token be issued.
+defaultScope: true
+oxAttributes: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+oxScopeType: openid
