@@ -23,7 +23,7 @@
     "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
     "backchannelAuthenticationEndpoint":"https://%(hostname)s/oxauth/restv1/bc-authorize",
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/oxauth/restv1/bc-deviceRegistration",
-    "deviceAuthorizationEndpoint":"https://%(hostname)s/oxauth/restv1/device-authorization",
+    "deviceAuthzEndpoint":"https://%(hostname)s/oxauth/restv1/device_authorization",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
         ["code"],
