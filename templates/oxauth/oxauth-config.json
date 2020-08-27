@@ -317,7 +317,6 @@
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
-    "useCacheForAllImplicitFlowObjects":false,
     "disableU2fEndpoint":false,
     "authenticationProtectionConfiguration": {
         "attemptExpiration": 15,
