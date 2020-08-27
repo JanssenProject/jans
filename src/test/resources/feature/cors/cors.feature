@@ -17,7 +17,14 @@ Feature: Verify Cors configuration filter endpoint
   	Scenario: Update Cors configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    And request read('cors.json')
+    When method GET
+    Then status 200
+    #And print response
+    Then def first_response = response 
+    #And print first_response
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 200
     And print response

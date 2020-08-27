@@ -16,20 +16,29 @@ Feature: Verify Expiration Notificator configuration endpoint
   	Scenario: Update Expiration Notificator configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    And request read('expiration.json')
+    When method GET
+    Then status 200
+    #And print response
+    Then def first_response = response 
+    #And print first_response
+    Given url  mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 200
     And print response
-    And assert response.length != null
-    
+          
     @error
   	Scenario: Error case for expirationNotificatorMapSizeLimit configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('expiration.json') 
-    Then set request_json.expirationNotificatorMapSizeLimit = 0
-    #And print request_json
-    And request request_json
+    When method GET
+    Then status 200
+    Then def first_response = response 
+    Then set first_response.expirationNotificatorMapSizeLimit = 0
+    Given url mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 400
     And print response
@@ -38,12 +47,14 @@ Feature: Verify Expiration Notificator configuration endpoint
   	Scenario: Error case for expirationNotificatorIntervalInSeconds configuration validation
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
-    Then def request_json = read('expiration.json') 
-    Then set request_json.expirationNotificatorIntervalInSeconds = 0
-     #And print request_json
-    And request request_json
+    When method GET
+    Then status 200
+    Then def first_response = response 
+    Then set first_response.expirationNotificatorIntervalInSeconds = 0
+    Given url mainUrl
+    And  header Authorization = 'Bearer ' + accessToken
+    And request first_response
     When method PUT
     Then status 400
     And print response
-     
     
