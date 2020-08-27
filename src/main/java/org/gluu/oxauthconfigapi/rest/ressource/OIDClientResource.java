@@ -3,32 +3,6 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -47,6 +21,17 @@ import org.gluu.oxtrust.service.EncryptionService;
 import org.gluu.oxtrust.service.ScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.json.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr
@@ -277,32 +262,29 @@ public class OIDClientResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES + ApiConstants.SEPARATOR + ApiConstants.SCOPE_INUM_PATH)
-	@Operation(summary = "Remove an scope from openId Connect client", description = "Remove an scope from openId Connect client")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response removeScopeFromClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
 			@PathParam(ApiConstants.SCOPE_INUM) @NotNull String scopeInum) {
 		try {
 			OxAuthClient client = clientService.getClientByInum(inum);
-			Scope scope = scopeService.getScopeByInum(scopeInum);
-			if (client != null) {
-				if (scope != null) {
-					List<String> oxAuthScopes = client.getOxAuthScopes();
-					if (oxAuthScopes == null) {
-						oxAuthScopes = new ArrayList<String>();
-					}
-					oxAuthScopes.remove(scope.getDn());
-					client.setOxAuthScopes(oxAuthScopes);
-					clientService.updateClient(client);
-					return Response.ok().build();
-				} else {
-					return getResourceNotFoundError("scope");
-				}
-			} else {
-				return getResourceNotFoundError("client");
-			}
+
+            if (client == null) {
+                return getResourceNotFoundError("client");
+            }
+
+            Scope scope = scopeService.getScopeByInum(scopeInum);
+            if (scope == null) {
+                return getResourceNotFoundError("scope");
+            }
+
+            List<String> oxAuthScopes = client.getOxAuthScopes();
+            if (oxAuthScopes == null) {
+                oxAuthScopes = new ArrayList<>();
+            }
+            oxAuthScopes.remove(scope.getDn());
+            client.setOxAuthScopes(oxAuthScopes);
+            clientService.updateClient(client);
+            return Response.ok().build();
 		} catch (Exception ex) {
 			logger.error("Failed to Delete OpenId Connect client", ex);
 			return getInternalServerError(ex);
