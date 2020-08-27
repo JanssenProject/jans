@@ -77,6 +77,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
                      if m in gluu_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
                          Config.mappingLocations[ml] = storage
 
+        if not Config.get('couchbase_bucket_prefix'):
+            Config.couchbase_bucket_prefix = 'gluu'
+
         # It is time to bind database
         dbUtils.bind()
 
@@ -142,8 +145,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if 'apiUmaResourceId' in oxTrustConfApplication:
             Config.oxtrust_resource_id =  oxTrustConfApplication['apiUmaResourceId']
 
-        if 'get_oxTrustConfApplication' in oxTrustConfApplication:
-            Config.shibJksPass =  self.unobscure(oxTrustConfApplication['idpSecurityKeyPassword'])
+        if 'idpSecurityKeyPassword' in oxTrustConfApplication:
+            Config.encoded_shib_jks_pw = oxTrustConfApplication['idpSecurityKeyPassword']
+            Config.shibJksPass =  self.unobscure(Config.encoded_shib_jks_pw)
 
         Config.admin_email =  oxTrustConfApplication['orgSupportEmail']
 
