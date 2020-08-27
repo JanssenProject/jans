@@ -7,11 +7,10 @@
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
+import java.nio.charset.Charset;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -41,6 +40,21 @@ public class XmlService {
     @Inject
     private Logger log;
 
+    public Document getXmlDocument(String xmlDocument) throws SAXException, IOException, ParserConfigurationException {
+        return getXmlDocument(xmlDocument, false);
+    }
+
+    public Document getXmlDocument(String xmlDocument, boolean skipValidation) throws SAXException, IOException, ParserConfigurationException {
+        InputStream is = IOUtils.toInputStream(xmlDocument, Charset.forName("utf-8"));
+        try {
+            DocumentBuilderFactory fty = createDocumentBuilderFactory(skipValidation);
+
+            return fty.newDocumentBuilder().parse(is);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+    }
+
     public Document getXmlDocument(byte[] xmlDocumentBytes) throws SAXException, IOException, ParserConfigurationException {
         return getXmlDocument(xmlDocumentBytes, false);
     }
@@ -68,7 +82,7 @@ public class XmlService {
         return fty.newDocumentBuilder().parse(is);
     }
 
-    public Document getXmlDocument(String uri) throws SAXException, IOException, ParserConfigurationException {
+    public Document getXmlDocumentFromUri(String uri) throws SAXException, IOException, ParserConfigurationException {
         DocumentBuilderFactory fty = createDocumentBuilderFactory();
 
         return fty.newDocumentBuilder().parse(uri);
@@ -114,6 +128,12 @@ public class XmlService {
 
         Node attributeNode = node.getAttributes().getNamedItem(attributeName);
         if (attributeNode == null) {
+        	if (node.getChildNodes().getLength() == 1) {
+        		node = node.getFirstChild();
+        		if (node.getNodeType() == Node.TEXT_NODE)  {
+        			return node.getNodeValue();
+        		}
+        	}
             return null;
         }
 
