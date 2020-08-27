@@ -118,7 +118,7 @@ public class AuthorizeRestWebServiceValidator {
     }
 
     public void validate(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, ResponseMode responseMode) {
-        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility(), responseMode)) {
+        if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility())) {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
