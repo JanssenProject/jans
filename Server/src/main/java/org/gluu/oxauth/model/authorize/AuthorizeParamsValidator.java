@@ -39,8 +39,9 @@ public class AuthorizeParamsValidator {
 
         boolean existsNonce = StringUtils.isNotBlank(nonce);
 
-        if (!existsNonce && responseTypes.contains(ResponseType.CODE)
-                && (responseTypes.contains(ResponseType.ID_TOKEN) || !responseTypes.contains(ResponseType.TOKEN))) {
+        if (!existsNonce && ((responseTypes.contains(ResponseType.CODE) && responseTypes.contains(ResponseType.ID_TOKEN))
+            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1)
+            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN)))) {
             return false;
         }
 
