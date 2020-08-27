@@ -12,7 +12,6 @@ Feature: Verify Auth configuration endpoint
     And print response
     And assert response.length != null
     
-    @ignore
     @auth-config-patch
   	Scenario: Patch cibaEnabled Auth configuration
   	Given url  mainUrl
@@ -24,8 +23,7 @@ Feature: Verify Auth configuration endpoint
     Then status 200
     And print response
     
-    @ignore
-    @auth-config-patch
+     @auth-config-patch
   	Scenario: Patch clientBlackList Auth configuration
   	Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
