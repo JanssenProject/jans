@@ -126,8 +126,6 @@ public class AppConfiguration implements Configuration {
     private int expirationNotificatorMapSizeLimit = 100000;
     private int expirationNotificatorIntervalInSeconds = 600;
 
-    private Boolean useCacheForAllImplicitFlowObjects = false;
-
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
@@ -1209,14 +1207,6 @@ public class AppConfiguration implements Configuration {
 
     public void setInvalidateSessionCookiesAfterAuthorizationFlow(Boolean invalidateSessionCookiesAfterAuthorizationFlow) {
         this.invalidateSessionCookiesAfterAuthorizationFlow = invalidateSessionCookiesAfterAuthorizationFlow;
-    }
-
-    public Boolean getUseCacheForAllImplicitFlowObjects() {
-        return useCacheForAllImplicitFlowObjects;
-    }
-
-    public void setUseCacheForAllImplicitFlowObjects(Boolean useCacheForAllImplicitFlowObjects) {
-        this.useCacheForAllImplicitFlowObjects = useCacheForAllImplicitFlowObjects;
     }
 
     public String getDynamicRegistrationCustomObjectClass() {

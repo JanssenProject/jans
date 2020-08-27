@@ -6,19 +6,7 @@
 
 package org.gluu.oxauth.service;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
@@ -35,11 +23,20 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.util.RedirectUri;
-import org.gluu.oxauth.util.ServerUtil;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Sets;
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Movchan
@@ -146,7 +143,7 @@ public class AuthorizeService {
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
-            boolean persistDuringImplicitFlow = ServerUtil.isFalse(appConfiguration.getUseCacheForAllImplicitFlowObjects()) || !ResponseType.isImplicitFlow(responseType);
+            boolean persistDuringImplicitFlow = !ResponseType.isImplicitFlow(responseType);
             if (!client.getTrustedClient() && persistDuringImplicitFlow && client.getPersistClientAuthorizations()) {
                 final Set<String> scopes = Sets.newHashSet(org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
                 clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
