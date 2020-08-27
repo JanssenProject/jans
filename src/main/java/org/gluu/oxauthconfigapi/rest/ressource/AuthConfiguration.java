@@ -1,8 +1,13 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-import java.util.*;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -15,7 +20,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.nio.charset.StandardCharsets;
+
 
 import org.json.JSONObject;
 
@@ -24,6 +29,8 @@ import javax.json.JsonPatchBuilder;
 import javax.json.JsonPatch;
 import javax.json.JsonReader;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 
@@ -64,24 +71,25 @@ public class AuthConfiguration extends BaseResource {
 		
 	@PATCH
 	@Path(ApiConstants.JSON_KEY_PATH)
-	public Response patchAppConfigurationProperty(@NotNull @PathParam(ApiConstants.JSON_KEY) String jsonKey, @NotNull JsonObject object) {
+	public Response patchAppConfigurationProperty(@NotNull @PathParam(ApiConstants.JSON_KEY) String jsonKey, @NotNull JsonObject jsonObject) {
 		log.info("=======================================================================");
-		log.info("\n\n jsonKey = "+jsonKey+" , object = "+object+"\n\n");
+		log.info("\n\n jsonKey = "+jsonKey+" , jsonObject = "+jsonObject+"\n\n");
 		try {
 		
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		JsonObject jsonObject =  createAppConfigurationJson(appConfiguration);
-		log.info("\n\n jsonObject = "+jsonObject+"\n\n");
-		boolean isPresent = jsonObject.containsKey(jsonKey);
-		log.info("\n\n isPresent = "+isPresent+"\n\n");
-		if(isPresent) {
-			JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
-			JsonPatch jsonPatch = jsonPatchBuilder
-					.replace("/"+jsonKey,object)
-					.build();
-			jsonObject = jsonPatch.apply(jsonObject);
-		}
-		log.info("\n\n jsonObject_2 = "+jsonObject+"\n\n");
+		JsonObject appConfigJsonObject =  createJsonObject(appConfiguration);
+		log.info("\n\n appConfigJsonObject = "+appConfigJsonObject+"\n\n");
+		//boolean isPresent = jsonObject.containsKey(jsonKey);
+		//log.info("\n\n isPresent = "+isPresent+"\n\n");
+		JsonValue jsonValue = getJsonValue(jsonKey,jsonObject);
+		log.info("\n\n jsonValue = "+jsonValue+"\n\n");
+		JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
+		JsonPatch jsonPatch = jsonPatchBuilder
+				.replace("/"+jsonKey,jsonValue)
+				.build();
+		appConfigJsonObject = jsonPatch.apply(appConfigJsonObject);
+		
+		log.info("\n\n appConfigJsonObject_2 = "+appConfigJsonObject+"\n\n");
 		log.info("=======================================================================");
 		//Update
 		//Convert jsonPatch to 
@@ -99,13 +107,31 @@ public class AuthConfiguration extends BaseResource {
 	private JsonObject createAppConfigurationJson(AppConfiguration appConfiguration) throws Exception {
 		JSONObject json = new JSONObject(appConfiguration);
 		String jsonStr = json.toString();
-		InputStream inputStream = new ByteArrayInputStream(jsonStr.getBytes(StandardCharsets.UTF_8));
-	    JsonReader jsonReader = Json.createReader(inputStream);
-	    JsonObject jsonObject = jsonReader.readObject();
-        jsonReader.close();
-        inputStream.close();	        
+		InputStream inputStream = new
+		ByteArrayInputStream(jsonStr.getBytes(StandardCharsets.UTF_8)); 
+		JsonReader jsonReader = Json.createReader(inputStream); 
+		JsonObject jsonObject = jsonReader.readObject(); 
+		jsonReader.close(); 
+		inputStream.close();
 		return jsonObject;
+
 	}
+	
+	private JsonObject createJsonObject(AppConfiguration appConfiguration) throws Exception {
+		JSONObject json = new JSONObject(appConfiguration);
+		String jsonStr = json.toString();
+		JsonReader reader = Json.createReader(new StringReader(jsonStr));
+		JsonObject jsonObject = reader.readObject();
+		return jsonObject;
+
+	}
+	
+	private JsonValue getJsonValue(String jsonKey, JsonObject jsonObject) throws Exception {
+		JsonValue jsonValue = jsonObject.get(jsonKey);
+		return jsonValue;
+
+	}
+	
 	
 	
 }
