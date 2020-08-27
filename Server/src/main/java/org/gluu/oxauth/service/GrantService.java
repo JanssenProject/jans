@@ -7,17 +7,13 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.CacheGrant;
-import org.gluu.oxauth.model.common.ClientTokens;
-import org.gluu.oxauth.model.common.SessionTokens;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
-import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
@@ -46,7 +42,7 @@ public class GrantService {
     private Logger log;
 
     @Inject
-    private PersistenceEntryManager ldapEntryManager;
+    private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     private ClientService clientService;
@@ -76,24 +72,20 @@ public class GrantService {
     }
 
     public void merge(TokenLdap p_token) {
-        ldapEntryManager.merge(p_token);
+        persistenceEntryManager.merge(p_token);
     }
 
     public void mergeSilently(TokenLdap p_token) {
         try {
-            ldapEntryManager.merge(p_token);
+            persistenceEntryManager.merge(p_token);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean shouldPutInCache(TokenType tokenType, boolean isImplicitFlow) {
+    private boolean shouldPutInCache(TokenType tokenType) {
         if (cacheConfiguration.getCacheProviderType() == CacheProviderType.NATIVE_PERSISTENCE) {
             return false;
-        }
-
-        if (isImplicitFlow && BooleanUtils.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects())) {
-            return true;
         }
 
         switch (tokenType) {
@@ -110,77 +102,12 @@ public class GrantService {
     }
 
     public void persist(TokenLdap token) {
-        if (shouldPutInCache(token.getTokenTypeEnum(), token.isImplicitFlow())) {
-            ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
-            clientTokens.getTokenHashes().add(token.getTokenCode());
-
-            int expiration = appConfiguration.getDynamicRegistrationExpirationTime(); // fallback to client's lifetime
-            switch (token.getTokenTypeEnum()) {
-                case ID_TOKEN:
-                    expiration = appConfiguration.getIdTokenLifetime();
-                    break;
-                case REFRESH_TOKEN:
-                    expiration = appConfiguration.getRefreshTokenLifetime();
-                    break;
-                case ACCESS_TOKEN:
-                case LONG_LIVED_ACCESS_TOKEN:
-                    int lifetime = appConfiguration.getAccessTokenLifetime();
-                    Client client = clientService.getClient(token.getClientId());
-                    // oxAuth #830 Client-specific access token expiration
-                    if (client != null && client.getAccessTokenLifetime() != null && client.getAccessTokenLifetime() > 0) {
-                        lifetime = client.getAccessTokenLifetime();
-                    }
-                    expiration = lifetime;
-                    break;
-                case AUTHORIZATION_CODE:
-                    expiration = appConfiguration.getAuthorizationCodeLifetime();
-                    break;
-            }
-
-            token.setIsFromCache(true);
-            cacheService.put(expiration, token.getTokenCode(), token);
-            cacheService.put(expiration, clientTokens.cacheKey(), clientTokens);
-
-            if (StringUtils.isNotBlank(token.getSessionDn())) {
-                SessionTokens sessionTokens = getCacheSessionTokens(token.getSessionDn());
-                sessionTokens.getTokenHashes().add(token.getTokenCode());
-
-                cacheService.put(expiration, sessionTokens.cacheKey(), sessionTokens);
-            }
-            return;
-        }
-
-        ldapEntryManager.persist(token);
-    }
-
-    public ClientTokens getCacheClientTokens(String clientId) {
-        ClientTokens clientTokens = new ClientTokens(clientId);
-        Object o = cacheService.get(clientTokens.cacheKey());
-        if (o instanceof ClientTokens) {
-            return (ClientTokens) o;
-        } else {
-            return clientTokens;
-        }
-    }
-
-    public SessionTokens getCacheSessionTokens(String sessionDn) {
-        SessionTokens sessionTokens = new SessionTokens(sessionDn);
-        Object o = cacheService.get(sessionTokens.cacheKey());
-        if (o instanceof SessionTokens) {
-            return (SessionTokens) o;
-        } else {
-            return sessionTokens;
-        }
+        persistenceEntryManager.persist(token);
     }
 
     public void remove(TokenLdap p_token) {
-        if (p_token.isFromCache()) {
-            cacheService.remove(p_token.getTokenCode());
-            log.trace("Removed token from cache, code: " + p_token.getTokenCode());
-        } else {
-            ldapEntryManager.remove(p_token);
-            log.trace("Removed token from LDAP, code: " + p_token.getTokenCode());
-        }
+        persistenceEntryManager.remove(p_token);
+        log.trace("Removed token from LDAP, code: " + p_token.getTokenCode());
     }
 
     public void removeSilently(TokenLdap token) {
@@ -228,7 +155,7 @@ public class GrantService {
     public List<TokenLdap> getGrantsOfClient(String p_clientId) {
         try {
             final String baseDn = clientService.buildClientDn(p_clientId);
-            return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("tknCde"));
+            return persistenceEntryManager.findEntries(baseDn, TokenLdap.class, Filter.createPresenceFilter("tknCde"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -238,7 +165,6 @@ public class GrantService {
     public TokenLdap getGrantByCode(String p_code) {
         return getGrantByCode(p_code, false);
     }
-
 
     public TokenLdap getGrantByCode(String p_code, boolean onlyFromCache) {
         Object grant = cacheService.get(TokenHashUtil.hash(p_code));
@@ -254,7 +180,7 @@ public class GrantService {
 
     private TokenLdap load(String p_tokenDn) {
         try {
-            final TokenLdap entry = ldapEntryManager.find(TokenLdap.class, p_tokenDn);
+            final TokenLdap entry = persistenceEntryManager.find(TokenLdap.class, p_tokenDn);
             return entry;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -264,7 +190,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
         try {
-            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", p_grantId));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("grtId", p_grantId));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -273,7 +199,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(p_authorizationCode)));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(p_authorizationCode)));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -283,47 +209,14 @@ public class GrantService {
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
         List<TokenLdap> grants = new ArrayList<>();
         try {
-            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("ssnId", sessionDn));
+            List<TokenLdap> ldapGrants = persistenceEntryManager.findEntries(tokenBaseDn(), TokenLdap.class, Filter.createEqualityFilter("ssnId", sessionDn));
             if (ldapGrants != null) {
                 grants.addAll(ldapGrants);
             }
-            grants.addAll(getGrantsFromCacheBySessionDn(sessionDn));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return grants;
-    }
-
-    public List<TokenLdap> getGrantsFromCacheBySessionDn(String sessionDn) {
-        if (StringUtils.isBlank(sessionDn)) {
-            return Collections.emptyList();
-        }
-        return getCacheTokensEntries(getCacheSessionTokens(sessionDn).getTokenHashes());
-    }
-
-    public List<TokenLdap> getCacheClientTokensEntries(String clientId) {
-        if (cacheConfiguration.getCacheProviderType() == CacheProviderType.NATIVE_PERSISTENCE) {
-            return Collections.emptyList();
-        }
-        Object o = cacheService.get(new ClientTokens(clientId).cacheKey());
-        if (o instanceof ClientTokens) {
-            return getCacheTokensEntries(((ClientTokens) o).getTokenHashes());
-        }
-        return Collections.emptyList();
-    }
-
-    public List<TokenLdap> getCacheTokensEntries(Set<String> tokenHashes) {
-        List<TokenLdap> tokens = new ArrayList<>();
-
-        for (String tokenHash : tokenHashes) {
-            Object o1 = cacheService.get(tokenHash);
-            if (o1 instanceof TokenLdap) {
-                TokenLdap token = (TokenLdap) o1;
-                token.setIsFromCache(true);
-                tokens.add(token);
-            }
-        }
-        return tokens;
     }
 
     public void logout(String sessionDn) {
