@@ -274,6 +274,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     if (!jwtRequest.getPrompts().isEmpty()) {
                         prompts = Lists.newArrayList(jwtRequest.getPrompts());
                     }
+                    if (jwtRequest.getResponseMode() != null) {
+                        redirectUriResponse.getRedirectUri().setResponseMode(jwtRequest.getResponseMode());
+                    }
 
                     final IdTokenMember idTokenMember = jwtRequest.getIdTokenMember();
                     if (idTokenMember != null) {
