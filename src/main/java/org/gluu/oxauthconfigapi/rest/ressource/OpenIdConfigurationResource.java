@@ -87,7 +87,7 @@ public class OpenIdConfigurationResource extends BaseResource {
 			openIdConfiguration.setLegacyIdTokenClaims(appConfiguration.getLegacyIdTokenClaims());
 			openIdConfiguration.setCustomHeadersWithAuthorizationResponse(appConfiguration.getCustomHeadersWithAuthorizationResponse());
 			openIdConfiguration.setFrontChannelLogoutSessionSupported(appConfiguration.getFrontChannelLogoutSessionSupported());
-			openIdConfiguration.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
+			//openIdConfiguration.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
 			openIdConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
 			openIdConfiguration.setOpenidScopeBackwardCompatibility(appConfiguration.getOpenidScopeBackwardCompatibility());
 			openIdConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());
@@ -150,7 +150,7 @@ public class OpenIdConfigurationResource extends BaseResource {
 			appConfiguration.setLegacyIdTokenClaims(openIdConfiguration.getLegacyIdTokenClaims());
 			appConfiguration.setCustomHeadersWithAuthorizationResponse(openIdConfiguration.getCustomHeadersWithAuthorizationResponse());
 			appConfiguration.setFrontChannelLogoutSessionSupported(openIdConfiguration.getFrontChannelLogoutSessionSupported());
-			appConfiguration.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
+			//appConfiguration.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
 			appConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(openIdConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
 			appConfiguration.setOpenidScopeBackwardCompatibility(openIdConfiguration.getOpenidScopeBackwardCompatibility());
 			appConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(openIdConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());

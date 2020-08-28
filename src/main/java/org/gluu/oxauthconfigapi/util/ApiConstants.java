@@ -54,6 +54,9 @@ public class ApiConstants {
 	public static final String STATUS = "status";
 	public static final String INUM = "inum";
 	public static final String SCOPE_INUM = "scope_inum";
+	public static final String OPERATION = "operation";
+	public static final String PATH = "path";
+	public static final String JSON = "json";
 
 	public static final String ALL = "all";
 	public static final String ACTIVE = "active";
