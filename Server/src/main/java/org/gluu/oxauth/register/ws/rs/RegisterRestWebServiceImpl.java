@@ -204,7 +204,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                     log.debug("The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema: " + r.getInitiateLoginUri());
                     throw errorResponseFactory.createWebApplicationException(
                             Response.Status.BAD_REQUEST,
-                            RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI,
+                            RegisterErrorResponseType.INVALID_CLIENT_METADATA,
                             "The Initiate Login Uri is invalid. The initiate_login_uri must use the https schema.");
                 }
             }
