@@ -41,7 +41,8 @@ public class AuthorizeParamsValidator {
 
         if (!existsNonce && ((responseTypes.contains(ResponseType.CODE) && responseTypes.contains(ResponseType.ID_TOKEN))
             || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.size() == 1)
-            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN)))) {
+            || (responseTypes.contains(ResponseType.ID_TOKEN) && responseTypes.contains(ResponseType.TOKEN))
+            || (responseTypes.contains(ResponseType.TOKEN) && responseTypes.size() == 1))) {
             return false;
         }
 
