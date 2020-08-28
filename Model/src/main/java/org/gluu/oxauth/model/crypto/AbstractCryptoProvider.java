@@ -253,7 +253,13 @@ public abstract class AbstractCryptoProvider {
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             Date today = new Date();
             long expiresInDays = (expirationTime - today.getTime()) / (24 * 60 * 60 * 1000);
-            if (expiresInDays <= 0) {
+            if (expiresInDays == 0) {
+                LOG.warn("\nWARNING! Key will expire soon, alias: " + alias
+                        + "\n\tExpires On: " + ft.format(expirationDate)
+                        + "\n\tToday's Date: " + ft.format(today));
+                return;
+            }
+            if (expiresInDays < 0) {
                 LOG.warn("\nWARNING! Expired Key is used, alias: " + alias
                         + "\n\tExpires On: " + ft.format(expirationDate)
                         + "\n\tToday's Date: " + ft.format(today));
