@@ -365,7 +365,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         return new Object[][]{
                 {redirectUris, redirectUri, userId, userSecret, Arrays.asList(ResponseType.TOKEN), sectorIdentifierUri},
                 {redirectUris, redirectUri, userId, userSecret, Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN), sectorIdentifierUri},
-                {redirectUris, redirectUri, userId, userSecret, Arrays.asList(ResponseType.CODE, ResponseType.TOKEN), sectorIdentifierUri},
+                {redirectUris, redirectUri, userId, userSecret, Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN), sectorIdentifierUri},
                 {redirectUris, redirectUri, userId, userSecret, Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN), sectorIdentifierUri},
         };
     }
