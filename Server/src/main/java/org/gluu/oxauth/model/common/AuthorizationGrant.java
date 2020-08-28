@@ -8,7 +8,6 @@ package org.gluu.oxauth.model.common;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.metric.MetricType;
 import org.gluu.oxauth.claims.Audience;
@@ -120,10 +119,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                         "Grant caching is not supported for : " + getAuthorizationGrantType());
             }
         } else {
-            if (BooleanUtils.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects()) && isImplicitFlow()) {
-                saveInCache();
-                return;
-            }
             saveImpl();
         }
     }
