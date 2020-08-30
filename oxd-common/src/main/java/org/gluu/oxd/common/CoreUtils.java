@@ -192,19 +192,19 @@ public class CoreUtils {
      */
 
 
-    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
+    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, String[] tlsVersions, String[] tlsSecureCiphers, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
 
         SSLContext sslcontext = SSLContexts.custom()
                 .loadTrustMaterial(pathToKeyStore, password.toCharArray())
                 .build();
 
         SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(
-                sslcontext, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+                sslcontext, tlsVersions, tlsSecureCiphers, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
         return createClient(sslConSocFactory, proxyConfiguration);
     }
 
-    public static HttpClient createHttpClientTrustAll(Optional<ProxyConfiguration> proxyConfiguration) throws NoSuchAlgorithmException, KeyManagementException,
+    public static HttpClient createHttpClientTrustAll(Optional<ProxyConfiguration> proxyConfiguration, String[] tlsVersions, String[] tlsSecureCiphers) throws NoSuchAlgorithmException, KeyManagementException,
             KeyStoreException {
 
         SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
@@ -225,7 +225,7 @@ public class CoreUtils {
             }
         };
 
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
+        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext, tlsVersions, tlsSecureCiphers, allowAllHosts);
 
         return createClient(sslContextFactory, proxyConfiguration);
     }

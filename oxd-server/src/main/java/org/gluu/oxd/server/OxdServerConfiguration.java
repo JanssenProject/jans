@@ -89,6 +89,10 @@ public class OxdServerConfiguration extends Configuration {
     private int persistenceManagerRemoveCount = 1000;
     @JsonProperty(value = "bind_ip_addresses")
     private List<String> bindIpAddresses;
+    @JsonProperty(value = "tls_version")
+    private List<String> tlsVersion;
+    @JsonProperty(value = "tls_secure_cipher")
+    private List<String> tlsSecureCipher;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -402,6 +406,22 @@ public class OxdServerConfiguration extends Configuration {
         this.jwksRegenerationIntervalInHours = jwksRegenerationIntervalInHours;
     }
 
+    public List<String> getTlsVersion() {
+        return tlsVersion;
+    }
+
+    public void setTlsVersion(List<String> tlsVersion) {
+        this.tlsVersion = tlsVersion;
+    }
+
+    public List<String> getTlsSecureCipher() {
+        return tlsSecureCipher;
+    }
+
+    public void setTlsSecureCipher(List<String> tlsSecureCipher) {
+        this.tlsSecureCipher = tlsSecureCipher;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -440,6 +460,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", jwksExpirationInHours=" + jwksExpirationInHours + '\'' +
                 ", requestObjectExpirationInMinutes=" + requestObjectExpirationInMinutes + '\'' +
                 ", jwksRegenerationIntervalInHours=" + jwksRegenerationIntervalInHours + '\'' +
+                ", tlsVersion=" + tlsVersion + '\'' +
                 '}';
     }
 }
