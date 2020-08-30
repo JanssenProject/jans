@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -39,12 +40,14 @@ public class HttpService {
 
     public HttpClient getHttpClient() {
         final Optional<ProxyConfiguration> proxyConfig = asProxyConfiguration(configuration);
+        final String[] tlsVersions = listToArray(configuration.getTlsVersion());
+        final String[] tlsSecureCiphers = listToArray(configuration.getTlsSecureCipher());
         try {
             validate(proxyConfig);
             final Boolean trustAllCerts = configuration.getTrustAllCerts();
             if (trustAllCerts != null && trustAllCerts) {
                 LOG.trace("Created TRUST_ALL client.");
-                return CoreUtils.createHttpClientTrustAll(proxyConfig);
+                return CoreUtils.createHttpClientTrustAll(proxyConfig, tlsVersions, tlsSecureCiphers);
             }
             final String keyStorePath = configuration.getKeyStorePath();
             if (StringUtils.isNotBlank(keyStorePath)) {
@@ -52,7 +55,7 @@ public class HttpService {
                 if (!keyStoreFile.exists()) {
                     LOG.error("ERROR in configuration. Key store path is invalid! Please fix key_store_path in oxd configuration");
                 } else {
-                    return CoreUtils.createHttpClientWithKeyStore(keyStoreFile, configuration.getKeyStorePassword(), proxyConfig);
+                    return CoreUtils.createHttpClientWithKeyStore(keyStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
                 }
             }
         } catch (Exception e) {
@@ -91,5 +94,13 @@ public class HttpService {
 
     public ClientHttpEngine getClientEngine() {
         return new ApacheHttpClient4Engine(getHttpClient());
+    }
+
+    private static String[] listToArray(List<String> input) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+        return input.stream().toArray(String[]::new);
+
     }
 }
