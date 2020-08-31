@@ -6,7 +6,6 @@ package org.gluu.oxd.server.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.Jackson2;
@@ -61,7 +60,7 @@ public class HttpService {
                 return CoreUtils.createClientFallback(proxyConfig);
             }
             //Perform mutual authentication over SSL if allowed
-            if(configuration.getMtlsEnabled()) {
+            if (configuration.getMtlsEnabled()) {
                 final String mtlsClientKeyStorePath = configuration.getMtlsClientKeyStorePath();
 
                 if (Strings.isNullOrEmpty(mtlsClientKeyStorePath)) {
