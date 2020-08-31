@@ -417,13 +417,14 @@ public class SessionIdService {
     }
 
     private SessionId generateSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
-        final String sid = UUID.randomUUID().toString();
+        final String internalSid = UUID.randomUUID().toString();
+        final String outsideSid = UUID.randomUUID().toString();
         final String salt = UUID.randomUUID().toString();
         final String clientId = sessionIdAttributes.get("client_id");
         final String opbs = UUID.randomUUID().toString();
         final String redirectUri = sessionIdAttributes.get("redirect_uri");
         final String sessionState = computeSessionState(clientId, redirectUri, opbs, salt);
-        final String dn = buildDn(sid);
+        final String dn = buildDn(internalSid);
         sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
 
         Preconditions.checkNotNull(dn);
@@ -433,7 +434,8 @@ public class SessionIdService {
         }
 
         final SessionId sessionId = new SessionId();
-        sessionId.setId(sid);
+        sessionId.setId(internalSid);
+        sessionId.setOutsideSid(outsideSid);
         sessionId.setDn(dn);
         sessionId.setUserDn(userDn);
         sessionId.setSessionState(sessionState);

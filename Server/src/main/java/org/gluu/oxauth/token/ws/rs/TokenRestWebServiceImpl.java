@@ -167,7 +167,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
             final SessionId sessionIdObj = sessionIdService.getSessionId(request);
-            final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getId() : null);
+            final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null);
 
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
@@ -225,7 +225,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     idToken = authorizationCodeGrant.createIdToken(
                             nonce, authorizationCodeGrant.getAuthorizationCode(), accToken, null, null,
-                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getId() : null));
+                            authorizationCodeGrant, includeIdTokenClaims, JwrService.wrapWithSidFunction(authorizationCodePreProcessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null));
                 }
 
 
