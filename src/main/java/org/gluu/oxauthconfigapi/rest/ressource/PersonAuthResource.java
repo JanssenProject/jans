@@ -22,15 +22,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
 import org.gluu.oxtrust.service.custom.CustomScriptService;
@@ -53,10 +47,6 @@ public class PersonAuthResource extends BaseResource {
 	CustomScriptService customScriptService;
 
 	@GET
-	@Operation(summary = "List of person authentication scripts")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CustomScript[].class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAttributes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -75,11 +65,6 @@ public class PersonAuthResource extends BaseResource {
 	}
 
 	@GET
-	@Operation(summary = "Get Person Authentication Script by Inum")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CustomScript.class, required = false))),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
 	public Response getAuthScriptByInum(@PathParam(ApiConstants.INUM) String inum) {
@@ -96,10 +81,6 @@ public class PersonAuthResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create Person Authentication Script")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = CustomScript.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Internal Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createPersonScript(@Valid CustomScript customScript) {
 		try {
@@ -124,12 +105,6 @@ public class PersonAuthResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update existing person script")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CustomScript.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updatePersonScript(@Valid CustomScript customScript) {
 		try {
@@ -161,10 +136,6 @@ public class PersonAuthResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@Operation(summary = "Delete Person Authentication Script", description = "Delete Person Authentication Script")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {

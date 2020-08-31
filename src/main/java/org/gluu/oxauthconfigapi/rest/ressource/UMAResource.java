@@ -21,11 +21,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
@@ -50,9 +45,6 @@ public class UMAResource extends BaseResource {
 	private ResourceSetService umaResourcesService;
 
 	@GET
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UmaResource[].class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response fetchUmaResources(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -72,10 +64,6 @@ public class UMAResource extends BaseResource {
 
 	@GET
 	@Path(ApiConstants.INUM_PATH)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UmaResource.class, required = false))),
-			@APIResponse(responseCode = "404", description = "Resource Not Found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) String inum) {
 		try {
@@ -92,10 +80,6 @@ public class UMAResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create Uma resource")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = UmaResource.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Internal Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createUmaResource(@Valid UmaResource umaResource) {
 		try {
@@ -120,12 +104,6 @@ public class UMAResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update existing Uma Resource")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UmaResource.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateUmaResource(@Valid UmaResource resource) {
 		try {
@@ -151,9 +129,6 @@ public class UMAResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@APIResponses(value = { @APIResponse(responseCode = "201"),
-			@APIResponse(responseCode = "404", description = "Resource Not Found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) String inum) {
 		try {

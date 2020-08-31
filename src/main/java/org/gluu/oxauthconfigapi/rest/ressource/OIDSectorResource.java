@@ -21,16 +21,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
-import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.model.OxAuthSectorIdentifier;
 import org.gluu.oxtrust.service.SectorIdentifierService;
 import org.slf4j.Logger;
@@ -50,10 +43,6 @@ public class OIDSectorResource extends BaseResource {
 	Logger logger;
 
 	@GET
-	@Operation(summary = "Get list of OpenID Connect Sectors")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthSectorIdentifier[].class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSectorIdentifiers(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -71,11 +60,6 @@ public class OIDSectorResource extends BaseResource {
 	}
 
 	@GET
-	@Operation(summary = "Get OpenID Connect Sector by Inum")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthSectorIdentifier.class, required = true))),
-			@APIResponse(responseCode = "404", description = "Resource not found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
 	public Response getSectorByInum(@PathParam(ApiConstants.INUM) String inum) {
@@ -92,10 +76,6 @@ public class OIDSectorResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create new OpenID Connect Sector")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = OxAuthSectorIdentifier.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createNewOpenIDSector(@Valid OxAuthSectorIdentifier sectorIdentifier) {
 		try {
@@ -115,12 +95,6 @@ public class OIDSectorResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update OpenId Connect Sector")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSector(@Valid OxAuthSectorIdentifier sectorIdentifier) {
 		try {
@@ -148,10 +122,6 @@ public class OIDSectorResource extends BaseResource {
 	}
 
 	@DELETE
-	@Operation(summary = "Delete OpenID Connect Sector")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteSector(@PathParam(ApiConstants.INUM) String inum) {
