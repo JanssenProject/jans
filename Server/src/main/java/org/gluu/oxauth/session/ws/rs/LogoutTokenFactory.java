@@ -41,13 +41,13 @@ public class LogoutTokenFactory {
     @Inject
     private SectorIdentifierService sectorIdentifierService;
 
-    public JsonWebResponse createLogoutToken(Client rpClient, String sessionId, User user) {
+    public JsonWebResponse createLogoutToken(Client rpClient, String outsideSid, User user) {
         try {
             Preconditions.checkNotNull(rpClient);
 
             JsonWebResponse jwr = jwrService.createJwr(rpClient);
 
-            fillClaims(jwr, rpClient, sessionId, user);
+            fillClaims(jwr, rpClient, outsideSid, user);
 
             jwrService.encode(jwr, rpClient);
             return jwr;
@@ -57,7 +57,7 @@ public class LogoutTokenFactory {
         }
     }
 
-    private void fillClaims(JsonWebResponse jwr, Client client, String sessionId, User user) {
+    private void fillClaims(JsonWebResponse jwr, Client client, String outsideSid, User user) {
         int lifeTime = appConfiguration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
@@ -71,8 +71,8 @@ public class LogoutTokenFactory {
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());
         Audience.setAudience(jwr.getClaims(), client);
 
-        if (StringUtils.isNotBlank(sessionId) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
-            jwr.getClaims().setClaim("sid", sessionId);
+        if (StringUtils.isNotBlank(outsideSid) && client.getAttributes().getBackchannelLogoutSessionRequired()) {
+            jwr.getClaims().setClaim("sid", outsideSid);
         }
 
         final String sub = sectorIdentifierService.getSub(client, user, false);
