@@ -7,6 +7,7 @@
 package org.gluu.oxauth.model.common;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.Deletable;
 
@@ -16,6 +17,7 @@ import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 
@@ -36,6 +38,9 @@ public class SessionId implements Deletable, Serializable {
 
     @AttributeName(name = "oxId")
     private String id;
+
+    @AttributeName(name = "sid")
+    private String outsideSid;
 
     @AttributeName(name = "oxLastAccessTime")
     private Date lastUsedAt;
@@ -256,6 +261,17 @@ public class SessionId implements Deletable, Serializable {
         this.creationDate = creationDate;
     }
 
+    public void setOutsideSid(String outsideSid) {
+        this.outsideSid = outsideSid;
+    }
+
+    public String getOutsideSid() {
+        if (StringUtils.isBlank(outsideSid)) {
+            outsideSid = UUID.randomUUID().toString();
+        }
+        return outsideSid;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -277,6 +293,7 @@ public class SessionId implements Deletable, Serializable {
         sb.append("SessionId {");
         sb.append("dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
+        sb.append(", outsideSid='").append(outsideSid).append('\'');
         sb.append(", lastUsedAt=").append(lastUsedAt);
         sb.append(", userDn='").append(userDn).append('\'');
         sb.append(", authenticationTime=").append(authenticationTime);

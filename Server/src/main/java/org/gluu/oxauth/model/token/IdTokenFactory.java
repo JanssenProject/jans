@@ -124,7 +124,7 @@ public class IdTokenFactory {
         }
         final SessionId session = sessionIdService.getSessionByDn(authorizationGrant.getSessionDn());
         if (session != null) {
-            jwr.setClaim("sid", session.getId());
+            jwr.setClaim("sid", session.getOutsideSid());
         }
 
         if (authorizationGrant.getAcrValues() != null) {

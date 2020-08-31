@@ -42,15 +42,11 @@ public class EndSessionUtils {
         }
     }
 
-    public static String appendSid(String logoutUri, String sid, boolean appendSid) {
-        if (!appendSid) {
-            return logoutUri;
-        }
-
+    public static String appendSid(String logoutUri, String sid, String issuer) {
         if (logoutUri.contains("?")) {
-            return logoutUri + "&sid=" + sid;
+            return logoutUri + "&sid=" + sid + "&iss=" + issuer;
         } else {
-            return logoutUri + "?sid=" + sid;
+            return logoutUri + "?sid=" + sid + "&iss=" + issuer;
         }
     }
 
