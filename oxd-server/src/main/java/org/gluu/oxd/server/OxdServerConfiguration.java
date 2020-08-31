@@ -93,6 +93,12 @@ public class OxdServerConfiguration extends Configuration {
     private List<String> tlsVersion;
     @JsonProperty(value = "tls_secure_cipher")
     private List<String> tlsSecureCipher;
+    @JsonProperty(value = "mtls_enabled")
+    private Boolean mtlsEnabled = false;
+    @JsonProperty(value = "mtls_client_key_store_path")
+    private String mtlsClientKeyStorePath;
+    @JsonProperty(value = "mtls_client_key_store_password")
+    private String mtlsClientKeyStorePassword;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -422,6 +428,30 @@ public class OxdServerConfiguration extends Configuration {
         this.tlsSecureCipher = tlsSecureCipher;
     }
 
+    public Boolean getMtlsEnabled() {
+        return mtlsEnabled;
+    }
+
+    public void setMtlsEnabled(Boolean mtlsEnabled) {
+        this.mtlsEnabled = mtlsEnabled;
+    }
+
+    public String getMtlsClientKeyStorePath() {
+        return mtlsClientKeyStorePath;
+    }
+
+    public void setMtlsClientKeyStorePath(String mtlsClientKeyStorePath) {
+        this.mtlsClientKeyStorePath = mtlsClientKeyStorePath;
+    }
+
+    public String getMtlsClientKeyStorePassword() {
+        return mtlsClientKeyStorePassword;
+    }
+
+    public void setMtlsClientKeyStorePassword(String mtlsClientKeyStorePassword) {
+        this.mtlsClientKeyStorePassword = mtlsClientKeyStorePassword;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -461,6 +491,9 @@ public class OxdServerConfiguration extends Configuration {
                 ", requestObjectExpirationInMinutes=" + requestObjectExpirationInMinutes + '\'' +
                 ", jwksRegenerationIntervalInHours=" + jwksRegenerationIntervalInHours + '\'' +
                 ", tlsVersion=" + tlsVersion + '\'' +
+                ", mtlsEnabled=" + mtlsEnabled + '\'' +
+                ", mtlsClientKeyStorePath=" + mtlsClientKeyStorePath + '\'' +
+                ", mtlsClientKeyStorePassword=" + mtlsClientKeyStorePassword + '\'' +
                 '}';
     }
 }
