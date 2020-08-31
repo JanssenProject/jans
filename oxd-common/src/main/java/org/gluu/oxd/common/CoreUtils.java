@@ -185,17 +185,30 @@ public class CoreUtils {
     }
 
     /**
-     * @param pathToKeyStore path to key store, e.g. D:/Development/gluu_conf/etc/certs/DA855F9895A1CA3B9E7D4BF5-java.jks
-     * @param password       key store password
+     * @param trustStoreFile     trust store file, e.g. D:/Development/gluu_conf/etc/certs/DA855F9895A1CA3B9E7D4BF5-java.jks
+     * @param trustStorePassword trust store password
      * @return http client
      * @throws Exception
      */
 
 
-    public static HttpClient createHttpClientWithKeyStore(File pathToKeyStore, String password, String[] tlsVersions, String[] tlsSecureCiphers, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
+    public static HttpClient createHttpClientWithKeyStore(File trustStoreFile, String trustStorePassword, String[] tlsVersions, String[] tlsSecureCiphers, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
 
         SSLContext sslcontext = SSLContexts.custom()
-                .loadTrustMaterial(pathToKeyStore, password.toCharArray())
+                .loadTrustMaterial(trustStoreFile, trustStorePassword.toCharArray())
+                .build();
+
+        SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(
+                sslcontext, tlsVersions, tlsSecureCiphers, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+        return createClient(sslConSocFactory, proxyConfiguration);
+    }
+
+    public static HttpClient createHttpClientForMutualAuthentication(File trustStoreFile, String trustStorePassword, File mtlsClientKeyStoreFile, String mtlsClientKeyStorePassword, String[] tlsVersions, String[] tlsSecureCiphers, Optional<ProxyConfiguration> proxyConfiguration) throws Exception {
+
+        SSLContext sslcontext = SSLContexts.custom()
+                .loadKeyMaterial(mtlsClientKeyStoreFile, mtlsClientKeyStorePassword.toCharArray(), mtlsClientKeyStorePassword.toCharArray())
+                .loadTrustMaterial(trustStoreFile, trustStorePassword.toCharArray())
                 .build();
 
         SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(
