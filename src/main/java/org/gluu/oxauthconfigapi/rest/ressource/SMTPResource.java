@@ -18,11 +18,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.model.SmtpConfiguration;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
@@ -50,10 +45,6 @@ public class SMTPResource extends BaseResource {
 	private MailService mailService;
 
 	@GET
-	@Operation(summary = "Retrieve smtp configuration", description = "Retrieve smtp configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSmtpServerConfiguration() {
 		try {
@@ -69,11 +60,6 @@ public class SMTPResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create smtp configuration", description = "Create smtp configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"
-					+ ""),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response setupSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
 		try {
@@ -93,11 +79,6 @@ public class SMTPResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update smtp configuration", description = "Update smtp configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"
-					+ ""),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
 		try {
@@ -117,10 +98,6 @@ public class SMTPResource extends BaseResource {
 
 	@GET
 	@Path(ApiConstants.STATUS)
-	@Operation(summary = "Test smtp configuration", description = "Test smtp configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SmtpConfiguration.class)), description = "success"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response testSmtpConfiguration() {
 		try {
@@ -140,9 +117,6 @@ public class SMTPResource extends BaseResource {
 	}
 
 	@DELETE
-	@Operation(summary = "Remove smtp configuration", description = "Remove smtp configuration")
-	@APIResponses(value = { @APIResponse(responseCode = "204"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response removeSmtpConfiguration() {
 		try {
