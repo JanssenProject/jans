@@ -26,6 +26,7 @@ import org.gluu.oxauth.model.gluu.GluuErrorResponseType;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import org.gluu.oxauth.model.session.EndSessionRequestParam;
 import org.gluu.oxauth.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.util.URLPatternList;
 import org.gluu.oxauth.model.util.Util;
@@ -46,6 +47,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -157,6 +159,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             }
 
             backChannel(backchannelUris, pair.getSecond(), pair.getFirst().getOutsideSid());
+            postLogoutRedirectUri = addStateInPostLogoutRedirectUri(postLogoutRedirectUri, state);
 
             if (frontchannelUris.isEmpty() && StringUtils.isNotBlank(postLogoutRedirectUri)) { // no front-channel
                 log.trace("No frontchannel_redirect_uri's found in clients involved in SSO.");
@@ -185,6 +188,20 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     .entity(errorResponseFactory.getJsonErrorResponse(GluuErrorResponseType.SERVER_ERROR))
                     .build());
         }
+    }
+
+    /**
+     * Adds state param in the post_logout_redirect_uri whether it exists.
+     */
+    private String addStateInPostLogoutRedirectUri(String postLogoutRedirectUri, String state) {
+        if (StringUtils.isBlank(postLogoutRedirectUri) || StringUtils.isBlank(state)) {
+            return postLogoutRedirectUri;
+        }
+
+        return UriBuilder.fromUri(postLogoutRedirectUri)
+                .queryParam(EndSessionRequestParam.STATE, state)
+                .build()
+                .toString();
     }
 
     private void validateSid(String postLogoutRedirectUri, Jwt idToken, SessionId session) {
