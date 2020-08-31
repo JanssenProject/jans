@@ -2476,6 +2476,12 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.428 NAME 'authReqId'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.429 NAME 'sid'
+  DESC 'Session Identifier'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
@@ -2588,7 +2594,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.19 NAME 'oxAuthSessionId'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ creationDate $ exp $ del $ oxLastAccessTime $ oxAuthUserDN $ authnTime $ oxState $ oxSessionState $ oxAuthPermissionGranted $ oxAsJwt $ oxJwt $ oxAuthPermissionGrantedMap $ oxInvolvedClients $ oxAuthSessionAttribute )
+  MAY ( oxId $ sid $ creationDate $ exp $ del $ oxLastAccessTime $ oxAuthUserDN $ authnTime $ oxState $ oxSessionState $ oxAuthPermissionGranted $ oxAsJwt $ oxJwt $ oxAuthPermissionGrantedMap $ oxInvolvedClients $ oxAuthSessionAttribute )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.20 NAME 'oxAuthConfiguration'
   SUP ( top )

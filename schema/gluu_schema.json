@@ -2311,7 +2311,18 @@
             "substr": "caseIgnoreSubstringsMatch", 
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
             "x_origin": "Gluu created attribute"
-        }, 
+        },
+        {
+            "desc": "Session Identifier",
+            "equality": "caseIgnoreMatch",
+            "names": [
+              "sid"
+            ],
+            "oid": "oxAttribute",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
         {
             "desc": "Boolean field to indicate whether object is used as JWT", 
             "equality": "booleanMatch", 
@@ -5376,6 +5387,7 @@
             "kind": "STRUCTURAL", 
             "may": [
                 "oxId",
+                "sid",
                 "creationDate",
                 "exp",
                 "del",
