@@ -6,7 +6,6 @@ package org.gluu.oxd.server.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.Jackson2;
@@ -49,15 +48,33 @@ public class HttpService {
                 LOG.trace("Created TRUST_ALL client.");
                 return CoreUtils.createHttpClientTrustAll(proxyConfig, tlsVersions, tlsSecureCiphers);
             }
-            final String keyStorePath = configuration.getKeyStorePath();
-            if (StringUtils.isNotBlank(keyStorePath)) {
-                final File keyStoreFile = new File(keyStorePath);
-                if (!keyStoreFile.exists()) {
-                    LOG.error("ERROR in configuration. Key store path is invalid! Please fix key_store_path in oxd configuration");
-                } else {
-                    return CoreUtils.createHttpClientWithKeyStore(keyStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
-                }
+            final String trustStorePath = configuration.getKeyStorePath();
+
+            if (Strings.isNullOrEmpty(trustStorePath)) {
+                return CoreUtils.createClientFallback(proxyConfig);
             }
+            final File trustStoreFile = new File(trustStorePath);
+
+            if (!trustStoreFile.exists()) {
+                LOG.error("ERROR in configuration. Trust store path is invalid! Please fix key_store_path in oxd configuration");
+                return CoreUtils.createClientFallback(proxyConfig);
+            }
+            //Perform mutual authentication over SSL if allowed
+            if (configuration.getMtlsEnabled()) {
+                final String mtlsClientKeyStorePath = configuration.getMtlsClientKeyStorePath();
+
+                if (Strings.isNullOrEmpty(mtlsClientKeyStorePath)) {
+                    LOG.error("Mtls Client key store path is empty! Please fix mtls_client_key_store_path in oxd configuration");
+                    return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
+                }
+                final File mtlsClientKeyStoreFile = new File(mtlsClientKeyStorePath);
+                if (!mtlsClientKeyStoreFile.exists()) {
+                    LOG.error("ERROR in configuration. Mtls Client key stroe path is invalid! Please fix mtls_client_key_store_path in oxd configuration");
+                    return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
+                }
+                return CoreUtils.createHttpClientForMutualAuthentication(trustStoreFile, configuration.getKeyStorePassword(), mtlsClientKeyStoreFile, configuration.getMtlsClientKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
+            }
+            return CoreUtils.createHttpClientWithKeyStore(trustStoreFile, configuration.getKeyStorePassword(), tlsVersions, tlsSecureCiphers, proxyConfig);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             LOG.error("Failed to create http client based on oxd configuration. Created default client.");
