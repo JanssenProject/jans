@@ -185,8 +185,8 @@ public class CoreUtils {
     }
 
     /**
-     * @param trustStoreFile trust store file, e.g. D:/Development/gluu_conf/etc/certs/DA855F9895A1CA3B9E7D4BF5-java.jks
-     * @param trustStorePassword       key store password
+     * @param trustStoreFile     trust store file, e.g. D:/Development/gluu_conf/etc/certs/DA855F9895A1CA3B9E7D4BF5-java.jks
+     * @param trustStorePassword trust store password
      * @return http client
      * @throws Exception
      */
