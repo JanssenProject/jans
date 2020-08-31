@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,7 +125,12 @@ public class CookieService {
         SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class); // avoid cycle dependency
         Set<String> toRemove = Sets.newHashSet();
         for (String sessionId : currentSessions) {
-            final SessionId sessionIdObject = sessionIdService.getSessionId(sessionId, true);
+            SessionId sessionIdObject = null;
+            try {
+                sessionIdObject = sessionIdService.getSessionId(sessionId, true);
+            } catch (EntryPersistenceException e) {
+                // ignore - valid case if session is outdated
+            }
             if (sessionIdObject == null) {
                 toRemove.add(sessionId);
             }
