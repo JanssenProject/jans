@@ -725,6 +725,11 @@ public class SessionIdService {
 
     @Nullable
     public SessionId getSessionByDn(@Nullable String dn) {
+        return getSessionByDn(dn, false);
+    }
+
+    @Nullable
+    public SessionId getSessionByDn(@Nullable String dn, boolean silently) {
         if (StringUtils.isBlank(dn)) {
             return null;
         }
@@ -748,7 +753,9 @@ public class SessionIdService {
             localCacheService.put(DEFAULT_LOCAL_CACHE_EXPIRATION, sessionId.getDn(), sessionId);
             return sessionId;
         } catch (Exception e) {
-            log.error("Failed to get session by dn: " + dn, e);
+            if (!silently) {
+                log.error("Failed to get session by dn: " + dn, e);
+            }
         }
         return null;
     }
