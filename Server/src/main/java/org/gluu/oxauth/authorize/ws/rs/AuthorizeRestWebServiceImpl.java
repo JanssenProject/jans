@@ -556,7 +556,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 IdToken idToken = authorizationGrant.createIdToken(
                         nonce, authorizationCode, newAccessToken, null,
                         state, authorizationGrant, includeIdTokenClaims,
-                        JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getId()));
+                        JwrService.wrapWithSidFunction(TokenBindingMessage.createIdTokenTokingBindingPreprocessing(tokenBindingHeader, client.getIdTokenTokenBindingCnf()), sessionUser.getOutsideSid()));
 
                 redirectUriResponse.getRedirectUri().addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
             }

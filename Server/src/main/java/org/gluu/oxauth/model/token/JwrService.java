@@ -137,7 +137,7 @@ public class JwrService {
         jwr.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
     }
 
-    public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String sessionId) {
+    public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String outsideSid) {
         return jwr -> {
             if (jwr == null) {
                 return null;
@@ -145,8 +145,8 @@ public class JwrService {
             if (input != null) {
                 input.apply(jwr);
             }
-            if (StringUtils.isNotEmpty(sessionId)) {
-                jwr.setClaim("sid", sessionId);
+            if (StringUtils.isNotEmpty(outsideSid)) {
+                jwr.setClaim("sid", outsideSid);
             }
             return null;
         };
