@@ -3,30 +3,6 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
@@ -34,6 +10,15 @@ import org.gluu.oxauthconfigapi.util.AttributeNames;
 import org.gluu.oxtrust.service.uma.UmaScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr
@@ -71,10 +56,6 @@ public class UMAScopeResource extends BaseResource {
 
 	@GET
 	@Path(ApiConstants.INUM_PATH)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
-			@APIResponse(responseCode = "404", description = "Resource Not Found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
@@ -90,10 +71,6 @@ public class UMAScopeResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create Uma Scope")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Internal Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createUmaScope(@Valid Scope scope) {
 		try {
@@ -118,12 +95,6 @@ public class UMAScopeResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update existing Uma Scope")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateUmaScope(@Valid Scope scope) {
 		try {
@@ -149,10 +120,6 @@ public class UMAScopeResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
-			@APIResponse(responseCode = "404", description = "Resource Not Found"),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
