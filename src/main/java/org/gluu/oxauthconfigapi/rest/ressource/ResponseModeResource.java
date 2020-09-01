@@ -3,6 +3,7 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -41,30 +42,20 @@ public class ResponseModeResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getSupportedResponseMode() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			Set<ResponseMode> responseModesSupported = appConfiguration.getResponseModesSupported();
-			return Response.ok(responseModesSupported).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth supported response modes", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getSupportedResponseMode() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		Set<ResponseMode> responseModesSupported = appConfiguration.getResponseModesSupported();
+		return Response.ok(responseModesSupported).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateSupportedResponseMode(@Valid Set<ResponseMode> responseModes) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			Set<ResponseMode> responseModesSupported = responseModes;
-			appConfiguration.setResponseModesSupported(responseModesSupported);
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth supported response modes", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateSupportedResponseMode(@Valid Set<ResponseMode> responseModes) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		Set<ResponseMode> responseModesSupported = responseModes;
+		appConfiguration.setResponseModesSupported(responseModesSupported);
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

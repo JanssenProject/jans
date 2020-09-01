@@ -37,45 +37,32 @@ public class Fido2Resource extends BaseResource {
 	public Response getFido2Configuration() {
 		Fido2Configuration fido2Configuration = new Fido2Configuration();
 		String fido2ConfigJson = null;
-		try {
-			DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService
-					.loadFido2Configuration();
-			if (dbApplicationConfiguration != null) {
-				fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
-				Gson gson = new Gson();
-				JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				JsonElement fido2ConfigurationElement = jsonObject.get("fido2Configuration");
-				fido2Configuration = gson.fromJson(fido2ConfigurationElement, Fido2Configuration.class);
-			}
-			return Response.ok(fido2Configuration).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to fetch oxAuth Fido2 configuration", ex);
-			return getInternalServerError(ex);
+		DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
+		if (dbApplicationConfiguration != null) {
+			fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
+			Gson gson = new Gson();
+			JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
+			JsonObject jsonObject = jsonElement.getAsJsonObject();
+			JsonElement fido2ConfigurationElement = jsonObject.get("fido2Configuration");
+			fido2Configuration = gson.fromJson(fido2ConfigurationElement, Fido2Configuration.class);
 		}
+		return Response.ok(fido2Configuration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
-		try {
-			DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService
-					.loadFido2Configuration();
-			if (dbApplicationConfiguration != null) {
-				String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
-				Gson gson = new Gson();
-				JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
-				JsonObject jsonObject = jsonElement.getAsJsonObject();
-				JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
-				jsonObject.add("fido2Configuration", updatedElement);
-				this.jsonConfigurationService.saveFido2Configuration(jsonObject.toString());
-			}
-			return Response.ok(fido2Configuration).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth Fido2 configuration", ex);
-			return getInternalServerError(ex);
+		DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
+		if (dbApplicationConfiguration != null) {
+			String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
+			Gson gson = new Gson();
+			JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
+			JsonObject jsonObject = jsonElement.getAsJsonObject();
+			JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
+			jsonObject.add("fido2Configuration", updatedElement);
+			this.jsonConfigurationService.saveFido2Configuration(jsonObject.toString());
 		}
+		return Response.ok(fido2Configuration).build();
 	}
 
 }

@@ -3,6 +3,8 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -39,39 +41,29 @@ public class RequestObjectResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getRequestObjectConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			RequestObject requestObject = new RequestObject();
-			requestObject.setRequestObjectSigningAlgValuesSupported(
-					appConfiguration.getRequestObjectSigningAlgValuesSupported());
-			requestObject.setRequestObjectEncryptionAlgValuesSupported(
-					appConfiguration.getRequestObjectEncryptionAlgValuesSupported());
-			requestObject.setRequestObjectEncryptionEncValuesSupported(
-					appConfiguration.getRequestObjectEncryptionEncValuesSupported());
-			return Response.ok(requestObject).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve request object settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getRequestObjectConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		RequestObject requestObject = new RequestObject();
+		requestObject.setRequestObjectSigningAlgValuesSupported(
+				appConfiguration.getRequestObjectSigningAlgValuesSupported());
+		requestObject.setRequestObjectEncryptionAlgValuesSupported(
+				appConfiguration.getRequestObjectEncryptionAlgValuesSupported());
+		requestObject.setRequestObjectEncryptionEncValuesSupported(
+				appConfiguration.getRequestObjectEncryptionEncValuesSupported());
+		return Response.ok(requestObject).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateRequestObjectConfiguration(@Valid RequestObject requestObject) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setRequestObjectSigningAlgValuesSupported(
-					requestObject.getRequestObjectSigningAlgValuesSupported());
-			appConfiguration.setRequestObjectEncryptionAlgValuesSupported(
-					requestObject.getRequestObjectEncryptionAlgValuesSupported());
-			appConfiguration.setRequestObjectEncryptionEncValuesSupported(
-					requestObject.getRequestObjectEncryptionEncValuesSupported());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update request object settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateRequestObjectConfiguration(@Valid RequestObject requestObject) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration
+				.setRequestObjectSigningAlgValuesSupported(requestObject.getRequestObjectSigningAlgValuesSupported());
+		appConfiguration.setRequestObjectEncryptionAlgValuesSupported(
+				requestObject.getRequestObjectEncryptionAlgValuesSupported());
+		appConfiguration.setRequestObjectEncryptionEncValuesSupported(
+				requestObject.getRequestObjectEncryptionEncValuesSupported());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 }

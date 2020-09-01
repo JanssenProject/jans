@@ -24,6 +24,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.model.GluuAttribute;
+import org.gluu.oxauthconfigapi.exception.ApiException;
+import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -50,118 +52,93 @@ public class AttributeResource extends BaseResource {
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAttributes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-			@DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) {
-		try {
-			List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
-			if (status.equalsIgnoreCase(ApiConstants.ALL)) {
-				if (!pattern.isEmpty() && pattern.length() >= 2) {
-					attributes = attributeService.searchAttributes(pattern, limit);
-				} else {
-					attributes = attributeService.searchAttributes(limit);
-				}
-			} else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
-				if (!pattern.isEmpty() && pattern.length() >= 2) {
-					attributes = attributeService.findAttributes(pattern, limit, true);
-				} else {
-					attributes = attributeService.searchAttributes(limit, true);
-				}
-
-			} else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
-				if (!pattern.isEmpty() && pattern.length() >= 2) {
-					attributes = attributeService.findAttributes(pattern, limit, false);
-				} else {
-					attributes = attributeService.searchAttributes(limit, false);
-				}
+			@DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) throws Exception {
+		List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
+		if (status.equalsIgnoreCase(ApiConstants.ALL)) {
+			if (!pattern.isEmpty() && pattern.length() >= 2) {
+				attributes = attributeService.searchAttributes(pattern, limit);
+			} else {
+				attributes = attributeService.searchAttributes(limit);
 			}
-			return Response.ok(attributes).build();
-		} catch (Exception e) {
-			logger.error("Failed to fetch attributes " + e);
-			return getInternalServerError(e);
+		} else if (status.equalsIgnoreCase(ApiConstants.ACTIVE)) {
+			if (!pattern.isEmpty() && pattern.length() >= 2) {
+				attributes = attributeService.findAttributes(pattern, limit, true);
+			} else {
+				attributes = attributeService.searchAttributes(limit, true);
+			}
+
+		} else if (status.equalsIgnoreCase(ApiConstants.INACTIVE)) {
+			if (!pattern.isEmpty() && pattern.length() >= 2) {
+				attributes = attributeService.findAttributes(pattern, limit, false);
+			} else {
+				attributes = attributeService.searchAttributes(limit, false);
+			}
 		}
+		return Response.ok(attributes).build();
 	}
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		try {
-			GluuAttribute attribute = attributeService.getAttributeByInum(inum);
-			if (attribute == null) {
-				return getResourceNotFoundError();
-			}
-			return Response.ok(attribute).build();
-		} catch (Exception ex) {
-			logger.error("Failed to fetch  attribute by inum " + inum, ex);
-			return getInternalServerError(ex);
+	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+		GluuAttribute attribute = attributeService.getAttributeByInum(inum);
+		if (attribute == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
+		return Response.ok(attribute).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createAttribute(@Valid GluuAttribute attribute) {
-		try {
-			if (attribute.getName() == null) {
-				return getMissingAttributeError(AttributeNames.NAME);
-			}
-			if (attribute.getDisplayName() == null) {
-				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
-			}
-			String inum = attributeService.generateInumForNewAttribute();
-			attribute.setInum(inum);
-			attribute.setDn(attributeService.getDnForAttribute(inum));
-			attributeService.addAttribute(attribute);
-			GluuAttribute result = attributeService.getAttributeByInum(inum);
-			return Response.status(Response.Status.CREATED).entity(result).build();
-		} catch (Exception e) {
-			logger.error("Failed to create attribute", e);
-			return getInternalServerError(e);
+	public Response createAttribute(@Valid GluuAttribute attribute) throws ApiException {
+		if (attribute.getName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
 		}
-
+		if (attribute.getDisplayName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
+		}
+		String inum = attributeService.generateInumForNewAttribute();
+		attribute.setInum(inum);
+		attribute.setDn(attributeService.getDnForAttribute(inum));
+		attributeService.addAttribute(attribute);
+		GluuAttribute result = attributeService.getAttributeByInum(inum);
+		return Response.status(Response.Status.CREATED).entity(result).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateAttribute(@Valid GluuAttribute attribute) {
-		try {
-			String inum = attribute.getInum();
-			if (inum == null) {
-				return getResourceNotFoundError();
-			}
-			GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
-			if (existingAttribute == null) {
-				return getResourceNotFoundError();
-			}
-			if (attribute.getName() == null) {
-				return getMissingAttributeError(AttributeNames.NAME);
-			}
-			if (attribute.getDisplayName() == null) {
-				return getMissingAttributeError(AttributeNames.DISPLAY_NAME);
-			}
-			attribute.setInum(existingAttribute.getInum());
-			attribute.setBaseDn(attributeService.getDnForAttribute(inum));
-			attributeService.updateAttribute(attribute);
-			GluuAttribute result = attributeService.getAttributeByInum(inum);
-			return Response.ok(result).build();
-		} catch (Exception e) {
-			return getInternalServerError(e);
+	public Response updateAttribute(@Valid GluuAttribute attribute) throws ApiException {
+		String inum = attribute.getInum();
+		if (inum == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
+		GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
+		if (existingAttribute == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
+		}
+		if (attribute.getName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
+		}
+		if (attribute.getDisplayName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
+		}
+		attribute.setInum(existingAttribute.getInum());
+		attribute.setBaseDn(attributeService.getDnForAttribute(inum));
+		attributeService.updateAttribute(attribute);
+		GluuAttribute result = attributeService.getAttributeByInum(inum);
+		return Response.ok(result).build();
 	}
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		try {
-			GluuAttribute attribute = attributeService.getAttributeByInum(inum);
-			if (attribute != null) {
-				attributeService.removeAttribute(attribute);
-				return Response.noContent().build();
-			} else {
-				return getResourceNotFoundError();
-			}
-		} catch (Exception ex) {
-			logger.error("Failed to delete attribute", ex);
-			return getInternalServerError(ex);
+	public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+		GluuAttribute attribute = attributeService.getAttributeByInum(inum);
+		if (attribute != null) {
+			attributeService.removeAttribute(attribute);
+			return Response.noContent().build();
+		} else {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
 	}
 

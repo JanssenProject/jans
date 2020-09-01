@@ -3,6 +3,8 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -40,36 +42,26 @@ public class MetricsResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getMetricsConfiguration() {
-		try {
-			Metrics metrics = new Metrics();
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			if (appConfiguration != null) {
-				metrics.setMetricReporterEnabled(appConfiguration.getMetricReporterEnabled());
-				metrics.setMetricReporterKeepDataDays(appConfiguration.getMetricReporterKeepDataDays());
-				metrics.setMetricReporterInterval(appConfiguration.getMetricReporterInterval());
-			}
-			return Response.ok(metrics).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth metric configuration", ex);
-			return getInternalServerError(ex);
+	public Response getMetricsConfiguration() throws IOException {
+		Metrics metrics = new Metrics();
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		if (appConfiguration != null) {
+			metrics.setMetricReporterEnabled(appConfiguration.getMetricReporterEnabled());
+			metrics.setMetricReporterKeepDataDays(appConfiguration.getMetricReporterKeepDataDays());
+			metrics.setMetricReporterInterval(appConfiguration.getMetricReporterInterval());
 		}
+		return Response.ok(metrics).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateMetricsConfiguration(@Valid Metrics metrics) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setMetricReporterEnabled(metrics.getMetricReporterEnabled());
-			appConfiguration.setMetricReporterKeepDataDays(metrics.getMetricReporterKeepDataDays());
-			appConfiguration.setMetricReporterInterval(metrics.getMetricReporterInterval());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth metric  configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateMetricsConfiguration(@Valid Metrics metrics) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setMetricReporterEnabled(metrics.getMetricReporterEnabled());
+		appConfiguration.setMetricReporterKeepDataDays(metrics.getMetricReporterKeepDataDays());
+		appConfiguration.setMetricReporterInterval(metrics.getMetricReporterInterval());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

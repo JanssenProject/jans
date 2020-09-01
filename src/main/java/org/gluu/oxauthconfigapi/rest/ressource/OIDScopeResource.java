@@ -108,7 +108,7 @@ public class OIDScopeResource extends BaseResource {
 		}
 		Scope existingScope = scopeService.getScopeByInum(inum);
 		if (existingScope == null) {
-			return getResourceNotFoundError();
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
 		if (scope.getScopeType() == null) {
 			scope.setScopeType(ScopeType.OAUTH);
@@ -122,7 +122,6 @@ public class OIDScopeResource extends BaseResource {
 		Scope result = scopeService.getScopeByInum(inum);
 		return Response.ok(result).build();
 	}
-
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)

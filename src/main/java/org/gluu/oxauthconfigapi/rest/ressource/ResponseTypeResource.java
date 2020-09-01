@@ -3,6 +3,7 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -42,31 +43,21 @@ public class ResponseTypeResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getSupportedResponseTypes() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			Set<Set<ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
-			return Response.ok(responseTypesSupported).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth supported response types", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getSupportedResponseTypes() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		Set<Set<ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
+		return Response.ok(responseTypesSupported).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateSupportedResponseTypes(@Valid Set<Set<ResponseType>> responseTypeSet) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			Set<Set<ResponseType>> responseTypesSupported = Sets.newHashSet();
-			responseTypesSupported = responseTypeSet;
-			appConfiguration.setResponseTypesSupported(responseTypesSupported);
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth supported response types", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateSupportedResponseTypes(@Valid Set<Set<ResponseType>> responseTypeSet) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		Set<Set<ResponseType>> responseTypesSupported = Sets.newHashSet();
+		responseTypesSupported = responseTypeSet;
+		appConfiguration.setResponseTypesSupported(responseTypesSupported);
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

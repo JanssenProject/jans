@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -37,30 +39,20 @@ public class GrantTypeResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getGrantTypeConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			GrantTypes grantTypes = new GrantTypes();
-			grantTypes.setGrantTypesSupported(appConfiguration.getGrantTypesSupported());
-			return Response.ok(grantTypes).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth supported Grant Type configuration.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getGrantTypeConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		GrantTypes grantTypes = new GrantTypes();
+		grantTypes.setGrantTypesSupported(appConfiguration.getGrantTypesSupported());
+		return Response.ok(grantTypes).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateGrantTypeConfiguration(@Valid GrantTypes grantTypes) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setGrantTypesSupported(grantTypes.getGrantTypesSupported());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth supported Grant Type configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateGrantTypeConfiguration(@Valid GrantTypes grantTypes) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setGrantTypesSupported(grantTypes.getGrantTypesSupported());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

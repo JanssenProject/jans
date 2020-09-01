@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -23,43 +25,38 @@ import com.couchbase.client.core.message.ResponseStatus;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ExpirationNotificatorResource extends BaseResource {
-	
+
 	@Inject
 	Logger log;
-		
+
 	@Inject
 	JsonConfigurationService jsonConfigurationService;
-	
+
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getExpirationNotificatorConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			ExpirationNotificator expirationNotificator = new ExpirationNotificator();
-			expirationNotificator.setExpirationNotificatorEnabled(appConfiguration.getExpirationNotificatorEnabled());
-			expirationNotificator.setExpirationNotificatorMapSizeLimit(appConfiguration.getExpirationNotificatorMapSizeLimit());
-			expirationNotificator.setExpirationNotificatorIntervalInSeconds(appConfiguration.getExpirationNotificatorIntervalInSeconds());
-			return Response.ok(expirationNotificator).build();
-		}catch(Exception ex) {
-			log.error("Failed to retrieve Expiration Notificator configuration.", ex);
-			return getInternalServerError(ex);		
-		}
-	}	
-	
+	public Response getExpirationNotificatorConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		ExpirationNotificator expirationNotificator = new ExpirationNotificator();
+		expirationNotificator.setExpirationNotificatorEnabled(appConfiguration.getExpirationNotificatorEnabled());
+		expirationNotificator
+				.setExpirationNotificatorMapSizeLimit(appConfiguration.getExpirationNotificatorMapSizeLimit());
+		expirationNotificator.setExpirationNotificatorIntervalInSeconds(
+				appConfiguration.getExpirationNotificatorIntervalInSeconds());
+		return Response.ok(expirationNotificator).build();
+	}
+
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateExpirationNotificatorConfiguration(@Valid ExpirationNotificator expirationNotificator) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setExpirationNotificatorEnabled(expirationNotificator.getExpirationNotificatorEnabled());
-			appConfiguration.setExpirationNotificatorMapSizeLimit(expirationNotificator.getExpirationNotificatorMapSizeLimit());
-			appConfiguration.setExpirationNotificatorIntervalInSeconds(expirationNotificator.getExpirationNotificatorIntervalInSeconds());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		}catch(Exception ex) {
-			log.error("Failed to update Expiration Notificator configuration.", ex);
-			return getInternalServerError(ex);		
-		}
+	public Response updateExpirationNotificatorConfiguration(@Valid ExpirationNotificator expirationNotificator)
+			throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setExpirationNotificatorEnabled(expirationNotificator.getExpirationNotificatorEnabled());
+		appConfiguration
+				.setExpirationNotificatorMapSizeLimit(expirationNotificator.getExpirationNotificatorMapSizeLimit());
+		appConfiguration.setExpirationNotificatorIntervalInSeconds(
+				expirationNotificator.getExpirationNotificatorIntervalInSeconds());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }
