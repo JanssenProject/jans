@@ -153,7 +153,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	}
 
 	private boolean updateCustomUserData(AmazonSNS snsClient, String endpoint, CustomUserData newCustomUserData) throws IOException {
-		log.debug("Adding custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
+		log.info("Adding custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
 
 		// Load existing attributes
 		GetEndpointAttributesRequest getEndpointAttributesRequest = new GetEndpointAttributesRequest()
@@ -175,8 +175,16 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 
 		// Union existing app data with new app data
 		List<String> newAppUserData = new ArrayList<String>();
-		newAppUserData.addAll(customUserData.getAppUserData());
-		newAppUserData.addAll(newCustomUserData.getAppUserData());
+		if (customUserData.getAppUserData() != null) {
+			newAppUserData.addAll(customUserData.getAppUserData());
+		} else {
+			log.warn("Current custom app user data is empty");
+		}
+		if (newCustomUserData.getAppUserData() != null) {
+			newAppUserData.addAll(newCustomUserData.getAppUserData());
+		} else {
+			log.warn("New custom app user data is empty");
+		}
 		customUserData.setAppUserData(newAppUserData);
 		
 		// Update modification date
