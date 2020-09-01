@@ -1,22 +1,24 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
-import com.couchbase.client.core.message.ResponseStatus;
+import java.io.IOException;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauthconfigapi.rest.model.Logging;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxtrust.service.JsonConfigurationService;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
+import com.couchbase.client.core.message.ResponseStatus;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.LOGGING)
 @Produces(MediaType.APPLICATION_JSON)
@@ -27,8 +29,6 @@ public class LoggingResource {
 	JsonConfigurationService jsonConfigurationService;
 
 	@GET
-	@Operation(summary = "Retrieve logging settings")
-	@APIResponse(responseCode = "200", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class, required = true)))
 	public Response getLogging() {
 		try {
 			Logging logging = new Logging();
@@ -52,7 +52,6 @@ public class LoggingResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update logging settings")
 	public Response updateHero(@Valid Logging logging) {
 		AppConfiguration appConfiguration;
 		try {

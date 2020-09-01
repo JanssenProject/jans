@@ -36,37 +36,28 @@ import org.gluu.oxauthconfigapi.util.ApiConstants;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SubjectConfigurationResource extends BaseResource {
-	
+
 	@Inject
 	Logger log;
-		
+
 	@Inject
 	JsonConfigurationService jsonConfigurationService;
-	
+
 	@GET
-	@Operation(summary = "Retrieve Subject configuration properties.")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = SubjectConfiguration.class, required = true, description = "Success"))),
-			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = true, description = "Unauthorized"))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
-	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getSubjectConfiguration() {
 		try {
-			log.debug("SubjectConfigurationResource::getSubjectConfiguration() - Retrieve Subject configuration properties.");
-			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			SubjectConfiguration subjectConfiguration = new SubjectConfiguration();
 			subjectConfiguration.setSubjectTypesSupported(appConfiguration.getSubjectTypesSupported());
-			subjectConfiguration.setShareSubjectIdBetweenClientsWithSameSectorId(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId());
-			
+			subjectConfiguration.setShareSubjectIdBetweenClientsWithSameSectorId(
+					appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId());
 			return Response.ok(subjectConfiguration).build();
-	
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			log.error("Failed to retrieve subject configuration properties.", ex);
-			return getInternalServerError(ex);		
+			return getInternalServerError(ex);
 		}
 	}
-	
+
 	@PUT
 	@Operation(summary = "Update Subject configuration properties.")
 	@APIResponses(value = {
@@ -76,21 +67,16 @@ public class SubjectConfigurationResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateSubjectConfiguration(@Valid SubjectConfiguration subjectConfiguration) {
 		try {
-			log.debug("SubjectConfigurationResource::updateSubjectConfiguration() - Update Subject configuration properties.");
-			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			appConfiguration.setSubjectTypesSupported(subjectConfiguration.getSubjectTypesSupported());
-			appConfiguration.setShareSubjectIdBetweenClientsWithSameSectorId(subjectConfiguration.getShareSubjectIdBetweenClientsWithSameSectorId());
-			
-			//Update
+			appConfiguration.setShareSubjectIdBetweenClientsWithSameSectorId(
+					subjectConfiguration.getShareSubjectIdBetweenClientsWithSameSectorId());
+			// Update
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			
 			return Response.ok(ResponseStatus.SUCCESS).build();
-			
-	
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			log.error("Failed to update subject configuration properties.", ex);
-			return getInternalServerError(ex);		
+			return getInternalServerError(ex);
 		}
 	}
 }
