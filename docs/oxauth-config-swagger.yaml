@@ -91,8 +91,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partial update of oxAuth configuration properties.
-      description: Partial update of oxAuth configuration properties.
+      summary: Partial update of oxAuth Application configuration(AppConfiguration) properties.
+      description: Partial update of oxAuth AppConfiguration properties.
       operationId: patch-properties
       security:
         - oxAuth:

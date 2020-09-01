@@ -22,17 +22,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
-import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.service.ScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
@@ -53,10 +46,6 @@ public class OIDScopeResource extends BaseResource {
 	ScopeService scopeService;
 
 	@GET
-	@Operation(summary = "List of OpenID Connect Scopes")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -75,11 +64,6 @@ public class OIDScopeResource extends BaseResource {
 	}
 
 	@GET
-	@Operation(summary = "Get OpenId Connect Scope by Inum")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = OxAuthClient.class, required = false))),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdScopeByInum(@PathParam(ApiConstants.INUM) String inum) {
@@ -96,10 +80,6 @@ public class OIDScopeResource extends BaseResource {
 	}
 
 	@POST
-	@Operation(summary = "Create OpenId Connect Scope")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = Scope.class, required = true))),
-			@APIResponse(responseCode = "500", description = "Internal Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createOpenidScope(@Valid Scope scope) {
 		try {
@@ -130,12 +110,6 @@ public class OIDScopeResource extends BaseResource {
 	}
 
 	@PUT
-	@Operation(summary = "Update existing OpenId Connect Scope")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Scope.class)), description = "Success"),
-			@APIResponse(responseCode = "400", description = "Bad Request"),
-			@APIResponse(responseCode = "404", description = "Not Found"),
-			@APIResponse(responseCode = "500", description = "Server Error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateOpenIdConnectScope(@Valid Scope scope) {
 		try {
@@ -165,10 +139,6 @@ public class OIDScopeResource extends BaseResource {
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
-	@Operation(summary = "Delete OpenId Connect Scope ", description = "Delete an OpenId Connect Scope")
-	@APIResponses(value = { @APIResponse(responseCode = "200", description = "Success"),
-			@APIResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class, required = false))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {

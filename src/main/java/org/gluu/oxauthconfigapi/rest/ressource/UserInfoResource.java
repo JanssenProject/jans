@@ -13,22 +13,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxauthconfigapi.filters.ProtectedApi;
+import org.gluu.oxauthconfigapi.rest.model.UserInfo;
+import org.gluu.oxauthconfigapi.util.ApiConstants;
+import org.gluu.oxtrust.service.JsonConfigurationService;
 import org.slf4j.Logger;
 
 import com.couchbase.client.core.message.ResponseStatus;
-
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxtrust.service.JsonConfigurationService;
-import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.rest.model.ApiError;
-import org.gluu.oxauthconfigapi.rest.model.UserInfo;
-import org.gluu.oxauthconfigapi.util.ApiConstants;
 
 /**
  * @author Puja Sharma
@@ -41,62 +33,48 @@ public class UserInfoResource extends BaseResource {
 
 	@Inject
 	Logger log;
-	
+
 	@Inject
 	JsonConfigurationService jsonConfigurationService;
-	
+
 	@GET
-	@Operation(summary = "Retrieve user info configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserInfo.class, required = true))),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getUserInfoConfiguration() {
-		try {		
-			
-			log.debug("UserInfoResource::getUserInfoConfiguration() - Retrieve user info configuration");
+		try {
 			UserInfo userInfo = new UserInfo();
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			
 			userInfo.setUserInfoSigningAlgValuesSupported(appConfiguration.getUserInfoSigningAlgValuesSupported());
-			userInfo.setUserInfoEncryptionAlgValuesSupported(appConfiguration.getUserInfoEncryptionAlgValuesSupported());
-			userInfo.setUserInfoEncryptionEncValuesSupported(appConfiguration.getUserInfoEncryptionEncValuesSupported());
-			
+			userInfo.setUserInfoEncryptionAlgValuesSupported(
+					appConfiguration.getUserInfoEncryptionAlgValuesSupported());
+			userInfo.setUserInfoEncryptionEncValuesSupported(
+					appConfiguration.getUserInfoEncryptionEncValuesSupported());
+
 			return Response.ok(userInfo).build();
-			
-		}catch(Exception ex) {
+
+		} catch (Exception ex) {
 			log.error("Failed to retrieve user info configuration", ex);
-			return getInternalServerError(ex);					
+			return getInternalServerError(ex);
 		}
 	}
-	
-	
+
 	@PUT
-	@Operation(summary = "Update user info configuration")
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = Response.class, required = true, description = "Success"))),
-			@APIResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class, required = false)) , description = "Unauthorized"),
-			@APIResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Server error") })
-	@ProtectedApi(scopes = { WRITE_ACCESS })	
+	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateUserInfoConfiguration(@Valid UserInfo userInfo) {
 		try {
-			log.debug("UserInfoResource::updateUserInfoConfiguration() - Update user info configuration");
-			
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			
+
 			appConfiguration.setUserInfoSigningAlgValuesSupported(userInfo.getUserInfoSigningAlgValuesSupported());
-			appConfiguration.setUserInfoEncryptionAlgValuesSupported(userInfo.getUserInfoEncryptionAlgValuesSupported());;
-			appConfiguration.setUserInfoEncryptionEncValuesSupported(userInfo.getUserInfoEncryptionEncValuesSupported());
-			
-			//Update
+			appConfiguration
+					.setUserInfoEncryptionAlgValuesSupported(userInfo.getUserInfoEncryptionAlgValuesSupported());
+			appConfiguration
+					.setUserInfoEncryptionEncValuesSupported(userInfo.getUserInfoEncryptionEncValuesSupported());
+
 			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			
-			return Response.ok(ResponseStatus.SUCCESS).build();			
-			
-		}catch(Exception ex) {
+			return Response.ok(ResponseStatus.SUCCESS).build();
+		} catch (Exception ex) {
 			log.error("Failed to update user info configuration", ex);
-			return getInternalServerError(ex);				
+			return getInternalServerError(ex);
 		}
 	}
-		
+
 }
