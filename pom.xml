@@ -82,47 +82,11 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-smallrye-metrics</artifactId>
 		</dependency>
-		<!-- Jsonb -->
-<!-- 		<dependency>
-			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-resteasy-jsonb</artifactId>
-		</dependency> -->
 		<dependency>
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-resteasy-jackson</artifactId>
 		</dependency>
-		
-	<dependency>
-    <groupId>org.jboss.resteasy</groupId>
-    <artifactId>resteasy-jaxrs</artifactId>
-    <version>3.0.5.Final</version>
-</dependency>
 
-<dependency>
-    <groupId>org.jboss.resteasy</groupId>
-    <artifactId>jaxrs-api</artifactId>
-    <version>3.0.5.Final</version>
-</dependency>
-
-<!-- <dependency>
-    <groupId>org.jboss.resteasy</groupId>
-    <artifactId>resteasy-jaxb-provider</artifactId>
-    <version>3.0.5.Final</version>
-</dependency> -->
-
-<dependency>
-    <groupId>org.jboss.resteasy</groupId>
-    <artifactId>resteasy-jackson2-provider</artifactId>
-    <version>3.0.5.Final</version>
-</dependency>
-
-
- <dependency>
-    <groupId>com.fasterxml.jackson.jaxrs</groupId>
-    <artifactId>jackson-jaxrs-base</artifactId>
-    <version>2.11.2</version>
-</dependency>
-		
 		<!-- gluu dependencies -->
 		<dependency>
 			<groupId>org.gluu</groupId>
@@ -136,15 +100,31 @@
 					<artifactId>log4j-slf4j-impl</artifactId>
 					<groupId>org.apache.logging.log4j</groupId>
 				</exclusion>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-ldap</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-couchbase</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
@@ -158,15 +138,31 @@
 					<artifactId>log4j-slf4j-impl</artifactId>
 					<groupId>org.apache.logging.log4j</groupId>
 				</exclusion>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-hybrid</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
@@ -181,6 +177,10 @@
 					<artifactId>*</artifactId>
 					<groupId>org.jboss.resteasy</groupId>
 				</exclusion>
+                <exclusion>
+                    <artifactId>org.jboss.resteasy</artifactId>
+                    <groupId>resteasy-jackson2-provider</groupId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 
@@ -261,6 +261,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${surefire-plugin.version}</version>
 				<configuration>
+                    <systemPropertyVariables>
+                        <quarkus.http.test-port>8087</quarkus.http.test-port>
+                    </systemPropertyVariables>
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
 						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>

@@ -17,7 +17,6 @@ public class AuthConfigurationResourceTest {
     public void patchAppConfigurationProperty() {
         given()
                 .when()
-                //.contentType(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON_PATCH_JSON)
                 .header("Authorization", "Bearer 12345", null)
                 .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")

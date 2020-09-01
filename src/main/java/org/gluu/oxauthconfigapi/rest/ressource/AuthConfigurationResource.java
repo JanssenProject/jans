@@ -26,13 +26,12 @@ public class AuthConfigurationResource extends BaseResource {
 	JsonConfigurationService jsonConfigurationService;
 
 	@GET
-	@ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
 	public Response getAppConfiguration() {
 		try {
 			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 			JSONObject json = new JSONObject(appConfiguration);
 			return Response.ok(json).build();
-
 		} catch (Exception ex) {
 			log.error("Failed to retrieve Auth application configuration.", ex);
 			return getInternalServerError(ex);
@@ -40,23 +39,22 @@ public class AuthConfigurationResource extends BaseResource {
 	}
 
     @PATCH
-    //@Consumes({MediaType.APPLICATION_JSON_PATCH_JSON, MediaType.APPLICATION_JSON})
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response patchAppConfigurationProperty(@NotNull String requestString) {
-        System.out.println("=======================================================================");
-        System.out.println("\n\n requestString = " + requestString + "\n\n");
+        log.trace("=======================================================================");
+        log.trace("\n\n requestString = " + requestString + "\n\n");
         try {
             AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 
             final JSONObject jsonBefore = new JSONObject(appConfiguration);
-            System.out.println("\n\n appConfiguration_before = " + jsonBefore + "\n\n");
+            log.trace("\n\n appConfiguration_before = " + jsonBefore + "\n\n");
 
             appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
 
             JSONObject jsonAfter = new JSONObject(appConfiguration);
-            System.out.println("\n\n appConfiguration_after = " + jsonAfter + "\n\n");
-            System.out.println("=======================================================================");
+            log.trace("\n\n appConfiguration_after = " + jsonAfter + "\n\n");
+            log.trace("=======================================================================");
 
             jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 
