@@ -18,7 +18,7 @@ Feature: Verify Auth configuration endpoint
     And  header Authorization = 'Bearer ' + accessToken
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
-    And request [ {'op':'replace', 'path': '/loggingLevel', 'value': 'DEBUG' } ]
+    And request {"[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]"} 
 	Then print request
     When method PATCH
     Then status 200
