@@ -1,16 +1,7 @@
 package org.gluu.oxauthconfigapi;
 
-import java.lang.annotation.Annotation;
-import java.util.Properties;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.quarkus.runtime.ShutdownEvent;
+import io.quarkus.runtime.StartupEvent;
 import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauthconfigapi.configuration.ConfigurationFactory;
 import org.gluu.oxtrust.service.ApplicationFactory;
@@ -26,8 +17,15 @@ import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
-import io.quarkus.runtime.ShutdownEvent;
-import io.quarkus.runtime.StartupEvent;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.lang.annotation.Annotation;
+import java.util.Properties;
 
 @ApplicationScoped
 public class OxauthConfigApiApplication {
@@ -77,9 +75,8 @@ public class OxauthConfigApiApplication {
 				.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory
 				.createEntryManager(connectionProperties);
-		logger.debug("Created {}: {} with operation service: {}",
-				new Object[] { ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, persistenceEntryManager,
-						persistenceEntryManager.getOperationService() });
+		logger.debug("Created {}: {} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
+                persistenceEntryManager, persistenceEntryManager.getOperationService());
 		return persistenceEntryManager;
 	}
 
