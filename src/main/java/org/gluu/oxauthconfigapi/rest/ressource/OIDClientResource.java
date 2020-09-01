@@ -86,7 +86,7 @@ public class OIDClientResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) String inum) {
+	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {
 			OxAuthClient client = clientService.getClientByInum(inum);
 			if (client == null) {
@@ -165,8 +165,7 @@ public class OIDClientResource extends BaseResource {
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES)
-	public Response addScopesToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
-			@NotNull JsonObject object) {
+	public Response addScopesToClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull JsonObject object) {
 		try {
 			if (inum == null) {
 				return getMissingAttributeError(AttributeNames.INUM);
@@ -207,7 +206,7 @@ public class OIDClientResource extends BaseResource {
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH + ApiConstants.GRANT_TYPES)
-	public Response addGrantTypeToClient(@NotNull @PathParam(ApiConstants.INUM) @NotNull String inum,
+	public Response addGrantTypeToClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
 			@NotNull JsonObject object) {
 		try {
 			if (inum == null) {
