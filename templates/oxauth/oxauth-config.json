@@ -197,6 +197,8 @@
     "requireRequestUriRegistration":false,
     "allowPostLogoutRedirectWithoutValidation":false,
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
+    "requestUriHashVerificationEnabled": false,
+    "idTokenFilterClaimsBasedOnAccessToken": false,
     "opPolicyUri":"http://ox.gluu.org/doku.php?id=oxauth:policy",
     "opTosUri":"http://ox.gluu.org/doku.php?id=oxauth:tos",
     "authorizationCodeLifetime":60,
