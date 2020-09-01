@@ -40,22 +40,23 @@ public class AuthConfigurationResource extends BaseResource {
 	}
 
     @PATCH
-    @Consumes({MediaType.APPLICATION_JSON_PATCH_JSON, MediaType.APPLICATION_JSON})
+    //@Consumes({MediaType.APPLICATION_JSON_PATCH_JSON, MediaType.APPLICATION_JSON})
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response patchAppConfigurationProperty(@NotNull String requestString) {
-        log.debug("=======================================================================");
-        log.debug("\n\n requestString = " + requestString + "\n\n");
+        System.out.println("=======================================================================");
+        System.out.println("\n\n requestString = " + requestString + "\n\n");
         try {
             AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 
             final JSONObject jsonBefore = new JSONObject(appConfiguration);
-            log.debug("\n\n appConfiguration_before = " + jsonBefore + "\n\n");
+            System.out.println("\n\n appConfiguration_before = " + jsonBefore + "\n\n");
 
             appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
 
             JSONObject jsonAfter = new JSONObject(appConfiguration);
-            log.debug("\n\n appConfiguration_after = " + jsonAfter + "\n\n");
-            log.debug("=======================================================================");
+            System.out.println("\n\n appConfiguration_after = " + jsonAfter + "\n\n");
+            System.out.println("=======================================================================");
 
             jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 
