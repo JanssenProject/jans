@@ -1,5 +1,6 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,28 +33,19 @@ public class CorsConfigurationFilterResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getCorsConfigurationFilters() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
-			return Response.ok(corsConfigurationFilters).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth Cors configuration filters.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getCorsConfigurationFilters() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		List<CorsConfigurationFilter> corsConfigurationFilters = appConfiguration.getCorsConfigurationFilters();
+		return Response.ok(corsConfigurationFilters).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateCorsConfigurationFilters(@Valid List<CorsConfigurationFilter> corsConfigurationFilters) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.getCorsConfigurationFilters().clear();
-			appConfiguration.getCorsConfigurationFilters().addAll(corsConfigurationFilters);
-			return Response.ok(corsConfigurationFilters).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth Cors configuration filters.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateCorsConfigurationFilters(@Valid List<CorsConfigurationFilter> corsConfigurationFilters)
+			throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.getCorsConfigurationFilters().clear();
+		appConfiguration.getCorsConfigurationFilters().addAll(corsConfigurationFilters);
+		return Response.ok(corsConfigurationFilters).build();
 	}
 }

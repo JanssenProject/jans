@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -32,47 +34,35 @@ public class SessionIdResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getSessionIdConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			SessionId sessionId = new SessionId();
-			sessionId.setSessionIdUnusedLifetime(appConfiguration.getSessionIdUnusedLifetime());
-			sessionId.setSessionIdUnauthenticatedUnusedLifetime(
-					appConfiguration.getSessionIdUnauthenticatedUnusedLifetime());
-			sessionId.setSessionIdLifetime(appConfiguration.getSessionIdLifetime());
-			sessionId.setSessionIdEnabled(appConfiguration.getSessionIdEnabled());
-			sessionId.setChangeSessionIdOnAuthentication(appConfiguration.getChangeSessionIdOnAuthentication());
-			sessionId.setSessionIdRequestParameterEnabled(appConfiguration.getSessionIdRequestParameterEnabled());
-			sessionId.setSessionIdPersistOnPromptNone(appConfiguration.getSessionIdPersistOnPromptNone());
-			sessionId.setServerSessionIdLifetime(appConfiguration.getServerSessionIdLifetime());
-			return Response.ok(sessionId).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to retrieve session id config settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getSessionIdConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		SessionId sessionId = new SessionId();
+		sessionId.setSessionIdUnusedLifetime(appConfiguration.getSessionIdUnusedLifetime());
+		sessionId.setSessionIdUnauthenticatedUnusedLifetime(
+				appConfiguration.getSessionIdUnauthenticatedUnusedLifetime());
+		sessionId.setSessionIdLifetime(appConfiguration.getSessionIdLifetime());
+		sessionId.setSessionIdEnabled(appConfiguration.getSessionIdEnabled());
+		sessionId.setChangeSessionIdOnAuthentication(appConfiguration.getChangeSessionIdOnAuthentication());
+		sessionId.setSessionIdRequestParameterEnabled(appConfiguration.getSessionIdRequestParameterEnabled());
+		sessionId.setSessionIdPersistOnPromptNone(appConfiguration.getSessionIdPersistOnPromptNone());
+		sessionId.setServerSessionIdLifetime(appConfiguration.getServerSessionIdLifetime());
+		return Response.ok(sessionId).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateSessionIdConfiguration(@Valid SessionId sessionId) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setSessionIdUnusedLifetime(sessionId.getSessionIdUnusedLifetime());
-			appConfiguration
-					.setSessionIdUnauthenticatedUnusedLifetime(sessionId.getSessionIdUnauthenticatedUnusedLifetime());
-			appConfiguration.setSessionIdLifetime(sessionId.getSessionIdLifetime());
-			appConfiguration.setSessionIdEnabled(sessionId.getSessionIdEnabled());
-			appConfiguration.setChangeSessionIdOnAuthentication(sessionId.getChangeSessionIdOnAuthentication());
-			appConfiguration.setSessionIdRequestParameterEnabled(sessionId.getSessionIdRequestParameterEnabled());
-			appConfiguration.setSessionIdPersistOnPromptNone(sessionId.getSessionIdPersistOnPromptNone());
-			appConfiguration.setServerSessionIdLifetime(sessionId.getServerSessionIdLifetime());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to retrieve session id config settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateSessionIdConfiguration(@Valid SessionId sessionId) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setSessionIdUnusedLifetime(sessionId.getSessionIdUnusedLifetime());
+		appConfiguration
+				.setSessionIdUnauthenticatedUnusedLifetime(sessionId.getSessionIdUnauthenticatedUnusedLifetime());
+		appConfiguration.setSessionIdLifetime(sessionId.getSessionIdLifetime());
+		appConfiguration.setSessionIdEnabled(sessionId.getSessionIdEnabled());
+		appConfiguration.setChangeSessionIdOnAuthentication(sessionId.getChangeSessionIdOnAuthentication());
+		appConfiguration.setSessionIdRequestParameterEnabled(sessionId.getSessionIdRequestParameterEnabled());
+		appConfiguration.setSessionIdPersistOnPromptNone(sessionId.getSessionIdPersistOnPromptNone());
+		appConfiguration.setServerSessionIdLifetime(sessionId.getServerSessionIdLifetime());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 }

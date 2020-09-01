@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -32,34 +34,24 @@ public class PairwiseResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getPairwiseConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			Pairwise pairwise = new Pairwise();
-			pairwise.setPairwiseIdType(appConfiguration.getPairwiseIdType());
-			pairwise.setPairwiseCalculationKey(appConfiguration.getPairwiseCalculationKey());
-			pairwise.setPairwiseCalculationSalt(appConfiguration.getPairwiseCalculationSalt());
-			return Response.ok(pairwise).build();
-		} catch (Exception ex) {
-			log.error("Failed to fetch oxAuth Pairwise configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getPairwiseConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		Pairwise pairwise = new Pairwise();
+		pairwise.setPairwiseIdType(appConfiguration.getPairwiseIdType());
+		pairwise.setPairwiseCalculationKey(appConfiguration.getPairwiseCalculationKey());
+		pairwise.setPairwiseCalculationSalt(appConfiguration.getPairwiseCalculationSalt());
+		return Response.ok(pairwise).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updatePairwiseConfiguration(@Valid Pairwise pairwise) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setPairwiseIdType(pairwise.getPairwiseIdType());
-			appConfiguration.setPairwiseCalculationKey(pairwise.getPairwiseCalculationKey());
-			appConfiguration.setPairwiseCalculationSalt(pairwise.getPairwiseCalculationSalt());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth Pairwise configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updatePairwiseConfiguration(@Valid Pairwise pairwise) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setPairwiseIdType(pairwise.getPairwiseIdType());
+		appConfiguration.setPairwiseCalculationKey(pairwise.getPairwiseCalculationKey());
+		appConfiguration.setPairwiseCalculationSalt(pairwise.getPairwiseCalculationSalt());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

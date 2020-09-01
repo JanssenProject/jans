@@ -3,6 +3,8 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -39,62 +41,52 @@ public class BackchannelResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getBackchannelConfiguration() {
-		try {
-			Backchannel backchannel = new Backchannel();
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			backchannel.setBackchannelClientId(appConfiguration.getBackchannelClientId());
-			backchannel.setBackchannelRedirectUri(appConfiguration.getBackchannelRedirectUri());
-			backchannel.setBackchannelAuthenticationEndpoint(appConfiguration.getBackchannelAuthenticationEndpoint());
-			backchannel.setBackchannelDeviceRegistrationEndpoint(
-					appConfiguration.getBackchannelDeviceRegistrationEndpoint());
-			backchannel.setBackchannelTokenDeliveryModesSupported(
-					appConfiguration.getBackchannelTokenDeliveryModesSupported());
-			backchannel.setBackchannelAuthenticationRequestSigningAlgValuesSupported(
-					appConfiguration.getBackchannelAuthenticationRequestSigningAlgValuesSupported());
-			backchannel.setBackchannelUserCodeParameterSupported(
-					appConfiguration.getBackchannelUserCodeParameterSupported());
-			backchannel.setBackchannelBindingMessagePattern(appConfiguration.getBackchannelBindingMessagePattern());
-			backchannel.setBackchannelAuthenticationResponseExpiresIn(
-					appConfiguration.getBackchannelAuthenticationResponseExpiresIn());
-			backchannel.setBackchannelAuthenticationResponseInterval(
-					appConfiguration.getBackchannelAuthenticationResponseInterval());
-			backchannel.setBackchannelLoginHintClaims(appConfiguration.getBackchannelLoginHintClaims());
-			return Response.ok(backchannel).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth Backchannel configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getBackchannelConfiguration() throws IOException {
+		Backchannel backchannel = new Backchannel();
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		backchannel.setBackchannelClientId(appConfiguration.getBackchannelClientId());
+		backchannel.setBackchannelRedirectUri(appConfiguration.getBackchannelRedirectUri());
+		backchannel.setBackchannelAuthenticationEndpoint(appConfiguration.getBackchannelAuthenticationEndpoint());
+		backchannel
+				.setBackchannelDeviceRegistrationEndpoint(appConfiguration.getBackchannelDeviceRegistrationEndpoint());
+		backchannel.setBackchannelTokenDeliveryModesSupported(
+				appConfiguration.getBackchannelTokenDeliveryModesSupported());
+		backchannel.setBackchannelAuthenticationRequestSigningAlgValuesSupported(
+				appConfiguration.getBackchannelAuthenticationRequestSigningAlgValuesSupported());
+		backchannel
+				.setBackchannelUserCodeParameterSupported(appConfiguration.getBackchannelUserCodeParameterSupported());
+		backchannel.setBackchannelBindingMessagePattern(appConfiguration.getBackchannelBindingMessagePattern());
+		backchannel.setBackchannelAuthenticationResponseExpiresIn(
+				appConfiguration.getBackchannelAuthenticationResponseExpiresIn());
+		backchannel.setBackchannelAuthenticationResponseInterval(
+				appConfiguration.getBackchannelAuthenticationResponseInterval());
+		backchannel.setBackchannelLoginHintClaims(appConfiguration.getBackchannelLoginHintClaims());
+		return Response.ok(backchannel).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateBackchannelConfiguration(@Valid Backchannel backchannel) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setBackchannelClientId(backchannel.getBackchannelClientId());
-			appConfiguration.setBackchannelRedirectUri(backchannel.getBackchannelRedirectUri());
-			appConfiguration.setBackchannelAuthenticationEndpoint(backchannel.getBackchannelAuthenticationEndpoint());
-			appConfiguration
-					.setBackchannelDeviceRegistrationEndpoint(backchannel.getBackchannelDeviceRegistrationEndpoint());
-			appConfiguration
-					.setBackchannelTokenDeliveryModesSupported(backchannel.getBackchannelTokenDeliveryModesSupported());
-			appConfiguration.setBackchannelAuthenticationRequestSigningAlgValuesSupported(
-					backchannel.getBackchannelAuthenticationRequestSigningAlgValuesSupported());
-			appConfiguration
-					.setBackchannelUserCodeParameterSupported(backchannel.getBackchannelUserCodeParameterSupported());
-			appConfiguration.setBackchannelBindingMessagePattern(backchannel.getBackchannelBindingMessagePattern());
-			appConfiguration.setBackchannelAuthenticationResponseExpiresIn(
-					backchannel.getBackchannelAuthenticationResponseExpiresIn());
-			appConfiguration.setBackchannelAuthenticationResponseInterval(
-					backchannel.getBackchannelAuthenticationResponseInterval());
-			appConfiguration.setBackchannelLoginHintClaims(backchannel.getBackchannelLoginHintClaims());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update oxAuth Backchannel configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateBackchannelConfiguration(@Valid Backchannel backchannel) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setBackchannelClientId(backchannel.getBackchannelClientId());
+		appConfiguration.setBackchannelRedirectUri(backchannel.getBackchannelRedirectUri());
+		appConfiguration.setBackchannelAuthenticationEndpoint(backchannel.getBackchannelAuthenticationEndpoint());
+		appConfiguration
+				.setBackchannelDeviceRegistrationEndpoint(backchannel.getBackchannelDeviceRegistrationEndpoint());
+		appConfiguration
+				.setBackchannelTokenDeliveryModesSupported(backchannel.getBackchannelTokenDeliveryModesSupported());
+		appConfiguration.setBackchannelAuthenticationRequestSigningAlgValuesSupported(
+				backchannel.getBackchannelAuthenticationRequestSigningAlgValuesSupported());
+		appConfiguration
+				.setBackchannelUserCodeParameterSupported(backchannel.getBackchannelUserCodeParameterSupported());
+		appConfiguration.setBackchannelBindingMessagePattern(backchannel.getBackchannelBindingMessagePattern());
+		appConfiguration.setBackchannelAuthenticationResponseExpiresIn(
+				backchannel.getBackchannelAuthenticationResponseExpiresIn());
+		appConfiguration.setBackchannelAuthenticationResponseInterval(
+				backchannel.getBackchannelAuthenticationResponseInterval());
+		appConfiguration.setBackchannelLoginHintClaims(backchannel.getBackchannelLoginHintClaims());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

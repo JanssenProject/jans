@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -32,36 +34,26 @@ public class KeyRegenerationResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getKeyRegenerationConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			KeyRegenerationConfiguration keyRegenerationConfiguration = new KeyRegenerationConfiguration();
-			keyRegenerationConfiguration.setKeyRegenerationEnabled(appConfiguration.getKeyRegenerationEnabled());
-			keyRegenerationConfiguration.setKeyRegenerationInterval(appConfiguration.getKeyRegenerationInterval());
-			keyRegenerationConfiguration.setDefaultSignatureAlgorithm(appConfiguration.getDefaultSignatureAlgorithm());
-			return Response.ok(keyRegenerationConfiguration).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve Key regeneration configuration.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getKeyRegenerationConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		KeyRegenerationConfiguration keyRegenerationConfiguration = new KeyRegenerationConfiguration();
+		keyRegenerationConfiguration.setKeyRegenerationEnabled(appConfiguration.getKeyRegenerationEnabled());
+		keyRegenerationConfiguration.setKeyRegenerationInterval(appConfiguration.getKeyRegenerationInterval());
+		keyRegenerationConfiguration.setDefaultSignatureAlgorithm(appConfiguration.getDefaultSignatureAlgorithm());
+		return Response.ok(keyRegenerationConfiguration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateKeyRegenerationConfiguration(
-			@Valid KeyRegenerationConfiguration keyRegenerationConfiguration) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setKeyRegenerationEnabled(keyRegenerationConfiguration.getKeyRegenerationEnabled());
-			appConfiguration.setKeyRegenerationInterval(keyRegenerationConfiguration.getKeyRegenerationInterval());
-			appConfiguration.setDefaultSignatureAlgorithm(keyRegenerationConfiguration.getDefaultSignatureAlgorithm());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
+	public Response updateKeyRegenerationConfiguration(@Valid KeyRegenerationConfiguration keyRegenerationConfiguration)
+			throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setKeyRegenerationEnabled(keyRegenerationConfiguration.getKeyRegenerationEnabled());
+		appConfiguration.setKeyRegenerationInterval(keyRegenerationConfiguration.getKeyRegenerationInterval());
+		appConfiguration.setDefaultSignatureAlgorithm(keyRegenerationConfiguration.getDefaultSignatureAlgorithm());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 
-		} catch (Exception ex) {
-			log.error("Failed to update Key regeneration configuration.", ex);
-			return getInternalServerError(ex);
-		}
 	}
 
 }

@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -37,40 +39,27 @@ public class TokenConfigurationResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getTokenConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			TokenConfiguration tokenConfiguration = new TokenConfiguration();
-			tokenConfiguration.setPersistRefreshTokenInLdap(appConfiguration.getPersistRefreshTokenInLdap());
-			tokenConfiguration.setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-			tokenConfiguration.setRefreshTokenLifetime(appConfiguration.getRefreshTokenLifetime());
-			tokenConfiguration.setAccessTokenLifetime(appConfiguration.getAccessTokenLifetime());
-
-			return Response.ok(tokenConfiguration).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to retrieve Token configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getTokenConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		TokenConfiguration tokenConfiguration = new TokenConfiguration();
+		tokenConfiguration.setPersistRefreshTokenInLdap(appConfiguration.getPersistRefreshTokenInLdap());
+		tokenConfiguration.setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
+		tokenConfiguration.setRefreshTokenLifetime(appConfiguration.getRefreshTokenLifetime());
+		tokenConfiguration.setAccessTokenLifetime(appConfiguration.getAccessTokenLifetime());
+		return Response.ok(tokenConfiguration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateTokenConfiguration(@Valid TokenConfiguration tokenConfiguration) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setPersistRefreshTokenInLdap(tokenConfiguration.getPersistRefreshTokenInLdap());
-			appConfiguration.setAuthorizationCodeLifetime(tokenConfiguration.getAuthorizationCodeLifetime());
-			appConfiguration.setRefreshTokenLifetime(tokenConfiguration.getRefreshTokenLifetime());
-			appConfiguration.setAccessTokenLifetime(tokenConfiguration.getAccessTokenLifetime());
-			// Update
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to update Token configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateTokenConfiguration(@Valid TokenConfiguration tokenConfiguration) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setPersistRefreshTokenInLdap(tokenConfiguration.getPersistRefreshTokenInLdap());
+		appConfiguration.setAuthorizationCodeLifetime(tokenConfiguration.getAuthorizationCodeLifetime());
+		appConfiguration.setRefreshTokenLifetime(tokenConfiguration.getRefreshTokenLifetime());
+		appConfiguration.setAccessTokenLifetime(tokenConfiguration.getAccessTokenLifetime());
+		// Update
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

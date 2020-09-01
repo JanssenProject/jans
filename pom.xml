@@ -66,11 +66,6 @@
 			<groupId>io.quarkus</groupId>
 			<artifactId>quarkus-rest-client</artifactId>
 		</dependency>
-		<!-- OPEN API via Swagger 2 -->
-		<dependency>
-			<groupId>io.quarkus</groupId>
-			<artifactId>quarkus-smallrye-openapi</artifactId>
-		</dependency>
 		<!-- Health Check -->
 		<dependency>
 			<groupId>io.quarkus</groupId>

@@ -36,30 +36,18 @@ public class AuthenticationMethodResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getDefaultAuthenticationMethod() {
-		try {
-			AuthenticationMethod authenticationMethod = new AuthenticationMethod();
-			authenticationMethod.setDefaultAcr(this.configurationService.getConfiguration().getAuthenticationMode());
-			authenticationMethod
-					.setOxtrustAcr(this.configurationService.getConfiguration().getOxTrustAuthenticationMode());
-			return Response.ok(authenticationMethod).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve oxAuth default authentication configuration.", ex);
-			return getInternalServerError(ex);
-		}
+		AuthenticationMethod authenticationMethod = new AuthenticationMethod();
+		authenticationMethod.setDefaultAcr(this.configurationService.getConfiguration().getAuthenticationMode());
+		authenticationMethod.setOxtrustAcr(this.configurationService.getConfiguration().getOxTrustAuthenticationMode());
+		return Response.ok(authenticationMethod).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
-		try {
-			this.configurationService.getConfiguration().setAuthenticationMode(authenticationMethod.getDefaultAcr());
-			this.configurationService.getConfiguration()
-					.setOxTrustAuthenticationMode(authenticationMethod.getOxtrustAcr());
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update default authentication method configuration", ex);
-			return getInternalServerError(ex);
-		}
+		this.configurationService.getConfiguration().setAuthenticationMode(authenticationMethod.getDefaultAcr());
+		this.configurationService.getConfiguration().setOxTrustAuthenticationMode(authenticationMethod.getOxtrustAcr());
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

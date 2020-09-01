@@ -3,6 +3,8 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -39,34 +41,24 @@ public class IdTokenResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getIdTokenConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			IdToken idToken = new IdToken();
-			idToken.setIdTokenSigningAlgValuesSupported(appConfiguration.getIdTokenSigningAlgValuesSupported());
-			idToken.setIdTokenEncryptionAlgValuesSupported(appConfiguration.getIdTokenEncryptionAlgValuesSupported());
-			idToken.setIdTokenEncryptionEncValuesSupported(appConfiguration.getIdTokenEncryptionEncValuesSupported());
-			return Response.ok(idToken).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve idToken config settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getIdTokenConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		IdToken idToken = new IdToken();
+		idToken.setIdTokenSigningAlgValuesSupported(appConfiguration.getIdTokenSigningAlgValuesSupported());
+		idToken.setIdTokenEncryptionAlgValuesSupported(appConfiguration.getIdTokenEncryptionAlgValuesSupported());
+		idToken.setIdTokenEncryptionEncValuesSupported(appConfiguration.getIdTokenEncryptionEncValuesSupported());
+		return Response.ok(idToken).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateIdTokenConfiguration(@Valid IdToken idToken) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setIdTokenSigningAlgValuesSupported(idToken.getIdTokenSigningAlgValuesSupported());
-			appConfiguration.setIdTokenEncryptionAlgValuesSupported(idToken.getIdTokenEncryptionAlgValuesSupported());
-			appConfiguration.setIdTokenEncryptionEncValuesSupported(idToken.getIdTokenEncryptionEncValuesSupported());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update idToken config settings", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateIdTokenConfiguration(@Valid IdToken idToken) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setIdTokenSigningAlgValuesSupported(idToken.getIdTokenSigningAlgValuesSupported());
+		appConfiguration.setIdTokenEncryptionAlgValuesSupported(idToken.getIdTokenEncryptionAlgValuesSupported());
+		appConfiguration.setIdTokenEncryptionEncValuesSupported(idToken.getIdTokenEncryptionEncValuesSupported());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

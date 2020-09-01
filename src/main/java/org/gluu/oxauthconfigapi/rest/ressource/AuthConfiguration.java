@@ -39,36 +39,24 @@ public class AuthConfiguration extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getAppConfiguration() {
-		try {
-
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			JsonObject jsonObject = createJsonObject(appConfiguration);
-			return Response.ok(jsonObject).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to retrieve Auth application configuration.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getAppConfiguration() throws Exception {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		JsonObject jsonObject = createJsonObject(appConfiguration);
+		return Response.ok(jsonObject).build();
 	}
 
 	@PATCH
 	@Path(ApiConstants.JSON_KEY_PATH)
 	public Response patchAppConfigurationProperty(@NotNull @PathParam(ApiConstants.JSON_KEY) String jsonKey,
-			@NotNull JsonObject jsonObject) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			JsonObject appConfigJsonObject = createJsonObject(appConfiguration);
-			JsonValue jsonValue = getJsonValue(jsonKey, jsonObject);
-			// Apply patch
-			JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
-			JsonPatch jsonPatch = jsonPatchBuilder.replace("/" + jsonKey, jsonValue).build();
-			appConfigJsonObject = jsonPatch.apply(appConfigJsonObject);
-			return Response.ok(jsonObject).build();
-		} catch (Exception ex) {
-			log.error("Failed to update Auth application configuration property.", ex);
-			return getInternalServerError(ex);
-		}
+			@NotNull JsonObject jsonObject) throws Exception {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		JsonObject appConfigJsonObject = createJsonObject(appConfiguration);
+		JsonValue jsonValue = getJsonValue(jsonKey, jsonObject);
+		// Apply patch
+		JsonPatchBuilder jsonPatchBuilder = Json.createPatchBuilder();
+		JsonPatch jsonPatch = jsonPatchBuilder.replace("/" + jsonKey, jsonValue).build();
+		appConfigJsonObject = jsonPatch.apply(appConfigJsonObject);
+		return Response.ok(jsonObject).build();
 	}
 
 	@SuppressWarnings("resource")

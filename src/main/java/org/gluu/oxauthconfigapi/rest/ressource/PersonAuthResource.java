@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response;
 
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
+import org.gluu.oxauthconfigapi.exception.ApiException;
+import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -50,105 +52,80 @@ public class PersonAuthResource extends BaseResource {
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAttributes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-		try {
-			List<CustomScript> customScripts = new ArrayList<CustomScript>();
-			if (!pattern.isEmpty() && pattern.length() >= 2) {
-				customScripts = customScriptService.findCustomAuthScripts(pattern, limit);
-			} else {
-				customScripts = customScriptService.findCustomAuthScripts(limit);
-			}
-			return Response.ok(customScripts).build();
-		} catch (Exception e) {
-			logger.error("Failed to fetch attributes " + e);
-			return getInternalServerError(e);
+		List<CustomScript> customScripts = new ArrayList<CustomScript>();
+		if (!pattern.isEmpty() && pattern.length() >= 2) {
+			customScripts = customScriptService.findCustomAuthScripts(pattern, limit);
+		} else {
+			customScripts = customScriptService.findCustomAuthScripts(limit);
 		}
+		return Response.ok(customScripts).build();
 	}
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getAuthScriptByInum(@PathParam(ApiConstants.INUM) String inum) {
-		try {
-			CustomScript attribute = customScriptService.getScriptByInum(inum);
-			if (attribute == null) {
-				return getResourceNotFoundError();
-			}
-			return Response.ok(attribute).build();
-		} catch (Exception ex) {
-			logger.error("Failed to fetch  Person Authentication Script by inum " + inum, ex);
-			return getInternalServerError(ex);
+	public Response getAuthScriptByInum(@PathParam(ApiConstants.INUM) String inum) throws ApiException {
+		CustomScript attribute = customScriptService.getScriptByInum(inum);
+		if (attribute == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
+		return Response.ok(attribute).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createPersonScript(@Valid CustomScript customScript) {
-		try {
-			if (customScript.getName() == null) {
-				return getMissingAttributeError(AttributeNames.NAME);
-			}
-			if (customScript.getDescription() == null) {
-				return getMissingAttributeError(AttributeNames.DESCRIPTION);
-			}
-			String inum = INumGenerator.generate(2);
-			customScript.setInum(inum);
-			customScript.setDn(customScriptService.buildDn(inum));
-			customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
-			customScriptService.add(customScript);
-			CustomScript result = customScriptService.getScriptByInum(inum);
-			return Response.status(Response.Status.CREATED).entity(result).build();
-		} catch (Exception e) {
-			logger.error("Failed to create person script", e);
-			return getInternalServerError(e);
+	public Response createPersonScript(@Valid CustomScript customScript) throws ApiException {
+		if (customScript.getName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
 		}
-
+		if (customScript.getDescription() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
+		}
+		String inum = INumGenerator.generate(2);
+		customScript.setInum(inum);
+		customScript.setDn(customScriptService.buildDn(inum));
+		customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
+		customScriptService.add(customScript);
+		CustomScript result = customScriptService.getScriptByInum(inum);
+		return Response.status(Response.Status.CREATED).entity(result).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updatePersonScript(@Valid CustomScript customScript) {
-		try {
-			String inum = customScript.getInum();
-			if (inum == null) {
-				return getResourceNotFoundError();
-			}
-			if (customScript.getName() == null) {
-				return getMissingAttributeError(AttributeNames.NAME);
-			}
-			if (customScript.getDescription() == null) {
-				return getMissingAttributeError(AttributeNames.DESCRIPTION);
-			}
-			CustomScript existingScript = customScriptService.getScriptByInum(inum);
-			if (existingScript == null) {
-				return getResourceNotFoundError();
-			}
-			customScript.setInum(existingScript.getInum());
-			customScript.setDn(existingScript.getDn());
-			customScript.setBaseDn(existingScript.getBaseDn());
-			customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
-			customScriptService.update(customScript);
-			CustomScript result = customScriptService.getScriptByInum(inum);
-			return Response.ok(result).build();
-		} catch (Exception e) {
-			return getInternalServerError(e);
+	public Response updatePersonScript(@Valid CustomScript customScript) throws ApiException {
+		String inum = customScript.getInum();
+		if (inum == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
+		if (customScript.getName() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
+		}
+		if (customScript.getDescription() == null) {
+			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
+		}
+		CustomScript existingScript = customScriptService.getScriptByInum(inum);
+		if (existingScript == null) {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
+		}
+		customScript.setInum(existingScript.getInum());
+		customScript.setDn(existingScript.getDn());
+		customScript.setBaseDn(existingScript.getBaseDn());
+		customScript.setScriptType(CustomScriptType.PERSON_AUTHENTICATION);
+		customScriptService.update(customScript);
+		CustomScript result = customScriptService.getScriptByInum(inum);
+		return Response.ok(result).build();
 	}
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		try {
-			CustomScript customScript = customScriptService.getScriptByInum(inum);
-			if (customScript != null) {
-				customScriptService.remove(customScript);
-				return Response.noContent().build();
-			} else {
-				return getResourceNotFoundError();
-			}
-		} catch (Exception ex) {
-			logger.error("Failed to delete person script", ex);
-			return getInternalServerError(ex);
+	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+		CustomScript customScript = customScriptService.getScriptByInum(inum);
+		if (customScript != null) {
+			customScriptService.remove(customScript);
+			return Response.noContent().build();
+		} else {
+			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
 		}
 	}
 }

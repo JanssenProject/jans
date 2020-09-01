@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -36,77 +38,66 @@ public class ServerConfigurationResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getServerConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			ServerConfiguration serverConfiguration = new ServerConfiguration();
-			serverConfiguration.setOxId(appConfiguration.getOxId());
-			serverConfiguration.setCssLocation(appConfiguration.getCssLocation());
-			serverConfiguration.setJsLocation(appConfiguration.getJsLocation());
-			serverConfiguration.setImgLocation(appConfiguration.getImgLocation());
-			serverConfiguration.setConfigurationUpdateInterval(appConfiguration.getConfigurationUpdateInterval());
-			serverConfiguration.setPersonCustomObjectClassList(appConfiguration.getPersonCustomObjectClassList());
-			serverConfiguration.setAuthorizationRequestCustomAllowedParameters(
-					appConfiguration.getAuthorizationRequestCustomAllowedParameters());
-			serverConfiguration.setErrorHandlingMethod(appConfiguration.getErrorHandlingMethod());
-			serverConfiguration.setIntrospectionScriptBackwardCompatibility(
-					appConfiguration.getIntrospectionScriptBackwardCompatibility());
-			serverConfiguration.setFapiCompatibility(appConfiguration.getFapiCompatibility());
-			serverConfiguration.setConsentGatheringScriptBackwardCompatibility(
-					appConfiguration.getConsentGatheringScriptBackwardCompatibility());
-			serverConfiguration.setErrorReasonEnabled(appConfiguration.getErrorReasonEnabled());
-			serverConfiguration.setClientRegDefaultToCodeFlowWithRefresh(
-					appConfiguration.getClientRegDefaultToCodeFlowWithRefresh());
-			serverConfiguration
-					.setLogClientIdOnClientAuthentication(appConfiguration.getLogClientIdOnClientAuthentication());
-			serverConfiguration
-					.setLogClientNameOnClientAuthentication(appConfiguration.getLogClientNameOnClientAuthentication());
-			serverConfiguration.setDisableU2fEndpoint(appConfiguration.getDisableU2fEndpoint());
-			serverConfiguration.setUseLocalCache(appConfiguration.getUseLocalCache());
-			serverConfiguration.setCibaEnabled(appConfiguration.getCibaEnabled());
-			return Response.ok(serverConfiguration).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve Server's common configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getServerConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		ServerConfiguration serverConfiguration = new ServerConfiguration();
+		serverConfiguration.setOxId(appConfiguration.getOxId());
+		serverConfiguration.setCssLocation(appConfiguration.getCssLocation());
+		serverConfiguration.setJsLocation(appConfiguration.getJsLocation());
+		serverConfiguration.setImgLocation(appConfiguration.getImgLocation());
+		serverConfiguration.setConfigurationUpdateInterval(appConfiguration.getConfigurationUpdateInterval());
+		serverConfiguration.setPersonCustomObjectClassList(appConfiguration.getPersonCustomObjectClassList());
+		serverConfiguration.setAuthorizationRequestCustomAllowedParameters(
+				appConfiguration.getAuthorizationRequestCustomAllowedParameters());
+		serverConfiguration.setErrorHandlingMethod(appConfiguration.getErrorHandlingMethod());
+		serverConfiguration.setIntrospectionScriptBackwardCompatibility(
+				appConfiguration.getIntrospectionScriptBackwardCompatibility());
+		serverConfiguration.setFapiCompatibility(appConfiguration.getFapiCompatibility());
+		serverConfiguration.setConsentGatheringScriptBackwardCompatibility(
+				appConfiguration.getConsentGatheringScriptBackwardCompatibility());
+		serverConfiguration.setErrorReasonEnabled(appConfiguration.getErrorReasonEnabled());
+		serverConfiguration
+				.setClientRegDefaultToCodeFlowWithRefresh(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh());
+		serverConfiguration
+				.setLogClientIdOnClientAuthentication(appConfiguration.getLogClientIdOnClientAuthentication());
+		serverConfiguration
+				.setLogClientNameOnClientAuthentication(appConfiguration.getLogClientNameOnClientAuthentication());
+		serverConfiguration.setDisableU2fEndpoint(appConfiguration.getDisableU2fEndpoint());
+		serverConfiguration.setUseLocalCache(appConfiguration.getUseLocalCache());
+		serverConfiguration.setCibaEnabled(appConfiguration.getCibaEnabled());
+		return Response.ok(serverConfiguration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateServerConfiguration(@Valid ServerConfiguration serverConfiguration) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setOxId(serverConfiguration.getOxId());
-			appConfiguration.setCssLocation(serverConfiguration.getCssLocation());
-			appConfiguration.setJsLocation(serverConfiguration.getJsLocation());
-			appConfiguration.setImgLocation(serverConfiguration.getImgLocation());
-			appConfiguration.setConfigurationUpdateInterval(serverConfiguration.getConfigurationUpdateInterval());
-			appConfiguration.setPersonCustomObjectClassList(serverConfiguration.getPersonCustomObjectClassList());
-			appConfiguration.setAuthorizationRequestCustomAllowedParameters(
-					appConfiguration.getAuthorizationRequestCustomAllowedParameters());
-			appConfiguration.setErrorHandlingMethod(serverConfiguration.getErrorHandlingMethod());
-			appConfiguration.setIntrospectionScriptBackwardCompatibility(
-					serverConfiguration.getIntrospectionScriptBackwardCompatibility());
-			appConfiguration.setFapiCompatibility(serverConfiguration.getFapiCompatibility());
-			appConfiguration.setConsentGatheringScriptBackwardCompatibility(
-					serverConfiguration.getConsentGatheringScriptBackwardCompatibility());
-			appConfiguration.setErrorReasonEnabled(serverConfiguration.getErrorReasonEnabled());
-			appConfiguration.setClientRegDefaultToCodeFlowWithRefresh(
-					serverConfiguration.getClientRegDefaultToCodeFlowWithRefresh());
-			appConfiguration
-					.setLogClientIdOnClientAuthentication(serverConfiguration.getLogClientIdOnClientAuthentication());
-			appConfiguration.setLogClientNameOnClientAuthentication(
-					serverConfiguration.getLogClientNameOnClientAuthentication());
-			appConfiguration.setDisableU2fEndpoint(serverConfiguration.getDisableU2fEndpoint());
-			appConfiguration.setUseLocalCache(serverConfiguration.getUseLocalCache());
-			appConfiguration.setCibaEnabled(serverConfiguration.getCibaEnabled());
+	public Response updateServerConfiguration(@Valid ServerConfiguration serverConfiguration) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setOxId(serverConfiguration.getOxId());
+		appConfiguration.setCssLocation(serverConfiguration.getCssLocation());
+		appConfiguration.setJsLocation(serverConfiguration.getJsLocation());
+		appConfiguration.setImgLocation(serverConfiguration.getImgLocation());
+		appConfiguration.setConfigurationUpdateInterval(serverConfiguration.getConfigurationUpdateInterval());
+		appConfiguration.setPersonCustomObjectClassList(serverConfiguration.getPersonCustomObjectClassList());
+		appConfiguration.setAuthorizationRequestCustomAllowedParameters(
+				appConfiguration.getAuthorizationRequestCustomAllowedParameters());
+		appConfiguration.setErrorHandlingMethod(serverConfiguration.getErrorHandlingMethod());
+		appConfiguration.setIntrospectionScriptBackwardCompatibility(
+				serverConfiguration.getIntrospectionScriptBackwardCompatibility());
+		appConfiguration.setFapiCompatibility(serverConfiguration.getFapiCompatibility());
+		appConfiguration.setConsentGatheringScriptBackwardCompatibility(
+				serverConfiguration.getConsentGatheringScriptBackwardCompatibility());
+		appConfiguration.setErrorReasonEnabled(serverConfiguration.getErrorReasonEnabled());
+		appConfiguration.setClientRegDefaultToCodeFlowWithRefresh(
+				serverConfiguration.getClientRegDefaultToCodeFlowWithRefresh());
+		appConfiguration
+				.setLogClientIdOnClientAuthentication(serverConfiguration.getLogClientIdOnClientAuthentication());
+		appConfiguration
+				.setLogClientNameOnClientAuthentication(serverConfiguration.getLogClientNameOnClientAuthentication());
+		appConfiguration.setDisableU2fEndpoint(serverConfiguration.getDisableU2fEndpoint());
+		appConfiguration.setUseLocalCache(serverConfiguration.getUseLocalCache());
+		appConfiguration.setCibaEnabled(serverConfiguration.getCibaEnabled());
 
-			return Response.ok(ResponseStatus.SUCCESS).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to update Server's common configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

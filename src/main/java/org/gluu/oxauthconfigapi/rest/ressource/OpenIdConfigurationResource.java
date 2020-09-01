@@ -1,5 +1,7 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -37,140 +39,129 @@ public class OpenIdConfigurationResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getOpenIdConfigurationResource() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
-			openIdConfiguration.setOxOpenIdConnectVersion(appConfiguration.getOxOpenIdConnectVersion());
-			openIdConfiguration.setIssuer(appConfiguration.getIssuer());
-			openIdConfiguration.setJwksUri(appConfiguration.getJwksUri());
-			openIdConfiguration
-					.setTokenEndpointAuthMethodsSupported(appConfiguration.getTokenEndpointAuthMethodsSupported());
-			openIdConfiguration.setTokenEndpointAuthSigningAlgValuesSupported(
-					appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported());
-			openIdConfiguration.setServiceDocumentation(appConfiguration.getServiceDocumentation());
-			openIdConfiguration.setUiLocalesSupported(appConfiguration.getUiLocalesSupported());
-			openIdConfiguration.setOpPolicyUri(appConfiguration.getOpPolicyUri());
-			openIdConfiguration.setOpTosUri(appConfiguration.getOpTosUri());
-			openIdConfiguration.setCheckSessionIFrame(appConfiguration.getCheckSessionIFrame());
-			openIdConfiguration.setDeviceAuthzEndpoint(appConfiguration.getDeviceAuthzEndpoint());
-			openIdConfiguration.setIntrospectionAccessTokenMustHaveUmaProtectionScope(
-					appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope());
-			openIdConfiguration.setDisplayValuesSupported(appConfiguration.getDisplayValuesSupported());
-			openIdConfiguration.setClaimTypesSupported(appConfiguration.getClaimTypesSupported());
-			openIdConfiguration.setClaimsLocalesSupported(appConfiguration.getClaimsLocalesSupported());
-			openIdConfiguration.setIdTokenTokenBindingCnfValuesSupported(
-					appConfiguration.getIdTokenTokenBindingCnfValuesSupported());
-			openIdConfiguration.setClaimsParameterSupported(appConfiguration.getClaimsParameterSupported());
-			openIdConfiguration.setRequestParameterSupported(appConfiguration.getRequestParameterSupported());
-			openIdConfiguration.setRequestUriParameterSupported(appConfiguration.getRequestUriParameterSupported());
-			openIdConfiguration.setRequireRequestUriRegistration(appConfiguration.getRequireRequestUriRegistration());
-			openIdConfiguration.setForceIdTokenHintPrecense(appConfiguration.getForceIdTokenHintPrecense());
-			openIdConfiguration.setForceOfflineAccessScopeToEnableRefreshToken(
-					appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken());
-			openIdConfiguration.setAllowPostLogoutRedirectWithoutValidation(
-					appConfiguration.getAllowPostLogoutRedirectWithoutValidation());
-			openIdConfiguration.setRemoveRefreshTokensForClientOnLogout(
-					appConfiguration.getRemoveRefreshTokensForClientOnLogout());
-			openIdConfiguration.setSpontaneousScopeLifetime(appConfiguration.getSpontaneousScopeLifetime());
-			openIdConfiguration.setEndSessionWithAccessToken(appConfiguration.getEndSessionWithAccessToken());
-			openIdConfiguration.setClientWhiteList(appConfiguration.getClientWhiteList());
-			openIdConfiguration.setClientBlackList(appConfiguration.getClientBlackList());
-			openIdConfiguration.setLegacyIdTokenClaims(appConfiguration.getLegacyIdTokenClaims());
-			openIdConfiguration.setCustomHeadersWithAuthorizationResponse(
-					appConfiguration.getCustomHeadersWithAuthorizationResponse());
-			openIdConfiguration
-					.setFrontChannelLogoutSessionSupported(appConfiguration.getFrontChannelLogoutSessionSupported());
-			openIdConfiguration
-					.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
-			openIdConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
-					appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
-			openIdConfiguration
-					.setOpenidScopeBackwardCompatibility(appConfiguration.getOpenidScopeBackwardCompatibility());
-			openIdConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(
-					appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());
-			openIdConfiguration.setKeepAuthenticatorAttributesOnAcrChange(
-					appConfiguration.getKeepAuthenticatorAttributesOnAcrChange());
-			openIdConfiguration.setDeviceAuthzRequestExpiresIn(appConfiguration.getDeviceAuthzRequestExpiresIn());
-			openIdConfiguration.setDeviceAuthzTokenPollInterval(appConfiguration.getDeviceAuthzTokenPollInterval());
-			openIdConfiguration.setDeviceAuthzResponseTypeToProcessAuthz(
-					appConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
-			openIdConfiguration.setCookieDomain(appConfiguration.getCookieDomain());
-			openIdConfiguration.setOpenidSubAttribute(appConfiguration.getOpenidSubAttribute());
-			return Response.ok(openIdConfiguration).build();
-		} catch (Exception ex) {
-			log.error("Failed to retrieve OpenID Connect configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getOpenIdConfigurationResource() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		OpenIdConfiguration openIdConfiguration = new OpenIdConfiguration();
+		openIdConfiguration.setOxOpenIdConnectVersion(appConfiguration.getOxOpenIdConnectVersion());
+		openIdConfiguration.setIssuer(appConfiguration.getIssuer());
+		openIdConfiguration.setJwksUri(appConfiguration.getJwksUri());
+		openIdConfiguration
+				.setTokenEndpointAuthMethodsSupported(appConfiguration.getTokenEndpointAuthMethodsSupported());
+		openIdConfiguration.setTokenEndpointAuthSigningAlgValuesSupported(
+				appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported());
+		openIdConfiguration.setServiceDocumentation(appConfiguration.getServiceDocumentation());
+		openIdConfiguration.setUiLocalesSupported(appConfiguration.getUiLocalesSupported());
+		openIdConfiguration.setOpPolicyUri(appConfiguration.getOpPolicyUri());
+		openIdConfiguration.setOpTosUri(appConfiguration.getOpTosUri());
+		openIdConfiguration.setCheckSessionIFrame(appConfiguration.getCheckSessionIFrame());
+		openIdConfiguration.setDeviceAuthzEndpoint(appConfiguration.getDeviceAuthzEndpoint());
+		openIdConfiguration.setIntrospectionAccessTokenMustHaveUmaProtectionScope(
+				appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope());
+		openIdConfiguration.setDisplayValuesSupported(appConfiguration.getDisplayValuesSupported());
+		openIdConfiguration.setClaimTypesSupported(appConfiguration.getClaimTypesSupported());
+		openIdConfiguration.setClaimsLocalesSupported(appConfiguration.getClaimsLocalesSupported());
+		openIdConfiguration
+				.setIdTokenTokenBindingCnfValuesSupported(appConfiguration.getIdTokenTokenBindingCnfValuesSupported());
+		openIdConfiguration.setClaimsParameterSupported(appConfiguration.getClaimsParameterSupported());
+		openIdConfiguration.setRequestParameterSupported(appConfiguration.getRequestParameterSupported());
+		openIdConfiguration.setRequestUriParameterSupported(appConfiguration.getRequestUriParameterSupported());
+		openIdConfiguration.setRequireRequestUriRegistration(appConfiguration.getRequireRequestUriRegistration());
+		openIdConfiguration.setForceIdTokenHintPrecense(appConfiguration.getForceIdTokenHintPrecense());
+		openIdConfiguration.setForceOfflineAccessScopeToEnableRefreshToken(
+				appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken());
+		openIdConfiguration.setAllowPostLogoutRedirectWithoutValidation(
+				appConfiguration.getAllowPostLogoutRedirectWithoutValidation());
+		openIdConfiguration
+				.setRemoveRefreshTokensForClientOnLogout(appConfiguration.getRemoveRefreshTokensForClientOnLogout());
+		openIdConfiguration.setSpontaneousScopeLifetime(appConfiguration.getSpontaneousScopeLifetime());
+		openIdConfiguration.setEndSessionWithAccessToken(appConfiguration.getEndSessionWithAccessToken());
+		openIdConfiguration.setClientWhiteList(appConfiguration.getClientWhiteList());
+		openIdConfiguration.setClientBlackList(appConfiguration.getClientBlackList());
+		openIdConfiguration.setLegacyIdTokenClaims(appConfiguration.getLegacyIdTokenClaims());
+		openIdConfiguration.setCustomHeadersWithAuthorizationResponse(
+				appConfiguration.getCustomHeadersWithAuthorizationResponse());
+		openIdConfiguration
+				.setFrontChannelLogoutSessionSupported(appConfiguration.getFrontChannelLogoutSessionSupported());
+		openIdConfiguration
+				.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
+		openIdConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
+				appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
+		openIdConfiguration.setOpenidScopeBackwardCompatibility(appConfiguration.getOpenidScopeBackwardCompatibility());
+		openIdConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(
+				appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());
+		openIdConfiguration.setKeepAuthenticatorAttributesOnAcrChange(
+				appConfiguration.getKeepAuthenticatorAttributesOnAcrChange());
+		openIdConfiguration.setDeviceAuthzRequestExpiresIn(appConfiguration.getDeviceAuthzRequestExpiresIn());
+		openIdConfiguration.setDeviceAuthzTokenPollInterval(appConfiguration.getDeviceAuthzTokenPollInterval());
+		openIdConfiguration
+				.setDeviceAuthzResponseTypeToProcessAuthz(appConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
+		openIdConfiguration.setCookieDomain(appConfiguration.getCookieDomain());
+		openIdConfiguration.setOpenidSubAttribute(appConfiguration.getOpenidSubAttribute());
+		return Response.ok(openIdConfiguration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateOpenIdConfigurationResource(@Valid OpenIdConfiguration openIdConfiguration) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setOxOpenIdConnectVersion(openIdConfiguration.getOxOpenIdConnectVersion());
-			appConfiguration.setIssuer(openIdConfiguration.getIssuer());
-			appConfiguration.setJwksUri(openIdConfiguration.getJwksUri());
-			appConfiguration
-					.setTokenEndpointAuthMethodsSupported(openIdConfiguration.getTokenEndpointAuthMethodsSupported());
-			appConfiguration.setTokenEndpointAuthSigningAlgValuesSupported(
-					openIdConfiguration.getTokenEndpointAuthSigningAlgValuesSupported());
-			appConfiguration.setServiceDocumentation(openIdConfiguration.getServiceDocumentation());
-			appConfiguration.setUiLocalesSupported(openIdConfiguration.getUiLocalesSupported());
-			appConfiguration.setOpPolicyUri(openIdConfiguration.getOpPolicyUri());
-			appConfiguration.setOpTosUri(openIdConfiguration.getOpTosUri());
-			appConfiguration.setCheckSessionIFrame(openIdConfiguration.getCheckSessionIFrame());
-			appConfiguration.setDeviceAuthzEndpoint(openIdConfiguration.getDeviceAuthzEndpoint());
-			appConfiguration.setIntrospectionAccessTokenMustHaveUmaProtectionScope(
-					openIdConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope());
-			appConfiguration.setDisplayValuesSupported(openIdConfiguration.getDisplayValuesSupported());
-			appConfiguration.setClaimTypesSupported(openIdConfiguration.getClaimTypesSupported());
-			appConfiguration.setClaimsLocalesSupported(openIdConfiguration.getClaimsLocalesSupported());
-			appConfiguration.setIdTokenTokenBindingCnfValuesSupported(
-					openIdConfiguration.getIdTokenTokenBindingCnfValuesSupported());
-			appConfiguration.setClaimsParameterSupported(openIdConfiguration.getClaimsParameterSupported());
-			appConfiguration.setRequestParameterSupported(openIdConfiguration.getRequestParameterSupported());
-			appConfiguration.setRequestUriParameterSupported(openIdConfiguration.getRequestUriParameterSupported());
-			appConfiguration.setRequireRequestUriRegistration(openIdConfiguration.getRequireRequestUriRegistration());
-			appConfiguration.setForceIdTokenHintPrecense(openIdConfiguration.getForceIdTokenHintPrecense());
-			appConfiguration.setForceOfflineAccessScopeToEnableRefreshToken(
-					openIdConfiguration.getForceOfflineAccessScopeToEnableRefreshToken());
-			appConfiguration.setAllowPostLogoutRedirectWithoutValidation(
-					openIdConfiguration.getAllowPostLogoutRedirectWithoutValidation());
-			appConfiguration.setRemoveRefreshTokensForClientOnLogout(
-					openIdConfiguration.getRemoveRefreshTokensForClientOnLogout());
-			appConfiguration.setSpontaneousScopeLifetime(openIdConfiguration.getSpontaneousScopeLifetime());
-			appConfiguration.setEndSessionWithAccessToken(openIdConfiguration.getEndSessionWithAccessToken());
-			appConfiguration.setClientWhiteList(openIdConfiguration.getClientWhiteList());
-			appConfiguration.setClientBlackList(openIdConfiguration.getClientBlackList());
-			appConfiguration.setLegacyIdTokenClaims(openIdConfiguration.getLegacyIdTokenClaims());
-			appConfiguration.setCustomHeadersWithAuthorizationResponse(
-					openIdConfiguration.getCustomHeadersWithAuthorizationResponse());
-			appConfiguration
-					.setFrontChannelLogoutSessionSupported(openIdConfiguration.getFrontChannelLogoutSessionSupported());
-			appConfiguration
-					.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
-			appConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
-					openIdConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
-			appConfiguration
-					.setOpenidScopeBackwardCompatibility(openIdConfiguration.getOpenidScopeBackwardCompatibility());
-			appConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(
-					openIdConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());
-			appConfiguration.setKeepAuthenticatorAttributesOnAcrChange(
-					openIdConfiguration.getKeepAuthenticatorAttributesOnAcrChange());
-			appConfiguration.setDeviceAuthzRequestExpiresIn(openIdConfiguration.getDeviceAuthzRequestExpiresIn());
-			appConfiguration.setDeviceAuthzTokenPollInterval(openIdConfiguration.getDeviceAuthzTokenPollInterval());
-			appConfiguration.setDeviceAuthzResponseTypeToProcessAuthz(
-					openIdConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
-			appConfiguration.setCookieDomain(openIdConfiguration.getCookieDomain());
-			appConfiguration.setOpenidSubAttribute(openIdConfiguration.getOpenidSubAttribute());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update OpenID Connect configuration properties.", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateOpenIdConfigurationResource(@Valid OpenIdConfiguration openIdConfiguration)
+			throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setOxOpenIdConnectVersion(openIdConfiguration.getOxOpenIdConnectVersion());
+		appConfiguration.setIssuer(openIdConfiguration.getIssuer());
+		appConfiguration.setJwksUri(openIdConfiguration.getJwksUri());
+		appConfiguration
+				.setTokenEndpointAuthMethodsSupported(openIdConfiguration.getTokenEndpointAuthMethodsSupported());
+		appConfiguration.setTokenEndpointAuthSigningAlgValuesSupported(
+				openIdConfiguration.getTokenEndpointAuthSigningAlgValuesSupported());
+		appConfiguration.setServiceDocumentation(openIdConfiguration.getServiceDocumentation());
+		appConfiguration.setUiLocalesSupported(openIdConfiguration.getUiLocalesSupported());
+		appConfiguration.setOpPolicyUri(openIdConfiguration.getOpPolicyUri());
+		appConfiguration.setOpTosUri(openIdConfiguration.getOpTosUri());
+		appConfiguration.setCheckSessionIFrame(openIdConfiguration.getCheckSessionIFrame());
+		appConfiguration.setDeviceAuthzEndpoint(openIdConfiguration.getDeviceAuthzEndpoint());
+		appConfiguration.setIntrospectionAccessTokenMustHaveUmaProtectionScope(
+				openIdConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope());
+		appConfiguration.setDisplayValuesSupported(openIdConfiguration.getDisplayValuesSupported());
+		appConfiguration.setClaimTypesSupported(openIdConfiguration.getClaimTypesSupported());
+		appConfiguration.setClaimsLocalesSupported(openIdConfiguration.getClaimsLocalesSupported());
+		appConfiguration.setIdTokenTokenBindingCnfValuesSupported(
+				openIdConfiguration.getIdTokenTokenBindingCnfValuesSupported());
+		appConfiguration.setClaimsParameterSupported(openIdConfiguration.getClaimsParameterSupported());
+		appConfiguration.setRequestParameterSupported(openIdConfiguration.getRequestParameterSupported());
+		appConfiguration.setRequestUriParameterSupported(openIdConfiguration.getRequestUriParameterSupported());
+		appConfiguration.setRequireRequestUriRegistration(openIdConfiguration.getRequireRequestUriRegistration());
+		appConfiguration.setForceIdTokenHintPrecense(openIdConfiguration.getForceIdTokenHintPrecense());
+		appConfiguration.setForceOfflineAccessScopeToEnableRefreshToken(
+				openIdConfiguration.getForceOfflineAccessScopeToEnableRefreshToken());
+		appConfiguration.setAllowPostLogoutRedirectWithoutValidation(
+				openIdConfiguration.getAllowPostLogoutRedirectWithoutValidation());
+		appConfiguration
+				.setRemoveRefreshTokensForClientOnLogout(openIdConfiguration.getRemoveRefreshTokensForClientOnLogout());
+		appConfiguration.setSpontaneousScopeLifetime(openIdConfiguration.getSpontaneousScopeLifetime());
+		appConfiguration.setEndSessionWithAccessToken(openIdConfiguration.getEndSessionWithAccessToken());
+		appConfiguration.setClientWhiteList(openIdConfiguration.getClientWhiteList());
+		appConfiguration.setClientBlackList(openIdConfiguration.getClientBlackList());
+		appConfiguration.setLegacyIdTokenClaims(openIdConfiguration.getLegacyIdTokenClaims());
+		appConfiguration.setCustomHeadersWithAuthorizationResponse(
+				openIdConfiguration.getCustomHeadersWithAuthorizationResponse());
+		appConfiguration
+				.setFrontChannelLogoutSessionSupported(openIdConfiguration.getFrontChannelLogoutSessionSupported());
+		appConfiguration
+				.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
+		appConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
+				openIdConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
+		appConfiguration.setOpenidScopeBackwardCompatibility(openIdConfiguration.getOpenidScopeBackwardCompatibility());
+		appConfiguration.setSkipAuthorizationForOpenIdScopeAndPairwiseId(
+				openIdConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId());
+		appConfiguration.setKeepAuthenticatorAttributesOnAcrChange(
+				openIdConfiguration.getKeepAuthenticatorAttributesOnAcrChange());
+		appConfiguration.setDeviceAuthzRequestExpiresIn(openIdConfiguration.getDeviceAuthzRequestExpiresIn());
+		appConfiguration.setDeviceAuthzTokenPollInterval(openIdConfiguration.getDeviceAuthzTokenPollInterval());
+		appConfiguration.setDeviceAuthzResponseTypeToProcessAuthz(
+				openIdConfiguration.getDeviceAuthzResponseTypeToProcessAuthz());
+		appConfiguration.setCookieDomain(openIdConfiguration.getCookieDomain());
+		appConfiguration.setOpenidSubAttribute(openIdConfiguration.getOpenidSubAttribute());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 
 }

@@ -3,6 +3,8 @@
  */
 package org.gluu.oxauthconfigapi.rest.ressource;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
@@ -39,50 +41,39 @@ public class UmaConfigurationResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUMAConfiguration() {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			UmaConfiguration umaConfiguration = new UmaConfiguration();
-			umaConfiguration.setUmaConfigurationEndpoint(appConfiguration.getUmaConfigurationEndpoint());
-			umaConfiguration.setUmaRptLifetime(appConfiguration.getUmaRptLifetime());
-			umaConfiguration.setUmaTicketLifetime(appConfiguration.getUmaTicketLifetime());
-			umaConfiguration.setUmaPctLifetime(appConfiguration.getUmaPctLifetime());
-			umaConfiguration.setUmaResourceLifetime(appConfiguration.getUmaResourceLifetime());
-			umaConfiguration.setUmaAddScopesAutomatically(appConfiguration.getUmaAddScopesAutomatically());
-			umaConfiguration.setUmaValidateClaimToken(appConfiguration.getUmaValidateClaimToken());
-			umaConfiguration.setUmaGrantAccessIfNoPolicies(appConfiguration.getUmaGrantAccessIfNoPolicies());
-			umaConfiguration.setUmaRestrictResourceToAssociatedClient(
-					appConfiguration.getUmaRestrictResourceToAssociatedClient());
-			umaConfiguration.setUmaRptAsJwt(appConfiguration.getUmaRptAsJwt());
-			return Response.ok(umaConfiguration).build();
-
-		} catch (Exception ex) {
-			log.error("Failed to retrieve UMA configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response getUMAConfiguration() throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		UmaConfiguration umaConfiguration = new UmaConfiguration();
+		umaConfiguration.setUmaConfigurationEndpoint(appConfiguration.getUmaConfigurationEndpoint());
+		umaConfiguration.setUmaRptLifetime(appConfiguration.getUmaRptLifetime());
+		umaConfiguration.setUmaTicketLifetime(appConfiguration.getUmaTicketLifetime());
+		umaConfiguration.setUmaPctLifetime(appConfiguration.getUmaPctLifetime());
+		umaConfiguration.setUmaResourceLifetime(appConfiguration.getUmaResourceLifetime());
+		umaConfiguration.setUmaAddScopesAutomatically(appConfiguration.getUmaAddScopesAutomatically());
+		umaConfiguration.setUmaValidateClaimToken(appConfiguration.getUmaValidateClaimToken());
+		umaConfiguration.setUmaGrantAccessIfNoPolicies(appConfiguration.getUmaGrantAccessIfNoPolicies());
+		umaConfiguration
+				.setUmaRestrictResourceToAssociatedClient(appConfiguration.getUmaRestrictResourceToAssociatedClient());
+		umaConfiguration.setUmaRptAsJwt(appConfiguration.getUmaRptAsJwt());
+		return Response.ok(umaConfiguration).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateUMAConfiguration(@Valid UmaConfiguration umaConfiguration) {
-		try {
-			AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-			appConfiguration.setUmaConfigurationEndpoint(umaConfiguration.getUmaConfigurationEndpoint());
-			appConfiguration.setUmaRptLifetime(umaConfiguration.getUmaRptLifetime());
-			appConfiguration.setUmaTicketLifetime(umaConfiguration.getUmaTicketLifetime());
-			appConfiguration.setUmaPctLifetime(umaConfiguration.getUmaPctLifetime());
-			appConfiguration.setUmaResourceLifetime(umaConfiguration.getUmaResourceLifetime());
-			appConfiguration.setUmaAddScopesAutomatically(umaConfiguration.getUmaAddScopesAutomatically());
-			appConfiguration.setUmaValidateClaimToken(umaConfiguration.getUmaValidateClaimToken());
-			appConfiguration.setUmaGrantAccessIfNoPolicies(umaConfiguration.getUmaGrantAccessIfNoPolicies());
-			appConfiguration.setUmaRestrictResourceToAssociatedClient(
-					umaConfiguration.getUmaRestrictResourceToAssociatedClient());
-			appConfiguration.setUmaRptAsJwt(umaConfiguration.getUmaRptAsJwt());
-			this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-			return Response.ok(ResponseStatus.SUCCESS).build();
-		} catch (Exception ex) {
-			log.error("Failed to update UMA configuration", ex);
-			return getInternalServerError(ex);
-		}
+	public Response updateUMAConfiguration(@Valid UmaConfiguration umaConfiguration) throws IOException {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration.setUmaConfigurationEndpoint(umaConfiguration.getUmaConfigurationEndpoint());
+		appConfiguration.setUmaRptLifetime(umaConfiguration.getUmaRptLifetime());
+		appConfiguration.setUmaTicketLifetime(umaConfiguration.getUmaTicketLifetime());
+		appConfiguration.setUmaPctLifetime(umaConfiguration.getUmaPctLifetime());
+		appConfiguration.setUmaResourceLifetime(umaConfiguration.getUmaResourceLifetime());
+		appConfiguration.setUmaAddScopesAutomatically(umaConfiguration.getUmaAddScopesAutomatically());
+		appConfiguration.setUmaValidateClaimToken(umaConfiguration.getUmaValidateClaimToken());
+		appConfiguration.setUmaGrantAccessIfNoPolicies(umaConfiguration.getUmaGrantAccessIfNoPolicies());
+		appConfiguration
+				.setUmaRestrictResourceToAssociatedClient(umaConfiguration.getUmaRestrictResourceToAssociatedClient());
+		appConfiguration.setUmaRptAsJwt(umaConfiguration.getUmaRptAsJwt());
+		this.jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 }
