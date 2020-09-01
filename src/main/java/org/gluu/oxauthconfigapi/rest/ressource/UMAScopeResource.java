@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -75,7 +76,7 @@ public class UMAScopeResource extends BaseResource {
 			@APIResponse(responseCode = "404", description = "Resource Not Found"),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) String inum) {
+	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
 			Scope scope = umaScopeService.getUmaScopeByInum(inum);
 			if (scope == null) {
@@ -153,7 +154,7 @@ public class UMAScopeResource extends BaseResource {
 			@APIResponse(responseCode = "404", description = "Resource Not Found"),
 			@APIResponse(responseCode = "500", description = "Server error") })
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) String inum) {
+	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
 			Scope scope = umaScopeService.getUmaScopeByInum(inum);
 			if (scope == null) {

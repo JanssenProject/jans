@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -61,7 +60,7 @@ public class SMTPResource extends BaseResource {
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response setupSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
+	public Response setupSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) {
 		try {
 			String password = smtpConfiguration.getPassword();
 			if (password != null && !password.isEmpty()) {
@@ -80,7 +79,7 @@ public class SMTPResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateSmtpConfiguration(@Valid @NotNull SmtpConfiguration smtpConfiguration) {
+	public Response updateSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) {
 		try {
 			String password = smtpConfiguration.getPassword();
 			if (password != null && !password.isEmpty()) {

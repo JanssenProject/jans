@@ -19,8 +19,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.gluu.oxauth.model.common.ScopeType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
@@ -45,6 +47,9 @@ public class OIDScopeResource extends BaseResource {
 	@Inject
 	ScopeService scopeService;
 
+	@Context
+	UriInfo uriInfo;
+
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
@@ -66,7 +71,7 @@ public class OIDScopeResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getOpenIdScopeByInum(@PathParam(ApiConstants.INUM) String inum) {
+	public Response getOpenIdScopeByInum(@NotNull @PathParam(ApiConstants.INUM) String inum) {
 		try {
 			Scope scope = scopeService.getScopeByInum(inum);
 			if (scope == null) {

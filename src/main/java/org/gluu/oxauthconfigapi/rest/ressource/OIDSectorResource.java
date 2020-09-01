@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -62,7 +63,7 @@ public class OIDSectorResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getSectorByInum(@PathParam(ApiConstants.INUM) String inum) {
+	public Response getSectorByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {
 			OxAuthSectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
 			if (inum == null || sectorIdentifier == null) {
@@ -124,7 +125,7 @@ public class OIDSectorResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteSector(@PathParam(ApiConstants.INUM) String inum) {
+	public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {
 			OxAuthSectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
 			if (inum == null || sectorIdentifier == null) {

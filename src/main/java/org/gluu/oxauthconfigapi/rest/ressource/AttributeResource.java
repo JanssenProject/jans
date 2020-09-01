@@ -83,7 +83,7 @@ public class AttributeResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) String inum) {
+	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		try {
 			GluuAttribute attribute = attributeService.getAttributeByInum(inum);
 			if (attribute == null) {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -65,7 +66,7 @@ public class UMAResource extends BaseResource {
 	@GET
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) String inum) {
+	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
 			String resourceDn = umaResourcesService.getDnForResource(inum);
 			UmaResource resource = umaResourcesService.getResourceByDn(resourceDn);
@@ -130,7 +131,7 @@ public class UMAResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) String inum) {
+	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		try {
 			String dn = umaResourcesService.getDnForResource(inum);
 			UmaResource umaResource = umaResourcesService.getResourceByDn(dn);
