@@ -9,30 +9,15 @@ import java.io.Serializable;
  * @author Mougang T.Gasmyr
  *
  */
-public class ApiError implements Serializable{
+public class ApiError implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3836623519481821884L;
-	String code;
-	String message;
-	String description;
-
-	public ApiError() {
-	}
-
-	public ApiError(String code, String message, String description) {
-		super();
-		this.code = code;
-		this.message = message;
-		this.description = description;
-	}
-
-	@Override
-	public String toString() {
-		return "ApiError [code=" + code + ", message=" + message + ", description=" + description + "]";
-	}
+	private String code;
+	private String message;
+	private String description;
 
 	public String getCode() {
 		return code;
@@ -57,4 +42,40 @@ public class ApiError implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	@Override
+	public String toString() {
+		return "ApiError [code=" + code + ", message=" + message + ", description=" + description + "]";
+	}
+
+	public static class ErrorBuilder {
+		private String code;
+		private String message;
+		private String description;
+
+		public ErrorBuilder withCode(String code) {
+			this.code = code;
+			return this;
+		}
+
+		public ErrorBuilder withMessage(String messge) {
+			this.message = messge;
+			return this;
+		}
+
+		public ErrorBuilder andDescription(String description) {
+			this.description = description;
+			return this;
+		}
+
+		public ApiError build() {
+			ApiError error = new ApiError();
+			error.code = this.code;
+			error.message = this.message;
+			error.description = this.description;
+			return error;
+		}
+
+	}
+
 }
