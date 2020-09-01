@@ -1,16 +1,7 @@
 package org.gluu.oxauthconfigapi;
 
-import java.lang.annotation.Annotation;
-import java.util.Properties;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import io.quarkus.runtime.ShutdownEvent;
+import io.quarkus.runtime.StartupEvent;
 import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauthconfigapi.configuration.ConfigurationFactory;
 import org.gluu.oxtrust.service.ApplicationFactory;
@@ -24,10 +15,18 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
-import io.quarkus.runtime.ShutdownEvent;
-import io.quarkus.runtime.StartupEvent;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.lang.annotation.Annotation;
+import java.util.Properties;
 
 @ApplicationScoped
 public class OxauthConfigApiApplication {
@@ -55,6 +54,7 @@ public class OxauthConfigApiApplication {
 		logger.info("=================================================================");
 		logger.info("=============  STARTING API APPLICATION  ========================");
 		logger.info("=================================================================");
+		System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
 		configurationFactory.create();
 		persistenceEntryManagerInstance.get();
 		logger.info("=================================================================");
