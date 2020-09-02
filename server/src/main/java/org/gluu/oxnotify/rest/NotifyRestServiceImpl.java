@@ -193,6 +193,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		// Remove old appUserData if needed to conform 2Kb size constrain
 		String customUserDataJson = applicationService.asJson(customUserData);
 		while ((customUserDataJson.length() > 2048) && (customUserData.getAppUserData().size() > 0)) {
+			log.warn("Removeing old app user data '{}' to confrom 2Kb size limitation", customUserData.getAppUserData().get(0));
 			customUserData.getAppUserData().remove(0);
 			customUserDataJson = applicationService.asJson(customUserData);
 		}
