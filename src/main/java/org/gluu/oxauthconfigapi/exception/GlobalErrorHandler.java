@@ -14,8 +14,8 @@ import org.gluu.oxauthconfigapi.rest.model.ApiError;
  *
  */
 @Provider
-public class GlobalErrorHandler implements ExceptionMapper<RuntimeException> {
-	public Response toResponse(RuntimeException exception) {
+public class GlobalErrorHandler implements ExceptionMapper<Exception> {
+	public Response toResponse(Exception exception) {
 		ApiError error = new ApiError.ErrorBuilder()
 				.withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()))
 				.withMessage("Internal Server error").andDescription(exception.getMessage()).build();

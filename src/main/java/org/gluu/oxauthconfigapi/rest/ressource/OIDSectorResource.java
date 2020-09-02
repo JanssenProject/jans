@@ -22,8 +22,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -40,6 +38,10 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {
 
+	/**
+	 * 
+	 */
+	private static final String SECTOR_IDENTIFIER = "sector identifier";
 	@Inject
 	SectorIdentifierService sectorIdentifierService;
 	@Inject
@@ -61,20 +63,16 @@ public class OIDSectorResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getSectorByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response getSectorByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		OxAuthSectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
-		if (inum == null || sectorIdentifier == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
 		return Response.ok().entity(sectorIdentifier).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createNewOpenIDSector(@Valid OxAuthSectorIdentifier sectorIdentifier) throws ApiException {
-		if (sectorIdentifier.getDescription() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
-		}
+	public Response createNewOpenIDSector(@Valid OxAuthSectorIdentifier sectorIdentifier) {
+		checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
 		String oxId = sectorIdentifierService.generateIdForNewSectorIdentifier();
 		sectorIdentifier.setId(oxId);
 		sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(oxId));
@@ -85,34 +83,25 @@ public class OIDSectorResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateSector(@Valid OxAuthSectorIdentifier sectorIdentifier) throws ApiException {
+	public Response updateSector(@Valid OxAuthSectorIdentifier sectorIdentifier) {
 		String inum = sectorIdentifier.getId();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.INUM);
-		}
-		if (sectorIdentifier.getDescription() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
-		}
+		checkNotNull(inum, AttributeNames.INUM);
+		checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
 		OxAuthSectorIdentifier existingSector = sectorIdentifierService.getSectorIdentifierById(inum);
-		if (existingSector != null) {
-			sectorIdentifier.setId(existingSector.getId());
-			sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(inum));
-			sectorIdentifierService.updateSectorIdentifier(sectorIdentifier);
-			OxAuthSectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(existingSector.getId());
-			return Response.ok(result).build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(existingSector, SECTOR_IDENTIFIER);
+		sectorIdentifier.setId(existingSector.getId());
+		sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(inum));
+		sectorIdentifierService.updateSectorIdentifier(sectorIdentifier);
+		OxAuthSectorIdentifier result = sectorIdentifierService.getSectorIdentifierById(existingSector.getId());
+		return Response.ok(result).build();
 	}
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deleteSector(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		OxAuthSectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierById(inum);
-		if (inum == null || sectorIdentifier == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
 		sectorIdentifierService.removeSectorIdentifier(sectorIdentifier);
 		return Response.noContent().build();
 

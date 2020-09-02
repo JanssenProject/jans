@@ -23,8 +23,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -40,6 +38,10 @@ import org.gluu.oxtrust.service.uma.ResourceSetService;
 @Produces(MediaType.APPLICATION_JSON)
 public class UMAResource extends BaseResource {
 
+	/**
+	 * 
+	 */
+	private static final String UMA_RESOURCE = "Uma resource";
 	@Inject
 	private ResourceSetService umaResourcesService;
 
@@ -59,25 +61,18 @@ public class UMAResource extends BaseResource {
 	@GET
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum)
-			throws ApiException {
+	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		String resourceDn = umaResourcesService.getDnForResource(inum);
 		UmaResource resource = umaResourcesService.getResourceByDn(resourceDn);
-		if (resource == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(resource, UMA_RESOURCE);
 		return Response.ok(resource).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createUmaResource(@Valid UmaResource umaResource) throws ApiException {
-		if (umaResource.getName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
-		}
-		if (umaResource.getDescription() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
-		}
+	public Response createUmaResource(@Valid UmaResource umaResource) {
+		checkNotNull(umaResource.getName(), AttributeNames.NAME);
+		checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
 		String inum = umaResourcesService.generateInumForNewResource();
 		umaResource.setInum(inum);
 		umaResource.setDn(umaResourcesService.getDnForResource(inum));
@@ -90,16 +85,12 @@ public class UMAResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateUmaResource(@Valid UmaResource resource) throws ApiException {
+	public Response updateUmaResource(@Valid UmaResource resource) {
 		String inum = resource.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkNotNull(inum, AttributeNames.INUM);
 		String dn = umaResourcesService.getDnForResource(inum);
 		UmaResource existingResource = umaResourcesService.getResourceByDn(dn);
-		if (existingResource == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(existingResource, UMA_RESOURCE);
 		resource.setInum(existingResource.getInum());
 		resource.setDn(umaResourcesService.getDnForResource(inum));
 		umaResourcesService.updateResource(resource);
@@ -110,12 +101,10 @@ public class UMAResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		String dn = umaResourcesService.getDnForResource(inum);
 		UmaResource umaResource = umaResourcesService.getResourceByDn(dn);
-		if (umaResource == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(umaResource, UMA_RESOURCE);
 		umaResourcesService.removeResource(umaResource);
 		return Response.status(Response.Status.NO_CONTENT).build();
 	}

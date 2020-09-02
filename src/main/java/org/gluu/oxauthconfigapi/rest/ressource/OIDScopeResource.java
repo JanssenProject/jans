@@ -25,8 +25,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -70,18 +68,14 @@ public class OIDScopeResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdScopeByInum(@NotNull @PathParam(ApiConstants.INUM) String inum) throws Exception {
 		Scope scope = scopeService.getScopeByInum(inum);
-		if (scope == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(scope, "scope");
 		return Response.ok(scope).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createOpenidScope(@Valid Scope scope) throws Exception {
-		if (scope.getId() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.ID);
-		}
+		checkNotNull(scope.getId(), AttributeNames.ID);
 		if (scope.getDisplayName() == null) {
 			scope.setDisplayName(scope.getId());
 		}
@@ -103,13 +97,9 @@ public class OIDScopeResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateOpenIdConnectScope(@Valid Scope scope) throws Exception {
 		String inum = scope.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, AttributeNames.SCOPES.toString());
-		}
+		checkNotNull(inum, "scope");
 		Scope existingScope = scopeService.getScopeByInum(inum);
-		if (existingScope == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(existingScope, "scope");
 		if (scope.getScopeType() == null) {
 			scope.setScopeType(ScopeType.OAUTH);
 		}
@@ -128,12 +118,9 @@ public class OIDScopeResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
 		Scope scope = scopeService.getScopeByInum(inum);
-		if (scope != null) {
-			scopeService.removeScope(scope);
-			return Response.noContent().build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(scope, "scope");
+		scopeService.removeScope(scope);
+		return Response.noContent().build();
 	}
 
 }
