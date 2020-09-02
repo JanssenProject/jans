@@ -3,6 +3,7 @@ package org.gluu.oxd.server;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.GetTokensByCodeResponse2;
 import org.gluu.oxd.common.CoreUtils;
@@ -36,6 +37,15 @@ public class GetTokensByCodeTest {
         ClientInterface client = Tester.newClient(host);
         final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
         GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString());
+        refreshToken(tokensResponse, client, site);
+    }
+
+    @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
+    @Test
+    public void withAuthenticationMethod_shouldGetTokenInResponse(String host, String opHost, String redirectUrls, String userId, String userSecret) {
+        ClientInterface client = Tester.newClient(host);
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, "PS256");
+        GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString(), AuthenticationMethod.PRIVATE_KEY_JWT.toString(), "PS256");
         refreshToken(tokensResponse, client, site);
     }
 
@@ -169,6 +179,10 @@ public class GetTokensByCodeTest {
     }
 
     public static GetTokensByCodeResponse2 tokenByCode(ClientInterface client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce) {
+        return tokenByCode(client, site, opHost, userId, userSecret, clientId, redirectUrls, nonce, null, null);
+    }
+
+    public static GetTokensByCodeResponse2 tokenByCode(ClientInterface client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce, String authenticationMethod, String algorithm) {
 
         final String state = CoreUtils.secureRandomString();
         String code = codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce);
@@ -179,6 +193,8 @@ public class GetTokensByCodeTest {
         params.setOxdId(site.getOxdId());
         params.setCode(code);
         params.setState(state);
+        params.setAuthenticationMethod(authenticationMethod);
+        params.setAlgorithm(algorithm);
 
         final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(site), null, params);
         assertNotNull(resp);

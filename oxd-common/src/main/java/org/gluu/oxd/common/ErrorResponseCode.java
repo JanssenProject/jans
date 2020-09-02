@@ -108,7 +108,7 @@ public enum ErrorResponseCode {
     NO_CLIENT_ID_RETURNED(500, "no_client_id_returned", "`client_id` is not returned from OP host. Please check OP log file for error (oxauth.log)."),
     NO_CLIENT_SECRET_RETURNED(500, "no_client_secret_returned", "`client_secret` is not returned from OP host. Please check: 1) OP log file for error (oxauth.log) 2) whether `returnClientSecretOnRead` configuration property is set to true on OP host."),
     OXD_ACCESS_DENIED(403, "oxd_access_denied", "The caller is not allowed to make request to oxd. To allow add ip_address of caller in `bind_ip_addresses` field of `oxd-server.yml`."),
-    JWKS_GENERATION_DISABLE(500, "jwks_generation_disable", "Relying party JWKS generation is disabled in running oxd instance. To enable it set `enable_jwks_generation` field to true in `oxd-server.yml`.");
+    JWKS_GENERATION_DISABLE(500, "jwks_generation_disable", "Relying party JWKS generation is disabled in running oxd instance. To enable it set `enable_jwks_generation` field to true in `oxd-server.yml`. Also set values of `crypt_provider_key_store_path` and `crypt_provider_key_store_password`.");
 
     private final int httpStatus;
     private final String code;
