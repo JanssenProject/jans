@@ -1,6 +1,7 @@
 package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.client.TokenClient;
@@ -8,6 +9,9 @@ import org.gluu.oxauth.client.TokenRequest;
 import org.gluu.oxauth.client.TokenResponse;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.gluu.oxauth.model.jwk.Algorithm;
+import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
@@ -49,9 +53,36 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenRequest.setCode(params.getCode());
         tokenRequest.setRedirectUri(rp.getRedirectUri());
         tokenRequest.setAuthUsername(rp.getClientId());
-        tokenRequest.setAuthPassword(rp.getClientSecret());
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        AuthenticationMethod authenticationMethod = Strings.isNullOrEmpty(params.getAuthenticationMethod()) ? AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()) : AuthenticationMethod.fromString(params.getAuthenticationMethod());
 
+        if (authenticationMethod == null) {
+            LOG.debug("TokenEndpointAuthMethod is either not set or not valid. Setting `client_secret_basic` as AuthenticationMethod. TokenEndpointAuthMethod : {} ", rp.getTokenEndpointAuthMethod());
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        } else {
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()));
+        }
+
+        if (Lists.newArrayList(AuthenticationMethod.PRIVATE_KEY_JWT, AuthenticationMethod.TLS_CLIENT_AUTH, AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH).contains(authenticationMethod)) {
+
+            Algorithm algorithm = Strings.isNullOrEmpty(params.getAlgorithm()) ? Algorithm.fromString(rp.getTokenEndpointAuthSigningAlg()) : Algorithm.fromString(params.getAlgorithm());
+            if (algorithm == null) {
+                LOG.error("TokenEndpointAuthSigningAlg is either not set or not valid. TokenEndpointAuthSigningAlg : {} ", rp.getTokenEndpointAuthSigningAlg());
+                throw new HttpException(ErrorResponseCode.INVALID_SIGNATURE_ALGORITHM);
+            }
+
+            tokenRequest.setAlgorithm(SignatureAlgorithm.fromString(rp.getTokenEndpointAuthSigningAlg()));
+
+            if (!getConfigurationService().getConfiguration().getEnableJwksGeneration()) {
+                LOG.error("The Token Authentication Method is {}. Please set `enable_jwks_generation` (to `true`), `crypt_provider_key_store_path` and `crypt_provider_key_store_password` in `oxd-server.yml` to enable RP-jwks generation in oxd.", authenticationMethod.toString());
+                throw new HttpException(ErrorResponseCode.JWKS_GENERATION_DISABLE);
+            }
+
+            tokenRequest.setCryptoProvider(getKeyGeneratorService().getCryptoProvider());
+            tokenRequest.setKeyId(getKeyGeneratorService().getCryptoProvider().getKeyId(getKeyGeneratorService().getKeys(), algorithm, Use.SIGNATURE));
+            tokenRequest.setAudience(discoveryResponse.getTokenEndpoint());
+        } else {
+            tokenRequest.setAuthPassword(rp.getClientSecret());
+        }
 
         final TokenClient tokenClient = getOpClientFactory().createTokenClient(discoveryResponse.getTokenEndpoint());
         tokenClient.setExecutor(getHttpService().getClientExecutor());
