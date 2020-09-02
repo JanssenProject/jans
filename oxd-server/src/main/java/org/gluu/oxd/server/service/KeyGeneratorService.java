@@ -198,4 +198,8 @@ public class KeyGeneratorService {
 
         return (expiresInMinutes <= 0);
     }
+
+    public AbstractCryptoProvider getCryptoProvider() {
+        return cryptoProvider;
+    }
 }
