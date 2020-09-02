@@ -17,6 +17,10 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
     private String code;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "authentication_method")
+    private String authentication_method;
+    @JsonProperty(value = "algorithm")
+    private String algorithm;
 
     public GetTokensByCodeParams() {
     }
@@ -45,6 +49,22 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         this.oxd_id = oxdId;
     }
 
+    public String getAuthenticationMethod() {
+        return authentication_method;
+    }
+
+    public void setAuthenticationMethod(String authenticationMethod) {
+        this.authentication_method = authenticationMethod;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public void setAlgorithm(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,6 +89,8 @@ public class GetTokensByCodeParams implements HasOxdIdParams {
         sb.append("{code='").append(code).append('\'');
         sb.append(", oxd_id='").append(oxd_id).append('\'');
         sb.append(", state='").append(state).append('\'');
+        sb.append(", authentication_method='").append(authentication_method).append('\'');
+        sb.append(", algorithm='").append(algorithm).append('\'');
         sb.append('}');
         return sb.toString();
     }
