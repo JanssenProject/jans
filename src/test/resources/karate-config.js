@@ -29,80 +29,12 @@ function() {
 	    // health endpoint
 	    healthUrl: baseUrl + ':' + port + '/health',
 	    
-	    // backchannel endpoint
-	    backchannelUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/backchannel',
-	    
-	    // Metrics endpoint
-	    metricsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/metrics',
-	    
-	    // DynamicRegistration endpoint
-	    dynamicRegistrationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/dyn_registration',
-	    
-	    // ResponsesTypes endpoint
-	    responsesTypesUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/responses_types',
-	    
-	    // ResponseMode endpoint
-	    responseModeUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/responses_modes',
-	    
-	    // JanssenPKCS endpoint
-	    janssenPKCSUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/janssenpkcs',
-	    
-	    // UserInfo endpoint
-	    userInfoUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/user_info',
-	    
-	    // RequestObject endpoint
-	    requestObjectUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/request_object',
-	    
-	    // UmaConfiguration endpoint
-	    umaConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/uma',
-	    
-	    // idToken endpoint
-	    idTokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/idtoken',
-
-	    // SessionId endpoint
-	    sessionIdUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/sessionid',
-	    
-	    // pairwise configuration endpoint
-	    pairwiseUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/pairwise',
-	    
-	    // CIBA configuration endpoint
-	    cibaUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/ciba',
-	    
+	    	    
 	    // fido2 configuration endpoint
 	    fido2Url: baseUrl + ':' + port + '/api/v1/fido2/config',
 	    
-	    // CORS configuration filter endpoint
-	    corsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/cors',
-	    
 	    // ACRS - Default Authentication Mode configuration filter endpoint
-	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',
-	    
-	    // Endpoints - available oxAuth endpoints.
-	    endpointsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/endpoints',
-
-	    // Grant Type - Supported oxAuth Grant Type endpoints.
-	    grantUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/grant',
-	    
-	    // OpenId - OpenID Connect configuration endpoints.
-	    openidUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/openid',
-	    
-	    // Subject - Subject configuration endpoints.
-	    subjectUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/subject',
-	    
-	    // Token - Token configuration endpoints.
-	    tokenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/token',
-	    
-	    // Server-config - Server configuration endpoints.
-	    serverConfigUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server-config',
-	    
-	    // Server-cleanup - Server cleanup configuration endpoints.
-	    serverCleanupUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/server-cleanup',
-	    
-	    // Key Regeneration configuration endpoints.
-	    keyRegenUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/key-regen',
-	    
-	    // Expiration Notificator configuration endpoints.
-	    expirationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties/expiration',
+	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',     
 	    
 	    // Auth configuration endpoints.
 	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties',
