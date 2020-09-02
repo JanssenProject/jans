@@ -15,6 +15,7 @@ import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -53,6 +54,7 @@ public class OxauthConfigApiApplication {
 		logger.info("=================================================================");
 		logger.info("=============  STARTING API APPLICATION  ========================");
 		logger.info("=================================================================");
+		System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
 		configurationFactory.create();
 		persistenceEntryManagerInstance.get();
 		logger.info("=================================================================");
