@@ -19,7 +19,7 @@ import java.io.IOException;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.PROPERTIES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthConfigurationResource extends BaseResource {
+public class ConfigResource extends BaseResource {
 
 	@Inject
 	Logger log;

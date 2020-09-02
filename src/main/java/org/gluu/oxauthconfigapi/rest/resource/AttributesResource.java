@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public class AttributeResource extends BaseResource {
+public class AttributesResource extends BaseResource {
 
 	/**
 	 * 

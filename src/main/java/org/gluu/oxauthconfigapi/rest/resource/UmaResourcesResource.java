@@ -36,7 +36,7 @@ import org.gluu.oxtrust.service.uma.ResourceSetService;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.RESOURCES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class UMAResource extends BaseResource {
+public class UmaResourcesResource extends BaseResource {
 
 	/**
 	 * 
