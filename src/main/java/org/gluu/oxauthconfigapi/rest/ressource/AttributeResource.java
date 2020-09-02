@@ -24,8 +24,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.model.GluuAttribute;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -43,6 +41,10 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class AttributeResource extends BaseResource {
 
+	/**
+	 * 
+	 */
+	private static final String GLUU_ATTRIBUTE = "gluu attribute";
 	@Inject
 	AttributeService attributeService;
 	@Inject
@@ -80,23 +82,17 @@ public class AttributeResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		GluuAttribute attribute = attributeService.getAttributeByInum(inum);
-		if (attribute == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
 		return Response.ok(attribute).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createAttribute(@Valid GluuAttribute attribute) throws ApiException {
-		if (attribute.getName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
-		}
-		if (attribute.getDisplayName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
-		}
+	public Response createAttribute(@Valid GluuAttribute attribute) {
+		checkNotNull(attribute.getName(), AttributeNames.NAME);
+		checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
 		String inum = attributeService.generateInumForNewAttribute();
 		attribute.setInum(inum);
 		attribute.setDn(attributeService.getDnForAttribute(inum));
@@ -107,21 +103,13 @@ public class AttributeResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateAttribute(@Valid GluuAttribute attribute) throws ApiException {
+	public Response updateAttribute(@Valid GluuAttribute attribute) {
 		String inum = attribute.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(inum, GLUU_ATTRIBUTE);
+		checkNotNull(attribute.getName(), AttributeNames.NAME);
+		checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
 		GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
-		if (existingAttribute == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
-		if (attribute.getName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
-		}
-		if (attribute.getDisplayName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
-		}
+		checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
 		attribute.setInum(existingAttribute.getInum());
 		attribute.setBaseDn(attributeService.getDnForAttribute(inum));
 		attributeService.updateAttribute(attribute);
@@ -132,14 +120,11 @@ public class AttributeResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		GluuAttribute attribute = attributeService.getAttributeByInum(inum);
-		if (attribute != null) {
-			attributeService.removeAttribute(attribute);
-			return Response.noContent().build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
+		attributeService.removeAttribute(attribute);
+		return Response.noContent().build();
 	}
 
 }

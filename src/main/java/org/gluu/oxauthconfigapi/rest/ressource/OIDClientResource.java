@@ -4,17 +4,10 @@
 package org.gluu.oxauthconfigapi.rest.ressource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
@@ -30,9 +23,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -43,7 +33,6 @@ import org.gluu.oxtrust.service.ClientService;
 import org.gluu.oxtrust.service.EncryptionService;
 import org.gluu.oxtrust.service.ScopeService;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
-import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 
 /**
@@ -56,6 +45,11 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
 public class OIDClientResource extends BaseResource {
+	/**
+	 * 
+	 */
+	private static final String OPENID_CONNECT_CLIENT = "openid connect client";
+
 	@Inject
 	Logger logger;
 
@@ -84,22 +78,18 @@ public class OIDClientResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		OxAuthClient client = clientService.getClientByInum(inum);
-		if (client == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
 		return Response.ok(client).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createOpenIdConnect(@Valid OxAuthClient client) throws ApiException, EncryptionException {
+	public Response createOpenIdConnect(@Valid OxAuthClient client) throws EncryptionException {
 		String inum = clientService.generateInumForNewClient();
 		client.setInum(inum);
-		if (client.getDisplayName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
-		}
+		checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
 		if (client.getEncodedClientSecret() != null) {
 			client.setEncodedClientSecret(encryptionService.encrypt(client.getEncodedClientSecret()));
 		}
@@ -118,155 +108,34 @@ public class OIDClientResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateClient(@Valid OxAuthClient client) throws ApiException, EncryptionException {
+	public Response updateClient(@Valid OxAuthClient client) throws EncryptionException {
 		String inum = client.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.INUM);
-		}
-		if (client.getDisplayName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
-		}
+		checkNotNull(inum, AttributeNames.INUM);
+		checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
 		OxAuthClient existingClient = clientService.getClientByInum(inum);
-		if (existingClient != null) {
-			client.setInum(existingClient.getInum());
-			client.setBaseDn(clientService.getDnForClient(inum));
-			client.setDeletable(client.getExp() != null);
-			if (client.getOxAuthClientSecret() != null) {
-				client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
-			}
-			clientService.updateClient(client);
-			OxAuthClient result = clientService.getClientByInum(existingClient.getInum());
-			if (result.getEncodedClientSecret() != null) {
-				result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
-			}
-			return Response.ok(result).build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
+		checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
+		client.setInum(existingClient.getInum());
+		client.setBaseDn(clientService.getDnForClient(inum));
+		client.setDeletable(client.getExp() != null);
+		if (client.getOxAuthClientSecret() != null) {
+			client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
 		}
-	}
-
-	@PUT
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES)
-	public Response addScopesToClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull JsonObject object)
-			throws Exception {
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.INUM);
+		clientService.updateClient(client);
+		OxAuthClient result = clientService.getClientByInum(existingClient.getInum());
+		if (result.getEncodedClientSecret() != null) {
+			result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
 		}
-		JsonArray scopeInums = object.getJsonArray("scopes");
-		if (scopeInums == null || scopeInums.isEmpty()) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.SCOPES);
-		}
-		OxAuthClient existingClient = clientService.getClientByInum(inum);
-		JsonObjectBuilder builder = Json.createObjectBuilder();
-		if (existingClient != null) {
-			List<String> oxAuthScopes = existingClient.getOxAuthScopes();
-			if (oxAuthScopes == null) {
-				oxAuthScopes = new ArrayList<String>();
-			}
-			for (JsonValue scopeInum : scopeInums) {
-				String inumScope = ((JsonString) scopeInum).getString();
-				Scope scope = scopeService.getScopeByInum(inumScope);
-				if (scope != null) {
-					builder.add(inumScope, Response.Status.OK.getStatusCode());
-					oxAuthScopes.add(scope.getDn());
-				} else {
-					builder.add(inumScope, Response.Status.NOT_FOUND.getStatusCode());
-				}
-			}
-			existingClient.setOxAuthScopes(oxAuthScopes);
-			clientService.updateClient(existingClient);
-			return Response.ok(builder.build()).build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
-	}
-
-	@PUT
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	@Path(ApiConstants.INUM_PATH + ApiConstants.GRANT_TYPES)
-	public Response addGrantTypeToClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull JsonObject object)
-			throws ApiException {
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.INUM);
-		}
-		JsonArray grantTypesValues = object.getJsonArray("grant-types");
-		if (grantTypesValues == null || grantTypesValues.isEmpty()) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.GRANT_TYPES);
-		}
-		OxAuthClient existingClient = clientService.getClientByInum(inum);
-		JsonObjectBuilder builder = Json.createObjectBuilder();
-		if (existingClient != null) {
-			GrantType[] grantTypes = existingClient.getGrantTypes();
-			if (grantTypes == null) {
-				grantTypes = new GrantType[] {};
-			}
-			List<GrantType> myList = new ArrayList<GrantType>(Arrays.asList(grantTypes));
-			for (JsonValue grantType : grantTypesValues) {
-				String grantTypeName = ((JsonString) grantType).getString();
-				GrantType mGrantType = getGrantTypeFromName(grantTypeName);
-				if (mGrantType != null) {
-					builder.add(grantTypeName, Response.Status.OK.getStatusCode());
-					myList.add(mGrantType);
-				} else {
-					builder.add(grantTypeName, Response.Status.NOT_FOUND.getStatusCode());
-				}
-			}
-			GrantType[] types = new GrantType[myList.size()];
-			existingClient.setGrantTypes(myList.toArray(types));
-			clientService.updateClient(existingClient);
-			return Response.ok(builder.build()).build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, "openid client");
-		}
-	}
-
-	private GrantType getGrantTypeFromName(String grantTypeName) {
-		try {
-			GrantType mGrantType = GrantType.fromString(grantTypeName);
-			return mGrantType;
-		} catch (Exception e) {
-			return null;
-		}
-
-	}
-
-	@DELETE
-	@Path(ApiConstants.INUM_PATH + ApiConstants.SCOPES + ApiConstants.SEPARATOR + ApiConstants.SCOPE_INUM_PATH)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response removeScopeFromClient(@PathParam(ApiConstants.INUM) @NotNull String inum,
-			@PathParam(ApiConstants.SCOPE_INUM) @NotNull String scopeInum) throws Exception {
-		OxAuthClient client = clientService.getClientByInum(inum);
-		Scope scope = scopeService.getScopeByInum(scopeInum);
-		if (client != null) {
-			if (scope != null) {
-				List<String> oxAuthScopes = client.getOxAuthScopes();
-				if (oxAuthScopes == null) {
-					oxAuthScopes = new ArrayList<String>();
-				}
-				oxAuthScopes.remove(scope.getDn());
-				client.setOxAuthScopes(oxAuthScopes);
-				clientService.updateClient(client);
-				return Response.ok().build();
-			} else {
-				throw new ApiException(ApiExceptionType.NOT_FOUND, "scope");
-			}
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, "client");
-		}
+		return Response.ok(result).build();
 	}
 
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		OxAuthClient client = clientService.getClientByInum(inum);
-		if (client != null) {
-			clientService.removeClient(client);
-			return Response.noContent().build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
+		clientService.removeClient(client);
+		return Response.noContent().build();
 	}
 
 }

@@ -24,8 +24,6 @@ import javax.ws.rs.core.Response;
 
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -41,6 +39,11 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PersonAuthResource extends BaseResource {
+
+	/**
+	 * 
+	 */
+	private static final String CUSTOM_SCRIPT = "custom script";
 
 	@Inject
 	Logger logger;
@@ -64,23 +67,17 @@ public class PersonAuthResource extends BaseResource {
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response getAuthScriptByInum(@PathParam(ApiConstants.INUM) String inum) throws ApiException {
-		CustomScript attribute = customScriptService.getScriptByInum(inum);
-		if (attribute == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
-		return Response.ok(attribute).build();
+	public Response getAuthScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+		CustomScript script = customScriptService.getScriptByInum(inum);
+		checkResourceNotNull(script, CUSTOM_SCRIPT);
+		return Response.ok(script).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createPersonScript(@Valid CustomScript customScript) throws ApiException {
-		if (customScript.getName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
-		}
-		if (customScript.getDescription() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
-		}
+	public Response createPersonScript(@Valid CustomScript customScript) {
+		checkNotNull(customScript.getName(), AttributeNames.NAME);
+		checkNotNull(customScript.getDescription(), AttributeNames.DESCRIPTION);
 		String inum = INumGenerator.generate(2);
 		customScript.setInum(inum);
 		customScript.setDn(customScriptService.buildDn(inum));
@@ -92,21 +89,13 @@ public class PersonAuthResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updatePersonScript(@Valid CustomScript customScript) throws ApiException {
+	public Response updatePersonScript(@Valid CustomScript customScript) {
 		String inum = customScript.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
-		if (customScript.getName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.NAME);
-		}
-		if (customScript.getDescription() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DESCRIPTION);
-		}
+		checkResourceNotNull(inum, CUSTOM_SCRIPT);
+		checkNotNull(customScript.getName(), AttributeNames.NAME);
+		checkNotNull(customScript.getDescription(), AttributeNames.DESCRIPTION);
 		CustomScript existingScript = customScriptService.getScriptByInum(inum);
-		if (existingScript == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
 		customScript.setInum(existingScript.getInum());
 		customScript.setDn(existingScript.getDn());
 		customScript.setBaseDn(existingScript.getBaseDn());
@@ -119,13 +108,10 @@ public class PersonAuthResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		CustomScript customScript = customScriptService.getScriptByInum(inum);
-		if (customScript != null) {
-			customScriptService.remove(customScript);
-			return Response.noContent().build();
-		} else {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(customScript, CUSTOM_SCRIPT);
+		customScriptService.remove(customScript);
+		return Response.noContent().build();
 	}
 }

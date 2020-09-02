@@ -23,8 +23,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.oxauthconfigapi.exception.ApiException;
-import org.gluu.oxauthconfigapi.exception.ApiExceptionType;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
@@ -41,6 +39,11 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UMAScopeResource extends BaseResource {
+
+	/**
+	 * 
+	 */
+	private static final String UMA_SCOPE = "Uma scope";
 
 	@Inject
 	Logger logger;
@@ -64,23 +67,17 @@ public class UMAScopeResource extends BaseResource {
 	@GET
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response getUmaScopeByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		Scope scope = umaScopeService.getUmaScopeByInum(inum);
-		if (scope == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(scope, UMA_SCOPE);
 		return Response.ok(scope).build();
 	}
 
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createUmaScope(@Valid Scope scope) throws ApiException {
-		if (scope.getId() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.ID);
-		}
-		if (scope.getDisplayName() == null) {
-			throw new ApiException(ApiExceptionType.MISSING_ATTRIBUTE, AttributeNames.DISPLAY_NAME);
-		}
+	public Response createUmaScope(@Valid Scope scope) {
+		checkNotNull(scope.getId(), AttributeNames.ID);
+		checkNotNull(scope.getDisplayName(), AttributeNames.DISPLAY_NAME);
 		String inum = umaScopeService.generateInumForNewScope();
 		scope.setInum(inum);
 		scope.setDn(umaScopeService.getDnForScope(inum));
@@ -92,15 +89,11 @@ public class UMAScopeResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateUmaScope(@Valid Scope scope) throws ApiException {
+	public Response updateUmaScope(@Valid Scope scope) {
 		String inum = scope.getInum();
-		if (inum == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkNotNull(inum, AttributeNames.INUM);
 		Scope existingScope = umaScopeService.getUmaScopeByInum(inum);
-		if (existingScope == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(existingScope, UMA_SCOPE);
 		scope.setInum(existingScope.getInum());
 		scope.setBaseDn(umaScopeService.getDnForScope(inum));
 		scope.setScopeType(ScopeType.UMA);
@@ -112,11 +105,9 @@ public class UMAScopeResource extends BaseResource {
 	@DELETE
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) @NotNull String inum) throws ApiException {
+	public Response deleteUmaScope(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
 		Scope scope = umaScopeService.getUmaScopeByInum(inum);
-		if (scope == null) {
-			throw new ApiException(ApiExceptionType.NOT_FOUND, inum);
-		}
+		checkResourceNotNull(scope, UMA_SCOPE);
 		umaScopeService.removeUmaScope(scope);
 		return Response.status(Response.Status.NO_CONTENT).build();
 	}
