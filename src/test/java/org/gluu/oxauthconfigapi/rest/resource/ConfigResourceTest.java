@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.given;
  * @author Yuriy Zabrovarnyy
  */
 @QuarkusTest
-public class AuthConfigurationResourceTest {
+public class ConfigResourceTest {
 
     @Test
     public void patchAppConfigurationProperty() {
