@@ -25,6 +25,8 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
     private String state;
     @JsonProperty(value = "nonce")
     private String nonce;
+    @JsonProperty(value = "request")
+    private String request;
 
     public GetAuthorizationCodeParams() {
     }
@@ -75,6 +77,14 @@ public class GetAuthorizationCodeParams implements HasOxdIdParams {
 
     public void setAcrValues(List<String> acrValues) {
         this.acr_values = acrValues;
+    }
+
+    public String getRequest() {
+        return request;
+    }
+
+    public void setRequest(String request) {
+        this.request = request;
     }
 
     @Override
