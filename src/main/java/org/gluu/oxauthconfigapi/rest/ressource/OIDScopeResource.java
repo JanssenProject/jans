@@ -41,6 +41,11 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OIDScopeResource extends BaseResource {
+	/**
+	 * 
+	 */
+	private static final String OPENID_SCOPE = "openid connect scope";
+
 	@Inject
 	Logger logger;
 
@@ -68,7 +73,7 @@ public class OIDScopeResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	public Response getOpenIdScopeByInum(@NotNull @PathParam(ApiConstants.INUM) String inum) throws Exception {
 		Scope scope = scopeService.getScopeByInum(inum);
-		checkResourceNotNull(scope, "scope");
+		checkResourceNotNull(scope, OPENID_SCOPE);
 		return Response.ok(scope).build();
 	}
 
@@ -97,9 +102,9 @@ public class OIDScopeResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateOpenIdConnectScope(@Valid Scope scope) throws Exception {
 		String inum = scope.getInum();
-		checkNotNull(inum, "scope");
+		checkNotNull(inum, OPENID_SCOPE);
 		Scope existingScope = scopeService.getScopeByInum(inum);
-		checkResourceNotNull(existingScope, "scope");
+		checkResourceNotNull(existingScope, OPENID_SCOPE);
 		if (scope.getScopeType() == null) {
 			scope.setScopeType(ScopeType.OAUTH);
 		}
@@ -118,7 +123,7 @@ public class OIDScopeResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
 		Scope scope = scopeService.getScopeByInum(inum);
-		checkResourceNotNull(scope, "scope");
+		checkResourceNotNull(scope, OPENID_SCOPE);
 		scopeService.removeScope(scope);
 		return Response.noContent().build();
 	}
