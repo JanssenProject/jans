@@ -257,7 +257,7 @@
 				<version>${surefire-plugin.version}</version>
 				<configuration>
                     <systemPropertyVariables>
-                        <quarkus.http.test-port>8087</quarkus.http.test-port>
+                        <quarkus.http.test-port>8083</quarkus.http.test-port>
                     </systemPropertyVariables>
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
