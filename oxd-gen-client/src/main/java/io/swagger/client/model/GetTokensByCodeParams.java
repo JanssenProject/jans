@@ -36,6 +36,12 @@ public class GetTokensByCodeParams {
   @SerializedName("state")
   private String state = null;
 
+  @SerializedName("authentication_method")
+  private String authenticationMethod = null;
+
+  @SerializedName("algorithm")
+  private String algorithm = null;
+
   public GetTokensByCodeParams oxdId(String oxdId) {
     this.oxdId = oxdId;
     return this;
@@ -90,6 +96,42 @@ public class GetTokensByCodeParams {
     this.state = state;
   }
 
+  public GetTokensByCodeParams authenticationMethod(String authenticationMethod) {
+    this.authenticationMethod = authenticationMethod;
+    return this;
+  }
+
+   /**
+   * if value is missed then basic authentication is used. Otherwise it&#x27;s possible to set &#x60;private_key_jwt&#x60; value for Private Key authentication.
+   * @return authenticationMethod
+  **/
+  @Schema(description = "if value is missed then basic authentication is used. Otherwise it's possible to set `private_key_jwt` value for Private Key authentication.")
+  public String getAuthenticationMethod() {
+    return authenticationMethod;
+  }
+
+  public void setAuthenticationMethod(String authenticationMethod) {
+    this.authenticationMethod = authenticationMethod;
+  }
+
+  public GetTokensByCodeParams algorithm(String algorithm) {
+    this.algorithm = algorithm;
+    return this;
+  }
+
+   /**
+   * optional but is required if authentication_method&#x3D;private_key_jwt. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512
+   * @return algorithm
+  **/
+  @Schema(description = "optional but is required if authentication_method=private_key_jwt. Valid values are none, HS256, HS384, HS512, RS256, RS384, RS512, ES256, ES384, ES512")
+  public String getAlgorithm() {
+    return algorithm;
+  }
+
+  public void setAlgorithm(String algorithm) {
+    this.algorithm = algorithm;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -102,12 +144,14 @@ public class GetTokensByCodeParams {
     GetTokensByCodeParams getTokensByCodeParams = (GetTokensByCodeParams) o;
     return Objects.equals(this.oxdId, getTokensByCodeParams.oxdId) &&
         Objects.equals(this.code, getTokensByCodeParams.code) &&
-        Objects.equals(this.state, getTokensByCodeParams.state);
+        Objects.equals(this.state, getTokensByCodeParams.state) &&
+        Objects.equals(this.authenticationMethod, getTokensByCodeParams.authenticationMethod) &&
+        Objects.equals(this.algorithm, getTokensByCodeParams.algorithm);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(oxdId, code, state);
+    return Objects.hash(oxdId, code, state, authenticationMethod, algorithm);
   }
 
 
@@ -119,6 +163,8 @@ public class GetTokensByCodeParams {
     sb.append("    oxdId: ").append(toIndentedString(oxdId)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
+    sb.append("    authenticationMethod: ").append(toIndentedString(authenticationMethod)).append("\n");
+    sb.append("    algorithm: ").append(toIndentedString(algorithm)).append("\n");
     sb.append("}");
     return sb.toString();
   }
