@@ -82,8 +82,8 @@ public class OpenIdConfigurationResource extends BaseResource {
 				appConfiguration.getCustomHeadersWithAuthorizationResponse());
 		openIdConfiguration
 				.setFrontChannelLogoutSessionSupported(appConfiguration.getFrontChannelLogoutSessionSupported());
-		openIdConfiguration
-				.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
+		//openIdConfiguration
+			//	.setUseCacheForAllImplicitFlowObjects(appConfiguration.getUseCacheForAllImplicitFlowObjects());
 		openIdConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
 				appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
 		openIdConfiguration.setOpenidScopeBackwardCompatibility(appConfiguration.getOpenidScopeBackwardCompatibility());
@@ -145,8 +145,8 @@ public class OpenIdConfigurationResource extends BaseResource {
 				openIdConfiguration.getCustomHeadersWithAuthorizationResponse());
 		appConfiguration
 				.setFrontChannelLogoutSessionSupported(openIdConfiguration.getFrontChannelLogoutSessionSupported());
-		appConfiguration
-				.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
+	//	appConfiguration
+		//		.setUseCacheForAllImplicitFlowObjects(openIdConfiguration.getUseCacheForAllImplicitFlowObjects());
 		appConfiguration.setInvalidateSessionCookiesAfterAuthorizationFlow(
 				openIdConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow());
 		appConfiguration.setOpenidScopeBackwardCompatibility(openIdConfiguration.getOpenidScopeBackwardCompatibility());
