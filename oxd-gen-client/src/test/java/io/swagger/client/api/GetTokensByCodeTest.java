@@ -8,6 +8,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
+import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxd.common.SeleniumTestUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -40,6 +41,19 @@ public class GetTokensByCodeTest {
         refreshToken(tokensResponse, client, site);
     }
 
+    @Parameters({"opHost", "redirectUrls", "userId", "userSecret"})
+    @Test
+    public void withAuthenticationMethod_shouldGetTokenInResponse(String opHost, String redirectUrls, String userId, String userSecret) throws Exception {
+
+        DevelopersApi client = Tester.api();
+
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+
+        GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString(), AuthenticationMethod.PRIVATE_KEY_JWT.toString(), "PS256");
+
+        refreshToken(tokensResponse, client, site);
+    }
+
     private static void refreshToken(GetTokensByCodeResponse resp, DevelopersApi client, RegisterSiteResponse site) throws Exception {
         notEmpty(resp.getRefreshToken());
 
@@ -59,6 +73,10 @@ public class GetTokensByCodeTest {
     }
 
     private static GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce) throws Exception {
+        return tokenByCode(client, site, opHost, userId, userSecret, clientId, redirectUrls, nonce, null, null);
+    }
+
+    private static GetTokensByCodeResponse tokenByCode(DevelopersApi client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce, String authenticationMethod, String algorithm) throws Exception {
 
         final String state = CoreUtils.secureRandomString();
 
@@ -72,6 +90,8 @@ public class GetTokensByCodeTest {
         params.setOxdId(site.getOxdId());
         params.setCode(code);
         params.setState(state);
+        params.setAuthenticationMethod(authenticationMethod);
+        params.setAlgorithm(algorithm);
 
         final GetTokensByCodeResponse resp = client.getTokensByCode(params, authorizationStr, null);
         assertNotNull(resp);
