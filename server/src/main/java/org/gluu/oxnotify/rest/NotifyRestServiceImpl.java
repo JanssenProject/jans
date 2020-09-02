@@ -189,10 +189,17 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		
 		// Update modification date
 		customUserData.setModificationDate(newCustomUserData.getCreationDate());
+		
+		// Remove old appUserData if needed to conform 2Kb size constrain
+		String customUserDataJson = applicationService.asJson(customUserData);
+		while ((customUserDataJson.length() > 2048) && (customUserData.getAppUserData().size() > 0)) {
+			customUserData.getAppUserData().remove(0);
+			customUserDataJson = applicationService.asJson(customUserData);
+		}
 
 		// Update custom user data
 		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
-				.withEndpointArn(endpoint).addAttributesEntry("CustomUserData", applicationService.asJson(customUserData));
+				.withEndpointArn(endpoint).addAttributesEntry("CustomUserData", customUserDataJson);
 
 		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 
