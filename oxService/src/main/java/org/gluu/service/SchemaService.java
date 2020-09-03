@@ -15,20 +15,14 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.model.SchemaEntry;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.hybrid.impl.HybridEntryManager;
 import org.gluu.persist.hybrid.impl.HybridEntryManagerFactory;
-import org.gluu.persist.hybrid.impl.HybridPersistenceOperationService;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.persist.ldap.operation.LdapOperationService;
-import org.gluu.persist.operation.PersistenceOperationService;
-import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.util.StringHelper;
 import org.gluu.util.exception.InvalidSchemaUpdateException;
 import org.slf4j.Logger;
@@ -51,8 +45,6 @@ public class SchemaService {
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
-    @Inject
-    private Instance<HybridEntryManager> hybridEntryManagerInstance;
 
     @Inject
     private DataSourceTypeService dataSourceTypeService;
