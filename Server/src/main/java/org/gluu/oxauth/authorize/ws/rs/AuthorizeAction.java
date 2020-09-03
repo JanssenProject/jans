@@ -54,6 +54,7 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -156,6 +157,9 @@ public class AuthorizeAction {
 	@Inject
 	private Identity identity;
 
+    @Inject
+    private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -241,6 +245,14 @@ public class AuthorizeAction {
 
         SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
+
+        try {
+            redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, session != null ? session.getSessionAttributes().get(SESSION_USER_CODE) : null, (HttpServletRequest) externalContext.getRequest());
+        } catch (WebApplicationException e) {
+            log.error(e.getMessage(), e);
+            permissionDenied();
+            return;
+        }
 
         try {
             session = sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(session, acrValues);
