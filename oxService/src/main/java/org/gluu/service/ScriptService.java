@@ -5,7 +5,9 @@ package org.gluu.service;
 
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
@@ -19,6 +21,8 @@ import org.gluu.util.StringHelper;
  * @author Mougang T.Gasmyr
  *
  */
+@ApplicationScoped
+@Named
 public class ScriptService extends AbstractCustomScriptService {
 
 	@Inject
