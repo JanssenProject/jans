@@ -130,6 +130,8 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         showResponse("requestEndSessionStep3", response, entity);
 
         assertEquals(response.getStatus(), 302, "Unexpected response code.");
-        assertEquals(response.getLocation(), new URI(postLogoutRedirectUri));
+        assertNotNull(response.getLocation());
+        assertTrue(response.getLocation().toString().contains(postLogoutRedirectUri));
+        assertTrue(response.getLocation().toString().contains("state=" + state));
     }
 }
