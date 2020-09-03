@@ -117,11 +117,6 @@ public class ScriptService extends AbstractCustomScriptService {
 		return String.format("inum=%s,ou=scripts,%s", inum, orgDn);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.gluu.service.custom.script.AbstractCustomScriptService#baseDn()
-	 */
 	@Override
 	public String baseDn() {
 		return String.format("ou=scripts,%s", organizationService.getDnForOrganization(null));
