@@ -214,12 +214,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
-            checkAcrChanged(acrValuesStr, prompts, sessionUser);
             updateSessionForROPC(httpRequest, sessionUser);
 
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state);
             String deviceAuthzUserCode = deviceAuthorizationService.getUserCodeFromSession(httpRequest);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, deviceAuthzUserCode, httpRequest);
+            checkAcrChanged(acrValuesStr, prompts, sessionUser); // check after redirect uri is validated
+
             RedirectUriResponse redirectUriResponse = new RedirectUriResponse(new RedirectUri(redirectUri, responseTypes, responseMode), state, httpRequest, errorResponseFactory);
             redirectUriResponse.setFapiCompatible(appConfiguration.getFapiCompatibility());
 
