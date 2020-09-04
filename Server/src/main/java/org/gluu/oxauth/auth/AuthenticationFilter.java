@@ -177,7 +177,7 @@ public class AuthenticationFilter implements Filter {
                     out.print(entity);
                     out.flush();
                 }
-            } else if (authorizationHeader != null) {
+            } else if (authorizationHeader != null && !tokenService.isNegotiateAuthToken(authorizationHeader)) {
                 if (tokenService.isBearerAuthToken(authorizationHeader)) {
                     processBearerAuth(httpRequest, httpResponse, filterChain);
                 } else if (tokenService.isBasicAuthToken(authorizationHeader)) {

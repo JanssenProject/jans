@@ -3,7 +3,8 @@ package org.gluu.oxauth.model.token;
 public enum  HttpAuthTokenType {
     Basic("Basic "),
     Bearer("Bearer "),
-    AccessToken("AccessToken ");
+    AccessToken("AccessToken "),
+    Negotiate("Negotiate ");
 
     private final String prefix;
 
