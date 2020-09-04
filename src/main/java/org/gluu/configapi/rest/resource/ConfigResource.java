@@ -32,7 +32,7 @@ public class ConfigResource extends BaseResource {
 	public Response getAppConfiguration() throws IOException {		
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		JSONObject json = new JSONObject(appConfiguration);
-		return Response.ok(json).build();
+		return Response.ok(appConfiguration).build();
 	
 	}
 
@@ -56,7 +56,7 @@ public class ConfigResource extends BaseResource {
 
         jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
 
-        return Response.ok(jsonAfter).build();
+        return Response.ok(appConfiguration).build();
      
     }
 }
