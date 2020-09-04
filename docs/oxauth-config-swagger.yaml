@@ -39,7 +39,7 @@ tags:
   - name: OAuth - UMA Scopes
   - name: OAuth - UMA Resources
 paths:
-  /api/v1/oxauth/config/properties:
+  /api/v1/oxauth/config/oxauth:
     get:
       summary: Gets all oxAuth configuration properties.
       description: Gets all oxAuth configuration properties.

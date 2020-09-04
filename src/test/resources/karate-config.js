@@ -37,7 +37,7 @@ function() {
 	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',     
 	    
 	    // Auth configuration endpoints.
-	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties',
+	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/oxauth',
 	    
 	    // Custom Script configuration endpoints.
 	    scriptsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/scripts',
