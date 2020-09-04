@@ -26,7 +26,7 @@ And  header Authorization = 'Bearer ' + accessToken
 And param pattern = 'Passport Resource'
 When method GET
 Then status 200
-And assert response.length == 1
+#And assert response.length == 1
 
 
 @CreateUpdateDelete

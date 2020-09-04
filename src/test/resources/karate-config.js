@@ -39,6 +39,9 @@ function() {
 	    // Auth configuration endpoints.
 	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/properties',
 	    
+	    // Custom Script configuration endpoints.
+	    scriptsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/scripts',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
@@ -58,7 +61,7 @@ function() {
 	    attributes_url: baseUrl + ':' + port + '/api/v1/oxauth/attributes',
 	    
 	    // Person Scripts
-	    personscripts_url: baseUrl + ':' + port + '/api/v1/oxauth/scripts/person_authn',
+	   // personscripts_url: baseUrl + ':' + port + '/api/v1/oxauth/scripts/person_authn',
 	    
 	    // Person Scripts
 	    smtp_url: baseUrl + ':' + port + '/api/v1/oxauth/config/smtp',
