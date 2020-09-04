@@ -47,6 +47,10 @@ public class TokenService {
         return isToken(authorizationParameter, HttpAuthTokenType.Bearer);
     }
 
+    public boolean isNegotiateAuthToken(@Nullable String authorizationParameter) {
+        return isToken(authorizationParameter,HttpAuthTokenType.Negotiate);
+    }
+
     @Nullable
     public String getBasicToken(@Nullable String authorizationParameter) {
         return extractToken(authorizationParameter, HttpAuthTokenType.Basic);
