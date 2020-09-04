@@ -4,9 +4,9 @@
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.gluu.oxauthconfigapi</groupId>
-	<artifactId>oxauth-config-api</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<groupId>org.gluu.configapi</groupId>
+	<artifactId>config-api</artifactId>
+	<version>5.0.0-SNAPSHOT</version>
 	<properties>
 		<compiler-plugin.version>3.8.1</compiler-plugin.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
