@@ -29,7 +29,7 @@ import java.lang.annotation.Annotation;
 import java.util.Properties;
 
 @ApplicationScoped
-public class OxauthConfigApiApplication {
+public class ConfigApiApplication {
 
 	@Inject
 	Logger logger;
