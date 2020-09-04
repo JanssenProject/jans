@@ -20,7 +20,7 @@ public class ConfigResourceTest {
                 .contentType(MediaType.APPLICATION_JSON_PATCH_JSON)
                 .header("Authorization", "Bearer 12345", null)
                 .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")
-                .patch("/api/v1/oxauth/config/properties")
+                .patch("/api/v1/oxauth/config/oxauth")
                 .then()
                 .statusCode(200);
     }
