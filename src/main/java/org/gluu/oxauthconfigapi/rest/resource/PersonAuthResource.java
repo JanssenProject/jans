@@ -27,7 +27,7 @@ import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.oxauthconfigapi.filters.ProtectedApi;
 import org.gluu.oxauthconfigapi.util.ApiConstants;
 import org.gluu.oxauthconfigapi.util.AttributeNames;
-import org.gluu.oxtrust.service.custom.CustomScriptService;
+import org.gluu.service.ScriptService;
 import org.gluu.util.INumGenerator;
 import org.slf4j.Logger;
 
@@ -49,7 +49,7 @@ public class PersonAuthResource extends BaseResource {
 	Logger logger;
 
 	@Inject
-	CustomScriptService customScriptService;
+	ScriptService customScriptService;
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
