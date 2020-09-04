@@ -23,7 +23,7 @@ public class BaseResource {
 
 	public static <T> void checkResourceNotNull(T resource, String objectName) {
 		if (resource == null) {
-			throw new NotFoundException("The requested " + objectName + " doesn't exist");
+			throw new NotFoundException(getNotFoundError(objectName));
 		}
 	}
 
@@ -48,6 +48,12 @@ public class BaseResource {
 				.withMessage(ApiConstants.MISSING_ATTRIBUTE_MESSAGE)
 				.andDescription("The attribute " + attributeName + " is required for this operation").build();
 		return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+	}
+
+	private static Response getNotFoundError(String objectName) {
+		ApiError error = new ApiError.ErrorBuilder().withCode(String.valueOf(Response.Status.NOT_FOUND.getStatusCode()))
+				.withMessage("The requested " + objectName + " doesn't exist").build();
+		return Response.status(Response.Status.NOT_FOUND).entity(error).build();
 	}
 
 }
