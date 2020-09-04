@@ -13,7 +13,7 @@ from net.shibboleth.idp.attribute import IdPAttribute, StringAttributeValue
 from net.shibboleth.idp.authn.context import AuthenticationContext, ExternalAuthenticationContext
 from net.shibboleth.idp.attribute.context import AttributeContext
 from javax.security.auth import Subject
-from java.util import Collections, HashSet, ArrayList, Arrays
+from java.util import Collections, HashMap, HashSet, ArrayList, Arrays
 
 import java
 
@@ -98,4 +98,19 @@ class IdpExtension(IdpType):
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"
+        attributeContext = context.getAttributeContext()
+
+        customAttributes = HashMap()
+        customAttributes.putAll(attributeContext.getIdPAttributes())
+
+        # Remove givenName attribute
+        customAttributes.remove("givenName")
+
+        # Update surname attribute
+        if customAttributes.containsKey("sn"):
+            customAttributes.get("sn").setValues(ArrayList(Arrays.asList(StringAttributeValue("Dummy"))))
+        
+        # Set updated attributes
+        attributeContext.setIdPAttributes(customAttributes.values())
+
         return True
