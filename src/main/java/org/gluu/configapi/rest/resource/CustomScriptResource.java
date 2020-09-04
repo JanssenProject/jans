@@ -43,55 +43,38 @@ public class CustomScriptResource extends BaseResource {
 	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getAllCustomScripts()
-	{
-		System.out.println(" CustomScriptResource::getAllCustomScripts()");
+	public Response getAllCustomScripts() {
 		List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
-		System.out.println(" CustomScriptResource::getAllCustomScripts() - customScripts = "+customScripts);
 		return Response.ok(customScripts).build();
 	}
 	
-	@GET
-	@Path(ApiConstants.TYPE_PATH)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getScriptByType(@PathParam(ApiConstants.TYPE) @NotNull String type)
-	{
-		System.out.println(" CustomScriptResource::getScriptByType() - type = "+type);
-		System.out.println(" CustomScriptResource::getScriptByType() - CustomScriptType.getByValue(type) = "+CustomScriptType.getByValue(type));
-		List<CustomScript> customScripts = this.customScriptService.findScriptByType(CustomScriptType.getByValue(type));
-		System.out.println(" CustomScriptResource::getScriptByType() - customScripts = "+customScripts);	
-		if (customScripts!=null && !customScripts.isEmpty()) 
-			return Response.ok(customScripts).build();
-		else
-			return Response.status(Response.Status.NOT_FOUND).build();
 		
-	}	
-	
 	@GET
-	@Path(ApiConstants.TYPE_PATH)
+	@Path("/" + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })	
 	public Response getCustomScriptsBygetCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
 			@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit) {
-		System.out.println(" CustomScriptResource::getCustomScriptsBygetCustomScriptsByTypePattern() - type = "+type+" , pattern = "+pattern+" , limit = "+limit);
 		List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
-		System.out.println(" CustomScriptResource::getCustomScriptsBygetCustomScriptsByTypePattern() - customScripts = "+customScripts);
 		if (customScripts!=null && !customScripts.isEmpty()) 
 			return Response.ok(customScripts).build();
 		else
-			return Response.status(Response.Status.NOT_FOUND).build();
-		
+			return Response.status(Response.Status.NOT_FOUND).build();		
 	}
+
 
 	@GET
+	@Path("/" +ApiConstants.INUM + "/"+ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
-	@Path(ApiConstants.INUM_PATH)
 	public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		CustomScript script = customScriptService.getScriptByInum(inum);
-		checkResourceNotNull(script, CUSTOM_SCRIPT);
-		return Response.ok(script).build();
+		CustomScript script = this.customScriptService.getScriptByInum(inum);
+		if (script != null) {
+			return Response.ok(script).build();
+		} else {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 	}
-
+	
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createPersonScript(@Valid CustomScript customScript) {
@@ -103,8 +86,7 @@ public class CustomScriptResource extends BaseResource {
 		customScript.setDn(customScriptService.buildDn(inum));
 		customScript.setInum(inum);
 		customScriptService.add(customScript);
-		return Response.ok(customScriptService.getScriptByInum(inum)).build();
-
+		return Response.status(Response.Status.CREATED).entity(customScript).build();
 	}	
 
 	@PUT
@@ -117,7 +99,7 @@ public class CustomScriptResource extends BaseResource {
 		if (existingScript != null) {
 			customScript.setInum(existingScript.getInum());
 			customScriptService.update(customScript);
-			return Response.ok().build();
+			return Response.ok(customScript).build();
 		} else {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
@@ -131,7 +113,7 @@ public class CustomScriptResource extends BaseResource {
 		CustomScript existingScript = customScriptService.getScriptByInum(inum);
 		if (existingScript != null) {
 			customScriptService.remove(existingScript);
-			return Response.ok().build();
+			return Response.noContent().build();
 		} else {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
