@@ -126,9 +126,9 @@ public class ScopesResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
 	public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+		Scope existingScope = scopeService.getScopeByInum(inum);
+		checkResourceNotNull(existingScope, OPENID_SCOPE);
 		try {
-			Scope existingScope = scopeService.getScopeByInum(inum);
-			checkResourceNotNull(existingScope, OPENID_SCOPE);
 			existingScope = Jackson.applyPatch(pathString, existingScope);
 			scopeService.updateScope(existingScope);
 			return Response.ok(existingScope).build();
