@@ -9,6 +9,7 @@ import sys
 import base64
 import platform
 import glob
+import csv
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,9 +26,19 @@ if ((3, 0) <= sys.version_info <= (3, 9)):
 elif ((2, 0) <= sys.version_info <= (2, 9)):
     from urlparse import urlparse
 
-p = platform.linux_distribution()
-os_type = p[0].split()[0].lower()
-os_version = p[1].split('.')[0]
+os_type, os_version = '', ''
+with open("/etc/os-release") as f:
+    reader = csv.reader(f, delimiter="=")
+    for row in reader:
+        if row:
+            if row[0] == 'ID':
+                os_type = row[1].lower()
+                if os_type in  ('rhel', 'redhat'):
+                    os_type = 'red'
+            elif row[0] == 'VERSION_ID':
+                os_version = row[1].split('.')[0]
+
+print("Detected OS", os_type, os_version)
 
 
 if os.path.exists('/etc/yum.repos.d/'):
