@@ -2,14 +2,9 @@ package org.gluu.oxauthconfigapi.util;
 
 public class ApiConstants {
 
-	private ApiConstants() {
-	}
-
 	public static final String BASE_API_URL = "/oxauth";
 	public static final String CONFIG = "/config";
 	public static final String PROPERTIES = "/properties";
-	public static final String JSON_KEY_PATH = "{json_key}";
-	public static final String JSON_KEY = "json_key";
 	public static final String LOGGING = "/logging";
 	public static final String METRICS = "/metrics";
 	public static final String BACKCHANNEL = "/backchannel";
@@ -48,15 +43,14 @@ public class ApiConstants {
 	public static final String PERSON_AUTH = "/person_authn";
 	public static final String INUM_PATH = "{inum}";
 	public static final String SCOPE_INUM_PATH = "{scope_inum}";
+	public static final String TYPE_PATH = "/{type}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
 	public static final String STATUS = "status";
 	public static final String INUM = "inum";
 	public static final String SCOPE_INUM = "scope_inum";
-	public static final String OPERATION = "operation";
-	public static final String PATH = "path";
-	public static final String JSON = "json";
+	public static final String TYPE = "type";
 
 	public static final String ALL = "all";
 	public static final String ACTIVE = "active";
