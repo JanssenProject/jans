@@ -1,4 +1,4 @@
-package org.gluu.oxauthconfigapi.rest.resource;
+package org.gluu.configapi.rest.resource;
 
 import java.util.List;
 import java.util.Objects;
@@ -23,8 +23,8 @@ import javax.ws.rs.core.Response;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
 import org.gluu.service.ScriptService;
-import org.gluu.oxauthconfigapi.filters.ProtectedApi;
-import org.gluu.oxauthconfigapi.util.ApiConstants;
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.util.ApiConstants;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
