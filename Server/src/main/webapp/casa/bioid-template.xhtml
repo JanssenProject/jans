@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<f:view transient="true" locale="#{language.locale}">
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>BWS Unified User Interface</title>
+       
+			<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+			<!--link rel="icon" href="${identity.getWorkingParameter('casa_faviconUrl')}" /-->
+			<link rel="icon" href="#{request.contextPath}/servlet/favicon" type='image/x-icon' />
+			<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/jquery-3.4.1.min.js" />
+			<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/platform.js" />
+
+			<!-- order of stylesheets is important, do not change -->
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}/styles/bootstrap.min.css" />
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}${identity.getWorkingParameter('casa_prefix')}/styles/gluu/style.css" />
+			<link rel="stylesheet" href="${identity.getWorkingParameter('casa_contextPath')}/styles/tachyons.min.css" />
+
+			<!-- load custom branding css snippets -->
+			<style>${identity.getWorkingParameter('casa_extraCss')}</style>
+			<style>
+				.focused-label-big {
+					top: 0;
+					left: 0;
+					right: 0; 
+					display: flex;
+					align-items: center;
+					position: absolute;
+					font-size: .9rem;
+					cursor: text;
+					transition: .2s ease-in-out;
+					box-sizing: border-box;
+					height: .6rem;
+					width: 100%;
+					pointer-events: none;
+					margin-top: .25rem;
+				}
+				.focused-text:valid + .focused-label-big,
+				.focused-text:focus + .focused-label-big {
+					top: -28px;
+					font-size: .7rem;
+					color: #15b565;
+				}
+				.media img {
+					width: 54px;
+					height: 54px;
+					border: 1px solid #dfdfdf;
+					background-color: #e7e7e7;
+					border-radius: 50%;
+				}
+				.mh-3r {
+					max-height: 3rem;
+				}
+			</style>
+
+			
+       	<script src="${identity.getWorkingParameter('casa_contextPath')}/scripts/gluu/main-util.js" />
+        <ui:insert name="head"/>
+    </h:head>
+    <h:body>
+        <div class="body">
+        	
+
+			<h:messages id="messages" globalOnly="true" styleClass="message"
+                        errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg"
+                        rendered="#{showGlobalMessages != 'false'}"/>
+            <ui:insert name="body"/>
+        </div>
+    </h:body>
+</f:view>
+</html>
