@@ -101,6 +101,11 @@ public class GetTokensByCodeTest {
     }
 
     public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
+                                     String nonce, String authorization) throws Exception {
+        return codeRequest(client, opHost, oxdId, userId, userSecret, clientId, redirectUrls, state, nonce, authorization, null);
+    }
+
+    public static String codeRequest(DevelopersApi client, String opHost, String oxdId, String userId, String userSecret, String clientId, String redirectUrls, String state,
                                      String nonce, String authorization, String authorizationOxdId) throws Exception {
         SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
 
