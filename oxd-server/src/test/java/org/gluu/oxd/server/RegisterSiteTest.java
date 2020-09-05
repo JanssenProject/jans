@@ -13,9 +13,9 @@ import org.testng.annotations.Test;
 
 import java.util.*;
 
+import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
-import static org.gluu.oxd.server.TestUtils.notEmpty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,6 +35,7 @@ public class RegisterSiteTest {
         notEmpty(resp.getOxdId());
         site = resp;
     }
+
     @Parameters({"host", "opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls"})
     @Test
     public static void register_withOpConfigurationEndpoint(String host, String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls) {

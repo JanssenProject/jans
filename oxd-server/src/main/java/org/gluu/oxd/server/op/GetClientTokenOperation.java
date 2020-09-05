@@ -2,8 +2,6 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.TokenClient;
 import org.gluu.oxauth.client.TokenRequest;
 import org.gluu.oxauth.client.TokenResponse;
@@ -18,6 +16,8 @@ import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
 import org.gluu.oxd.server.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;

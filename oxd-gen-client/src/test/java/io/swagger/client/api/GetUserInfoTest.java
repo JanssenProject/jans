@@ -5,9 +5,9 @@ import io.swagger.client.model.GetTokensByCodeParams;
 import io.swagger.client.model.GetTokensByCodeResponse;
 import io.swagger.client.model.GetUserInfoParams;
 import io.swagger.client.model.RegisterSiteResponse;
+import org.gluu.oxd.common.CoreUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxd.common.CoreUtils;
 
 import java.util.Map;
 
@@ -18,7 +18,6 @@ import static org.testng.Assert.*;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Shoeb
- *
  * @version 10/25/2018
  */
 
@@ -55,7 +54,7 @@ public class GetUserInfoTest {
         params.setAccessToken("blahBlah"); // invalid token
 
         final ApiResponse<Map<String, Object>> apiResponse = client.getUserInfoWithHttpInfo(params, getAuthorization(site), null);
-        assertEquals(apiResponse.getStatusCode() , 200); // fixme should be 401
+        assertEquals(apiResponse.getStatusCode(), 200); // fixme should be 401
 
         assertNotNull(apiResponse.getData());
         assertNull(apiResponse.getData().get("sub"));
