@@ -9,13 +9,13 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import io.swagger.client.model.*;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
+import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.SeleniumTestUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxd.common.CoreUtils;
 
 import static io.swagger.client.api.Tester.notEmpty;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Test class to test refresh token and related end points

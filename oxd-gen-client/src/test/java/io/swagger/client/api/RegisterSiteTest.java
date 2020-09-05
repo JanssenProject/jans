@@ -33,7 +33,7 @@ public class RegisterSiteTest {
 
     @Parameters({"opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register(String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public void register(String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
         DevelopersApi client = api();
 
         registerSite(client, opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
@@ -42,7 +42,7 @@ public class RegisterSiteTest {
 
     @Parameters({"opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register_withOpConfigurationEndpoint(String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public void register_withOpConfigurationEndpoint(String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
         DevelopersApi client = api();
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
