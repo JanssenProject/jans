@@ -1,7 +1,5 @@
 package org.gluu.oxd.server;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxd.client.ClientInterface;
@@ -10,7 +8,6 @@ import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.SeleniumTestUtils;
 import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
-import org.gluu.oxd.common.params.GetClientTokenParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
@@ -22,7 +19,6 @@ import javax.ws.rs.BadRequestException;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -235,6 +231,10 @@ public class GetTokensByCodeTest {
         }
 
         return resp;
+    }
+
+    public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
+        return codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
     }
 
     public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, String accessToken, String authorizationOxdId) {
