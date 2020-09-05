@@ -59,7 +59,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             LOG.debug("TokenEndpointAuthMethod is either not set or not valid. Setting `client_secret_basic` as AuthenticationMethod. TokenEndpointAuthMethod : {} ", rp.getTokenEndpointAuthMethod());
             tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         } else {
-            tokenRequest.setAuthenticationMethod(AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()));
+            tokenRequest.setAuthenticationMethod(authenticationMethod);
         }
 
         if (Lists.newArrayList(AuthenticationMethod.PRIVATE_KEY_JWT, AuthenticationMethod.TLS_CLIENT_AUTH, AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH).contains(authenticationMethod)) {

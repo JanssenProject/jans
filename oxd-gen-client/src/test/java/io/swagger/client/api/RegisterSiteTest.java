@@ -133,6 +133,28 @@ public class RegisterSiteTest {
         return resp;
     }
 
+    public static RegisterSiteResponse registerSite_withAuthenticationMethod(DevelopersApi apiClient, String opHost, String redirectUrls, String logoutUri, String postLogoutRedirectUrls, String algorithm, String authenticationMethod) throws Exception {
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri.split(" ")));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
+        params.setAccessTokenSigningAlg(algorithm);
+        params.setClientTokenEndpointAuthMethod(authenticationMethod);
+        params.setJwks(apiClient.getRpJwks().toString());
+        final RegisterSiteResponse resp = apiClient.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        return resp;
+    }
+
     @Parameters({"opHost", "redirectUrls", "postLogoutRedirectUrls", "clientJwksUri"})
     @Test
     public void registerWithInvalidAlgorithm(String opHost, String redirectUrls, String postLogoutRedirectUrls, String clientJwksUri) {
