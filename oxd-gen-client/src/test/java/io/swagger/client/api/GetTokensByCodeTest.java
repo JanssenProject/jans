@@ -128,7 +128,7 @@ public class GetTokensByCodeTest {
         final RequestBody reqBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
 
         com.squareup.okhttp.Request.Builder request = new Request.Builder();
-        if (Strings.isNullOrEmpty(authorizationOxdId)) {
+        if (!Strings.isNullOrEmpty(authorizationOxdId)) {
             request.addHeader("AuthorizationOxdId", authorizationOxdId);
         }
         return request
