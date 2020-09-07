@@ -33,7 +33,7 @@ public class RegisterSiteTest {
 
     @Parameters({"opHost", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register(String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public void register(String opHost, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
         DevelopersApi client = api();
 
         registerSite(client, opHost, redirectUrls, logoutUrl, postLogoutRedirectUrls, clientJwksUri, accessTokenSigningAlg);
@@ -42,7 +42,7 @@ public class RegisterSiteTest {
 
     @Parameters({"opConfigurationEndpoint", "redirectUrls", "logoutUrl", "postLogoutRedirectUrls", "clientJwksUri", "accessTokenSigningAlg"})
     @Test
-    public void register_withOpConfigurationEndpoint(String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls,  String clientJwksUri, String accessTokenSigningAlg) throws Exception {
+    public void register_withOpConfigurationEndpoint(String opConfigurationEndpoint, String redirectUrls, String logoutUrl, String postLogoutRedirectUrls, String clientJwksUri, String accessTokenSigningAlg) throws Exception {
         DevelopersApi client = api();
         // more specific site registration
         final RegisterSiteParams params = new RegisterSiteParams();
@@ -127,6 +127,28 @@ public class RegisterSiteTest {
         params.setClientJwksUri(clientJwksUri);
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
         params.setAccessTokenSigningAlg(accessTokenSigningAlg);
+        final RegisterSiteResponse resp = apiClient.registerSite(params);
+        assertNotNull(resp);
+        assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
+        return resp;
+    }
+
+    public static RegisterSiteResponse registerSite_withAuthenticationMethod(DevelopersApi apiClient, String opHost, String redirectUrls, String logoutUri, String postLogoutRedirectUrls, String algorithm, String authenticationMethod) throws Exception {
+
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri.split(" ")));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
+        params.setGrantTypes(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
+        params.setAccessTokenSigningAlg(algorithm);
+        params.setClientTokenEndpointAuthMethod(authenticationMethod);
+        params.setJwks(apiClient.getRpJwks().toString());
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));

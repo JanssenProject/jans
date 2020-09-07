@@ -10,8 +10,8 @@ import org.gluu.oxd.common.response.RegisterSiteResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import static org.testng.AssertJUnit.assertNotNull;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
+import static org.testng.AssertJUnit.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
