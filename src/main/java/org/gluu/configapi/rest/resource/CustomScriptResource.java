@@ -39,8 +39,6 @@ public class CustomScriptResource extends BaseResource {
 	@Inject
 	ScriptService customScriptService;
 	
-	private static final String CUSTOM_SCRIPT = "custom script";
-	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAllCustomScripts() {
