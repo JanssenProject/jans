@@ -1,6 +1,7 @@
 package org.gluu.oxd.server;
 
 import com.google.common.collect.Lists;
+import io.dropwizard.util.Strings;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.GetTokensByCodeResponse2;
@@ -245,6 +246,7 @@ public class GetTokensByCodeTest {
         params.setPassword(userSecret);
         params.setState(state);
         params.setNonce(nonce);
+        accessToken = Strings.isNullOrEmpty(accessToken) ? Tester.getAuthorization(site) : accessToken;
 
         return client.getAuthorizationCode(accessToken, authorizationOxdId, params).getCode();
     }
