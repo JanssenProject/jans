@@ -26,7 +26,6 @@ import org.python.jline.internal.Log;
  *
  */
 @ApplicationScoped
-@Named
 public class ScriptService {
 
 	@Inject
