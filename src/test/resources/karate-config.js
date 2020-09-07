@@ -16,8 +16,9 @@ function() {
     env = 'dev'; //env can be anything: dev, qa, staging, etc.
     }
     
-    var baseUrl = props.get('karate.test.url');
+    var url = props.get('karate.test.url');
     var port = props.get('karate.test.port');
+    var baseUrl = url + (port ? ':' + port : '');
     //karate.log('karate baseUrl:port =', baseUrl+':'+port);
     var config = {
 	    env: env,
@@ -27,44 +28,44 @@ function() {
 	    accessToken: 'c8dd2445-4734-4119-8dd1-4dbe91976202',
 	    
 	    // health endpoint
-	    healthUrl: baseUrl + ':' + port + '/health',
+	    healthUrl: baseUrl + '/health',
 	    
 	    	    
 	    // fido2 configuration endpoint
-	    fido2Url: baseUrl + ':' + port + '/api/v1/fido2/config',
+	    fido2Url: baseUrl + '/api/v1/fido2/config',
 	    
 	    // ACRS - Default Authentication Mode configuration filter endpoint
-	    acrsUrl: baseUrl + ':' + port + '/api/v1/oxauth/acrs',     
+	    acrsUrl: baseUrl + '/api/v1/oxauth/acrs',     
 	    
 	    // Auth configuration endpoints.
-	    authConfigurationUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/oxauth',
+	    authConfigurationUrl: baseUrl + '/api/v1/oxauth/config/oxauth',
 	    
 	    // Custom Script configuration endpoints.
-	    scriptsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/scripts',
+	    scriptsUrl: baseUrl + '/api/v1/oxauth/config/scripts',
 	    
 	    // OpenIdConnect Clients Endpoint
-	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
+	    openidclients_url: baseUrl + '/api/v1/oxauth/clients',
 	    
 	    // OpenIdConnect Scopes Endpoint
-	    openidscopes_url: baseUrl + ':' + port + '/api/v1/oxauth/scopes',
+	    openidscopes_url: baseUrl + '/api/v1/oxauth/scopes',
 	    
 	    // OpenIdConnect Sectors Endpoint
-	    openidsectors_url: baseUrl + ':' + port + '/api/v1/oxauth/openid/sectoridentifiers',
+	    openidsectors_url: baseUrl + '/api/v1/oxauth/openid/sectoridentifiers',
 	    
 	    // Uma scopes
-	    umascopes_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/scopes',
+	    umascopes_url: baseUrl + '/api/v1/oxauth/uma/scopes',
 	    
 	    // Uma resources
-	    umaresources_url: baseUrl + ':' + port + '/api/v1/oxauth/uma/resources',
+	    umaresources_url: baseUrl + '/api/v1/oxauth/uma/resources',
 	    
 	    // Uma resources
-	    attributes_url: baseUrl + ':' + port + '/api/v1/oxauth/attributes',
+	    attributes_url: baseUrl + '/api/v1/oxauth/attributes',
 	    
 	    // Person Scripts
-	   // personscripts_url: baseUrl + ':' + port + '/api/v1/oxauth/scripts/person_authn',
+	   // personscripts_url: baseUrl + '/api/v1/oxauth/scripts/person_authn',
 	    
 	    // Person Scripts
-	    smtp_url: baseUrl + ':' + port + '/api/v1/oxauth/config/smtp',
+	    smtp_url: baseUrl + '/api/v1/oxauth/config/smtp',
 	    
 	    };
     
