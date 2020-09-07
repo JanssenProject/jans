@@ -136,7 +136,6 @@ public class ScopesResource extends BaseResource {
 			logger.error("",e);
 			throw new WebApplicationException(e.getMessage());
 		}
-
 	}
 
 	@DELETE
