@@ -37,12 +37,12 @@ public class CustomScriptResource extends BaseResource {
 	Logger logger;
 	
 	@Inject
-	ScriptService customScriptService;
+	ScriptService scriptService;
 	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAllCustomScripts() {
-		List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
+		List<CustomScript> customScripts = scriptService.findAllCustomScripts(null);
 		return Response.ok(customScripts).build();
 	}
 	
@@ -53,7 +53,7 @@ public class CustomScriptResource extends BaseResource {
 	public Response getCustomScriptsBygetCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
 			@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit) {
-		List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
+		List<CustomScript> customScripts = this.scriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
 		if (customScripts!=null && !customScripts.isEmpty()) 
 			return Response.ok(customScripts).build();
 		else
@@ -65,7 +65,7 @@ public class CustomScriptResource extends BaseResource {
 	@Path("/" +ApiConstants.INUM + "/"+ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		CustomScript script = this.customScriptService.getScriptByInum(inum);
+		CustomScript script = this.scriptService.getScriptByInum(inum);
 		if (script != null) {
 			return Response.ok(script).build();
 		} else {
@@ -81,9 +81,9 @@ public class CustomScriptResource extends BaseResource {
 		if (StringHelper.isEmpty(inum)) {
 			inum = UUID.randomUUID().toString();
 		}
-		customScript.setDn(customScriptService.buildDn(inum));
+		customScript.setDn(scriptService.buildDn(inum));
 		customScript.setInum(inum);
-		customScriptService.add(customScript);
+		scriptService.add(customScript);
 		return Response.status(Response.Status.CREATED).entity(customScript).build();
 	}	
 
@@ -93,10 +93,10 @@ public class CustomScriptResource extends BaseResource {
 		Objects.requireNonNull(customScript, "Attempt to update null custom script");
 		String inum = customScript.getInum();
 		logger.info("Update custom script " + inum);
-		CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
+		CustomScript existingScript = scriptService.getScriptByInum(customScript.getInum());
 		if (existingScript != null) {
 			customScript.setInum(existingScript.getInum());
-			customScriptService.update(customScript);
+			scriptService.update(customScript);
 			return Response.ok(customScript).build();
 		} else {
 			return Response.status(Response.Status.NOT_FOUND).build();
@@ -108,9 +108,9 @@ public class CustomScriptResource extends BaseResource {
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		Objects.requireNonNull(inum);
-		CustomScript existingScript = customScriptService.getScriptByInum(inum);
+		CustomScript existingScript = scriptService.getScriptByInum(inum);
 		if (existingScript != null) {
-			customScriptService.remove(existingScript);
+			scriptService.remove(existingScript);
 			return Response.noContent().build();
 		} else {
 			return Response.status(Response.Status.NOT_FOUND).build();
