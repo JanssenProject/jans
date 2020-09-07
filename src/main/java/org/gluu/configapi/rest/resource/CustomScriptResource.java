@@ -32,36 +32,37 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CustomScriptResource extends BaseResource {
-
+	
 	@Inject
 	Logger logger;
-
+	
 	@Inject
 	ScriptService customScriptService;
-
+	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAllCustomScripts() {
 		List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
 		return Response.ok(customScripts).build();
 	}
-
+	
+		
 	@GET
 	@Path("/" + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
-	@ProtectedApi(scopes = { READ_ACCESS })
+	@ProtectedApi(scopes = { READ_ACCESS })	
 	public Response getCustomScriptsBygetCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
 			@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit) {
-		List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
-				CustomScriptType.getByValue(type), limit);
-		if (customScripts != null && !customScripts.isEmpty())
+		List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
+		if (customScripts!=null && !customScripts.isEmpty()) 
 			return Response.ok(customScripts).build();
 		else
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return Response.status(Response.Status.NOT_FOUND).build();		
 	}
 
+
 	@GET
-	@Path("/" + ApiConstants.INUM + "/" + ApiConstants.INUM_PATH)
+	@Path("/" +ApiConstants.INUM + "/"+ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		CustomScript script = this.customScriptService.getScriptByInum(inum);
@@ -71,7 +72,7 @@ public class CustomScriptResource extends BaseResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 	}
-
+	
 	@POST
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response createPersonScript(@Valid CustomScript customScript) {
@@ -84,7 +85,7 @@ public class CustomScriptResource extends BaseResource {
 		customScript.setInum(inum);
 		customScriptService.add(customScript);
 		return Response.status(Response.Status.CREATED).entity(customScript).build();
-	}
+	}	
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
