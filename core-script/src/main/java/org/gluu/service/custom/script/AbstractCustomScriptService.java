@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
  * Operations with custom scripts
  *
  * @author Yuriy Movchan Date: 12/03/2014
+ * @author Mougang T.Gasmyr
  */
 public abstract class AbstractCustomScriptService implements Serializable {
 
