@@ -13,6 +13,7 @@ import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.SeleniumTestUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.testng.util.Strings;
 
 import static io.swagger.client.api.Tester.notEmpty;
 import static org.testng.Assert.assertNotNull;
@@ -126,14 +127,16 @@ public class GetTokensByCodeTest {
 
         final RequestBody reqBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json);
 
-        return new Request.Builder()
+        com.squareup.okhttp.Request.Builder request = new Request.Builder();
+        if (Strings.isNullOrEmpty(authorizationOxdId)) {
+            request.addHeader("AuthorizationOxdId", authorizationOxdId);
+        }
+        return request
                 .addHeader("Authorization", authorization)
-                .addHeader("AuthorizationOxdId", authorizationOxdId)
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json")
                 .method("POST", reqBody)
                 .url(client.getApiClient().getBasePath() + AUTH_CODE_ENDPOINT).build();
-
     }
 
 }
