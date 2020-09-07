@@ -42,6 +42,9 @@ function() {
 	    // Custom Script configuration endpoints.
 	    scriptsUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/scripts',
 	    
+	    // Cache configuration endpoints.
+	    cacheUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/cache',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + ':' + port + '/api/v1/oxauth/clients',
 	    
