@@ -14,18 +14,21 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
 import org.gluu.oxtrust.model.OxAuthApplicationType;
 import org.gluu.oxtrust.model.OxAuthClient;
 import org.gluu.oxtrust.model.OxAuthSubjectType;
@@ -126,6 +129,23 @@ public class ClientsResource extends BaseResource {
 			result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
 		}
 		return Response.ok(result).build();
+	}
+
+	@PATCH
+	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH)
+	public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+		OxAuthClient existingClient = clientService.getClientByInum(inum);
+		checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
+		try {
+			existingClient = Jackson.applyPatch(pathString, existingClient);
+			clientService.updateClient(existingClient);
+			return Response.ok(existingClient).build();
+		} catch (Exception e) {
+			logger.error("", e);
+			throw new WebApplicationException(e.getMessage());
+		}
 	}
 
 	@DELETE
