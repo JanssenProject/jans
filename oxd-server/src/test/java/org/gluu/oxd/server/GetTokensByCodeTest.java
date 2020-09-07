@@ -1,8 +1,7 @@
 package org.gluu.oxd.server;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.dropwizard.util.Strings;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxd.client.ClientInterface;
 import org.gluu.oxd.client.GetTokensByCodeResponse2;
@@ -10,7 +9,6 @@ import org.gluu.oxd.common.CoreUtils;
 import org.gluu.oxd.common.SeleniumTestUtils;
 import org.gluu.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.gluu.oxd.common.params.GetAuthorizationCodeParams;
-import org.gluu.oxd.common.params.GetClientTokenParams;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetClientTokenResponse;
 import org.gluu.oxd.common.response.RegisterSiteResponse;
@@ -22,7 +20,6 @@ import javax.ws.rs.BadRequestException;
 import static org.gluu.oxd.server.TestUtils.notEmpty;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,9 +41,8 @@ public class GetTokensByCodeTest {
     @Test
     public void withAuthenticationMethod_shouldGetTokenInResponse(String host, String opHost, String redirectUrls, String userId, String userSecret) {
         ClientInterface client = Tester.newClient(host);
-        final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls, "PS256");
+        final RegisterSiteResponse site = RegisterSiteTest.registerSite_withAuthenticationMethod(client, opHost, redirectUrls, "PS256", AuthenticationMethod.PRIVATE_KEY_JWT.toString());
         GetTokensByCodeResponse2 tokensResponse = tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, CoreUtils.secureRandomString(), AuthenticationMethod.PRIVATE_KEY_JWT.toString(), "PS256");
-        refreshToken(tokensResponse, client, site);
     }
 
     @Parameters({"host", "opHost", "redirectUrls", "userId", "userSecret"})
@@ -185,7 +181,11 @@ public class GetTokensByCodeTest {
     public static GetTokensByCodeResponse2 tokenByCode(ClientInterface client, RegisterSiteResponse site, String opHost, String userId, String userSecret, String clientId, String redirectUrls, String nonce, String authenticationMethod, String algorithm) {
 
         final String state = CoreUtils.secureRandomString();
-        String code = codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce);
+        RegisterSiteResponse authServer = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
+        String accessToken = Tester.getAuthorization(authServer);
+        String authorizationOxdId = authServer.getOxdId();
+
+        String code = codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, accessToken, authorizationOxdId);
 
         notEmpty(code);
 
@@ -196,7 +196,7 @@ public class GetTokensByCodeTest {
         params.setAuthenticationMethod(authenticationMethod);
         params.setAlgorithm(algorithm);
 
-        final GetTokensByCodeResponse2 resp = client.getTokenByCode(Tester.getAuthorization(site), null, params);
+        final GetTokensByCodeResponse2 resp = client.getTokenByCode(accessToken, authorizationOxdId, params);
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
@@ -235,6 +235,10 @@ public class GetTokensByCodeTest {
     }
 
     public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce) {
+        return codeRequest(client, opHost, site, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
+    }
+
+    public static String codeRequest(ClientInterface client, String opHost, RegisterSiteResponse site, String userId, String userSecret, String clientId, String redirectUrls, String state, String nonce, String accessToken, String authorizationOxdId) {
         SeleniumTestUtils.authorizeClient(opHost, userId, userSecret, clientId, redirectUrls, state, nonce, null, null);
         GetAuthorizationCodeParams params = new GetAuthorizationCodeParams();
         params.setOxdId(site.getOxdId());
@@ -242,7 +246,8 @@ public class GetTokensByCodeTest {
         params.setPassword(userSecret);
         params.setState(state);
         params.setNonce(nonce);
+        accessToken = Strings.isNullOrEmpty(accessToken) ? Tester.getAuthorization(site) : accessToken;
 
-        return client.getAuthorizationCode(Tester.getAuthorization(site), null, params).getCode();
+        return client.getAuthorizationCode(accessToken, authorizationOxdId, params).getCode();
     }
 }
