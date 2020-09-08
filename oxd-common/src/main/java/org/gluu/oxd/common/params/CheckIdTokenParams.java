@@ -20,6 +20,8 @@ public class CheckIdTokenParams implements HasOxdIdParams {
     private String id_token;
     @JsonProperty(value = "nonce")
     private String nonce;
+    @JsonProperty(value = "state")
+    private String state;
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "access_token")
@@ -68,6 +70,14 @@ public class CheckIdTokenParams implements HasOxdIdParams {
         this.access_token = access_token;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     /**
      * Returns string representation of object
      *
@@ -82,6 +92,7 @@ public class CheckIdTokenParams implements HasOxdIdParams {
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", code='").append(code).append('\'');
         sb.append(", access_token='").append(access_token).append('\'');
+        sb.append(", state='").append(state).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -162,6 +162,27 @@ public class Validator {
         }
     }
 
+    public void validateState(String state) {
+
+        if (!configuration.getIdTokenValidationSHashRequired()) {
+            return;
+        }
+
+        if (Strings.isNullOrEmpty(state)) {
+            return;
+        }
+
+        String sHash = idToken.getClaims().getClaimAsString("s_hash");
+        if (Strings.isNullOrEmpty(sHash)) {
+            LOG.error("`s_hash` is missing in `ID_TOKEN`.");
+            throw new HttpException(ErrorResponseCode.S_HASH_NOT_FOUND);
+        }
+        if (!jwsSigner.validateState(state, idToken)) {
+            LOG.error("Hash from id_token does not match hash of the state (s_hash). state:" + state + ", idToken: " + idToken + ", sHash:" + sHash);
+            throw new HttpException(ErrorResponseCode.INVALID_STATE_BAD_HASH);
+        }
+    }
+
     public void validateAuthorizationCode(String code) {
         if (!configuration.getIdTokenValidationCHashRequired()) {
             return;
