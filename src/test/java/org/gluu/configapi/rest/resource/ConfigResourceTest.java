@@ -1,5 +1,8 @@
 package org.gluu.configapi.rest.resource;
 
+import io.quarkus.test.junit.QuarkusTest;
+import org.junit.jupiter.api.Test;
+
 import javax.ws.rs.core.MediaType;
 
 import static io.restassured.RestAssured.given;
@@ -7,8 +10,10 @@ import static io.restassured.RestAssured.given;
 /**
  * @author Yuriy Zabrovarnyy
  */
+@QuarkusTest
 public class ConfigResourceTest {
 
+    @Test
     public void patchAppConfigurationProperty() {
         given()
                 .when()
