@@ -13,20 +13,24 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.oxtrust.service.uma.ResourceSetService;
+import org.slf4j.Logger;
 
 /**
  * @author Mougang T.Gasmyr
@@ -43,7 +47,10 @@ public class UmaResourcesResource extends BaseResource {
 	 */
 	private static final String UMA_RESOURCE = "Uma resource";
 	@Inject
-	private ResourceSetService umaResourcesService;
+	ResourceSetService umaResourcesService;
+
+	@Inject
+	Logger logger;
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
@@ -96,6 +103,24 @@ public class UmaResourcesResource extends BaseResource {
 		umaResourcesService.updateResource(resource);
 		UmaResource result = umaResourcesService.getResourceByDn(dn);
 		return Response.ok(result).build();
+	}
+
+	@PATCH
+	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH)
+	public Response patchResource(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+		String dn = umaResourcesService.getDnForResource(inum);
+		UmaResource existingResource = umaResourcesService.getResourceByDn(dn);
+		checkResourceNotNull(existingResource, UMA_RESOURCE);
+		try {
+			existingResource = Jackson.applyPatch(pathString, existingResource);
+			umaResourcesService.updateResource(existingResource);
+			return Response.ok(existingResource).build();
+		} catch (Exception e) {
+			logger.error("", e);
+			throw new WebApplicationException(e.getMessage());
+		}
 	}
 
 	@DELETE

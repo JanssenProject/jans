@@ -28,7 +28,6 @@ tags:
   - name: Configuration – Log File
   - name: Configuration – JWK - JSON Web Key (JWK)
   - name: Custom Scripts
-  - name: Custom Scripts - Person Authentication
   - name: Database - Couchbase
   - name: Database - LDAP configuration
   - name: Graphics - Logo
@@ -64,7 +63,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     patch:
-      summary: Partially modifies oxAuth Application configuration (AppConfiguration) properties.
+      summary: Partially modifies oxAuth Application configuration properties.
       description: Partially modifies oxAuth AppConfiguration properties.
       operationId: patch-properties
       security:
@@ -79,7 +78,7 @@ paths:
               type: string 
               $ref: '#/components/schemas/PatchRequest'
               description: String representing patch-document.
-              example: [ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]
+              example: '[ {op:replace, path: loggingLevel, value: DEBUG } ]'
       responses:
         '200':
           description: OK
@@ -1512,131 +1511,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /api/v1/oxauth/scripts/person_authn:
-    get:
-      summary: Gets list of person authentication script.
-      description: Gets list of person authentication script. Optionally scripts type can be provided to fetch specific types of script.
-      operationId: get-scripts-person_authn
-      tags:
-        - Custom Scripts - Person Authentication
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: type
-          description: Script type.
-    post:
-      summary: Adds a new person authentication script.
-      description: Adds a new custom person authentication script.
-      operationId: post-scripts-person_authn
-      tags:
-        - Custom Scripts - Person Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates list of person authentication script.
-      description: Updates list of person authentication script.
-      operationId: put-scripts-person_authn
-      tags:
-        - Custom Scripts - Person Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/CustomScript'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/scripts/person_authn/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        description: Script identifier
-        required: true
-    delete:
-      summary: Deletes person authentication script.
-      description: Deletes person authentication script.
-      operationId: delete-scripts-person_authn-by-inum
-      tags:
-        - Custom Scripts - Person Authentication
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    get:
-      summary: Gets person authentication script by inum.
-      description: Gets person authentication script identified by inum.
-      operationId: get-scripts-person_authn-by-inum
-      tags:
-        - Custom Scripts - Person Authentication
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomScript'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
+  
   /api/v1/config/oxauth/scripts:
     get:
       summary: Get all custom scripts.
@@ -1655,8 +1530,6 @@ paths:
                   $ref: '#/components/schemas/CustomScript'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -1669,17 +1542,16 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        '201':
+          description: CREATED
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomScript'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Internal Server Error
-      description: Creates a new custom script of a specific type.
+          $ref: '#/components/responses/InternalServerError'      
       security:
         - oxAuth:
             - write
@@ -1701,12 +1573,14 @@ paths:
           description: OK
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oxAuth:
             - write    
-  /api/v1/config/oxauth/scripts/{type}:
+  /api/v1/config/oxauth/scripts/type/{type}:
     parameters:
       - schema:
           type: string
@@ -1737,16 +1611,16 @@ paths:
         description: Script type.
         required: true
       - schema:
-           type: integer
-           default: 50
-         in: query
-         name: limit
-         description: Search size - max size of the results to return.
-       - schema:
-           type: string
-         in: query
-         name: pattern
-         description: Search pattern.
+          type: string
+        in: query
+        name: pattern
+        description: Search pattern.
+      - schema:
+          type: integer
+          default: 50
+        in: query
+        name: limit
+        description: Search size - max size of the results to return.
     get:
       summary: Get scripts by type.
       description: Get scripts by type.
@@ -1771,7 +1645,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /api/v1/config/oxauth/scripts/{inum}:
+  /api/v1/config/oxauth/scripts/inum/{inum}:
     parameters:
       - schema:
           type: string
@@ -1801,6 +1675,14 @@ paths:
       security:
         - oxAuth:
             - read
+  /api/v1/config/oxauth/scripts/{inum}:
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        required: true
+        description: Script identifier.
     delete:
       summary: Delete custom script.
       description: Delete custom script.
@@ -1808,15 +1690,14 @@ paths:
       tags:
         - Custom Scripts
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           description: Unauthorized
         '404':
           description: Not Found
         '500':
           description: Internal Server Error
-      description: Deletes a custom script by inum.
       security:
         - oxAuth:
             - write    
@@ -2803,8 +2684,92 @@ paths:
                   exclusiveMaximum: false
                   exclusiveMinimum: false
       responses:
-        '200':
-          description: OK
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache Configuration
+                properties:
+                  redisProviderType:
+                    description: Type of connection.
+                    type: string
+                    enum:
+                      - STANDALONE
+                      - CLUSTER
+                      - SHARDED
+                      - SENTINEL
+                  servers:
+                    description: 'server details separated by comma e.g. ''server1:8080server2:8081''.'
+                    type: string
+                    title: servers
+                    format: url
+                    minLength: 3
+                  password:
+                    description: Redis password.
+                    type: string
+                    minLength: 0
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  sentinelMasterGroupName:
+                    description: Sentinel Master Group Name (required if SENTINEL type of connection is selected).
+                    type: string
+                    minLength: 1
+                  useSSL:
+                    description: Enable SSL communication between Gluu Server and Redis cache.
+                    type: boolean
+                  sslTrustStoreFilePath:
+                    description: Directory Path to Trust Store.
+                    type: string
+                    format: url
+                    minLength: 1
+                  maxIdleConnections:
+                    description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  maxTotalConnections:
+                    description: The number of maximum connection instances in the pool.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  connectionTimeout:
+                    description: Connection time out.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  soTimeout:
+                    description: With this option set to a non-zero timeout a read() call on the InputStream associated with this Socket will block for only this amount of time. If the timeout expires a java.net.SocketTimeoutException is raised though the Socket is still valid. The option must be enabled prior to entering the blocking operation to have effect. The timeout must be > 0. A timeout of zero is interpreted as an infinite timeout.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  maxRetryAttempts:
+                    description: Maximum retry attempts in case of failure.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2906,6 +2871,90 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache Configuration
+                properties:
+                  redisProviderType:
+                    description: Type of connection.
+                    type: string
+                    enum:
+                      - STANDALONE
+                      - CLUSTER
+                      - SHARDED
+                      - SENTINEL
+                  servers:
+                    description: 'server details separated by comma e.g. ''server1:8080server2:8081''.'
+                    type: string
+                    title: servers
+                    format: url
+                    minLength: 3
+                  password:
+                    description: Redis password.
+                    type: string
+                    minLength: 0
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  sentinelMasterGroupName:
+                    description: Sentinel Master Group Name (required if SENTINEL type of connection is selected).
+                    type: string
+                    minLength: 1
+                  useSSL:
+                    description: Enable SSL communication between Gluu Server and Redis cache.
+                    type: boolean
+                  sslTrustStoreFilePath:
+                    description: Directory Path to Trust Store.
+                    type: string
+                    format: url
+                    minLength: 1
+                  maxIdleConnections:
+                    description: The cap on the number of \idle\ instances in the pool. If max idle is set too low on heavily loaded systems it is possible you will see objects being destroyed and almost immediately new objects being created. This is a result of the active threads momentarily returning objects faster than they are requesting them causing the number of idle objects to rise above max idle. The best value for max idle for heavily loaded system will vary but the default is a good starting point.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  maxTotalConnections:
+                    description: The number of maximum connection instances in the pool.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  connectionTimeout:
+                    description: Connection time out.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  soTimeout:
+                    description: With this option set to a non-zero timeout a read() call on the InputStream associated with this Socket will block for only this amount of time. If the timeout expires a java.net.SocketTimeoutException is raised though the Socket is still valid. The option must be enabled prior to entering the blocking operation to have effect. The timeout must be > 0. A timeout of zero is interpreted as an infinite timeout.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  maxRetryAttempts:
+                    description: Maximum retry attempts in case of failure.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':

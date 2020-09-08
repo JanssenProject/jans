@@ -6,7 +6,7 @@ package org.gluu.configapi.rest.resource;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -14,19 +14,22 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.gluu.model.GluuAttribute;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.model.GluuAttribute;
 import org.gluu.oxtrust.service.AttributeService;
 import org.slf4j.Logger;
 
@@ -38,7 +41,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.ATTRIBUTES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@ApplicationScoped
+@RequestScoped
 public class AttributesResource extends BaseResource {
 
 	/**
@@ -115,6 +118,23 @@ public class AttributesResource extends BaseResource {
 		attributeService.updateAttribute(attribute);
 		GluuAttribute result = attributeService.getAttributeByInum(inum);
 		return Response.ok(result).build();
+	}
+
+	@PATCH
+	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH)
+	public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+		GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
+		checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
+		try {
+			existingAttribute = Jackson.applyPatch(pathString, existingAttribute);
+			attributeService.updateAttribute(existingAttribute);
+			return Response.ok(existingAttribute).build();
+		} catch (Exception e) {
+			logger.error("", e);
+			throw new WebApplicationException(e.getMessage());
+		}
 	}
 
 	@DELETE

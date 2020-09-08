@@ -1,6 +1,7 @@
 package org.gluu.configapi.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jackson.JacksonUtils;
@@ -27,11 +28,11 @@ public class Jackson {
         return applyPatch(jsonPatch, obj);
     }
 
-    public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
+    @SuppressWarnings("unchecked")
+	public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);
         Preconditions.checkNotNull(obj);
-
-        ObjectMapper objectMapper = JacksonUtils.newMapper();
+        ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonNode patched = jsonPatch.apply(objectMapper.convertValue(obj, JsonNode.class));
         return (T) objectMapper.treeToValue(patched, obj.getClass());
     }

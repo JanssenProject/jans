@@ -1,20 +1,23 @@
 package org.gluu.configapi.rest.resource;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.Jackson;
-import org.gluu.oxtrust.service.JsonConfigurationService;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.io.IOException;
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.model.configuration.AppConfiguration;
+import org.gluu.oxtrust.service.JsonConfigurationService;
+import org.slf4j.Logger;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.OXAUTH)
 @Produces(MediaType.APPLICATION_JSON)
@@ -28,35 +31,21 @@ public class ConfigResource extends BaseResource {
 	JsonConfigurationService jsonConfigurationService;
 
 	@GET
-    @ProtectedApi(scopes = {READ_ACCESS})
-	public Response getAppConfiguration() throws IOException {		
+	@ProtectedApi(scopes = { READ_ACCESS })
+	public Response getAppConfiguration() throws IOException {
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
-		JSONObject json = new JSONObject(appConfiguration);
 		return Response.ok(appConfiguration).build();
-	
+
 	}
 
-    @PATCH
-    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception{
-        log.trace("=======================================================================");
-        log.trace("\n\n requestString = " + requestString + "\n\n");
-    
-        AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+	@PATCH
+	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
+		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
+		appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
+		jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
+		return Response.ok(appConfiguration).build();
 
-        final JSONObject jsonBefore = new JSONObject(appConfiguration);
-        log.trace("\n\n appConfiguration_before = " + jsonBefore + "\n\n");
-
-        appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
-
-        JSONObject jsonAfter = new JSONObject(appConfiguration);
-        log.trace("\n\n appConfiguration_after = " + jsonAfter + "\n\n");
-        log.trace("=======================================================================");
-
-        jsonConfigurationService.saveOxAuthAppConfiguration(appConfiguration);
-
-        return Response.ok(appConfiguration).build();
-     
-    }
+	}
 }
