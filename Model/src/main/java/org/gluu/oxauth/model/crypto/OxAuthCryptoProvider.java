@@ -135,7 +135,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
         KeyPairGenerator keyGen = null;
 
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());;
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
         if (signatureAlgorithm == null) {
             signatureAlgorithm = SignatureAlgorithm.RS256;
         }
@@ -189,8 +189,8 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         } else if (publicKey instanceof ECPublicKey) {
             ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
             jsonObject.put(CURVE, signatureAlgorithm.getCurve().getName());
-            jsonObject.put(X, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineX()));
-            jsonObject.put(Y, Base64Util.base64urlencodeUnsignedBigInt(ecPublicKey.getW().getAffineY()));
+            jsonObject.put(X, Base64Util.base64urlencode(ecPublicKey.getW().getAffineX().toByteArray()));
+            jsonObject.put(Y, Base64Util.base64urlencode(ecPublicKey.getW().getAffineY().toByteArray()));
         }
         JSONArray x5c = new JSONArray();
         x5c.put(Base64.encodeBase64String(cert.getEncoded()));
