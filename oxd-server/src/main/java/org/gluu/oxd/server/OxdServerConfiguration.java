@@ -57,6 +57,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean idTokenValidationCHashRequired = true;
     @JsonProperty(value = "id_token_validation_at_hash_required")
     private Boolean idTokenValidationAtHashRequired = true;
+    @JsonProperty(value = "id_token_validation_s_hash_required")
+    private Boolean idTokenValidationSHashRequired = false;
     @JsonProperty(value = "validate_user_info_with_id_token")
     private Boolean validateUserInfoWithIdToken = false;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
@@ -452,6 +454,14 @@ public class OxdServerConfiguration extends Configuration {
         this.mtlsClientKeyStorePassword = mtlsClientKeyStorePassword;
     }
 
+    public Boolean getIdTokenValidationSHashRequired() {
+        return idTokenValidationSHashRequired;
+    }
+
+    public void setIdTokenValidationSHashRequired(Boolean idTokenValidationSHashRequired) {
+        this.idTokenValidationSHashRequired = idTokenValidationSHashRequired;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -494,6 +504,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", mtlsEnabled=" + mtlsEnabled + '\'' +
                 ", mtlsClientKeyStorePath=" + mtlsClientKeyStorePath + '\'' +
                 ", mtlsClientKeyStorePassword=" + mtlsClientKeyStorePassword + '\'' +
+                ", idTokenValidationSHashRequired=" + idTokenValidationSHashRequired + '\'' +
                 '}';
     }
 }
