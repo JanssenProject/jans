@@ -40,7 +40,8 @@ public class ApiConstants {
 	public static final String SCRIPTS = "/scripts";
 	public static final String SMTP = "/smtp";
 	public static final String GRANT_TYPES = "/grant-types";
-	public static final String PERSON_AUTH = "/person_authn";
+	public static final String CACHE = "/cache";
+	public static final String REDIS = "/redis";
 	public static final String INUM_PATH = "{inum}";
 	public static final String SCOPE_INUM_PATH = "{scope_inum}";
 	public static final String TYPE_PATH = "/{type}";

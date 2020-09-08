@@ -3,24 +3,37 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.AttributeNames;
-import org.gluu.oxtrust.service.ScopeService;
-import org.oxauth.persistence.model.Scope;
-import org.slf4j.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.model.common.ScopeType;
+import org.gluu.oxtrust.service.ScopeService;
+import org.oxauth.persistence.model.Scope;
+import org.slf4j.Logger;
 
 /**
  * @author Mougang T.Gasmyr
@@ -106,6 +119,23 @@ public class ScopesResource extends BaseResource {
 		scopeService.updateScope(scope);
 		Scope result = scopeService.getScopeByInum(inum);
 		return Response.ok(result).build();
+	}
+
+	@PATCH
+	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Path(ApiConstants.INUM_PATH)
+	public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+		Scope existingScope = scopeService.getScopeByInum(inum);
+		checkResourceNotNull(existingScope, OPENID_SCOPE);
+		try {
+			existingScope = Jackson.applyPatch(pathString, existingScope);
+			scopeService.updateScope(existingScope);
+			return Response.ok(existingScope).build();
+		} catch (Exception e) {
+			logger.error("",e);
+			throw new WebApplicationException(e.getMessage());
+		}
 	}
 
 	@DELETE
