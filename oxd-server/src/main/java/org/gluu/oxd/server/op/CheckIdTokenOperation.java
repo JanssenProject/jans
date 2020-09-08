@@ -54,6 +54,8 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             validator.validateAccessToken(params.getAccessToken(), atHashCheckRequired(rp.getResponseTypes()));
             //validate c_hash in id_token
             validator.validateAuthorizationCode(params.getCode());
+            //validate s_hash in id_token
+            validator.validateState(params.getState());
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid(params.getNonce()));
