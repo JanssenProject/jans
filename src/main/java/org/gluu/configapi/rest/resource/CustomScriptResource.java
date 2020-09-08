@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
-import org.gluu.service.ScriptService;
+import org.gluu.service.custom.CustomScriptService;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.util.StringHelper;
@@ -37,7 +37,7 @@ public class CustomScriptResource extends BaseResource {
 	Logger logger;
 	
 	@Inject
-	ScriptService scriptService;
+	CustomScriptService scriptService;
 	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
