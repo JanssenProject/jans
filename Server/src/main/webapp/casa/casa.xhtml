@@ -118,6 +118,10 @@
 				elem.html(icons[k])
 			}
 		}
+		
+		if (${identity.getWorkingParameter('methods').size() eq 0}) {
+			$("#alter_link").addClass("dn")
+		}
 	</script>
 
 </div>
