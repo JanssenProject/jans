@@ -26,7 +26,8 @@
 				</ul>
 				<div class="flex justify-between items-center mt4">
 					<div class="pr4">
-						<a href="javascript:showAlternative('phone_sel_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
+						<!-- do not change the ID of anchor following -->
+						<a id="alter_link" href="javascript:showAlternative('phone_sel_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
 					</div>
 					<h:commandButton class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
 						value="#{msgs['casa.sms.send']}" action="#{authenticator.authenticate}" />
