@@ -8,6 +8,7 @@ import io.swagger.client.model.RegisterSiteResponse;
 import io.swagger.client.model.UpdateSiteParams;
 import io.swagger.client.model.UpdateSiteResponse;
 import org.gluu.oxauth.model.common.GrantType;
+import org.gluu.oxd.common.Jackson2;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.testng.collections.Maps;
@@ -146,9 +147,10 @@ public class RegisterSiteTest {
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
         params.setResponseTypes(Lists.newArrayList("code", "id_token", "token"));
-        params.setAccessTokenSigningAlg(algorithm);
+        params.setIdTokenSignedResponseAlg(algorithm);
+        params.setClientTokenEndpointAuthSigningAlg(algorithm);
         params.setClientTokenEndpointAuthMethod(authenticationMethod);
-        params.setJwks(apiClient.getRpJwks().toString());
+        params.setJwks(Jackson2.asJson(apiClient.getRpJwks()));
         final RegisterSiteResponse resp = apiClient.registerSite(params);
         assertNotNull(resp);
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
