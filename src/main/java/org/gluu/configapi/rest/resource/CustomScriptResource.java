@@ -37,12 +37,12 @@ public class CustomScriptResource extends BaseResource {
 	Logger logger;
 	
 	@Inject
-	CustomScriptService scriptService;
+	CustomScriptService customScriptService;
 	
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAllCustomScripts() {
-		List<CustomScript> customScripts = scriptService.findAllCustomScripts(null);
+		List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
 		return Response.ok(customScripts).build();
 	}
 	
@@ -53,7 +53,7 @@ public class CustomScriptResource extends BaseResource {
 	public Response getCustomScriptsBygetCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
 			@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit) {
-		List<CustomScript> customScripts = this.scriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
+		List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,CustomScriptType.getByValue(type),limit);
 		if (customScripts!=null && !customScripts.isEmpty()) 
 			return Response.ok(customScripts).build();
 		else
@@ -62,15 +62,19 @@ public class CustomScriptResource extends BaseResource {
 
 
 	@GET
-	@Path("/" +ApiConstants.INUM + "/"+ApiConstants.INUM_PATH)
+	@Path("/" +ApiConstants.INUM + "/" +ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-		CustomScript script = this.scriptService.getScriptByInum(inum);
-		if (script != null) {
-			return Response.ok(script).build();
-		} else {
-			return Response.status(Response.Status.NOT_FOUND).build();
+		CustomScript script = null;
+		try {
+			script = this.customScriptService.getScriptByInum(inum);			
 		}
+		catch(Exception ex)	{
+			if(ex.getMessage().contains("Failed to find entry")) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}			
+		}
+		return Response.ok(script).build();
 	}
 	
 	@POST
@@ -81,9 +85,9 @@ public class CustomScriptResource extends BaseResource {
 		if (StringHelper.isEmpty(inum)) {
 			inum = UUID.randomUUID().toString();
 		}
-		customScript.setDn(scriptService.buildDn(inum));
+		customScript.setDn(customScriptService.buildDn(inum));
 		customScript.setInum(inum);
-		scriptService.add(customScript);
+		customScriptService.add(customScript);
 		return Response.status(Response.Status.CREATED).entity(customScript).build();
 	}	
 
@@ -93,10 +97,10 @@ public class CustomScriptResource extends BaseResource {
 		Objects.requireNonNull(customScript, "Attempt to update null custom script");
 		String inum = customScript.getInum();
 		logger.info("Update custom script " + inum);
-		CustomScript existingScript = scriptService.getScriptByInum(customScript.getInum());
+		CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
 		if (existingScript != null) {
 			customScript.setInum(existingScript.getInum());
-			scriptService.update(customScript);
+			customScriptService.update(customScript);
 			return Response.ok(customScript).build();
 		} else {
 			return Response.status(Response.Status.NOT_FOUND).build();
@@ -107,14 +111,20 @@ public class CustomScriptResource extends BaseResource {
 	@Path(ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+		logger.info("Delete custom script " + inum);
 		Objects.requireNonNull(inum);
-		CustomScript existingScript = scriptService.getScriptByInum(inum);
-		if (existingScript != null) {
-			scriptService.remove(existingScript);
-			return Response.noContent().build();
-		} else {
-			return Response.status(Response.Status.NOT_FOUND).build();
+		CustomScript existingScript = null;
+		try {
+			existingScript = customScriptService.getScriptByInum(inum);
+			customScriptService.remove(existingScript);
+			
 		}
+		catch(Exception ex)	{
+			if(ex.getMessage().contains("Failed to find entry")) {
+				return Response.status(Response.Status.NOT_FOUND).build();
+			}			
+		}
+		return Response.noContent().build();
 	}
 
 }

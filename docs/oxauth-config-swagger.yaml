@@ -1889,6 +1889,8 @@ paths:
                         default: 25
                         exclusiveMaximum: false
                         exclusiveMinimum: false
+                      deleteExpiredOnGetRequest:
+                        type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3016,8 +3018,22 @@ paths:
                   exclusiveMaximum: false
                   exclusiveMinimum: false
       responses:
-        '200':
-          description: OK
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache configuration.
+                properties:
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3049,6 +3065,20 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache configuration.
+                properties:
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3091,6 +3121,8 @@ paths:
                     default: 25
                     exclusiveMaximum: false
                     exclusiveMinimum: false
+                  deleteExpiredOnGetRequest:
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3129,6 +3161,8 @@ paths:
                   default: 25
                   exclusiveMaximum: false
                   exclusiveMinimum: false
+                deleteExpiredOnGetRequest:
+                  type: boolean
       responses:
         '200':
           description: OK
@@ -3170,6 +3204,8 @@ paths:
                   default: 25
                   exclusiveMaximum: false
                   exclusiveMinimum: false
+                deleteExpiredOnGetRequest:
+                  type: boolean
       responses:
         '200':
           description: OK
