@@ -48,7 +48,8 @@
 				<div class="db w5 tc f7-cust pv3">#{msgs['casa.securitykey.tap']}</div>
 			</div>
 
-			<a href="javascript:showAlternative('u2f_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
+			<!-- do not change the ID of anchor following -->
+			<a id="alter_link" href="javascript:showAlternative('u2f_section')" class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
 		</section>
 		<ui:include src="/casa/casa.xhtml" />
 	</ui:define>
