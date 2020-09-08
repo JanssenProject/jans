@@ -44,7 +44,7 @@ function() {
 	    scriptsUrl: baseUrl + '/api/v1/oxauth/config/scripts',
 	    
 	    // Cache configuration endpoints.
-	    cacheUrl: baseUrl + ':' + port + '/api/v1/oxauth/config/cache',
+	    cacheUrl: baseUrl + '/api/v1/oxauth/config/cache',
 	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + '/api/v1/oxauth/clients',
