@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.metrics.MetricUnits;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Metered;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.Jackson;
@@ -34,6 +35,9 @@ public class ConfigResource extends BaseResource {
 	JsonConfigurationService jsonConfigurationService;
 
 	@GET
+	@Counted(name = "fetchAppConfigurationInvocations", description = "Counting the invocations of the application configuration endpoint.", displayName = "fetchAppConfigurationInvocations")
+	@Metered(name = "applicationConfigurationRetrieve", unit = MetricUnits.SECONDS, description = "Metrics to monitor application configuration retrieval.", absolute = true)
+	@Timed(name = "fetchApplicationConfiguration-time", description = "Metrics to monitor time to change application configuration.", unit = MetricUnits.MINUTES, absolute = true)
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getAppConfiguration() throws IOException {
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
@@ -44,8 +48,9 @@ public class ConfigResource extends BaseResource {
 	@PATCH
 	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
-	@Counted(name = "patchAppConfigurationInvocations", description = "Counting the patch invocations of the application configuration", displayName = "patchAppConfigurationInvocations")
-	@Metered(name = "patchAppConfigurationInvocationTimer", unit = MetricUnits.SECONDS, description = "Metrics to monitor movies", absolute = true)
+	@Counted(name = "patchAppConfigurationInvocations", description = "Counting the patch invocations of the application configuration change endpoint.", displayName = "patchAppConfigurationInvocations")
+	@Metered(name = "applicationConfigurationChanges", unit = MetricUnits.SECONDS, description = "Metrics to monitor application configuration changes.", absolute = true)
+	@Timed(name = "patchApplicationConfiguration-time", description = "Metrics to monitor time to change application configuration.", unit = MetricUnits.MINUTES, absolute = true)
 	public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
