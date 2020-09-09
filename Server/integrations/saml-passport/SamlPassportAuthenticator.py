@@ -104,21 +104,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Detected idp-initiated inbound Saml flow"
                 # get request from session attributes
                 jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
-                print "Passport. authenticate. step ==1. if self.isInboundFlow(identity):."
                 print "jwt_param = %s" % jwt_param
                 # now jwt_param != None
 
 
 
             if jwt_param == None:
-                print "Entered if jwt_param == None"
                 # gets jwt parameter "user" sent after authentication by passport (if exists)
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
 
 
             if jwt_param != None:
                 # and now that the jwt_param user exists...
-                print "Entered if jwt_param != None"
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
                 if self.isInboundFlow(identity):
@@ -145,12 +142,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
             #See passportlogin.xhtml
-            print "-------------============------------"
             provider = ServerUtil.getFirstValue(requestParameters, "loginForm:provider")
-            print "authenticate() - provider = %s" % str(provider)
-
-
-            print "authenticate - self.registeredProviders: %s" % str(self.registeredProviders)
             if StringHelper.isEmpty(provider):
 
                 #it's username + passw auth
@@ -172,7 +164,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             elif provider in self.registeredProviders:
                 # user selected provider
-                    # it's a recognized external IDP
+                # it's a recognized external IDP
 
                 identity.setWorkingParameter("selectedProvider", provider)
                 print "Passport. authenticate for step 1. Retrying step 1"
@@ -813,18 +805,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         try:
-
-            print("passport.isInboundJwt. value = %s" % value)
-            # value = value.replace("_", ".")
-            # print("passport.isInboundJwt. value = %s" % value)
-
             jwt = Jwt.parse(value)
             print "passport.isInboundJwt. jwt = %s" % jwt
-
-            # user_profile_json = jwt.getClaims().getClaimAsString("data")
-
             user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt.getClaims().getClaimAsString("data"))
-            print "passport.isInboundJwt. user_profile_json = %s" % user_profile_json
             if StringHelper.isEmpty(user_profile_json):
                 return False
         except InvalidJwtException:
