@@ -78,7 +78,7 @@ public class BaseTest {
          */
         if (testMode)
             client=ScimClientFactory.getTestClient(ClientSideService.class, params.get("domainURL"), params.get("OIDCMetadataUrl"));
-            //client=ScimClientFactory.getDummyClient(params.get("domainURL"));
+            //client=ScimClientFactory.getTestClient(ClientSideService.class, params.get("domainURL"), params.get("OIDCMetadataUrl"), "clientId", "clientSecret");
         else
             client=ScimClientFactory.getClient(
                     ClientSideService.class,

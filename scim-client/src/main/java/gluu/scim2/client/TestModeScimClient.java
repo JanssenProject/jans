@@ -76,13 +76,18 @@ public class TestModeScimClient<T> extends AbstractScimClient<T> {
 
     }
 
-	public TestModeScimClient(Class<T> serviceClass, String serviceUrl, String id, String secret) throws Exception {
+	public TestModeScimClient(Class<T> serviceClass, String serviceUrl, String OIDCMetadataUrl, String id, String secret) throws Exception {
         super(serviceUrl, serviceClass);
-
+        
+        //Extract token endpoint from metadata URL
+        JsonNode tree = mapper.readTree(new URL(OIDCMetadataUrl));
+        this.tokenEndpoint = tree.get("token_endpoint").asText();
+        
         if (StringHelper.isNotEmpty(id) && StringHelper.isNotEmpty(secret)) {
         	clientExpiration = Long.MAX_VALUE;
         	clientId = id;
         	password = secret;
+        	updateTokens(GrantType.CLIENT_CREDENTIALS);
         } else {
         	throw new Exception("Client ID/secret cannot be empty");
         }
