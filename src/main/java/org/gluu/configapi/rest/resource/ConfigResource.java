@@ -12,6 +12,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.Jackson;
@@ -41,6 +44,8 @@ public class ConfigResource extends BaseResource {
 	@PATCH
 	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Counted(name = "patchAppConfigurationInvocations", description = "Counting the patch invocations of the application configuration", displayName = "patchAppConfigurationInvocations")
+	@Metered(name = "patchAppConfigurationInvocationTimer", unit = MetricUnits.SECONDS, description = "Metrics to monitor movies", absolute = true)
 	public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
 		AppConfiguration appConfiguration = this.jsonConfigurationService.getOxauthAppConfiguration();
 		appConfiguration = Jackson.applyPatch(requestString, appConfiguration);
