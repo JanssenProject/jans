@@ -69,7 +69,7 @@ public class ClientsResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	@Timed(name = "retrieveOpenIdClient", description = "A measure of how long it takes to retrieve/search openid connect client.", unit = MetricUnits.MILLISECONDS)
+	@Timed(name = "retrieveOpenIdClient-time", description = "Metrics to monitor time to retrieve/search openid connect client.", unit = MetricUnits.MINUTES, absolute = true)
 	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		List<OxAuthClient> clients = new ArrayList<OxAuthClient>();
