@@ -21,7 +21,7 @@ public class JenkinsTestRunner {
     @Test
     public void testParallel() {
         Results results = Runner.path("src/test/resources/feature").tags("~@ignore").parallel(5);
-        KarateTestRunner.generateReport(results.getReportDir());
+        generateReport(results.getReportDir());
         Assertions.assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 
