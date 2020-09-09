@@ -90,14 +90,15 @@ public class ScimClientFactory {
      * @param interfaceClass The Class to which the object returned will belong to. Normally it will be an interface inside
      *                       package {@link gluu.scim2.client.rest gluu.scim2.client.rest} or {@link org.gluu.oxtrust.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}
      * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/identity/restv1}
+     * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
      * @param clientID ID of an already registered OIDC client in the Gluu Server
      * @param clientSecret Secret of the corresponding client (see clientID parameter)
      * @param <T> The type the object returned will belong to.
      * @return An object that allows to invoke service methods
      * @throws Exception If there is initialization problem
      */
-    public static <T> T getTestClient(Class <T> interfaceClass, String domain, String clientId, String clientSecret) throws Exception {
-        InvocationHandler handler = new TestModeScimClient<>(interfaceClass, domain, clientId, clientSecret);
+    public static <T> T getTestClient(Class <T> interfaceClass, String domain, String OIDCMetadataUrl, String clientId, String clientSecret) throws Exception {
+        InvocationHandler handler = new TestModeScimClient<>(interfaceClass, domain, OIDCMetadataUrl, clientId, clientSecret);
         return typedProxy(interfaceClass, handler);
     }
     
@@ -126,13 +127,14 @@ public class ScimClientFactory {
      * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. Also has some support to
      * call service provider configuration endpoints (see section 4 of RFC 7644)
      * @param domain The root URL of the SCIM service. Usually in the form {@code https://your.gluu-server.com/identity/restv1}
+     * @param OIDCMetadataUrl URL of authorization servers' metadata document. Usually in the form {@code https://your.gluu-server.com/.well-known/openid-configuration}
      * @param clientID ID of an already registered OIDC client in the Gluu Server
      * @param clientSecret Secret of the corresponding client (see clientID parameter)
      * @return An object that allows to invoke service methods
      * @throws Exception If there is initialization problem
      */
-    public static ClientSideService getTestClient(String domain, String clientId, String clientSecret) throws Exception {
-        return getTestClient(defaultInterface, domain, clientId, clientSecret);
+    public static ClientSideService getTestClient(String domain, String OIDCMetadataUrl, String clientId, String clientSecret) throws Exception {
+        return getTestClient(defaultInterface, domain, OIDCMetadataUrl, clientId, clientSecret);
     }
 
     private static <T> T typedProxy(Class <T> interfaceClass, InvocationHandler handler){
