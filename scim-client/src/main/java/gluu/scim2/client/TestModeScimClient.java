@@ -76,16 +76,15 @@ public class TestModeScimClient<T> extends AbstractScimClient<T> {
 
     }
 
-	public TestModeScimClient(Class<T> serviceClass, String clientCredentials) throws Exception {
+	public TestModeScimClient(Class<T> serviceClass, String serviceUrl, String id, String secret) throws Exception {
         super(serviceUrl, serviceClass);
 
-        int colonIndex = clientCredentials.indexOf(":");
-        if (colonIndex > 0) {
+        if (StringHelper.isNotEmpty(id) && StringHelper.isNotEmpty(secret)) {
         	clientExpiration = Long.MAX_VALUE;
-        	clientId = clientCredentials.substring(0, colonIndex);
-        	password = clientCredentials.substring(colonIndex + 1);
+        	clientId = id
+        	password = secret;
         } else {
-        	throw new Exception("Couldn't extract client ID/secret from credentials param. Use a colon character to separate them");
+        	throw new Exception("Client ID/secret cannot be empty");
         }
         
 	}
