@@ -81,7 +81,7 @@ public class TestModeScimClient<T> extends AbstractScimClient<T> {
 
         if (StringHelper.isNotEmpty(id) && StringHelper.isNotEmpty(secret)) {
         	clientExpiration = Long.MAX_VALUE;
-        	clientId = id
+        	clientId = id;
         	password = secret;
         } else {
         	throw new Exception("Client ID/secret cannot be empty");
