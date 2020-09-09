@@ -25,6 +25,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
@@ -67,6 +69,7 @@ public class ClientsResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
+	@Timed(name = "retrieveOpenIdClient-time", description = "Metrics to monitor time to retrieve/search openid connect client.", unit = MetricUnits.MINUTES, absolute = true)
 	public Response getOpenIdConnectClients(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		List<OxAuthClient> clients = new ArrayList<OxAuthClient>();
