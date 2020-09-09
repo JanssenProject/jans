@@ -68,7 +68,7 @@ public class ScimClientFactory {
     /**
      * Constructs an object that allows direct interaction with the SCIM API assuming it is being protected by test mode.
      * This method hides the complexity of steps required at the authorization server in a test-mode setting.
-     * Usage examples of this type of cliente can be found at the
+     * Usage examples of this type of client can be found at the
      * <a href="https://www.gluu.org/docs/ce/user-management/scim2/">SCIM 2.0 docs page</a>.
      * @param interfaceClass The Class to which the object returned will belong to. Normally it will be an interface inside
      *                       package {@link gluu.scim2.client.rest gluu.scim2.client.rest} or {@link org.gluu.oxtrust.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}
@@ -82,11 +82,28 @@ public class ScimClientFactory {
         InvocationHandler handler = new TestModeScimClient<>(interfaceClass, domain, OIDCMetadataUrl);
         return typedProxy(interfaceClass, handler);
     }
-
+    
+    /**
+     * Constructs an object that allows direct interaction with the SCIM API assuming it is being protected by test mode.
+     * Usage examples of this type of client can be found at the
+     * <a href="https://www.gluu.org/docs/ce/user-management/scim2/">SCIM 2.0 docs page</a>.
+     * @param interfaceClass The Class to which the object returned will belong to. Normally it will be an interface inside
+     *                       package {@link gluu.scim2.client.rest gluu.scim2.client.rest} or {@link org.gluu.oxtrust.ws.rs.scim2 org.gluu.oxtrust.ws.rs.scim2}
+     * @param clientCredentials Credentials of an already registered OIDC client in the Gluu Server.
+     *                          They are in the format client_id:client_secret
+     * @param <T> The type the object returned will belong to.
+     * @return An object that allows to invoke service methods
+     * @throws Exception If there is initialization problem
+     */
+    public static <T> T getTestClient(Class <T> interfaceClass, String clientCredentials) throws Exception {
+        InvocationHandler handler = new TestModeScimClient<>(interfaceClass, clientCredentials);
+        return typedProxy(interfaceClass, handler);
+    }
+    
     /**
      * Constructs an object that allows direct interaction with the SCIM API assuming it is being protected by test mode.
      * This method hides the complexity of steps required at the authorization server in a test-mode setting.
-     * Usage examples of this type of cliente can be found at the
+     * Usage examples of this type of client can be found at the
      * <a href="https://www.gluu.org/docs/ce/user-management/scim2/">SCIM 2.0 docs page</a>.<br>
      * The object returned by this method belongs to interface {@link gluu.scim2.client.rest.ClientSideService ClientSideService}
      * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. Also has some support to
@@ -98,6 +115,22 @@ public class ScimClientFactory {
      */
     public static ClientSideService getTestClient(String domain, String OIDCMetadataUrl) throws Exception {
         return getTestClient(defaultInterface, domain, OIDCMetadataUrl);
+    }
+
+    /**
+     * Constructs an object that allows direct interaction with the SCIM API assuming it is being protected by test mode.
+     * Usage examples of this type of client can be found at the
+     * <a href="https://www.gluu.org/docs/ce/user-management/scim2/">SCIM 2.0 docs page</a>.<br>
+     * The object returned by this method belongs to interface {@link gluu.scim2.client.rest.ClientSideService ClientSideService}
+     * which has all methods available to interact with User, Group, and FidoDevice SCIM resources. Also has some support to
+     * call service provider configuration endpoints (see section 4 of RFC 7644)
+     * @param clientCredentials Credentials of an already registered OIDC client in the Gluu Server.
+     *                          They are in the format client_id:client_secret
+     * @return An object that allows to invoke service methods
+     * @throws Exception If there is initialization problem
+     */
+    public static ClientSideService getTestClient(String clientCredentials) throws Exception {
+        return getTestClient(defaultInterface, clientCredentials);
     }
 
     private static <T> T typedProxy(Class <T> interfaceClass, InvocationHandler handler){

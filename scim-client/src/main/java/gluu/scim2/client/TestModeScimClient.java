@@ -76,6 +76,20 @@ public class TestModeScimClient<T> extends AbstractScimClient<T> {
 
     }
 
+	public TestModeScimClient(Class<T> serviceClass, String clientCredentials) throws Exception {
+        super(serviceUrl, serviceClass);
+
+        int colonIndex = clientCredentials.indexOf(":");
+        if (colonIndex > 0) {
+        	clientExpiration = Long.MAX_VALUE;
+        	clientId = clientCredentials.substring(0, colonIndex);
+        	password = clientCredentials.substring(colonIndex + 1);
+        } else {
+        	throw new Exception("Couldn't extract client ID/secret from credentials param. Use a colon character to separate them");
+        }
+        
+	}
+        
     private boolean triggerRegistrationIfNeeded() throws Exception {
 
         boolean flag = false;
@@ -96,7 +110,8 @@ public class TestModeScimClient<T> extends AbstractScimClient<T> {
             RegisterResponse response = registerClient.exec();
             clientId = response.getClientId();
             password = response.getClientSecret();
-            clientExpiration = response.getClientSecretExpiresAt().getTime();
+            clientExpiration = Optional.ofNullable(response.getClientSecretExpiresAt())
+            					.map(Date::getTime).orElse(Long.MAX_VALUE);
 
             flag = true;
         }
