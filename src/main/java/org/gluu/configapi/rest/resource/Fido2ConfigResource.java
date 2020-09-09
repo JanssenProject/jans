@@ -3,6 +3,11 @@ package org.gluu.configapi.rest.resource;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Metered;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.gluu.config.oxtrust.DbApplicationConfiguration;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.rest.model.Fido2Configuration;
@@ -29,6 +34,9 @@ public class Fido2ConfigResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
+	@Counted(name = "fetchFido2ConfigurationInvocations", description = "Counting the invocations of the fido2 configuration endpoint.")
+	@Metered(name = "fido2ConfigurationRetrieve", unit = MetricUnits.SECONDS, description = "Metrics to monitor fido2 configuration retrieval.", absolute = true)
+	@Timed(name = "fetchFido2Configuration-time", description = "Metrics to monitor time to fetch fido2 configuration.", unit = MetricUnits.MINUTES, absolute = true)
 	public Response getFido2Configuration() {
 		Fido2Configuration fido2Configuration = new Fido2Configuration();
 		String fido2ConfigJson = null;
@@ -46,6 +54,9 @@ public class Fido2ConfigResource extends BaseResource {
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
+	@Counted(name = "updateFido2ConfigurationInvocations", description = "Counting the invocations of the fido2 update configuration endpoint.")
+	@Metered(name = "fido2ConfigurationUpdate", unit = MetricUnits.SECONDS, description = "Metrics to monitor fido2 configuration change.s", absolute = true)
+	@Timed(name = "updateFido2Configuration-time", description = "Metrics to monitor time to change fido2 configuration.", unit = MetricUnits.MINUTES, absolute = true)
 	public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
 		DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
 		if (dbApplicationConfiguration != null) {
