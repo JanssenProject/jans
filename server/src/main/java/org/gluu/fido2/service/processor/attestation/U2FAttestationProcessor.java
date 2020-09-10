@@ -24,6 +24,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.fido2.ctap.AttestationFormat;
+import org.gluu.fido2.exception.Fido2MissingAttestationCertException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
@@ -97,8 +98,13 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             credIdAndCounters.setSignatureAlgorithm(alg);
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
 //            certificateValidator.saveCertificate(certificates.get(0));
-            Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
+            Certificate verifiedCert;
+			try {
+				verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+	            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
+			} catch (Fido2MissingAttestationCertException ex) {
+				log.error("Skipping attestation signature check");
+			}
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
             throw new UnsupportedOperationException("ecdaaKeyId is not supported");
