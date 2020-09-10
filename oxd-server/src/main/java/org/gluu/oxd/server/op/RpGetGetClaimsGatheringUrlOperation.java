@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.uma.UmaMetadata;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.params.RpGetClaimsGatheringUrlParams;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.common.response.RpGetClaimsGatheringUrlResponse;
@@ -36,7 +37,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
 
         final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
         final Rp rp = getRp();
-        final String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
+        final String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
 
         String url = metadata.getClaimsInteractionEndpoint() +
                 "?client_id=" + rp.getClientId() +
