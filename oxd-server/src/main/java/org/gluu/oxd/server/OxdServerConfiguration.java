@@ -101,6 +101,10 @@ public class OxdServerConfiguration extends Configuration {
     private String mtlsClientKeyStorePath;
     @JsonProperty(value = "mtls_client_key_store_password")
     private String mtlsClientKeyStorePassword;
+    @JsonProperty(value = "encode_state_from_request_parameter")
+    private Boolean encodeStateFromRequestParameter = false;
+    @JsonProperty(value = "encode_nonce_from_request_parameter")
+    private Boolean encodeNonceFromRequestParameter = false;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -462,6 +466,22 @@ public class OxdServerConfiguration extends Configuration {
         this.idTokenValidationSHashRequired = idTokenValidationSHashRequired;
     }
 
+    public Boolean getEncodeStateFromRequestParameter() {
+        return encodeStateFromRequestParameter;
+    }
+
+    public void setEncodeStateFromRequestParameter(Boolean encodeStateFromRequestParameter) {
+        this.encodeStateFromRequestParameter = encodeStateFromRequestParameter;
+    }
+
+    public Boolean getEncodeNonceFromRequestParameter() {
+        return encodeNonceFromRequestParameter;
+    }
+
+    public void setEncodeNonceFromRequestParameter(Boolean encodeNonceFromRequestParameter) {
+        this.encodeNonceFromRequestParameter = encodeNonceFromRequestParameter;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -505,6 +525,8 @@ public class OxdServerConfiguration extends Configuration {
                 ", mtlsClientKeyStorePath=" + mtlsClientKeyStorePath + '\'' +
                 ", mtlsClientKeyStorePassword=" + mtlsClientKeyStorePassword + '\'' +
                 ", idTokenValidationSHashRequired=" + idTokenValidationSHashRequired + '\'' +
+                ", encodeStateFromRequestParameter=" + encodeStateFromRequestParameter + '\'' +
+                ", encodeNonceFromRequestParameter=" + encodeNonceFromRequestParameter + '\'' +
                 '}';
     }
 }
