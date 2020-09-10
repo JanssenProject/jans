@@ -3,10 +3,12 @@ package org.gluu.oxd.server.service;
 import com.google.inject.Inject;
 import org.gluu.oxd.common.ExpiredObject;
 import org.gluu.oxd.common.ExpiredObjectType;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.persistence.service.PersistenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -58,5 +60,17 @@ public class StateService {
     public String putNonce(String nonce) {
         persistenceService.createExpiredObject(new ExpiredObject(nonce, nonce, ExpiredObjectType.NONCE, configurationService.get().getNonceExpirationInMinutes()));
         return nonce;
+    }
+
+    public String encodeExpiredObject(String expiredObject, ExpiredObjectType type) throws UnsupportedEncodingException {
+        if (type == ExpiredObjectType.STATE && configurationService.get().getEncodeStateFromRequestParameter()) {
+            return Utils.encode(expiredObject);
+        }
+
+        if (type == ExpiredObjectType.NONCE && configurationService.get().getEncodeNonceFromRequestParameter()) {
+            return Utils.encode(expiredObject);
+        }
+
+        return expiredObject;
     }
 }
