@@ -30,13 +30,13 @@ import javax.ws.rs.core.Response;
 public class ConfigSmtpResource extends BaseResource {
 
 	@Inject
-	private ConfigurationService configurationService;
+	ConfigurationService configurationService;
 
 	@Inject
 	EncryptionService encryptionService;
 
 	@Inject
-	private MailService mailService;
+	MailService mailService;
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })

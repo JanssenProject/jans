@@ -26,7 +26,7 @@ public class AcrsResource extends BaseResource {
 	Logger log;
 
 	@Inject
-	private ConfigurationService configurationService;
+	ConfigurationService configurationService;
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
