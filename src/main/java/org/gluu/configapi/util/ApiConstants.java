@@ -41,6 +41,8 @@ public class ApiConstants {
 	public static final String SMTP = "/smtp";
 	public static final String GRANT_TYPES = "/grant-types";
 	public static final String CACHE = "/cache";
+	public static final String DATABASE = "/database";
+	public static final String LDAP = "/ldap";
 	public static final String REDIS = "/redis";
 	public static final String IN_MEMORY = "/in-memory";
 	public static final String NATIVE_PERSISTENCE = "/native-persistence";
@@ -48,6 +50,7 @@ public class ApiConstants {
 	public static final String INUM_PATH = "{inum}";
 	public static final String SCOPE_INUM_PATH = "{scope_inum}";
 	public static final String TYPE_PATH = "/{type}";
+	public static final String NAME_PARAM_PATH = "/{name}";
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
@@ -55,6 +58,7 @@ public class ApiConstants {
 	public static final String INUM = "inum";
 	public static final String SCOPE_INUM = "scope_inum";
 	public static final String TYPE = "type";
+	public static final String NAME = "name";
 	
 	public static final String ALL = "all";
 	public static final String ACTIVE = "active";

@@ -72,13 +72,14 @@ public class CustomScriptResource extends BaseResource {
 	}
 
 	@GET
-	@Path(ApiConstants.INUM_PATH)
+	@Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
 		CustomScript script = null;
 		try {
 			script = this.customScriptService.getScriptByInum(inum);
 		} catch (Exception ex) {
+		    ex.printStackTrace();
 			if (ex.getMessage().contains("Failed to find entry")) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
