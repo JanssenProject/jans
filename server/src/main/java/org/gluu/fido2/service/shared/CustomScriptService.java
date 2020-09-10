@@ -6,8 +6,11 @@
 
 package org.gluu.fido2.service.shared;
 
+import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
+import javax.interceptor.Interceptor;
 
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.service.custom.script.AbstractCustomScriptService;
@@ -18,6 +21,8 @@ import org.gluu.service.custom.script.AbstractCustomScriptService;
  * @author Yuriy Movchan Date: 05/13/2020
  */
 @ApplicationScoped
+@Alternative
+@Priority(Interceptor.Priority.APPLICATION + 1)
 public class CustomScriptService extends AbstractCustomScriptService {
 	
 	@Inject
