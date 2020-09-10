@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,6 +61,10 @@ public class Utils {
 
     public static String encode(String str) throws UnsupportedEncodingException {
         return URLEncoder.encode(str, "UTF-8");
+    }
+
+    public static String decode(String str) throws UnsupportedEncodingException {
+        return URLDecoder.decode(str, "UTF-8");
     }
 
     public static int hoursDiff(Date earlierDate, Date laterDate) {
