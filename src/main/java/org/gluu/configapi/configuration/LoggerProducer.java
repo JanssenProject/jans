@@ -1,6 +1,5 @@
 package org.gluu.configapi.configuration;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -8,9 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.quarkus.arc.AlternativePriority;
+import io.quarkus.runtime.Startup;
 
-@ApplicationScoped
-@AlternativePriority(value=1)
+@Startup
+@AlternativePriority(value = 1)
 public class LoggerProducer {
 
 	@Produces
