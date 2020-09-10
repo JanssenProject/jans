@@ -98,12 +98,13 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             credIdAndCounters.setSignatureAlgorithm(alg);
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
 //            certificateValidator.saveCertificate(certificates.get(0));
-            Certificate verifiedCert;
 			try {
-				verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+				Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 	            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, clientDataHash, signature, verifiedCert, alg);
 			} catch (Fido2MissingAttestationCertException ex) {
-				log.error("Skipping attestation signature check");
+				X509Certificate certificate = certificates.get(0);
+				String issuerDN = certificate.getIssuerDN().getName();
+				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
 			}
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
