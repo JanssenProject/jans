@@ -8,6 +8,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObjectType;
 
 import java.io.FileInputStream;
 import java.io.IOException;

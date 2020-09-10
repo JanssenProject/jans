@@ -15,6 +15,7 @@ import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
@@ -115,15 +116,17 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     .rp(rp)
                     .build();
 
+            String state = getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
+
             validator.validateNonce(getStateService());
             validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
-            validator.validateState(params.getState());
+            validator.validateState(state);
             // persist tokens
             rp.setIdToken(response.getIdToken());
             rp.setAccessToken(response.getAccessToken());
             getRpService().update(rp);
-            getStateService().deleteExpiredObjectsByKey(params.getState());
+            getStateService().deleteExpiredObjectsByKey(state);
 
             LOG.trace("Scope: " + response.getScope());
 
@@ -152,7 +155,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
         try {
-            if (!getStateService().isExpiredObjectPresent(params.getState()) && !getStateService().isExpiredObjectPresent(Utils.decode(params.getState()))) {
+            if (!getStateService().isExpiredObjectPresent(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE))) {
                 throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
             }
         } catch (Exception e) {
