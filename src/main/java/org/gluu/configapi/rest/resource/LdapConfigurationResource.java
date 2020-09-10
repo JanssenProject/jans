@@ -38,38 +38,29 @@ public class LdapConfigurationResource extends BaseResource {
   @GET
   @ProtectedApi( scopes = {READ_ACCESS} )
   public Response getLdapConfiguration() {
-    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfiguration() - Entry \n\n\n");
-    List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
-    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfiguration() - ldapConfigurationList = "+ldapConfigurationList+"\n\n\n");
-    
-    return Response.ok(ldapConfigurationList).build();
+     List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
+     return Response.ok(ldapConfigurationList).build();
   }  
   
   @GET
   @Path(ApiConstants.NAME_PARAM_PATH)
   @ProtectedApi( scopes = {READ_ACCESS} )
   public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
-    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - name ="+name+" \n\n\n");
     GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
-    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");  
     return Response.ok(ldapConfiguration).build();
   }
   
   @POST
   @ProtectedApi( scopes = {WRITE_ACCESS} )
   public Response addLdapConfiguration(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) {
-    System.out.println("\n\n\n\n LdapConfigurationResource::addLdapConfiguration() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
     this.ldapConfigurationService.save(ldapConfiguration);
-    System.out.println("\n\n\n\n LdapConfigurationResource::addLdapConfiguration() - SUCCESS \n\n\n");
     return Response.status(Response.Status.CREATED).entity(ldapConfiguration).build();  
   }
     
   @PUT
   @ProtectedApi( scopes = {WRITE_ACCESS} )
   public Response updateLdapConfiguration(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) {
-    System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
-    GluuLdapConfiguration existingLdapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
-    System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - existingLdapConfiguration ="+existingLdapConfiguration+" \n\n\n");
+    findLdapConfigurationByName(ldapConfiguration.getConfigId());
     this.ldapConfigurationService.update(ldapConfiguration);
     return Response.ok(ldapConfiguration).build();  
   }
@@ -79,21 +70,19 @@ public class LdapConfigurationResource extends BaseResource {
   @Path(ApiConstants.NAME_PARAM_PATH)
   @ProtectedApi( scopes = {WRITE_ACCESS} )
   public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
-    System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - name ="+name+" \n\n\n");
-    GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
-    System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
+    findLdapConfigurationByName(name);
+    logger.info("Delete Ldap Configuration by name " + name);
     this.ldapConfigurationService.remove(name);
     return Response.noContent().build();
   }
   
   private GluuLdapConfiguration findLdapConfigurationByName(String name) {
-    System.out.println("\n\n\n\n LdapConfigurationResource::findLdapConfigurationByName() - name ="+name+" \n\n\n");   
    try{
       return this.ldapConfigurationService.findLdapConfigurationByName(name);
     }
     catch(Exception ex) {
-      logger.info("Could not Ldap Configuration by name " + name, ex);
-      throw new NotFoundException(getNotFoundError("Ldap Configuration - " + name));
+      logger.error("Could not find Ldap Configuration by name '"+ name+"'", ex);
+      throw new NotFoundException(getNotFoundError("Ldap Configuration - '"+name+"'"));
       
     }
   }
