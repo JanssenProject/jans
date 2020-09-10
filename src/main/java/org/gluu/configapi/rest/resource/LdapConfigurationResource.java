@@ -1,0 +1,111 @@
+package org.gluu.configapi.rest.resource;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.GET;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+
+import org.gluu.model.ldap.GluuLdapConfiguration;
+import org.gluu.oxtrust.service.LdapConfigurationService;
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.util.ApiConstants;
+
+@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class LdapConfigurationResource extends BaseResource {
+  
+  @Inject
+  Logger logger;
+  
+  @Inject
+  LdapConfigurationService ldapConfigurationService;
+  
+  @GET
+  @ProtectedApi( scopes = {READ_ACCESS} )
+  public Response getLdapConfiguration() {
+    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfiguration() - Entry \n\n\n");
+    List<GluuLdapConfiguration> ldapConfigurationList = this.ldapConfigurationService.findLdapConfigurations();
+    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfiguration() - ldapConfigurationList = "+ldapConfigurationList+"\n\n\n");
+    
+    return Response.ok(ldapConfigurationList).build();
+  }  
+  
+  @GET
+  @Path(ApiConstants.NAME_PARAM_PATH)
+  @ProtectedApi( scopes = {READ_ACCESS} )
+  public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
+    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - name ="+name+" \n\n\n");
+    GluuLdapConfiguration ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
+   /* try{
+        ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+      
+    }*/
+    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
+  
+    return Response.ok(ldapConfiguration).build();
+  }
+  
+  @POST
+  @ProtectedApi( scopes = {WRITE_ACCESS} )
+  public Response addLdapConfiguration(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) {
+    System.out.println("\n\n\n\n LdapConfigurationResource::addLdapConfiguration() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
+    this.ldapConfigurationService.save(ldapConfiguration);
+    System.out.println("\n\n\n\n LdapConfigurationResource::addLdapConfiguration() - SUCCESS \n\n\n");
+    return Response.status(Response.Status.CREATED).entity(ldapConfiguration).build();  
+  }
+    
+  @PUT
+  @ProtectedApi( scopes = {WRITE_ACCESS} )
+  public Response updateLdapConfiguration(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) {
+    System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
+    GluuLdapConfiguration existingLdapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(ldapConfiguration.getConfigId());
+   /* try{
+        existingLdapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(ldapConfiguration.getConfigId());
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+      
+    }*/
+    System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - existingLdapConfiguration ="+existingLdapConfiguration+" \n\n\n");
+    this.ldapConfigurationService.update(ldapConfiguration);
+    return Response.ok(ldapConfiguration).build();  
+  }
+  
+  
+  @DELETE
+  @Path(ApiConstants.NAME_PARAM_PATH)
+  @ProtectedApi( scopes = {WRITE_ACCESS} )
+  public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
+    System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - name ="+name+" \n\n\n");
+    GluuLdapConfiguration ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
+   /* try{
+        ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+      
+    }*/
+    System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
+    this.ldapConfigurationService.remove(name);
+    return Response.noContent().build();
+  }
+  
+
+}

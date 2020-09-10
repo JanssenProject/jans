@@ -46,6 +46,9 @@ function() {
 	    // Cache configuration endpoints.
 	    cacheUrl: baseUrl + '/api/v1/oxauth/config/cache',
 	    
+	    // LDAP configuration endpoints.
+	    ldapUrl: baseUrl + '/api/v1/oxauth/config/database/ldap',
+	    
 	    // OpenIdConnect Clients Endpoint
 	    openidclients_url: baseUrl + '/api/v1/oxauth/clients',
 	    
