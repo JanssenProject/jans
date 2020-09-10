@@ -2,6 +2,7 @@ package org.gluu.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gluu.oxauth.client.OpenIdConfigurationResponse;
@@ -66,7 +67,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
             uri += separator(uri) + "post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
         }
         if (!Strings.isNullOrEmpty(params.getState())) {
-            uri += separator(uri) + "state=" + params.getState();
+            uri += separator(uri) + "state=" + getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
         }
         if (!Strings.isNullOrEmpty(params.getSessionState())) {
             uri += separator(uri) + "session_state=" + params.getSessionState();
