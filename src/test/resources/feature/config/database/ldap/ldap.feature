@@ -37,7 +37,16 @@ Feature: Verify Auth configuration endpoint
     When method GET
     Then status 200
     And print response
-    And assert response.length != null       
+    And assert response.length != null 
+    
+    @ldap-config-get-by-name-invalid
+  	Scenario: Get Non-existing LDAP configuration By Name
+    Given url  mainUrl + '/' +'Non-existing-ldap'
+    And  header Authorization = 'Bearer ' + accessToken
+    When method GET
+    Then status 404
+    And print response
+    And assert response.length != null      
     
     @ldap-config-post
   	Scenario: Add LDAP configuration

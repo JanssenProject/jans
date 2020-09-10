@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.PUT;
 import javax.ws.rs.POST;
@@ -49,16 +50,8 @@ public class LdapConfigurationResource extends BaseResource {
   @ProtectedApi( scopes = {READ_ACCESS} )
   public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
     System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - name ="+name+" \n\n\n");
-    GluuLdapConfiguration ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
-   /* try{
-        ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-      
-    }*/
-    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
-  
+    GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
+    System.out.println("\n\n\n\n LdapConfigurationResource::getLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");  
     return Response.ok(ldapConfiguration).build();
   }
   
@@ -75,14 +68,7 @@ public class LdapConfigurationResource extends BaseResource {
   @ProtectedApi( scopes = {WRITE_ACCESS} )
   public Response updateLdapConfiguration(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) {
     System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
-    GluuLdapConfiguration existingLdapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(ldapConfiguration.getConfigId());
-   /* try{
-        existingLdapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(ldapConfiguration.getConfigId());
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-      
-    }*/
+    GluuLdapConfiguration existingLdapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
     System.out.println("\n\n\n\n LdapConfigurationResource::updateLdapConfiguration() - existingLdapConfiguration ="+existingLdapConfiguration+" \n\n\n");
     this.ldapConfigurationService.update(ldapConfiguration);
     return Response.ok(ldapConfiguration).build();  
@@ -94,18 +80,24 @@ public class LdapConfigurationResource extends BaseResource {
   @ProtectedApi( scopes = {WRITE_ACCESS} )
   public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
     System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - name ="+name+" \n\n\n");
-    GluuLdapConfiguration ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
-   /* try{
-        ldapConfiguration = this.ldapConfigurationService.findLdapConfigurationByName(name);
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-      
-    }*/
+    GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
     System.out.println("\n\n\n\n LdapConfigurationResource::deleteLdapConfigurationByName() - ldapConfiguration ="+ldapConfiguration+" \n\n\n");
     this.ldapConfigurationService.remove(name);
     return Response.noContent().build();
   }
+  
+  private GluuLdapConfiguration findLdapConfigurationByName(String name) {
+    System.out.println("\n\n\n\n LdapConfigurationResource::findLdapConfigurationByName() - name ="+name+" \n\n\n");   
+   try{
+      return this.ldapConfigurationService.findLdapConfigurationByName(name);
+    }
+    catch(Exception ex) {
+      logger.info("Could not Ldap Configuration by name " + name, ex);
+      throw new NotFoundException(getNotFoundError("Ldap Configuration - " + name));
+      
+    }
+  }
+  
   
 
 }
