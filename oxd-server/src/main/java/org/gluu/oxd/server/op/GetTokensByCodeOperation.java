@@ -15,12 +15,15 @@ import org.gluu.oxauth.model.jwk.Use;
 import org.gluu.oxauth.model.jwt.Jwt;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.Jackson2;
 import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,15 +116,17 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                     .rp(rp)
                     .build();
 
+            String state = getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE);
+
             validator.validateNonce(getStateService());
             validator.validateIdToken();
             validator.validateAccessToken(response.getAccessToken());
-            validator.validateState(params.getState());
+            validator.validateState(state);
             // persist tokens
             rp.setIdToken(response.getIdToken());
             rp.setAccessToken(response.getAccessToken());
             getRpService().update(rp);
-            getStateService().deleteExpiredObjectsByKey(params.getState());
+            getStateService().deleteExpiredObjectsByKey(state);
 
             LOG.trace("Scope: " + response.getScope());
 
@@ -142,13 +147,19 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     }
 
     private void validate(GetTokensByCodeParams params) {
+
         if (Strings.isNullOrEmpty(params.getCode())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
         }
         if (Strings.isNullOrEmpty(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
-        if (!getStateService().isExpiredObjectPresent(params.getState())) {
+        try {
+            if (!getStateService().isExpiredObjectPresent(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE))) {
+                throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
+            }
+        } catch (Exception e) {
+            Log.error(e.getMessage(), e);
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
     }
