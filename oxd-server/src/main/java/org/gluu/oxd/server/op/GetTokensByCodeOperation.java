@@ -20,7 +20,9 @@ import org.gluu.oxd.common.params.GetTokensByCodeParams;
 import org.gluu.oxd.common.response.GetTokensByCodeResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
+import org.gluu.oxd.server.Utils;
 import org.gluu.oxd.server.service.Rp;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,13 +144,19 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     }
 
     private void validate(GetTokensByCodeParams params) {
+
         if (Strings.isNullOrEmpty(params.getCode())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_CODE);
         }
         if (Strings.isNullOrEmpty(params.getState())) {
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_NO_STATE);
         }
-        if (!getStateService().isExpiredObjectPresent(params.getState())) {
+        try {
+            if (!getStateService().isExpiredObjectPresent(params.getState()) && !getStateService().isExpiredObjectPresent(Utils.decode(params.getState()))) {
+                throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
+            }
+        } catch (Exception e) {
+            Log.error(e.getMessage(), e);
             throw new HttpException(ErrorResponseCode.BAD_REQUEST_STATE_NOT_VALID);
         }
     }
