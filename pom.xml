@@ -95,31 +95,31 @@
 					<artifactId>log4j-slf4j-impl</artifactId>
 					<groupId>org.apache.logging.log4j</groupId>
 				</exclusion>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-ldap</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-couchbase</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
@@ -133,31 +133,31 @@
 					<artifactId>log4j-slf4j-impl</artifactId>
 					<groupId>org.apache.logging.log4j</groupId>
 				</exclusion>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-hybrid</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-service</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
-            </exclusions>
+			<exclusions>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
@@ -172,10 +172,10 @@
 					<artifactId>*</artifactId>
 					<groupId>org.jboss.resteasy</groupId>
 				</exclusion>
-                <exclusion>
-                    <artifactId>org.jboss.resteasy</artifactId>
-                    <groupId>resteasy-jackson2-provider</groupId>
-                </exclusion>
+				<exclusion>
+					<artifactId>org.jboss.resteasy</artifactId>
+					<groupId>resteasy-jackson2-provider</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -194,23 +194,15 @@
 			<scope>test</scope>
 		</dependency>
 
-       <dependency>
-		    <groupId>io.quarkus</groupId>
-		    <artifactId>quarkus-hibernate-validator</artifactId>
-		</dependency>
-		
 		<dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson-version}</version>
-        </dependency>
-        
-    <dependency>
-	    <groupId>com.github.java-json-tools</groupId>
-	    <artifactId>json-patch</artifactId>
-	    <version>${json-patch-version}</version>
-	</dependency>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-hibernate-validator</artifactId>
+		</dependency>
 
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>net.masterthought</groupId>
 			<artifactId>cucumber-reporting</artifactId>
@@ -266,9 +258,9 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${surefire-plugin.version}</version>
 				<configuration>
-                    <systemPropertyVariables>
-                        <quarkus.http.test-port>8083</quarkus.http.test-port>
-                    </systemPropertyVariables>
+					<systemPropertyVariables>
+						<quarkus.http.test-port>8083</quarkus.http.test-port>
+					</systemPropertyVariables>
 					<excludedGroups>integration</excludedGroups>
 					<systemProperties>
 						<java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
@@ -357,9 +349,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-
-
 		</plugins>
 	</build>
 	<profiles>
