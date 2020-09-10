@@ -24,8 +24,9 @@ public class CheckAccessTokenTest {
 
         ClientInterface client = Tester.newClient(host);
         String nonce = CoreUtils.secureRandomString();
+        String state = CoreUtils.secureRandomString();
         RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrls);
-        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, nonce);
+        GetTokensByCodeResponse2 response = GetTokensByCodeTest.tokenByCode(client, site, opHost, userId, userSecret, site.getClientId(), redirectUrls, nonce, state);
 
         final CheckAccessTokenParams params = new CheckAccessTokenParams();
         params.setAccessToken(response.getAccessToken());

@@ -8,6 +8,7 @@ import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxd.common.Command;
 import org.gluu.oxd.common.ErrorResponseCode;
+import org.gluu.oxd.common.ExpiredObjectType;
 import org.gluu.oxd.common.params.GetAuthorizationUrlParams;
 import org.gluu.oxd.common.response.GetAuthorizationUrlResponse;
 import org.gluu.oxd.common.response.IOpResponse;
@@ -17,6 +18,7 @@ import org.gluu.oxd.server.service.Rp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,8 +69,8 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
             responseTypes.addAll(rp.getResponseTypes());
         }
 
-        String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(Utils.encode(params.getState())) : getStateService().generateState();
-        String nonce = StringUtils.isNotBlank(params.getNonce()) ? getStateService().putNonce(Utils.encode(params.getNonce())) : getStateService().generateNonce();
+        String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
+        String nonce = StringUtils.isNotBlank(params.getNonce()) ? getStateService().putNonce(getStateService().encodeExpiredObject(params.getNonce(), ExpiredObjectType.NONCE)) : getStateService().generateNonce();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
