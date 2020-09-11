@@ -39,6 +39,7 @@ public enum ErrorResponseCode {
     INVALID_ID_TOKEN_BAD_AUDIENCE(500, "invalid_id_token_bad_audience", "Invalid id_token. Audience value from token does not match audience from request."),
     INVALID_ID_TOKEN_NO_AUDIENCE(500, "invalid_id_token_no_audience", "Invalid id_token. Audience claim is missing from id_token."),
     INVALID_ID_TOKEN_BAD_AUTHORIZED_PARTY(500, "invalid_id_token_bad_authorized_party", "Invalid id_token. Authorized party value from token does not match client_id of client."),
+    INVALID_ID_TOKEN_NO_AUTHORIZED_PARTY(500, "invalid_id_token_no_authorized_party", "Invalid id_token. Authorized party (`azp`) is missing in ID Token."),
     INVALID_ID_TOKEN_EXPIRED(500, "invalid_id_token_expired", "Invalid id_token. id_token expired."),
     INVALID_ID_TOKEN_NO_ISSUER(500, "invalid_id_token_no_issuer", "Invalid id_token. Issuer claim is missing from id_token."),
     INVALID_ID_TOKEN_BAD_ISSUER(500, "invalid_id_token_bad_issuer", "Invalid id_token. Bad issuer."),
