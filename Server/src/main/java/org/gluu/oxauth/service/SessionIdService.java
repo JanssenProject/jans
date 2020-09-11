@@ -720,7 +720,7 @@ public class SessionIdService {
 
     @Nullable
     public SessionId getSessionById(@Nullable String sessionId, boolean silently) {
-        return getSessionByDn(buildDn(sessionId));
+        return getSessionByDn(buildDn(sessionId), silently);
     }
 
     @Nullable
@@ -773,13 +773,13 @@ public class SessionIdService {
         return getSessionId(sessionId, false);
     }
 
-    public SessionId getSessionId(String sessionId, boolean siliently) {
+    public SessionId getSessionId(String sessionId, boolean silently) {
         if (StringHelper.isEmpty(sessionId)) {
             return null;
         }
 
         try {
-            final SessionId entity = getSessionById(sessionId, siliently);
+            final SessionId entity = getSessionById(sessionId, silently);
             log.trace("Try to get session by id: {} ...", sessionId);
             if (entity != null) {
                 log.trace("Session dn: {}", entity.getDn());
@@ -789,7 +789,7 @@ public class SessionIdService {
                 }
             }
         } catch (Exception ex) {
-            if (!siliently) {
+            if (!silently) {
                 log.trace(ex.getMessage(), ex);
             }
         }
