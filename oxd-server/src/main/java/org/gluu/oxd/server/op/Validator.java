@@ -373,9 +373,14 @@ public class Validator {
                     LOG.error("ID Token has invalid audience (string list). Expected audience: " + clientId + ", audience from token is: " + audAsList);
                     throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
                 }
-                //If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
+
                 if (audAsList.size() > 1) {
                     String azpFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUTHORIZED_PARTY);
+                    //If the ID Token contains multiple audiences, the Client SHOULD verify that an azp Claim is present.
+                    if(Strings.isNullOrEmpty(azpFromToken)) {
+                        LOG.error("The ID Token has multiple audiences. Authorized party (`azp`) is missing in ID Token.");
+                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_NO_AUTHORIZED_PARTY);
+                    }
                     //If an azp (authorized party) Claim is present, the Client SHOULD verify that its client_id is the Claim Value. If present, it MUST contain the OAuth 2.0 Client ID of this party.
                     if (!Strings.isNullOrEmpty(azpFromToken) && !azpFromToken.equalsIgnoreCase(clientId)) {
                         LOG.error("ID Token has invalid authorized party (string list). Expected authorized party: " + clientId + ", authorized party from token is: " + azpFromToken);
