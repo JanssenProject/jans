@@ -83,6 +83,21 @@
 		</dependency>
 
 		<!-- gluu dependencies -->
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxauth-model</artifactId>
+            <version>${oxauth.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>log4j2-jboss-logmanager</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxcore-persistence-annotation</artifactId>
