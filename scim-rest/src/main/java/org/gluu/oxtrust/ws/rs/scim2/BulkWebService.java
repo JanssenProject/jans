@@ -421,7 +421,7 @@ public class BulkWebService extends BaseScimWebService {
                         break;
                     case PATCH:
                         PatchRequest pr=mapper.readValue(data, PatchRequest.class);
-                        response=fido2DeviceWS.patch2Device(pr, fragment, "id", null);
+                        response=fido2DeviceWS.patchF2Device(pr, fragment, "id", null);
                         break;
                     case POST:
                         response=fido2DeviceWS.createDevice();
