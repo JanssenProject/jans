@@ -274,6 +274,11 @@ public class Validator {
             final String sub = idToken.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
             final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
             final String clientId = rp.getClientId();
+            //validate nonce
+            if(configuration.getFapiEnabled() && Strings.isNullOrEmpty(nonce)) {
+                LOG.error("Nonce is missing from id_token.");
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_NO_NONCE);
+            }
 
             if (!Strings.isNullOrEmpty(nonce) && !nonceFromToken.endsWith(nonce)) {
                 LOG.error("ID Token has invalid nonce. Expected nonce: " + nonce + ", nonce from token is: " + nonceFromToken);
@@ -304,6 +309,11 @@ public class Validator {
             }
 
             // 1. validate issuer
+            if (Strings.isNullOrEmpty(issuer)) {
+                LOG.error("Issuer (`iss`) claim is missing from id_token.");
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_NO_ISSUER);
+            }
+
             if (!issuer.equals(discoveryResponse.getIssuer())) {
                 LOG.error("ID Token issuer is invalid. Token issuer: " + issuer + ", discovery issuer: " + discoveryResponse.getIssuer());
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_ISSUER);
@@ -344,6 +354,12 @@ public class Validator {
     public static void validateAudience(Jwt idToken, String clientId) {
 
         final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
+
+        if (Strings.isNullOrEmpty(audienceFromToken)) {
+            LOG.error("The audience (`aud`) claim is missing from ID Token.");
+            throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_NO_AUDIENCE);
+        }
+
         if (!clientId.equalsIgnoreCase(audienceFromToken)) {
             List<String> audAsList = idToken.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
 
@@ -367,13 +383,6 @@ public class Validator {
                     }
                 }
             }
-
-            // somehow fetching string list does not return actual list, so we do this ugly trick to compare single valued array, more details in #178
-            /*boolean equalsWithSingleValuedArray = ("[\"" + clientId + "\"]").equalsIgnoreCase(audienceFromToken);
-            if (!equalsWithSingleValuedArray) {
-                LOG.error("ID Token has invalid audience (single valued array). Expected audience: " + clientId + ", audience from token is: " + audienceFromToken);
-                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_AUDIENCE);
-            }*/
         }
     }
 
