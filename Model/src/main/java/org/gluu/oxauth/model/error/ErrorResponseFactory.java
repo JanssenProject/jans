@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.model.error;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
@@ -18,11 +20,10 @@ import org.gluu.oxauth.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenRevocationErrorResponseType;
 import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
-import org.gluu.oxauth.util.ServerUtil;
+import org.gluu.oxauth.model.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -37,7 +38,6 @@ import java.util.List;
  * @author Yuriy Movchan
  * @version August 20, 2019
  */
-@Vetoed
 public class ErrorResponseFactory implements Configuration {
 
     private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
@@ -165,7 +165,8 @@ public class ErrorResponseFactory implements Configuration {
         JsonErrorResponse jsonErrorResponse = new JsonErrorResponse(response);
 
         try {
-            return ServerUtil.asJson(jsonErrorResponse);
+            final ObjectMapper mapper = Util.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+            return mapper.writeValueAsString(jsonErrorResponse);
         } catch (IOException ex) {
             log.error("Failed to generate error response", ex);
             return null;
