@@ -19,6 +19,8 @@ public class Fido2Configuration {
     private String mdsCertsFolder;
     private String mdsTocsFolder;
 
+    private boolean checkU2fAttestations = false;
+
     private boolean userAutoEnrollment = false;
 
     private int unfinishedRequestExpiration = 120; // 120 seconds
@@ -62,7 +64,15 @@ public class Fido2Configuration {
         this.mdsTocsFolder = mdsTocsFolder;
     }
 
-    public boolean isUserAutoEnrollment() {
+    public boolean isCheckU2fAttestations() {
+		return checkU2fAttestations;
+	}
+
+	public void setCheckU2fAttestations(boolean checkU2fAttestations) {
+		this.checkU2fAttestations = checkU2fAttestations;
+	}
+
+	public boolean isUserAutoEnrollment() {
         return userAutoEnrollment;
     }
 
