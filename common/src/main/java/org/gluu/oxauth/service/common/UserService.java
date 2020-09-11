@@ -177,20 +177,7 @@ public abstract class UserService {
     }
 
     public User getUserByAttribute(String attributeName, Object attributeValue, Boolean multiValued) {
-        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
-        
-        if (StringHelper.isEmpty(attributeName) || (attributeValue == null)) {
-        	return null;
-        }
-
-        Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
-        if (multiValued != null) {
-        	filter.multiValued(multiValued);
-        }
-
-        List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, filter, 1);
-        log.debug("Found '{}' entries", entries.size());
-
+        List<User> entries = getUsersByAttribute(attributeName, attributeValue, multiValued, 1);
         if (entries.size() > 0) {
             return entries.get(0);
         } else {
@@ -234,7 +221,25 @@ public abstract class UserService {
 		return user;
 	}
 
-	public User getUserByAttributes(Object attributeValue, String[] attributeNames, String... returnAttributes) {
+	public List<User> getUsersByAttribute(String attributeName, Object attributeValue, Boolean multiValued, int limit) {
+		log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+
+		if (StringHelper.isEmpty(attributeName) || (attributeValue == null)) {
+			return null;
+		}
+
+		Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
+		if (multiValued != null) {
+			filter.multiValued(multiValued);
+		}
+
+		List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, filter, limit);
+		log.debug("Found '{}' entries", entries.size());
+
+		return entries;
+	}
+
+    public User getUserByAttributes(Object attributeValue, String[] attributeNames, String... returnAttributes) {
 		return getUserByAttributes(attributeValue, attributeNames, null, returnAttributes);
 	}
 
