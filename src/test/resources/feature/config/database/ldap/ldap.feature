@@ -1,4 +1,4 @@
-Feature: Verify Auth configuration endpoint
+Feature: Verify LDAP configuration endpoint
 
   	Background:
   	* def mainUrl = ldapUrl
