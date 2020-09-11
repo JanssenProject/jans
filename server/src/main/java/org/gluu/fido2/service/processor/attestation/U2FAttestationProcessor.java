@@ -27,6 +27,7 @@ import org.gluu.fido2.ctap.AttestationFormat;
 import org.gluu.fido2.exception.Fido2MissingAttestationCertException;
 import org.gluu.fido2.model.auth.AuthData;
 import org.gluu.fido2.model.auth.CredAndCounterData;
+import org.gluu.fido2.model.conf.AppConfiguration;
 import org.gluu.fido2.model.entry.Fido2RegistrationData;
 import org.gluu.fido2.service.Base64Service;
 import org.gluu.fido2.service.CertificateService;
@@ -46,6 +47,9 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private CommonVerifiers commonVerifiers;
@@ -105,6 +109,9 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 				X509Certificate certificate = certificates.get(0);
 				String issuerDN = certificate.getIssuerDN().getName();
 				log.warn("Failed to find attestation validation signature public certificate with DN: '{}'", issuerDN);
+				if (appConfiguration.getFido2Configuration().isCheckU2fAttestations()) {
+					throw ex;
+				}
 			}
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
