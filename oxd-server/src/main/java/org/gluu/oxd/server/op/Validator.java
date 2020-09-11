@@ -325,7 +325,7 @@ public class Validator {
             //validate algorithm
             if (!Strings.isNullOrEmpty(rp.getIdTokenSignedResponseAlg()) &&
                     SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()) != signatureAlgorithm) {
-                LOG.error("The algorithm used to sign the ID Token does not matches with `id_token_signed_response_alg` algorithm set during client registration.Expected: {}, Got: {}", rp.getIdTokenSignedResponseAlg(), signatureAlgorithm.toString());
+                LOG.error("The algorithm used to sign the ID Token does not matches with `id_token_signed_response_alg` algorithm set during client registration.Expected: {}, Got: {}", rp.getIdTokenSignedResponseAlg(), algorithm);
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_INVALID_ALGORITHM);
             }
             if (signatureAlgorithm != SignatureAlgorithm.NONE) {
