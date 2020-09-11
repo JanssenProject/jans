@@ -319,10 +319,15 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_ISSUER);
             }
 
-            // 2. validate signature
+            //validate signature
             final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
             final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
-
+            //validate algorithm
+            if (!Strings.isNullOrEmpty(rp.getIdTokenSignedResponseAlg()) &&
+                    SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()) != signatureAlgorithm) {
+                LOG.error("The algorithm used to sign the ID Token does not matches with `id_token_signed_response_alg` algorithm set during client registration.");
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_INVALID_ALGORITHM);
+            }
             if (signatureAlgorithm != SignatureAlgorithm.NONE) {
                 boolean signature = jwsSigner.validate(idToken);
                 if (!signature) {
