@@ -48,6 +48,7 @@ Feature: Verify LDAP configuration endpoint
     And print response
     And assert response.length != null      
     
+    @ignore
     @ldap-config-post
   	Scenario: Add LDAP configuration
     Given url  mainUrl
@@ -74,6 +75,7 @@ Feature: Verify LDAP configuration endpoint
     And print response
     And assert response.length != null   
     
+     @ignore
     @ldap-config-put
   	Scenario: Update LDAP configuration
     Given url  mainUrl
