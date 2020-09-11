@@ -50,6 +50,7 @@ import org.gluu.oxtrust.model.scim2.bulk.BulkOperation;
 import org.gluu.oxtrust.model.scim2.bulk.BulkRequest;
 import org.gluu.oxtrust.model.scim2.bulk.BulkResponse;
 import org.gluu.oxtrust.model.scim2.fido.FidoDeviceResource;
+import org.gluu.oxtrust.model.scim2.fido.Fido2DeviceResource;
 import org.gluu.oxtrust.model.scim2.group.GroupResource;
 import org.gluu.oxtrust.model.scim2.patch.PatchRequest;
 import org.gluu.oxtrust.model.scim2.user.UserResource;
@@ -83,6 +84,7 @@ public class BulkWebService extends BaseScimWebService {
     private String usersEndpoint;
     private String groupsEndpoint;
     private String fidodevicesEndpoint;
+    private String fido2devicesEndpoint;
     private String commonWsEndpointPrefix;
 
     @Inject
@@ -93,6 +95,9 @@ public class BulkWebService extends BaseScimWebService {
 
     @Inject
     private FidoDeviceWebService fidoDeviceWS;
+    
+    @Inject
+    private Fido2DeviceWebService fido2DeviceWS;
 
     @Context
     private HttpHeaders httpHeaders;
@@ -250,7 +255,7 @@ public class BulkWebService extends BaseScimWebService {
                         throw new Exception("method not recognized: " + method);
 
                     //Check if path passed is consistent with respect to method:
-                    List<String> availableEndpoints=Arrays.asList(usersEndpoint, groupsEndpoint, fidodevicesEndpoint);
+                    List<String> availableEndpoints=Arrays.asList(usersEndpoint, groupsEndpoint, fidodevicesEndpoint, fido2devicesEndpoint);
                     boolean consistent = false;
                     for (String endpoint : availableEndpoints) {
                         if (verb.equals(POST))
@@ -293,6 +298,9 @@ public class BulkWebService extends BaseScimWebService {
         else
         if (path.startsWith(fidodevicesEndpoint))
             return fidoDeviceWS;
+        else
+        if (path.startsWith(fido2devicesEndpoint))
+            return fido2DeviceWS;
         else
             return null;
     }
@@ -388,7 +396,8 @@ public class BulkWebService extends BaseScimWebService {
                         response=fidoDeviceWS.updateDevice(dev, fragment, "id", null);
                         break;
                     case DELETE:
-                        response=fidoDeviceWS.deleteDevice(fragment);
+                    	//No support for removal in couchbase via bulk
+                        response=fidoDeviceWS.deleteDevice(fragment, null);
                         break;
                     case PATCH:
                         PatchRequest pr=mapper.readValue(data, PatchRequest.class);
@@ -396,6 +405,26 @@ public class BulkWebService extends BaseScimWebService {
                         break;
                     case POST:
                         response=fidoDeviceWS.createDevice();
+                        break;
+                }
+
+            else
+            if (ws==fido2DeviceWS)
+                switch (verb){
+                    case PUT:
+                        Fido2DeviceResource dev=mapper.readValue(data, Fido2DeviceResource.class);
+                        response=fido2DeviceWS.updateF2Device(dev, fragment, "id", null);
+                        break;
+                    case DELETE:
+                    	//No support for removal in couchbase via bulk
+                        response=fido2DeviceWS.deleteF2Device(fragment, null);
+                        break;
+                    case PATCH:
+                        PatchRequest pr=mapper.readValue(data, PatchRequest.class);
+                        response=fido2DeviceWS.patch2Device(pr, fragment, "id", null);
+                        break;
+                    case POST:
+                        response=fido2DeviceWS.createDevice();
                         break;
                 }
         }
@@ -416,6 +445,7 @@ public class BulkWebService extends BaseScimWebService {
         usersEndpoint=userWS.getEndpointUrl();
         groupsEndpoint=groupWS.getEndpointUrl();
         fidodevicesEndpoint=fidoDeviceWS.getEndpointUrl();
+        fido2devicesEndpoint=fido2DeviceWS.getEndpointUrl();
         commonWsEndpointPrefix=usersEndpoint.substring(0, usersEndpoint.lastIndexOf("/"));
     }
 
