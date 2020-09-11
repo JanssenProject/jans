@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.PUT;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -23,6 +24,8 @@ import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxtrust.service.LdapConfigurationService;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.ConnectionStatus;
+import org.gluu.configapi.util.Jackson;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,6 +37,10 @@ public class LdapConfigurationResource extends BaseResource {
   
   @Inject
   LdapConfigurationService ldapConfigurationService;
+  
+  /*
+   * @Inject ConnectionStatus connectionStatus;
+   */
   
   @GET
   @ProtectedApi( scopes = {READ_ACCESS} )
@@ -65,7 +72,6 @@ public class LdapConfigurationResource extends BaseResource {
     return Response.ok(ldapConfiguration).build();  
   }
   
-  
   @DELETE
   @Path(ApiConstants.NAME_PARAM_PATH)
   @ProtectedApi( scopes = {WRITE_ACCESS} )
@@ -75,6 +81,32 @@ public class LdapConfigurationResource extends BaseResource {
     this.ldapConfigurationService.remove(name);
     return Response.noContent().build();
   }
+  
+  
+  @PATCH
+  @Path(ApiConstants.NAME_PARAM_PATH)
+  @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+  @ProtectedApi(scopes = { WRITE_ACCESS })
+  public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws Exception {
+    GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
+    logger.info("Patch Ldap Configuration by name " + name);
+    ldapConfiguration = Jackson.applyPatch(requestString, ldapConfiguration);
+    this.ldapConfigurationService.update(ldapConfiguration);
+      return Response.ok(ldapConfiguration).build();
+  }
+  
+  @POST
+  @Path(ApiConstants.TEST)
+  @ProtectedApi(scopes = { READ_ACCESS })
+  public Response testLdapConfigurationByName(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) throws Exception {
+    System.out.println("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - ldapConfiguration = "+ldapConfiguration+"\n\n\n");
+    logger.info("Test Ldap Configuration " + ldapConfiguration);
+    ConnectionStatus connectionStatus = new ConnectionStatus();
+    boolean status = connectionStatus.isUp(ldapConfiguration);
+    System.out.println("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = "+status+"\n\n\n");
+    return Response.ok(status).build();
+  }
+      
   
   private GluuLdapConfiguration findLdapConfigurationByName(String name) {
    try{

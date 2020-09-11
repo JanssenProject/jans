@@ -47,10 +47,12 @@ public class ApiConstants {
 	public static final String IN_MEMORY = "/in-memory";
 	public static final String NATIVE_PERSISTENCE = "/native-persistence";
 	public static final String MEMCACHED = "/memcached";
+	public static final String TEST = "/test";
 	public static final String INUM_PATH = "{inum}";
 	public static final String SCOPE_INUM_PATH = "{scope_inum}";
 	public static final String TYPE_PATH = "/{type}";
 	public static final String NAME_PARAM_PATH = "/{name}";
+
 
 	public static final String LIMIT = "limit";
 	public static final String PATTERN = "pattern";
