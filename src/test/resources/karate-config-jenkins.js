@@ -22,6 +22,8 @@ function() {
 
 	    accessToken: 'c8dd2445-4734-4119-8dd1-4dbe91976202',
 
+	    baseUrl: baseUrl,
+
 	    // health endpoint
 	    healthUrl: baseUrl + '/health',
 
