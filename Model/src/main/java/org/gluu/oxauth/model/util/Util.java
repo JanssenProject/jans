@@ -13,12 +13,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.HasParamName;
 import org.gluu.persist.annotation.AttributeEnum;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,7 +37,7 @@ import java.util.*;
 
 public class Util {
 
-    private static final Logger LOG = Logger.getLogger(Util.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
 
     public static final String UTF8_STRING_ENCODING = "UTF-8";
 
