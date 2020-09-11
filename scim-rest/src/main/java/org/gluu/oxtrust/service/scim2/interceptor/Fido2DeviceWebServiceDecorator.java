@@ -88,9 +88,9 @@ public abstract class Fido2DeviceWebServiceDecorator extends BaseScimWebService 
 
     }
 
-    public Response deleteF2Device(String id) {
+    public Response deleteF2Device(String id, String userId) {
 
-        Response response = validateExistenceOfDevice(null, id);
+        Response response = validateExistenceOfDevice(userId, id);
         if (response == null)
             response = service.deleteF2Device(id);
         return response;
