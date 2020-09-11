@@ -105,6 +105,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean encodeStateFromRequestParameter = false;
     @JsonProperty(value = "encode_nonce_from_request_parameter")
     private Boolean encodeNonceFromRequestParameter = false;
+    @JsonProperty(value = "fapi_enabled")
+    private Boolean fapiEnabled = false;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -482,6 +484,14 @@ public class OxdServerConfiguration extends Configuration {
         this.encodeNonceFromRequestParameter = encodeNonceFromRequestParameter;
     }
 
+    public Boolean getFapiEnabled() {
+        return fapiEnabled;
+    }
+
+    public void setFapiEnabled(Boolean fapiEnabled) {
+        this.fapiEnabled = fapiEnabled;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -527,6 +537,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", idTokenValidationSHashRequired=" + idTokenValidationSHashRequired + '\'' +
                 ", encodeStateFromRequestParameter=" + encodeStateFromRequestParameter + '\'' +
                 ", encodeNonceFromRequestParameter=" + encodeNonceFromRequestParameter + '\'' +
+                ", fapiEnabled=" + fapiEnabled + '\'' +
                 '}';
     }
 }
