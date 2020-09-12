@@ -64,6 +64,7 @@ public class PublicOpKeyService {
             JwkResponse jwkResponse = jwkClient.exec();
             if (jwkResponse != null && jwkResponse.getStatus() == 200) {
                 publicKey = jwkResponse.getPublicKey(keyId);
+                cache.put(mapKey, publicKey);
             }
 
             return publicKey;

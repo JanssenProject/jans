@@ -107,8 +107,6 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean encodeNonceFromRequestParameter = false;
     @JsonProperty(value = "fapi_enabled")
     private Boolean fapiEnabled = false;
-    @JsonProperty(value = "allow_id_token_validation_with_refreshed_op_jwks")
-    private Boolean allowIdTokenValidationWithRefreshedOpJwks = true;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -494,14 +492,6 @@ public class OxdServerConfiguration extends Configuration {
         this.fapiEnabled = fapiEnabled;
     }
 
-    public Boolean getAllowIdTokenValidationWithRefreshedOpJwks() {
-        return allowIdTokenValidationWithRefreshedOpJwks;
-    }
-
-    public void setAllowIdTokenValidationWithRefreshedOpJwks(Boolean allowIdTokenValidationWithRefreshedOpJwks) {
-        this.allowIdTokenValidationWithRefreshedOpJwks = allowIdTokenValidationWithRefreshedOpJwks;
-    }
-
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -548,8 +538,6 @@ public class OxdServerConfiguration extends Configuration {
                 ", encodeStateFromRequestParameter=" + encodeStateFromRequestParameter + '\'' +
                 ", encodeNonceFromRequestParameter=" + encodeNonceFromRequestParameter + '\'' +
                 ", fapiEnabled=" + fapiEnabled + '\'' +
-                ", allowIdTokenValidationWithRefreshedOpJwks=" + allowIdTokenValidationWithRefreshedOpJwks + '\'' +
-
                 '}';
     }
 }
