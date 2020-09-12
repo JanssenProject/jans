@@ -331,26 +331,9 @@ public class Validator {
             if (signatureAlgorithm != SignatureAlgorithm.NONE) {
                 boolean signature = jwsSigner.validate(idToken);
 
-                if(!configuration.getAllowIdTokenValidationWithRefreshedOpJwks() && !signature){
+                if (!signature) {
                     LOG.error("ID Token signature is invalid.");
                     throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
-                }
-
-                if (!signature) {
-                    final String jwkUrl = discoveryResponse.getJwksUri();
-                    final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
-
-                    keyService.refetchKey(jwkUrl, kid);
-
-                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
-                    signature = signerWithRefreshedKey.validate(idToken);
-
-                    if (!signature) {
-                        LOG.error("ID Token signature is invalid.");
-                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
-                    } else {
-                        this.jwsSigner = signerWithRefreshedKey;
-                    }
                 }
             }
         } catch (HttpException e) {
