@@ -38,9 +38,8 @@ public class LdapConfigurationResource extends BaseResource {
   @Inject
   LdapConfigurationService ldapConfigurationService;
   
-  /*
-   * @Inject ConnectionStatus connectionStatus;
-   */
+  @Inject
+  ConnectionStatus connectionStatus;
   
   @GET
   @ProtectedApi( scopes = {READ_ACCESS} )
@@ -99,11 +98,10 @@ public class LdapConfigurationResource extends BaseResource {
   @Path(ApiConstants.TEST)
   @ProtectedApi(scopes = { READ_ACCESS })
   public Response testLdapConfigurationByName(@Valid @NotNull  GluuLdapConfiguration ldapConfiguration) throws Exception {
-    System.out.println("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - ldapConfiguration = "+ldapConfiguration+"\n\n\n");
+    logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - ldapConfiguration = "+ldapConfiguration+"\n\n\n");
     logger.info("Test Ldap Configuration " + ldapConfiguration);
-    ConnectionStatus connectionStatus = new ConnectionStatus();
     boolean status = connectionStatus.isUp(ldapConfiguration);
-    System.out.println("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = "+status+"\n\n\n");
+    logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = "+status+"\n\n\n");
     return Response.ok(status).build();
   }
       
@@ -118,7 +116,4 @@ public class LdapConfigurationResource extends BaseResource {
       
     }
   }
-  
-  
-
 }
