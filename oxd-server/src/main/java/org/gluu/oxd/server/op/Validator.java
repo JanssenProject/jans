@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -300,9 +301,20 @@ public class Validator {
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_ISSUED_AT);
             }
 
+            final Date now = new Date();
+            if (TimeUnit.MILLISECONDS.toHours(now.getTime() - issuedAt.getTime()) > configuration.getIatExpirationInHours()) {
+                LOG.error("`ISSUED_AT` date too far in the past. iat : " + issuedAt + " now : " + now + ").");
+                throw new HttpException(ErrorResponseCode.ID_TOKEN_EXPIRED_ISSUED_AT);
+            }
+
             //validate id_token expire date
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-            final Date now = new Date();
+
+            if (expiresAt == null) {
+                LOG.error("EXPIRATION_TIME (`exp`) is either invalid or missing from `ID_TOKEN`.");
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_EXPIRATION_TIME);
+            }
+
             if (now.after(expiresAt)) {
                 LOG.error("ID Token is expired. (" + expiresAt + " is before " + now + ").");
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_EXPIRED);
