@@ -6,7 +6,6 @@ package org.gluu.configapi.rest.resource;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -41,7 +40,6 @@ import org.slf4j.Logger;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.ATTRIBUTES)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@RequestScoped
 public class AttributesResource extends BaseResource {
 
 	/**
