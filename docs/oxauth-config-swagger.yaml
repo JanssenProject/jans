@@ -1382,6 +1382,34 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/v1/oxauth/config/database/ldap/test:
+    post:
+      summary: Test an LDAP configuration.
+      description: Test an LDAP configuration.
+      operationId: post-config-database-ldap-test
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: Boolean value true if LDAP connection is successfully established.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
   /api/v1/oxauth/config/database/couchbase:
     get:
       summary: Gets Couchbase configuration.
