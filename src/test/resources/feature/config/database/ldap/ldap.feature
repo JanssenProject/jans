@@ -3,8 +3,6 @@ Feature: Verify LDAP configuration endpoint
 
   	Background:
   	* def mainUrl = ldapUrl
-  	#* def all_ldap_config_array = call read('ldap-get-config.feature') 
-  	#* def ldap_config = all_ldap_config_array[0] 
   	
   	@ignore
   	@ldap-config-delete
@@ -141,7 +139,6 @@ Feature: Verify LDAP configuration endpoint
     Then status 200
     And print response
     
-    @ignore
     @ldap-config-test
     Scenario: Test LDAP configuration
     Given url  mainUrl
