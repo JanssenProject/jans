@@ -56,6 +56,6 @@ public class MetricFilter implements Filter {
         chain.doFilter(servletRequest, servletResponse);
 
         meter.mark();
-        timer.time();
+        timer.time().stop();
     }
 }
