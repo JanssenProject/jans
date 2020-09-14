@@ -1,10 +1,11 @@
-/**
- * 
- */
 package org.gluu.configapi.filters;
+
+import org.gluu.oxtrust.auth.uma.BaseUmaProtectionService;
+import org.slf4j.Logger;
 
 import javax.annotation.Priority;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
@@ -15,11 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
-//import org.gluu.oxtrust.auth.uma.ApiUmaProtectionService;
-import org.gluu.oxtrust.auth.uma.BaseUmaProtectionService;
-import org.slf4j.Logger;
-
-import io.vertx.core.http.HttpServerRequest;
 
 /**
  * @author Mougang T.Gasmyr
@@ -35,7 +31,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 	UriInfo info;
 
 	@Context
-	HttpServerRequest request;
+    HttpServletRequest request;
 
 	@Context
 	private HttpHeaders httpHeaders;
@@ -50,8 +46,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
 	public void filter(ContainerRequestContext context) {
 		logger.info("=======================================================================");
-		logger.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP "
-				+ request.remoteAddress().toString());
+		logger.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
 		logger.info("======PERFORMING AUTHORIZATION=========================================");
 		String authorizationHeader = context.getHeaderString(HttpHeaders.AUTHORIZATION);
 		if (!isTokenBasedAuthentication(authorizationHeader)) {
