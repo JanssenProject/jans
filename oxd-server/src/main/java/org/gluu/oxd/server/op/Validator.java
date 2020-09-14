@@ -325,26 +325,15 @@ public class Validator {
             //validate algorithm
             if (!Strings.isNullOrEmpty(rp.getIdTokenSignedResponseAlg()) &&
                     SignatureAlgorithm.fromString(rp.getIdTokenSignedResponseAlg()) != signatureAlgorithm) {
-                LOG.error("The algorithm used to sign the ID Token does not matches with `id_token_signed_response_alg` algorithm set during client registration.");
+                LOG.error("The algorithm used to sign the ID Token does not matches with `id_token_signed_response_alg` algorithm set during client registration.Expected: {}, Got: {}", rp.getIdTokenSignedResponseAlg(), algorithm);
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_INVALID_ALGORITHM);
             }
             if (signatureAlgorithm != SignatureAlgorithm.NONE) {
                 boolean signature = jwsSigner.validate(idToken);
+
                 if (!signature) {
-                    final String jwkUrl = discoveryResponse.getJwksUri();
-                    final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
-
-                    keyService.refetchKey(jwkUrl, kid);
-
-                    AbstractJwsSigner signerWithRefreshedKey = createJwsSigner(idToken, discoveryResponse, keyService, opClientFactory, rp, configuration);
-                    signature = signerWithRefreshedKey.validate(idToken);
-
-                    if (!signature) {
-                        LOG.error("ID Token signature is invalid.");
-                        throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
-                    } else {
-                        this.jwsSigner = signerWithRefreshedKey;
-                    }
+                    LOG.error("ID Token signature is invalid.");
+                    throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
                 }
             }
         } catch (HttpException e) {
