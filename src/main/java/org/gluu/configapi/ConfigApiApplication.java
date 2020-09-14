@@ -55,7 +55,7 @@ public class ConfigApiApplication {
 		logger.info("=============  STARTING API APPLICATION  ========================");
 		logger.info("=================================================================");
 		System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
-		configurationFactory.create();
+		this.configurationFactory.create();
 		persistenceEntryManagerInstance.get();
 		logger.info("=================================================================");
 		logger.info("==============  APPLICATION IS UP AND RUNNING ===================");
@@ -66,6 +66,12 @@ public class ConfigApiApplication {
 		logger.info("================================================================");
 		logger.info("===========  API APPLICATION STOPPED  ==========================");
 		logger.info("================================================================");
+	}
+	
+	@Produces
+    @ApplicationScoped
+    public ConfigurationFactory getConfigurationFactory() {
+	  return configurationFactory;
 	}
 
 	@Produces
@@ -85,7 +91,10 @@ public class ConfigApiApplication {
 	@Produces
 	@ApplicationScoped
 	public StringEncrypter getStringEncrypter() throws OxIntializationException {
+	    logger.info("\n\n\n ************************************************************ ");
 		String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
+		logger.info(" encodeSalt = "+encodeSalt);
+		logger.info(" ************************************************************ \n\n\n");
 		if (StringHelper.isEmpty(encodeSalt)) {
 			throw new OxIntializationException("Encode salt isn't defined");
 		}
