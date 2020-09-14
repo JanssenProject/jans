@@ -43,3 +43,6 @@ class DynamicScope(DynamicScopeType):
     
     def getApiVersion(self):
         return 11
+    
+    def getSupportedClaims(self,arg):
+         return None
