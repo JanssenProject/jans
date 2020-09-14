@@ -1218,8 +1218,8 @@ paths:
     parameters: []
   /api/v1/oxauth/config/database/ldap:
     get:
-      summary: Gets list of existing LDAP configuration.
-      description: Gets list of existing LDAP configuration. Optionally status and name of the LDAP config can be provided.
+      summary: Get list of existing LDAP configuration.
+      description: Get list of existing LDAP configuration. 
       operationId: get-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1241,21 +1241,9 @@ paths:
       security:
         - oxAuth:
             - read
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: name
-          description: Name of LDAP config
-        - schema:
-            type: string
-            default: all
-          in: query
-          name: status
-          description: Status of LDAP configuration.
     post:
-      summary: Adds a new LDAP configuration.
-      description: Adds a new LDAP configuration.
+      summary: Add a new LDAP configuration.
+      description: Add a new LDAP configuration.
       operationId: post-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1266,8 +1254,12 @@ paths:
             schema:
               $ref: '#/components/schemas/LdapConfiguration'
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1276,8 +1268,8 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Updates list of LDAP configuration.
-      description: Updates list of LDAP configuration.
+      summary: Update LDAP configuration.
+      description: Update LDAP configuration.
       operationId: put-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1290,6 +1282,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LdapConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1308,15 +1304,41 @@ paths:
         description: Name of LDAP configuration.
         schema:
           type: string
-    delete:
-      summary: Deletes LDAP configuration by name.
-      description: Deletes LDAP configuration by name.
-      operationId: delete-config-database-ldap
+    get:
+      summary: Get LDAP configuration by name.
+      description: Get LDAP configuration by name.
+      operationId: get-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: LdapConfiguration
+                description: LDAP configuration.
+                type: object
+                items:
+                  $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
+    delete:
+      summary: Delete a LDAP configuration.
+      description: Delete a LDAP configuration.
+      operationId: delete-config-database-ldap-by-name
+      tags:
+        - Database - LDAP configuration
+      responses:
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1326,6 +1348,68 @@ paths:
       security:
         - oxAuth:
             - write
+    patch:
+      summary: Partially modify an LDAP configuration.
+      description: Partially modify an LDAP configuration.
+      operationId: patch-config-database-ldap-by-name
+      security:
+        - oxAuth:
+            - write
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: maxConnections, value: 8 } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: LdapConfiguration
+                description: LDAP configuration.
+                type: object
+                items:
+                  $ref: '#/components/schemas/LdapConfiguration'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/oxauth/config/database/ldap/test:
+    post:
+      summary: Test an LDAP configuration.
+      description: Test an LDAP configuration.
+      operationId: post-config-database-ldap-test
+      tags:
+        - Database - LDAP configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LdapConfiguration'
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: Boolean value true if LDAP connection is successfully established.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - oxAuth:
+            - read
   /api/v1/oxauth/config/database/couchbase:
     get:
       summary: Gets Couchbase configuration.
