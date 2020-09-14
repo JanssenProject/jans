@@ -60,7 +60,7 @@ public class ScopesResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getOpenIdConnectScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
+	public Response getOpenIdConnectScopes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		List<Scope> scopes = new ArrayList<Scope>();
 		if (!pattern.isEmpty() && pattern.length() >= 2) {

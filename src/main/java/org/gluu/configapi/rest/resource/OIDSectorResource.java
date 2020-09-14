@@ -52,7 +52,7 @@ public class OIDSectorResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getSectorIdentifiers(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
+	public Response getSectorIdentifiers(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		List<OxAuthSectorIdentifier> sectors = new ArrayList<OxAuthSectorIdentifier>();
 		if (!pattern.isEmpty()) {

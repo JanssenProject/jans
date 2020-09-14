@@ -26,6 +26,11 @@ import com.google.gson.JsonObject;
 @Produces(MediaType.APPLICATION_JSON)
 public class Fido2ConfigResource extends BaseResource {
 
+    /**
+     * 
+     */
+    private static final String FIDO2_CONFIGURATION = "fido2Configuration";
+
     @Inject
     Logger log;
 
@@ -43,7 +48,7 @@ public class Fido2ConfigResource extends BaseResource {
             Gson gson = new Gson();
             JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
             JsonObject jsonObject = jsonElement.getAsJsonObject();
-            JsonElement fido2ConfigurationElement = jsonObject.get("fido2Configuration");
+            JsonElement fido2ConfigurationElement = jsonObject.get(FIDO2_CONFIGURATION);
             fido2Configuration = gson.fromJson(fido2ConfigurationElement, Fido2Configuration.class);
         }
         return Response.ok(fido2Configuration).build();
@@ -59,7 +64,7 @@ public class Fido2ConfigResource extends BaseResource {
             JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
-            jsonObject.add("fido2Configuration", updatedElement);
+            jsonObject.add(FIDO2_CONFIGURATION, updatedElement);
             this.jsonConfigurationService.saveFido2Configuration(jsonObject.toString());
         }
         return Response.ok(fido2Configuration).build();

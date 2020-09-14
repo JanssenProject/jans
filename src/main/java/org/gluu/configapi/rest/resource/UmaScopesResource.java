@@ -43,9 +43,6 @@ import org.slf4j.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UmaScopesResource extends BaseResource {
 
-	/**
-	 * 
-	 */
 	private static final String UMA_SCOPE = "Uma scope";
 
 	@Inject
@@ -56,7 +53,7 @@ public class UmaScopesResource extends BaseResource {
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getAllUmaScopes(@DefaultValue("50") @QueryParam(value = ApiConstants.LIMIT) int limit,
+	public Response getAllUmaScopes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
 			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
 		List<Scope> scopes = new ArrayList<Scope>();
 		if (!pattern.isEmpty()) {
