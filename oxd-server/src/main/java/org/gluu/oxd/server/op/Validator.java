@@ -304,7 +304,7 @@ public class Validator {
             final Date now = new Date();
             if (TimeUnit.MILLISECONDS.toHours(now.getTime() - issuedAt.getTime()) > configuration.getIatExpirationInHours()) {
                 LOG.error("`ISSUED_AT` date too far in the past. iat : " + issuedAt + " now : " + now + ").");
-                throw new HttpException(ErrorResponseCode.ID_TOKEN_EXPIRED_ISSUED_AT);
+                throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_OLD_ISSUED_AT);
             }
 
             //validate id_token expire date
