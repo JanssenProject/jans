@@ -4011,121 +4011,11 @@ paths:
       security:
         - oxAuth:
             - read
-    post:
-      tags:
-        - Configuration – JWK - JSON Web Key (JWK)
-      summary: Adds a new JSON Web Key (JWK).
-      description: Adds a new JSON Web Key (JWK).
-      operationId: post-config-jwks
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: WebKeysConfiguration
-              required:
-                - keys
-              type: object
-              description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
-              properties:
-                keys:
-                  type: array
-                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
-                  items:
-                    $ref: '#/components/schemas/JsonWebKey'
-                jwksAlgorithmsSupported:
-                  type: array
-                  description: A list of algorithms that will be used in JWKS endpoint.
-                  minItems: 1
-                  uniqueItems: true
-                  items:
-                    type: string
-                  enum:
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                    - RSA1_5
-                    - RSA-OAEP
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/config/jwks/{id}':
-    parameters:
-      - name: id
-        in: path
-        required: true
-        description: Key ID.
-        schema:
-          type: string
-    get:
-      tags:
-        - Configuration – JWK - JSON Web Key (JWK)
-      summary: Gets the JSON Web Key (JWK).
-      description: Gets the JSON Web Key (JWK).
-      operationId: get-config-jwks-by-id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: WebKeysConfiguration
-                required:
-                  - keys
-                type: object
-                description: 'JSON Web Key Set (JWKS) - A JSON object that represents a set of JWKs. The JSON object MUST have a keys member, which is an array of JWKs.'
-                properties:
-                  keys:
-                    type: array
-                    description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
-                    items:
-                      $ref: '#/components/schemas/JsonWebKey'
-                  jwksAlgorithmsSupported:
-                    type: array
-                    description: A list of algorithms that will be used in JWKS endpoint.
-                    minItems: 1
-                    uniqueItems: true
-                    items:
-                      type: string
-                    enum:
-                      - RS256
-                      - RS384
-                      - RS512
-                      - ES256
-                      - ES384
-                      - ES512
-                      - PS256
-                      - PS384
-                      - PS512
-                      - RSA1_5
-                      - RSA-OAEP
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
     put:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
-      summary: Updates JSON Web Key (JWK).
-      description: Updates JSON Web Key (JWK).
+      summary: Puts/replaces JWKS
+      description: Puts/replaces JSON Web Keys (JWKS).
       operationId: put-config-jwks
       requestBody:
         content:
@@ -4142,50 +4032,35 @@ paths:
                   description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
                   items:
                     $ref: '#/components/schemas/JsonWebKey'
-                jwksAlgorithmsSupported:
-                  type: array
-                  description: A list of algorithms that will be used in JWKS endpoint.
-                  minItems: 1
-                  uniqueItems: true
-                  items:
-                    type: string
-                  enum:
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                    - RSA1_5
-                    - RSA-OAEP
       responses:
         '200':
           description: OK
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:
         - oxAuth:
             - write
-    delete:
+    patch:
       tags:
         - Configuration – JWK - JSON Web Key (JWK)
-      summary: Deletes the specified JSON Web Key (JWK).
-      description: Deletes the specified JSON Web Key (JWK).
-      operationId: delete-config-jwks
+      summary: Patch JWKS
+      description: Patch JSON Web Keys (JWKS).
+      operationId: patch-config-jwks
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: string
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[{"op": "add","path": "/keys/1", "value": { "kty": "RSA", "e": "AQAB","use": "sig","crv": "","kid": "dd570bfb-276a-44aa-a97d-667b57587108_sig_rs256","x5c": ["MIIDBDCC..."],"exp": 1599751946863,"alg": "RS256","n": "zj1NE.."}}]'
       responses:
         '200':
           description: OK
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
       security:

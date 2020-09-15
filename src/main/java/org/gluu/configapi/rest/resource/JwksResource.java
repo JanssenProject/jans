@@ -1,8 +1,10 @@
 package org.gluu.configapi.rest.resource;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.ConfigurationService;
 import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.config.Conf;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
 
@@ -10,6 +12,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,5 +39,17 @@ public class JwksResource extends BaseResource {
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
         return Response.ok().build();
+    }
+
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = { WRITE_ACCESS })
+    public Response patch(String requestString) throws JsonPatchException, IOException {
+        final Conf conf = configurationService.find();
+        WebKeysConfiguration webKeys = conf.getWebKeys();
+        webKeys = Jackson.applyPatch(requestString, webKeys);
+        conf.setWebKeys(webKeys);
+        configurationService.merge(conf);
+        return Response.ok(webKeys.toString()).build();
     }
 }
