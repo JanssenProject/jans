@@ -298,6 +298,7 @@ public class SessionId implements Deletable, Serializable {
         sb.append(", userDn='").append(userDn).append('\'');
         sb.append(", authenticationTime=").append(authenticationTime);
         sb.append(", state=").append(state);
+        sb.append(", expirationDate=").append(expirationDate);
         sb.append(", sessionState='").append(sessionState).append('\'');
         sb.append(", permissionGranted=").append(permissionGranted);
         sb.append(", isJwt=").append(isJwt);
