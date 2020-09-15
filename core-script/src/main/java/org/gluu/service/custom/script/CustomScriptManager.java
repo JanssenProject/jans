@@ -24,6 +24,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 
@@ -83,6 +84,9 @@ public class CustomScriptManager implements Serializable {
 	@ReloadScript
 	private Event<String> event;
 
+	@Inject
+	private Instance<ExternalScriptService> externalScriptServiceInstance;
+
 	protected List<CustomScriptType> supportedCustomScriptTypes;
 	private Map<String, CustomScriptConfiguration> customScriptConfigurations;
 
@@ -100,7 +104,7 @@ public class CustomScriptManager implements Serializable {
 		final int delay = 30;
 		final int interval = DEFAULT_INTERVAL;
 
-		reload();
+		reload(true);
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new UpdateScriptEvent(),
 				Scheduled.Literal.INSTANCE));
@@ -121,7 +125,7 @@ public class CustomScriptManager implements Serializable {
 		}
 
 		try {
-			reload();
+			reload(false);
 		} catch (Throwable ex) {
 			log.error("Exception happened while reloading custom scripts configuration", ex);
 		} finally {
@@ -144,16 +148,24 @@ public class CustomScriptManager implements Serializable {
 		}
 	}
 
-	private void reload() {
+	private void reload(boolean syncUpdate) {
 		boolean modified = reloadImpl();
 
 		if (modified) {
-			updateScriptServices();
+			updateScriptServices(syncUpdate);
 		}
 	}
 
-	protected void updateScriptServices() {
-		event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
+	protected void updateScriptServices(boolean syncUpdate) {
+		if (syncUpdate) {
+			for (ExternalScriptService externalScriptService : externalScriptServiceInstance) {
+				if (supportedCustomScriptTypes.contains(externalScriptService.getCustomScriptType())) {
+					externalScriptService.reload(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
+				}
+			}
+		} else {
+			event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
+		}
 	}
 
 	private boolean reloadImpl() {
