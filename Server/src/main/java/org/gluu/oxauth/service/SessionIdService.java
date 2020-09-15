@@ -766,7 +766,9 @@ public class SessionIdService {
     }
 
     public SessionId getSessionId(HttpServletRequest request) {
-        return getSessionId(cookieService.getSessionIdFromCookie(request));
+        final String sessionIdFromCookie = cookieService.getSessionIdFromCookie(request);
+        log.trace("SessionId from cookie: " + sessionIdFromCookie);
+        return getSessionId(sessionIdFromCookie);
     }
 
     public SessionId getSessionId(String sessionId) {

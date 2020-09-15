@@ -282,7 +282,7 @@ public class Authenticator {
 		SessionId sessionId = getSessionId(servletRequest);
 		Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 		if (sessionIdAttributes == null) {
-			logger.debug("Unable to get session attributes");
+			logger.debug("Unable to get session attributes. SessionId: " + (sessionId != null ? sessionId.getId() : null));
 			return Constants.RESULT_EXPIRED;
 		}
 
