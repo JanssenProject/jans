@@ -60,7 +60,7 @@ public class StandaloneCustomScriptManager extends CustomScriptManager {
 	}
 
 	@Override
-	public void updateScriptServices() {
+	public void updateScriptServices(boolean syncUpdate) {
 		for (ExternalScriptService externalScriptService : externalScriptServices) {
 			externalScriptService.reload(null);
 		}
