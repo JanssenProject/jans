@@ -8,6 +8,11 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 
 /**
+ * Configures both OpenID Connect and UMA scopes.
+ *
+ * Scope type is defined by org.gluu.oxauth.model.common.ScopeType.
+ *
+ *
  * @author Mougang T.Gasmyr
  *
  */
