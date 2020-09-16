@@ -29,7 +29,7 @@ public class Jackson {
     }
 
     @SuppressWarnings("unchecked")
-	public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
+    public static <T> T applyPatch(JsonPatch jsonPatch, T obj) throws JsonPatchException, JsonProcessingException {
         Preconditions.checkNotNull(jsonPatch);
         Preconditions.checkNotNull(obj);
         ObjectMapper objectMapper = JacksonUtils.newMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

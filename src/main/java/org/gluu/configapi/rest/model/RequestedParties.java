@@ -1,37 +1,36 @@
 package org.gluu.configapi.rest.model;
 
-import java.io.Serializable;
-import java.util.List;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.List;
 
-public class RequestedParties  implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@NotBlank
-	@Size(min=1)
-	private String name;
-	
-	@NotEmpty
-	@Size(min=1)
-	private List<String> domains;
+public class RequestedParties implements Serializable {
 
-	public String getName() {
-		return name;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    @NotBlank
+    @Size(min = 1)
+    private String name;
 
-	public List<String> getDomains() {
-		return domains;
-	}
+    @NotEmpty
+    @Size(min = 1)
+    private List<String> domains;
 
-	public void setDomains(List<String> domains) {
-		this.domains = domains;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getDomains() {
+        return domains;
+    }
+
+    public void setDomains(List<String> domains) {
+        this.domains = domains;
+    }
 }

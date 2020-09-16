@@ -1,16 +1,15 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.rest.resource;
 
-import java.util.List;
+import org.gluu.configapi.rest.model.ApiError;
+import org.gluu.configapi.util.ApiConstants;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
-
-import org.gluu.configapi.rest.model.ApiError;
-import org.gluu.configapi.util.ApiConstants;
+import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr

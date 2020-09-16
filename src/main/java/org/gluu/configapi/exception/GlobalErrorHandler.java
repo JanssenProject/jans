@@ -11,7 +11,6 @@ import javax.ws.rs.ext.Provider;
 
 /**
  * @author Mougang T.Gasmyr
- *
  */
 @Provider
 public class GlobalErrorHandler implements ExceptionMapper<Exception> {

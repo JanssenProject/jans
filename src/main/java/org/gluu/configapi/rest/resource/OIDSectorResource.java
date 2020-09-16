@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.rest.resource;
 
@@ -12,10 +12,10 @@ package org.gluu.configapi.rest.resource;
 //@Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {
 
-	/**
-	 * 
-	 */
-	private static final String SECTOR_IDENTIFIER = "sector identifier";
+    /**
+     *
+     */
+    private static final String SECTOR_IDENTIFIER = "sector identifier";
 /*
 	@Inject
 	Logger logger;

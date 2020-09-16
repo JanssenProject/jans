@@ -5,70 +5,70 @@ import java.util.Set;
 
 public class Logging {
 
-	private String loggingLevel;
-	private String loggingLayout;
-	private boolean httpLoggingEnabled;
-	private boolean disableJdkLogger;
-	private boolean enabledOAuthAuditLogging;
-	private String externalLoggerConfiguration;
-	private Set<String> httpLoggingExludePaths = new HashSet<String>();
+    private String loggingLevel;
+    private String loggingLayout;
+    private boolean httpLoggingEnabled;
+    private boolean disableJdkLogger;
+    private boolean enabledOAuthAuditLogging;
+    private String externalLoggerConfiguration;
+    private Set<String> httpLoggingExludePaths = new HashSet<String>();
 
-	public Logging() {
-	}
+    public Logging() {
+    }
 
-	public String getLoggingLevel() {
-		return loggingLevel;
-	}
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
 
-	public void setLoggingLevel(String loggingLevel) {
-		this.loggingLevel = loggingLevel;
-	}
+    public void setLoggingLevel(String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
 
-	public String getLoggingLayout() {
-		return loggingLayout;
-	}
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
 
-	public void setLoggingLayout(String loggingLayout) {
-		this.loggingLayout = loggingLayout;
-	}
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
 
-	public boolean isHttpLoggingEnabled() {
-		return httpLoggingEnabled;
-	}
+    public boolean isHttpLoggingEnabled() {
+        return httpLoggingEnabled;
+    }
 
-	public void setHttpLoggingEnabled(boolean httpLoggingEnabled) {
-		this.httpLoggingEnabled = httpLoggingEnabled;
-	}
+    public void setHttpLoggingEnabled(boolean httpLoggingEnabled) {
+        this.httpLoggingEnabled = httpLoggingEnabled;
+    }
 
-	public boolean isDisableJdkLogger() {
-		return disableJdkLogger;
-	}
+    public boolean isDisableJdkLogger() {
+        return disableJdkLogger;
+    }
 
-	public void setDisableJdkLogger(boolean disableJdkLogger) {
-		this.disableJdkLogger = disableJdkLogger;
-	}
+    public void setDisableJdkLogger(boolean disableJdkLogger) {
+        this.disableJdkLogger = disableJdkLogger;
+    }
 
-	public boolean isEnabledOAuthAuditLogging() {
-		return enabledOAuthAuditLogging;
-	}
+    public boolean isEnabledOAuthAuditLogging() {
+        return enabledOAuthAuditLogging;
+    }
 
-	public void setEnabledOAuthAuditLogging(boolean enabledOAuthAuditLogging) {
-		this.enabledOAuthAuditLogging = enabledOAuthAuditLogging;
-	}
+    public void setEnabledOAuthAuditLogging(boolean enabledOAuthAuditLogging) {
+        this.enabledOAuthAuditLogging = enabledOAuthAuditLogging;
+    }
 
-	public String getExternalLoggerConfiguration() {
-		return externalLoggerConfiguration;
-	}
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
 
-	public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
-		this.externalLoggerConfiguration = externalLoggerConfiguration;
-	}
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }
 
-	public Set<String> getHttpLoggingExludePaths() {
-		return httpLoggingExludePaths;
-	}
+    public Set<String> getHttpLoggingExludePaths() {
+        return httpLoggingExludePaths;
+    }
 
-	public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-		this.httpLoggingExludePaths = httpLoggingExludePaths;
-	}
+    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
+        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    }
 }
