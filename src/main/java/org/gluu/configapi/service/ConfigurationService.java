@@ -26,21 +26,9 @@ public class ConfigurationService {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    public Conf find(String... returnAttributes) {
+    public Conf findConf() {
         final String dn = configurationFactory.getOxauthConfigurationDn();
-        return persistenceManager.get().find(dn, Conf.class, returnAttributes);
-    }
-
-    public Conf findForAppConfigurationOnly() {
-        return find("oxAuthConfDynamic");
-    }
-
-    public Conf findStaticConfigurationOnly() {
-        return find("oxAuthConfStatic");
-    }
-
-    public Conf findWebKeysOnly() {
-        return find("oxAuthConfWebKeys");
+        return persistenceManager.get().find(dn, Conf.class, null);
     }
 
     public void merge(Conf conf) {
@@ -53,12 +41,12 @@ public class ConfigurationService {
     }
 
     public AppConfiguration find() {
-        final Conf conf = findForAppConfigurationOnly();
+        final Conf conf = findConf();
         return conf.getDynamic();
     }
 
     public GluuConfiguration findGluuConfiguration() {
-        String configurationDn = findStaticConfigurationOnly().getStatics().getBaseDn().getConfiguration();
+        String configurationDn = findConf().getStatics().getBaseDn().getConfiguration();
         if (StringHelper.isEmpty(configurationDn)) {
             return null;
         }

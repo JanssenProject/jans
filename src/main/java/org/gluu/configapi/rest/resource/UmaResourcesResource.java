@@ -1,106 +1,110 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
+
+import com.github.fge.jsonpatch.JsonPatchException;
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.service.UmaResourceService;
+import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.model.uma.persistence.UmaResource;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Mougang T.Gasmyr
  *
  */
 
-//@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.RESOURCES)
-//@Consumes(MediaType.APPLICATION_JSON)
-//@Produces(MediaType.APPLICATION_JSON)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.RESOURCES)
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class UmaResourcesResource extends BaseResource {
-/*
 
-	private static final String UMA_RESOURCE = "Uma resource";
-	@Inject
-	ResourceSetService umaResourcesService;
 
-	@Inject
-	Logger logger;
+    private static final String UMA_RESOURCE = "Uma resource";
+    @Inject
+    UmaResourceService umaResourceService;
 
-	@GET
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response fetchUmaResources(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-			@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-		List<UmaResource> resources = new ArrayList<UmaResource>();
-		if (!pattern.isEmpty() && pattern.length() >= 2) {
-			resources = umaResourcesService.findResources(pattern, 1000);
-		} else {
-			resources = umaResourcesService.getAllResources(limit);
-		}
-		return Response.ok(resources).build();
-	}
+    @GET
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response fetchUmaResources(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+                                      @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+        final List<UmaResource> resources;
+        if (!pattern.isEmpty() && pattern.length() >= 2) {
+            resources = umaResourceService.findResources(pattern, 1000);
+        } else {
+            resources = umaResourceService.getAllResources(limit);
+        }
+        return Response.ok(resources).build();
+    }
 
-	@GET
-	@Path(ApiConstants.INUM_PATH)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
-		String resourceDn = umaResourcesService.getDnForResource(inum);
-		UmaResource resource = umaResourcesService.getResourceByDn(resourceDn);
-		checkResourceNotNull(resource, UMA_RESOURCE);
-		return Response.ok(resource).build();
-	}
+    @GET
+    @Path(ApiConstants.INUM_PATH)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String id) {
+        UmaResource resource = umaResourceService.getResourceById(id);
+        checkResourceNotNull(resource, UMA_RESOURCE);
+        return Response.ok(resource).build();
+    }
 
-	@POST
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response createUmaResource(@Valid UmaResource umaResource) {
-		checkNotNull(umaResource.getName(), AttributeNames.NAME);
-		checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
-		String inum = umaResourcesService.generateInumForNewResource();
-		umaResource.setInum(inum);
-		umaResource.setDn(umaResourcesService.getDnForResource(inum));
-		umaResourcesService.addResource(umaResource);
-		String dn = umaResourcesService.getDnForResource(inum);
-		UmaResource result = umaResourcesService.getResourceByDn(dn);
-		return Response.status(Response.Status.CREATED).entity(result).build();
+    @POST
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response createUmaResource(@Valid UmaResource umaResource) {
+        checkNotNull(umaResource.getName(), AttributeNames.NAME);
+        checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
+        String id = UUID.randomUUID().toString();
+        umaResource.setInum(UUID.randomUUID().toString());
+        umaResource.setDn(umaResourceService.getDnForResource(id));
 
-	}
+        umaResourceService.addResource(umaResource);
 
-	@PUT
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateUmaResource(@Valid UmaResource resource) {
-		String inum = resource.getInum();
-		checkNotNull(inum, AttributeNames.INUM);
-		String dn = umaResourcesService.getDnForResource(inum);
-		UmaResource existingResource = umaResourcesService.getResourceByDn(dn);
-		checkResourceNotNull(existingResource, UMA_RESOURCE);
-		resource.setInum(existingResource.getInum());
-		resource.setDn(umaResourcesService.getDnForResource(inum));
-		umaResourcesService.updateResource(resource);
-		UmaResource result = umaResourcesService.getResourceByDn(dn);
-		return Response.ok(result).build();
-	}
+        return Response.status(Response.Status.CREATED).entity(umaResource).build();
 
-	@PATCH
-	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	@Path(ApiConstants.INUM_PATH)
-	public Response patchResource(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
-		String dn = umaResourcesService.getDnForResource(inum);
-		UmaResource existingResource = umaResourcesService.getResourceByDn(dn);
-		checkResourceNotNull(existingResource, UMA_RESOURCE);
-		try {
-			existingResource = Jackson.applyPatch(pathString, existingResource);
-			umaResourcesService.updateResource(existingResource);
-			return Response.ok(existingResource).build();
-		} catch (Exception e) {
-			logger.error("", e);
-			throw new WebApplicationException(e.getMessage());
-		}
-	}
+    }
 
-	@DELETE
-	@Path(ApiConstants.INUM_PATH)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
-		String dn = umaResourcesService.getDnForResource(inum);
-		UmaResource umaResource = umaResourcesService.getResourceByDn(dn);
-		checkResourceNotNull(umaResource, UMA_RESOURCE);
-		umaResourcesService.removeResource(umaResource);
-		return Response.status(Response.Status.NO_CONTENT).build();
-	}
-*/
+    @PUT
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateUmaResource(@Valid UmaResource resource) {
+        String inum = resource.getInum();
+        checkNotNull(inum, AttributeNames.INUM);
+        UmaResource existingResource = umaResourceService.getResourceById(inum);
+        checkResourceNotNull(existingResource, UMA_RESOURCE);
+        resource.setInum(existingResource.getInum());
+        resource.setDn(umaResourceService.getDnForResource(inum));
+        umaResourceService.updateResource(resource);
+        return Response.ok(resource).build();
+    }
+
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @Path(ApiConstants.INUM_PATH)
+    public Response patchResource(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
+        UmaResource existingResource = umaResourceService.getResourceById(inum);
+        checkResourceNotNull(existingResource, UMA_RESOURCE);
+
+        existingResource = Jackson.applyPatch(pathString, existingResource);
+        umaResourceService.updateResource(existingResource);
+        return Response.ok(existingResource).build();
+
+    }
+
+    @DELETE
+    @Path(ApiConstants.INUM_PATH)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
+        UmaResource umaResource = umaResourceService.getResourceById(inum);
+        checkResourceNotNull(umaResource, UMA_RESOURCE);
+        umaResourceService.remove(umaResource);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
 }

@@ -32,7 +32,7 @@ public class ConfigResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response patchAppConfigurationProperty(@NotNull String requestString) throws Exception {
-        Conf conf = configurationService.findForAppConfigurationOnly();
+        Conf conf = configurationService.findConf();
         AppConfiguration appConfiguration = Jackson.applyPatch(requestString, conf.getDynamic());
         conf.setDynamic(appConfiguration);
 
