@@ -1,21 +1,19 @@
 package org.gluu.configapi.util;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import javax.inject.Inject;
-import javax.enterprise.context.ApplicationScoped;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
-import org.slf4j.Logger;
-
-import org.gluu.model.ldap.GluuLdapConfiguration;
+import org.gluu.configapi.configuration.ConfigurationFactory;
 import org.gluu.model.SimpleProperty;
+import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.util.security.PropertiesDecrypter;
-import org.gluu.configapi.configuration.ConfigurationFactory;
+import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 
 @ApplicationScoped
@@ -36,7 +34,6 @@ public class ConnectionStatus {
     properties.setProperty("servers", buildServersString(getServers(ldapConfiguration)));
     logger.info("\n\n\n ConnectionStatus:::isUp() - configurationFactory = "+configurationFactory+"\n\n\n");
     logger.info("\n\n\n ConnectionStatus:::isUp() - configurationFactory.getCryptoConfigurationSalt() = "+configurationFactory.getCryptoConfigurationSalt()+"\n\n\n");
-    //LdapConnectionProvider connectionProvider = new LdapConnectionProvider(properties);
     LdapConnectionProvider connectionProvider = new LdapConnectionProvider(PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt()));
 
     
