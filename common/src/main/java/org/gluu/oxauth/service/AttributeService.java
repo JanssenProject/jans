@@ -6,18 +6,17 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.service.BaseCacheService;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
