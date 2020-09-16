@@ -790,13 +790,15 @@ public class Authenticator {
 		facesMessages.add(severity, message);
 	}
 
-	private SessionId getSessionId(HttpServletRequest servletRequest) {
-		if (this.curentSessionId == null) {
-			this.curentSessionId = sessionIdService.getSessionId(servletRequest);
-		}
-		
-		return this.curentSessionId;
-	}
+    private SessionId getSessionId(HttpServletRequest servletRequest) {
+        if (this.curentSessionId == null && identity.getSessionId() != null) {
+            return curentSessionId = identity.getSessionId();
+        }
+        if (this.curentSessionId == null) {
+            this.curentSessionId = sessionIdService.getSessionId(servletRequest);
+        }
+        return this.curentSessionId;
+    }
 
 	public String getMaskedNumber() {
 		String result = getFullNumber();
