@@ -50,6 +50,7 @@ public class ApiConstants {
     public static final String MEMCACHED = "/memcached";
     public static final String TEST = "/test";
     public static final String INUM_PATH = "{inum}";
+    public static final String ID_PATH = "{id}";
     public static final String SCOPE_INUM_PATH = "{scope_inum}";
     public static final String TYPE_PATH = "/{type}";
     public static final String NAME_PARAM_PATH = "/{name}";
@@ -59,6 +60,7 @@ public class ApiConstants {
     public static final String PATTERN = "pattern";
     public static final String STATUS = "status";
     public static final String INUM = "inum";
+    public static final String ID = "id";
     public static final String SCOPE_INUM = "scope_inum";
     public static final String TYPE = "type";
     public static final String NAME = "name";
