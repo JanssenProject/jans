@@ -3,7 +3,6 @@ package org.gluu.configapi;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
 import org.gluu.configapi.configuration.ConfigurationFactory;
-import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.persist.PersistenceEntryManager;
@@ -12,10 +11,7 @@ import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.util.CdiUtil;
-import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
-import org.gluu.util.security.StringEncrypter;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
 import org.slf4j.Logger;
 
@@ -85,24 +81,6 @@ public class ConfigApiApplication {
 		logger.debug("Created {}: {} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
                 persistenceEntryManager, persistenceEntryManager.getOperationService());
 		return persistenceEntryManager;
-	}
-
-	@Produces
-	@ApplicationScoped
-	public StringEncrypter getStringEncrypter() throws OxIntializationException {
-	    logger.info("\n\n\n ************************************************************ ");
-		String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
-		logger.info(" encodeSalt = "+encodeSalt);
-		logger.info(" ************************************************************ \n\n\n");
-		if (StringHelper.isEmpty(encodeSalt)) {
-			throw new OxIntializationException("Encode salt isn't defined");
-		}
-		try {
-			StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-			return stringEncrypter;
-		} catch (EncryptionException ex) {
-			throw new OxIntializationException("Failed to create StringEncrypter instance");
-		}
 	}
 
 	protected Properties preparePersistanceProperties() {
