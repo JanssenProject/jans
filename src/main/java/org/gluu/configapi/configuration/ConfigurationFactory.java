@@ -50,7 +50,6 @@ public class ConfigurationFactory {
     private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
     private final String SALT_FILE_NAME = "salt";
 
-
 	@Inject
 	Logger log;
 
@@ -139,8 +138,9 @@ public class ConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
-        log.trace("Base configuration:" + baseConfiguration.getProperties());
+        log.info("Loading base configuration " + BASE_PROPERTIES_FILE);
+        this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
+        log.info("Loaded base configuration:" + baseConfiguration.getProperties());
     }
 
     private String confDir() {
@@ -152,19 +152,14 @@ public class ConfigurationFactory {
         return DIR;
     }
 
-    private FileConfiguration createFileConfiguration(String fileName, boolean isMandatory) {
+    private FileConfiguration createFileConfiguration(String fileName) {
         try {
             FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-
             return fileConfiguration;
         } catch (Exception ex) {
-            if (isMandatory) {
-                log.error("Failed to load configuration from {}", fileName, ex);
-                throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
-            }
+            log.error("Failed to load configuration from {}", fileName, ex);
+            throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
         }
-
-        return null;
     }
 
     private void init(Conf p_conf) {
@@ -188,7 +183,7 @@ public class ConfigurationFactory {
 
     public void loadCryptoConfigurationSalt() {
         try {
-            FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath, true);
+            FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath);
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
