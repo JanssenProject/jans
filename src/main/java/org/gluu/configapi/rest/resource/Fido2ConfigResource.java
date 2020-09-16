@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import org.gluu.config.oxtrust.DbApplicationConfiguration;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.rest.model.Fido2Configuration;
-import org.gluu.configapi.service.JsonConfigurationService;
+import org.gluu.configapi.service.Fido2Service;
 import org.gluu.configapi.util.ApiConstants;
 
 import javax.inject.Inject;
@@ -26,14 +26,14 @@ public class Fido2ConfigResource extends BaseResource {
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
     @Inject
-    JsonConfigurationService jsonConfigurationService;
+    Fido2Service jsonConfigurationService;
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getFido2Configuration() {
         Fido2Configuration fido2Configuration = new Fido2Configuration();
         String fido2ConfigJson = null;
-        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
+        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.find();
         if (dbApplicationConfiguration != null) {
             fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
             Gson gson = new Gson();
@@ -48,7 +48,7 @@ public class Fido2ConfigResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
-        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
+        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.find();
         if (dbApplicationConfiguration != null) {
             String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
             Gson gson = new Gson();
@@ -56,7 +56,7 @@ public class Fido2ConfigResource extends BaseResource {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
             jsonObject.add(FIDO2_CONFIGURATION, updatedElement);
-            this.jsonConfigurationService.saveFido2Configuration(jsonObject.toString());
+            this.jsonConfigurationService.merge(jsonObject.toString());
         }
         return Response.ok(fido2Configuration).build();
     }

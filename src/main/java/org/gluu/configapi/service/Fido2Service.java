@@ -13,7 +13,7 @@ import javax.inject.Inject;
  * @author Yuriy Zabrovarnyy
  */
 @ApplicationScoped
-public class JsonConfigurationService {
+public class Fido2Service {
 
     @Inject
     Logger logger;
@@ -24,22 +24,20 @@ public class JsonConfigurationService {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    public DbApplicationConfiguration loadFido2Configuration() {
+    public DbApplicationConfiguration find() {
         try {
             String configurationDn = configurationFactory.getBaseConfiguration().getString("fido2_ConfigurationEntryDN");
-            DbApplicationConfiguration conf = persistenceManager.find(DbApplicationConfiguration.class, configurationDn);
-            return conf;
+            return persistenceManager.find(DbApplicationConfiguration.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load Fido2 configuration from LDAP");
             return null;
         }
     }
 
-    public void saveFido2Configuration(String fido2ConfigJson) {
-        DbApplicationConfiguration fido2Configuration = this.loadFido2Configuration();
+    public void merge(String fido2ConfigJson) {
+        DbApplicationConfiguration fido2Configuration = this.find();
         fido2Configuration.setDynamicConf(fido2ConfigJson);
         fido2Configuration.setRevision(fido2Configuration.getRevision() + 1L);
         persistenceManager.merge(fido2Configuration);
     }
-
 }
