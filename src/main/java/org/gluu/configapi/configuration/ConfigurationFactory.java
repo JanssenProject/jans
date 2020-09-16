@@ -1,9 +1,9 @@
 package org.gluu.configapi.configuration;
 
 import io.quarkus.arc.AlternativePriority;
-import io.quarkus.runtime.StartupEvent;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.exception.ConfigurationException;
+import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauth.model.config.Conf;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.config.WebKeysConfiguration;
@@ -14,11 +14,12 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.exception.BasePersistenceException;
 import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
+import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
+import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -70,16 +71,6 @@ public class ConfigurationFactory {
     private String confDir;
     private String saltFilePath;
 
-    void onStart(@Observes StartupEvent ev) {
-        loadBaseConfiguration();
-        this.confDir = confDir();
-        this.saltFilePath = confDir + SALT_FILE_NAME;
-
-        this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
-        loadCryptoConfigurationSalt();
-        create();
-    }
-
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -97,12 +88,20 @@ public class ConfigurationFactory {
     }
 
     public void create() {
+        loadBaseConfiguration();
+        this.confDir = confDir();
+        this.saltFilePath = confDir + SALT_FILE_NAME;
+
+        this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
+        loadCryptoConfigurationSalt();
+
         if (!createFromDb()) {
             log.error("Failed to load configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from persistence.");
         } else {
             log.info("Configuration loaded successfully.");
         }
+
     }
 
     private boolean createFromDb() {
@@ -212,5 +211,18 @@ public class ConfigurationFactory {
     @ApplicationScoped
     public ErrorResponseFactory getErrorResponseFactory() {
         return errorResponseFactory;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public StringEncrypter getStringEncrypter() throws OxIntializationException {
+        if (StringHelper.isEmpty(cryptoConfigurationSalt)) {
+            throw new OxIntializationException("Encode salt isn't defined");
+        }
+        try {
+            return StringEncrypter.instance(cryptoConfigurationSalt);
+        } catch (StringEncrypter.EncryptionException ex) {
+            throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
+        }
     }
 }

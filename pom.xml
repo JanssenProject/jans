@@ -100,6 +100,16 @@
             <groupId>org.gluu</groupId>
             <artifactId>oxauth-model</artifactId>
             <version>${oxauth.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.jackrabbit</groupId>
+                    <artifactId>jackrabbit-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.gluu</groupId>
@@ -126,7 +136,7 @@
 			<exclusions>
 				<exclusion>
 					<artifactId>org.jboss.resteasy</artifactId>
-					<groupId>resteasy-jackson2-provider</groupId>
+					<groupId>*</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
