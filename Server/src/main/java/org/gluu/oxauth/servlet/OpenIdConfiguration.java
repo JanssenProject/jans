@@ -42,7 +42,7 @@ import static org.gluu.oxauth.model.util.StringUtils.implode;
  * @author Yuriy Movchan Date: 2016/04/26
  * @version August 14, 2019
  */
-@WebServlet(urlPatterns = "/.well-known/openid-configuration")
+@WebServlet(urlPatterns = "/.well-known/openid-configuration", loadOnStartup = 10)
 public class OpenIdConfiguration extends HttpServlet {
 
 	private static final long serialVersionUID = -8224898157373678903L;
@@ -76,9 +76,15 @@ public class OpenIdConfiguration extends HttpServlet {
 	 *            servlet request
 	 * @param httpResponse
 	 *            servlet response
+	 * @throws IOException 
 	 */
 	@SuppressWarnings("deprecation")
-	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) {
+	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse httpResponse) throws IOException {
+		if (!(externalAuthenticationService.isLoaded() && externalDynamicScopeService.isLoaded())) {
+			httpResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+			log.error("oxAuth still starting up!");
+			return;
+		}
 
 		httpResponse.setContentType("application/json");
 		try (PrintWriter out = httpResponse.getWriter()) {
