@@ -740,10 +740,6 @@
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
 
-				<dependency>
-				    <groupId>org.hibernate</groupId>
-				    <artifactId>hibernate-validator-cdi</artifactId>
-				</dependency>
 		        <dependency>
 		            <groupId>org.jboss.spec.javax.ejb</groupId>
 		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
