@@ -7,6 +7,7 @@ import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -28,10 +29,13 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 public class UmaResourcesResource extends BaseResource {
 
-
     private static final String UMA_RESOURCE = "Uma resource";
+
     @Inject
     UmaResourceService umaResourceService;
+
+    @Inject
+    Logger logger;
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
@@ -47,9 +51,9 @@ public class UmaResourcesResource extends BaseResource {
     }
 
     @GET
-    @Path(ApiConstants.INUM_PATH)
+    @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response getUmaResourceByImun(@PathParam(value = ApiConstants.INUM) @NotNull String id) {
+    public Response getUmaResourceByImun(@PathParam(value = ApiConstants.ID) @NotNull String id) {
         UmaResource resource = umaResourceService.getResourceById(id);
         checkResourceNotNull(resource, UMA_RESOURCE);
         return Response.ok(resource).build();
@@ -61,24 +65,23 @@ public class UmaResourcesResource extends BaseResource {
         checkNotNull(umaResource.getName(), AttributeNames.NAME);
         checkNotNull(umaResource.getDescription(), AttributeNames.DESCRIPTION);
         String id = UUID.randomUUID().toString();
-        umaResource.setInum(UUID.randomUUID().toString());
+        umaResource.setId(id);
         umaResource.setDn(umaResourceService.getDnForResource(id));
 
         umaResourceService.addResource(umaResource);
 
         return Response.status(Response.Status.CREATED).entity(umaResource).build();
-
     }
 
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateUmaResource(@Valid UmaResource resource) {
-        String inum = resource.getInum();
-        checkNotNull(inum, AttributeNames.INUM);
-        UmaResource existingResource = umaResourceService.getResourceById(inum);
+        String id = resource.getId();
+        checkNotNull(id, AttributeNames.ID);
+        UmaResource existingResource = umaResourceService.getResourceById(id);
         checkResourceNotNull(existingResource, UMA_RESOURCE);
-        resource.setInum(existingResource.getInum());
-        resource.setDn(umaResourceService.getDnForResource(inum));
+        resource.setId(existingResource.getId());
+        resource.setDn(umaResourceService.getDnForResource(id));
         umaResourceService.updateResource(resource);
         return Response.ok(resource).build();
     }
@@ -86,25 +89,23 @@ public class UmaResourcesResource extends BaseResource {
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    @Path(ApiConstants.INUM_PATH)
-    public Response patchResource(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
-        UmaResource existingResource = umaResourceService.getResourceById(inum);
+    @Path(ApiConstants.ID_PATH)
+    public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString) throws JsonPatchException, IOException {
+        UmaResource existingResource = umaResourceService.getResourceById(id);
         checkResourceNotNull(existingResource, UMA_RESOURCE);
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
         umaResourceService.updateResource(existingResource);
         return Response.ok(existingResource).build();
-
     }
 
     @DELETE
-    @Path(ApiConstants.INUM_PATH)
+    @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response deleteUmaResource(@PathParam(value = ApiConstants.INUM) @NotNull String inum) {
-        UmaResource umaResource = umaResourceService.getResourceById(inum);
+    public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+        UmaResource umaResource = umaResourceService.getResourceById(id);
         checkResourceNotNull(umaResource, UMA_RESOURCE);
         umaResourceService.remove(umaResource);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
-
 }
