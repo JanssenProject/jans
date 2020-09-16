@@ -8,11 +8,11 @@ import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
 import org.gluu.util.OxConstants;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-@Stateless
+@ApplicationScoped
 @Named("organizationService")
 public class OrganizationService extends org.gluu.service.OrganizationService {
 
