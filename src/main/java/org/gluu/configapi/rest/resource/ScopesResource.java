@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.rest.resource;
 
@@ -16,13 +16,13 @@ import javax.inject.Inject;
 //@Produces(MediaType.APPLICATION_JSON)
 //@Consumes(MediaType.APPLICATION_JSON)
 public class ScopesResource extends BaseResource {
-	/**
-	 * 
-	 */
-	private static final String OPENID_SCOPE = "openid connect scope";
+    /**
+     *
+     */
+    private static final String OPENID_SCOPE = "openid connect scope";
 
-	@Inject
-	Logger logger;
+    @Inject
+    Logger logger;
 /*
 	@Inject
 	ScopeService scopeService;

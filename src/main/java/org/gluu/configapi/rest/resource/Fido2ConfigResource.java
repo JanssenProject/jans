@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 public class Fido2ConfigResource extends BaseResource {
 
     /**
-     * 
+     *
      */
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
@@ -29,7 +29,7 @@ public class Fido2ConfigResource extends BaseResource {
     JsonConfigurationService jsonConfigurationService;
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getFido2Configuration() {
         Fido2Configuration fido2Configuration = new Fido2Configuration();
         String fido2ConfigJson = null;
@@ -46,7 +46,7 @@ public class Fido2ConfigResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
         DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.loadFido2Configuration();
         if (dbApplicationConfiguration != null) {

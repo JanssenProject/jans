@@ -51,17 +51,17 @@ public class ConfigurationFactory {
     private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
     private final String SALT_FILE_NAME = "salt";
 
-	@Inject
-	Logger log;
+    @Inject
+    Logger log;
 
-	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-	Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
+    @Inject
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+    Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
     @Inject
     private PersistanceFactoryService persistanceFactoryService;
 
-	private AppConfiguration appConfiguration;
+    private AppConfiguration appConfiguration;
     private StaticConfiguration staticConf;
     private WebKeysConfiguration jwks;
     private ErrorResponseFactory errorResponseFactory;

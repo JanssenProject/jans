@@ -20,19 +20,19 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
     @Inject
     ConfigurationService configurationService;
 
-	public HealthCheckResponse call() {
-		HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("oxauth-config-api readiness");
-		try {
-			checkDatabaseConnection();
-			responseBuilder.up();
-		} catch (Exception e) {
+    public HealthCheckResponse call() {
+        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("oxauth-config-api readiness");
+        try {
+            checkDatabaseConnection();
+            responseBuilder.up();
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
-			responseBuilder.down().withData("error", e.getMessage());
-		}
-		return responseBuilder.build();
-	}
+            responseBuilder.down().withData("error", e.getMessage());
+        }
+        return responseBuilder.build();
+    }
 
-	private void checkDatabaseConnection() {
+    private void checkDatabaseConnection() {
         configurationService.findForAppConfigurationOnly();
-	}
+    }
 }

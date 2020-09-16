@@ -1,28 +1,17 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.filters;
 
-import java.io.IOException;
+import org.eclipse.microprofile.metrics.*;
+import org.eclipse.microprofile.metrics.annotation.RegistryType;
 
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ext.Provider;
-
-import org.eclipse.microprofile.metrics.Metadata;
-import org.eclipse.microprofile.metrics.MetadataBuilder;
-import org.eclipse.microprofile.metrics.Meter;
-import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
-import org.eclipse.microprofile.metrics.MetricUnits;
-import org.eclipse.microprofile.metrics.Timer;
-import org.eclipse.microprofile.metrics.annotation.RegistryType;
+import java.io.IOException;
 
 /**
  * @author Mougang T.Gasmyr
@@ -30,7 +19,7 @@ import org.eclipse.microprofile.metrics.annotation.RegistryType;
  */
 
 @Provider
-@WebFilter(urlPatterns = { "*" })
+@WebFilter(urlPatterns = {"*"})
 public class MetricFilter implements Filter {
 
     private static final String METER = "meter_";

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.rest.resource;
 
@@ -18,7 +18,7 @@ import javax.inject.Inject;
 //@RequestScoped
 public class ClientsResource extends BaseResource {
     /**
-     * 
+     *
      */
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 

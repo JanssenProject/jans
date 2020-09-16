@@ -13,19 +13,19 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class LoggingFilter implements ContainerRequestFilter {
 
-	@Context
-	UriInfo info;
+    @Context
+    UriInfo info;
 
     @Context
     HttpServletRequest request;
 
-	@Inject
-	Logger logger;
+    @Inject
+    Logger logger;
 
-	public void filter(ContainerRequestContext context) {
-		logger.info("***********************************************************************");
-		logger.info("****Request " + context.getMethod() + " " + info.getPath() + " from IP " + request.getRemoteAddr());
+    public void filter(ContainerRequestContext context) {
+        logger.info("***********************************************************************");
+        logger.info("****Request " + context.getMethod() + " " + info.getPath() + " from IP " + request.getRemoteAddr());
 
-	}
+    }
 
 }

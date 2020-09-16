@@ -1,33 +1,22 @@
 package org.gluu.configapi.rest.resource;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.util.ApiConstants;
+import org.gluu.model.custom.script.CustomScriptType;
+import org.gluu.model.custom.script.model.CustomScript;
+import org.gluu.service.custom.CustomScriptService;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.model.CustomScript;
-import org.gluu.service.custom.CustomScriptService;
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.SCRIPTS)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -35,12 +24,12 @@ import org.slf4j.Logger;
 public class CustomScriptResource extends BaseResource {
 
     /**
-     * 
+     *
      */
     private static final String CUSTOM_SCRIPT = "custom script";
 
     /**
-     * 
+     *
      */
     private static final String PATH_SEPARATOR = "/";
 
@@ -51,7 +40,7 @@ public class CustomScriptResource extends BaseResource {
     CustomScriptService customScriptService;
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getAllCustomScripts() {
         List<CustomScript> customScripts = customScriptService.findAllCustomScripts(null);
         return Response.ok(customScripts).build();
@@ -59,10 +48,10 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
+                                                  @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+                                                  @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         List<CustomScript> customScripts = this.customScriptService.findScriptByPatternAndType(pattern,
                 CustomScriptType.getByValue(type), limit);
         if (customScripts != null && !customScripts.isEmpty())
@@ -73,7 +62,7 @@ public class CustomScriptResource extends BaseResource {
 
     @GET
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         CustomScript script = null;
         try {
@@ -88,7 +77,7 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response createPersonScript(@Valid CustomScript customScript) {
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
@@ -102,7 +91,7 @@ public class CustomScriptResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updatePersonScript(@Valid @NotNull CustomScript customScript) {
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
@@ -113,7 +102,7 @@ public class CustomScriptResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response deletePersonScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
             CustomScript existingScript = customScriptService.getScriptByInum(inum);

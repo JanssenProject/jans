@@ -83,8 +83,8 @@ public class CacheConfigurationResource extends BaseResource {
     @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
     public Response addRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
         final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
-                cache.setRedisConfiguration(redisConfiguration);
-                return cache;
+            cache.setRedisConfiguration(redisConfiguration);
+            return cache;
         });
         return Response.status(Response.Status.CREATED).entity(modifiedCache.getRedisConfiguration()).build();
     }

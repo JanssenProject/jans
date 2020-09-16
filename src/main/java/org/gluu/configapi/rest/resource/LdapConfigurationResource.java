@@ -8,9 +8,9 @@ import javax.inject.Inject;
 //@Produces(MediaType.APPLICATION_JSON)
 //@Consumes(MediaType.APPLICATION_JSON)
 public class LdapConfigurationResource extends BaseResource {
-  
-  @Inject
-  Logger logger;
+
+    @Inject
+    Logger logger;
 /*
   @Inject
   LdapConfigurationService ldapConfigurationService;

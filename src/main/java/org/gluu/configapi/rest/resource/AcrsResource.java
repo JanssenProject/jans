@@ -15,33 +15,32 @@ import javax.ws.rs.core.Response;
 
 /**
  * @author Puja Sharma
- *
  */
 @Path(ApiConstants.BASE_API_URL + ApiConstants.ACRS)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AcrsResource extends BaseResource {
 
-	@Inject
+    @Inject
     ConfigurationService configurationService;
 
-	@GET
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getDefaultAuthenticationMethod() {
+    @GET
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getDefaultAuthenticationMethod() {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
 
         AuthenticationMethod authenticationMethod = new AuthenticationMethod();
-		authenticationMethod.setDefaultAcr(gluuConfiguration.getAuthenticationMode());
-		return Response.ok(authenticationMethod).build();
-	}
+        authenticationMethod.setDefaultAcr(gluuConfiguration.getAuthenticationMode());
+        return Response.ok(authenticationMethod).build();
+    }
 
-	@PUT
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
+    @PUT
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
         configurationService.merge(gluuConfiguration);
-		return Response.ok(ResponseStatus.SUCCESS).build();
-	}
+        return Response.ok(ResponseStatus.SUCCESS).build();
+    }
 
 }
