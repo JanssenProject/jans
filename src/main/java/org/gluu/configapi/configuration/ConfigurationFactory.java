@@ -140,6 +140,7 @@ public class ConfigurationFactory {
 
     private void loadBaseConfiguration() {
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE, true);
+        log.trace("Base configuration:" + baseConfiguration.getProperties());
     }
 
     private String confDir() {
