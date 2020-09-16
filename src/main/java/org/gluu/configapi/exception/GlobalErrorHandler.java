@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.gluu.configapi.exception;
 
 import org.gluu.configapi.rest.model.ApiError;

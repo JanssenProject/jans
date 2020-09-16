@@ -1,169 +1,194 @@
 package org.gluu.configapi.rest.resource;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-
-import org.gluu.service.cache.CacheConfiguration;
-import org.gluu.service.cache.RedisConfiguration;
-import org.gluu.service.cache.InMemoryConfiguration;
-import org.gluu.service.cache.NativePersistenceConfiguration;
-import org.gluu.service.cache.MemcachedConfiguration;
-import org.gluu.oxtrust.service.JsonConfigurationService;
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.service.ConfigurationService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.persist.PersistenceEntryManager;
+import org.gluu.service.cache.*;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import org.slf4j.Logger;
+
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.function.Function;
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.CACHE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CacheConfigurationResource extends BaseResource {
-	
-	@Inject
-	Logger logger;
-	
-	@Inject
-	JsonConfigurationService jsonConfigurationService;
-	
 
-	@GET
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getCacheConfiguration() {
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-				return Response.ok(cacheConfiguration).build();
-	}
-	
-	@PATCH
-	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response patchCacheConfiguration(@NotNull String requestString) throws Exception {
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration = Jackson.applyPatch(requestString, cacheConfiguration);
-		jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.ok(cacheConfiguration).build();
+    @Inject
+    Logger logger;
 
-	}
-		
-	@GET
-	@Path(ApiConstants.REDIS)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getRedisConfiguration() throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		return Response.ok(cacheConfiguration.getRedisConfiguration()).build();
-	}
-	
-	@POST
-	@Path(ApiConstants.REDIS)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response addRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setRedisConfiguration(redisConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.status(Response.Status.CREATED).entity(redisConfiguration).build();
-	}
-	
-	@PUT
-	@Path(ApiConstants.REDIS)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setRedisConfiguration(redisConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.ok(redisConfiguration).build();
-	}	
-	
-	@GET
-	@Path(ApiConstants.IN_MEMORY)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getInMemoryConfiguration() throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		return Response.ok(cacheConfiguration.getInMemoryConfiguration()).build();
-	}
+    @Inject
+    ConfigurationService configurationService;
 
-	@POST
-	@Path(ApiConstants.IN_MEMORY)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response addInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setInMemoryConfiguration(inMemoryConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.status(Response.Status.CREATED).entity(inMemoryConfiguration).build();
-	}
-	
-	@PUT
-	@Path(ApiConstants.IN_MEMORY)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setInMemoryConfiguration(inMemoryConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.ok(inMemoryConfiguration).build();
-	}
-	
-	@GET
-	@Path(ApiConstants.NATIVE_PERSISTENCE)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getNativePersistenceConfiguration() throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		return Response.ok(cacheConfiguration.getNativePersistenceConfiguration()).build();
-	}
-	
-	@POST
-	@Path(ApiConstants.NATIVE_PERSISTENCE)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response addNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setNativePersistenceConfiguration(nativePersistenceConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.status(Response.Status.CREATED).entity(nativePersistenceConfiguration).build();
-	}
-	
-	@PUT
-	@Path(ApiConstants.NATIVE_PERSISTENCE)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setNativePersistenceConfiguration(nativePersistenceConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.ok(nativePersistenceConfiguration).build();
-	}
-	
-	@GET
-	@Path(ApiConstants.MEMCACHED)
-	@ProtectedApi(scopes = { READ_ACCESS })
-	public Response getMemcachedConfiguration() throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		return Response.ok(cacheConfiguration.getMemcachedConfiguration()).build();
-	}	
-	
-	@POST
-	@Path(ApiConstants.MEMCACHED)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response addMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setMemcachedConfiguration(memcachedConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.status(Response.Status.CREATED).entity(memcachedConfiguration).build();
-	}
-		
-	@PUT
-	@Path(ApiConstants.MEMCACHED)
-	@ProtectedApi(scopes = { WRITE_ACCESS })
-	public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) throws Exception{
-		CacheConfiguration cacheConfiguration = this.jsonConfigurationService.getOxMemCacheConfiguration();
-		cacheConfiguration.setMemcachedConfiguration(memcachedConfiguration);
-		this.jsonConfigurationService.saveOxMemCacheConfiguration(cacheConfiguration);
-		return Response.ok(memcachedConfiguration).build();
-	}
-	
+    @Inject
+    @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
+    Instance<PersistenceEntryManager> persistenceManager;
+
+    private CacheConfiguration loadCacheConfiguration() {
+        return configurationService.findGluuConfiguration().getCacheConfiguration();
+    }
+
+    private CacheConfiguration mergeModifiedCache(Function<CacheConfiguration, CacheConfiguration> function) {
+        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+
+        final CacheConfiguration modifiedCache = function.apply(gluuConfiguration.getCacheConfiguration());
+        gluuConfiguration.setCacheConfiguration(modifiedCache);
+
+        persistenceManager.get().merge(gluuConfiguration);
+        return modifiedCache;
+    }
+
+    @GET
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getCacheConfiguration() {
+        return Response.ok(loadCacheConfiguration()).build();
+    }
+
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response patchCacheConfiguration(@NotNull String requestString) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            try {
+                return Jackson.applyPatch(requestString, cache);
+            } catch (IOException | JsonPatchException e) {
+                throw new RuntimeException("Unable to apply patch.", e);
+            }
+        });
+        return Response.ok(modifiedCache).build();
+    }
+
+    @GET
+    @Path(ApiConstants.REDIS)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getRedisConfiguration() {
+        return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
+    }
+
+    @POST
+    @Path(ApiConstants.REDIS)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
+    public Response addRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+                cache.setRedisConfiguration(redisConfiguration);
+                return cache;
+        });
+        return Response.status(Response.Status.CREATED).entity(modifiedCache.getRedisConfiguration()).build();
+    }
+
+    @PUT
+    @Path(ApiConstants.REDIS)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setRedisConfiguration(redisConfiguration);
+            return cache;
+        });
+        return Response.ok(modifiedCache.getRedisConfiguration()).build();
+    }
+
+    @GET
+    @Path(ApiConstants.IN_MEMORY)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getInMemoryConfiguration() {
+        return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
+    }
+
+    @POST
+    @Path(ApiConstants.IN_MEMORY)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
+    public Response addInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setInMemoryConfiguration(inMemoryConfiguration);
+            return cache;
+        });
+        return Response.status(Response.Status.CREATED).entity(modifiedCache.getInMemoryConfiguration()).build();
+    }
+
+    @PUT
+    @Path(ApiConstants.IN_MEMORY)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setInMemoryConfiguration(inMemoryConfiguration);
+            return cache;
+        });
+
+        return Response.ok(modifiedCache.getInMemoryConfiguration()).build();
+    }
+
+    @GET
+    @Path(ApiConstants.NATIVE_PERSISTENCE)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getNativePersistenceConfiguration() throws Exception {
+        return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
+    }
+
+    @POST
+    @Path(ApiConstants.NATIVE_PERSISTENCE)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
+    public Response addNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
+            return cache;
+        });
+        return Response.status(Response.Status.CREATED).entity(modifiedCache.getNativePersistenceConfiguration()).build();
+    }
+
+    @PUT
+    @Path(ApiConstants.NATIVE_PERSISTENCE)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
+            return cache;
+        });
+        return Response.ok(modifiedCache.getNativePersistenceConfiguration()).build();
+    }
+
+    @GET
+    @Path(ApiConstants.MEMCACHED)
+    @ProtectedApi(scopes = {READ_ACCESS})
+    public Response getMemcachedConfiguration() throws Exception {
+        return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
+    }
+
+    @POST
+    @Path(ApiConstants.MEMCACHED)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
+    public Response addMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setMemcachedConfiguration(memcachedConfiguration);
+            return cache;
+        });
+        return Response.status(Response.Status.CREATED).entity(modifiedCache.getMemcachedConfiguration()).build();
+    }
+
+    @PUT
+    @Path(ApiConstants.MEMCACHED)
+    @ProtectedApi(scopes = {WRITE_ACCESS})
+    public Response updateMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
+        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
+            cache.setMemcachedConfiguration(memcachedConfiguration);
+            return cache;
+        });
+        return Response.ok(modifiedCache.getMemcachedConfiguration()).build();
+    }
+
 }

@@ -1,40 +1,17 @@
 package org.gluu.configapi.rest.resource;
 
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.PUT;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 
-import org.gluu.model.ldap.GluuLdapConfiguration;
-import org.gluu.oxtrust.service.LdapConfigurationService;
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.ConnectionStatus;
-import org.gluu.configapi.util.Jackson;
+import javax.inject.Inject;
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+//@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
+//@Produces(MediaType.APPLICATION_JSON)
+//@Consumes(MediaType.APPLICATION_JSON)
 public class LdapConfigurationResource extends BaseResource {
   
   @Inject
   Logger logger;
-  
+/*
   @Inject
   LdapConfigurationService ldapConfigurationService;
   
@@ -116,4 +93,5 @@ public class LdapConfigurationResource extends BaseResource {
       
     }
   }
+  */
 }

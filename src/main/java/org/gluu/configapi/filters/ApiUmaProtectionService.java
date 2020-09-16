@@ -3,26 +3,11 @@
  */
 package org.gluu.configapi.filters;
 
-import java.io.Serializable;
+import io.quarkus.arc.AlternativePriority;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.config.oxtrust.AppConfiguration;
-import org.gluu.oxauth.client.ClientInfoClient;
-import org.gluu.oxauth.client.ClientInfoResponse;
-import org.gluu.oxtrust.auth.uma.BaseUmaProtectionService;
-import org.gluu.oxtrust.auth.uma.BindingUrls;
-import org.gluu.oxtrust.service.OpenIdService;
-import org.slf4j.Logger;
-
-import io.quarkus.arc.AlternativePriority;
+import java.io.Serializable;
 
 /**
  * @author Mougang T.Gasmyr
@@ -31,12 +16,9 @@ import io.quarkus.arc.AlternativePriority;
 @ApplicationScoped
 @Named("apiUmaProtectionService")
 @AlternativePriority(value = 1)
-@BindingUrls({ "/api/v1" })
-public class ApiUmaProtectionService extends BaseUmaProtectionService implements Serializable {
+public class ApiUmaProtectionService /*extends BaseUmaProtectionService*/ implements Serializable {
+/*
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6553095758559902245L;
 
 	@Inject
@@ -131,5 +113,5 @@ public class ApiUmaProtectionService extends BaseUmaProtectionService implements
 		}
 		return response;
 	}
-
+*/
 }
