@@ -4,7 +4,7 @@ import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 import org.eclipse.microprofile.health.Readiness;
-import org.gluu.oxtrust.service.GroupService;
+import org.gluu.configapi.service.ConfigurationService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -14,11 +14,11 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class DatabaseConnectionHealthCheck implements HealthCheck {
 
-	@Inject
-	GroupService groupService;
-
     @Inject
     Logger logger;
+
+    @Inject
+    ConfigurationService configurationService;
 
 	public HealthCheckResponse call() {
 		HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("oxauth-config-api readiness");
@@ -33,6 +33,6 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
 	}
 
 	private void checkDatabaseConnection() {
-		groupService.countGroups();
+        configurationService.findForAppConfigurationOnly();
 	}
 }

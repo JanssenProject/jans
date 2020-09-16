@@ -35,7 +35,7 @@ public class JwksResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { WRITE_ACCESS })
     public Response put(WebKeysConfiguration webkeys)  {
-        final Conf conf = configurationService.find();
+        final Conf conf = configurationService.findWebKeysOnly();
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
         return Response.ok().build();
@@ -45,7 +45,7 @@ public class JwksResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { WRITE_ACCESS })
     public Response patch(String requestString) throws JsonPatchException, IOException {
-        final Conf conf = configurationService.find();
+        final Conf conf = configurationService.findWebKeysOnly();
         WebKeysConfiguration webKeys = conf.getWebKeys();
         webKeys = Jackson.applyPatch(requestString, webKeys);
         conf.setWebKeys(webKeys);

@@ -3,32 +3,15 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import org.gluu.model.SmtpConfiguration;
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.oxtrust.model.GluuConfiguration;
-import org.gluu.oxtrust.service.ConfigurationService;
-import org.gluu.oxtrust.service.EncryptionService;
-import org.gluu.service.MailService;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.validation.Valid;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 /**
  * @author Mougang T.Gasmyr
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.SMTP)
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+//@Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.SMTP)
+//@Produces(MediaType.APPLICATION_JSON)
+//@Consumes(MediaType.APPLICATION_JSON)
 public class ConfigSmtpResource extends BaseResource {
-
+/*
 	@Inject
 	ConfigurationService configurationService;
 
@@ -102,5 +85,5 @@ public class ConfigSmtpResource extends BaseResource {
 		configurationService.updateConfiguration(configurationUpdate);
 		return Response.noContent().build();
 	}
-
+*/
 }

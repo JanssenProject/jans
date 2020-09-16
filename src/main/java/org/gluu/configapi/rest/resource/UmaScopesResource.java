@@ -3,46 +3,16 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.AttributeNames;
-import org.gluu.configapi.util.Jackson;
-import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.oxtrust.service.uma.UmaScopeService;
-import org.oxauth.persistence.model.Scope;
-import org.slf4j.Logger;
-
 /**
  * @author Mougang T.Gasmyr
  *
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.SCOPES)
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+//@Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.SCOPES)
+//@Produces(MediaType.APPLICATION_JSON)
+//@Consumes(MediaType.APPLICATION_JSON)
 public class UmaScopesResource extends BaseResource {
-
+/*
 	private static final String UMA_SCOPE = "Uma scope";
 
 	@Inject
@@ -128,4 +98,5 @@ public class UmaScopesResource extends BaseResource {
 		umaScopeService.removeUmaScope(scope);
 		return Response.status(Response.Status.NO_CONTENT).build();
 	}
+	*/
 }

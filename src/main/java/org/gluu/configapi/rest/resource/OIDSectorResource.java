@@ -3,50 +3,20 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.AttributeNames;
-import org.gluu.configapi.util.Jackson;
-import org.gluu.oxtrust.model.OxAuthSectorIdentifier;
-import org.gluu.oxtrust.service.SectorIdentifierService;
-import org.slf4j.Logger;
-
 /**
  * @author Mougang T.Gasmyr
  *
  */
-@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.SECTORS)
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
+//@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.SECTORS)
+//@Consumes(MediaType.APPLICATION_JSON)
+//@Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {
 
 	/**
 	 * 
 	 */
 	private static final String SECTOR_IDENTIFIER = "sector identifier";
-	@Inject
-	SectorIdentifierService sectorIdentifierService;
+/*
 	@Inject
 	Logger logger;
 
@@ -126,5 +96,5 @@ public class OIDSectorResource extends BaseResource {
 		return Response.noContent().build();
 
 	}
-
+*/
 }

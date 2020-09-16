@@ -1,6 +1,5 @@
 package org.gluu.configapi.filters;
 
-import org.gluu.oxtrust.auth.uma.BaseUmaProtectionService;
 import org.slf4j.Logger;
 
 import javax.annotation.Priority;
@@ -39,8 +38,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 	@Context
 	private ResourceInfo resourceInfo;
 
-	BaseUmaProtectionService protectionService;
-
 	@Inject
 	Logger logger;
 
@@ -77,7 +74,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 	}
 
 	private void validateToken(String token, ContainerRequestContext context) throws Exception {
-		protectionService = new ApiUmaProtectionService();
 		//protectionService.processAuthorization(httpHeaders, resourceInfo);
 		// Check if the token was issued by the server and if it's not expired
 		// Throw an Exception if the token is invalid

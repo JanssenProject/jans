@@ -3,9 +3,9 @@ package org.gluu.configapi.rest.resource;
 import com.couchbase.client.core.message.ResponseStatus;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.rest.model.AuthenticationMethod;
+import org.gluu.configapi.service.ConfigurationService;
 import org.gluu.configapi.util.ApiConstants;
-import org.gluu.oxtrust.service.ConfigurationService;
-import org.slf4j.Logger;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -23,25 +23,24 @@ import javax.ws.rs.core.Response;
 public class AcrsResource extends BaseResource {
 
 	@Inject
-	Logger log;
-
-	@Inject
-	ConfigurationService configurationService;
+    ConfigurationService configurationService;
 
 	@GET
 	@ProtectedApi(scopes = { READ_ACCESS })
 	public Response getDefaultAuthenticationMethod() {
-		AuthenticationMethod authenticationMethod = new AuthenticationMethod();
-		authenticationMethod.setDefaultAcr(this.configurationService.getConfiguration().getAuthenticationMode());
-		authenticationMethod.setOxtrustAcr(this.configurationService.getConfiguration().getOxTrustAuthenticationMode());
+        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+
+        AuthenticationMethod authenticationMethod = new AuthenticationMethod();
+		authenticationMethod.setDefaultAcr(gluuConfiguration.getAuthenticationMode());
 		return Response.ok(authenticationMethod).build();
 	}
 
 	@PUT
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	public Response updateDefaultAuthenticationMethod(@Valid AuthenticationMethod authenticationMethod) {
-		this.configurationService.getConfiguration().setAuthenticationMode(authenticationMethod.getDefaultAcr());
-		this.configurationService.getConfiguration().setOxTrustAuthenticationMode(authenticationMethod.getOxtrustAcr());
+        final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
+        gluuConfiguration.setAuthenticationMode(authenticationMethod.getDefaultAcr());
+        configurationService.merge(gluuConfiguration);
 		return Response.ok(ResponseStatus.SUCCESS).build();
 	}
 

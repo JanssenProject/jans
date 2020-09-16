@@ -2,13 +2,14 @@ package org.gluu.configapi;
 
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
-import org.gluu.exception.OxIntializationException;
 import org.gluu.configapi.configuration.ConfigurationFactory;
-import org.gluu.oxtrust.service.ApplicationFactory;
-import org.gluu.oxtrust.service.EncryptionService;
+import org.gluu.exception.OxIntializationException;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.PersistenceEntryManagerFactory;
 import org.gluu.persist.model.PersistenceConfiguration;
+import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.util.StringHelper;
@@ -42,10 +43,10 @@ public class ConfigApiApplication {
 	Instance<EncryptionService> encryptionServiceInstance;
 
 	@Inject
-	ApplicationFactory applicationFactory;
-
-	@Inject
 	BeanManager beanManager;
+
+    @Inject
+    private PersistanceFactoryService persistanceFactoryService;
 
 	@Inject
 	ConfigurationFactory configurationFactory;
@@ -79,10 +80,8 @@ public class ConfigApiApplication {
 	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
 	public PersistenceEntryManager createPersistenceEntryManager() {
 		Properties connectionProperties = preparePersistanceProperties();
-		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory
-				.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
-		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory
-				.createEntryManager(connectionProperties);
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
+		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(connectionProperties);
 		logger.debug("Created {}: {} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
                 persistenceEntryManager, persistenceEntryManager.getOperationService());
 		return persistenceEntryManager;
@@ -109,7 +108,7 @@ public class ConfigApiApplication {
 	protected Properties preparePersistanceProperties() {
 		PersistenceConfiguration persistenceConfiguration = this.configurationFactory.getPersistenceConfiguration();
 		FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
-		Properties connectionProperties = (Properties) persistenceConfig.getProperties();
+		Properties connectionProperties = persistenceConfig.getProperties();
 
 		EncryptionService securityService = encryptionServiceInstance.get();
 		Properties decryptedConnectionProperties = securityService.decryptAllProperties(connectionProperties);
