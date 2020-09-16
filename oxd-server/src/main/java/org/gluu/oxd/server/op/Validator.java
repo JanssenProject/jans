@@ -276,7 +276,7 @@ public class Validator {
             final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
             final String clientId = rp.getClientId();
             //validate nonce
-            if(configuration.getFapiEnabled() && Strings.isNullOrEmpty(nonce)) {
+            if(configuration.getFapiEnabled() && Strings.isNullOrEmpty(nonceFromToken)) {
                 LOG.error("Nonce is missing from id_token.");
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_NO_NONCE);
             }
@@ -302,7 +302,7 @@ public class Validator {
             }
 
             final Date now = new Date();
-            if (TimeUnit.MILLISECONDS.toHours(now.getTime() - issuedAt.getTime()) > configuration.getIatExpirationInHours()) {
+            if (configuration.getFapiEnabled() && TimeUnit.MILLISECONDS.toHours(now.getTime() - issuedAt.getTime()) > configuration.getIatExpirationInHours()) {
                 LOG.error("`ISSUED_AT` date too far in the past. iat : " + issuedAt + " now : " + now + ").");
                 throw new HttpException(ErrorResponseCode.INVALID_ID_TOKEN_OLD_ISSUED_AT);
             }
