@@ -159,13 +159,9 @@ public class RegistrationService extends RequestService {
                 throw new BadInputException(String.format("KeyHandle %s was compromised", deviceRegistration.getKeyHandle()));
             }
 
-    		// Final registration entry should be without expiration
-            deviceRegistration.clearExpiration();
-
     		deviceRegistrationService.addUserDeviceRegistration(userInum, deviceRegistration);
         } else {
             deviceRegistration.setDn(deviceRegistrationService.getDnForOneStepU2fDevice(deviceRegistrationId));
-
             deviceRegistrationService.addOneStepDeviceRegistration(deviceRegistration);
         }
 
