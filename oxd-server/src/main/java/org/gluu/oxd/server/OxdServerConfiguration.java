@@ -107,6 +107,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean encodeNonceFromRequestParameter = false;
     @JsonProperty(value = "fapi_enabled")
     private Boolean fapiEnabled = false;
+    @JsonProperty(value = "iat_expiration_in_hours")
+    private int iatExpirationInHours = 1;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -492,6 +494,14 @@ public class OxdServerConfiguration extends Configuration {
         this.fapiEnabled = fapiEnabled;
     }
 
+    public int getIatExpirationInHours() {
+        return iatExpirationInHours;
+    }
+
+    public void setIatExpirationInHours(int iatExpirationInHours) {
+        this.iatExpirationInHours = iatExpirationInHours;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -538,6 +548,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", encodeStateFromRequestParameter=" + encodeStateFromRequestParameter + '\'' +
                 ", encodeNonceFromRequestParameter=" + encodeNonceFromRequestParameter + '\'' +
                 ", fapiEnabled=" + fapiEnabled + '\'' +
+                ", iatExpirationInHours=" + iatExpirationInHours + '\'' +
                 '}';
     }
 }
