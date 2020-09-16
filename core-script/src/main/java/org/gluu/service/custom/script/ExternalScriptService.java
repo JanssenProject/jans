@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -41,10 +42,17 @@ public abstract class ExternalScriptService implements Serializable {
     protected CustomScriptManager customScriptManager;
 
     protected CustomScriptType customScriptType;
+    
+    protected boolean loaded;
 
     protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
     protected List<CustomScriptConfiguration> customScriptConfigurations;
     protected CustomScriptConfiguration defaultExternalCustomScript;
+
+    @PostConstruct
+    public void init() {
+    	this.loaded = false;
+    }
 
     public ExternalScriptService(CustomScriptType customScriptType) {
         this.customScriptType = customScriptType;
@@ -76,6 +84,8 @@ public abstract class ExternalScriptService implements Serializable {
 
         // Allow to execute additional logic
         reloadExternal();
+        
+        loaded = true;
     }
 
     protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
@@ -163,6 +173,10 @@ public abstract class ExternalScriptService implements Serializable {
 
 	public CustomScriptType getCustomScriptType() {
 		return customScriptType;
+	}
+
+	public boolean isLoaded() {
+		return loaded;
 	}
 
 }
