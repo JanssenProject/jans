@@ -26,16 +26,15 @@ public class Fido2ConfigResource extends BaseResource {
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
     @Inject
-    Fido2Service jsonConfigurationService;
+    Fido2Service fido2Service;
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getFido2Configuration() {
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        String fido2ConfigJson = null;
-        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.find();
+        DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
         if (dbApplicationConfiguration != null) {
-            fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
+            String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
             Gson gson = new Gson();
             JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
             JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -48,7 +47,7 @@ public class Fido2ConfigResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
-        DbApplicationConfiguration dbApplicationConfiguration = this.jsonConfigurationService.find();
+        DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
         if (dbApplicationConfiguration != null) {
             String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
             Gson gson = new Gson();
@@ -56,7 +55,7 @@ public class Fido2ConfigResource extends BaseResource {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
             jsonObject.add(FIDO2_CONFIGURATION, updatedElement);
-            this.jsonConfigurationService.merge(jsonObject.toString());
+            this.fido2Service.merge(jsonObject.toString());
         }
         return Response.ok(fido2Configuration).build();
     }
