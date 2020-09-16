@@ -105,6 +105,8 @@ public enum ErrorResponseCode {
     NO_SUBJECT_IDENTIFIER(500, "no_subject_identifier", "ID Token is missing `sub` value."),
     ID_TOKEN_WITHOUT_SIGNATURE_NOT_ALLOWED(400, "id_token_without_signature_not_allowed", "`ID_TOKEN` without signature is not allowed. To allow `ID_TOKEN` without signature set `accept_id_token_without_signature` field to 'true' in oxd-server.yml."),
     INVALID_ID_TOKEN_ISSUED_AT(500, "invalid_id_token_issued_at", "`ISSUED_AT` date is either invalid or missing from `ID_TOKEN`."),
+    INVALID_ID_TOKEN_EXPIRATION_TIME(500, "invalid_id_token_expiration_time", "EXPIRATION_TIME (`exp`) is either invalid or missing from `ID_TOKEN`."),
+    INVALID_ID_TOKEN_OLD_ISSUED_AT(500, "invalid_id_token_old_issued_at", "Invalid ID_TOKEN. `ISSUED_AT` date too far in the past"),
     INVALID_SUBJECT_IDENTIFIER(500, "invalid_subject_identifier", "UserInfo `sub` value does not matches with `sub` value of ID_TOKEN."),
     FAILED_TO_VERIFY_SUBJECT_IDENTIFIER(500, "failed_to_verify_subject_identifier", "Failed to verify subject identifier (`sub`) of UserInfo response. See oxd-server logs for details."),
     AT_HASH_NOT_FOUND(500, "at_hash_not_found", "`at_hash` is missing in `ID_TOKEN`."),
