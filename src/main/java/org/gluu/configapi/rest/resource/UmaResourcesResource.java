@@ -7,6 +7,7 @@ import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import org.gluu.persist.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -54,9 +55,7 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getUmaResourceByImun(@PathParam(value = ApiConstants.ID) @NotNull String id) {
-        UmaResource resource = umaResourceService.getResourceById(id);
-        checkResourceNotNull(resource, UMA_RESOURCE);
-        return Response.ok(resource).build();
+        return Response.ok(findOrThrow(id)).build();
     }
 
     @POST
@@ -73,13 +72,23 @@ public class UmaResourcesResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(umaResource).build();
     }
 
+    private UmaResource findOrThrow(String id) {
+        try {
+            UmaResource existingResource = umaResourceService.getResourceById(id);
+            checkResourceNotNull(existingResource, UMA_RESOURCE);
+            return existingResource;
+        } catch (EntryPersistenceException e) {
+            throw new NotFoundException(getNotFoundError(UMA_RESOURCE));
+        }
+    }
+
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateUmaResource(@Valid UmaResource resource) {
         String id = resource.getId();
         checkNotNull(id, AttributeNames.ID);
-        UmaResource existingResource = umaResourceService.getResourceById(id);
-        checkResourceNotNull(existingResource, UMA_RESOURCE);
+        UmaResource existingResource = findOrThrow(id);
+
         resource.setId(existingResource.getId());
         resource.setDn(umaResourceService.getDnForResource(id));
         umaResourceService.updateResource(resource);
@@ -91,8 +100,7 @@ public class UmaResourcesResource extends BaseResource {
     @ProtectedApi(scopes = {WRITE_ACCESS})
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString) throws JsonPatchException, IOException {
-        UmaResource existingResource = umaResourceService.getResourceById(id);
-        checkResourceNotNull(existingResource, UMA_RESOURCE);
+        UmaResource existingResource = findOrThrow(id);
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
         umaResourceService.updateResource(existingResource);
@@ -103,8 +111,7 @@ public class UmaResourcesResource extends BaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
-        UmaResource umaResource = umaResourceService.getResourceById(id);
-        checkResourceNotNull(umaResource, UMA_RESOURCE);
+        UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
