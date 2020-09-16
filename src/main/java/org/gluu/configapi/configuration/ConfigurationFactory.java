@@ -126,7 +126,7 @@ public class ConfigurationFactory {
     private Conf loadConfigurationFromDb() {
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            final Conf conf = persistenceEntryManager.find(getOxauthConfigurationDn(), Conf.class, null);
+            final Conf conf = persistenceEntryManager.find(Conf.class, getOxauthConfigurationDn());
 
             return conf;
         } catch (BasePersistenceException ex) {

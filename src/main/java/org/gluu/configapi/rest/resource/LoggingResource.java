@@ -42,7 +42,7 @@ public class LoggingResource {
 
     @PUT
     public Response updateHero(@Valid Logging logging) {
-        Conf conf = configurationService.findForAppConfigurationOnly();
+        Conf conf = configurationService.findConf();
 
         if (!StringUtils.isBlank(logging.getLoggingLevel())) {
             conf.getDynamic().setLoggingLevel(logging.getLoggingLevel());

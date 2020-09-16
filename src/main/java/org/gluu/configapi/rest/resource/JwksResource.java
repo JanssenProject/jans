@@ -28,14 +28,14 @@ public class JwksResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response get() {
-        final String json = configurationService.find("oxAuthConfWebKeys").getWebKeys().toString();
+        final String json = configurationService.findConf().getWebKeys().toString();
         return Response.ok(json).build();
     }
 
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response put(WebKeysConfiguration webkeys) {
-        final Conf conf = configurationService.findWebKeysOnly();
+        final Conf conf = configurationService.findConf();
         conf.setWebKeys(webkeys);
         configurationService.merge(conf);
         return Response.ok().build();
@@ -45,7 +45,7 @@ public class JwksResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response patch(String requestString) throws JsonPatchException, IOException {
-        final Conf conf = configurationService.findWebKeysOnly();
+        final Conf conf = configurationService.findConf();
         WebKeysConfiguration webKeys = conf.getWebKeys();
         webKeys = Jackson.applyPatch(requestString, webKeys);
         conf.setWebKeys(webKeys);
