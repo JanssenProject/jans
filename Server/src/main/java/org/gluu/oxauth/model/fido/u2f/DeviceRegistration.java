@@ -5,13 +5,6 @@
  */
 package org.gluu.oxauth.model.fido.u2f;
 
-import org.gluu.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.BaseEntry;
-
 import java.io.Serializable;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -19,6 +12,17 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+
+import org.gluu.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
+import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
+import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
+import org.gluu.oxauth.model.util.Base64Util;
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.Expiration;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.BaseEntry;
 
 /**
  * U2F Device registration
@@ -100,8 +104,6 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.keyHandle = keyHandle;
 		this.keyHandleHashCode = keyHandleHashCode;
 		this.creationDate = creationDate;
-
-        updateExpirationDate();
 	}
 
 	public DeviceRegistration(String userInum, String keyHandle, String publicKey, X509Certificate attestationCert, long counter) throws BadInputException {
@@ -219,18 +221,6 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
-        updateExpirationDate();
-    }
-
-    private void updateExpirationDate() {
-        if (creationDate != null) {
-            final int expiration = 90;
-            Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-            calendar.setTime(creationDate);
-            calendar.add(Calendar.SECOND, expiration);
-            this.expirationDate = calendar.getTime();
-            this.ttl = expiration;
-        }
     }
 
 	public void clearExpiration() {
@@ -238,6 +228,18 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
         this.deletable = false;
         this.ttl = 0;
 	}
+
+	public void setExpiration() {
+        if (creationDate != null) {
+            final int expiration = 90;
+            Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            calendar.setTime(creationDate);
+            calendar.add(Calendar.SECOND, expiration);
+            this.expirationDate = calendar.getTime();
+            this.deletable = true;
+            this.ttl = expiration;
+        }
+    }
 
     public Integer getTtl() {
         return ttl;
