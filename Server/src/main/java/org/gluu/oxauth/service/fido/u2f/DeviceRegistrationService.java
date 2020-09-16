@@ -119,6 +119,9 @@ public class DeviceRegistrationService {
 	public void addUserDeviceRegistration(String userInum, DeviceRegistration deviceRegistration) {
 		prepareBranch(userInum);
 
+		// Final registration entry should be without expiration
+        deviceRegistration.clearExpiration();
+
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
@@ -148,6 +151,9 @@ public class DeviceRegistrationService {
 	}
 
 	public void addOneStepDeviceRegistration(DeviceRegistration deviceRegistration) {
+        // Set expiration for one step flow
+        deviceRegistration.setExpiration();
+		
 		ldapEntryManager.persist(deviceRegistration);
 	}
 
