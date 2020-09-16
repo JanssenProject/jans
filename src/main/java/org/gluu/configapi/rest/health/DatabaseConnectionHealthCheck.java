@@ -33,6 +33,6 @@ public class DatabaseConnectionHealthCheck implements HealthCheck {
     }
 
     private void checkDatabaseConnection() {
-        configurationService.findForAppConfigurationOnly();
+        configurationService.findConf();
     }
 }
