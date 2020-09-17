@@ -31,6 +31,8 @@ import static org.gluu.oxauth.service.SessionIdService.OP_BROWSER_STATE;
 @ObjectClass(value = "oxAuthSessionId")
 public class SessionId implements Deletable, Serializable {
 
+    public static final String OLD_SESSION_ID_ATTR_KEY = "old_session_id";
+
     private static final long serialVersionUID = -237476411915686378L;
 
     @DN
