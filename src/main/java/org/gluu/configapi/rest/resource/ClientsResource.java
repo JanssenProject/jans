@@ -26,12 +26,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.service.ClientService;
 import org.gluu.configapi.service.ScopeService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.service.common.ClientService;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
@@ -90,10 +90,10 @@ public class ClientsResource extends BaseResource {
     @ProtectedApi(scopes = { WRITE_ACCESS })
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         String inum = clientService.generateInumForNewClient();
-        client.setInum(inum);
+        client.setClientId(inum);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
-        if (client.getEncodedClientSecret() != null) {
-            client.setEncodedClientSecret(encryptionService.encrypt(client.getEncodedClientSecret()));
+        if (client.getClientSecret() != null) {
+            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
         }
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
@@ -105,21 +105,21 @@ public class ClientsResource extends BaseResource {
     @PUT
     @ProtectedApi(scopes = { WRITE_ACCESS })
     public Response updateClient(@Valid Client client) throws EncryptionException {
-        String inum = client.getInum();
+        String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
         checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
-        client.setInum(existingClient.getInum());
+        client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
-        if (client.getOxAuthClientSecret() != null) {
-            client.setEncodedClientSecret(encryptionService.encrypt(client.getOxAuthClientSecret()));
+        if (client.getClientSecret() != null) {
+            client.setClientSecret(encryptionService.encrypt(client.getClientSecret()));
         }
         clientService.updateClient(client);
-        Client result = clientService.getClientByInum(existingClient.getInum());
-        if (result.getEncodedClientSecret() != null) {
-            result.setOxAuthClientSecret(encryptionService.decrypt(client.getEncodedClientSecret()));
+        Client result = clientService.getClientByInum(existingClient.getClientId());
+        if (result.getClientSecret() != null) {
+            result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
         }
         return Response.ok(result).build();
     }
