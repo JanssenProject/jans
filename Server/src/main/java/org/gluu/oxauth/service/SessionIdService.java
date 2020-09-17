@@ -505,21 +505,22 @@ public class SessionIdService {
 
         final boolean persisted;
         if (appConfiguration.getChangeSessionIdOnAuthentication() && httpResponse != null) {
-            final String oldSesionId = sessionId.getId();
+            final String oldSessionId = sessionId.getId();
             final String newSessionId = UUID.randomUUID().toString();
 
-            log.debug("Changing session id from {} to {} ...", oldSesionId, newSessionId);
+            log.debug("Changing session id from {} to {} ...", oldSessionId, newSessionId);
             remove(sessionId);
 
             sessionId.setId(newSessionId);
             sessionId.setDn(buildDn(newSessionId));
+            sessionId.getSessionAttributes().put(SessionId.OLD_SESSION_ID_ATTR_KEY, oldSessionId);
             if (sessionId.getIsJwt()) {
                 sessionId.setJwt(generateJwt(sessionId, sessionId.getUserDn()).asString());
             }
 
             persisted = persistSessionId(sessionId, true);
             cookieService.createSessionIdCookie(sessionId, httpRequest, httpResponse, false);
-            log.debug("Session identifier changed from {} to {} .", oldSesionId, newSessionId);
+            log.debug("Session identifier changed from {} to {} .", oldSessionId, newSessionId);
         } else {
             persisted = updateSessionId(sessionId, true, true, true);
         }
