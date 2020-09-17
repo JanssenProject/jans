@@ -3,23 +3,10 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.service.ScopeService;
-import org.gluu.configapi.util.ApiConstants;
-import org.gluu.configapi.util.AttributeNames;
-import org.gluu.configapi.util.Jackson;
-import org.gluu.oxauth.model.common.OxAuthApplicationType;
-import org.gluu.oxauth.model.common.OxAuthSubjectType;
-import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.service.common.ClientService;
-import org.gluu.oxauth.service.common.EncryptionService;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -35,8 +22,19 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.service.ScopeService;
+import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.AttributeNames;
+import org.gluu.configapi.util.Jackson;
+import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.service.common.ClientService;
+import org.gluu.oxauth.service.common.EncryptionService;
+import org.gluu.util.security.StringEncrypter.EncryptionException;
+import org.slf4j.Logger;
 
 /**
  * @author Mougang T.Gasmyr
@@ -46,7 +44,7 @@ import javax.ws.rs.core.MediaType;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CLIENTS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@RequestScoped
+@ApplicationScoped
 public class ClientsResource extends BaseResource {
     /**
      *
@@ -93,15 +91,9 @@ public class ClientsResource extends BaseResource {
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         String inum = clientService.generateInumForNewClient();
         client.setInum(inum);
-        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         if (client.getEncodedClientSecret() != null) {
             client.setEncodedClientSecret(encryptionService.encrypt(client.getEncodedClientSecret()));
-        }
-        if (client.getOxAuthAppType() == null) {
-            client.setOxAuthAppType(OxAuthApplicationType.WEB);
-        }
-        if (client.getOxAuthAppType() == null) {
-            client.setOxAuthSubjectType(OxAuthSubjectType.PUBLIC);
         }
         client.setDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getClientSecretExpiresAt() != null);
@@ -115,7 +107,7 @@ public class ClientsResource extends BaseResource {
     public Response updateClient(@Valid Client client) throws EncryptionException {
         String inum = client.getInum();
         checkNotNull(inum, AttributeNames.INUM);
-        checkNotNull(client.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(client.getClientName(), AttributeNames.DISPLAY_NAME);
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
         client.setInum(existingClient.getInum());
