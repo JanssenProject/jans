@@ -8,11 +8,15 @@ package org.gluu.oxauth.model.register;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.gluu.persist.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 01.12.2012
  */
-public enum ApplicationType {
+public enum ApplicationType implements AttributeEnum {
 
     /**
      * Clients incapable of maintaining the confidentiality of their credentials
@@ -29,6 +33,14 @@ public enum ApplicationType {
      * other means.
      */
     WEB("web");
+
+    private static Map<String, ApplicationType> mapByValues = new HashMap<String, ApplicationType>();
+
+    static {
+        for (ApplicationType enumType : values()) {
+            mapByValues.put(enumType.getValue(), enumType);
+        }
+    }
 
     private final String paramName;
 
@@ -55,6 +67,10 @@ public enum ApplicationType {
         return WEB;
     }
 
+    public static ApplicationType getByValue(String value) {
+        return mapByValues.get(value);
+    }
+
     /**
      * Returns a string representation of the object. In this case the parameter name.
      *
@@ -64,5 +80,13 @@ public enum ApplicationType {
     @JsonValue
     public String toString() {
         return paramName;
+    }
+
+    public String getValue() {
+        return name().toString();
+    }
+
+    public Enum<? extends AttributeEnum> resolveByValue(String value) {
+        return getByValue(value);
     }
 }
