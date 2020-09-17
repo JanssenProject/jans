@@ -25,10 +25,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.gluu.configapi.filters.ProtectedApi;
+import org.gluu.configapi.service.SectorService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
-import org.gluu.oxauth.service.common.SectorService;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 
