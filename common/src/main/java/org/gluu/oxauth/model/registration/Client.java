@@ -40,11 +40,6 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String clientId;
 
-    @NotNull
-    @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
-    @AttributeName
-    private String displayName;
-
     @AttributeName(name = "oxAuthClientSecret")
     private String clientSecret;
 
@@ -76,7 +71,7 @@ public class Client extends DeletableEntity implements Serializable {
     private GrantType[] grantTypes;
 
     @AttributeName(name = "oxAuthAppType")
-    private String applicationType;
+    private String applicationType = OxAuthApplicationType.WEB.getValue();
 
     @AttributeName(name = "oxAuthContact")
     private String[] contacts;
@@ -109,7 +104,7 @@ public class Client extends DeletableEntity implements Serializable {
     private String sectorIdentifierUri;
 
     @AttributeName(name = "oxAuthSubjectType")
-    private String subjectType;
+    private String subjectType = OxAuthSubjectType.PUBLIC.getValue();
 
     @AttributeName(name = "oxAuthIdTokenSignedResponseAlg")
     private String idTokenSignedResponseAlg;
@@ -243,13 +238,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     @Transient
     private String oxAuthClientSecret;
-
-    @NotNull
-    @AttributeName(name = "oxAuthAppType")
-    private OxAuthApplicationType oxAuthAppType;
-
-    @AttributeName(name = "oxAuthSubjectType")
-    private OxAuthSubjectType oxAuthSubjectType;
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
@@ -1267,14 +1255,6 @@ public class Client extends DeletableEntity implements Serializable {
         this.oxAuthClientSecret = oxAuthClientSecret;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     public String getInum() {
         return clientId;
     }
@@ -1283,19 +1263,12 @@ public class Client extends DeletableEntity implements Serializable {
         this.clientId = inum;
     }
 
-    public OxAuthApplicationType getOxAuthAppType() {
-        return oxAuthAppType;
+    public String getDisplayName() {
+        return clientName;
     }
 
-    public void setOxAuthAppType(OxAuthApplicationType oxAuthAppType) {
-        this.oxAuthAppType = oxAuthAppType;
+    public void setDisplayName(String displayName) {
+        this.clientName = displayName;
     }
 
-    public OxAuthSubjectType getOxAuthSubjectType() {
-        return oxAuthSubjectType;
-    }
-
-    public void setOxAuthSubjectType(OxAuthSubjectType oxAuthSubjectType) {
-        this.oxAuthSubjectType = oxAuthSubjectType;
-    }
 }
