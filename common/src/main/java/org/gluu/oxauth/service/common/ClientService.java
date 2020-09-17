@@ -56,33 +56,21 @@ public class ClientService implements Serializable {
         persistenceEntryManager.removeRecursively(client.getDn());
     }
 
-    public String getDnForClient(String inum) {
-        String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=clients,%s", orgDn);
-        }
-        return String.format("inum=%s,ou=clients,%s", inum, orgDn);
-    }
-
     public void updateClient(Client client) {
         persistenceEntryManager.merge(client);
     }
 
-    public String generateInumForNewClient() {
-        String newInum = null;
-        String newDn = null;
-        int trycount = 0;
-        do {
-            if (trycount < IdGenService.MAX_IDGEN_TRY_COUNT) {
-                newInum = idGenService.generateId("client");
-                trycount++;
-            } else {
-                newInum = idGenService.generateDefaultId();
-            }
-            newDn = getDnForClient(newInum);
-        } while (persistenceEntryManager.contains(newDn, Client.class));
-        return newInum;
+    public Client getClientByInum(String inum) {
+        Client result = null;
+        try {
+            result = persistenceEntryManager.find(Client.class, getDnForClient(inum));
+        } catch (Exception ex) {
+            logger.error("Failed to load client entry", ex);
+        }
+        return result;
     }
+
+
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
         String[] targetArray = new String[]{pattern};
@@ -109,7 +97,6 @@ public class ClientService implements Serializable {
             logger.warn("", e);
             return null;
         }
-
     }
 
     public OxAuthApplicationType[] getApplicationType() {
@@ -148,14 +135,27 @@ public class ClientService implements Serializable {
         return AuthenticationMethod.values();
     }
 
-    public Client getClientByInum(String inum) {
-        Client result = null;
-        try {
-            result = persistenceEntryManager.find(Client.class, getDnForClient(inum));
-        } catch (Exception ex) {
-            logger.error("Failed to load client entry", ex);
-        }
-        return result;
-    }
 
+    public String getDnForClient(String inum) {
+        String orgDn = organizationService.getDnForOrganization();
+        if (StringHelper.isEmpty(inum)) {
+            return String.format("ou=clients,%s", orgDn);
+        }
+        return String.format("inum=%s,ou=clients,%s", inum, orgDn);
+    }
+    public String generateInumForNewClient() {
+        String newInum = null;
+        String newDn = null;
+        int trycount = 0;
+        do {
+            if (trycount < IdGenService.MAX_IDGEN_TRY_COUNT) {
+                newInum = idGenService.generateId("client");
+                trycount++;
+            } else {
+                newInum = idGenService.generateDefaultId();
+            }
+            newDn = getDnForClient(newInum);
+        } while (persistenceEntryManager.contains(newDn, Client.class));
+        return newInum;
+    }
 }
