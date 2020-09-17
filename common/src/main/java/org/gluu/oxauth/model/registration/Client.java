@@ -6,17 +6,18 @@
 
 package org.gluu.oxauth.model.registration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
+import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
-import org.gluu.persist.annotation.*;
 import org.oxauth.persistence.model.ClientAttributes;
 
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,8 +27,9 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @version August 20, 2019
  */
-@DataEntry
+@DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "oxAuthClient")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = -6832496019942067970L;
@@ -35,8 +37,13 @@ public class Client extends DeletableEntity implements Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "inum")
+    @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String clientId;
+
+    @NotNull
+    @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
+    @AttributeName
+    private String displayName;
 
     @AttributeName(name = "oxAuthClientSecret")
     private String clientSecret;
@@ -231,6 +238,20 @@ public class Client extends DeletableEntity implements Serializable {
     @Expiration
     private Integer ttl;
 
+    @NotNull
+    @AttributeName(name = "oxAuthClientSecret")
+    private String encodedClientSecret;
+
+    @Transient
+    private String oxAuthClientSecret;
+
+    @NotNull
+    @AttributeName(name = "oxAuthAppType")
+    private OxAuthApplicationType oxAuthAppType;
+
+    @AttributeName(name = "oxAuthSubjectType")
+    private OxAuthSubjectType oxAuthSubjectType;
+
     public ClientAttributes getAttributes() {
         if (attributes == null) {
             attributes = new ClientAttributes();
@@ -357,7 +378,7 @@ public class Client extends DeletableEntity implements Serializable {
      * @param clientSecret The client secret.
      */
     public void setClientSecret(String clientSecret) {
-    	this.clientSecret = clientSecret;
+        this.clientSecret = clientSecret;
     }
 
     /**
@@ -1229,5 +1250,53 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
+    }
+
+    public String getEncodedClientSecret() {
+        return encodedClientSecret;
+    }
+
+    public void setEncodedClientSecret(String encodedClientSecret) {
+        this.encodedClientSecret = encodedClientSecret;
+    }
+
+    public String getOxAuthClientSecret() {
+        return oxAuthClientSecret;
+    }
+
+    public void setOxAuthClientSecret(String oxAuthClientSecret) {
+        this.oxAuthClientSecret = oxAuthClientSecret;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getInum() {
+        return clientId;
+    }
+
+    public void setInum(String inum) {
+        this.clientId = inum;
+    }
+
+    public OxAuthApplicationType getOxAuthAppType() {
+        return oxAuthAppType;
+    }
+
+    public void setOxAuthAppType(OxAuthApplicationType oxAuthAppType) {
+        this.oxAuthAppType = oxAuthAppType;
+    }
+
+    public OxAuthSubjectType getOxAuthSubjectType() {
+        return oxAuthSubjectType;
+    }
+
+    public void setOxAuthSubjectType(OxAuthSubjectType oxAuthSubjectType) {
+        this.oxAuthSubjectType = oxAuthSubjectType;
     }
 }
