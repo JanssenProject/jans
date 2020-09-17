@@ -7,9 +7,11 @@
 package org.gluu.oxauth.model.registration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.persist.annotation.*;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
@@ -37,6 +39,7 @@ public class Client extends DeletableEntity implements Serializable {
     @DN
     private String dn;
 
+    @JsonProperty("inum")
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String clientId;
 
@@ -71,7 +74,7 @@ public class Client extends DeletableEntity implements Serializable {
     private GrantType[] grantTypes;
 
     @AttributeName(name = "oxAuthAppType")
-    private String applicationType = OxAuthApplicationType.WEB.getValue();
+    private ApplicationType applicationType = ApplicationType.WEB;
 
     @AttributeName(name = "oxAuthContact")
     private String[] contacts;
@@ -104,7 +107,7 @@ public class Client extends DeletableEntity implements Serializable {
     private String sectorIdentifierUri;
 
     @AttributeName(name = "oxAuthSubjectType")
-    private String subjectType = OxAuthSubjectType.PUBLIC.getValue();
+    private SubjectType subjectType = SubjectType.PUBLIC;
 
     @AttributeName(name = "oxAuthIdTokenSignedResponseAlg")
     private String idTokenSignedResponseAlg;
@@ -232,12 +235,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     @Expiration
     private Integer ttl;
-
-    @AttributeName(name = "oxAuthClientSecret")
-    private String encodedClientSecret;
-
-    @Transient
-    private String oxAuthClientSecret;
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
@@ -524,7 +521,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The type of the client application.
      */
-    public String getApplicationType() {
+    public ApplicationType getApplicationType() {
         return applicationType;
     }
 
@@ -537,7 +534,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param applicationType The type of the client application.
      */
-    public void setApplicationType(String applicationType) {
+    public void setApplicationType(ApplicationType applicationType) {
         this.applicationType = applicationType;
     }
 
@@ -744,7 +741,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return The subject type.
      */
-    public String getSubjectType() {
+    public SubjectType getSubjectType() {
         return subjectType;
     }
 
@@ -753,7 +750,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param subjectType The subject type.
      */
-    public void setSubjectType(String subjectType) {
+    public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
     }
 
@@ -1237,30 +1234,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     public void setBackchannelUserCodeParameter(Boolean backchannelUserCodeParameter) {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
-    }
-
-    public String getEncodedClientSecret() {
-        return encodedClientSecret;
-    }
-
-    public void setEncodedClientSecret(String encodedClientSecret) {
-        this.encodedClientSecret = encodedClientSecret;
-    }
-
-    public String getOxAuthClientSecret() {
-        return oxAuthClientSecret;
-    }
-
-    public void setOxAuthClientSecret(String oxAuthClientSecret) {
-        this.oxAuthClientSecret = oxAuthClientSecret;
-    }
-
-    public String getInum() {
-        return clientId;
-    }
-
-    public void setInum(String inum) {
-        this.clientId = inum;
     }
 
     public String getDisplayName() {
