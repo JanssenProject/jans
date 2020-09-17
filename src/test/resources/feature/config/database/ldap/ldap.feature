@@ -139,6 +139,7 @@ Feature: Verify LDAP configuration endpoint
     Then status 200
     And print response
     
+    @ignore
     @ldap-config-test
     Scenario: Test LDAP configuration
     Given url  mainUrl
