@@ -102,7 +102,7 @@ public class SectorIdentifierService {
             return "";
         }
 
-        final boolean isClientPairwise = SubjectType.PAIRWISE.equals(SubjectType.fromString(client.getSubjectType()));
+        final boolean isClientPairwise = SubjectType.PAIRWISE.equals(client.getSubjectType());
         if (isClientPairwise) {
             final String sectorIdentifierUri;
 
