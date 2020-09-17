@@ -446,7 +446,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[claimsRedirectUris.size()]));
         }
         if (requestObject.getApplicationType() != null) {
-            p_client.setApplicationType(requestObject.getApplicationType().toString());
+            p_client.setApplicationType(requestObject.getApplicationType());
         }
         if (StringUtils.isNotBlank(requestObject.getClientName())) {
             p_client.setClientName(requestObject.getClientName());
@@ -526,7 +526,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setJwks(requestObject.getJwks());
         }
         if (requestObject.getSubjectType() != null) {
-            p_client.setSubjectType(requestObject.getSubjectType().toString());
+            p_client.setSubjectType(requestObject.getSubjectType());
         }
         if (requestObject.getRptAsJwt() != null) {
             p_client.setRptAsJwt(requestObject.getRptAsJwt());
