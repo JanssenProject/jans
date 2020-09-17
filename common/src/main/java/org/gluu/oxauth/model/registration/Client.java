@@ -238,7 +238,6 @@ public class Client extends DeletableEntity implements Serializable {
     @Expiration
     private Integer ttl;
 
-    @NotNull
     @AttributeName(name = "oxAuthClientSecret")
     private String encodedClientSecret;
 
