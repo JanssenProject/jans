@@ -86,6 +86,10 @@ public class ConfigurationFactory {
     public FileConfiguration getBaseConfiguration() {
         return baseConfiguration;
     }
+    
+    public static String getAppPropertiesFile() {
+      return APP_PROPERTIES_FILE;
+    }
 
     public void create() {
         loadBaseConfiguration();
