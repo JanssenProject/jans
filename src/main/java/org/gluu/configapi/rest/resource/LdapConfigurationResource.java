@@ -92,10 +92,7 @@ public class LdapConfigurationResource extends BaseResource {
   public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration)
       throws Exception {
     logger.info("Test ldapConfiguration " + ldapConfiguration);
-    logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - ldapConfiguration = "
-        + ldapConfiguration + "\n\n\n");
-    logger.info("Test Ldap Configuration " + ldapConfiguration);
-    boolean status = connectionStatus.isUp(ldapConfiguration);
+     boolean status = connectionStatus.isUp(ldapConfiguration);
     logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = " + status + "\n\n\n");
     return Response.ok(status).build();
   }

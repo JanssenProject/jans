@@ -28,48 +28,41 @@ public class ConnectionStatus {
   ConfigurationFactory configurationFactory;
 
   public boolean isUp(GluuLdapConfiguration ldapConfiguration) {
-    // Properties properties = new Properties();
+    Properties properties = new Properties();
     FileConfiguration configuration = loadFileConfiguration();
-    Properties properties = configuration.getProperties();
+    if (configuration != null)
+      properties = configuration.getProperties();
     properties.setProperty("bindDN", ldapConfiguration.getBindDN());
     properties.setProperty("bindPassword", ldapConfiguration.getBindPassword());
     properties.setProperty("servers", buildServersString(getServers(ldapConfiguration)));
-    logger.info("\n\n\n ConnectionStatus:::isUp() - configurationFactory = " + configurationFactory + "\n\n\n");
-    logger.info("\n\n\n ConnectionStatus:::isUp() - configurationFactory.getCryptoConfigurationSalt() = "
-        + configurationFactory.getCryptoConfigurationSalt() + "\n\n\n");
-    // LdapConnectionProvider connectionProvider = new
-    // LdapConnectionProvider(PropertiesDecrypter.decryptProperties(properties,
-    // configurationFactory.getCryptoConfigurationSalt()));
 
     LdapConnectionProvider connectionProvider = new LdapConnectionProvider(
         PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt()));
 
     if (connectionProvider.getConnectionPool() != null) {
       boolean isConnected = connectionProvider.isConnected();
-      logger.info("\n\n\n ConnectionStatus:::isUp() - isConnected_1 = " + isConnected + "\n\n\n");
       connectionProvider.closeConnectionPool();
-      logger.info("\n\n\n ConnectionStatus:::isUp() - isConnected_2 = " + isConnected + "\n\n\n");
       return isConnected;
     }
 
     return false;
   }
-  
+
   private FileConfiguration loadFileConfiguration() {
-    FileConfiguration configuration = new FileConfiguration(ConfigurationFactory.getAppPropertiesFile());
-    if (!configuration.isLoaded()) {
-        configuration = new FileConfiguration(LdapEntryManagerFactory.LDAP_DEFAULT_PROPERTIES_FILE);
+    FileConfiguration configuration = null;
+    try {
+      configuration = new FileConfiguration(ConfigurationFactory.getAppPropertiesFile());
+    } catch (Exception ex) {
+      logger.error("ConnectionStatus:::loadFileConfiguration() - ****Exception**** = " + ex);
+      configuration = new FileConfiguration(LdapEntryManagerFactory.LDAP_DEFAULT_PROPERTIES_FILE);
     }
     return configuration;
-}
+  }
 
   private List<String> getServers(GluuLdapConfiguration ldapConfiguration) {
-    logger.info("\n\n\n ConnectionStatus:::getServers() - ldapConfiguration.getServers() = "
-        + ldapConfiguration.getServers() + "\n\n\n");
     List<String> servers = new ArrayList<String>();
     for (SimpleProperty server : ldapConfiguration.getServers())
       servers.add(server.getValue());
-    logger.info("\n\n\n ConnectionStatus:::getServers() - servers = " + servers + "\n\n\n");
     return servers;
   }
 
