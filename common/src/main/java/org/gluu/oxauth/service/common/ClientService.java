@@ -14,6 +14,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.Serializable;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.List;
 /**
  * @author gasmyr on 9/17/20.
  */
+@ApplicationScoped
 public class ClientService implements Serializable {
 
     private static final long serialVersionUID = 7912416439116338984L;
