@@ -68,8 +68,7 @@ public class ConfigApiApplication {
     public PersistenceEntryManager createPersistenceEntryManager() throws OxIntializationException {
         PersistenceEntryManagerFactory persistenceEntryManagerFactory = persistanceFactoryService.getPersistenceEntryManagerFactory(configurationFactory.getPersistenceConfiguration());
         PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerFactory.createEntryManager(configurationFactory.getDecryptedConnectionProperties());
-        logger.debug("Created {}: {} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-                persistenceEntryManager, persistenceEntryManager.getOperationService());
+        logger.debug("Created {} with operation service {}", persistenceEntryManager, persistenceEntryManager.getOperationService());
         return persistenceEntryManager;
     }
 
@@ -77,8 +76,7 @@ public class ConfigApiApplication {
         closePersistenceEntryManager();
         PersistenceEntryManager ldapEntryManager = persistenceEntryManagerInstance.get();
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
-        logger.debug("Recreated instance {}: {} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-                ldapEntryManager, ldapEntryManager.getOperationService());
+        logger.debug("Recreated instance {} with operation service: {}", ldapEntryManager, ldapEntryManager.getOperationService());
     }
 
     private void closePersistenceEntryManager() {
@@ -86,11 +84,8 @@ public class ConfigApiApplication {
         if (oldInstance == null || oldInstance.getOperationService() == null)
             return;
 
-
-        logger.debug("Attempting to destroy {}:{} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-                oldInstance, oldInstance.getOperationService());
+        logger.debug("Attempting to destroy {} with operation service: {}", oldInstance, oldInstance.getOperationService());
         oldInstance.destroy();
-        logger.debug("Destroyed {}:{} with operation service: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
-                oldInstance, oldInstance.getOperationService());
+        logger.debug("Destroyed {} with operation service: {}", oldInstance, oldInstance.getOperationService());
     }
 }
