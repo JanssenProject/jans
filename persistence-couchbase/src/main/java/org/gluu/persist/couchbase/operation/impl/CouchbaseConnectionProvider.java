@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.gluu.persist.couchbase.model.BucketMapping;
 import org.gluu.persist.couchbase.model.ResultCode;
@@ -243,7 +245,7 @@ public class CouchbaseConnectionProvider {
                     isConnected = false;
                     break;
                 }
-            } catch (CouchbaseException ex) {
+            } catch (CouchbaseException | TimeoutException ex) {
                 LOG.error("Failed to check bucket", ex);
             }
         }
@@ -251,11 +253,11 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    private boolean isConnected(BucketMapping bucketMapping) {
+    private boolean isConnected(BucketMapping bucketMapping) throws TimeoutException {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = bucket.bucketManager();
-        BucketInfo bucketInfo = bucketManager.info();
+        BucketInfo bucketInfo = bucketManager.info(30, TimeUnit.SECONDS);
 
         boolean result = true;
         if (com.couchbase.client.java.bucket.BucketType.COUCHBASE == bucketInfo.type()) {
