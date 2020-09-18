@@ -233,8 +233,8 @@ public class CouchbaseConnectionProvider {
         }
 
         boolean isConnected = true;
-        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-            try {
+        try {
+	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
                 Bucket bucket = bucketMapping.getBucket();
                 if (bucket.isClosed() || !isConnected(bucketMapping)) {
                     if (bucket.isClosed()) {
@@ -245,15 +245,16 @@ public class CouchbaseConnectionProvider {
                     isConnected = false;
                     break;
                 }
-            } catch (CouchbaseException | TimeoutException ex) {
-                LOG.error("Failed to check bucket", ex);
-            }
+	        }
+        } catch (RuntimeException ex) {
+            LOG.error("Failed to check bucket", ex);
+            isConnected = false;
         }
 
         return isConnected;
     }
 
-    private boolean isConnected(BucketMapping bucketMapping) throws TimeoutException {
+    private boolean isConnected(BucketMapping bucketMapping) {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = bucket.bucketManager();
