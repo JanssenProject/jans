@@ -16,7 +16,6 @@ import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr
- *
  */
 @ApplicationScoped
 public class SectorService implements Serializable {
@@ -44,7 +43,7 @@ public class SectorService implements Serializable {
     }
 
     public List<SectorIdentifier> searchSectorIdentifiers(String pattern, int sizeLimit) {
-        String[] targetArray = new String[] { pattern };
+        String[] targetArray = new String[]{pattern};
         Filter searchFilter = Filter.createSubstringFilter(OxConstants.oxId, null, targetArray, null);
         return persistenceEntryManager.findEntries(getDnForSectorIdentifier(null), SectorIdentifier.class, searchFilter,
                 sizeLimit);

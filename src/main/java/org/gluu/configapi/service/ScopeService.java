@@ -81,7 +81,7 @@ public class ScopeService {
     }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit) {
-        String[] targetArray = new String[] { pattern };
+        String[] targetArray = new String[]{pattern};
         Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
         Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);

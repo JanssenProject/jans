@@ -1,13 +1,7 @@
 /**
- * 
+ *
  */
 package org.gluu.configapi.service;
-
-import java.io.Serializable;
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.gluu.oxauth.model.common.SubjectType;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -20,6 +14,11 @@ import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr
@@ -69,7 +68,7 @@ public class ClientService implements Serializable {
     }
 
     public List<Client> searchClients(String pattern, int sizeLimit) {
-        String[] targetArray = new String[] { pattern };
+        String[] targetArray = new String[]{pattern};
         Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
         Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
         Filter inumFilter = Filter.createSubstringFilter(OxConstants.inum, null, targetArray, null);

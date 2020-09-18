@@ -3,28 +3,6 @@
  */
 package org.gluu.configapi.rest.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.ClientService;
 import org.gluu.configapi.service.ScopeService;
@@ -35,6 +13,16 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mougang T.Gasmyr
@@ -64,7 +52,7 @@ public class ClientsResource extends BaseResource {
     EncryptionService encryptionService;
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
@@ -78,7 +66,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
@@ -87,7 +75,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response createOpenIdConnect(@Valid Client client) throws EncryptionException {
         String inum = clientService.generateInumForNewClient();
         client.setClientId(inum);
@@ -103,7 +91,7 @@ public class ClientsResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateClient(@Valid Client client) throws EncryptionException {
         String inum = client.getClientId();
         checkNotNull(inum, AttributeNames.INUM);
@@ -126,7 +114,7 @@ public class ClientsResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
         Client existingClient = clientService.getClientByInum(inum);
@@ -143,7 +131,7 @@ public class ClientsResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Client client = clientService.getClientByInum(inum);
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
