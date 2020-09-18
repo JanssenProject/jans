@@ -35,6 +35,7 @@ public class ConnectionStatus {
     properties.setProperty("bindDN", ldapConfiguration.getBindDN());
     properties.setProperty("bindPassword", ldapConfiguration.getBindPassword());
     properties.setProperty("servers", buildServersString(getServers(ldapConfiguration)));
+    properties.setProperty("useSSL", Boolean.toString(ldapConfiguration.isUseSSL()));
 
     LdapConnectionProvider connectionProvider = new LdapConnectionProvider(
         PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt()));
