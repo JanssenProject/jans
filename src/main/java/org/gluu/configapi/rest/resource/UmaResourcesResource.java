@@ -22,7 +22,6 @@ import java.util.UUID;
 
 /**
  * @author Mougang T.Gasmyr
- *
  */
 
 @Path(ApiConstants.BASE_API_URL + ApiConstants.UMA + ApiConstants.RESOURCES)

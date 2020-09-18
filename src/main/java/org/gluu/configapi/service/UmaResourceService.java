@@ -32,7 +32,7 @@ public class UmaResourceService {
     }
 
     public List<UmaResource> findResources(String pattern, int sizeLimit) {
-        String[] targetArray = new String[] { pattern };
+        String[] targetArray = new String[]{pattern};
         Filter oxIdFilter = Filter.createSubstringFilter("oxId", null, targetArray, null);
 
         return persistenceEntryManager.findEntries(getDnForResource(null), UmaResource.class, oxIdFilter, sizeLimit);

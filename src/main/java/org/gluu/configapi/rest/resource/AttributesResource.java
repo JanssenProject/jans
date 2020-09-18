@@ -40,10 +40,10 @@ public class AttributesResource extends BaseResource {
     Logger logger;
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     public Response getAttributes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) throws Exception {
+                                  @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+                                  @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status) throws Exception {
         List<GluuAttribute> attributes = new ArrayList<GluuAttribute>();
 
         if (status.equalsIgnoreCase(ApiConstants.ALL)) {
@@ -71,7 +71,7 @@ public class AttributesResource extends BaseResource {
     }
 
     @GET
-    @ProtectedApi(scopes = { READ_ACCESS })
+    @ProtectedApi(scopes = {READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
@@ -80,7 +80,7 @@ public class AttributesResource extends BaseResource {
     }
 
     @POST
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response createAttribute(@Valid GluuAttribute attribute) {
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
@@ -93,7 +93,7 @@ public class AttributesResource extends BaseResource {
     }
 
     @PUT
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response updateAttribute(@Valid GluuAttribute attribute) {
         String inum = attribute.getInum();
         checkResourceNotNull(inum, GLUU_ATTRIBUTE);
@@ -110,7 +110,7 @@ public class AttributesResource extends BaseResource {
 
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
     public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
@@ -127,7 +127,7 @@ public class AttributesResource extends BaseResource {
 
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { WRITE_ACCESS })
+    @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
