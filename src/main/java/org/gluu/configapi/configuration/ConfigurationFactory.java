@@ -16,6 +16,7 @@ import org.gluu.persist.model.PersistenceConfiguration;
 import org.gluu.persist.service.PersistanceFactoryService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
+import org.gluu.util.security.PropertiesDecrypter;
 import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 
@@ -25,6 +26,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.util.Properties;
 
 @ApplicationScoped
 @AlternativePriority(1)
@@ -49,7 +51,7 @@ public class ConfigurationFactory {
 
     private static final String BASE_PROPERTIES_FILE = DIR + "gluu.properties";
     private static final String APP_PROPERTIES_FILE = DIR + "oxauth.properties";
-    private final String SALT_FILE_NAME = "salt";
+    private static final String SALT_FILE_NAME = "salt";
 
     @Inject
     Logger log;
@@ -68,7 +70,6 @@ public class ConfigurationFactory {
     private PersistenceConfiguration persistenceConfiguration;
     private FileConfiguration baseConfiguration;
     private String cryptoConfigurationSalt;
-    private String confDir;
     private String saltFilePath;
 
     @Produces
@@ -93,8 +94,7 @@ public class ConfigurationFactory {
 
     public void create() {
         loadBaseConfiguration();
-        this.confDir = confDir();
-        this.saltFilePath = confDir + SALT_FILE_NAME;
+        this.saltFilePath = confDir() + SALT_FILE_NAME;
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
@@ -130,14 +130,11 @@ public class ConfigurationFactory {
     private Conf loadConfigurationFromDb() {
         final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
         try {
-            final Conf conf = persistenceEntryManager.find(Conf.class, getOxauthConfigurationDn());
-
-            return conf;
+            return persistenceEntryManager.find(Conf.class, getOxauthConfigurationDn());
         } catch (BasePersistenceException ex) {
             log.error(ex.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     private void loadBaseConfiguration() {
@@ -157,8 +154,7 @@ public class ConfigurationFactory {
 
     private FileConfiguration createFileConfiguration(String fileName) {
         try {
-            FileConfiguration fileConfiguration = new FileConfiguration(fileName);
-            return fileConfiguration;
+            return new FileConfiguration(fileName);
         } catch (Exception ex) {
             log.error("Failed to load configuration from {}", fileName, ex);
             throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
@@ -184,7 +180,7 @@ public class ConfigurationFactory {
         }
     }
 
-    public void loadCryptoConfigurationSalt() {
+    private void loadCryptoConfigurationSalt() {
         try {
             FileConfiguration cryptoConfiguration = createFileConfiguration(saltFilePath);
 
@@ -197,6 +193,15 @@ public class ConfigurationFactory {
 
     public String getCryptoConfigurationSalt() {
         return cryptoConfigurationSalt;
+    }
+
+    public Properties getDecryptedConnectionProperties() throws OxIntializationException {
+        FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
+        Properties connectionProperties = persistenceConfig.getProperties();
+        if (connectionProperties == null || connectionProperties.isEmpty())
+            return connectionProperties;
+
+        return PropertiesDecrypter.decryptAllProperties(getStringEncrypter(), connectionProperties);
     }
 
     @Produces
