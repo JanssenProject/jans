@@ -1,15 +1,12 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.model.GluuAttribute;
 import org.gluu.oxauth.service.AttributeService;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -17,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,14 +28,10 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 public class AttributesResource extends BaseResource {
 
-    /**
-     *
-     */
     private static final String GLUU_ATTRIBUTE = "gluu attribute";
+
     @Inject
     AttributeService attributeService;
-    @Inject
-    Logger logger;
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
@@ -112,17 +106,13 @@ public class AttributesResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
-    public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+    public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, GLUU_ATTRIBUTE);
-        try {
-            existingAttribute = Jackson.applyPatch(pathString, existingAttribute);
-            attributeService.updateAttribute(existingAttribute);
-            return Response.ok(existingAttribute).build();
-        } catch (Exception e) {
-            logger.error("", e);
-            throw new WebApplicationException(e.getMessage());
-        }
+
+        existingAttribute = Jackson.applyPatch(pathString, existingAttribute);
+        attributeService.updateAttribute(existingAttribute);
+        return Response.ok(existingAttribute).build();
     }
 
     @DELETE
