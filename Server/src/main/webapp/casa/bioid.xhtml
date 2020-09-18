@@ -94,17 +94,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="row mt-3 mb-3">
-			<div class="col">
-				<div class="center">
-					<label class="checkbox"> <input type="checkbox"
-						class="intro-checkbox" id="introskip" value="yes"><span
-							data-res="introductionDontShowAgain">GOT IT! Don't show
-								the instruction again</span></input>
-					</label>
-				</div>
-			</div>
-		</div>
+		
 		<div class="row center m-3">
 			<div class="col mb-5">
 				<button onclick="showIntroduction(false)"
@@ -829,7 +819,7 @@
             let loader = new THREE.OBJLoader(manager);
             let material = new THREE.MeshLambertMaterial({ transparent: false, opacity: 0.8 });
 
-            loader.load('./model/head.obj', function (head) {
+            loader.load('../auth/bioid/model/head.obj', function (head) {
                 head.traverse(function (child) {
                     if (child instanceof THREE.Mesh) {
                      // child.material = material;
