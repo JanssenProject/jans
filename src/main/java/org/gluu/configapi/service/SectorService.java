@@ -1,14 +1,4 @@
-/**
- * 
- */
 package org.gluu.configapi.service;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.OrganizationService;
@@ -19,6 +9,11 @@ import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.List;
+
 /**
  * @author Mougang T.Gasmyr
  *
@@ -26,9 +21,6 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class SectorService implements Serializable {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     @Inject
@@ -66,25 +58,9 @@ public class SectorService implements Serializable {
         try {
             return persistenceEntryManager.find(SectorIdentifier.class, getDnForSectorIdentifier(oxId));
         } catch (Exception e) {
-            log.warn("Failed to find sector identifier by oxId " + oxId, e);
+            log.trace("Failed to find sector identifier by oxId " + oxId, e);
             return null;
         }
-    }
-
-    public String generateIdForNewSectorIdentifier() {
-        SectorIdentifier sectorIdentifier = new SectorIdentifier();
-        String newId = null;
-        String newDn = null;
-        do {
-            newId = generateIdForNewSectorIdentifierImpl();
-            newDn = getDnForSectorIdentifier(newId);
-            sectorIdentifier.setDn(newDn);
-        } while (persistenceEntryManager.contains(newDn, SectorIdentifier.class));
-        return newId;
-    }
-
-    private String generateIdForNewSectorIdentifierImpl() {
-        return UUID.randomUUID().toString();
     }
 
     public void addSectorIdentifier(SectorIdentifier sectorIdentifier) {

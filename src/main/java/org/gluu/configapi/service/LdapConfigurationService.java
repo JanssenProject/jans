@@ -1,51 +1,32 @@
 package org.gluu.configapi.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.stream.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.gluu.model.ldap.GluuLdapConfiguration;
+import org.gluu.oxauth.service.common.EncryptionService;
+import org.gluu.util.security.StringEncrypter;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
-
-import org.gluu.model.ldap.GluuLdapConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.util.security.StringEncrypter;
-import org.gluu.oxauth.service.common.EncryptionService;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
-import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
-import org.gluu.configapi.exception.GlobalRuntimeException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class LdapConfigurationService {
 
-  private static final String AUTH = "auth";
+    private static final String AUTH = "auth";
 
-  @Inject
-  Logger looger;
+    @Inject
+    ConfigurationService configurationService;
 
-  @Inject
-  ConfigurationService configurationService;
-
-  @Inject
-  PersistenceEntryManager persistenceEntryManager;
-
-  @Inject
-  private EncryptionService encryptionService;
-
+    @Inject
+    private EncryptionService encryptionService;
 
   public List<GluuLdapConfiguration> findLdapConfigurations() {
-    return FluentIterable.from(getOxIDPAuthConf()).transform(extractLdapConfiguration()).toList();
+      return getOxIDPAuthConf().stream().map(oxIDPAuthConf::getConfig).collect(Collectors.toList());
   }
 
   public GluuLdapConfiguration findLdapConfigurationByName(final String name) {
@@ -66,7 +47,7 @@ public class LdapConfigurationService {
 
   public void update(GluuLdapConfiguration ldapConfiguration) {
     List<GluuLdapConfiguration> ldapConfigurations = excludeFromConfigurations(
-        new ArrayList<GluuLdapConfiguration>(findLdapConfigurations()), ldapConfiguration);
+        new ArrayList<>(findLdapConfigurations()), ldapConfiguration);
     ldapConfigurations.add(ldapConfiguration);
 
     save(ldapConfigurations);
@@ -83,32 +64,26 @@ public class LdapConfigurationService {
     List<GluuLdapConfiguration> ldapConfigurations = findLdapConfigurations();
     Optional<GluuLdapConfiguration> matchingLdapConfiguration = ldapConfigurations.stream()
         .filter(d -> d.getConfigId().equals(name)).findFirst();
-    GluuLdapConfiguration ldapConfiguration = matchingLdapConfiguration.get();
-    return ldapConfiguration;
+      return matchingLdapConfiguration.get();
   }
 
-  private Function<oxIDPAuthConf, GluuLdapConfiguration> extractLdapConfiguration() {
-    return new Function<oxIDPAuthConf, GluuLdapConfiguration>() {
-      @Override
-      public GluuLdapConfiguration apply(oxIDPAuthConf authConf) {
-        return authConf.getConfig();
-      }
-    };
-  }
-
-  private List<oxIDPAuthConf> getOxIDPAuthConf() {
-    List<oxIDPAuthConf> idpConfList = trimToEmpty(
-        configurationService.findGluuConfiguration().getOxIDPAuthentication());
-    List<oxIDPAuthConf> authConfs = idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH))
-        .collect(Collectors.toCollection(() -> new ArrayList<oxIDPAuthConf>()));
-    return authConfs;
-  }
+    private List<oxIDPAuthConf> getOxIDPAuthConf() {
+        List<oxIDPAuthConf> idpConfList = configurationService.findGluuConfiguration().getOxIDPAuthentication();
+        if (idpConfList == null) {
+            return Lists.newArrayList();
+        }
+        return idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH)).collect(Collectors.toCollection(ArrayList::new));
+    }
 
   private List<oxIDPAuthConf> getOxIDPAuthConfs(List<GluuLdapConfiguration> ldapConfigurations) {
     List<oxIDPAuthConf> idpConf = new ArrayList<oxIDPAuthConf>();
     for (GluuLdapConfiguration ldapConfig : ldapConfigurations) {
       if (shouldEncryptPassword(ldapConfig)) {
-        ldapConfig.setBindPassword(encrypt(ldapConfig.getBindPassword()));
+          try {
+              ldapConfig.setBindPassword(encryptionService.encrypt(ldapConfig.getBindPassword()));
+          } catch (StringEncrypter.EncryptionException e) {
+              throw new RuntimeException("Unable to decrypt password.", e);
+          }
       }
       if (ldapConfig.isUseAnonymousBind()) {
         ldapConfig.setBindDN(null);
@@ -135,18 +110,6 @@ public class LdapConfigurationService {
       throw new NoSuchElementException(ldapConfiguration.getConfigId());
     }
     return ldapConfigurations;
-  }
-
-  public static <E> List<E> trimToEmpty(List<E> list) {
-    return list == null ? Collections.<E>emptyList() : list;
-  }
-
-  private String encrypt(String data) {
-    try {
-      return encryptionService.encrypt(data);
-    } catch (StringEncrypter.EncryptionException ex) {
-      throw new GlobalRuntimeException(ex);
-    }
   }
 
   public boolean shouldEncryptPassword(GluuLdapConfiguration ldapConfiguration) {

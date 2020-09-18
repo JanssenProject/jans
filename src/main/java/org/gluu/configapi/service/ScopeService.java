@@ -1,12 +1,5 @@
 package org.gluu.configapi.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.service.OrganizationService;
@@ -16,6 +9,11 @@ import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Responsible for OpenID Connect, OAuth2 and UMA scopes. (Type is defined by
@@ -54,46 +52,32 @@ public class ScopeService {
         persistenceEntryManager.persist(scope);
     }
 
-    public void addScope(Scope scope) throws Exception {
+    public void addScope(Scope scope) {
         persistenceEntryManager.persist(scope);
     }
 
-    public void removeScope(Scope scope) throws Exception {
+    public void removeScope(Scope scope) {
         persistenceEntryManager.remove(scope);
     }
 
-    public void updateScope(Scope scope) throws Exception {
+    public void updateScope(Scope scope) {
         persistenceEntryManager.merge(scope);
     }
 
     public Scope getScopeByInum(String inum) {
-        Scope result = null;
         try {
-            result = persistenceEntryManager.find(Scope.class, getDnForScope(inum));
+            return persistenceEntryManager.find(Scope.class, getDnForScope(inum));
         } catch (Exception e) {
-            logger.debug("", e);
+            return null;
         }
-        return result;
     }
 
-    public String getDnForScope(String inum) throws Exception {
+    public String getDnForScope(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
             return String.format("ou=scopes,%s", orgDn);
         }
         return String.format("inum=%s,ou=scopes,%s", inum, orgDn);
-    }
-
-    public String generateInumForNewScope() throws Exception {
-        Scope scope = new Scope();
-        String newInum = null;
-        String newDn = null;
-        do {
-            newInum = UUID.randomUUID().toString();
-            newDn = getDnForScope(newInum);
-            scope.setDn(newDn);
-        } while (persistenceEntryManager.contains(newDn, Scope.class));
-        return newInum;
     }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit) {
@@ -104,19 +88,12 @@ public class ScopeService {
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, sizeLimit);
         } catch (Exception e) {
-            logger.error("", e);
-            return new ArrayList<Scope>();
+            logger.error("No scopes found by pattern: " + pattern, e);
+            return new ArrayList<>();
         }
-       
     }
 
     public List<Scope> getAllScopesList(int size) {
-        try {
-            return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, null, size);
-        } catch (Exception e) {
-            logger.error("", e);
-            return new ArrayList<Scope>();
-        }
+        return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, null, size);
     }
-
 }

@@ -3,6 +3,7 @@
  */
 package org.gluu.configapi.rest.resource;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.ScopeService;
 import org.gluu.configapi.util.ApiConstants;
@@ -10,30 +11,19 @@ import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.common.ScopeType;
 import org.oxauth.persistence.model.Scope;
-import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Configures both OpenID Connect and UMA scopes.
@@ -49,13 +39,8 @@ import javax.ws.rs.core.UriInfo;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ScopesResource extends BaseResource {
-    /**
-     *
-     */
-    private static final String OPENID_SCOPE = "openid connect scope";
 
-    @Inject
-    Logger logger;
+    private static final String OPENID_SCOPE = "openid connect scope";
 
 	@Inject
 	ScopeService scopeService;
@@ -92,7 +77,7 @@ public class ScopesResource extends BaseResource {
 		if (scope.getDisplayName() == null) {
 			scope.setDisplayName(scope.getId());
 		}
-		String inum = scopeService.generateInumForNewScope();
+		String inum = UUID.randomUUID().toString();
 		scope.setInum(inum);
 		scope.setDn(scopeService.getDnForScope(inum));
 		if (scope.getScopeType() == null) {
@@ -130,17 +115,12 @@ public class ScopesResource extends BaseResource {
 	@Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
 	@ProtectedApi(scopes = { WRITE_ACCESS })
 	@Path(ApiConstants.INUM_PATH)
-	public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
-		Scope existingScope = scopeService.getScopeByInum(inum);
-		checkResourceNotNull(existingScope, OPENID_SCOPE);
-		try {
-			existingScope = Jackson.applyPatch(pathString, existingScope);
-			scopeService.updateScope(existingScope);
-			return Response.ok(existingScope).build();
-		} catch (Exception e) {
-			logger.error("",e);
-			throw new WebApplicationException(e.getMessage());
-		}
+	public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
+        Scope existingScope = scopeService.getScopeByInum(inum);
+        checkResourceNotNull(existingScope, OPENID_SCOPE);
+        existingScope = Jackson.applyPatch(pathString, existingScope);
+        scopeService.updateScope(existingScope);
+        return Response.ok(existingScope).build();
 	}
 
 	@DELETE
@@ -152,5 +132,4 @@ public class ScopesResource extends BaseResource {
 		scopeService.removeScope(scope);
 		return Response.noContent().build();
 	}
-
 }
