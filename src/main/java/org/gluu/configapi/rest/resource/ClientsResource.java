@@ -3,16 +3,15 @@
  */
 package org.gluu.configapi.rest.resource;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.ClientService;
-import org.gluu.configapi.service.ScopeService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
-import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -21,7 +20,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -40,13 +39,7 @@ public class ClientsResource extends BaseResource {
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
     @Inject
-    Logger logger;
-
-    @Inject
     ClientService clientService;
-
-    @Inject
-    ScopeService scopeService;
 
     @Inject
     EncryptionService encryptionService;
@@ -56,7 +49,7 @@ public class ClientsResource extends BaseResource {
     public Response getOpenIdConnectClients(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        List<Client> clients = new ArrayList<Client>();
+        final List<Client> clients;
         if (!pattern.isEmpty() && pattern.length() >= 2) {
             clients = clientService.searchClients(pattern, limit);
         } else {
@@ -116,17 +109,13 @@ public class ClientsResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+    public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
-        try {
-            existingClient = Jackson.applyPatch(pathString, existingClient);
-            clientService.updateClient(existingClient);
-            return Response.ok(existingClient).build();
-        } catch (Exception e) {
-            logger.error("", e);
-            throw new WebApplicationException(e.getMessage());
-        }
+
+        existingClient = Jackson.applyPatch(pathString, existingClient);
+        clientService.updateClient(existingClient);
+        return Response.ok(existingClient).build();
     }
 
     @DELETE
