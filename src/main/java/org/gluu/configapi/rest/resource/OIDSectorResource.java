@@ -1,36 +1,22 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.SectorService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.oxauth.persistence.model.SectorIdentifier;
-import org.slf4j.Logger;
+
+import javax.inject.Inject;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Mougang T.Gasmyr
@@ -41,13 +27,7 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class OIDSectorResource extends BaseResource {
 
-    /**
-     *
-     */
     private static final String SECTOR_IDENTIFIER = "sector identifier";
-
-    @Inject
-    Logger logger;
 
     @Inject
     SectorService sectorIdentifierService;
@@ -57,7 +37,7 @@ public class OIDSectorResource extends BaseResource {
     public Response getSectorIdentifiers(
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        List<SectorIdentifier> sectors = new ArrayList<SectorIdentifier>();
+        final List<SectorIdentifier> sectors;
         if (!pattern.isEmpty()) {
             sectors = sectorIdentifierService.searchSectorIdentifiers(pattern, limit);
         } else {
@@ -79,7 +59,7 @@ public class OIDSectorResource extends BaseResource {
     @ProtectedApi(scopes = { WRITE_ACCESS })
     public Response createNewOpenIDSector(@Valid SectorIdentifier sectorIdentifier) {
         checkNotNull(sectorIdentifier.getDescription(), AttributeNames.DESCRIPTION);
-        String oxId = sectorIdentifierService.generateIdForNewSectorIdentifier();
+        String oxId = UUID.randomUUID().toString();
         sectorIdentifier.setId(oxId);
         sectorIdentifier.setBaseDn(sectorIdentifierService.getDnForSectorIdentifier(oxId));
         sectorIdentifierService.addSectorIdentifier(sectorIdentifier);
@@ -106,17 +86,12 @@ public class OIDSectorResource extends BaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) {
+    public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         SectorIdentifier existingSector = sectorIdentifierService.getSectorIdentifierById(inum);
         checkResourceNotNull(existingSector, SECTOR_IDENTIFIER);
-        try {
             existingSector = Jackson.applyPatch(pathString, existingSector);
             sectorIdentifierService.updateSectorIdentifier(existingSector);
             return Response.ok(existingSector).build();
-        } catch (Exception e) {
-            logger.error("", e);
-            throw new WebApplicationException(e.getMessage());
-        }
     }
 
     @DELETE
@@ -127,6 +102,5 @@ public class OIDSectorResource extends BaseResource {
         checkResourceNotNull(sectorIdentifier, SECTOR_IDENTIFIER);
         sectorIdentifierService.removeSectorIdentifier(sectorIdentifier);
         return Response.noContent().build();
-
     }
 }
