@@ -71,10 +71,11 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
         String state = StringUtils.isNotBlank(params.getState()) ? getStateService().putState(getStateService().encodeExpiredObject(params.getState(), ExpiredObjectType.STATE)) : getStateService().generateState();
         String nonce = StringUtils.isNotBlank(params.getNonce()) ? getStateService().putNonce(getStateService().encodeExpiredObject(params.getNonce(), ExpiredObjectType.NONCE)) : getStateService().generateNonce();
+        String clientId = getConfigurationService().getConfiguration().getEncodeClientIdInAuthorizationUrl() ? Utils.encode(rp.getClientId()) : rp.getClientId();
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
-        authorizationEndpoint += "&client_id=" + rp.getClientId();
+        authorizationEndpoint += "&client_id=" + clientId;
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + state;
