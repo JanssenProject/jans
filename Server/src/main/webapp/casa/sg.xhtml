@@ -44,8 +44,8 @@
 
 			$(document).ready(function() {
 				gluu_auth.renderQrCode('#subsequentContainer', request, qr_options, label)
-				gluu_auth.startProgressBar('#subsequentProgressbar', 60, onSignInCallback)
-				gluu_auth.startSessionChecker(onSignInCallback, 60)
+				gluu_auth.startProgressBar('#subsequentProgressbar', 90, onSignInCallback)
+				gluu_auth.startSessionChecker(onSignInCallback, 90)
 
 				if (request == '') {
 					onSignInCallback('error')
