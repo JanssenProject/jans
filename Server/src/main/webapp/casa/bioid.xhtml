@@ -108,14 +108,18 @@
 				<div id="uuiinstruction" class="instruction transparent-background"></div>
 			</div>
 		</div>
-		<div class="row mt-3">
+		<div class="row ">
+			
 			<div class="col center">
 				<h:form method="post" id="bioIDForm">
 					<h:commandButton id="enrollButton" value="Enroll Action"
 						style="display:none" action="#{authenticator.authenticate}" />
 				</h:form>
-
+				<a id="alter_link" href="javascript:showAlternative('bioid_casa')"
+				class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
 				<button id="uuistart" class="button" data-res="buttonStart">START</button>
+				
+				
 			</div>
 		</div>
 		<div class="row">
@@ -188,23 +192,21 @@
 				<div id="uuiprompt" class="promt">
 					<p data-res="prompt" class="mt-9"></p>
 					<p id="uuierror" class="alert-danger"></p>
-					<a id="uuiskip" class="button button-info" href=""
-						data-res="buttonContinue">Skip biometrics</a> <a id="uuimobileapp"
-						class="button button-info" href="" data-res="buttonMobileApp">Start
-						BioID app</a>
+					
 				</div>
 			</div>
 		</div>
 		
 		</section>
-		<div>
-			<!-- do not change the ID of anchor following -->
-			<a id="alter_link" href="javascript:showAlternative('bioid_casa')"
-				class="green hover-green f7-cust">#{msgs['casa.alternative']}</a>
-		</div>
+		
+		
 		 </main> </section>
-		<ui:include src="/casa/casa.xhtml" />
-
+		<div class="row mt-9 d-flex justify-content-center h-100">
+			
+			<div class="my-auto">
+			<ui:include src="/casa/casa.xhtml" />
+			</div>
+		</div>
 		<script src="../auth/bioid/js/jquery-3.5.1.min.js"></script>
 		<script src="../auth/bioid/js/getUserMedia.min.js"></script>
 		<script src="../auth/bioid/js/bws.capture.js"></script>
