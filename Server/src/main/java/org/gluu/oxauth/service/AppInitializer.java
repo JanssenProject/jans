@@ -641,7 +641,7 @@ public class AppInitializer {
 		}
 
 		for (oxIDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
-			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.getConfig();
+			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.asLdapConfiguration();
 			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
 				persistenceAuthConfigs.add(persistenceAuthConfig);
 			}
