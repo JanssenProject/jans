@@ -228,7 +228,7 @@
         
         var challenges = "[]";
         var maxHeight = 320;
-		var skipIntro = false;
+		var skipIntro = true;
 			
 		$(function() {
 			initialize();
@@ -262,11 +262,11 @@
 				$('#uuimobileapp').hide();
 			});
 
-			if (skipIntro) {
+			//if (skipIntro) {
 				showIntroduction(false);
-			} else {
+			/*} else {
 				showIntroduction(true);
-			} 
+			} */
 		});
 		
 	     // BWS capture jQuery plugin
