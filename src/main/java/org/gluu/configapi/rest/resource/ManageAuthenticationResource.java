@@ -1,7 +1,7 @@
 package org.gluu.configapi.rest.resource;
 
 import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.service.LdapConfigurationService;
+import org.gluu.configapi.service.ManageAuthenticationService;
 import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.ConnectionStatus;
 import org.gluu.configapi.util.Jackson;
@@ -20,13 +20,13 @@ import java.util.NoSuchElementException;
 @Path(ApiConstants.BASE_API_URL + ApiConstants.CONFIG + ApiConstants.DATABASE + ApiConstants.LDAP)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LdapConfigurationResource extends BaseResource {
+public class ManageAuthenticationResource extends BaseResource {
 
     @Inject
     Logger logger;
 
     @Inject
-    LdapConfigurationService ldapConfigurationService;
+    ManageAuthenticationService ldapConfigurationService;
 
     @Inject
     ConnectionStatus connectionStatus;
@@ -88,8 +88,7 @@ public class LdapConfigurationResource extends BaseResource {
     @POST
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration)
-            throws Exception {
+    public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.info("Test ldapConfiguration " + ldapConfiguration);
         boolean status = connectionStatus.isUp(ldapConfiguration);
         logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = " + status + "\n\n\n");
@@ -102,7 +101,6 @@ public class LdapConfigurationResource extends BaseResource {
         } catch (NoSuchElementException ex) {
             logger.error("Could not find Ldap Configuration by name '" + name + "'", ex);
             throw new NotFoundException(getNotFoundError("Ldap Configuration - '" + name + "'"));
-
         }
     }
 

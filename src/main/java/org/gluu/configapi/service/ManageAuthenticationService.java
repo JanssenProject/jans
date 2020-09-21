@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class LdapConfigurationService {
+public class ManageAuthenticationService {
 
     private static final String AUTH = "auth";
 
