@@ -10,6 +10,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CouchbaseConnectionConfiguration {
 
+    private String configId;
     private String userName;
     private String userPassword;
     private List<String> servers;
@@ -26,6 +27,14 @@ public class CouchbaseConnectionConfiguration {
     private String sslTrustStoreFormat;
     private List<String> binaryAttributes;
     private List<String> certificateAttributes;
+
+    public String getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(String configId) {
+        this.configId = configId;
+    }
 
     public String getUserName() {
         return userName;
