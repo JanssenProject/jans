@@ -109,6 +109,8 @@ public class OxdServerConfiguration extends Configuration {
     private Boolean fapiEnabled = false;
     @JsonProperty(value = "iat_expiration_in_hours")
     private int iatExpirationInHours = 1;
+    @JsonProperty(value = "encode_client_id_in_authorization_url")
+    private Boolean encodeClientIdInAuthorizationUrl = false;
 
     public Boolean getEnableTracing() {
         return enableTracing;
@@ -502,6 +504,14 @@ public class OxdServerConfiguration extends Configuration {
         this.iatExpirationInHours = iatExpirationInHours;
     }
 
+    public Boolean getEncodeClientIdInAuthorizationUrl() {
+        return encodeClientIdInAuthorizationUrl;
+    }
+
+    public void setEncodeClientIdInAuthorizationUrl(Boolean encodeClientIdInAuthorizationUrl) {
+        this.encodeClientIdInAuthorizationUrl = encodeClientIdInAuthorizationUrl;
+    }
+
     @Override
     public String toString() {
         return "OxdServerConfiguration{" +
@@ -549,6 +559,7 @@ public class OxdServerConfiguration extends Configuration {
                 ", encodeNonceFromRequestParameter=" + encodeNonceFromRequestParameter + '\'' +
                 ", fapiEnabled=" + fapiEnabled + '\'' +
                 ", iatExpirationInHours=" + iatExpirationInHours + '\'' +
+                ", encodeClientIdInAuthorizationUrl=" + encodeClientIdInAuthorizationUrl + '\'' +
                 '}';
     }
 }
