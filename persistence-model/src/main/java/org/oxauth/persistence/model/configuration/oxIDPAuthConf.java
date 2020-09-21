@@ -6,16 +6,19 @@
 
 package org.oxauth.persistence.model.configuration;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.gluu.model.ldap.GluuLdapConfiguration;
+import org.gluu.oxauth.model.util.Util;
+import org.gluu.persist.couchbase.model.CouchbaseConnectionConfiguration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.gluu.model.ldap.GluuLdapConfiguration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * oxIDPAuthConf
@@ -37,7 +40,7 @@ public class oxIDPAuthConf {
 	private List<CustomProperty> fields;
 	private int version;
 
-	private GluuLdapConfiguration config;
+	private JsonNode config;
 
 	public oxIDPAuthConf() {
 		this.fields = new ArrayList<CustomProperty>();
@@ -99,12 +102,30 @@ public class oxIDPAuthConf {
 		this.version = version;
 	}
 
-	public GluuLdapConfiguration getConfig() {
+	public JsonNode getConfig() {
 		return config;
 	}
 
-	public void setConfig(GluuLdapConfiguration config) {
+	public void setConfig(JsonNode config) {
 		this.config = config;
 	}
 
+	public GluuLdapConfiguration asLdapConfiguration() {
+        return read(GluuLdapConfiguration.class);
+    }
+
+    public CouchbaseConnectionConfiguration asCouchbaseConfiguration() {
+	    return read(CouchbaseConnectionConfiguration.class);
+    }
+
+    private <T> T read(Class<T> clazz) {
+        try {
+            if (config != null) {
+                return Util.createJsonMapper().treeToValue(config, clazz);
+            }
+        } catch (JsonProcessingException e) {
+            // ignore
+        }
+        return null;
+    }
 }
