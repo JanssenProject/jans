@@ -74,7 +74,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         String redirectUri = StringUtils.isNotBlank(params.getRedirectUri()) ? params.getRedirectUri() : rp.getRedirectUri();
 
         authorizationEndpoint += "?response_type=" + Utils.joinAndUrlEncode(responseTypes);
-        authorizationEndpoint += "&client_id=" + rp.getClientId();
+        authorizationEndpoint += "&client_id=" + Utils.encode(rp.getClientId());
         authorizationEndpoint += "&redirect_uri=" + redirectUri;
         authorizationEndpoint += "&scope=" + Utils.joinAndUrlEncode(scope);
         authorizationEndpoint += "&state=" + state;
