@@ -72,6 +72,9 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         if (!Strings.isNullOrEmpty(params.getSessionState())) {
             uri += separator(uri) + "session_state=" + params.getSessionState();
         }
+        if (!Strings.isNullOrEmpty(params.getIdTokenHint())) {
+            uri += separator(uri) + "id_token_hint=" + params.getIdTokenHint();
+        }
 
         return new GetLogoutUriResponse(uri);
     }
