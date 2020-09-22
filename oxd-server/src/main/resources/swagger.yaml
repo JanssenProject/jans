@@ -152,11 +152,9 @@ paths:
                     by the Client for use at the Authorization Server.
                   items:
                     type: string
-                client_frontchannel_logout_uris:
-                  type: array
-                  description: Provide frontchannel logout uris.
-                  items:
-                    type: string
+                client_frontchannel_logout_uri:
+                  type: string
+                  description: Provide frontchannel logout uri.
                 client_sector_identifier_uri:
                   type: string
                   description: Provide the URL using the https scheme to be used in
