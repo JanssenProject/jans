@@ -73,8 +73,8 @@ public class RegisterSiteParams {
   @SerializedName("client_request_uris")
   private List<String> clientRequestUris = null;
 
-  @SerializedName("client_frontchannel_logout_uris")
-  private List<String> clientFrontchannelLogoutUris = null;
+  @SerializedName("client_frontchannel_logout_uri")
+  private String clientFrontchannelLogoutUri = null;
 
   @SerializedName("client_sector_identifier_uri")
   private String clientSectorIdentifierUri = null;
@@ -504,30 +504,22 @@ public class RegisterSiteParams {
     this.clientRequestUris = clientRequestUris;
   }
 
-  public RegisterSiteParams clientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
-    this.clientFrontchannelLogoutUris = clientFrontchannelLogoutUris;
-    return this;
-  }
-
-  public RegisterSiteParams addClientFrontchannelLogoutUrisItem(String clientFrontchannelLogoutUrisItem) {
-    if (this.clientFrontchannelLogoutUris == null) {
-      this.clientFrontchannelLogoutUris = new ArrayList<String>();
-    }
-    this.clientFrontchannelLogoutUris.add(clientFrontchannelLogoutUrisItem);
+  public RegisterSiteParams clientFrontchannelLogoutUri(String clientFrontchannelLogoutUri) {
+    this.clientFrontchannelLogoutUri = clientFrontchannelLogoutUri;
     return this;
   }
 
    /**
-   * Provide frontchannel logout uris.
-   * @return clientFrontchannelLogoutUris
+   * Provide frontchannel logout uri.
+   * @return clientFrontchannelLogoutUri
   **/
-  @Schema(description = "Provide frontchannel logout uris.")
-  public List<String> getClientFrontchannelLogoutUris() {
-    return clientFrontchannelLogoutUris;
+  @Schema(description = "Provide frontchannel logout uri.")
+  public String getClientFrontchannelLogoutUri() {
+    return clientFrontchannelLogoutUri;
   }
 
-  public void setClientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
-    this.clientFrontchannelLogoutUris = clientFrontchannelLogoutUris;
+  public void setClientFrontchannelLogoutUri(String clientFrontchannelLogoutUri) {
+    this.clientFrontchannelLogoutUri = clientFrontchannelLogoutUri;
   }
 
   public RegisterSiteParams clientSectorIdentifierUri(String clientSectorIdentifierUri) {
@@ -1348,7 +1340,7 @@ public class RegisterSiteParams {
         Objects.equals(this.clientTokenEndpointAuthMethod, registerSiteParams.clientTokenEndpointAuthMethod) &&
         Objects.equals(this.clientTokenEndpointAuthSigningAlg, registerSiteParams.clientTokenEndpointAuthSigningAlg) &&
         Objects.equals(this.clientRequestUris, registerSiteParams.clientRequestUris) &&
-        Objects.equals(this.clientFrontchannelLogoutUris, registerSiteParams.clientFrontchannelLogoutUris) &&
+        Objects.equals(this.clientFrontchannelLogoutUri, registerSiteParams.clientFrontchannelLogoutUri) &&
         Objects.equals(this.clientSectorIdentifierUri, registerSiteParams.clientSectorIdentifierUri) &&
         Objects.equals(this.contacts, registerSiteParams.contacts) &&
         Objects.equals(this.uiLocales, registerSiteParams.uiLocales) &&
@@ -1394,7 +1386,7 @@ public class RegisterSiteParams {
 
   @Override
   public int hashCode() {
-    return Objects.hash(redirectUris, opConfigurationEndpoint, opHost, opDiscoveryPath, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUris, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
+    return Objects.hash(redirectUris, opConfigurationEndpoint, opHost, opDiscoveryPath, postLogoutRedirectUris, responseTypes, grantTypes, scope, acrValues, clientName, clientJwksUri, clientTokenEndpointAuthMethod, clientTokenEndpointAuthSigningAlg, clientRequestUris, clientFrontchannelLogoutUri, clientSectorIdentifierUri, contacts, uiLocales, claimsLocales, claimsRedirectUri, clientId, clientSecret, accessTokenAsJwt, accessTokenSigningAlg, rptAsJwt, logoUri, clientUri, policyUri, frontChannelLogoutSessionRequired, tosUri, jwks, idTokenBindingCnf, tlsClientAuthSubjectDn, runIntrospectionScriptBeforeaccessTokenAsJwtCreationAndIncludeClaims, idTokenSignedResponseAlg, idTokenEncryptedResponseAlg, idTokenEncryptedResponseEnc, userInfoSignedResponseAlg, userInfoEncryptedResponseAlg, userInfoEncryptedResponseEnc, requestObjectSigningAlg, requestObjectEncryptionAlg, requestObjectEncryptionEnc, defaultMaxAge, requireAuthTime, initiateLoginUri, authorizedOrigins, accessTokenLifetime, softwareId, softwareVersion, softwareStatement, customAttributes, syncClientFromOp, syncClientPeriodInSeconds, allowSpontaneousScopes, spontaneousScopes);
   }
 
 
@@ -1417,7 +1409,7 @@ public class RegisterSiteParams {
     sb.append("    clientTokenEndpointAuthMethod: ").append(toIndentedString(clientTokenEndpointAuthMethod)).append("\n");
     sb.append("    clientTokenEndpointAuthSigningAlg: ").append(toIndentedString(clientTokenEndpointAuthSigningAlg)).append("\n");
     sb.append("    clientRequestUris: ").append(toIndentedString(clientRequestUris)).append("\n");
-    sb.append("    clientFrontchannelLogoutUris: ").append(toIndentedString(clientFrontchannelLogoutUris)).append("\n");
+    sb.append("    clientFrontchannelLogoutUri: ").append(toIndentedString(clientFrontchannelLogoutUri)).append("\n");
     sb.append("    clientSectorIdentifierUri: ").append(toIndentedString(clientSectorIdentifierUri)).append("\n");
     sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
     sb.append("    uiLocales: ").append(toIndentedString(uiLocales)).append("\n");

@@ -55,7 +55,7 @@ public class AuthorizationCodeFlowTest {
         final RegisterSiteParams params = new RegisterSiteParams();
         params.setOpHost(opHost);
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUri(logoutUri);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setIdTokenSignedResponseAlg("HS256");
