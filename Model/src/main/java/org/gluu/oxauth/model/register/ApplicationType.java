@@ -34,7 +34,7 @@ public enum ApplicationType implements AttributeEnum {
      */
     WEB("web");
 
-    private static Map<String, ApplicationType> mapByValues = new HashMap<String, ApplicationType>();
+    private static Map<String, ApplicationType> mapByValues = new HashMap<>();
 
     static {
         for (ApplicationType enumType : values()) {
@@ -83,7 +83,7 @@ public enum ApplicationType implements AttributeEnum {
     }
 
     public String getValue() {
-        return name().toString();
+        return paramName;
     }
 
     public Enum<? extends AttributeEnum> resolveByValue(String value) {
