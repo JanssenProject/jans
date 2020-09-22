@@ -152,7 +152,7 @@ public class RegistrationAction implements Serializable {
             request.setInitiateLoginUri(initiateLoginUri);
             request.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUris));
             request.setRequestUris(StringUtils.spaceSeparatedToList(requestUris));
-            request.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
+            request.setFrontChannelLogoutUri(logoutUri);
             request.setFrontChannelLogoutSessionRequired(logoutSessionRequired);
 
             // CIBA
