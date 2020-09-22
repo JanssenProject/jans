@@ -64,7 +64,7 @@ public class RegisterRequest extends BaseRequest {
     private String logoUri;
     private String clientUri;
     private String policyUri;
-    private List<String> frontChannelLogoutUris;
+    private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
     private List<String> backchannelLogoutUris;
     private Boolean backchannelLogoutSessionRequired;
@@ -265,17 +265,17 @@ public class RegisterRequest extends BaseRequest {
      *
      * @return logout uri
      */
-    public List<String> getFrontChannelLogoutUris() {
-        return frontChannelLogoutUris;
+    public String getFrontChannelLogoutUri() {
+        return frontChannelLogoutUri;
     }
 
     /**
      * Sets logout uri
      *
-     * @param logoutUris logout uri
+     * @param logoutUri logout uri
      */
-    public void setFrontChannelLogoutUris(List<String> logoutUris) {
-        this.frontChannelLogoutUris = logoutUris;
+    public void setFrontChannelLogoutUri(String logoutUri) {
+        this.frontChannelLogoutUri = logoutUri;
     }
 
     /**
@@ -1252,8 +1252,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
         }
-        if (frontChannelLogoutUris != null && !frontChannelLogoutUris.isEmpty()) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(frontChannelLogoutUris).toString());
+        if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
         }
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
@@ -1457,7 +1457,7 @@ public class RegisterRequest extends BaseRequest {
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
         result.setRequireAuthTime(requestObject.has(REQUIRE_AUTH_TIME.toString()) && requestObject.getBoolean(REQUIRE_AUTH_TIME.toString()));
-        result.setFrontChannelLogoutUris(extractList(requestObject, FRONT_CHANNEL_LOGOUT_URI.toString()));
+        result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setBackchannelLogoutUris(extractList(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
@@ -1670,8 +1670,8 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
-        if (frontChannelLogoutUris != null && !frontChannelLogoutUris.isEmpty()) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(frontChannelLogoutUris));
+        if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
         }
         if (frontChannelLogoutSessionRequired != null) {
             parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
