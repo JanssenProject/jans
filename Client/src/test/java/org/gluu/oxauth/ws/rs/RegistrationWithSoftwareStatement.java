@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import com.google.common.collect.Lists;
-import org.json.JSONArray;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
+import org.gluu.oxauth.client.RegisterClient;
+import org.gluu.oxauth.client.RegisterRequest;
+import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.client.model.SoftwareStatement;
 import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.SubjectType;
@@ -20,6 +20,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.register.ApplicationType;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.model.util.Util;
+import org.json.JSONArray;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -71,7 +72,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Arrays.asList("http://www.gluu.org/request"));
-        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_URI.toString(), Lists.newArrayList(logoutUri));
+        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_URI.toString(), logoutUri);
         softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), true);
         softwareStatement.getClaims().put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), SignatureAlgorithm.RS512);
         softwareStatement.getClaims().put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), KeyEncryptionAlgorithm.RSA1_5);
@@ -106,7 +107,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertEquals(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()), logoutUri);
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
@@ -190,7 +191,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         softwareStatement.getClaims().put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         softwareStatement.getClaims().put(SUBJECT_TYPE.toString(), SubjectType.PAIRWISE);
         softwareStatement.getClaims().put(REQUEST_URIS.toString(), Arrays.asList("http://www.gluu.org/request"));
-        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_URI.toString(), Lists.newArrayList(logoutUri));
+        softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_URI.toString(), logoutUri);
         softwareStatement.getClaims().put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), true);
         softwareStatement.getClaims().put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), SignatureAlgorithm.RS512);
         softwareStatement.getClaims().put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), KeyEncryptionAlgorithm.RSA1_5);
@@ -225,7 +226,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertEquals(logoutUri, response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
