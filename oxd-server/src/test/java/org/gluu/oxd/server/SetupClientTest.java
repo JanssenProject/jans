@@ -31,7 +31,7 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUrl));
+        params.setClientFrontchannelLogoutUri(logoutUrl);
         params.setAcrValues(new ArrayList<String>());
         params.setScope(Lists.newArrayList("openid", "profile"));
         params.setGrantTypes(Lists.newArrayList("authorization_code"));
@@ -59,7 +59,7 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(postLogoutRedirectUrls.split(" ")));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUri(logoutUri);
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setGrantTypes(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),

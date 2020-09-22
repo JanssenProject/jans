@@ -35,7 +35,7 @@ public class RegisterRequestMapper {
             rp.setGrantType(request.getGrantTypes().stream().map(item -> item.getValue()).collect(Collectors.toList()));
         }
 
-        rp.setFrontChannelLogoutUris(request.getFrontChannelLogoutUris());
+        rp.setFrontChannelLogoutUri(request.getFrontChannelLogoutUri());
         rp.setTokenEndpointAuthMethod(safeToString(request.getTokenEndpointAuthMethod()));
 
         if (CollectionUtils.isNotEmpty(request.getRequestUris())) {
@@ -177,10 +177,7 @@ public class RegisterRequestMapper {
             request.setGrantTypes(rp.getGrantType().stream().map(item -> GrantType.fromString(item)).collect(Collectors.toList()));
         }
 
-        if (CollectionUtils.isNotEmpty(rp.getFrontChannelLogoutUris())) {
-            request.setFrontChannelLogoutUris(rp.getFrontChannelLogoutUris());
-        }
-
+        request.setFrontChannelLogoutUri(rp.getFrontChannelLogoutUri());
         request.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(rp.getTokenEndpointAuthMethod()));
 
         if (CollectionUtils.isNotEmpty(rp.getRequestUris())) {
