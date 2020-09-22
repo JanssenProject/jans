@@ -28,7 +28,7 @@ import java.util.List;
  *
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.CLIENTS)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.CLIENTS)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped

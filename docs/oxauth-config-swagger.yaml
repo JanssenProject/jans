@@ -23,15 +23,10 @@ tags:
   - name: Configuration – Properties
   - name: Configuration – Fido2
   - name: Configuration – SMTP
-  - name: Configuration – Library
   - name: Configuration – Logging
-  - name: Configuration – Log File
   - name: Configuration – JWK - JSON Web Key (JWK)
   - name: Custom Scripts
-  - name: Database - Couchbase
   - name: Database - LDAP configuration
-  - name: Graphics - Logo
-  - name: Graphics - Favicon
   - name: OAuth - OpenID Connect - Clients
   - name: OAuth - OpenID Connect - Scopes
   - name: OAuth - OpenID Connect - Sector Identifiers
@@ -230,233 +225,9 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/graphics/logo:
-    get:
-      summary: Retrieves organization logo graphic details.
-      description: Retrieves organization logo graphic details.
-      operationId: get-config-graphics-logo
-      tags:
-        - Graphics - Logo
-      responses:
-        '200':
-          description: OK
-          headers: {}
-          content:
-            image/x-icon:
-              schema:
-                type: object
-                required:
-                  - logoLocation
-                properties:
-                  logoLocation:
-                    type: string
-                    format: binary
-                    description: Logo image that is used.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-    post:
-      summary: Adds organization logo graphic details.
-      description: Adds organization logo graphic details.
-      operationId: post-config-graphics-logo
-      tags:
-        - Graphics - Logo
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - logoLocation
-              properties:
-                logoLocation:
-                  type: string
-                  format: binary
-                  description: Logo image that is used.
-            encoding:
-              logoLocation:
-                contentType: image/x-icon
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates organization logo graphic details.
-      description: Updates organization logo graphic details.
-      operationId: put-config-graphics-logo
-      tags:
-        - Graphics - Logo
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - logoLocation
-              properties:
-                logoLocation:
-                  type: string
-                  format: binary
-                  description: Logo image that is used.
-            encoding:
-              logoLocation:
-                contentType: image/x-icon
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    delete:
-      summary: Deletes organization logo graphic details.
-      description: Deletes organization logo graphic details.
-      operationId: delete-config-graphics-logo
-      tags:
-        - Graphics - Logo
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  /api/v1/oxauth/config/graphics/favicon:
-    get:
-      summary: Gets organization favicon graphic details.
-      description: Gets organization favicon graphic details.
-      operationId: get-config-graphics-favicon
-      tags:
-        - Graphics - Favicon
-      responses:
-        '200':
-          description: OK
-          content:
-            image/x-icon:
-              schema:
-                type: object
-                required:
-                  - faviconPath
-                properties:
-                  faviconPath:
-                    type: string
-                    format: binary
-                    description: Favicon image that is used.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-    post:
-      summary: Adds organization favicon graphic details.
-      description: Adds organization favicon graphic details.
-      operationId: post-config-graphics-favicon
-      tags:
-        - Graphics - Favicon
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - faviconPath
-              properties:
-                faviconPath:
-                  type: string
-                  format: binary
-                  description: Favicon image that is used.
-            encoding:
-              faviconPath:
-                contentType: image/x-icon
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates organization favicon graphic details.
-      description: Updates organization favicon graphic details.
-      operationId: put-config-graphics-favicon
-      tags:
-        - Graphics - Favicon
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              description: Details of organization favicon to be updated.
-              required:
-                - faviconPath
-              properties:
-                faviconPath:
-                  type: string
-                  format: binary
-                  description: Favicon image that is used.
-            encoding:
-              faviconPath:
-                contentType: image/x-icon
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    delete:
-      summary: Deletes organization favicon graphic details.
-      description: Deletes organization favicon graphic details.
-      operationId: delete-config-graphics-favicon
-      tags:
-        - Graphics - Favicon
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    parameters: []
   /api/v1/oxauth/attributes:
     get:
-      summary: Gets all attributes.
+      summary: Gets a list of Gluu attributes.
       description: 'Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.'
       operationId: get-attributes
       tags:
@@ -471,99 +242,7 @@ paths:
                 description: List of all attribute.
                 type: array
                 items:
-                  type: object
-                  title: Gluu Attribute
-                  required:
-                    - inum
-                    - name
-                    - displayName
-                    - dataType
-                    - status
-                  properties:
-                    inum:
-                      type: string
-                      description: Unique id identifying the attribute.
-                    name:
-                      type: string
-                      description: Name of the attribute.
-                      example: 'name, displayName, birthdate, email'
-                    displayName:
-                      type: string
-                    description:
-                      type: string
-                      description: User friendly descriptive detail of attribute.
-                    dataType:
-                      type: string
-                      description: Data Type of attribute.
-                      enum:
-                        - STRING
-                        - NUMERIC
-                        - BOOLEAN
-                        - BINARY
-                        - DATE
-                    status:
-                      type: string
-                      description: Distinguished Name
-                    oxMultiValuedAttribute:
-                      type: boolean
-                      description: Boolean value indicating if the attribute is multi-value
-                    lifetime:
-                      type: string
-                    sourceAttribute:
-                      type: string
-                    salt:
-                      type: string
-                    nameIdType:
-                      type: string
-                    origin:
-                      type: string
-                    editType:
-                      type: array
-                      description: GluuUserRole
-                      items:
-                        type: string
-                    viewType:
-                      type: array
-                      description: GluuUserRole
-                      items:
-                        type: string
-                    usageType:
-                      type: object
-                      description: GluuAttributeUsageType
-                      items:
-                        type: string
-                    oxAuthClaimName:
-                      type: string
-                    seeAlso:
-                      type: string
-                    saml1Uri:
-                      type: string
-                    saml2Uri:
-                      type: string
-                    urn:
-                      type: string
-                    oxSCIMCustomAttribute:
-                      type: boolean
-                      description: Boolean value indicating if the attribute is a SCIM custom attribute
-                    custom:
-                      type: boolean
-                      description: Boolean value indicating if the attribute is a custom attribute
-                    requred:
-                      type: boolean
-                      description: Boolean value indicating is a mandatory attribute
-                    attributeValidation:
-                      type: object
-                      description: Details of validations to be applied on the attribute
-                      properties:
-                        regexp:
-                          type: string
-                          description: Reguar expression to be used to validate the dataType.
-                        minLength:
-                          type: integer
-                        maxLength:
-                          type: integer
-                    gluuTooltip:
-                      type: string
+                  $ref: '#/components/schemas/GluuAttribute'
         '401':
           description: Unauthorized
         '500':
@@ -600,199 +279,14 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              title: GluuAttribute
-              description: New attribute.
-              type: object
-              required:
-                - name
-                - displayName
-                - dataType
-                - status
-              properties:
-                name:
-                  type: string
-                  description: Name of the attribute.
-                  example: 'name, displayName, birthdate, email'
-                displayName:
-                  type: string
-                  items:
-                    type: string
-                description:
-                  type: string
-                  description: User friendly descriptive detail of attribute.
-                dataType:
-                  type: string
-                  description: Data Type of attribute.
-                  enum:
-                    - STRING
-                    - NUMERIC
-                    - BOOLEAN
-                    - BINARY
-                    - DATE
-                status:
-                  type: string
-                  description: Distinguished Name
-                oxMultiValuedAttribute:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is multi-value
-                lifetime:
-                  type: string
-                sourceAttribute:
-                  type: string
-                salt:
-                  type: string
-                nameIdType:
-                  type: string
-                origin:
-                  type: string
-                editType:
-                  type: array
-                  description: GluuUserRole
-                  items:
-                    type: string
-                viewType:
-                  type: array
-                  description: GluuUserRole
-                  items:
-                    type: string
-                usageType:
-                  type: object
-                  description: GluuAttributeUsageType
-                  items:
-                    type: string
-                oxAuthClaimName:
-                  type: string
-                seeAlso:
-                  type: string
-                saml1Uri:
-                  type: string
-                saml2Uri:
-                  type: string
-                urn:
-                  type: string
-                oxSCIMCustomAttribute:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is a SCIM custom attribute
-                custom:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is a custom attribute
-                requred:
-                  type: boolean
-                  description: Boolean value indicating is a mandatory attribute
-                attributeValidation:
-                  type: object
-                  description: Details of validations to be applied on the attribute
-                  properties:
-                    regexp:
-                      type: string
-                      description: Reguar expression to be used to validate the dataType.
-                    minLength:
-                      type: integer
-                    maxLength:
-                      type: integer
-                gluuTooltip:
-                  type: string
+              $ref: '#/components/schemas/GluuAttribute'
       responses:
-        '200':
+        '201':
           description: OK
           content:
             application/json:
               schema:
-                title: GluuAttribute
-                type: object
-                required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
-                properties:
-                  inum:
-                    type: string
-                    description: Unique id identifying the attribute
-                  name:
-                    type: string
-                    description: Name of the attribute.
-                    example: 'name, displayName, birthdate, email'
-                  displayName:
-                    type: string
-                    items:
-                      type: string
-                  description:
-                    type: string
-                    description: User friendly descriptive detail of attribute.
-                  dataType:
-                    type: string
-                    description: Data Type of attribute.
-                    enum:
-                      - STRING
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE
-                  status:
-                    type: string
-                    description: Distinguished Name
-                  oxMultiValuedAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is multi-value
-                  lifetime:
-                    type: string
-                  sourceAttribute:
-                    type: string
-                  salt:
-                    type: string
-                  nameIdType:
-                    type: string
-                  origin:
-                    type: string
-                  editType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  viewType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  usageType:
-                    type: object
-                    description: GluuAttributeUsageType
-                    items:
-                      type: string
-                  oxAuthClaimName:
-                    type: string
-                  seeAlso:
-                    type: string
-                  saml1Uri:
-                    type: string
-                  saml2Uri:
-                    type: string
-                  urn:
-                    type: string
-                  oxSCIMCustomAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a SCIM custom attribute
-                  custom:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a custom attribute
-                  requred:
-                    type: boolean
-                    description: Boolean value indicating is a mandatory attribute
-                  attributeValidation:
-                    type: object
-                    description: Details of validations to be applied on the attribute
-                    properties:
-                      regexp:
-                        type: string
-                        description: Reguar expression to be used to validate the dataType.
-                      minLength:
-                        type: integer
-                      maxLength:
-                        type: integer
-                  gluuTooltip:
-                    type: string
+                $ref: '#/components/schemas/GluuAttribute'
         '401':
           description: Unauthorized
         '500':
@@ -801,8 +295,8 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Update existing attribute.
-      description: Update existing attribute.
+      summary: Updates an existing attribute.
+      description: Updates an existing attribute.
       operationId: put-attributes
       tags:
         - Attribute
@@ -811,102 +305,7 @@ paths:
         content:
           application/json:
             schema:
-              title: GluuAttribute
-              description: Attribute details
-              type: object
-              required:
-                - inum
-                - name
-                - displayName
-                - dataType
-                - status
-              properties:
-                inum:
-                  type: string
-                  description: Unique id identifying the attribute
-                name:
-                  type: string
-                  description: Name of the attribute.
-                  example: 'name, displayName, birthdate, email'
-                displayName:
-                  type: string
-                  items:
-                    type: string
-                description:
-                  type: string
-                  description: User friendly descriptive detail of attribute.
-                dataType:
-                  type: string
-                  description: Data Type of attribute.
-                  enum:
-                    - STRING
-                    - NUMERIC
-                    - BOOLEAN
-                    - BINARY
-                    - DATE
-                status:
-                  type: string
-                  description: Distinguished Name
-                oxMultiValuedAttribute:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is multi-value
-                lifetime:
-                  type: string
-                sourceAttribute:
-                  type: string
-                salt:
-                  type: string
-                nameIdType:
-                  type: string
-                origin:
-                  type: string
-                editType:
-                  type: array
-                  description: GluuUserRole
-                  items:
-                    type: string
-                viewType:
-                  type: array
-                  description: GluuUserRole
-                  items:
-                    type: string
-                usageType:
-                  type: object
-                  description: GluuAttributeUsageType
-                  items:
-                    type: string
-                oxAuthClaimName:
-                  type: string
-                seeAlso:
-                  type: string
-                saml1Uri:
-                  type: string
-                saml2Uri:
-                  type: string
-                urn:
-                  type: string
-                oxSCIMCustomAttribute:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is a SCIM custom attribute
-                custom:
-                  type: boolean
-                  description: Boolean value indicating if the attribute is a custom attribute
-                requred:
-                  type: boolean
-                  description: Boolean value indicating is a mandatory attribute
-                attributeValidation:
-                  type: object
-                  description: Details of validations to be applied on the attribute
-                  properties:
-                    regexp:
-                      type: string
-                      description: Reguar expression to be used to validate the dataType.
-                    minLength:
-                      type: integer
-                    maxLength:
-                      type: integer
-                gluuTooltip:
-                  type: string
+              $ref: '#/components/schemas/GluuAttribute'
       responses:
         '200':
           description: OK
@@ -915,99 +314,8 @@ paths:
               schema:
                 title: GluuAttribute
                 type: object
-                required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
-                properties:
-                  inum:
-                    type: string
-                    description: Unique id identifying the attribute
-                  name:
-                    type: string
-                    description: Name of the attribute.
-                    example: 'name, displayName, birthdate, email'
-                  displayName:
-                    type: string
-                    items:
-                      type: string
-                  description:
-                    type: string
-                    description: User friendly descriptive detail of attribute.
-                  dataType:
-                    type: string
-                    description: Data Type of attribute.
-                    enum:
-                      - STRING
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE
-                  status:
-                    type: string
-                    description: Distinguished Name
-                  oxMultiValuedAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is multi-value
-                  lifetime:
-                    type: string
-                  sourceAttribute:
-                    type: string
-                  salt:
-                    type: string
-                  nameIdType:
-                    type: string
-                  origin:
-                    type: string
-                  editType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  viewType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  usageType:
-                    type: object
-                    description: GluuAttributeUsageType
-                    items:
-                      type: string
-                  oxAuthClaimName:
-                    type: string
-                  seeAlso:
-                    type: string
-                  saml1Uri:
-                    type: string
-                  saml2Uri:
-                    type: string
-                  urn:
-                    type: string
-                  oxSCIMCustomAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a SCIM custom attribute
-                  custom:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a custom attribute
-                  requred:
-                    type: boolean
-                    description: Boolean value indicating is a mandatory attribute
-                  attributeValidation:
-                    type: object
-                    description: Details of validations to be applied on the attribute
-                    properties:
-                      regexp:
-                        type: string
-                        description: Reguar expression to be used to validate the dataType.
-                      minLength:
-                        type: integer
-                      maxLength:
-                        type: integer
-                  gluuTooltip:
-                    type: string
+                items:
+                  $ref: '#/components/schemas/GluuAttribute'
         '401':
           description: Unauthorized
         '404':
@@ -1027,8 +335,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Gets attribute by inum.
-      description: Gets attribute based on inum.
+      summary: Gets an attribute based on inum.
+      description: Gets an attribute based on inum.
       operationId: get-attributes-by-inum
       tags:
         - Attribute
@@ -1038,102 +346,7 @@ paths:
           content:
             application/json:
               schema:
-                title: GluuAttribute
-                description: 'Gluu Server attribute corresponding to the identifier{inum}'
-                type: object
-                required:
-                  - inum
-                  - name
-                  - displayName
-                  - dataType
-                  - status
-                properties:
-                  inum:
-                    type: string
-                    description: Unique id identifying the attribute
-                  name:
-                    type: string
-                    description: Name of the attribute.
-                    example: 'name, displayName, birthdate, email'
-                  displayName:
-                    type: string
-                    items:
-                      type: string
-                  description:
-                    type: string
-                    description: User friendly descriptive detail of attribute.
-                  dataType:
-                    type: string
-                    description: Data Type of attribute.
-                    enum:
-                      - STRING
-                      - NUMERIC
-                      - BOOLEAN
-                      - BINARY
-                      - DATE
-                  status:
-                    type: string
-                    description: Distinguished Name
-                  oxMultiValuedAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is multi-value
-                  lifetime:
-                    type: string
-                  sourceAttribute:
-                    type: string
-                  salt:
-                    type: string
-                  nameIdType:
-                    type: string
-                  origin:
-                    type: string
-                  editType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  viewType:
-                    type: array
-                    description: GluuUserRole
-                    items:
-                      type: string
-                  usageType:
-                    type: object
-                    description: GluuAttributeUsageType
-                    items:
-                      type: string
-                  oxAuthClaimName:
-                    type: string
-                  seeAlso:
-                    type: string
-                  saml1Uri:
-                    type: string
-                  saml2Uri:
-                    type: string
-                  urn:
-                    type: string
-                  oxSCIMCustomAttribute:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a SCIM custom attribute
-                  custom:
-                    type: boolean
-                    description: Boolean value indicating if the attribute is a custom attribute
-                  requred:
-                    type: boolean
-                    description: Boolean value indicating is a mandatory attribute
-                  attributeValidation:
-                    type: object
-                    description: Details of validations to be applied on the attribute
-                    properties:
-                      regexp:
-                        type: string
-                        description: Reguar expression to be used to validate the dataType.
-                      minLength:
-                        type: integer
-                      maxLength:
-                        type: integer
-                  gluuTooltip:
-                    type: string
+                $ref: '#/components/schemas/GluuAttribute'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -1142,14 +355,14 @@ paths:
         - oxAuth:
             - read
     delete:
-      summary: Deletes an attribute by inum.
-      description: Deletes an attribute by inum.
+      summary: Deletes an attribute based on inum.
+      description: Deletes an attribute based on inum.
       operationId: delete-attributes-by-inum
       tags:
         - Attribute
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1159,6 +372,36 @@ paths:
       security:
         - oxAuth:
             - write
+    patch:
+      summary: Partially modify a GluuAttribute.
+      description: Partially modify a GluuAttribute.
+      operationId: patch-attributes-by-inum
+      security:
+        - oxAuth:
+            - write
+      tags:
+        - Attribute
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: displayName, value: \"CustomAttribute\" } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GluuAttribute'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/oxauth/acrs:
     get:
       summary: Gets default authentication method.
@@ -1218,8 +461,8 @@ paths:
     parameters: []
   /api/v1/oxauth/config/database/ldap:
     get:
-      summary: Get list of existing LDAP configuration.
-      description: Get list of existing LDAP configuration. 
+      summary: Gets list of existing LDAP configurations.
+      description: Gets list of existing LDAP configurations. 
       operationId: get-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1242,8 +485,8 @@ paths:
         - oxAuth:
             - read
     post:
-      summary: Add a new LDAP configuration.
-      description: Add a new LDAP configuration.
+      summary: Adds a new LDAP configuration.
+      description: Adds a new LDAP configuration.
       operationId: post-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1268,8 +511,8 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Update LDAP configuration.
-      description: Update LDAP configuration.
+      summary: Updates LDAP configuration.
+      description: Updates LDAP configuration.
       operationId: put-config-database-ldap
       tags:
         - Database - LDAP configuration
@@ -1305,8 +548,8 @@ paths:
         schema:
           type: string
     get:
-      summary: Get LDAP configuration by name.
-      description: Get LDAP configuration by name.
+      summary: Gets an LDAP configuration by name.
+      description: Gets an LDAP configuration by name.
       operationId: get-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -1316,11 +559,7 @@ paths:
           content:
             application/json:
               schema:
-                title: LdapConfiguration
-                description: LDAP configuration.
-                type: object
-                items:
-                  $ref: '#/components/schemas/LdapConfiguration'
+                $ref: '#/components/schemas/LdapConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1331,8 +570,8 @@ paths:
         - oxAuth:
             - read
     delete:
-      summary: Delete a LDAP configuration.
-      description: Delete a LDAP configuration.
+      summary: Deletes an LDAP configuration.
+      description: Deletes an LDAP configuration.
       operationId: delete-config-database-ldap-by-name
       tags:
         - Database - LDAP configuration
@@ -1371,235 +610,17 @@ paths:
           content:
             application/json:
               schema:
-                title: LdapConfiguration
-                description: LDAP configuration.
-                type: object
-                items:
-                  $ref: '#/components/schemas/LdapConfiguration'
+                $ref: '#/components/schemas/LdapConfiguration'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/oxauth/config/database/ldap/test:
-    post:
-      summary: Test an LDAP configuration.
-      description: Test an LDAP configuration.
-      operationId: post-config-database-ldap-test
-      tags:
-        - Database - LDAP configuration
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LdapConfiguration'
-      responses:
-        '200':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: boolean
-                description: Boolean value true if LDAP connection is successfully established.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-  /api/v1/oxauth/config/database/couchbase:
+  /api/v1/oxauth/config/scripts:
     get:
-      summary: Gets Couchbase configuration.
-      description: Gets Couchbase configuration.
-      operationId: get-config-database-couchbase
-      tags:
-        - Database - Couchbase
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: CouchbaseConfiguration
-                description: List of configured Couchbase configuration.
-                type: array
-                items:
-                  $ref: '#/components/schemas/CouchbaseConfiguration'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - read
-    post:
-      summary: Adds Couchbase configuration.
-      description: Adds Couchbase configuration.
-      operationId: post-config-database-couchbase
-      tags:
-        - Database - Couchbase
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CouchbaseConfiguration'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    put:
-      summary: Updates Couchbase configuration.
-      description: Updates Couchbase configuration.
-      operationId: put-config-database-couchbase
-      tags:
-        - Database - Couchbase
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CouchbaseConfiguration'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    delete:
-      summary: Deletes Couchbase configuration.
-      description: Deletes Couchbase configuration.
-      operationId: delete-config-database-couchbase
-      tags:
-        - Database - Couchbase
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  /api/v1/oxauth/config/library:
-    get:
-      summary: Gets custom library.
-      description: Gets custom library. Optionally library name can be provided.
-      operationId: get-config-library
-      tags:
-        - Configuration – Library
-      responses:
-        '200':
-          description: OK
-          content:
-            multipart/form-data:
-              schema:
-                type: array
-                items:
-                  type: object
-                  required:
-                    - file
-                  properties:
-                    file:
-                      format: binary
-                      type: string
-                      description: List of custom libraries.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: name
-          description: Name of library file.
-    post:
-      summary: Uploads new custom library.
-      description: Uploads new custom library.
-      operationId: post-config-library
-      tags:
-        - Configuration – Library
-      parameters: []
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: File to upload.
-              required:
-                - file
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/config/library/{name}':
-    parameters:
-      - schema:
-          type: string
-          minLength: 1
-        name: name
-        in: path
-        description: Name of the library.
-        required: true
-    delete:
-      summary: Deletes custom library by name.
-      description: Deletes custom library by name.
-      operationId: delete-config-library-by-name
-      tags:
-        - Configuration – Library
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - oxAuth:
-            - write
-  
-  /api/v1/config/oxauth/scripts:
-    get:
-      summary: Get all custom scripts.
-      description: Get all custom scripts.
+      summary: Gets a list of custom scripts.
+      description: Gets a list of custom scripts.
       operationId: get-config-oxauth-scripts
       tags:
         - Custom Scripts
@@ -1620,8 +641,8 @@ paths:
         - oxAuth:
             - read
     post:
-      summary: Add new custom script.
-      description: Add new custom script.
+      summary: Adds a new custom script.
+      description: Adds a new custom script.
       operationId: post-config-oxauth-scripts
       tags:
         - Custom Scripts
@@ -1640,8 +661,8 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Update custom script.
-      description: Update custom script.
+      summary: Updates a custom script.
+      description: Updates a custom script.
       operationId: put-config-oxauth-scripts
       tags:
         - Custom Scripts
@@ -1664,7 +685,7 @@ paths:
       security:
         - oxAuth:
             - write    
-  /api/v1/config/oxauth/scripts/type/{type}:
+  /api/v1/oxauth/config/scripts/type/{type}:
     parameters:
       - schema:
           type: string
@@ -1706,8 +727,8 @@ paths:
         name: limit
         description: Search size - max size of the results to return.
     get:
-      summary: Get scripts by type.
-      description: Get scripts by type.
+      summary: Gets list of scripts by type.
+      description: Gets list of scripts by type.
       operationId: get-config-oxauth-scripts-by-type
       tags:
         - Custom Scripts
@@ -1729,7 +750,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /api/v1/config/oxauth/scripts/inum/{inum}:
+  /api/v1/oxauth/config/scripts/inum/{inum}:
     parameters:
       - schema:
           type: string
@@ -1738,8 +759,8 @@ paths:
         required: true
         description: Script identifier.
     get:
-      summary: Get scripts by Inum.
-      description: Get scripts by Inum.
+      summary: Gets a script by Inum.
+      description: Gets a script by Inum.
       operationId: get-config-oxauth-scripts-by-inum
       tags:
         - Custom Scripts
@@ -1759,7 +780,7 @@ paths:
       security:
         - oxAuth:
             - read
-  /api/v1/config/oxauth/scripts/{inum}:
+  /api/v1/oxauth/config/scripts/{inum}:
     parameters:
       - schema:
           type: string
@@ -1768,8 +789,8 @@ paths:
         required: true
         description: Script identifier.
     delete:
-      summary: Delete custom script.
-      description: Delete custom script.
+      summary: Deletes a custom script.
+      description: Deletes a custom script.
       operationId: delete-config-oxauth-scripts-by-inum
       tags:
         - Custom Scripts
@@ -2186,8 +1207,8 @@ paths:
             - write
   /api/v1/oxauth/config/cache/memcached:
     get:
-      summary: Returns a Memcached cache configuration.
-      description: Returns a Memcached cache configuration.
+      summary: Returns Memcached cache configuration.
+      description: Returns Memcached cache configuration.
       operationId: get-oxauth-config-cache-memcached
       tags:
         - Cache Configuration – Memcached
@@ -2252,8 +1273,8 @@ paths:
         - oxAuth:
             - read
     post:
-      summary: Adds a Memcached cache configuration.
-      description: Adds a Memcached cache configuration.
+      summary: Adds Memcached cache configuration.
+      description: Adds Memcached cache configuration.
       operationId: post-oxauth-config-cache-memcached
       tags:
         - Cache Configuration – Memcached
@@ -2309,8 +1330,58 @@ paths:
                     - DEFAULT
                     - BINARY
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Memcached cache configuration.
+                required:
+                  - servers
+                  - maxOperationQueueLength
+                  - bufferSize
+                  - defaultPutExpiration
+                  - memcachedConnectionFactoryType
+                properties:
+                  servers:
+                    type: string
+                    description: Server details separated by spaces.
+                    format: url
+                    minLength: 1
+                  maxOperationQueueLength:
+                    type: integer
+                    description: Maximum operation Queue Length.
+                    default: 99999999
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  bufferSize:
+                    type: integer
+                    description: Buffer Size.
+                    default: 32768
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  defaultPutExpiration:
+                    type: integer
+                    description: Expiration timeout value.
+                    default: 60
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  memcachedConnectionFactoryType:
+                    type: string
+                    description: The MemcachedConnectionFactoryType Type.
+                    enum:
+                      - DEFAULT
+                      - BINARY
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -2319,8 +1390,8 @@ paths:
         - oxAuth:
             - write
     put:
-      summary: Updates a Memcached cache configuration.
-      description: Updates a Memcached cache configuration.
+      summary: Updates Memcached cache configuration.
+      description: Updates Memcached cache configuration.
       operationId: put-oxauth-config-cache-memcached
       tags:
         - Cache Configuration – Memcached
@@ -2373,11 +1444,61 @@ paths:
                   type: string
                   description: The MemcachedConnectionFactoryType Type.
                   enum:
-                    - DEFAULT
-                    - BINARY
+                  - DEFAULT
+                  - BINARY
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Memcached cache configuration.
+                required:
+                  - servers
+                  - maxOperationQueueLength
+                  - bufferSize
+                  - defaultPutExpiration
+                  - memcachedConnectionFactoryType
+                properties:
+                  servers:
+                    type: string
+                    description: Server details separated by spaces.
+                    format: url
+                    minLength: 1
+                  maxOperationQueueLength:
+                    type: integer
+                    description: Maximum operation Queue Length.
+                    default: 99999999
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  bufferSize:
+                    type: integer
+                    description: Buffer Size.
+                    default: 32768
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  defaultPutExpiration:
+                    type: integer
+                    description: Expiration timeout value.
+                    default: 60
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  memcachedConnectionFactoryType:
+                    type: string
+                    description: The MemcachedConnectionFactoryType Type.
+                    enum:
+                    - DEFAULT
+                    - BINARY
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3059,8 +2180,34 @@ paths:
                 deleteExpiredOnGetRequest:
                   type: boolean
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache configuration.
+                properties:
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    default: 60
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  defaultCleanupBatchSize:
+                    description: defaultCleanupBatchSize page size.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 25
+                    default: 25
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  deleteExpiredOnGetRequest:
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3104,6 +2251,32 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Cache configuration.
+                properties:
+                  defaultPutExpiration:
+                    description: defaultPutExpiration timeout value.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 1
+                    default: 60
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  defaultCleanupBatchSize:
+                    description: defaultCleanupBatchSize page size.
+                    type: integer
+                    multipleOf: 1
+                    maximum: 2147483647
+                    minimum: 25
+                    default: 25
+                    exclusiveMaximum: false
+                    exclusiveMinimum: false
+                  deleteExpiredOnGetRequest:
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3207,8 +2380,43 @@ paths:
                   description: Password for the SMTP.
                   type: string
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                description: SMTP configuration.
+                properties:
+                  host:
+                    description: Hostname of the SMTP server.
+                    type: string
+                    format: url
+                  port:
+                    description: Port number of the SMTP server.
+                    type: integer
+                    multipleOf: 1
+                  requires-ssl:
+                    description: 'Boolean value with default value false. If true, SSL will be enabled.'
+                    type: boolean
+                  trust-host:
+                    type: boolean
+                    description: Boolean value with default value false.
+                  from-name:
+                    description: Name of the sender.
+                    type: string
+                  from-email-address:
+                    description: Email Address of the Sender.
+                    type: string
+                  requires-authentication:
+                    description: Boolean value with default value false. It true it will enable sender authentication.
+                    type: boolean
+                  user-name:
+                    description: Username of the SMTP.
+                    type: string
+                  password:
+                    description: Password for the SMTP.
+                    type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3261,6 +2469,41 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: SMTP configuration.
+                properties:
+                  host:
+                    description: Hostname of the SMTP server.
+                    type: string
+                    format: url
+                  port:
+                    description: Port number of the SMTP server.
+                    type: integer
+                    multipleOf: 1
+                  requires-ssl:
+                    description: 'Boolean value with default value false. If true, SSL will be enabled.'
+                    type: boolean
+                  trust-host:
+                    type: boolean
+                    description: Boolean value with default value false.
+                  from-name:
+                    description: Name of the sender.
+                    type: string
+                  from-email-address:
+                    description: Email Address of the Sender.
+                    type: string
+                  requires-authentication:
+                    description: Boolean value with default value false. It true it will enable sender authentication.
+                    type: boolean
+                  user-name:
+                    description: Username of the SMTP.
+                    type: string
+                  password:
+                    description: Password for the SMTP.
+                    type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3277,8 +2520,8 @@ paths:
       tags:
         - Configuration – SMTP
       responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3289,25 +2532,6 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/smtp/status:
-    get:
-      summary: Test SMTP server configuration.
-      description: Test SMTP server configuration.
-      operationId: get-oxauth-config-smtp-status
-      tags:
-        - Configuration – SMTP
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
   /api/v1/oxauth/openid/scopes:
     get:
       tags:
@@ -3460,8 +2684,63 @@ paths:
                         description: Origin of claim attribute.
                         type: string
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: Scope
+                required:
+                  - id
+                  - name
+                properties:
+                  dn:
+                    type: string
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  inum:
+                    description: Unique id identifying the attribute
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string
+                  description:
+                    description: A human-readable string describing the scope.
+                    type: string
+                  defaultScope:
+                    description: Boolean value to specify default scope.
+                    type: boolean
+                  scopeType:
+                    description: The scopes type associated with Access Tokens determine what resources will.
+                    type: string
+                    enum:
+                      - OpenID
+                      - Dynamic
+                      - OAuth
+                  claims:
+                    description: Claim attributes associated with the scope.
+                    type: array
+                    items:
+                      type: object
+                      title: GluuAttribute
+                      properties:
+                        inum:
+                          description: Unique id identifying the attribute.
+                          type: string
+                        name:
+                          description: Name of the attribute.
+                          type: string
+                          example: 'name, displayName, birthdate, email'
+                        displayName:
+                          description: A human-readable name of the attribute.
+                          type: string
+                        description:
+                          description: User friendly descriptive detail of attribute.
+                          type: string
+                        origin:
+                          description: Origin of claim attribute.
+                          type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -3472,8 +2751,8 @@ paths:
     put:
       tags:
         - OAuth - OpenID Connect - Scopes
-      summary: Update existing OpenId Connect Scope.
-      description: Update existing OpenId Connect Scope.
+      summary: Updates existing OpenId Connect Scope.
+      description: Updates existing OpenId Connect Scope.
       operationId: put-oauth-openid-scopes
       requestBody:
         content:
@@ -3534,6 +2813,61 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope
+                required:
+                  - id
+                  - name
+                properties:
+                  dn:
+                    type: string
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  inum:
+                    description: Unique id identifying the attribute
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string
+                  description:
+                    description: A human-readable string describing the scope.
+                    type: string
+                  defaultScope:
+                    description: Boolean value to specify default scope.
+                    type: boolean
+                  scopeType:
+                    description: The scopes type associated with Access Tokens determine what resources will.
+                    type: string
+                    enum:
+                      - OpenID
+                      - Dynamic
+                      - OAuth
+                  claims:
+                    description: Claim attributes associated with the scope.
+                    type: array
+                    items:
+                      type: object
+                      title: GluuAttribute
+                      properties:
+                        inum:
+                          description: Unique id identifying the attribute.
+                          type: string
+                        name:
+                          description: Name of the attribute.
+                          type: string
+                          example: 'name, displayName, birthdate, email'
+                        displayName:
+                          description: A human-readable name of the attribute.
+                          type: string
+                        description:
+                          description: User friendly descriptive detail of attribute.
+                          type: string
+                        origin:
+                          description: Origin of claim attribute.
+                          type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3631,82 +2965,8 @@ paths:
       description: Delete OpenId Connect Scope.
       operationId: delete-oauth-openid-scopes-by-id
       responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Update existing OpenId Connect Scope by Inum.
-      description: Update existing OpenId Connect Scope by Inum.
-      operationId: put-oauth-openid-scopes-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: Scope
-              required:
-                - id
-                - name
-              properties:
-                dn:
-                  type: string
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                inum:
-                  description: Unique id identifying the attribute
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                description:
-                  description: A human-readable string describing the scope.
-                  type: string
-                defaultScope:
-                  description: Boolean value to specify default scope.
-                  type: boolean
-                scopeType:
-                  description: The scopes type associated with Access Tokens determine what resources will.
-                  type: string
-                  enum:
-                    - OpenID
-                    - Dynamic
-                    - OAuth
-                claims:
-                  description: Claim attributes associated with the scope.
-                  type: array
-                  items:
-                    type: object
-                    title: GluuAttribute
-                    properties:
-                      inum:
-                        description: Unique id identifying the attribute.
-                        type: string
-                      name:
-                        description: Name of the attribute.
-                        type: string
-                        example: 'name, displayName, birthdate, email'
-                      displayName:
-                        description: A human-readable name of the attribute.
-                        type: string
-                      description:
-                        description: User friendly descriptive detail of attribute.
-                        type: string
-                      origin:
-                        description: Origin of claim attribute.
-                        type: string
-      responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -3726,58 +2986,10 @@ paths:
         content:
           application/json:
             schema:
-              title: Scope
-              required:
-                - id
-                - name
-              properties:
-                dn:
-                  type: string
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                inum:
-                  description: Unique id identifying the attribute
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                description:
-                  description: A human-readable string describing the scope.
-                  type: string
-                defaultScope:
-                  description: Boolean value to specify default scope.
-                  type: boolean
-                scopeType:
-                  description: The scopes type associated with Access Tokens determine what resources will.
-                  type: string
-                  enum:
-                    - OpenID
-                    - Dynamic
-                    - OAuth
-                claims:
-                  description: Claim attributes associated with the scope.
-                  type: array
-                  items:
-                    type: object
-                    title: GluuAttribute
-                    properties:
-                      inum:
-                        description: Unique id identifying the attribute.
-                        type: string
-                      name:
-                        description: Name of the attribute.
-                        type: string
-                        example: 'name, displayName, birthdate, email'
-                      displayName:
-                        description: A human-readable name of the attribute.
-                        type: string
-                      description:
-                        description: User friendly descriptive detail of attribute.
-                        type: string
-                      origin:
-                        description: Origin of claim attribute.
-                        type: string
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: defaultScope, value: true } ]'
       responses:
         '200':
           description: OK
@@ -3790,7 +3002,7 @@ paths:
       security:
         - oxAuth:
             - write
-  /api/v1/oxauth/config/logging:
+  /api/v1/oxauth/logging:
     get:
       tags:
         - Configuration – Logging
@@ -3915,52 +3127,6 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/config/logs:
-    get:
-      tags:
-        - Configuration – Log File
-      summary: Gets all oxAuth log files. Optionally a log file name and limit for line count can be provided.
-      description: Gets all oxAuth log files. Optionally a log file name and limit for line count can be provided.
-      operationId: get-config-logs
-      parameters:
-        - schema:
-            type: string
-            default: null
-          in: query
-          name: name
-          description: Log file name.
-        - schema:
-            type: integer
-            default: 400
-          in: query
-          name: limit
-          description: Display last lines count.
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                items:
-                  type: array
-                  items:
-                    type: object
-                    description: Log file.
-                    properties:
-                      log_file:
-                        type: string
-                        format: binary
-                      log_location:
-                        description: Log file location.
-                        type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-    parameters: []  
   /api/v1/oxauth/config/jwks:
     get:
       tags:
@@ -4070,8 +3236,8 @@ paths:
     get:
       tags:
         - OAuth - OpenID Connect - Clients
-      summary: Get list of OpenID Connect clients
-      description: Get list of OpenID Connect clients
+      summary: Gets list of OpenID Connect clients
+      description: Gets list of OpenID Connect clients
       operationId: get-oauth-openid-clients
       responses:
         '200':
@@ -4079,8 +3245,8 @@ paths:
           content:
             application/json:
               schema:
-                title: Clients.
-                description: List of clients.
+                title: OpenID Clients.
+                description: List of OpenID clients.
                 type: array
                 items:
                   type: object
@@ -4848,8 +4014,379 @@ paths:
                   description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
                   type: boolean
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: OpenID Connect Client Details.
+                description: OpenID Connect Client Details.
+                type: object
+                properties:
+                  inum:
+                    description: XRI i-number. Client Identifier to uniquely identify the client.
+                    type: string
+                  display_Name:
+                    description: A human-readable name of the client.
+                    type: string
+                  description:
+                    description: A human-readable string describing the client.
+                    type: string
+                  application_type:
+                    description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
+                    type: string
+                    enum:
+                      - Web
+                      - Native
+                  contacts:
+                    description: e-mail addresses of people responsible for this Client.
+                    type: array
+                    items:
+                      type: string
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/cb'
+                  post_logout_redirect_uris:
+                    description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/logout/page1'
+                      - 'https://client.example.org/logout/page2'
+                      - 'https://client.example.org/logout/page3'
+                  scope:
+                    description: Provide list of scopes granted to the client.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read write dolphin
+                  claims:
+                    description: Provide list of claims granted to the client.
+                    type: array
+                    items:
+                      type: string
+                      description: String containing a space-separated list of claims that can be requested individually.
+                  client_secret:
+                    type: string
+                    description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+                  password:
+                    type: string
+                    description: User password.
+                  associated_persons:
+                    description: List of associated persons.
+                    type: array
+                    items:
+                      type: string
+                      description: Reference the DN of a person.
+                  trusted_client:
+                    description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
+                    type: boolean
+                  response_types:
+                    description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - CODE
+                        - TOKEN
+                        - ID_TOKEN
+                  grant_types:
+                    description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - AUTHORIZATION_CODE
+                        - IMPLICIT
+                        - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+                        - CLIENT_CREDENTIALS
+                        - REFRESH_TOKEN
+                        - OXAUTH_UMA_TICKET
+                        - CIBA
+                        - DEVICE_CODE
+                  logo_uri:
+                    description: URL that references a logo for the Client application.
+                    type: string
+                  client_uri:
+                    description: URL of the home page of the Client. The value of this field must point to a valid Web page.
+                    type: string
+                  policy_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                    type: string
+                  tos_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+                    type: string
+                  jwks_uri:
+                    description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
+                    type: string
+                  jwks:
+                    description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey'
+                    example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
+                  sector_identifier_uri:
+                    description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
+                    type: string
+                  subject_type:
+                    description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                    type: string
+                    enum:
+                      - PAIRWISE
+                      - PUBLIC
+                  id_token_token_binding_cnf:
+                    description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
+                    type: string
+                  rpt_as_jwt:
+                    description: Specifies whether RPT should be return as signed JWT.
+                    type: boolean
+                  access_token_as_jwt:
+                    description: Specifies whether access token as signed JWT.
+                    type: boolean
+                  access_token_signing_alg:
+                    description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  id_token_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                  id_token_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  id_token_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  userinfo_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  userinfo_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  userinfo_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  request_object_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  request_object_encryption_alg:
+                    description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  request_object_encryption_enc:
+                    description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  token_endpoint_auth_method:
+                    description: Requested Client Authentication method for the Token Endpoint.
+                    type: string
+                    enum:
+                      - client_secret_basic
+                      - client_secret_post
+                      - client_secret_jwt
+                      - private_key_jwt
+                      - none
+                  token_endpoint_auth_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  default_max_age:
+                    description: Specifies the Default Maximum Authentication Age.
+                    type: integer
+                    format: int32
+                    example: 1000000
+                  require_auth_time:
+                    description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
+                    type: boolean
+                  claims_redirect_uri:
+                    description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
+                    type: array
+                    items:
+                      type: string
+                  logout_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: array
+                    items:
+                      type: string
+                  logout_session_required:
+                    description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
+                    type: boolean
+                  persist_client_authorizations:
+                    description: Specifies if the client authorization details are to be persisted. Default value is true.
+                    type: boolean
+                  include_claims_in_id_token:
+                    description: 'If true then claims are included in token id, default value is false.'
+                    type: boolean
+                  refresh_token_lifetime:
+                    description: Specifies the Client-specific refresh token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  access_token_lifetime:
+                    description: Specifies the Client-specific access token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  default_acr_values:
+                    description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
+                    type: array
+                    items:
+                      type: string
+                  initiate_login_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: string
+                  exp:
+                    description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+                    type: string
+                    format: date
+                  request_uris:
+                    description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+                    type: array
+                    items:
+                      type: string
+                  authorized_origins:
+                    description: Specifies authorized JavaScript origins.
+                    type: array
+                    items:
+                      type: string
+                  software_id:
+                    description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                    type: string
+                    example: 4NRB1-0XZABZI9E6-5SM3R
+                  software_version:
+                    description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                    type: string
+                    example: '2.1'
+                  software_statement:
+                    description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+                    type: string
+                  disabled:
+                    description: Specifies whether client is disabled.
+                    type: boolean
+                  oxId:
+                    description: oxAuth Attribute Scope Id.
+                    type: string
+                  deletable:
+                    description: Specifies whether client is deletable.
+                    type: boolean
+                  client_attributes:
+                    type: object
+                    properties:
+                      tlsClientAuthSubjectDn:
+                        type: string
+                      runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+                        description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+                        type: boolean
+                      keepClientAuthorizationAfterExpiration:
+                        description: Keep Client Authorization After Expiration.
+                        type: boolean
+                  backchannel_authentication_request_signing_alg:
+                    description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
+                    type: string
+                    enum:
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  backchannel_token_delivery_mode:
+                    description: specifies how backchannel token will be delivered.
+                    type: string
+                  backchannel_client_notification_endpoint:
+                    description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
+                    type: string
+                  backchannel_user_code_parameter:
+                    description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -5238,6 +4775,377 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: OpenID Connect Client Details.
+                description: OpenID Connect Client Details.
+                type: object
+                properties:
+                  inum:
+                    description: XRI i-number. Client Identifier to uniquely identify the client.
+                    type: string
+                  display_Name:
+                    description: A human-readable name of the client.
+                    type: string
+                  description:
+                    description: A human-readable string describing the client.
+                    type: string
+                  application_type:
+                    description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
+                    type: string
+                    enum:
+                      - Web
+                      - Native
+                  contacts:
+                    description: e-mail addresses of people responsible for this Client.
+                    type: array
+                    items:
+                      type: string
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/cb'
+                  post_logout_redirect_uris:
+                    description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/logout/page1'
+                      - 'https://client.example.org/logout/page2'
+                      - 'https://client.example.org/logout/page3'
+                  scope:
+                    description: Provide list of scopes granted to the client.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read write dolphin
+                  claims:
+                    description: Provide list of claims granted to the client.
+                    type: array
+                    items:
+                      type: string
+                      description: String containing a space-separated list of claims that can be requested individually.
+                  client_secret:
+                    type: string
+                    description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+                  password:
+                    type: string
+                    description: User password.
+                  associated_persons:
+                    description: List of associated persons.
+                    type: array
+                    items:
+                      type: string
+                      description: Reference the DN of a person.
+                  trusted_client:
+                    description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
+                    type: boolean
+                  response_types:
+                    description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - CODE
+                        - TOKEN
+                        - ID_TOKEN
+                  grant_types:
+                    description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - AUTHORIZATION_CODE
+                        - IMPLICIT
+                        - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+                        - CLIENT_CREDENTIALS
+                        - REFRESH_TOKEN
+                        - OXAUTH_UMA_TICKET
+                        - CIBA
+                        - DEVICE_CODE
+                  logo_uri:
+                    description: URL that references a logo for the Client application.
+                    type: string
+                  client_uri:
+                    description: URL of the home page of the Client. The value of this field must point to a valid Web page.
+                    type: string
+                  policy_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                    type: string
+                  tos_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+                    type: string
+                  jwks_uri:
+                    description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
+                    type: string
+                  jwks:
+                    description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey'
+                    example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
+                  sector_identifier_uri:
+                    description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
+                    type: string
+                  subject_type:
+                    description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                    type: string
+                    enum:
+                      - PAIRWISE
+                      - PUBLIC
+                  id_token_token_binding_cnf:
+                    description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
+                    type: string
+                  rpt_as_jwt:
+                    description: Specifies whether RPT should be return as signed JWT.
+                    type: boolean
+                  access_token_as_jwt:
+                    description: Specifies whether access token as signed JWT.
+                    type: boolean
+                  access_token_signing_alg:
+                    description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  id_token_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                  id_token_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  id_token_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  userinfo_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  userinfo_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  userinfo_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  request_object_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  request_object_encryption_alg:
+                    description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  request_object_encryption_enc:
+                    description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  token_endpoint_auth_method:
+                    description: Requested Client Authentication method for the Token Endpoint.
+                    type: string
+                    enum:
+                      - client_secret_basic
+                      - client_secret_post
+                      - client_secret_jwt
+                      - private_key_jwt
+                      - none
+                  token_endpoint_auth_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  default_max_age:
+                    description: Specifies the Default Maximum Authentication Age.
+                    type: integer
+                    format: int32
+                    example: 1000000
+                  require_auth_time:
+                    description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
+                    type: boolean
+                  claims_redirect_uri:
+                    description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
+                    type: array
+                    items:
+                      type: string
+                  logout_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: array
+                    items:
+                      type: string
+                  logout_session_required:
+                    description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
+                    type: boolean
+                  persist_client_authorizations:
+                    description: Specifies if the client authorization details are to be persisted. Default value is true.
+                    type: boolean
+                  include_claims_in_id_token:
+                    description: 'If true then claims are included in token id, default value is false.'
+                    type: boolean
+                  refresh_token_lifetime:
+                    description: Specifies the Client-specific refresh token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  access_token_lifetime:
+                    description: Specifies the Client-specific access token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  default_acr_values:
+                    description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
+                    type: array
+                    items:
+                      type: string
+                  initiate_login_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: string
+                  exp:
+                    description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+                    type: string
+                    format: date
+                  request_uris:
+                    description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+                    type: array
+                    items:
+                      type: string
+                  authorized_origins:
+                    description: Specifies authorized JavaScript origins.
+                    type: array
+                    items:
+                      type: string
+                  software_id:
+                    description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                    type: string
+                    example: 4NRB1-0XZABZI9E6-5SM3R
+                  software_version:
+                    description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                    type: string
+                    example: '2.1'
+                  software_statement:
+                    description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+                    type: string
+                  disabled:
+                    description: Specifies whether client is disabled.
+                    type: boolean
+                  oxId:
+                    description: oxAuth Attribute Scope Id.
+                    type: string
+                  deletable:
+                    description: Specifies whether client is deletable.
+                    type: boolean
+                  client_attributes:
+                    type: object
+                    properties:
+                      tlsClientAuthSubjectDn:
+                        type: string
+                      runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+                        description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+                        type: boolean
+                      keepClientAuthorizationAfterExpiration:
+                        description: Keep Client Authorization After Expiration.
+                        type: boolean
+                  backchannel_authentication_request_signing_alg:
+                    description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
+                    type: string
+                    enum:
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  backchannel_token_delivery_mode:
+                    description: specifies how backchannel token will be delivered.
+                    type: string
+                  backchannel_client_notification_endpoint:
+                    description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
+                    type: string
+                  backchannel_user_code_parameter:
+                    description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -5648,398 +5556,8 @@ paths:
       description: Delete OpenId Connect client.
       operationId: delete-oauth-openid-clients-by-inum
       responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - OpenID Connect - Clients
-      summary: Update OpenId Connect client by Inum.
-      description: Update OpenId Connect client by Inum.
-      operationId: put-oauth-openid-clients-by-inum
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: OpenID Connect Client Details.
-              description: OpenID Connect Client Details.
-              type: object
-              properties:
-                inum:
-                  description: XRI i-number. Client Identifier to uniquely identify the client.
-                  type: string
-                display_Name:
-                  description: A human-readable name of the client.
-                  type: string
-                description:
-                  description: A human-readable string describing the client.
-                  type: string
-                application_type:
-                  description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
-                  type: string
-                  enum:
-                    - Web
-                    - Native
-                contacts:
-                  description: e-mail addresses of people responsible for this Client.
-                  type: array
-                  items:
-                    type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                post_logout_redirect_uris:
-                  description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/logout/page1'
-                    - 'https://client.example.org/logout/page2'
-                    - 'https://client.example.org/logout/page3'
-                scope:
-                  description: Provide list of scopes granted to the client.
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - read write dolphin
-                claims:
-                  description: Provide list of claims granted to the client.
-                  type: array
-                  items:
-                    type: string
-                    description: String containing a space-separated list of claims that can be requested individually.
-                client_secret:
-                  type: string
-                  description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
-                password:
-                  type: string
-                  description: User password.
-                associated_persons:
-                  description: List of associated persons.
-                  type: array
-                  items:
-                    type: string
-                    description: Reference the DN of a person.
-                trusted_client:
-                  description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
-                  type: boolean
-                response_types:
-                  description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - CODE
-                      - TOKEN
-                      - ID_TOKEN
-                grant_types:
-                  description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - AUTHORIZATION_CODE
-                      - IMPLICIT
-                      - RESOURCE_OWNER_PASSWORD_CREDENTIALS
-                      - CLIENT_CREDENTIALS
-                      - REFRESH_TOKEN
-                      - OXAUTH_UMA_TICKET
-                      - CIBA
-                      - DEVICE_CODE
-                logo_uri:
-                  description: URL that references a logo for the Client application.
-                  type: string
-                client_uri:
-                  description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-                  type: string
-                policy_uri:
-                  description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-                  type: string
-                tos_uri:
-                  description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
-                  type: string
-                jwks_uri:
-                  description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
-                  type: string
-                jwks:
-                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/JsonWebKey'
-                  example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
-                sector_identifier_uri:
-                  description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
-                  type: string
-                subject_type:
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
-                  type: string
-                  enum:
-                    - PAIRWISE
-                    - PUBLIC
-                id_token_token_binding_cnf:
-                  description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
-                  type: string
-                rpt_as_jwt:
-                  description: Specifies whether RPT should be return as signed JWT.
-                  type: boolean
-                access_token_as_jwt:
-                  description: Specifies whether access token as signed JWT.
-                  type: boolean
-                access_token_signing_alg:
-                  description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                id_token_signed_response_alg:
-                  description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
-                id_token_encrypted_response_alg:
-                  description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                id_token_encrypted_response_enc:
-                  description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                userinfo_signed_response_alg:
-                  description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                userinfo_encrypted_response_alg:
-                  description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                userinfo_encrypted_response_enc:
-                  description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                request_object_signing_alg:
-                  description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                request_object_encryption_alg:
-                  description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                request_object_encryption_enc:
-                  description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                token_endpoint_auth_method:
-                  description: Requested Client Authentication method for the Token Endpoint.
-                  type: string
-                  enum:
-                    - client_secret_basic
-                    - client_secret_post
-                    - client_secret_jwt
-                    - private_key_jwt
-                    - none
-                token_endpoint_auth_signing_alg:
-                  description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                default_max_age:
-                  description: Specifies the Default Maximum Authentication Age.
-                  type: integer
-                  format: int32
-                  example: 1000000
-                require_auth_time:
-                  description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-                  type: boolean
-                claims_redirect_uri:
-                  description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
-                  type: array
-                  items:
-                    type: string
-                logout_uri:
-                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
-                  type: array
-                  items:
-                    type: string
-                logout_session_required:
-                  description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
-                  type: boolean
-                persist_client_authorizations:
-                  description: Specifies if the client authorization details are to be persisted. Default value is true.
-                  type: boolean
-                include_claims_in_id_token:
-                  description: 'If true then claims are included in token id, default value is false.'
-                  type: boolean
-                refresh_token_lifetime:
-                  description: Specifies the Client-specific refresh token expiration.
-                  type: integer
-                  format: int32
-                  example: 100000000
-                access_token_lifetime:
-                  description: Specifies the Client-specific access token expiration.
-                  type: integer
-                  format: int32
-                  example: 100000000
-                default_acr_values:
-                  description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
-                  type: array
-                  items:
-                    type: string
-                initiate_login_uri:
-                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
-                  type: string
-                exp:
-                  description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
-                  type: string
-                  format: date
-                request_uris:
-                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                authorized_origins:
-                  description: Specifies authorized JavaScript origins.
-                  type: array
-                  items:
-                    type: string
-                software_id:
-                  description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
-                  type: string
-                  example: 4NRB1-0XZABZI9E6-5SM3R
-                software_version:
-                  description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
-                  type: string
-                  example: '2.1'
-                software_statement:
-                  description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
-                  type: string
-                disabled:
-                  description: Specifies whether client is disabled.
-                  type: boolean
-                oxId:
-                  description: oxAuth Attribute Scope Id.
-                  type: string
-                deletable:
-                  description: Specifies whether client is deletable.
-                  type: boolean
-                client_attributes:
-                  type: object
-                  properties:
-                    tlsClientAuthSubjectDn:
-                      type: string
-                    runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
-                      type: boolean
-                    keepClientAuthorizationAfterExpiration:
-                      description: Keep Client Authorization After Expiration.
-                      type: boolean
-                backchannel_authentication_request_signing_alg:
-                  description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
-                  type: string
-                  enum:
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                backchannel_token_delivery_mode:
-                  description: specifies how backchannel token will be delivered.
-                  type: string
-                backchannel_client_notification_endpoint:
-                  description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
-                  type: string
-                backchannel_user_code_parameter:
-                  description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
-                  type: boolean
-      responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6059,374 +5577,10 @@ paths:
         content:
           application/json:
             schema:
-              title: OpenID Connect Client Details.
-              description: OpenID Connect Client Details.
-              type: object
-              properties:
-                inum:
-                  description: XRI i-number. Client Identifier to uniquely identify the client.
-                  type: string
-                display_Name:
-                  description: A human-readable name of the client.
-                  type: string
-                description:
-                  description: A human-readable string describing the client.
-                  type: string
-                application_type:
-                  description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
-                  type: string
-                  enum:
-                    - Web
-                    - Native
-                contacts:
-                  description: e-mail addresses of people responsible for this Client.
-                  type: array
-                  items:
-                    type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                post_logout_redirect_uris:
-                  description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/logout/page1'
-                    - 'https://client.example.org/logout/page2'
-                    - 'https://client.example.org/logout/page3'
-                scope:
-                  description: Provide list of scopes granted to the client.
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - read write dolphin
-                claims:
-                  description: Provide list of claims granted to the client.
-                  type: array
-                  items:
-                    type: string
-                    description: String containing a space-separated list of claims that can be requested individually.
-                client_secret:
-                  type: string
-                  description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
-                password:
-                  type: string
-                  description: User password.
-                associated_persons:
-                  description: List of associated persons.
-                  type: array
-                  items:
-                    type: string
-                    description: Reference the DN of a person.
-                trusted_client:
-                  description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
-                  type: boolean
-                response_types:
-                  description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - CODE
-                      - TOKEN
-                      - ID_TOKEN
-                grant_types:
-                  description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
-                  type: array
-                  items:
-                    type: string
-                    enum:
-                      - AUTHORIZATION_CODE
-                      - IMPLICIT
-                      - RESOURCE_OWNER_PASSWORD_CREDENTIALS
-                      - CLIENT_CREDENTIALS
-                      - REFRESH_TOKEN
-                      - OXAUTH_UMA_TICKET
-                      - CIBA
-                      - DEVICE_CODE
-                logo_uri:
-                  description: URL that references a logo for the Client application.
-                  type: string
-                client_uri:
-                  description: URL of the home page of the Client. The value of this field must point to a valid Web page.
-                  type: string
-                policy_uri:
-                  description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
-                  type: string
-                tos_uri:
-                  description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
-                  type: string
-                jwks_uri:
-                  description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
-                  type: string
-                jwks:
-                  description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/JsonWebKey'
-                  example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
-                sector_identifier_uri:
-                  description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
-                  type: string
-                subject_type:
-                  description: Subject type requested for the Client ID. Valid types include pairwise and public.
-                  type: string
-                  enum:
-                    - PAIRWISE
-                    - PUBLIC
-                id_token_token_binding_cnf:
-                  description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
-                  type: string
-                rpt_as_jwt:
-                  description: Specifies whether RPT should be return as signed JWT.
-                  type: boolean
-                access_token_as_jwt:
-                  description: Specifies whether access token as signed JWT.
-                  type: boolean
-                access_token_signing_alg:
-                  description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                id_token_signed_response_alg:
-                  description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
-                id_token_encrypted_response_alg:
-                  description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                id_token_encrypted_response_enc:
-                  description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                userinfo_signed_response_alg:
-                  description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                userinfo_encrypted_response_alg:
-                  description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                userinfo_encrypted_response_enc:
-                  description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                request_object_signing_alg:
-                  description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                request_object_encryption_alg:
-                  description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - RSA1_5
-                    - RSA-OAEP
-                    - A128KW
-                    - A256KW
-                request_object_encryption_enc:
-                  description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
-                  type: string
-                  enum:
-                    - A128CBC+HS256
-                    - A256CBC+HS512
-                    - A128GCM
-                    - A256GCM
-                token_endpoint_auth_method:
-                  description: Requested Client Authentication method for the Token Endpoint.
-                  type: string
-                  enum:
-                    - client_secret_basic
-                    - client_secret_post
-                    - client_secret_jwt
-                    - private_key_jwt
-                    - none
-                token_endpoint_auth_signing_alg:
-                  description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
-                  type: string
-                  enum:
-                    - HS256
-                    - HS384
-                    - HS512
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                default_max_age:
-                  description: Specifies the Default Maximum Authentication Age.
-                  type: integer
-                  format: int32
-                  example: 1000000
-                require_auth_time:
-                  description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
-                  type: boolean
-                claims_redirect_uri:
-                  description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
-                  type: array
-                  items:
-                    type: string
-                logout_uri:
-                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
-                  type: array
-                  items:
-                    type: string
-                logout_session_required:
-                  description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
-                  type: boolean
-                persist_client_authorizations:
-                  description: Specifies if the client authorization details are to be persisted. Default value is true.
-                  type: boolean
-                include_claims_in_id_token:
-                  description: 'If true then claims are included in token id, default value is false.'
-                  type: boolean
-                refresh_token_lifetime:
-                  description: Specifies the Client-specific refresh token expiration.
-                  type: integer
-                  format: int32
-                  example: 100000000
-                access_token_lifetime:
-                  description: Specifies the Client-specific access token expiration.
-                  type: integer
-                  format: int32
-                  example: 100000000
-                default_acr_values:
-                  description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
-                  type: array
-                  items:
-                    type: string
-                initiate_login_uri:
-                  description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
-                  type: string
-                exp:
-                  description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
-                  type: string
-                  format: date
-                request_uris:
-                  description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                authorized_origins:
-                  description: Specifies authorized JavaScript origins.
-                  type: array
-                  items:
-                    type: string
-                software_id:
-                  description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
-                  type: string
-                  example: 4NRB1-0XZABZI9E6-5SM3R
-                software_version:
-                  description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
-                  type: string
-                  example: '2.1'
-                software_statement:
-                  description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
-                  type: string
-                disabled:
-                  description: Specifies whether client is disabled.
-                  type: boolean
-                oxId:
-                  description: oxAuth Attribute Scope Id.
-                  type: string
-                deletable:
-                  description: Specifies whether client is deletable.
-                  type: boolean
-                client_attributes:
-                  type: object
-                  properties:
-                    tlsClientAuthSubjectDn:
-                      type: string
-                    runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
-                      description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
-                      type: boolean
-                    keepClientAuthorizationAfterExpiration:
-                      description: Keep Client Authorization After Expiration.
-                      type: boolean
-                backchannel_authentication_request_signing_alg:
-                  description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
-                  type: string
-                  enum:
-                    - RS256
-                    - RS384
-                    - RS512
-                    - ES256
-                    - ES384
-                    - ES512
-                    - PS256
-                    - PS384
-                    - PS512
-                backchannel_token_delivery_mode:
-                  description: specifies how backchannel token will be delivered.
-                  type: string
-                backchannel_client_notification_endpoint:
-                  description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
-                  type: string
-                backchannel_user_code_parameter:
-                  description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
-                  type: boolean
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: backchannel_authentication_request_signing_alg, value: false } ]'
       responses:
         '200':
           description: OK
@@ -6443,8 +5597,8 @@ paths:
     get:
       tags:
         - OAuth - OpenID Connect - Sector Identifiers
-      summary: Get list of OpenID Connect Sectors.
-      description: Get list of OpenID Connect Sectors.
+      summary: Gets list of OpenID Connect Sectors.
+      description: Gets list of OpenID Connect Sectors.
       operationId: get-oauth-openid-sectors
       responses:
         '200':
@@ -6518,8 +5672,34 @@ paths:
                     type: string
                   example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: Newly added OpenID Connect Sector Identifier.
+                description: Newly added OpenID Connect Sector Identifier.
+                type: object
+                properties:
+                  id:
+                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
+                    type: string
+                  description:
+                    description: A human-readable string describing the sector.
+                    type: string
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/cb'
+                  client_id:
+                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
+                    type: array
+                    items:
+                      type: string
+                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -6562,6 +5742,32 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: Newly added OpenID Connect Sector Identifier.
+                description: Newly added OpenID Connect Sector Identifier.
+                type: object
+                properties:
+                  id:
+                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
+                    type: string
+                  description:
+                    description: A human-readable string describing the sector.
+                    type: string
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/cb'
+                  client_id:
+                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
+                    type: array
+                    items:
+                      type: string
+                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6629,52 +5835,8 @@ paths:
       description: Delete OpenID Connect Sector.
       operationId: delete-oauth-openid-sectors-by-id
       responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - OpenID Connect - Sector Identifiers
-      summary: Update OpenId Connect Sector by Inum.
-      description: Update OpenId Connect Sector by Inum.
-      operationId: put-oauth-openid-sectors-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Sector Identifier Details.
-              properties:
-                id:
-                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                  type: string
-                description:
-                  description: A human-readable string describing the sector.
-                  type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                client_id:
-                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
-      responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6694,28 +5856,10 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              description: Sector Identifier Details.
-              properties:
-                id:
-                  description: XRI i-number. Sector Identifier to uniquely identify the sector.
-                  type: string
-                description:
-                  description: A human-readable string describing the sector.
-                  type: string
-                redirect_uris:
-                  description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
-                  type: array
-                  items:
-                    type: string
-                  example:
-                    - 'https://client.example.org/cb'
-                client_id:
-                  description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
-                  type: array
-                  items:
-                    type: string
-                  example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: redirect_uris/2, value: https://client.example.org/cb/new } ]'
       responses:
         '200':
           description: OK
@@ -8865,7 +8009,99 @@ components:
         cibaMaxExpirationTimeAllowedSec:
           type: integer
           description: Specifies the CIBA token expiration time in seconds.
-          
+    GluuAttribute:
+      title: GluuAttribute
+      description: New attribute.
+      type: object
+      required:
+        - name
+        - displayName
+        - dataType
+        - status
+      properties:
+        name:
+          type: string
+          description: Name of the attribute.
+          example: 'name, displayName, birthdate, email'
+        displayName:
+          type: string
+          items:
+            type: string
+        description:
+          type: string
+          description: User friendly descriptive detail of attribute.
+        dataType:
+          type: string
+          description: Data Type of attribute.
+          enum:
+            - STRING
+            - NUMERIC
+            - BOOLEAN
+            - BINARY
+            - DATE
+        status:
+          type: string
+          description: Distinguished Name
+        oxMultiValuedAttribute:
+          type: boolean
+          description: Boolean value indicating if the attribute is multi-value
+        lifetime:
+          type: string
+        sourceAttribute:
+          type: string
+        salt:
+          type: string
+        nameIdType:
+          type: string
+        origin:
+          type: string
+        editType:
+          type: array
+          description: GluuUserRole
+          items:
+            type: string
+        viewType:
+          type: array
+          description: GluuUserRole
+          items:
+            type: string
+        usageType:
+          type: object
+          description: GluuAttributeUsageType
+          items:
+            type: string
+        oxAuthClaimName:
+          type: string
+        seeAlso:
+          type: string
+        saml1Uri:
+          type: string
+        saml2Uri:
+          type: string
+        urn:
+          type: string
+        oxSCIMCustomAttribute:
+          type: boolean
+          description: Boolean value indicating if the attribute is a SCIM custom attribute
+        custom:
+          type: boolean
+          description: Boolean value indicating if the attribute is a custom attribute
+        requred:
+          type: boolean
+          description: Boolean value indicating is a mandatory attribute
+        attributeValidation:
+          type: object
+          description: Details of validations to be applied on the attribute
+          properties:
+            regexp:
+              type: string
+              description: Reguar expression to be used to validate the dataType.
+            minLength:
+              type: integer
+            maxLength:
+              type: integer
+        gluuTooltip:
+          type: string    
     PatchRequest: 
       description: A JSONPatch document as defined by RFC 6902 
       required:
