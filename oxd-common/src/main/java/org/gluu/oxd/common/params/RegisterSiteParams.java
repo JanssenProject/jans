@@ -45,8 +45,8 @@ public class RegisterSiteParams implements HasOxdIdParams {
     private String client_token_endpoint_auth_signing_alg;
     @JsonProperty(value = "client_request_uris")
     private List<String> client_request_uris;
-    @JsonProperty(value = "client_frontchannel_logout_uris")
-    private List<String> client_frontchannel_logout_uris;
+    @JsonProperty(value = "client_frontchannel_logout_uri")
+    private String client_frontchannel_logout_uri;
     @JsonProperty(value = "client_sector_identifier_uri")
     private String client_sector_identifier_uri;
 
@@ -217,12 +217,12 @@ public class RegisterSiteParams implements HasOxdIdParams {
         this.client_sector_identifier_uri = clientSectorIdentifierUri;
     }
 
-    public List<String> getClientFrontchannelLogoutUris() {
-        return client_frontchannel_logout_uris;
+    public String getClientFrontchannelLogoutUri() {
+        return client_frontchannel_logout_uri;
     }
 
-    public void setClientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
-        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUris;
+    public void setClientFrontchannelLogoutUri(String clientFrontchannelLogoutUri) {
+        this.client_frontchannel_logout_uri = clientFrontchannelLogoutUri;
     }
 
     public List<String> getClientRequestUris() {
@@ -903,7 +903,7 @@ public class RegisterSiteParams implements HasOxdIdParams {
                 ", client_token_endpoint_auth_method='" + client_token_endpoint_auth_method + '\'' +
                 ", client_token_endpoint_auth_signing_alg='" + client_token_endpoint_auth_signing_alg + '\'' +
                 ", client_request_uris=" + client_request_uris +
-                ", client_frontchannel_logout_uris=" + client_frontchannel_logout_uris +
+                ", client_frontchannel_logout_uri=" + client_frontchannel_logout_uri +
                 ", client_sector_identifier_uri='" + client_sector_identifier_uri + '\'' +
                 ", scope=" + scope +
                 ", ui_locales=" + ui_locales +
