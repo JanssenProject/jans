@@ -48,7 +48,7 @@ public class RpGetRptTest {
         params.setOpHost(opHost);
         params.setRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
         params.setPostLogoutRedirectUris(Lists.newArrayList(redirectUrls.split(" ")));
-        params.setClientFrontchannelLogoutUris(Lists.newArrayList(redirectUrls.split(" ")));
+        params.setClientFrontchannelLogoutUri(redirectUrls.split(" ")[0]);
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile", "oxd"));
         params.setRptAsJwt(true);
         params.setGrantTypes(Lists.newArrayList(
