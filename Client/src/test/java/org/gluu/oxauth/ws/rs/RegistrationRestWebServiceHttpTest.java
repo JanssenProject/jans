@@ -148,7 +148,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
-        registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setFrontChannelLogoutUri(logoutUri);
         registerRequest.setFrontChannelLogoutSessionRequired(true);
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setBackchannelLogoutSessionRequired(true);
