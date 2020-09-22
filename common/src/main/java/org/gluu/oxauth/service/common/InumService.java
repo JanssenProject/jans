@@ -6,14 +6,13 @@
 
 package org.gluu.oxauth.service.common;
 
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.gluu.oxauth.model.util.Pair;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.UUID;
 
 /**
  * Provides operations with clients.
@@ -54,8 +53,7 @@ public class InumService {
 
     public String generateId(String idType) {
         if (externalIdGenerationService.isEnabled()) {
-            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("oxtrust",
-                    idType, "");
+            final String generatedId = externalIdGenerationService.executeExternalDefaultGenerateIdMethod("oxauth", idType, "");
 
             if (StringHelper.isNotEmpty(generatedId)) {
                 return generatedId;
@@ -65,7 +63,6 @@ public class InumService {
     }
 
     public String generateDefaultId() {
-
         return UUID.randomUUID().toString();
     }
 
