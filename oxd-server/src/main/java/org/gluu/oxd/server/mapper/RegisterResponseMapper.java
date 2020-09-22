@@ -44,8 +44,8 @@ public class RegisterResponseMapper {
             isRpChanged = true;
         }
 
-        if (!isListsEqualIgnoringOrder(rpFromOP.getFrontChannelLogoutUris(), rp.getFrontChannelLogoutUris())) {
-            rp.setFrontChannelLogoutUris(rpFromOP.getFrontChannelLogoutUris());
+        if (!StringUtils.equals(rpFromOP.getFrontChannelLogoutUri(), rp.getFrontChannelLogoutUri())) {
+            rp.setFrontChannelLogoutUri(rpFromOP.getFrontChannelLogoutUri());
             isRpChanged = true;
         }
 

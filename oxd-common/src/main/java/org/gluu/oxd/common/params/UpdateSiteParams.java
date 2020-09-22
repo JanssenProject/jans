@@ -36,8 +36,8 @@ public class UpdateSiteParams implements HasOxdIdParams {
     private String client_token_endpoint_auth_method;
     @JsonProperty(value = "client_request_uris")
     private List<String> client_request_uris;
-    @JsonProperty(value = "client_frontchannel_logout_uris")
-    private List<String> client_frontchannel_logout_uris;
+    @JsonProperty(value = "client_frontchannel_logout_uri")
+    private String client_frontchannel_logout_uri;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -168,12 +168,12 @@ public class UpdateSiteParams implements HasOxdIdParams {
         this.oxd_id = oxdId;
     }
 
-    public List<String> getClientFrontchannelLogoutUris() {
-        return client_frontchannel_logout_uris;
+    public String getClientFrontchannelLogoutUri() {
+        return client_frontchannel_logout_uri;
     }
 
-    public void setClientFrontchannelLogoutUris(List<String> clientFrontchannelLogoutUris) {
-        this.client_frontchannel_logout_uris = clientFrontchannelLogoutUris;
+    public void setClientFrontchannelLogoutUri(String clientFrontchannelLogoutUri) {
+        this.client_frontchannel_logout_uri = clientFrontchannelLogoutUri;
     }
 
     public List<String> getClientRequestUris() {
@@ -889,7 +889,7 @@ public class UpdateSiteParams implements HasOxdIdParams {
         sb.append(", access_token_signing_alg=").append(access_token_signing_alg);
         sb.append(", rpt_as_jwt=").append(rpt_as_jwt);
         sb.append(",claims_redirect_uri=").append(claims_redirect_uri);
-        sb.append(",client_frontchannel_logout_uris=").append(client_frontchannel_logout_uris);
+        sb.append(",client_frontchannel_logout_uri=").append(client_frontchannel_logout_uri);
 
 
         sb.append(", client_registration_access_token=").append(client_registration_access_token);

@@ -45,7 +45,7 @@ public class UpdateSiteTest {
 
         final RegisterSiteParams registerParams = new RegisterSiteParams();
         registerParams.setOpHost(opHost);
-        registerParams.setClientFrontchannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerParams.setClientFrontchannelLogoutUri(logoutUri);
         registerParams.setRedirectUris(Lists.newArrayList(authorizationRedirectUri, anotherRedirectUri, logoutUri));
         registerParams.setAcrValues(Lists.newArrayList("basic"));
         registerParams.setScope(Lists.newArrayList("openid", "profile"));

@@ -176,8 +176,8 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
-        if (params.getClientFrontchannelLogoutUris() != null && !params.getClientFrontchannelLogoutUris().isEmpty()) {
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
+        if (!Strings.isNullOrEmpty(params.getClientFrontchannelLogoutUri())) {
+            request.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
