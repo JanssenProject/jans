@@ -1,5 +1,6 @@
 package org.gluu.configapi.service;
 
+import com.github.fge.jackson.JacksonUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
@@ -29,11 +30,7 @@ public class LdapConfigurationService {
     private EncryptionService encryptionService;
 
     public List<GluuLdapConfiguration> findLdapConfigurations() {
-        return getOxIDPAuthConf().stream().map(oxIDPAuthConf::getConfig).collect(Collectors.toList());
-    }
-
-    public GluuLdapConfiguration findLdapConfigurationByName(final String name) {
-        return findByName(name);
+        return getOxIDPAuthConf().stream().map(oxIDPAuthConf::asLdapConfiguration).collect(Collectors.toList());
     }
 
     public void save(GluuLdapConfiguration ldapConfiguration) {
@@ -57,13 +54,13 @@ public class LdapConfigurationService {
     }
 
     public void remove(String name) {
-        GluuLdapConfiguration toRemove = findLdapConfigurationByName(name);
+        GluuLdapConfiguration toRemove = findByName(name);
         List<GluuLdapConfiguration> allConfiguration = new ArrayList<GluuLdapConfiguration>(findLdapConfigurations());
         List<GluuLdapConfiguration> newConfigurations = excludeFromConfigurations(allConfiguration, toRemove);
         save(newConfigurations);
     }
 
-    private GluuLdapConfiguration findByName(String name) {
+    public GluuLdapConfiguration findByName(String name) {
         List<GluuLdapConfiguration> ldapConfigurations = findLdapConfigurations();
         Optional<GluuLdapConfiguration> matchingLdapConfiguration = ldapConfigurations.stream()
                 .filter(d -> d.getConfigId().equals(name)).findFirst();
@@ -98,7 +95,7 @@ public class LdapConfigurationService {
             ldapConfigIdpAuthConf.setVersion(ldapConfigIdpAuthConf.getVersion() + 1);
             ldapConfigIdpAuthConf.setName(ldapConfig.getConfigId());
             ldapConfigIdpAuthConf.setEnabled(ldapConfig.isEnabled());
-            ldapConfigIdpAuthConf.setConfig(ldapConfig);
+            ldapConfigIdpAuthConf.setConfig(JacksonUtils.newMapper().valueToTree(ldapConfig));
 
             idpConf.add(ldapConfigIdpAuthConf);
         }

@@ -1,5 +1,6 @@
 package org.gluu.configapi.rest.resource;
 
+import com.github.fge.jsonpatch.JsonPatchException;
 import org.gluu.configapi.filters.ProtectedApi;
 import org.gluu.configapi.service.LdapConfigurationService;
 import org.gluu.configapi.util.ApiConstants;
@@ -14,6 +15,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -76,8 +78,7 @@ public class LdapConfigurationResource extends BaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString)
-            throws Exception {
+    public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name, @NotNull String requestString) throws JsonPatchException, IOException {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         logger.info("Patch Ldap Configuration by name " + name);
         ldapConfiguration = Jackson.applyPatch(requestString, ldapConfiguration);
@@ -88,8 +89,7 @@ public class LdapConfigurationResource extends BaseResource {
     @POST
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration)
-            throws Exception {
+    public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
         logger.info("Test ldapConfiguration " + ldapConfiguration);
         boolean status = connectionStatus.isUp(ldapConfiguration);
         logger.info("\n\n\n LdapConfigurationResource:::testLdapConfigurationByName() - status = " + status + "\n\n\n");
@@ -98,12 +98,10 @@ public class LdapConfigurationResource extends BaseResource {
 
     private GluuLdapConfiguration findLdapConfigurationByName(String name) {
         try {
-            return this.ldapConfigurationService.findLdapConfigurationByName(name);
+            return this.ldapConfigurationService.findByName(name);
         } catch (NoSuchElementException ex) {
             logger.error("Could not find Ldap Configuration by name '" + name + "'", ex);
             throw new NotFoundException(getNotFoundError("Ldap Configuration - '" + name + "'"));
-
         }
     }
-
 }
