@@ -248,8 +248,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
 
         //front_channel_logout_uris
-        if ((params.getClientFrontchannelLogoutUris() == null || params.getClientFrontchannelLogoutUris().isEmpty()) && (fallback.getFrontChannelLogoutUris() != null && !fallback.getFrontChannelLogoutUris().isEmpty())) {
-            params.setClientFrontchannelLogoutUris(fallback.getFrontChannelLogoutUris());
+        if (StringUtils.isBlank(params.getClientFrontchannelLogoutUri()) && StringUtils.isNotBlank(fallback.getFrontChannelLogoutUri())) {
+            params.setClientFrontchannelLogoutUri(fallback.getFrontChannelLogoutUri());
         }
 
         //sector_identifier_uri
@@ -534,8 +534,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
         request.setGrantTypes(grantTypes);
 
-        if (params.getClientFrontchannelLogoutUris() != null) {
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUris()));
+        if (StringUtils.isNotBlank(params.getClientFrontchannelLogoutUri())) {
+            request.setFrontChannelLogoutUri(params.getClientFrontchannelLogoutUri());
         }
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
