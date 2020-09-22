@@ -6,12 +6,6 @@
 
 package org.gluu.oxauth.comp;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
-
-import javax.inject.Inject;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.model.ProgrammingLanguage;
@@ -22,9 +16,13 @@ import org.gluu.oxauth.idgen.ws.rs.IdGenService;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.service.custom.CustomScriptService;
 import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.util.INumGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
