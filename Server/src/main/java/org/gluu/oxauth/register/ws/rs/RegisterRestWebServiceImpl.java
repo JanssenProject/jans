@@ -241,7 +241,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
 
-            registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
+            registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);
             registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
             String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
@@ -607,8 +607,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
-        if (requestObject.getFrontChannelLogoutUris() != null && !requestObject.getFrontChannelLogoutUris().isEmpty()) {
-            p_client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUris().toArray(new String[requestObject.getFrontChannelLogoutUris().size()]));
+        if (StringUtils.isNotBlank(requestObject.getFrontChannelLogoutUri())) {
+            p_client.setFrontChannelLogoutUri(new String[]{requestObject.getFrontChannelLogoutUri()});
         }
         p_client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
