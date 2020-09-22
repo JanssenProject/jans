@@ -60,7 +60,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-        registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setFrontChannelLogoutUri(logoutUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
