@@ -5,17 +5,18 @@ Background:
 * def customAttributes_url = attributes_url
 
 
-
 Scenario: Connect Client with CustomAttribute Testing for Client Claim Management
 #Check if custom attribute is present
 Given url customAttributes_url 
 And header Authorization = 'Bearer ' + accessToken
 And param pattern = 'customTest' 
+And param limit = 1 
 When method GET 
 Then status 200
 And print response
-When response.length != 0  
 Then print response[0].name
+Then assert responseStatus == 200
+And eval if( response.length == 0 ||response[0].name != 'customTest' ) karate.abort()
 # Create Client with CustomAttribute
 Given url openidclients_url
 And header Authorization = 'Bearer ' + accessToken
