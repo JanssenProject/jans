@@ -32,7 +32,7 @@ import java.util.UUID;
  *
  */
 
-@Path(ApiConstants.BASE_API_URL + ApiConstants.OPENID + ApiConstants.SCOPES)
+@Path(ApiConstants.BASE_API_URL + ApiConstants.SCOPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ScopesResource extends BaseResource {

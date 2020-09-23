@@ -28,10 +28,9 @@ tags:
   - name: Custom Scripts
   - name: Database - LDAP configuration
   - name: OAuth - OpenID Connect - Clients
-  - name: OAuth - OpenID Connect - Scopes
   - name: OAuth - OpenID Connect - Sector Identifiers
-  - name: OAuth - UMA Scopes
   - name: OAuth - UMA Resources
+  - name: OAuth - Scopes
 paths:
   /api/v1/oxauth/config/oxauth:
     get:
@@ -2532,476 +2531,6 @@ paths:
         - oxAuth:
             - write
     parameters: []
-  /api/v1/oxauth/openid/scopes:
-    get:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Gets list of OpenID Connect Scopes.
-      description: Gets list of OpenID Connect Scopes. Optionally max-size of the result and pattern can be provided.
-      operationId: get-oauth-openid-scopes
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: Scope description list.
-                description: List of scope description.
-                type: array
-                items:
-                  type: object
-                  description: Scope
-                  required:
-                    - id
-                    - name
-                  properties:
-                    dn:
-                      type: string
-                    id:
-                      description: The base64url encoded id.
-                      type: string
-                    inum:
-                      description: Unique id identifying the attribute
-                      type: string
-                    displayName:
-                      description: A human-readable name of the scope.
-                      type: string
-                    description:
-                      description: A human-readable string describing the scope.
-                      type: string
-                    defaultScope:
-                      description: Boolean value to specify default scope.
-                      type: boolean
-                    scopeType:
-                      description: The scopes type associated with Access Tokens determine what resources will.
-                      type: string
-                      enum:
-                        - OpenID
-                        - Dynamic
-                        - OAuth
-                    claims:
-                      description: Claim attributes associated with the scope.
-                      type: array
-                      items:
-                        type: object
-                        title: GluuAttribute
-                        properties:
-                          inum:
-                            description: Unique id identifying the attribute.
-                            type: string
-                          name:
-                            description: Name of the attribute.
-                            type: string
-                            example: 'name, displayName, birthdate, email'
-                          displayName:
-                            description: A human-readable name of the attribute.
-                            type: string
-                          description:
-                            description: User friendly descriptive detail of attribute.
-                            type: string
-                          origin:
-                            description: Origin of claim attribute.
-                            type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: integer
-            default: 50
-          in: query
-          name: limit
-          description: Search size - max size of the results to return.
-        - schema:
-            type: string
-          in: query
-          name: pattern
-          description: Search pattern.
-    post:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Create OpenId Connect Scope.
-      description: Create OpenId Connect Scope.
-      operationId: post-oauth-openid-scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: Scope
-              required:
-                - id
-                - name
-              properties:
-                dn:
-                  type: string
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                inum:
-                  description: Unique id identifying the attribute
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                description:
-                  description: A human-readable string describing the scope.
-                  type: string
-                defaultScope:
-                  description: Boolean value to specify default scope.
-                  type: boolean
-                scopeType:
-                  description: The scopes type associated with Access Tokens determine what resources will.
-                  type: string
-                  enum:
-                    - OpenID
-                    - Dynamic
-                    - OAuth
-                claims:
-                  description: Claim attributes associated with the scope.
-                  type: array
-                  items:
-                    type: object
-                    title: GluuAttribute
-                    properties:
-                      inum:
-                        description: Unique id identifying the attribute.
-                        type: string
-                      name:
-                        description: Name of the attribute.
-                        type: string
-                        example: 'name, displayName, birthdate, email'
-                      displayName:
-                        description: A human-readable name of the attribute.
-                        type: string
-                      description:
-                        description: User friendly descriptive detail of attribute.
-                        type: string
-                      origin:
-                        description: Origin of claim attribute.
-                        type: string
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                title: Scope
-                required:
-                  - id
-                  - name
-                properties:
-                  dn:
-                    type: string
-                  id:
-                    description: The base64url encoded id.
-                    type: string
-                  inum:
-                    description: Unique id identifying the attribute
-                    type: string
-                  displayName:
-                    description: A human-readable name of the scope.
-                    type: string
-                  description:
-                    description: A human-readable string describing the scope.
-                    type: string
-                  defaultScope:
-                    description: Boolean value to specify default scope.
-                    type: boolean
-                  scopeType:
-                    description: The scopes type associated with Access Tokens determine what resources will.
-                    type: string
-                    enum:
-                      - OpenID
-                      - Dynamic
-                      - OAuth
-                  claims:
-                    description: Claim attributes associated with the scope.
-                    type: array
-                    items:
-                      type: object
-                      title: GluuAttribute
-                      properties:
-                        inum:
-                          description: Unique id identifying the attribute.
-                          type: string
-                        name:
-                          description: Name of the attribute.
-                          type: string
-                          example: 'name, displayName, birthdate, email'
-                        displayName:
-                          description: A human-readable name of the attribute.
-                          type: string
-                        description:
-                          description: User friendly descriptive detail of attribute.
-                          type: string
-                        origin:
-                          description: Origin of claim attribute.
-                          type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Updates existing OpenId Connect Scope.
-      description: Updates existing OpenId Connect Scope.
-      operationId: put-oauth-openid-scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: Scope
-              required:
-                - id
-                - name
-              properties:
-                dn:
-                  type: string
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                inum:
-                  description: Unique id identifying the attribute
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                description:
-                  description: A human-readable string describing the scope.
-                  type: string
-                defaultScope:
-                  description: Boolean value to specify default scope.
-                  type: boolean
-                scopeType:
-                  description: The scopes type associated with Access Tokens determine what resources will.
-                  type: string
-                  enum:
-                    - OpenID
-                    - Dynamic
-                    - OAuth
-                claims:
-                  description: Claim attributes associated with the scope.
-                  type: array
-                  items:
-                    type: object
-                    title: GluuAttribute
-                    properties:
-                      inum:
-                        description: Unique id identifying the attribute.
-                        type: string
-                      name:
-                        description: Name of the attribute.
-                        type: string
-                        example: 'name, displayName, birthdate, email'
-                      displayName:
-                        description: A human-readable name of the attribute.
-                        type: string
-                      description:
-                        description: User friendly descriptive detail of attribute.
-                        type: string
-                      origin:
-                        description: Origin of claim attribute.
-                        type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: Scope
-                required:
-                  - id
-                  - name
-                properties:
-                  dn:
-                    type: string
-                  id:
-                    description: The base64url encoded id.
-                    type: string
-                  inum:
-                    description: Unique id identifying the attribute
-                    type: string
-                  displayName:
-                    description: A human-readable name of the scope.
-                    type: string
-                  description:
-                    description: A human-readable string describing the scope.
-                    type: string
-                  defaultScope:
-                    description: Boolean value to specify default scope.
-                    type: boolean
-                  scopeType:
-                    description: The scopes type associated with Access Tokens determine what resources will.
-                    type: string
-                    enum:
-                      - OpenID
-                      - Dynamic
-                      - OAuth
-                  claims:
-                    description: Claim attributes associated with the scope.
-                    type: array
-                    items:
-                      type: object
-                      title: GluuAttribute
-                      properties:
-                        inum:
-                          description: Unique id identifying the attribute.
-                          type: string
-                        name:
-                          description: Name of the attribute.
-                          type: string
-                          example: 'name, displayName, birthdate, email'
-                        displayName:
-                          description: A human-readable name of the attribute.
-                          type: string
-                        description:
-                          description: User friendly descriptive detail of attribute.
-                          type: string
-                        origin:
-                          description: Origin of claim attribute.
-                          type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    parameters: []
-  '/api/v1/oxauth/openid/scopes/{inum}':
-    parameters:
-      - schema:
-          type: string
-        name: inum
-        in: path
-        required: true
-    get:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Get OpenId Connect Scope by Inum
-      description: Get OpenId Connect Scope by Inum
-      operationId: get-oauth-openid-scopes-by-inum
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: Scope
-                required:
-                  - id
-                  - name
-                properties:
-                  dn:
-                    type: string
-                  id:
-                    description: The base64url encoded id.
-                    type: string
-                  inum:
-                    description: Unique id identifying the attribute
-                    type: string
-                  displayName:
-                    description: A human-readable name of the scope.
-                    type: string
-                  description:
-                    description: A human-readable string describing the scope.
-                    type: string
-                  defaultScope:
-                    description: Boolean value to specify default scope.
-                    type: boolean
-                  scopeType:
-                    description: The scopes type associated with Access Tokens determine what resources will.
-                    type: string
-                    enum:
-                      - OpenID
-                      - Dynamic
-                      - OAuth
-                  claims:
-                    description: Claim attributes associated with the scope.
-                    type: array
-                    items:
-                      type: object
-                      title: GluuAttribute
-                      properties:
-                        inum:
-                          description: Unique id identifying the attribute.
-                          type: string
-                        name:
-                          description: Name of the attribute.
-                          type: string
-                          example: 'name, displayName, birthdate, email'
-                        displayName:
-                          description: A human-readable name of the attribute.
-                          type: string
-                        description:
-                          description: User friendly descriptive detail of attribute.
-                          type: string
-                        origin:
-                          description: Origin of claim attribute.
-                          type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-    delete:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Delete OpenId Connect Scope.
-      description: Delete OpenId Connect Scope.
-      operationId: delete-oauth-openid-scopes-by-id
-      responses:
-        '204':
-          description: No Content
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    patch:
-      tags:
-        - OAuth - OpenID Connect - Scopes
-      summary: Update modified attributes of existing OpenId Connect Scope by Inum.
-      description: Update modified attributes of existing OpenId Connect Scope by Inum.
-      operationId: patch-oauth-openid-scopes-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: defaultScope, value: true } ]'
-      responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
   /api/v1/oxauth/logging:
     get:
       tags:
@@ -5584,6 +5113,376 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Client Details.
+                properties:
+                  inum:
+                    description: XRI i-number. Client Identifier to uniquely identify the client.
+                    type: string
+                  display_Name:
+                    description: A human-readable name of the client.
+                    type: string
+                  description:
+                    description: A human-readable string describing the client.
+                    type: string
+                  application_type:
+                    description: 'Kind of the application. The default, if omitted, is web. The defined values are native or web. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris, they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http scheme with localhost as the hostname.'
+                    type: string
+                    enum:
+                      - Web
+                      - Native
+                  contacts:
+                    description: e-mail addresses of people responsible for this Client.
+                    type: array
+                    items:
+                      type: string
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/cb'
+                  post_logout_redirect_uris:
+                    description: Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has been performed.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - 'https://client.example.org/logout/page1'
+                      - 'https://client.example.org/logout/page2'
+                      - 'https://client.example.org/logout/page3'
+                  scope:
+                    description: Provide list of scopes granted to the client.
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - read write dolphin
+                  claims:
+                    description: Provide list of claims granted to the client.
+                    type: array
+                    items:
+                      type: string
+                      description: String containing a space-separated list of claims that can be requested individually.
+                  client_secret:
+                    type: string
+                    description: The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+                  password:
+                    type: string
+                    description: User password.
+                  associated_persons:
+                    description: List of associated persons.
+                    type: array
+                    items:
+                      type: string
+                      description: Reference the DN of a person.
+                  trusted_client:
+                    description: Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
+                    type: boolean
+                  response_types:
+                    description: 'A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.'
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - CODE
+                        - TOKEN
+                        - ID_TOKEN
+                  grant_types:
+                    description: A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+                    type: array
+                    items:
+                      type: string
+                      enum:
+                        - AUTHORIZATION_CODE
+                        - IMPLICIT
+                        - RESOURCE_OWNER_PASSWORD_CREDENTIALS
+                        - CLIENT_CREDENTIALS
+                        - REFRESH_TOKEN
+                        - OXAUTH_UMA_TICKET
+                        - CIBA
+                        - DEVICE_CODE
+                  logo_uri:
+                    description: URL that references a logo for the Client application.
+                    type: string
+                  client_uri:
+                    description: URL of the home page of the Client. The value of this field must point to a valid Web page.
+                    type: string
+                  policy_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+                    type: string
+                  tos_uri:
+                    description: URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+                    type: string
+                  jwks_uri:
+                    description: 'URL for the Client''s JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. The JWK Set may also contain the Client''s encryption keys(s) that are used by the OP to encrypt the responses to the Client. When both signing and encryption keys are made available, a use (Key Use) parameter value is required for all keys in the document to indicate each key''s intended usage.'
+                    type: string
+                  jwks:
+                    description: 'List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JsonWebKey'
+                    example: '{ "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }'
+                  sector_identifier_uri:
+                    description: URL using the https scheme to be used in calculating Pseudonymous Identifiers by the OP.
+                    type: string
+                  subject_type:
+                    description: Subject type requested for the Client ID. Valid types include pairwise and public.
+                    type: string
+                    enum:
+                      - PAIRWISE
+                      - PUBLIC
+                  id_token_token_binding_cnf:
+                    description: 'Specifies the JWT Confirmation Method member name (e.g. tbh) that the Relying Party expects when receiving Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.'
+                    type: string
+                  rpt_as_jwt:
+                    description: Specifies whether RPT should be return as signed JWT.
+                    type: boolean
+                  access_token_as_jwt:
+                    description: Specifies whether access token as signed JWT.
+                    type: boolean
+                  access_token_signing_alg:
+                    description: 'Specifies signing algorithm that has to be used during JWT signing. If it''s not specified, then the default OP signing algorithm will be used.'
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  id_token_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - HS256 - HS384 - HS512 - RS256 - RS384 - RS512 - ES256 - ES384 - ES512 - PS256 - PS384 - PS512
+                  id_token_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  id_token_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  userinfo_signed_response_alg:
+                    description: JWS alg algorithm (JWA) required for signing UserInfo Responses.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  userinfo_encrypted_response_alg:
+                    description: JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  userinfo_encrypted_response_enc:
+                    description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  request_object_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  request_object_encryption_alg:
+                    description: JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - RSA1_5
+                      - RSA-OAEP
+                      - A128KW
+                      - A256KW
+                  request_object_encryption_enc:
+                    description: JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
+                    type: string
+                    enum:
+                      - A128CBC+HS256
+                      - A256CBC+HS512
+                      - A128GCM
+                      - A256GCM
+                  token_endpoint_auth_method:
+                    description: Requested Client Authentication method for the Token Endpoint.
+                    type: string
+                    enum:
+                      - client_secret_basic
+                      - client_secret_post
+                      - client_secret_jwt
+                      - private_key_jwt
+                      - none
+                  token_endpoint_auth_signing_alg:
+                    description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
+                    type: string
+                    enum:
+                      - HS256
+                      - HS384
+                      - HS512
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  default_max_age:
+                    description: Specifies the Default Maximum Authentication Age.
+                    type: integer
+                    format: int32
+                    example: 1000000
+                  require_auth_time:
+                    description: Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
+                    type: boolean
+                  claims_redirect_uri:
+                    description: Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the requesting party's user agent after completing its interaction.
+                    type: array
+                    items:
+                      type: string
+                  logout_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: array
+                    items:
+                      type: string
+                  logout_session_required:
+                    description: 'Boolean value specifying whether the RP requires that a session ID query parameter be included to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.'
+                    type: boolean
+                  persist_client_authorizations:
+                    description: Specifies if the client authorization details are to be persisted. Default value is true.
+                    type: boolean
+                  include_claims_in_id_token:
+                    description: 'If true then claims are included in token id, default value is false.'
+                    type: boolean
+                  refresh_token_lifetime:
+                    description: Specifies the Client-specific refresh token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  access_token_lifetime:
+                    description: Specifies the Client-specific access token expiration.
+                    type: integer
+                    format: int32
+                    example: 100000000
+                  default_acr_values:
+                    description: Array of default requested Authentication Context Class Reference values that the Authorization Server must use for processing requests from the Client.
+                    type: array
+                    items:
+                      type: string
+                  initiate_login_uri:
+                    description: Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
+                    type: string
+                  exp:
+                    description: 'Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.'
+                    type: string
+                    format: date
+                  request_uris:
+                    description: Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
+                    type: array
+                    items:
+                      type: string
+                  authorized_origins:
+                    description: Specifies authorized JavaScript origins.
+                    type: array
+                    items:
+                      type: string
+                  software_id:
+                    description: Specifies a unique identifier string (UUID) assigned by the client developer or software publisher used by registration endpoints to identify the client software to be dynamically registered.
+                    type: string
+                    example: 4NRB1-0XZABZI9E6-5SM3R
+                  software_version:
+                    description: Specifies a version identifier string for the client software identified by 'software_id'. The value of the 'software_version' should change on any update to the client software identified by the same 'software_id'.
+                    type: string
+                    example: '2.1'
+                  software_statement:
+                    description: Specifies a software statement containing client metadata values about the client software as claims. This is a string value containing the entire signed JWT.
+                    type: string
+                  disabled:
+                    description: Specifies whether client is disabled.
+                    type: boolean
+                  oxId:
+                    description: oxAuth Attribute Scope Id.
+                    type: string
+                  deletable:
+                    description: Specifies whether client is deletable.
+                    type: boolean
+                  client_attributes:
+                    type: object
+                    properties:
+                      tlsClientAuthSubjectDn:
+                        type: string
+                      runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims:
+                        description: Run Introspection Script Before Access Token as Jwt Creation and Include Claims. Default value is false.
+                        type: boolean
+                      keepClientAuthorizationAfterExpiration:
+                        description: Keep Client Authorization After Expiration.
+                        type: boolean
+                  backchannel_authentication_request_signing_alg:
+                    description: 'The JWS algorithm alg value that the Client will use for signing authentication request, as described in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.'
+                    type: string
+                    enum:
+                      - RS256
+                      - RS384
+                      - RS512
+                      - ES256
+                      - ES384
+                      - ES512
+                      - PS256
+                      - PS384
+                      - PS512
+                  backchannel_token_delivery_mode:
+                    description: specifies how backchannel token will be delivered.
+                    type: string
+                  backchannel_client_notification_endpoint:
+                    description: 'Client Initiated Backchannel Authentication (CIBA) enables a Client to initiate the authentication of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a request to the token endpoint to obtain the tokens.'
+                    type: string
+                  backchannel_user_code_parameter:
+                    description: 'Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.'
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -5863,278 +5762,31 @@ paths:
       responses:
         '200':
           description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-  /api/v1/oxauth/uma/scopes:
-    get:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Gets list of of Uma Scopes.
-      description: Gets list of of Uma Scopes.
-      operationId: get-oauth-uma-scopes
-      responses:
-        '200':
-          description: OK
           content:
             application/json:
               schema:
-                title: UMA scope description list.
-                description: List of UMA scope description.
-                type: array
-                items:
-                  type: object
-                  description: UmaScope
-                  required:
-                    - id
-                    - name
-                  properties:
-                    id:
-                      description: The base64url encoded id.
-                      type: string
-                    displayName:
-                      description: A human-readable name of the scope.
-                      type: string
-                    iconUrl:
-                      description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                      type: string
-                    authorizationPolicies:
-                      description: Policies associated with all scopes.
-                      type: array
-                      items:
-                        type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-      parameters:
-        - schema:
-            type: integer
-            default: 50
-          in: query
-          name: limit
-          description: Search size - max size of the results to return.
-        - schema:
-            type: string
-          in: query
-          name: pattern
-          description: Search pattern.
-    post:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Creates a new Uma Scope.
-      description: Creates a new Uma Scope.
-      operationId: post-oauth-uma-scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: UmaScope
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                  type: string
-                authorizationPolicies:
-                  description: Policies associated with all scopes.
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                title: UmaScope
-                required:
-                  - id
-                  - name
+                type: object
+                description: Sector Identifier Details.
                 properties:
                   id:
-                    description: The base64url encoded id.
+                    description: XRI i-number. Sector Identifier to uniquely identify the sector.
                     type: string
-                  displayName:
-                    description: A human-readable name of the scope.
+                  description:
+                    description: A human-readable string describing the sector.
                     type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                    type: string
-                  authorizationPolicies:
-                    description: Policies associated with all scopes.
+                  redirect_uris:
+                    description: Redirection URI values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request
                     type: array
                     items:
                       type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Updates existing Uma Scope.
-      description: Updates existing Uma Scope.
-      operationId: put-oauth-uma-scopes
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: UmaScope
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                  type: string
-                authorizationPolicies:
-                  description: Policies associated with all scopes.
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: UmaScope
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: The base64url encoded id.
-                    type: string
-                  displayName:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                    type: string
-                  authorizationPolicies:
-                    description: Policies associated with all scopes.
+                    example:
+                      - 'https://client.example.org/cb'
+                  client_id:
+                    description: List of OAuth 2.0 Client Identifier valid at the Authorization Server.
                     type: array
                     items:
                       type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-  '/api/v1/oxauth/uma/scopes/{inum}':
-    parameters:
-      - name: inum
-        in: path
-        required: true
-        description: Resource description ID.
-        schema:
-          type: string
-    get:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Gets Uma Scopes by Inum.
-      description: Gets Uma Scopes by Inum.
-      operationId: get-oauth-uma-scopes-by-id
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: UmaScope
-                required:
-                  - id
-                  - name
-                properties:
-                  id:
-                    description: The base64url encoded id.
-                    type: string
-                  displayName:
-                    description: A human-readable name of the scope.
-                    type: string
-                  iconUrl:
-                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                    type: string
-                  authorizationPolicies:
-                    description: Policies associated with all scopes.
-                    type: array
-                    items:
-                      type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - read
-    delete:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Deletes an Uma Scopes.
-      description: Deletes an Uma Scopes.
-      operationId: delete-oauth-uma-scopes-by-id
-      responses:
-        '204':
-          description: No Content
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    patch:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Partially update existing Uma Scope by Inum.
-      description: Partially update existing Uma Scope by Inum.
-      operationId: patch-oauth-uma-scopes-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: string 
-              $ref: '#/components/schemas/PatchRequest'
-              description: String representing patch-document.
-              example: '[ {op:replace, path: iconUrl, value:http://www.gluu.org/icons/add_photo_scope.png } ]'
-      responses:
-        '200':
-          description: OK
+                    example: 1402.0ab17362-36cc-4ac8-9c73-20239de64364 API Requesting Party Client.
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6467,6 +6119,209 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: UMAResource
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: Resource id.
+                    type: string
+                  name:
+                    description: A human-readable name of the scope.
+                    type: string
+                  iconUrl:
+                    description: A URL for a graphic icon representing the resource.
+                    type: string
+                  scopes:
+                    description: Applicable resource scopes.
+                    type: array
+                    items:
+                      type: string
+                  scopeExpression:
+                    description: List of resource scope expression.
+                    type: array
+                    items:
+                      type: string
+                  clients:
+                    description: List of associated clients.
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+  /api/v1/oxauth/scopes:
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Gets list of Scopes.
+      description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+      operationId: get-oauth-scopes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: Scope description list.
+                description: List of scope description.
+                items:
+                  $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - read
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: type
+          description: Scope type.
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
+    post:
+      tags:
+        - OAuth - Scopes
+      summary: Create Scope.
+      description: Create Scope.
+      operationId: post-oauth-scopes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scope'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    put:
+      tags:
+        - OAuth - Scopes
+      summary: Updates existing Scope.
+      description: Updates existing Scope.
+      operationId: put-oauth-scopes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scope'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    parameters: []
+  '/api/v1/oxauth/scopes/{inum}':
+    parameters:
+      - schema:
+          type: string
+        name: inum
+        in: path
+        required: true
+    get:
+      tags:
+        - OAuth - Scopes
+      summary: Get Scope by Inum
+      description: Get Scope by Inum
+      operationId: get-oauth-scopes-by-inum
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - read
+    delete:
+      tags:
+        - OAuth - Scopes
+      summary: Delete Scope.
+      description: Delete Scope.
+      operationId: delete-oauth-scopes-by-id
+      responses:
+        '204':
+          description: No Content
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+      security:
+        - oxAuth:
+            - write
+    patch:
+      tags:
+        - OAuth - Scopes
+      summary: Update modified attributes of existing Scope by Inum.
+      description: Update modified attributes of existing Scope by Inum.
+      operationId: patch-oauth-scopes-by-id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: defaultScope, value: true } ]'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -8011,7 +7866,7 @@ components:
           description: Specifies the CIBA token expiration time in seconds.
     GluuAttribute:
       title: GluuAttribute
-      description: New attribute.
+      description: Attribute.
       type: object
       required:
         - name
@@ -8124,3 +7979,64 @@ components:
        value: 
         type: object 
         description: The value to be used within the operations.
+    Scope:
+      title: Scope
+      description: Auth Scope.
+      type: object
+      properties:
+        dn:
+          type: string
+        id:
+          description: The base64url encoded id.
+          type: string
+        inum:
+          description: Unique id identifying the attribute
+          type: string
+        displayName:
+          description: A human-readable name of the scope.
+          type: string
+        description:
+          description: A human-readable string describing the scope.
+          type: string
+        iconUrl:
+          description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+          type: string
+        authorizationPolicies:
+          description: Policies associated with all scopes.
+          type: array
+          items:
+            type: string
+        defaultScope:
+          description: Boolean value to specify default scope.
+          type: boolean
+        scopeType:
+          description: The scopes type associated with Access Tokens determine what resources will.
+          type: string
+          enum:
+            - OpenID
+            - Dynamic
+            - OAuth
+        oxAuthClaims:
+          description: Claim attributes associated with the scope.
+          type: array
+          items:
+            type: string
+        umaType:
+          type: boolean
+        umaAuthorizationPolicies:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          description: ScopeAttributes
+          properties:
+            spontaneousClientId:
+              type: string
+            spontaneousClientScopes:
+              type: array
+              items:
+                type: string
+            showInConfigurationEndpoint:
+              type: boolean
+       

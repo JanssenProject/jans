@@ -26,7 +26,7 @@ function() {
 	    cacheUrl: baseUrl + '/api/v1/oxauth/config/cache',
 	    ldapUrl: baseUrl + '/api/v1/oxauth/config/database/ldap',
 	    openidclients_url: baseUrl + '/api/v1/oxauth/openid/clients',
-	    scopes_url: baseUrl + '/api/v1/oxauth/openid/scopes',
+	    scopes_url: baseUrl + '/api/v1/oxauth/scopes',
 	    openidsectors_url: baseUrl + '/api/v1/oxauth/openid/sectoridentifiers',
 	    umaresources_url: baseUrl + '/api/v1/oxauth/uma/resources',
 	    attributes_url: baseUrl + '/api/v1/oxauth/attributes',
