@@ -143,6 +143,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             #See passportlogin.xhtml
             provider = ServerUtil.getFirstValue(requestParameters, "loginForm:provider")
+
             if StringHelper.isEmpty(provider):
 
                 #it's username + passw auth
