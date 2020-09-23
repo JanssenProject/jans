@@ -9,7 +9,6 @@ import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.service.cache.*;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
-import org.slf4j.Logger;
 
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -25,9 +24,6 @@ import java.util.function.Function;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class CacheConfigurationResource extends BaseResource {
-
-    @Inject
-    Logger logger;
 
     @Inject
     ConfigurationService configurationService;
@@ -134,7 +130,7 @@ public class CacheConfigurationResource extends BaseResource {
     @GET
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response getNativePersistenceConfiguration() throws Exception {
+    public Response getNativePersistenceConfiguration() {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
 
@@ -164,7 +160,7 @@ public class CacheConfigurationResource extends BaseResource {
     @GET
     @Path(ApiConstants.MEMCACHED)
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response getMemcachedConfiguration() throws Exception {
+    public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
     }
 

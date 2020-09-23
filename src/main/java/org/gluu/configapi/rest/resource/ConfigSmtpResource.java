@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
 
 import org.gluu.configapi.filters.ProtectedApi;
@@ -19,6 +16,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Objects;
 
 /**
  * @author Mougang T.Gasmyr
@@ -42,11 +40,7 @@ public class ConfigSmtpResource extends BaseResource {
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getSmtpServerConfiguration() {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
-        if (smtpConfiguration != null) {
-            return Response.ok(smtpConfiguration).build();
-        } else {
-            return Response.ok(new SmtpConfiguration()).build();
-        }
+        return Response.ok(Objects.requireNonNullElseGet(smtpConfiguration, SmtpConfiguration::new)).build();
     }
 
     @POST
@@ -55,7 +49,6 @@ public class ConfigSmtpResource extends BaseResource {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
             smtpConfiguration.setPassword(encryptionService.encrypt(password));
-            password = null;
         }
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(smtpConfiguration);
@@ -70,7 +63,6 @@ public class ConfigSmtpResource extends BaseResource {
         String password = smtpConfiguration.getPassword();
         if (password != null && !password.isEmpty()) {
             smtpConfiguration.setPassword(encryptionService.encrypt(password));
-            password = null;
         }
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(smtpConfiguration);

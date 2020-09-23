@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
