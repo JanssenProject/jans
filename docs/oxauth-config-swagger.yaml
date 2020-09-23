@@ -5916,11 +5916,23 @@ paths:
       security:
         - oxAuth:
             - read
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
     post:
       tags:
         - OAuth - UMA Scopes
-      summary: Creates an Uma Scope.
-      description: Creates an Uma Scope.
+      summary: Creates a new Uma Scope.
+      description: Creates a new Uma Scope.
       operationId: post-oauth-uma-scopes
       requestBody:
         content:
@@ -5946,8 +5958,30 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: UmaScope
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string
+                  iconUrl:
+                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                    type: string
+                  authorizationPolicies:
+                    description: Policies associated with all scopes.
+                    type: array
+                    items:
+                      type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -5958,8 +5992,8 @@ paths:
     put:
       tags:
         - OAuth - UMA Scopes
-      summary: Update existing Uma Scope.
-      description: Update existing Uma Scope.
+      summary: Updates existing Uma Scope.
+      description: Updates existing Uma Scope.
       operationId: put-oauth-uma-scopes
       requestBody:
         content:
@@ -5987,6 +6021,28 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: UmaScope
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: The base64url encoded id.
+                    type: string
+                  displayName:
+                    description: A human-readable name of the scope.
+                    type: string
+                  iconUrl:
+                    description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
+                    type: string
+                  authorizationPolicies:
+                    description: Policies associated with all scopes.
+                    type: array
+                    items:
+                      type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6051,49 +6107,8 @@ paths:
       description: Deletes an Uma Scopes.
       operationId: delete-oauth-uma-scopes-by-id
       responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - UMA Scopes
-      summary: Update existing Uma Scope by Inum.
-      description: Update existing Uma Scope by Inum.
-      operationId: put-oauth-uma-scopes-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: UmaScope
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                  type: string
-                authorizationPolicies:
-                  description: Policies associated with all scopes.
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6113,25 +6128,10 @@ paths:
         content:
           application/json:
             schema:
-              title: UmaScope
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: The base64url encoded id.
-                  type: string
-                displayName:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner.
-                  type: string
-                authorizationPolicies:
-                  description: Policies associated with all scopes.
-                  type: array
-                  items:
-                    type: string
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: iconUrl, value:http://www.gluu.org/icons/add_photo_scope.png } ]'
       responses:
         '200':
           description: OK
@@ -6198,6 +6198,18 @@ paths:
       security:
         - oxAuth:
             - read
+      parameters:
+        - schema:
+            type: integer
+            default: 50
+          in: query
+          name: limit
+          description: Search size - max size of the results to return.
+        - schema:
+            type: string
+          in: query
+          name: pattern
+          description: Search pattern.
     post:
       tags:
         - OAuth - UMA Resources
@@ -6238,8 +6250,40 @@ paths:
                   items:
                     type: string
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                title: UMAResource
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: Resource id.
+                    type: string
+                  name:
+                    description: A human-readable name of the scope.
+                    type: string
+                  iconUrl:
+                    description: A URL for a graphic icon representing the resource.
+                    type: string
+                  scopes:
+                    description: Applicable resource scopes.
+                    type: array
+                    items:
+                      type: string
+                  scopeExpression:
+                    description: List of resource scope expression.
+                    type: array
+                    items:
+                      type: string
+                  clients:
+                    description: List of associated clients.
+                    type: array
+                    items:
+                      type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -6289,6 +6333,38 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                title: UMAResource
+                required:
+                  - id
+                  - name
+                properties:
+                  id:
+                    description: Resource id.
+                    type: string
+                  name:
+                    description: A human-readable name of the scope.
+                    type: string
+                  iconUrl:
+                    description: A URL for a graphic icon representing the resource.
+                    type: string
+                  scopes:
+                    description: Applicable resource scopes.
+                    type: array
+                    items:
+                      type: string
+                  scopeExpression:
+                    description: List of resource scope expression.
+                    type: array
+                    items:
+                      type: string
+                  clients:
+                    description: List of associated clients.
+                    type: array
+                    items:
+                      type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6298,9 +6374,9 @@ paths:
       security:
         - oxAuth:
             - write
-  '/api/v1/oxauth/uma/resources/{inum}':
+  '/api/v1/oxauth/uma/resources/{id}':
     parameters:
-      - name: inum
+      - name: id
         in: path
         required: true
         description: Resource description ID.
@@ -6309,8 +6385,8 @@ paths:
     get:
       tags:
         - OAuth - UMA Resources
-      summary: Gets an UMA resource by Inum.
-      description: Gets an UMA resource by Inum.
+      summary: Gets an UMA resource by ID.
+      description: Gets an UMA resource by ID.  
       operationId: get-oauth-uma-resources-by-id
       responses:
         '200':
@@ -6363,59 +6439,8 @@ paths:
       description: Deletes an UMA resource.
       operationId: delete-oauth-uma-resources-by-id
       responses:
-        '200':
-          description: OK
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          description: Internal Server Error
-      security:
-        - oxAuth:
-            - write
-    put:
-      tags:
-        - OAuth - UMA Resources
-      summary: Updates an UMA resource by Inum.
-      description: Updates an UMA resource by Inum.
-      operationId: put-oauth-uma-resources-by-id
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: UMAResource
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: Resource id.
-                  type: string
-                name:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the resource.
-                  type: string
-                scopes:
-                  description: Applicable resource scopes.
-                  type: array
-                  items:
-                    type: string
-                scopeExpression:
-                  description: List of resource scope expression.
-                  type: array
-                  items:
-                    type: string
-                clients:
-                  description: List of associated clients.
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          description: OK
+        '204':
+          description: No Content
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -6435,35 +6460,10 @@ paths:
         content:
           application/json:
             schema:
-              title: UMAResource
-              required:
-                - id
-                - name
-              properties:
-                id:
-                  description: Resource id.
-                  type: string
-                name:
-                  description: A human-readable name of the scope.
-                  type: string
-                iconUrl:
-                  description: A URL for a graphic icon representing the resource.
-                  type: string
-                scopes:
-                  description: Applicable resource scopes.
-                  type: array
-                  items:
-                    type: string
-                scopeExpression:
-                  description: List of resource scope expression.
-                  type: array
-                  items:
-                    type: string
-                clients:
-                  description: List of associated clients.
-                  type: array
-                  items:
-                    type: string
+              type: string 
+              $ref: '#/components/schemas/PatchRequest'
+              description: String representing patch-document.
+              example: '[ {op:replace, path: clients, value: [\"client_1\",\"client_2\"] },{op:add, path: clients/2, value: \"client_3\" } ]'
       responses:
         '200':
           description: OK
