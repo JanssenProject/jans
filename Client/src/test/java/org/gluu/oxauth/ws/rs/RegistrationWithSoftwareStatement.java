@@ -107,7 +107,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertTrue(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()).equals(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
@@ -226,7 +226,7 @@ public class RegistrationWithSoftwareStatement extends BaseTest {
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertTrue(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()).equals(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
