@@ -8,7 +8,6 @@ import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.persist.exception.EntryPersistenceException;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -33,9 +32,6 @@ public class UmaResourcesResource extends BaseResource {
 
     @Inject
     UmaResourceService umaResourceService;
-
-    @Inject
-    Logger logger;
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})

@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.gluu.configapi.rest.resource;
 
 import com.github.fge.jsonpatch.JsonPatchException;
@@ -22,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +50,7 @@ public class ScopesResource extends BaseResource {
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
             @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        List<Scope> scopes = new ArrayList<Scope>();
+        final List<Scope> scopes;
         if (StringHelper.isNotEmpty(pattern)) {
             scopes = scopeService.searchScopes(pattern, limit, type);
         } else {
@@ -66,7 +62,7 @@ public class ScopesResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
     @Path(ApiConstants.INUM_PATH)
-    public Response getOpenIdScopeByInum(@NotNull @PathParam(ApiConstants.INUM) String inum) throws Exception {
+    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
@@ -74,7 +70,7 @@ public class ScopesResource extends BaseResource {
 
     @POST
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response createOpenidScope(@Valid Scope scope) throws Exception {
+    public Response createOpenidScope(@Valid Scope scope) {
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
             scope.setDisplayName(scope.getId());
@@ -95,7 +91,7 @@ public class ScopesResource extends BaseResource {
 
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response updateScope(@Valid Scope scope) throws Exception {
+    public Response updateScope(@Valid Scope scope) {
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -128,7 +124,7 @@ public class ScopesResource extends BaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
+    public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);
