@@ -81,10 +81,17 @@ public class ScopeService {
     }
 
     public List<Scope> searchScopes(String pattern, int sizeLimit) {
-        String[] targetArray = new String[]{pattern};
+        return searchScopes(pattern, sizeLimit, null);
+    }
+
+    public List<Scope> searchScopes(String pattern, int sizeLimit, String scopeType) {
+        String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(OxConstants.displayName, null, targetArray, null);
         Filter descriptionFilter = Filter.createSubstringFilter(OxConstants.description, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+        if (StringHelper.isNotEmpty(scopeType)) {
+            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("oxScopeType", scopeType), searchFilter);
+        }
         try {
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, sizeLimit);
         } catch (Exception e) {
@@ -94,6 +101,14 @@ public class ScopeService {
     }
 
     public List<Scope> getAllScopesList(int size) {
-        return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, null, size);
+        return getAllScopesList(size, null);
+    }
+
+    public List<Scope> getAllScopesList(int size, String scopeType) {
+        Filter searchFilter = null;
+        if (StringHelper.isNotEmpty(scopeType)) {
+            searchFilter = Filter.createEqualityFilter("oxScopeType", scopeType);
+        }
+        return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, searchFilter, size);
     }
 }

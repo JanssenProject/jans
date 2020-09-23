@@ -1,6 +1,6 @@
-Feature: Openid connect Scopes
+Feature:  Scopes
 
-Scenario: Fetch all openid connect scopes without bearer token
+Scenario: Fetch all scopes without bearer token
 Given url scopes_url
 When method GET
 Then status 401
@@ -13,37 +13,33 @@ Then status 200
 And print response
 And assert response.length != null
 
-Scenario: Fetch all openid connect scopes
+Scenario: Fetch all scopes
 Given url scopes_url
-And  header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
+And header Authorization = 'Bearer ' + accessToken
 When method GET
 Then status 200
 And print response
 And assert response.length != null
 
-Scenario: Fetch the first three openidconnect scopes
+Scenario: Fetch the first three scopes
 Given url scopes_url
-And  header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
+And header Authorization = 'Bearer ' + accessToken
 And param limit = 3
 When method GET
 Then status 200
 And print response
 And assert response.length == 3
 
-Scenario: Search openid connect scopes given a serach pattern
+Scenario: Search scopes given a serach pattern
 Given url scopes_url
-And  header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
-And param pattern = 'openid'
+And header Authorization = 'Bearer ' + accessToken
+And param pattern = 'View'
 When method GET
 Then status 200
 And print response
-And assert response.length == 1
 
 @CreateUpdateDelete
-Scenario: Create new OpenId Connect Scope
+Scenario: Create new Scope
 Given url scopes_url
 And header Authorization = 'Bearer ' + accessToken
 And request read('classpath:scope.json')
@@ -64,31 +60,27 @@ And header Authorization = 'Bearer ' + accessToken
 When method DELETE
 Then status 204
 
-Scenario: Delete a non-existing openid connect scope by inum
+Scenario: Delete a non-existing scope by inum
 Given url scopes_url + '/1402.66633-8675-473e-a749'
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 404
-And print response
 
 
-Scenario: Get an openid connect scope by inum(unexisting scope)
+Scenario: Get an scope by inum(unexisting scope)
 Given url scopes_url + '/53553532727272772'
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 404
 And print response
 
-Scenario: Get an openid connect scopes by inum
+Scenario: Get an scopes by inum
 Given url scopes_url
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 200
 Given url scopes_url + '/' +response[0].inum
 And header Authorization = 'Bearer ' + accessToken
-And param type = 'openid'
 When method GET
 Then status 200
+
