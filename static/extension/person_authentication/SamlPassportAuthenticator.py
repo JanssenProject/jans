@@ -104,21 +104,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Passport. authenticate for step 1. Detected idp-initiated inbound Saml flow"
                 # get request from session attributes
                 jwt_param = identity.getSessionId().getSessionAttributes().get(AuthorizeRequestParam.STATE)
-                print "Passport. authenticate. step ==1. if self.isInboundFlow(identity):."
                 print "jwt_param = %s" % jwt_param
                 # now jwt_param != None
 
 
 
             if jwt_param == None:
-                print "Entered if jwt_param == None"
                 # gets jwt parameter "user" sent after authentication by passport (if exists)
                 jwt_param = ServerUtil.getFirstValue(requestParameters, "user")
 
 
             if jwt_param != None:
                 # and now that the jwt_param user exists...
-                print "Entered if jwt_param != None"
                 print "Passport. authenticate for step 1. JWT user profile token found"
 
                 if self.isInboundFlow(identity):
@@ -145,12 +142,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return self.attemptAuthentication(identity, user_profile, jsonp)
 
             #See passportlogin.xhtml
-            print "-------------============------------"
             provider = ServerUtil.getFirstValue(requestParameters, "loginForm:provider")
-            print "authenticate() - provider = %s" % str(provider)
 
-
-            print "authenticate - self.registeredProviders: %s" % str(self.registeredProviders)
             if StringHelper.isEmpty(provider):
 
                 #it's username + passw auth
@@ -172,7 +165,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             elif provider in self.registeredProviders:
                 # user selected provider
-                    # it's a recognized external IDP
+                # it's a recognized external IDP
 
                 identity.setWorkingParameter("selectedProvider", provider)
                 print "Passport. authenticate for step 1. Retrying step 1"
@@ -666,7 +659,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 tmpList = userByMail.getAttributeValues("oxExternalUid")
                 tmpList = ArrayList() if tmpList == None else ArrayList(tmpList)
                 tmpList.add(externalUid)
-                userByMail.setAttribute("oxExternalUid", tmpList)
+                userByMail.setAttribute("oxExternalUid", tmpList, True)
 
                 userByUid = userByMail
                 print "External user supplying mail %s will be linked to existing account '%s'" % (email, userByMail.getUserId())
@@ -701,18 +694,18 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getUserByExternalUid(self, uid, provider, userService):
         newFormat = "passport-%s:%s:%s" % ("saml", provider, uid)
-        user = userService.getUserByAttribute("oxExternalUid", newFormat)
+        user = userService.getUserByAttribute("oxExternalUid", newFormat, True)
 
         if user == None:
             oldFormat = "passport-%s:%s" % ("saml", uid)
-            user = userService.getUserByAttribute("oxExternalUid", oldFormat)
+            user = userService.getUserByAttribute("oxExternalUid", oldFormat, True)
 
             if user != None:
                 # Migrate to newer format
                 list = HashSet(user.getAttributeValues("oxExternalUid"))
                 list.remove(oldFormat)
                 list.add(newFormat)
-                user.setAttribute("oxExternalUid", ArrayList(list))
+                user.setAttribute("oxExternalUid", ArrayList(list), True)
                 print "Migrating user's oxExternalUid to newer format 'passport-saml:provider:uid'"
                 userService.updateUser(user)
 
@@ -741,7 +734,7 @@ class PersonAuthentication(PersonAuthenticationType):
         print "Passport. addUser. profile = %s" % profile
         newUser = User()
         #Fill user attrs
-        newUser.setAttribute("oxExternalUid", externalUid)
+        newUser.setAttribute("oxExternalUid", externalUid, True)
         self.fillUser(newUser, profile)
         newUser = userService.addUser(newUser, True)
         return newUser
@@ -813,18 +806,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         try:
-
-            print("passport.isInboundJwt. value = %s" % value)
-            # value = value.replace("_", ".")
-            # print("passport.isInboundJwt. value = %s" % value)
-
             jwt = Jwt.parse(value)
             print "passport.isInboundJwt. jwt = %s" % jwt
-
-            # user_profile_json = jwt.getClaims().getClaimAsString("data")
-
             user_profile_json = CdiUtil.bean(EncryptionService).decrypt(jwt.getClaims().getClaimAsString("data"))
-            print "passport.isInboundJwt. user_profile_json = %s" % user_profile_json
             if StringHelper.isEmpty(user_profile_json):
                 return False
         except InvalidJwtException:
