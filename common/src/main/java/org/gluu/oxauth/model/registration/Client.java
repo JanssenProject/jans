@@ -17,9 +17,6 @@ import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.DeletableEntity;
 import org.oxauth.persistence.model.ClientAttributes;
 
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,7 +44,7 @@ public class Client extends DeletableEntity implements Serializable {
     private String clientSecret;
 
     @AttributeName(name = "oxAuthLogoutURI")
-    private String[] frontChannelLogoutUri;
+    private String frontChannelLogoutUri;
 
     @AttributeName(name = "oxAuthLogoutSessionRequired")
     private Boolean frontChannelLogoutSessionRequired;
@@ -315,8 +312,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @return logout uri
      */
-    public String[] getFrontChannelLogoutUri() {
-        if (frontChannelLogoutUri == null) frontChannelLogoutUri = new String[0];
+    public String getFrontChannelLogoutUri() {
         return frontChannelLogoutUri;
     }
 
@@ -325,7 +321,7 @@ public class Client extends DeletableEntity implements Serializable {
      *
      * @param frontChannelLogoutUri logout uri
      */
-    public void setFrontChannelLogoutUri(String[] frontChannelLogoutUri) {
+    public void setFrontChannelLogoutUri(String frontChannelLogoutUri) {
         this.frontChannelLogoutUri = frontChannelLogoutUri;
     }
 
