@@ -73,18 +73,6 @@ public class CacheConfigurationResource extends BaseResource {
         return Response.ok(loadCacheConfiguration().getRedisConfiguration()).build();
     }
 
-    @POST
-    @Path(ApiConstants.REDIS)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
-    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
-    public Response addRedisConfiguration(@NotNull RedisConfiguration redisConfiguration) {
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
-            cache.setRedisConfiguration(redisConfiguration);
-            return cache;
-        });
-        return Response.status(Response.Status.CREATED).entity(modifiedCache.getRedisConfiguration()).build();
-    }
-
     @PUT
     @Path(ApiConstants.REDIS)
     @ProtectedApi(scopes = {WRITE_ACCESS})
@@ -101,18 +89,6 @@ public class CacheConfigurationResource extends BaseResource {
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getInMemoryConfiguration() {
         return Response.ok(loadCacheConfiguration().getInMemoryConfiguration()).build();
-    }
-
-    @POST
-    @Path(ApiConstants.IN_MEMORY)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
-    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
-    public Response addInMemoryConfiguration(@NotNull InMemoryConfiguration inMemoryConfiguration) {
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
-            cache.setInMemoryConfiguration(inMemoryConfiguration);
-            return cache;
-        });
-        return Response.status(Response.Status.CREATED).entity(modifiedCache.getInMemoryConfiguration()).build();
     }
 
     @PUT
@@ -134,18 +110,6 @@ public class CacheConfigurationResource extends BaseResource {
         return Response.ok(loadCacheConfiguration().getNativePersistenceConfiguration()).build();
     }
 
-    @POST
-    @Path(ApiConstants.NATIVE_PERSISTENCE)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
-    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
-    public Response addNativePersistenceConfiguration(@NotNull NativePersistenceConfiguration nativePersistenceConfiguration) {
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
-            cache.setNativePersistenceConfiguration(nativePersistenceConfiguration);
-            return cache;
-        });
-        return Response.status(Response.Status.CREATED).entity(modifiedCache.getNativePersistenceConfiguration()).build();
-    }
-
     @PUT
     @Path(ApiConstants.NATIVE_PERSISTENCE)
     @ProtectedApi(scopes = {WRITE_ACCESS})
@@ -162,18 +126,6 @@ public class CacheConfigurationResource extends BaseResource {
     @ProtectedApi(scopes = {READ_ACCESS})
     public Response getMemcachedConfiguration() {
         return Response.ok(loadCacheConfiguration().getMemcachedConfiguration()).build();
-    }
-
-    @POST
-    @Path(ApiConstants.MEMCACHED)
-    @ProtectedApi(scopes = {WRITE_ACCESS})
-    @Deprecated // todo what is the difference between POST and PUT ? We should drop it.
-    public Response addMemcachedConfiguration(@NotNull MemcachedConfiguration memcachedConfiguration) {
-        final CacheConfiguration modifiedCache = mergeModifiedCache(cache -> {
-            cache.setMemcachedConfiguration(memcachedConfiguration);
-            return cache;
-        });
-        return Response.status(Response.Status.CREATED).entity(modifiedCache.getMemcachedConfiguration()).build();
     }
 
     @PUT
