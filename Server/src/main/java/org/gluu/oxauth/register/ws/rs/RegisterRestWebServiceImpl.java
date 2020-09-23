@@ -608,7 +608,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         if (StringUtils.isNotBlank(requestObject.getFrontChannelLogoutUri())) {
-            p_client.setFrontChannelLogoutUri(new String[]{requestObject.getFrontChannelLogoutUri()});
+            p_client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUri());
         }
         p_client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 

@@ -146,15 +146,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     continue;
                 }
 
-                for (String logoutUri : client.getFrontChannelLogoutUri()) {
-                    if (Util.isNullOrEmpty(logoutUri)) {
-                        continue; // skip if logout_uri is blank
-                    }
-
-                    if (client.getFrontChannelLogoutSessionRequired()) {
-                        logoutUri = EndSessionUtils.appendSid(logoutUri, pair.getFirst().getOutsideSid(), appConfiguration.getIssuer());
-                    }
-                    frontchannelUris.add(logoutUri);
+                if(StringUtils.isNotBlank(client.getFrontChannelLogoutUri())) {
+                    frontchannelUris.add(EndSessionUtils.appendSid(client.getFrontChannelLogoutUri(), pair.getFirst().getOutsideSid(), appConfiguration.getIssuer()));
                 }
             }
 
