@@ -10,6 +10,7 @@ import org.gluu.configapi.util.ApiConstants;
 import org.gluu.configapi.util.AttributeNames;
 import org.gluu.configapi.util.Jackson;
 import org.gluu.oxauth.model.common.ScopeType;
+import org.gluu.util.StringHelper;
 import org.oxauth.persistence.model.Scope;
 
 import javax.inject.Inject;
@@ -40,7 +41,7 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)
 public class ScopesResource extends BaseResource {
 
-    private static final String OPENID_SCOPE = "openid connect scope";
+    private static final String SCOPE = "scope";
 
     @Inject
     ScopeService scopeService;
@@ -50,13 +51,14 @@ public class ScopesResource extends BaseResource {
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response getOpenIdConnectScopes(@DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-                                           @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
+    public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
+            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
         List<Scope> scopes = new ArrayList<Scope>();
-        if (!pattern.isEmpty() && pattern.length() >= 2) {
-            scopes = scopeService.searchScopes(pattern, limit);
+        if (StringHelper.isNotEmpty(pattern)) {
+            scopes = scopeService.searchScopes(pattern, limit, type);
         } else {
-            scopes = scopeService.getAllScopesList(limit);
+            scopes = scopeService.getAllScopesList(limit, type);
         }
         return Response.ok(scopes).build();
     }
@@ -66,7 +68,7 @@ public class ScopesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response getOpenIdScopeByInum(@NotNull @PathParam(ApiConstants.INUM) String inum) throws Exception {
         Scope scope = scopeService.getScopeByInum(inum);
-        checkResourceNotNull(scope, OPENID_SCOPE);
+        checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
     }
 
@@ -93,11 +95,11 @@ public class ScopesResource extends BaseResource {
 
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response updateOpenIdConnectScope(@Valid Scope scope) throws Exception {
+    public Response updateScope(@Valid Scope scope) throws Exception {
         String inum = scope.getInum();
-        checkNotNull(inum, OPENID_SCOPE);
+        checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
-        checkResourceNotNull(existingScope, OPENID_SCOPE);
+        checkResourceNotNull(existingScope, SCOPE);
         if (scope.getScopeType() == null) {
             scope.setScopeType(ScopeType.OAUTH);
         }
@@ -117,7 +119,7 @@ public class ScopesResource extends BaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString) throws JsonPatchException, IOException {
         Scope existingScope = scopeService.getScopeByInum(inum);
-        checkResourceNotNull(existingScope, OPENID_SCOPE);
+        checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
         scopeService.updateScope(existingScope);
         return Response.ok(existingScope).build();
@@ -128,7 +130,7 @@ public class ScopesResource extends BaseResource {
     @ProtectedApi(scopes = {WRITE_ACCESS})
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) throws Exception {
         Scope scope = scopeService.getScopeByInum(inum);
-        checkResourceNotNull(scope, OPENID_SCOPE);
+        checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);
         return Response.noContent().build();
     }
