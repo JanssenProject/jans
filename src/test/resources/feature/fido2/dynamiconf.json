@@ -1,27 +1,39 @@
 {
-"issuer":"https://pujavs3.infinity.com",
-"baseEndpoint":"https://pujavs3.infinity.com/fido2/restv1",
-"cleanServiceInterval":60,
-"cleanServiceBatchChunkSize":10000,
-"useLocalCache":true,
-"disableJdkLogger":true,
-"loggingLevel":"INFO",
-"loggingLayout":"text",
-"externalLoggerConfiguration":"",
-"metricReporterInterval":300,
-"metricReporterKeepDataDays":15,
-"metricReporterEnabled":true,
-"personCustomObjectClassList":["gluuCustomPerson","gluuPerson"],
-"fido2Configuration":{
-	"authenticatorCertsFolder":"/etc/gluu/conf/fido2/authenticator_cert",
-	"mdsCertsFolder":"/etc/gluu/conf/fido2/mds/cert",
-	"mdsTocsFolder":"/etc/gluu/conf/fido2/mds/toc",
-	"serverMetadataFolder":"/etc/gluu/conf/fido2/server_metadata",
-	"requestedCredentialTypes":["RS256","ES256"],
-	"requestedParties":[{"name":"https://pujavs3.infinity.com",
-	"domains":["pujavs3.infinity.com"]}],
-	"userAutoEnrollment":false,
-	"unfinishedRequestExpiration":180,
-	"authenticationHistoryExpiration":1296000}
-	
+  "useLocalCache": true,
+  "metricReporterInterval": 300,
+  "cleanServiceInterval": 60,
+  "issuer": "https://pujavs4.2.gluu.server",
+  "baseEndpoint": "https://pujavs4.2.gluu.server/fido2/restv1",
+  "disableJdkLogger": true,
+  "externalLoggerConfiguration": "",
+  "cleanServiceBatchChunkSize": 10000,
+  "metricReporterEnabled": true,
+  "loggingLayout": "text",
+  "metricReporterKeepDataDays": 15,
+  "loggingLevel": "INFO",
+  "personCustomObjectClassList": [
+    "gluuCustomPerson",
+    "gluuPerson"
+  ],
+  "fido2Configuration": {
+    "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
+    "requestedParties": [
+      {
+        "name": "https://pujavs4.2.gluu.server",
+        "domains": [
+          "pujavs4.2.gluu.server"
+        ]
+      }
+    ],
+    "authenticationHistoryExpiration": 800,
+    "mdsTocsFolder": "/etc/gluu/conf/fido2/mds/toc",
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ],
+    "authenticatorCertsFolder": "/etc/gluu/conf/fido2/authenticator_cert",
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 180,
+    "mdsCertsFolder": "/etc/gluu/conf/fido2/mds/cert"
+  }
 }
