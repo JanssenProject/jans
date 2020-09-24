@@ -1,10 +1,11 @@
-import sys
 import os
 import json
 import argparse
-import uuid
+import subprocess
 
-import ldap3
+from ldap3 import Server, Connection, SUBTREE, BASE, LEVEL, \
+    MODIFY_REPLACE, MODIFY_ADD, MODIFY_DELETE
+
 
 def modify_etc_hosts(host_ip, old_hosts, old_host):
 
@@ -67,7 +68,11 @@ class Installer:
 
             self.container = '/opt/gluu-server'
 
-            if ('Ubuntu' in self.server_os) or ('Debian' in self.server_os):
+            if 'nochroot' in self.gluu_version:
+                self.run_command = '{}'
+                self.container = '/'
+
+            elif ('Ubuntu' in self.server_os) or ('Debian' in self.server_os):
                 self.run_command = 'chroot {} /bin/bash -c "{}"'.format(self.container,'{}')
                 self.install_command = 'chroot {} /bin/bash -c "apt-get install -y {}"'.format(self.container,'{}')
             elif 'CentOS' in self.server_os:
@@ -82,13 +87,13 @@ class Installer:
             self.run_command = '{}'
 
     def run(self, cmd):
-        print "Executing:", cmd
+        print("Executing:", cmd)
         run_cmd = self.run_command.format(cmd)
         return self.c.run(run_cmd)
 
     def install(self, package):
         run_cmd = self.install_command.format(package)
-        print "Executing:", run_cmd
+        print("Executing:", run_cmd)
         return self.c.run(run_cmd)
 
     def delete_key(self, suffix, hostname):
@@ -144,10 +149,10 @@ class FakeRemote:
             Standard input, output and error of command
 
         """
-        print cmd
-        cin, cout, cerr = os.popen3(cmd)
+        print(cmd)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-        return '', cout.read(), cerr.read()
+        return '', p.stdout.read().decode(), p.stderr.read().decode()
 
 
     def put_file(self, filename, filecontent):
@@ -186,17 +191,18 @@ class ChangeGluuHostname:
         self.gluu_version = gluu_version
         self.local = local
         self.logger_tid = None
-        self.new_host_sa = False
+
 
     def startup(self):
-        ldap_server = ldap3.Server("ldaps://{}:1636".format(self.server), use_ssl=True)
-        self.conn = ldap3.Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
+        ldap_server = Server("ldaps://{}:1636".format(self.server), use_ssl=True)
+        self.conn = Connection(ldap_server, user="cn=directory manager", password=self.ldap_password)
         r = self.conn.bind()
         if not r:
-            print "Can't conect to LDAP Server"
+            print("Can't conect to LDAP Server")
             return False
 
-        self.container = '/opt/gluu-server'
+        
+        self.container =  '/' if 'nochroot' in self.gluu_version else '/opt/gluu-server'
 
         self.c = FakeRemote()
 
@@ -208,11 +214,11 @@ class ChangeGluuHostname:
         return True
 
     def change_ldap_entries(self):
-        print "Changing LDAP Entries"
+        print("Changing LDAP Entries")
 
         self.conn.modify(
             'ou=configuration,o=gluu', 
-             {'gluuHostname': [ldap3.MODIFY_REPLACE, self.new_host]}
+             {'gluuHostname': [MODIFY_REPLACE, self.new_host]}
             )
 
         sdns = [
@@ -224,73 +230,25 @@ class ChangeGluuHostname:
                 ]
 
         for sdn in sdns:
-            self.conn.search(search_base=sdn, search_scope=ldap3.SUBTREE, search_filter='(objectclass=*)', attributes=['*'])
+            self.conn.search(search_base=sdn, search_scope=SUBTREE, search_filter='(objectclass=*)', attributes=['*'])
+
             for entry in self.conn.response:
-
-                dn = entry['dn']
-
-                if self.new_host_sa:
-                    if 'oxAuthClient' in entry['attributes']['objectClass'] and entry['attributes']['inum'][0].startswith('1001.'):
-                        self.oxauth_client_inum = 'NEW-1001.' + str(uuid.uuid4())
-                        dn = dn.replace(entry['attributes']['inum'][0], self.oxauth_client_inum)
-                        entry['attributes']['inum'][0] = self.oxauth_client_inum
-                        self.conn.add(dn, attributes=entry['attributes'])
-
-                    elif 'oxAuthClient' in entry['attributes']['objectClass'] and entry['attributes']['inum'][0].startswith('1101.'):
-                        self.openIdClientId_inum = 'NEW-1101.' + str(uuid.uuid4())
-                        dn = dn.replace(entry['attributes']['inum'][0], self.openIdClientId_inum)
-                        entry['attributes']['inum'][0] = self.openIdClientId_inum
-                        self.conn.add(dn, attributes=entry['attributes'])
-
-                    elif dn=='ou=oxauth,ou=configuration,o=gluu':
-                        dn = 'ou=oxauth_sa,ou=configuration,o=gluu'
-                        entry['attributes']['ou'][0] = 'oxauth_sa'
-                        self.conn.add(dn, attributes=entry['attributes'])
-
-                    elif dn=='ou=oxtrust,ou=configuration,o=gluu':
-                        dn = 'ou=oxtrust_sa,ou=configuration,o=gluu'
-                        entry['attributes']['ou'][0] = 'oxtrust_sa'
-                        self.conn.add(dn, attributes=entry['attributes'])
-
-                    elif dn=='ou=oxidp,ou=configuration,o=gluu':
-                        dn = 'ou=oxidp_sa,ou=configuration,o=gluu'
-                        entry['attributes']['ou'][0] = 'oxidp_sa'
-                        self.conn.add(dn, attributes=entry['attributes'])
-
+                
                 for field in entry['attributes']:
                     changeAttr = False
                     for i, e in enumerate(entry['attributes'][field]):
-                        if isinstance(e, unicode) and self.old_host in e:
+                        if isinstance(e, str) and self.old_host in e:
                             entry['attributes'][field][i] = e.replace(self.old_host, self.new_host)
                             changeAttr = True
 
-                    if changeAttr:                
+                    if changeAttr:
                         self.conn.modify(
-                                dn, 
-                               {field: [ldap3.MODIFY_REPLACE, entry['attributes'][field]]}
-                               )
-
-        if self.new_host_sa:
-            self.conn.search(search_base='ou=oxtrust_sa,ou=configuration,o=gluu', search_scope=ldap3.BASE, search_filter='(objectclass=*)', attributes=['oxTrustConfApplication'])
-            oxTrustConfApplication = json.loads(self.conn.response[0]['attributes']['oxTrustConfApplication'][0])
-            oxTrustConfApplication['oxAuthClientId'] = self.oxauth_client_inum
-
-            self.conn.modify(
-                self.conn.response[0]['dn'], 
-                {'oxTrustConfApplication': [ldap3.MODIFY_REPLACE, json.dumps(oxTrustConfApplication, indent=2)]}
-                )
-
-            self.conn.search(search_base='ou=oxidp_sa,ou=configuration,o=gluu', search_scope=ldap3.BASE, search_filter='(objectclass=*)', attributes=['oxConfApplication'])
-            oxConfApplication = json.loads(self.conn.response[0]['attributes']['oxConfApplication'][0])
-            oxConfApplication['openIdClientId'] = self.openIdClientId_inum
-
-            self.conn.modify(
-                self.conn.response[0]['dn'], 
-                {'oxConfApplication': [ldap3.MODIFY_REPLACE, json.dumps(oxConfApplication, indent=2)]}
-                )
+                                entry['dn'], 
+                                {field: [MODIFY_REPLACE, entry['attributes'][field]]}
+                                )
 
     def change_httpd_conf(self):
-        print "Changing httpd configurations"
+        print("Changing httpd configurations")
         if 'CentOS' in self.os_type:
             
             httpd_conf = os.path.join(self.container, 'etc/httpd/conf/httpd.conf')
@@ -310,7 +268,7 @@ class ChangeGluuHostname:
 
 
     def create_new_certs(self):
-        print "Creating certificates"
+        print("Creating certificates")
         cmd_list = [
             '/usr/bin/openssl genrsa -des3 -out /etc/certs/{0}.key.orig -passout pass:secret 2048',
             '/usr/bin/openssl rsa -in /etc/certs/{0}.key.orig -passin pass:secret -out /etc/certs/{0}.key',
@@ -330,7 +288,7 @@ class ChangeGluuHostname:
 
             for cmd in cmd_list:
                 cmd = cmd.format(crt)
-                print self.installer.run(cmd)
+                print(self.installer.run(cmd))
 
 
             if not crt == 'saml.pem':
@@ -345,18 +303,18 @@ class ChangeGluuHostname:
         self.installer.run('chown jetty:jetty /etc/certs/oxauth-keys.*')
 
     def change_host_name(self):
-        print "Changing hostname"
+        print("Changing hostname")
         hostname_file = os.path.join(self.container, 'etc/hostname')
-        print self.c.put_file(hostname_file, self.new_host)
+        print(self.c.put_file(hostname_file, self.new_host))
 
     def modify_etc_hosts(self):
-        print "Modifying /etc/hosts"
+        print("Modifying /etc/hosts")
         hosts_file = os.path.join(self.container, 'etc/hosts')
         r = self.c.get_file(hosts_file)
         if r[0]:
             old_hosts = r[1]
             news_hosts = modify_etc_hosts([(self.new_host, self.ip_address)], old_hosts, self.old_host)
-            print self.c.put_file(hosts_file, news_hosts) 
+            print(self.c.put_file(hosts_file, news_hosts)) 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
