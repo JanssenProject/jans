@@ -1,16 +1,13 @@
 package org.gluu.configapi.rest.resource;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import org.gluu.config.oxtrust.DbApplicationConfiguration;
 import org.gluu.configapi.filters.ProtectedApi;
-import org.gluu.configapi.rest.model.Fido2Configuration;
 import org.gluu.configapi.service.Fido2Service;
 import org.gluu.configapi.util.ApiConstants;
+import org.gluu.configapi.util.Jackson;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,9 +17,6 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class Fido2ConfigResource extends BaseResource {
 
-    /**
-     *
-     */
     private static final String FIDO2_CONFIGURATION = "fido2Configuration";
 
     @Inject
@@ -30,34 +24,17 @@ public class Fido2ConfigResource extends BaseResource {
 
     @GET
     @ProtectedApi(scopes = {READ_ACCESS})
-    public Response getFido2Configuration() {
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
+    public Response getFido2Configuration() throws Exception{
         DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
-        if (dbApplicationConfiguration != null) {
-            String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
-            Gson gson = new Gson();
-            JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            JsonElement fido2ConfigurationElement = jsonObject.get(FIDO2_CONFIGURATION);
-            fido2Configuration = gson.fromJson(fido2ConfigurationElement, Fido2Configuration.class);
-        }
-        return Response.ok(fido2Configuration).build();
+        return Response.ok(Jackson.asJsonNode(dbApplicationConfiguration.getDynamicConf())).build();
     }
 
     @PUT
     @ProtectedApi(scopes = {WRITE_ACCESS})
-    public Response updateFido2Configuration(@Valid Fido2Configuration fido2Configuration) {
-        DbApplicationConfiguration dbApplicationConfiguration = this.fido2Service.find();
-        if (dbApplicationConfiguration != null) {
-            String fido2ConfigJson = dbApplicationConfiguration.getDynamicConf();
-            Gson gson = new Gson();
-            JsonElement jsonElement = gson.fromJson(fido2ConfigJson, JsonElement.class);
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            JsonElement updatedElement = gson.toJsonTree(fido2Configuration);
-            jsonObject.add(FIDO2_CONFIGURATION, updatedElement);
-            this.fido2Service.merge(jsonObject.toString());
-        }
-        return Response.ok(fido2Configuration).build();
+    public Response updateFido2Configuration(@NotNull String fido2ConfigJson) {
+        checkResourceNotNull(fido2ConfigJson, FIDO2_CONFIGURATION);
+         this.fido2Service.merge(fido2ConfigJson);
+        return Response.ok(fido2ConfigJson).build();
     }
-
+    
 }
