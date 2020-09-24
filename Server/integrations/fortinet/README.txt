@@ -46,8 +46,8 @@ Follow the steps below to enable Fortinet's RADIUS authentication:
 
 |	Property	|	Description		| Input value     |
 |-----------------------|-------------------------------|---------------|
-|RADIUS_SERVER_IP		|IP address of Fortinet's RADIUS Server		| 123.12.12.32 |
-|RADIUS_SERVER_SECRET		|Configured when the RADIUS client is registered. | anc@QdZZee= |
+|RADIUS_SERVER_IP		|IP address of Fortinet's RADIUS Server		| 10.10.10.1 |
+|RADIUS_SERVER_SECRET		|Configured when the RADIUS client is registered. | spam |
 |RADIUS_SERVER_AUTH_PORT            |Authentication port | 1812 |
 |RADIUS_SERVER_ACCT_PORT            |Accounting port | 1813 |
 
