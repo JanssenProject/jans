@@ -28,7 +28,7 @@ name_changer = ChangeGluuHostname(
     server='localhost',
     
     # The password to the the LDAP server
-    ldap_password="Top!Secret-20",
+    ldap_password="Gluu1234.",
     
     # 'Ubuntu' or 'CentOS'
     os_type='CentOS',
@@ -37,8 +37,8 @@ name_changer = ChangeGluuHostname(
     # Not recommended as the script should be run locally
     local = True,
     
-    # Version of Gluu Server you're trying to modify. For example: '4.1.1'
-    gluu_version='4.1.1',
+    # Version of Gluu Server you're trying to modify. For example: 4.1.1 , nochroot-4.2.1
+    gluu_version='4.2.1',
     
     )
 
