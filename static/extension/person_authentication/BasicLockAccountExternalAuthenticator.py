@@ -240,6 +240,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return
         
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
+        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "false")
         updated_user = userService.updateUser(find_user_by_uid)
 
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
@@ -264,6 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
         userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "active")
+        userService.setCustomAttribute(find_user_by_uid, "oxTrustActive", "true")
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         updated_user = userService.updateUser(find_user_by_uid)
 
