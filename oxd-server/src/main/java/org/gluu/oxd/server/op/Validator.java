@@ -213,11 +213,7 @@ public class Validator {
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
         if (Strings.isNullOrEmpty(kid) && (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA || signatureAlgorithm.getFamily() == AlgorithmFamily.EC)) {
-            LOG.warn("`kid` is missing in id_token. Checking keystore for `kid`");
-            kid = keyService.getKeyId(idToken, jwkUrl, signatureAlgorithm, Use.SIGNATURE);
-            if (Strings.isNullOrEmpty(kid)) {
-                throw new HttpException(ErrorResponseCode.KEY_ID_NOT_FOUND);
-            }
+            LOG.warn("Warning:`kid` is missing in id_token header. Error will fail if RP is unable to determine the key to used for `id_token` validation.");
         }
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
@@ -238,12 +234,12 @@ public class Validator {
                 }
             };
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA) {
-            final RSAPublicKey publicKey = (RSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
+            final RSAPublicKey publicKey = (RSAPublicKey) keyService.getPublicKey(jwkUrl, kid, signatureAlgorithm, Use.SIGNATURE);
             return opClientFactory.createRSASigner(signatureAlgorithm, publicKey);
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
             return new HMACSigner(signatureAlgorithm, rp.getClientSecret());
         } else if (signatureAlgorithm.getFamily() == AlgorithmFamily.EC) {
-            final ECDSAPublicKey publicKey = (ECDSAPublicKey) keyService.getPublicKey(jwkUrl, kid);
+            final ECDSAPublicKey publicKey = (ECDSAPublicKey) keyService.getPublicKey(jwkUrl, kid, signatureAlgorithm, Use.SIGNATURE);
             return new ECDSASigner(signatureAlgorithm, publicKey);
         }
         throw new HttpException(ErrorResponseCode.ALGORITHM_NOT_SUPPORTED);
