@@ -213,7 +213,7 @@ public class Validator {
             throw new HttpException(ErrorResponseCode.INVALID_ALGORITHM);
 
         if (Strings.isNullOrEmpty(kid) && (signatureAlgorithm.getFamily() == AlgorithmFamily.RSA || signatureAlgorithm.getFamily() == AlgorithmFamily.EC)) {
-            LOG.warn("Warning:`kid` is missing in id_token header. Error will fail if RP is unable to determine the key to used for `id_token` validation.");
+            LOG.warn("Warning:`kid` is missing in id_token header. oxd will throw error if RP is unable to determine the key to used for `id_token` validation.");
         }
         if (signatureAlgorithm == SignatureAlgorithm.NONE) {
 
