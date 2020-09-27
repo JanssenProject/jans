@@ -248,7 +248,7 @@ public class Validator {
     public void validateNonce(StateService stateService) {
         final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
         if (!stateService.isExpiredObjectPresent(nonceFromToken)) {
-            LOG.error("Nonce value is not registered by oxd.");
+            LOG.error("Nonce value from `id_token` is not registered with oxd.");
             throw new HttpException(ErrorResponseCode.INVALID_NONCE);
         }
     }
