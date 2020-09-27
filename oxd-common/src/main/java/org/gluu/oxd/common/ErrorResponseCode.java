@@ -32,7 +32,7 @@ public enum ErrorResponseCode {
     NO_ID_TOKEN_PARAM(400, "no_id_token", "id_token is not provided in request to oxd."),
     NO_ACCESS_TOKEN_RETURNED(500, "no_access_token", "access_token is not returned by OP. Please check OP configuration."),
     ACCESS_TOKEN_INSUFFICIENT_SCOPE(403, "access_token_insufficient_scope", "access_token does not have `oxd` scope. Make sure a) scope exists on AS b) register_site is registered with 'oxd' scope c) get_client_token has 'oxd' scope in request"),
-    INVALID_NONCE(400, "invalid_nonce", "Nonce value is not registered by oxd."),
+    INVALID_NONCE(400, "invalid_nonce", "Nonce value is not registered with oxd."),
     INVALID_ID_TOKEN_NO_NONCE(500, "invalid_id_token_no_nonce", "Invalid id_token. Nonce claim is missing from id_token."),
     INVALID_STATE(400, "invalid_state", "State value is not registered by oxd."),
     INVALID_ID_TOKEN_BAD_NONCE(500, "invalid_id_token_bad_nonce", "Invalid id_token. Nonce value from token does not match nonce from request."),
