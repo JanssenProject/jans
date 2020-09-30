@@ -109,7 +109,7 @@ public class ConfigurationFactory {
 
         this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
         loadCryptoConfigurationSalt();
-
+        
         if (!createFromDb()) {
             log.error("Failed to load configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from persistence.");

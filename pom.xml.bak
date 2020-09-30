@@ -126,6 +126,11 @@
             </exclusions>
         </dependency>
         <dependency>
+                <groupId>org.gluu</groupId>
+                <artifactId>oxauth-client</artifactId>
+                <version>${oxauth.version}</version>
+            </dependency>
+        <dependency>
             <groupId>org.jboss.logmanager</groupId>
             <artifactId>log4j2-jboss-logmanager</artifactId>
         </dependency>
@@ -138,11 +143,6 @@
                     <groupId>*</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxauth-client</artifactId>
-            <version>${oxauth.version}</version>
         </dependency>
 
         <!-- Karate -->
