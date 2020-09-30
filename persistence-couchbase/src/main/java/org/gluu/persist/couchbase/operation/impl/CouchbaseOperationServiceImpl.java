@@ -219,7 +219,6 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 		try {
             MutateInBuilder builder = bucketMapping.getBucket().mutateIn(key);
             if (expiration != null) {
-            	bucketMapping.getBucket().touch(key, expiration);
             	builder = builder.withExpiry(expiration);
             }
 
