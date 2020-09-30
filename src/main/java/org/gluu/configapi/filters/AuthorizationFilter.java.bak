@@ -21,6 +21,7 @@ import javax.ws.rs.ext.Provider;
  * @author Mougang T.Gasmyr
  */
 @Provider
+@ProtectedApi
 @PreMatching
 @Priority(1)
 public class AuthorizationFilter implements ContainerRequestFilter {
