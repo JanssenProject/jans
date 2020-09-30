@@ -115,7 +115,7 @@ class RadiusInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '+x', '/etc/init.d/gluu-radius'])
         
             if base.os_name != 'ubuntu16':
-                self.copyFile(os.path.join(self.source_dir, 'systemd/gluu-radius.service'), '/usr/lib/systemd/system')
+                self.copyFile(os.path.join(self.source_dir, 'systemd/gluu-radius.service'), '/etc/systemd/system')
 
         #create empty gluu-radius.private-key.pem
         gluu_radius_private_key_fn = os.path.join(Config.certFolder, 'gluu-radius.private-key.pem')
