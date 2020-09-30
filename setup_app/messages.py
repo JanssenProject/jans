@@ -3,7 +3,7 @@ class msg:
     MAIN_label = "System Information"
     HostForm_label = "Gathering Information"
     ServicesForm_label = "Select Services to Install"
-    DBBackendForm_label = "Choose to Store in WrenDS"
+    DBBackendForm_label = "Choose to Store in OpenDJ"
     StorageSelectionForm_label = "Hybrid Storage Selection"
     InstallStepsForm_label = "Installing Gluu Server"
     DisplaySummaryForm_label = "Gluu Server Installation Summary"
@@ -34,7 +34,7 @@ class msg:
     installOxAuthRP_label = "Install OxAuthRP" 
     installPassport_label = "Install Passport" 
     installGluuRadius_label = "Install Radius"
-    wrends_storages_label = "Store on WrenDS"
+    wrends_storages_label = "Store on OpenDJ"
     installing_label = "Current"
     installOxd_label = "Install Oxd"
     installCasa_label = "Install Casa"
@@ -57,7 +57,7 @@ class msg:
     oxtrust_admin_password_label = "oxTrust Admin Password"
     oxtrust_admin_password_warning = "oxTrust Admin Password should be at least six characters"
     max_ram_int_warning = "Please enter and integer value for Max ram"
-    memory_warning = "WARINIG: You don't have enough memory to run Gluu CE properly with selected applications."
+    memory_warning = "WARINIG: You don't have enough memory to run Gluu CE properly with selected applications. Continue anyway?"
 
     exit_from_app = "Setup is exiting. %(reason)s"
     not_to_continue = "Since you don't want to continue."
@@ -79,12 +79,12 @@ class msg:
     ask_installGluuRadius = "Install Gluu Radius"
     ask_installCasa = "Install Casa"
     ask_installOxd = "Install Oxd"
-    ask_wrends_install = "Install WrenDS"
+    ask_wrends_install = "Install OpenDJ"
     ask_installScimServer = "Install Scim Server"
     ask_installFido2 = "Install Fido2"
 
 
-    wrends_install_options = ["Don't Install","Install Locally","Use Remote WrenDS"]
+    wrends_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
     oxd_url_label = "oxd Server URL"
     install_oxd_or_url_warning = "Please either enter oxd Server URL or check Install Oxd"
     oxd_connection_error = "Can't connect to oxd-server with url {}. Reason: {}"
@@ -111,7 +111,7 @@ class msg:
     post_installation = "Please exit from container and restart Gluu Server."
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
-    installation_description_opendj = "WrenDS is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
+    installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
     installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
     installation_description_oxtrust = "oxTrust is a Weld based web application for Gluu Server administration."
     installation_description_saml = "The Gluu Server acts as a SAML identity provider (IDP) to support outbound SAML single sign-on (SSO)."
