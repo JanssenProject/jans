@@ -17,7 +17,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def __init__(self):
         self.service_name = 'opendj'
-        self.pbar_text = "Installing WrenDS"
+        self.pbar_text = "Installing OpenDJ"
         self.needdb = False # we don't need backend connection in this class
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
@@ -34,33 +34,33 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
 
     def install(self):
-        self.logIt("Running WrenDS Setup")
+        self.logIt("Running OpenDJ Setup")
 
         if not base.snap:
-            Config.pbar.progress(self.service_name, "Extracting WrenDS", False)
+            Config.pbar.progress(self.service_name, "Extracting OpenDJ", False)
             self.extractOpenDJ()
 
         self.createLdapPw()
 
-        Config.pbar.progress(self.service_name, "Installing WrenDS", False)
+        Config.pbar.progress(self.service_name, "Installing OpenDJ", False)
         if Config.wrends_install == InstallTypes.LOCAL:
             self.install_opendj()
-            Config.pbar.progress(self.service_name, "Setting up WrenDS service", False)
+            Config.pbar.progress(self.service_name, "Setting up OpenDJ service", False)
             self.setup_opendj_service()
-            Config.pbar.progress(self.service_name, "Preparing WrenDS schema", False)
+            Config.pbar.progress(self.service_name, "Preparing OpenDJ schema", False)
             self.prepare_opendj_schema()
 
-        # it is time to bind WrenDS
+        # it is time to bind OpenDJ
         self.dbUtils.bind()
 
         if Config.wrends_install:
-            Config.pbar.progress(self.service_name, "Creating WrenDS backends", False)
+            Config.pbar.progress(self.service_name, "Creating OpenDJ backends", False)
             self.create_backends()
-            Config.pbar.progress(self.service_name, "Configuring WrenDS", False)
+            Config.pbar.progress(self.service_name, "Configuring OpenDJ", False)
             self.configure_opendj()
-            Config.pbar.progress(self.service_name, "Exporting WrenDS certificate", False)
+            Config.pbar.progress(self.service_name, "Exporting OpenDJ certificate", False)
             self.export_opendj_public_cert()
-            Config.pbar.progress(self.service_name, "Creating WrenDS indexes", False)
+            Config.pbar.progress(self.service_name, "Creating OpenDJ indexes", False)
             self.index_opendj()
 
             ldif_files = []
@@ -73,13 +73,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             for group in ldap_mappings:
                 ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
 
-            Config.pbar.progress(self.service_name, "Importing ldif files to WrenDS", False)
+            Config.pbar.progress(self.service_name, "Importing ldif files to OpenDJ", False)
             if not Config.ldif_base in ldif_files:
                 self.dbUtils.import_ldif([Config.ldif_base], force=BackendTypes.LDAP)
 
             self.dbUtils.import_ldif(ldif_files)
 
-            Config.pbar.progress(self.service_name, "WrenDS post installation", False)
+            Config.pbar.progress(self.service_name, "OpenDJ post installation", False)
             if Config.wrends_install == InstallTypes.LOCAL:
                 self.post_install_opendj()
 
@@ -189,7 +189,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
 
     def configure_opendj(self):
-        self.logIt("Configuring WrenDS")
+        self.logIt("Configuring OpenDJ")
 
         opendj_config = [
                 ('ds-cfg-backend-id=userRoot,cn=Backends,cn=config', 'ds-cfg-db-cache-percent', '70', ldap3.MODIFY_REPLACE),
@@ -208,14 +208,14 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             opendj_config.append(('cn=Administration Connector,cn=config', 'ds-cfg-listen-address', '127.0.0.1', ldap3.MODIFY_REPLACE))
 
         for dn, attr, val, change_type in opendj_config:
-            self.logIt("Changing WrenDS Configuration for {}".format(dn))
+            self.logIt("Changing OpenDJ Configuration for {}".format(dn))
             self.dbUtils.ldap_conn.modify(
                     dn, 
                      {attr: [change_type, val]}
                     )
         #Create uniqueness for attrbiutes
         for attr in ('mail', 'uid'):
-            self.logIt("Creating WrenDS uniqueness for {}".format(attr))
+            self.logIt("Creating OpenDJ uniqueness for {}".format(attr))
             cn = 'Unique {} entry'.format(attr)
             self.dbUtils.ldap_conn.add(
                 'cn={},cn=Plugins,cn=config'.format(cn),
@@ -268,7 +268,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
     def index_opendj(self):
 
-        self.logIt("Creating WrenDS Indexes")
+        self.logIt("Creating OpenDJ Indexes")
 
         with open(self.openDjIndexJson) as f:
             index_json = json.load(f)
