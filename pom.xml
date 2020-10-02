@@ -149,12 +149,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>janssen-fido2-server</artifactId>
+				<artifactId>fido2-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>janssen-fido2-client</artifactId>
+				<artifactId>fido2-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -243,12 +243,6 @@
 				<groupId>org.janssen</groupId>
 				<artifactId>eleven-model</artifactId>
 				<version>${oxeleven.version}</version>
-			</dependency>
-			<!-- Fido2 -->
-			<dependency>
-				<groupId>org.janssen</groupId>
-				<artifactId>fido2-client</artifactId>
-				<version>${fido2.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
