@@ -32,9 +32,9 @@
 			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
 		<repository>
-			<id>janssen</id>
-			<name>janssen repository</name>
-			<url>https://ox.janssen.org/maven</url>
+			<id>gluu</id>
+			<name>gluu repository</name>
+			<url>https://ox.gluu.org/maven</url>
 		</repository>
 	</repositories>
 
