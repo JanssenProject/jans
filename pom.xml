@@ -103,7 +103,7 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>oxcore-util</artifactId>
+                <artifactId>core-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -113,7 +113,7 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>oxcore-cdi</artifactId>
+                <artifactId>core-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -178,7 +178,7 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>janssen-core-util</artifactId>
+                <artifactId>core-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
