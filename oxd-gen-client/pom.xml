@@ -288,5 +288,6 @@
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <junit-version>4.12</junit-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <skip.swagger.client.generation>true</skip.swagger.client.generation>
     </properties>
 </project>
