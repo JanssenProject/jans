@@ -22,6 +22,7 @@
         <guava.version>[24.1.1,)</guava.version>
         <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
         <selenium.version>2.53.1</selenium.version>
+        <skip.swagger.client.generation>false</skip.swagger.client.generation>
     </properties>
 
     <prerequisites>
@@ -383,6 +384,62 @@
                         </plugin>
                     </plugins>
                 </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>generate-swagger-client</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.swagger.codegen.v3</groupId>
+                        <artifactId>swagger-codegen-maven-plugin</artifactId>
+                        <version>3.0.18</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.swagger.client.generation}</skip>
+                                    <inputSpec>${project.basedir}/oxd-server/src/main/resources/swagger.yaml</inputSpec>
+                                    <output>${project.basedir}/target/generated-sources/swagger</output>
+                                    <language>java</language>
+                                    <generateApiTests>false</generateApiTests>
+                                    <generateModelDocumentation>false</generateModelDocumentation>
+                                    <generateApiDocumentation>false</generateApiDocumentation>
+                                    <configOptions>
+                                        <sourceFolder>gen</sourceFolder>
+                                        <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                    </configOptions>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>delete-swagger-generated-client-from-builtDir</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skip.swagger.client.generation}</skip>
+                                    <target>
+                                        <copy todir="${project.basedir}/oxd-gen-client/src/main/java">
+                                            <fileset dir="${project.basedir}/target/generated-sources/swagger/gen"/>
+                                        </copy>
+                                        <delete dir="${project.basedir}/target"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
             </build>
         </profile>
     </profiles>
