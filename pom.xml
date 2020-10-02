@@ -7,7 +7,6 @@
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
 	<name>janssen</name>
-	<url>http://www.janssen.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -177,32 +176,32 @@
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-annotation</artifactId>
+				<artifactId>persistence-annotation</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-ldap</artifactId>
+				<artifactId>persistence-ldap</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-couchbase</artifactId>
+				<artifactId>persistence-couchbase</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-hybrid</artifactId>
+				<artifactId>persistence-hybrid</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-cdi</artifactId>
+				<artifactId>persistence-cdi</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>core-persistence-filter</artifactId>
+				<artifactId>persistence-filter</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
 			<dependency>
