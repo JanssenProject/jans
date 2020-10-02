@@ -69,8 +69,6 @@ public interface IFido2DeviceWebService {
     /**
      * Removes a Fido 2 device via DELETE HTTP method (see section 3.6 of RFC 7644).
      * @param id The "id" attribute of the resource to be removed
-     * @param userId The "inum" attribute of the owner of this resource. This is required for the operation
-     *               to succeed in backends such as couchbase
      * @return An object abstracting the response obtained from the server to this request.
      * A succesful response for this operation should contain a status code of 204 (no content)
      */
@@ -78,7 +76,7 @@ public interface IFido2DeviceWebService {
     @DELETE
     @Produces({MEDIA_TYPE_SCIM_JSON + UTF8_CHARSET_FRAGMENT, MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT})
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
-    Response deleteF2Device(@PathParam("id") String id, @QueryParam("userId") String userId);
+    Response deleteF2Device(@PathParam("id") String id);
 
     /**
      * Sends a search query for Fido 2 devices using GET (see section 3.4.2 of RFC 7644).

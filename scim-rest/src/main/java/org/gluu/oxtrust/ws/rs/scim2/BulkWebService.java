@@ -396,8 +396,7 @@ public class BulkWebService extends BaseScimWebService {
                         response=fidoDeviceWS.updateDevice(dev, fragment, "id", null);
                         break;
                     case DELETE:
-                    	//No support for removal in couchbase via bulk
-                        response=fidoDeviceWS.deleteDevice(fragment, null);
+                        response=fidoDeviceWS.deleteDevice(fragment);
                         break;
                     case PATCH:
                         PatchRequest pr=mapper.readValue(data, PatchRequest.class);
@@ -416,8 +415,7 @@ public class BulkWebService extends BaseScimWebService {
                         response=fido2DeviceWS.updateF2Device(dev, fragment, "id", null);
                         break;
                     case DELETE:
-                    	//No support for removal in couchbase via bulk
-                        response=fido2DeviceWS.deleteF2Device(fragment, null);
+                        response=fido2DeviceWS.deleteF2Device(fragment);
                         break;
                     case PATCH:
                         PatchRequest pr=mapper.readValue(data, PatchRequest.class);

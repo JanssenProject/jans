@@ -100,7 +100,7 @@ public class Fido2DeviceTest extends BaseTest {
     @Test(dependsOnMethods = "updateWithObject", alwaysRun = true)
     public void delete(){
         logger.debug("Deleting Fido 2 device");
-        Response response=client.deleteF2Device(device.getId(), device.getUserId());
+        Response response=client.deleteF2Device(device.getId());
         assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
         logger.debug("deleted");
     }
