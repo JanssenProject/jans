@@ -88,16 +88,14 @@
             <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
 
-        <!-- Gluu -->
+        <!-- Janssen -->
         <dependency>
             <groupId>org.janssen</groupId>
             <artifactId>janssen-client</artifactId>
-            <version>${gluu.version}</version>
         </dependency>
         <dependency>
             <groupId>org.janssen</groupId>
             <artifactId>fido2-model</artifactId>
-            <version>${gluu.version}</version>
         </dependency>
 
         <!-- commons -->

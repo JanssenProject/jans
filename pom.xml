@@ -66,16 +66,20 @@
 				<artifactId>janssen-common</artifactId>
 				<version>${janssen.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.janssen</groupId>
 				<artifactId>janssen-model</artifactId>
 				<version>${janssen.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.janssen</groupId>
+                <artifactId>janssen-client</artifactId>
+                <version>${janssen.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
 				<artifactId>fido2-model</artifactId>
-				<version>${janssen.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
