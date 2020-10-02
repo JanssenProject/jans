@@ -35,14 +35,14 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         List<String> resourceScopes = getRequestedScopes(resourceInfo);
 
         IntrospectionResponse introspectionResponse = openIdService.getIntrospectionService()
-                .introspectToken("Bearer " + token, "invalid_token");
+                .introspectToken("Bearer " + token, token);
         if (introspectionResponse == null || !introspectionResponse.isActive()) {
-            logger.error("Token is Invalid !!!!!!");
+            logger.error("Token is Invalid.");
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
         if (!validateScope(introspectionResponse.getScope(), resourceScopes)) {
-            logger.error("Inadequate Authorization !!!!!!");
+            logger.trace("Insufficient scopes. Required scope: " + resourceScopes + ", token scopes: " + introspectionResponse.getScope());
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
