@@ -3,13 +3,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxauth-model</artifactId>
-	<name>oxAuth Model</name>
+	<artifactId>janssen-model</artifactId>
+	<name>janssen Model</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxauth</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -18,7 +18,7 @@
 	</prerequisites>
 
 	<build>
-		<finalName>oxauth-model</finalName>
+		<finalName>janssen-model</finalName>
 
 		<resources>
 			<resource>
@@ -58,11 +58,11 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
+			<groupId>org.janssen</groupId>
 			<artifactId>oxeleven-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
+			<groupId>org.janssen</groupId>
 			<artifactId>oxeleven-model</artifactId>
 		</dependency>
 		<dependency>
@@ -70,16 +70,16 @@
 			<artifactId>resteasy-jaxb-provider</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-annotation</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-persistence-annotation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-util</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
