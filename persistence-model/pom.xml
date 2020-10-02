@@ -5,11 +5,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxauth</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>oxauth-persistence-model</artifactId>
+	<artifactId>janssen-persistence-model</artifactId>
 	<name>Persistence model</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -17,7 +17,7 @@
 	</properties>
 
 	<build>
-		<finalName>oxauth-persistence-model</finalName>
+		<finalName>janssen-persistence-model</finalName>
 
 		<resources>
 			<resource>
@@ -69,16 +69,16 @@
         </dependency>
 
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-service</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-service</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-document-store</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-document-store</artifactId>
 		</dependency>
 
 	</dependencies>

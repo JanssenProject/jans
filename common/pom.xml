@@ -3,13 +3,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxauth-common</artifactId>
-	<name>oxAuth Common</name>
+	<artifactId>janssen-common</artifactId>
+	<name>janssen common</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxauth</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -18,7 +18,7 @@
 	</prerequisites>
 
 	<build>
-		<finalName>oxauth-common</finalName>
+		<finalName>janssen-common</finalName>
 
 		<resources>
 			<resource>
@@ -63,34 +63,34 @@
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- janssen -->
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-annotation</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-persistence-annotation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-persistence-ldap</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-persistence-ldap</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-util</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-service</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-service</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-model</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxauth-persistence-model</artifactId>
+            <groupId>org.janssen</groupId>
+            <artifactId>janssen-persistence-model</artifactId>
         </dependency>
 
 		<!-- CDI -->

@@ -9,12 +9,12 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
-	<groupId>org.gluu</groupId>
+	<groupId>org.janssen</groupId>
 	<artifactId>rp-spring-boot</artifactId>
 	<version>5.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 	<name>rp-spring-boot</name>
-	<description>oxAuth demo project for Spring Boot</description>
+	<description>janssen demo project for Spring Boot</description>
 
 	<properties>
 		<java.version>1.8</java.version>
