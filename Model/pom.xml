@@ -71,7 +71,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-annotation</artifactId>
+			<artifactId>persistence-annotation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
