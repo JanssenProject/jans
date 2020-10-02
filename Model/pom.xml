@@ -59,11 +59,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>oxeleven-client</artifactId>
+			<artifactId>eleven-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>oxeleven-model</artifactId>
+			<artifactId>eleven-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
