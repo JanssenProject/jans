@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class BaseResource {
 
-    protected static final String READ_ACCESS = "oxauth-config-read";
-    protected static final String WRITE_ACCESS = "oxauth-config-write";
+    protected static final String READ_ACCESS = "config-api-read";
+    protected static final String WRITE_ACCESS = "config-api-write";
     protected static final String DEFAULT_LIST_SIZE = "50";
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {

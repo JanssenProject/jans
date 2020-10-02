@@ -2,6 +2,7 @@ package org.gluu.configapi.configuration;
 
 import io.quarkus.arc.AlternativePriority;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.configapi.auth.*;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.exception.OxIntializationException;
 import org.gluu.oxauth.model.config.Conf;
@@ -27,6 +28,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.util.Properties;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 @AlternativePriority(1)
@@ -71,7 +74,14 @@ public class ConfigurationFactory {
     private FileConfiguration baseConfiguration;
     private String cryptoConfigurationSalt;
     private String saltFilePath;
-
+    
+    @Inject
+    @ConfigProperty(name = "protection.type")
+    private static String API_PROTECTION_TYPE;
+    
+    @Inject
+    private Instance<AuthorizationService> authorizationServiceInstance;
+    
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -89,7 +99,11 @@ public class ConfigurationFactory {
     }
     
     public static String getAppPropertiesFile() {
-      return APP_PROPERTIES_FILE;
+        return APP_PROPERTIES_FILE;
+    }
+
+    public static String getConfigAppPropertiesFile() {
+        return API_PROTECTION_TYPE;
     }
 
     public void create() {
@@ -106,6 +120,8 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
+        //Initialize API Protection Mechanism
+        initApiProtectionService();
     }
 
     private boolean createFromDb() {
@@ -234,4 +250,25 @@ public class ConfigurationFactory {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
         }
     }
+
+   
+   
+    @Produces
+    @ApplicationScoped
+    @Named("authorizationService")
+    private AuthorizationService initApiProtectionService() {
+        if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
+            throw new ConfigurationException("API Protection Type not defined");
+        }
+        try {
+            if (ConfigurationFactory.getConfigAppPropertiesFile().equals("oauth2")) {
+                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            } else
+                return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
+        } catch (Exception ex) {
+            throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
+        }
+    }
+    
+
 }

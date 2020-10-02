@@ -139,6 +139,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.gluu</groupId>
+            <artifactId>oxauth-client</artifactId>
+            <version>${oxauth.version}</version>
+        </dependency>
 
         <!-- Karate -->
         <dependency>
