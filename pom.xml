@@ -60,7 +60,7 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- oxCore -->
+			<!-- Core -->
             <dependency>
                 <groupId>org.janssen</groupId>
                 <artifactId>core-model</artifactId>
@@ -178,11 +178,6 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.janssen</groupId>
                 <artifactId>persistence-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -191,8 +186,23 @@
                 <artifactId>core-script</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.janssen</groupId>
+                <artifactId>janssen-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.janssen</groupId>
+                <artifactId>janssen-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.janssen</groupId>
+                <artifactId>janssen-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-			<!-- Google -->
+            <!-- Google -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
