@@ -308,23 +308,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-annotation</artifactId>
+			<artifactId>persistence-annotation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-ldap</artifactId>
+			<artifactId>persistence-ldap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-couchbase</artifactId>
+			<artifactId>persistence-couchbase</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-hybrid</artifactId>
+			<artifactId>persistence-hybrid</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>core-persistence-cdi</artifactId>
+			<artifactId>persistence-cdi</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
