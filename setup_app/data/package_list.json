@@ -1,7 +1,7 @@
 {
   "red 7": {
     "optional": "",
-    "mondatory": "httpd mod_ssl curl wget tar xz unzip python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2"
+    "mondatory": "httpd httpd-mod_ssl curl wget tar xz unzip python3 rsyslog python3-ldap3 python3-requests python3-ruamel-yaml bzip2"
   },
   "red 8": {
       "optional": "",
