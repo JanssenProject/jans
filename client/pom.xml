@@ -3,21 +3,21 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxnotify-client</artifactId>
-	<name>oxNotify Client</name>
+	<artifactId>janssen-notify-client</artifactId>
+	<name>janssen-notify Client</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<artifactId>oxnotify</artifactId>
-		<groupId>org.gluu</groupId>
+		<artifactId>janssen-notify</artifactId>
+		<groupId>org.janssen</groupId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- janssen -->
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxnotify-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-notify-model</artifactId>
 		</dependency>
 
 		<!-- Resteasy -->

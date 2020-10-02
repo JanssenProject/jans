@@ -2,29 +2,29 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxnotify-server</artifactId>
-	<name>oxNotify Server</name>
+	<artifactId>janssen-notify-server</artifactId>
+	<name>janssen-notify Server</name>
 	<packaging>war</packaging>
 
 	<parent>
-		<artifactId>oxnotify</artifactId>
-		<groupId>org.gluu</groupId>
+		<artifactId>janssen-notify</artifactId>
+		<groupId>org.janssen</groupId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<build>
-		<finalName>oxnotify</finalName>
+		<finalName>janssen-notify</finalName>
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- janssen -->
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxnotify-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-notify-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-util</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-util</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>*</groupId>
