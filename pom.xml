@@ -133,47 +133,47 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-annotation</artifactId>
+                <artifactId>persistence-annotation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-cdi</artifactId>
+                <artifactId>persistence-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-core</artifactId>
+                <artifactId>persistence-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-couchbase</artifactId>
+                <artifactId>persistence-couchbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-filter</artifactId>
+                <artifactId>persistence-filter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-hybrid</artifactId>
+                <artifactId>persistence-hybrid</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-ldap</artifactId>
+                <artifactId>persistence-ldap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-model</artifactId>
+                <artifactId>persistence-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
-                <artifactId>core-persistence-standalone</artifactId>
+                <artifactId>persistence-standalone</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
