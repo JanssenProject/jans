@@ -8,11 +8,10 @@
 	<artifactId>fido2-server</artifactId>
 	<name>Fido2 API Server</name>
 	<packaging>war</packaging>
-	<url>http://www.gluu.org</url>
-	
+
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>fido2</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen-fido2</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -72,22 +71,6 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<artifactId>maven-war-plugin</artifactId>
-				<groupId>org.apache.maven.plugins</groupId>
-				<version>2.3</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-						<manifestEntries>
-							<Implementation-Build>${buildNumber}</Implementation-Build>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-
 			<!-- Build number plugin -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -110,14 +93,14 @@
 	</build>
 
 	<dependencies>
-        <!-- Gluu -->
+        <!-- Janssen -->
         <dependency>
-            <groupId>org.gluu</groupId>
+            <groupId>org.janssen</groupId>
             <artifactId>fido2-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxauth-common</artifactId>
+            <groupId>org.janssen</groupId>
+            <artifactId>janssen-common</artifactId>
             <exclusions>
             	<exclusion>
             		<groupId>org.apache.jackrabbit</groupId>
@@ -126,11 +109,11 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.gluu</groupId>
-            <artifactId>oxcore-timer-weld</artifactId>
+            <groupId>org.janssen</groupId>
+            <artifactId>core-timer-weld</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.gluu</groupId>
+            <groupId>org.janssen</groupId>
             <artifactId>exception-extension-cdi</artifactId>
         </dependency>
 
