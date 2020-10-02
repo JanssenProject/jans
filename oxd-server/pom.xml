@@ -16,6 +16,7 @@
         <jersey-test-framework-provider>2.29.1</jersey-test-framework-provider>
         <generate.windows.exe>false</generate.windows.exe>
         <commons-daemon.bin.version>1.2.1</commons-daemon.bin.version>
+        <skip.swagger.client.generation>true</skip.swagger.client.generation>
     </properties>
 
     <parent>
