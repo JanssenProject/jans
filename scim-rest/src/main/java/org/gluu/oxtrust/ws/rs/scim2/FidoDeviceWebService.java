@@ -190,14 +190,14 @@ public class FidoDeviceWebService extends BaseScimWebService implements IFidoDev
     @HeaderParam("Accept") @DefaultValue(MEDIA_TYPE_SCIM_JSON)
     @ProtectedApi
     @ApiOperation(value = "Delete device")
-    public Response deleteDevice(@PathParam("id") String id, @QueryParam("userId") String userId) {
+    public Response deleteDevice(@PathParam("id") String id) {
 
         Response response;
         try {
             log.debug("Executing web service method. deleteDevice");
 
             //No need to check id being non-null. fidoDeviceService will give null if null is provided
-            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(userId, id);
+            GluuCustomFidoDevice device = fidoDeviceService.getGluuCustomFidoDeviceById(null, id);
             if (device != null) {
                 fidoDeviceService.removeGluuCustomFidoDevice(device);
                 response = Response.noContent().build();

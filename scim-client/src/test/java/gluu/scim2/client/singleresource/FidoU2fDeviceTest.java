@@ -108,7 +108,7 @@ public class FidoU2fDeviceTest extends BaseTest {
     @Test(dependsOnMethods = "updateWithObject", alwaysRun = true)
     public void delete(){
         logger.debug("Deleting device");
-        Response response=client.deleteDevice(device.getId(), device.getUserId());
+        Response response=client.deleteDevice(device.getId());
         assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
         logger.debug("deleted");
     }
