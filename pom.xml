@@ -178,6 +178,11 @@
             </dependency>
             <dependency>
                 <groupId>org.janssen</groupId>
+                <artifactId>persistence-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.janssen</groupId>
                 <artifactId>core-script</artifactId>
                 <version>${project.version}</version>
             </dependency>
