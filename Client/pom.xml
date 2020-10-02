@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxauth-client</artifactId>
-	<name>oxAuth Client</name>
+	<artifactId>janssen-client</artifactId>
+	<name>janssen client</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxauth</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -17,7 +17,7 @@
 	</prerequisites>
 
 	<build>
-		<finalName>oxauth-client</finalName>
+		<finalName>janssen-client</finalName>
 
 		<filters>
 			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
@@ -111,8 +111,8 @@
 			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-model</artifactId>
 		</dependency>
 		<!-- RestEasy -->
 		<dependency>
@@ -187,8 +187,8 @@
             <scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxauth-model</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>janssen-model</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -236,8 +236,8 @@
 			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.gluu</groupId>
-					<artifactId>oxauth-model</artifactId>
+					<groupId>org.janssen</groupId>
+					<artifactId>janssen-model</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
