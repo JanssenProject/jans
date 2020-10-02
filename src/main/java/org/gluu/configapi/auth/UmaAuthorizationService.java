@@ -1,13 +1,17 @@
 package org.gluu.configapi.auth;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.configapi.service.UmaService;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+
 import java.io.Serializable;
+import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -24,11 +28,16 @@ public class UmaAuthorizationService extends AuthorizationService implements Ser
 
     @Inject
     UmaService umaService;
-    
-    public Response processAuthorization(String token, ResourceInfo resourceInfo) throws Exception {
-        logger.info(" UmaAuthorizationService::processAuthorization() - token  = " + token
-                + " , resourceInfo = " + resourceInfo+" , umaService = "+umaService);
-        return null;
+
+    public void validateAuthorization(String token, ResourceInfo resourceInfo) throws Exception {
+        if (StringUtils.isBlank(token)) {
+            logger.info("Token is blank");
+            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        List<String> resourceScopes = getRequestedScopes(resourceInfo);
+
+        // UmaRptIntrospectionService.requestRptStatus()
+
     }
-   
+
 }

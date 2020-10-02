@@ -78,7 +78,10 @@ public class ConfigurationFactory {
     @Inject
     @ConfigProperty(name = "protection.type")
     private static String API_PROTECTION_TYPE;
-
+    
+    @Inject
+    private Instance<AuthorizationService> authorizationServiceInstance;
+    
     @Produces
     @ApplicationScoped
     public AppConfiguration getAppConfiguration() {
@@ -96,12 +99,12 @@ public class ConfigurationFactory {
     }
     
     public static String getAppPropertiesFile() {
-      return APP_PROPERTIES_FILE;
+        return APP_PROPERTIES_FILE;
     }
-    
+
     public static String getConfigAppPropertiesFile() {
         return API_PROTECTION_TYPE;
-      }
+    }
 
     public void create() {
         loadBaseConfiguration();
@@ -117,6 +120,8 @@ public class ConfigurationFactory {
             log.info("Configuration loaded successfully.");
         }
 
+        //Initialize API Protection Mechanism
+        initApiProtectionService();
     }
 
     private boolean createFromDb() {
@@ -245,27 +250,25 @@ public class ConfigurationFactory {
             throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
         }
     }
-    
 
+   
+   
     @Produces
     @ApplicationScoped
     @Named("authorizationService")
-    public AuthorizationService getApiProtectionService() throws Exception {
-        System.out.println("********** ConfigurationFactory::getApiProtectionService() - ConfigurationFactory.getConfigAppPropertiesFile() = "+ConfigurationFactory.getConfigAppPropertiesFile()+"**********");
+    private AuthorizationService initApiProtectionService() {
         if (StringHelper.isEmpty(ConfigurationFactory.getConfigAppPropertiesFile())) {
-            System.out.println("********** ConfigurationFactory::getApiProtectionService() - API Protection Type not defined ********** " );
-            throw new OxIntializationException("API Protection Type not defined");
+            throw new ConfigurationException("API Protection Type not defined");
         }
         try {
-           if(ConfigurationFactory.getConfigAppPropertiesFile().equals("oauth2"))
-              return new OpenIdAuthorizationService();
-           else
-               return new UmaAuthorizationService();
+            if (ConfigurationFactory.getConfigAppPropertiesFile().equals("oauth2")) {
+                return authorizationServiceInstance.select(OpenIdAuthorizationService.class).get();
+            } else
+                return authorizationServiceInstance.select(UmaAuthorizationService.class).get();
         } catch (Exception ex) {
-            throw new OxIntializationException("Failed to create AuthorizationService instance", ex);
+            throw new ConfigurationException("Failed to create AuthorizationService instance", ex);
         }
     }
+    
 
-    
-    
 }

@@ -8,21 +8,20 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
-
 
 /**
  * @author Mougang T.Gasmyr
  */
 @Provider
-@PreMatching
-@Priority(1)
+@ProtectedApi
+@Priority(Priorities.AUTHENTICATION)
 public class AuthorizationFilter implements ContainerRequestFilter {
     private static final String AUTHENTICATION_SCHEME = "Bearer";
 
@@ -40,10 +39,10 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
     @Inject
     Logger logger;
-    
+
     @Inject
     AuthorizationService authorizationService;
-    
+
     public void filter(ContainerRequestContext context) {
         logger.info("=======================================================================");
         logger.info("======" + context.getMethod() + " " + info.getPath() + " FROM IP " + request.getRemoteAddr());
@@ -54,16 +53,13 @@ public class AuthorizationFilter implements ContainerRequestFilter {
             logger.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
         }
-        String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
-        System.out.println("********** AuthorizationFilter::filter() - token = "+token+"**********");
-      
         try {
-            Response authorizationResponse = this.validateToken(token, resourceInfo);
+            String token = authorizationHeader.substring(AUTHENTICATION_SCHEME.length()).trim();
+            this.authorizationService.validateAuthorization(token, resourceInfo);
             logger.info("======AUTHORIZATION  GRANTED===========================================");
-        } catch (Exception e) {
-            logger.info("", e);
+        } catch (Exception ex) {
+            logger.error("======AUTHORIZATION  FAILED ===========================================", ex);
             abortWithUnauthorized(context);
-            logger.info("======INVALID AUTHORIZATION TOKEN======================================");
         }
 
     }
@@ -76,15 +72,6 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     private void abortWithUnauthorized(ContainerRequestContext requestContext) {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, AUTHENTICATION_SCHEME).build());
-    }
-
-    private Response validateToken(String token, ResourceInfo resourceInfo) throws Exception {
-        //protectionService.processAuthorization(httpHeaders, resourceInfo);
-        // Check if the token was issued by the server and if it's not expired
-        // Throw an Exception if the token is invalid
-        return this.authorizationService.processAuthorization(token, null);
-       
-        
     }
 
 }
