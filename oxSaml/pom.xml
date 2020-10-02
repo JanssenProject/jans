@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxcore-saml</artifactId>
+	<artifactId>core-saml</artifactId>
 	<name>oxSaml</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxcore</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen-core</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -47,12 +47,12 @@
 
 		<!-- Gluu -->
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-util</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-document-store</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-document-store</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -64,11 +64,11 @@
 			<groupId>org.apache.ws.security</groupId>
 			<artifactId>wss4j</artifactId>
 		</dependency>
-		<dependency>
-		    <groupId>org.opensaml</groupId>
-		    <artifactId>opensaml</artifactId>
-                    <version>2.6.4</version>
-		</dependency>
+        <dependency>
+            <groupId>org.opensaml</groupId>
+            <artifactId>opensaml</artifactId>
+            <version>2.6.4</version>
+        </dependency>
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>

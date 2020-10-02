@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxcore-jsf-util</artifactId>
+	<artifactId>core-jsf-util</artifactId>
 	<packaging>jar</packaging>
 	<name>oxJsfUtil</name>
 	<description>JSF2 utilities</description>
 
 	<parent>
-		<groupId>org.gluu</groupId>
-		<artifactId>oxcore</artifactId>
+		<groupId>org.janssen</groupId>
+		<artifactId>janssen-core</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
@@ -29,8 +29,8 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxcore-service</artifactId>
+			<groupId>org.janssen</groupId>
+			<artifactId>core-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.enterprise</groupId>
