@@ -357,14 +357,14 @@
 			<artifactId>oxeleven-client</artifactId>
 		</dependency>
 
-		<!-- oxNotify -->
+		<!-- janssen-notify -->
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>oxnotify-model</artifactId>
+			<artifactId>janssen-notify-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.janssen</groupId>
-			<artifactId>oxnotify-client</artifactId>
+			<artifactId>janssen-notify-client</artifactId>
 		</dependency>
 
 		<!-- Fido2 -->

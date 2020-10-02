@@ -15,7 +15,7 @@
 
 		<oxcore.version>5.0.0-SNAPSHOT</oxcore.version>
 		<oxeleven.version>5.0.0-SNAPSHOT</oxeleven.version>
-		<oxnotify.version>5.0.0-SNAPSHOT</oxnotify.version>
+		<janssen-notify.version>5.0.0-SNAPSHOT</janssen-notify.version>
 		<oxlicense.version>5.0.0-SNAPSHOT</oxlicense.version>
 		<fido2.version>5.0.0-SNAPSHOT</fido2.version>
 
@@ -253,13 +253,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>oxnotify-client</artifactId>
-				<version>${oxnotify.version}</version>
+				<artifactId>janssen-notify-client</artifactId>
+				<version>${janssen-notify.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.janssen</groupId>
-				<artifactId>oxnotify-model</artifactId>
-				<version>${oxnotify.version}</version>
+				<artifactId>janssen-notify-model</artifactId>
+				<version>${janssen-notify.version}</version>
 			</dependency>
 
 			<!-- Weld -->
