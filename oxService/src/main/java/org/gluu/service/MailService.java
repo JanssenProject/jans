@@ -4,25 +4,20 @@
  * Copyright (c) 2014, Gluu
  */package org.gluu.service;
 
-import java.util.Date;
-import java.util.Properties;
+import io.jans.model.SmtpConfiguration;
+import org.gluu.util.StringHelper;
+import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.mail.Message;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-
-import org.gluu.model.SmtpConfiguration;
-import org.gluu.util.StringHelper;
-import org.slf4j.Logger;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * Provides operations with sending E-mails
