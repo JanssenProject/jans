@@ -6,10 +6,10 @@
 
 package org.gluu.model;
 
+import io.jans.persist.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.gluu.persist.annotation.AttributeEnum;
 
 /**
  * Specify type of script location

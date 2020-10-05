@@ -1,12 +1,7 @@
 package org.gluu.service.document.store.manual;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import javax.jcr.RepositoryException;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.util.security.StringEncrypter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.gluu.service.document.store.StandaloneDocumentStoreProviderFactory;
@@ -15,10 +10,12 @@ import org.gluu.service.document.store.conf.DocumentStoreType;
 import org.gluu.service.document.store.conf.JcaDocumentStoreConfiguration;
 import org.gluu.service.document.store.conf.LocalDocumentStoreConfiguration;
 import org.gluu.service.document.store.provider.DocumentStoreProvider;
-import org.gluu.util.security.StringEncrypter;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.jcr.RepositoryException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class JcaDocumentStoreManualTest {
 
@@ -26,7 +23,7 @@ public class JcaDocumentStoreManualTest {
 		
 	}
 
-	public static void main(String[] args) throws RepositoryException, IOException, EncryptionException {
+	public static void main(String[] args) throws RepositoryException, IOException, StringEncrypter.EncryptionException {
 		StringEncrypter se = new StringEncrypter(StringEncrypter.DESEDE_ENCRYPTION_SCHEME, "Zqvw62DEFdhxoL4csi9hpVI4");
 		DocumentStoreConfiguration dsc = new DocumentStoreConfiguration();
 		dsc.setDocumentStoreType(DocumentStoreType.JCA);

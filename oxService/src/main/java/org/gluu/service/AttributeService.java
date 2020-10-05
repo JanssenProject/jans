@@ -13,8 +13,8 @@ import javax.inject.Inject;
 
 import org.gluu.model.GluuAttribute;
 import org.gluu.model.SchemaEntry;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.search.filter.Filter;
 import org.gluu.util.OxConstants;
 import org.slf4j.Logger;
 

@@ -41,7 +41,7 @@ import org.gluu.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
 import org.gluu.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import org.gluu.model.custom.script.type.uma.*;
 import org.gluu.model.custom.script.type.user.*;
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;

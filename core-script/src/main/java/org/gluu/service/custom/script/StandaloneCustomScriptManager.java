@@ -6,7 +6,7 @@ import java.util.List;
 import javax.enterprise.inject.Vetoed;
 
 import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.persist.PersistenceEntryManager;
 import org.gluu.service.PythonService;
 import org.slf4j.LoggerFactory;
 

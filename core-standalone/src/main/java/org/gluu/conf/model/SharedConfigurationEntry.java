@@ -6,19 +6,14 @@
 
 package org.gluu.conf.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.gluu.model.SmtpConfiguration;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.CustomObjectClass;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.InumEntry;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.model.SmtpConfiguration;
+import io.jans.persist.annotation.*;
+import io.jans.persist.model.base.InumEntry;
 import org.gluu.service.cache.CacheConfiguration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * GluuConfiguration

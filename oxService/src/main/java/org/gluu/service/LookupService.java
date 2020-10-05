@@ -16,9 +16,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.model.DisplayNameEntry;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.Entry;
-import org.gluu.search.filter.Filter;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.model.base.Entry;
+import io.jans.search.filter.Filter;
 import org.gluu.util.OxConstants;
 
 /**

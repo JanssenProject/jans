@@ -6,30 +6,29 @@
 
 package org.gluu.conf.service;
 
-import java.io.File;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.PersistenceEntryManagerFactory;
+import io.jans.persist.exception.BasePersistenceException;
+import io.jans.persist.model.PersistenceConfiguration;
+import io.jans.persist.service.PersistanceFactoryService;
+import io.jans.persist.service.StandalonePersistanceFactoryService;
+import io.jans.util.StringHelper;
+import io.jans.util.exception.ConfigurationException;
+import io.jans.util.properties.FileConfiguration;
+import io.jans.util.security.PropertiesDecrypter;
+import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.conf.model.AppConfiguration;
 import org.gluu.conf.model.AppConfigurationEntry;
 import org.gluu.conf.model.SharedConfigurationEntry;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.PersistenceEntryManagerFactory;
-import org.gluu.persist.exception.BasePersistenceException;
-import org.gluu.persist.model.PersistenceConfiguration;
-import org.gluu.persist.service.PersistanceFactoryService;
-import org.gluu.persist.service.StandalonePersistanceFactoryService;
 import org.gluu.service.cache.CacheConfiguration;
 import org.gluu.service.cache.InMemoryConfiguration;
-import org.gluu.util.StringHelper;
-import org.gluu.util.exception.ConfigurationException;
-import org.gluu.util.properties.FileConfiguration;
-import org.gluu.util.security.PropertiesDecrypter;
-import org.gluu.util.security.StringEncrypter;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base OpenId configuration
@@ -229,7 +228,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 		Properties decryptedConnectionProperties;
 		try {
 			decryptedConnectionProperties = PropertiesDecrypter.decryptAllProperties(StringEncrypter.defaultInstance(), connectionProperties, this.cryptoConfigurationSalt);
-        } catch (EncryptionException ex) {
+        } catch (StringEncrypter.EncryptionException ex) {
         	throw new ConfigurationException("Failed to decript configuration properties", ex);
         }
 
@@ -268,7 +267,7 @@ public abstract class ConfigurationFactory<C extends AppConfiguration, L extends
 			StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
 
 			return stringEncrypter;
-		} catch (EncryptionException ex) {
+		} catch (StringEncrypter.EncryptionException ex) {
 			throw new ConfigurationException("Failed to create StringEncrypter instance");
 		}
 	}

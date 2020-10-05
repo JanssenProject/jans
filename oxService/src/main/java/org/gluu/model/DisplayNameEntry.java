@@ -8,9 +8,9 @@ package org.gluu.model;
 
 import java.io.Serializable;
 
-import org.gluu.persist.model.base.Entry;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
+import io.jans.persist.model.base.Entry;
+import io.jans.persist.annotation.AttributeName;
+import io.jans.persist.annotation.DataEntry;
 
 /**
  * Entry with display Name attribute

@@ -19,8 +19,8 @@ import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.model.custom.script.type.persistence.PersistenceType;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.extension.PersistenceExtension;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.exception.extension.PersistenceExtension;
 import org.gluu.service.custom.script.ExternalScriptService;
 import org.gluu.service.external.context.PersistenceExternalContext;
 

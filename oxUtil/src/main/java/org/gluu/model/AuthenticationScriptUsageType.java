@@ -9,7 +9,7 @@ package org.gluu.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 
 /**
  * Authentication script type

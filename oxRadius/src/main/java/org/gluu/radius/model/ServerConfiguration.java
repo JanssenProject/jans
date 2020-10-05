@@ -10,10 +10,10 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.persist.annotation.AttributeName;
+import io.jans.persist.annotation.DataEntry;
+import io.jans.persist.annotation.DN;
+import io.jans.persist.annotation.ObjectClass;
 
 
 @DataEntry

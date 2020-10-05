@@ -17,11 +17,11 @@ import org.gluu.model.ScriptLocationType;
 import org.gluu.model.SimpleCustomProperty;
 import org.gluu.model.SimpleExtendedCustomProperty;
 import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.BaseEntry;
+import io.jans.persist.annotation.AttributeName;
+import io.jans.persist.annotation.DataEntry;
+import io.jans.persist.annotation.JsonObject;
+import io.jans.persist.annotation.ObjectClass;
+import io.jans.persist.model.base.BaseEntry;
 import org.gluu.util.StringHelper;
 
 /**
