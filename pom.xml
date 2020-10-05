@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.janssen</groupId>
+	<groupId>io.jans</groupId>
 	<artifactId>janssen-core-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>janssen-core-bom</name>
@@ -62,142 +62,142 @@
 		<dependencies>
 			<!-- Core -->
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-demo-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-jsf-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>security-extension-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>exception-extension-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-radius</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-saml</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-timer-weld</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-document-store</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-annotation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-couchbase</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-filter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-hybrid</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-ldap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-standalone</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>core-script</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>janssen-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>janssen-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>janssen-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
