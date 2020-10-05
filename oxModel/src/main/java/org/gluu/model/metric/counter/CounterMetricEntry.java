@@ -7,8 +7,8 @@
 import java.util.Date;
 
 import org.gluu.model.metric.ldap.MetricEntry;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.JsonObject;
+import io.jans.persist.annotation.AttributeName;
+import io.jans.persist.annotation.JsonObject;
 
 /**
  * Metric entry which represents numeric value

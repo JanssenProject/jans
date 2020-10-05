@@ -1,12 +1,12 @@
 package org.gluu.service.document.store;
 
+import io.jans.util.security.StringEncrypter;
 import org.gluu.service.document.store.conf.DocumentStoreConfiguration;
 import org.gluu.service.document.store.conf.DocumentStoreType;
 import org.gluu.service.document.store.provider.DocumentStoreProvider;
 import org.gluu.service.document.store.provider.JcaDocumentStoreProvider;
 import org.gluu.service.document.store.provider.LocalDocumentStoreProvider;
 import org.gluu.service.document.store.provider.WebDavDocumentStoreProvider;
-import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

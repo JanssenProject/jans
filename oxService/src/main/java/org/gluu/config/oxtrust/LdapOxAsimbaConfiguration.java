@@ -5,11 +5,11 @@
  */
 package org.gluu.config.oxtrust;
 
-import org.gluu.persist.model.base.Entry;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.persist.model.base.Entry;
+import io.jans.persist.annotation.AttributeName;
+import io.jans.persist.annotation.DataEntry;
+import io.jans.persist.annotation.JsonObject;
+import io.jans.persist.annotation.ObjectClass;
 
 /**
  * Asimba LDAP settings configuration entry.

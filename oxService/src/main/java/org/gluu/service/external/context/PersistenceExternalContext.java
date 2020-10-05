@@ -8,7 +8,7 @@ package org.gluu.service.external.context;
 
 import java.util.Properties;
 
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.persist.PersistenceEntryManager;
 
 /**
  * Holds object required in persistence scope custom scripts 

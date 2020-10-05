@@ -56,6 +56,11 @@
 			<artifactId>persistence-standalone</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>core-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<!-- Tests -->
 		<dependency>

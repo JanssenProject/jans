@@ -1,7 +1,7 @@
 package org.gluu.service;
 
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
 
 import java.io.Serializable;
 import javax.enterprise.context.ApplicationScoped;

@@ -1,8 +1,8 @@
 package org.gluu.service.cache;
 
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.Deletable;
-import org.gluu.persist.model.base.DeletableEntity;
+import io.jans.persist.annotation.*;
+import io.jans.persist.model.base.Deletable;
+import io.jans.persist.model.base.DeletableEntity;
 
 import java.io.Serializable;
 import java.util.Date;

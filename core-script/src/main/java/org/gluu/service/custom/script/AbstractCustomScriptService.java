@@ -8,8 +8,8 @@ package org.gluu.service.custom.script;
 import com.google.common.base.Optional;
 import org.gluu.model.custom.script.CustomScriptType;
 import org.gluu.model.custom.script.model.CustomScript;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.search.filter.Filter;
 import org.gluu.util.OxConstants;
 import org.slf4j.Logger;
 

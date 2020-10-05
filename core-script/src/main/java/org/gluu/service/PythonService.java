@@ -21,7 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.gluu.exception.PythonException;
-import org.gluu.persist.reflect.util.ReflectHelper;
+import io.jans.persist.reflect.util.ReflectHelper;
 import org.gluu.util.StringHelper;
 import org.python.core.PyException;
 import org.python.core.PyObject;

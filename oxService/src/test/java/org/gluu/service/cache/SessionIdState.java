@@ -1,6 +1,6 @@
 package org.gluu.service.cache;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;
