@@ -47,7 +47,7 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.jans</groupId>
+				<groupId>io.jans</groupId>
 				<artifactId>core-bom</artifactId>
 				<version>5.0.0-SNAPSHOT</version>
 				<scope>import</scope>

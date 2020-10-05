@@ -19,10 +19,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.model.SchemaEntry;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.hybrid.impl.HybridEntryManagerFactory;
-import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
-import org.gluu.persist.ldap.operation.LdapOperationService;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.hybrid.impl.HybridEntryManagerFactory;
+import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
+import io.jans.persist.ldap.operation.LdapOperationService;
 import org.gluu.util.StringHelper;
 import org.gluu.util.exception.InvalidSchemaUpdateException;
 import org.slf4j.Logger;

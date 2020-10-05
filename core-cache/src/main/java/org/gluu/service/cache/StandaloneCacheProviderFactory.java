@@ -1,8 +1,9 @@
 package org.gluu.service.cache;
 
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.util.StringHelper;
-import org.gluu.util.security.StringEncrypter;
+import io.jans.persist.PersistenceEntryManager;
+
+import io.jans.util.StringHelper;
+import io.jans.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

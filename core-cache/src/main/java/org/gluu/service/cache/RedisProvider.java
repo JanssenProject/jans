@@ -1,7 +1,7 @@
 package org.gluu.service.cache;
 
+import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.util.security.StringEncrypter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

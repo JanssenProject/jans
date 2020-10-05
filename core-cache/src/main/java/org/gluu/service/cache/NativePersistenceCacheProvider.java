@@ -4,9 +4,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.model.base.SimpleBranch;
+import io.jans.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

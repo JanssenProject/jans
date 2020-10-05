@@ -8,7 +8,7 @@ package org.gluu.model.attribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 
 /**
  * Attribute Data Type

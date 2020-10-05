@@ -48,6 +48,11 @@
 			<artifactId>core-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>persistence-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<!-- CDI -->
 		<dependency>

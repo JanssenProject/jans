@@ -6,9 +6,9 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.log.LoggingHelper;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
+import io.jans.persist.PersistenceEntryManager;
+import io.jans.persist.ldap.impl.LdapEntryManager;
+import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
 import org.gluu.service.custom.script.StandaloneCustomScriptManager;
 
 public class StandaloneCustomScriptManagerTest {
