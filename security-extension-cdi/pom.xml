@@ -7,8 +7,8 @@
 	<description>Reusable CDI security extension</description>
 
 	<parent>
-		<groupId>org.janssen</groupId>
-		<artifactId>janssen-core</artifactId>
+		<groupId>io.jans</groupId>
+		<artifactId>core</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 

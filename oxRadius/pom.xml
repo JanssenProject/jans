@@ -6,18 +6,18 @@
     <name>oxRadius</name>
     
     <parent>
-        <groupId>org.janssen</groupId>
-        <artifactId>janssen-core</artifactId>
+        <groupId>io.jans</groupId>
+        <artifactId>core</artifactId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
-            <groupId>org.janssen</groupId>
+            <groupId>io.jans</groupId>
             <artifactId>persistence-ldap</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.janssen</groupId>
+            <groupId>io.jans</groupId>
             <artifactId>persistence-annotation</artifactId>
         </dependency>
     </dependencies>

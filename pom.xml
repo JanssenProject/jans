@@ -2,11 +2,11 @@
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.janssen</groupId>
-	<artifactId>janssen-core</artifactId>
+	<groupId>io.jans</groupId>
+	<artifactId>core</artifactId>
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
-	<name>janssen-core</name>
+	<name>core</name>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
@@ -19,9 +19,9 @@
 	</properties>
 
 	<scm>
-		<url>https://github.com/JanssenProject/janssen-core</url>
-		<connection>scm:git:git://github.com/JanssenProject/janssen-core.git</connection>
-		<developerConnection>scm:git:git@github.com:JanssenProject/janssen-core.git</developerConnection>
+		<url>https://github.com/JanssenProject/core</url>
+		<connection>scm:git:git://github.com/JanssenProject/core.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/core.git</developerConnection>
 	</scm>
 
 	<modules>
@@ -47,8 +47,8 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.janssen</groupId>
-				<artifactId>janssen-core-bom</artifactId>
+				<groupId>org.jans</groupId>
+				<artifactId>core-bom</artifactId>
 				<version>5.0.0-SNAPSHOT</version>
 				<scope>import</scope>
 				<type>pom</type>
