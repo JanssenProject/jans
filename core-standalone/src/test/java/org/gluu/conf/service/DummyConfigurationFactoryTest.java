@@ -2,7 +2,7 @@ package org.gluu.conf.service;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.gluu.service.cache.CacheConfiguration;
+import io.jans.service.cache.CacheConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

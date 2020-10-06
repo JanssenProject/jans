@@ -13,7 +13,7 @@ import javax.faces.convert.FacesConverter;
 import javax.inject.Inject;
 
 import org.gluu.model.GluuAttribute;
-import org.gluu.service.AttributeService;
+import io.jans.service.AttributeService;
 
 @FacesConverter("org.gluu.jsf2.converter.AttributeNameConverter")
 public class AttributeNameConverter implements Converter {
