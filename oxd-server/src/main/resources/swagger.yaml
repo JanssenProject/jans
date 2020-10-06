@@ -2115,9 +2115,32 @@ paths:
             schema:
               title: GetIssuerParams
               required:
+              - op_configuration_endpoint
               - resource
               type: object
               properties:
+                op_configuration_endpoint:
+                  type: string
+                  example: https://op.example.com/acme/.well-known/openid-configuration
+                  description: The openid configuration endpoint URL. If missing,
+                    then `op_host` must be defined.
+                op_host:
+                  type: string
+                  example: https://<ophostname>
+                  deprecated: true
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide the URL of OpenID Provider (OP) in this
+                    field. If missing, then `op_configuration_endpoint` must be defined.
+                op_discovery_path:
+                  type: string
+                  example: /oxauth
+                  deprecated: true
+                  description: Deprecated in favor of `op_configuration_endpoint`. It will be
+                    removed in future version(s). Provide path to the OpenID Connect Provider's
+                    discovery document in this field. For example, if it is
+                    'https://example.com/.well-known/openid-configuration' then the path is blank.
+                    But if it is 'https://example.com/oxauth/.well-known/openid-configuration'
+                    then the path is '/oxauth'
                 resource:
                   type: string
                   example: admin@jenkins-ldap.gluu.org
