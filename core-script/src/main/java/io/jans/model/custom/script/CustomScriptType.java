@@ -41,8 +41,6 @@ import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.*;
 import io.jans.model.custom.script.type.BaseExternalType;
-import org.gluu.model.custom.script.type.uma.*;
-import org.gluu.model.custom.script.type.user.*;
 import io.jans.persist.annotation.AttributeEnum;
 
 import java.util.HashMap;
