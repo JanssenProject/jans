@@ -28,25 +28,32 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
 
     public IOpResponse execute(GetIssuerParams params) {
         validateParams(params);
-        GetIssuerResponse webfingerResponse = new GetIssuerResponse();
+        GetIssuerResponse webfingerResponse = getWebfingerResponse(params.getResource());
+
+        String issuerFromDiscovery = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
+        validateIssuer(webfingerResponse, issuerFromDiscovery);
+
+        return webfingerResponse;
+    }
+
+    private static GetIssuerResponse getWebfingerResponse(String resource) {
         try {
-            OpenIdConnectDiscoveryClient client = new OpenIdConnectDiscoveryClient(params.getResource());
+            OpenIdConnectDiscoveryClient client = new OpenIdConnectDiscoveryClient(resource);
             OpenIdConnectDiscoveryResponse response = client.exec();
-            if (response == null) {
+            if (response == null || Strings.isNullOrEmpty(response.getSubject()) || response.getLinks().isEmpty()) {
                 LOG.error("Error in fetching op discovery configuration response ");
                 throw new HttpException(ErrorResponseCode.FAILED_TO_GET_ISSUER);
             }
+
+            GetIssuerResponse webfingerResponse = new GetIssuerResponse();
             BeanUtils.copyProperties(webfingerResponse, response);
+
+            return webfingerResponse;
 
         } catch (Exception e) {
             LOG.error("Error in creating op discovery configuration response ", e);
             throw new HttpException(ErrorResponseCode.FAILED_TO_GET_ISSUER);
         }
-        String issuerFromDiscovery = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
-        validateIssuer(webfingerResponse, issuerFromDiscovery);
-
-        return webfingerResponse;
-
     }
 
     private static void validateParams(GetIssuerParams params) {
