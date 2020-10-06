@@ -19,7 +19,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.IOUtils;
-import org.gluu.service.document.store.service.DocumentStoreService;
+import io.jans.service.document.store.service.DocumentStoreService;
 import org.gluu.util.io.HTTPFileDownloader;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;

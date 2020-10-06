@@ -21,8 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.conf.model.AppConfiguration;
 import org.gluu.conf.model.AppConfigurationEntry;
 import org.gluu.conf.model.SharedConfigurationEntry;
-import org.gluu.service.cache.CacheConfiguration;
-import org.gluu.service.cache.InMemoryConfiguration;
+import io.jans.service.cache.CacheConfiguration;
+import io.jans.service.cache.InMemoryConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.SmtpConfiguration;
 import io.jans.persist.annotation.*;
 import io.jans.persist.model.base.InumEntry;
-import org.gluu.service.cache.CacheConfiguration;
+import io.jans.service.cache.CacheConfiguration;
 
 import java.io.Serializable;
 import java.util.Date;
