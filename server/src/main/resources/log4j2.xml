@@ -32,7 +32,7 @@
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
-        <Logger name="org.gluu.fido2" level="INFO">
+        <Logger name="io.jans.fido2" level="INFO">
             <AppenderRef ref="FILE" />
         </Logger>
 
