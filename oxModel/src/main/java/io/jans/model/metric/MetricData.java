@@ -1,0 +1,23 @@
+/*
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
+package io.jans.model.metric;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.io.Serializable;
+
+/**
+ * Base metric data class
+ *
+ * @author Yuriy Movchan Date: 07/28/2015
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class MetricData implements Serializable {
+
+    private static final long serialVersionUID = -2520744744010853187L;
+
+}
