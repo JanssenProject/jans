@@ -20,9 +20,9 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.exception.PythonException;
+import io.jans.exception.PythonException;
 import io.jans.persist.reflect.util.ReflectHelper;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;

@@ -16,7 +16,7 @@ import java.util.Map;
 import javax.faces.FacesException;
 import javax.faces.view.facelets.ResourceResolver;
 
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

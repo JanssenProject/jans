@@ -5,7 +5,7 @@
  */package io.jans.service;
 
 import io.jans.model.SmtpConfiguration;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

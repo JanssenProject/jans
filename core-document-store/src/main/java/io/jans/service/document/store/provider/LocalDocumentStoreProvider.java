@@ -17,7 +17,7 @@ import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import io.jans.service.document.store.conf.DocumentStoreType;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

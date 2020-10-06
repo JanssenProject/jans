@@ -5,7 +5,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.log.LoggingHelper;
+import io.jans.log.LoggingHelper;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.persist.ldap.impl.LdapEntryManager;
 import io.jans.persist.ldap.impl.LdapEntryManagerFactory;

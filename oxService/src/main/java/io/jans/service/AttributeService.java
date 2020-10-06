@@ -11,11 +11,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.gluu.model.GluuAttribute;
-import org.gluu.model.SchemaEntry;
+import io.jans.model.GluuAttribute;
+import io.jans.model.SchemaEntry;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
-import org.gluu.util.OxConstants;
+import io.jans.util.OxConstants;
 import org.slf4j.Logger;
 
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;

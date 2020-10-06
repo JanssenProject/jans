@@ -15,11 +15,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.model.DisplayNameEntry;
+import io.jans.model.DisplayNameEntry;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.persist.model.base.Entry;
 import io.jans.search.filter.Filter;
-import org.gluu.util.OxConstants;
+import io.jans.util.OxConstants;
 
 /**
  * Provides operations with DisplayNameEntry

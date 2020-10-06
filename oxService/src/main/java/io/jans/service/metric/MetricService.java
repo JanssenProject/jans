@@ -9,10 +9,10 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
-import org.gluu.model.ApplicationType;
-import org.gluu.model.metric.MetricType;
-import org.gluu.model.metric.ldap.MetricEntry;
-import org.gluu.model.metric.ldap.MetricReport;
+import io.jans.model.ApplicationType;
+import io.jans.model.metric.MetricType;
+import io.jans.model.metric.ldap.MetricEntry;
+import io.jans.model.metric.ldap.MetricReport;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.persist.exception.EntryPersistenceException;
 import io.jans.persist.model.DefaultBatchOperation;
@@ -21,7 +21,7 @@ import io.jans.persist.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.metric.inject.ReportMetric;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.event.Observes;

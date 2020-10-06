@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.enterprise.inject.Vetoed;
 
-import org.gluu.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.CustomScriptType;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.service.PythonService;
 import org.slf4j.LoggerFactory;
