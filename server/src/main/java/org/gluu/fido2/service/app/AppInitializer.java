@@ -6,23 +6,8 @@
 
 package org.gluu.fido2.service.app;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Lists;
+import io.jans.service.timer.QuartzSchedulerManager;
 import org.gluu.exception.ConfigurationException;
 import org.gluu.fido2.service.shared.LoggerService;
 import org.gluu.fido2.service.shared.MetricService;
@@ -39,14 +24,27 @@ import org.gluu.service.cdi.event.LdapConfigurationReload;
 import org.gluu.service.cdi.util.CdiUtil;
 import org.gluu.service.custom.script.CustomScriptManager;
 import org.gluu.service.metric.inject.ReportMetric;
-import org.gluu.service.timer.QuartzSchedulerManager;
 import org.gluu.util.StringHelper;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.StringEncrypter;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Lists;
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * @author Yuriy MOvchan
