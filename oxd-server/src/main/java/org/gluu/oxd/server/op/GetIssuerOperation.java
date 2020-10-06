@@ -27,26 +27,26 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
     }
 
     public IOpResponse execute(GetIssuerParams params) {
-
+        validateParams(params);
+        GetIssuerResponse webfingerResponse = new GetIssuerResponse();
         try {
-            validateParams(params);
             OpenIdConnectDiscoveryClient client = new OpenIdConnectDiscoveryClient(params.getResource());
             OpenIdConnectDiscoveryResponse response = client.exec();
             if (response == null) {
                 LOG.error("Error in fetching op discovery configuration response ");
                 throw new HttpException(ErrorResponseCode.FAILED_TO_GET_ISSUER);
             }
-            GetIssuerResponse webfingerResponse = new GetIssuerResponse();
             BeanUtils.copyProperties(webfingerResponse, response);
 
-            String issuerFromDiscovery = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
-            validateIssuer(webfingerResponse, issuerFromDiscovery);
-
-            return webfingerResponse;
         } catch (Exception e) {
             LOG.error("Error in creating op discovery configuration response ", e);
+            throw new HttpException(ErrorResponseCode.FAILED_TO_GET_ISSUER);
         }
-        throw new HttpException(ErrorResponseCode.FAILED_TO_GET_ISSUER);
+        String issuerFromDiscovery = getDiscoveryService().getConnectDiscoveryResponse(params.getOpConfigurationEndpoint(), params.getOpHost(), params.getOpDiscoveryPath()).getIssuer();
+        validateIssuer(webfingerResponse, issuerFromDiscovery);
+
+        return webfingerResponse;
+
     }
 
     private static void validateParams(GetIssuerParams params) {
