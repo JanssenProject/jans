@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<parent>
-		<groupId>org.janssen</groupId>
+		<groupId>io.jans</groupId>
 		<artifactId>janssen</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
@@ -275,101 +275,101 @@
 		</dependency>
 		<!-- janssen -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-common</artifactId>
 		</dependency>
 		<!-- persistence model -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-persistence-model</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-static</artifactId>
 		</dependency>
 
 		<!-- janssen -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>persistence-annotation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>persistence-ldap</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>persistence-couchbase</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>persistence-hybrid</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>persistence-cdi</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-service</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-jsf-util</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-timer-weld</artifactId>
 		</dependency>
         <dependency>
-            <groupId>org.janssen</groupId>
+            <groupId>io.jans</groupId>
             <artifactId>core-script</artifactId>
         </dependency>
 
 		<!-- Eleven -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>eleven-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>eleven-client</artifactId>
 		</dependency>
 
 		<!-- janssen-notify -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-notify-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-notify-client</artifactId>
 		</dependency>
 
 		<!-- Fido2 -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>fido2-client</artifactId>
 		</dependency>
 
@@ -588,14 +588,14 @@
 
 		<!-- Test -->
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-model</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>janssen-client</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
@@ -1074,7 +1074,7 @@
 			</build>
 			<dependencies>
 				<dependency>
-					<groupId>org.janssen</groupId>
+					<groupId>io.jans</groupId>
 					<artifactId>core-saml</artifactId>
 				</dependency>
 			</dependencies>
@@ -1150,14 +1150,14 @@
 			</activation>
 			<dependencies>
 				<dependency>
-					<groupId>org.janssen</groupId>
+					<groupId>io.jans</groupId>
 					<artifactId>janssen-model</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
-					<groupId>org.janssen</groupId>
+					<groupId>io.jans</groupId>
 					<artifactId>janssen-client</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
