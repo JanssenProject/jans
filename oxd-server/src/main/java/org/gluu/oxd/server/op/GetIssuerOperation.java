@@ -11,13 +11,10 @@ import org.gluu.oxd.common.params.GetIssuerParams;
 import org.gluu.oxd.common.response.GetIssuerResponse;
 import org.gluu.oxd.common.response.IOpResponse;
 import org.gluu.oxd.server.HttpException;
-import org.gluu.oxd.server.service.Rp;
 import org.python.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,7 +64,6 @@ public class GetIssuerOperation extends BaseOperation<GetIssuerParams> {
     private static void validateIssuer(GetIssuerResponse webfingerResponse, String issuerFromDiscovery) {
 
         List<String> locations = webfingerResponse.getLinks().stream().filter(webFingerLink -> webFingerLink.getRel().equals(WebFingerParam.REL_VALUE)).map(webFingerLink -> webFingerLink.getHref()).collect(Collectors.toList());
-        System.out.println("---------------------->"+locations);
         if (locations.stream().noneMatch(webFingerLink -> webFingerLink.equals(issuerFromDiscovery))) {
             LOG.error("Discovered issuer not matched with issuer obtained from Webfinger. Got : {}, Expected : {}", issuerFromDiscovery, String.join(", ", locations));
             throw new HttpException(ErrorResponseCode.INVALID_ISSUER_DISCOVERED);
