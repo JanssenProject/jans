@@ -2,10 +2,10 @@ package io.jans.service.custom.script.test;
 
 import java.util.Map;
 
-import org.gluu.model.SimpleCustomProperty;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.idp.IdpType;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.idp.IdpType;
 import io.jans.service.custom.script.ExternalScriptService;
 
 /**

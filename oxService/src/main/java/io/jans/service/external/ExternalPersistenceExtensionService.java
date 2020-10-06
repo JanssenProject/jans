@@ -16,10 +16,10 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import io.jans.service.external.context.PersistenceExternalContext;
-import org.gluu.model.SimpleCustomProperty;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.persistence.PersistenceType;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.persistence.PersistenceType;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.persist.exception.extension.PersistenceExtension;
 import io.jans.service.custom.script.ExternalScriptService;
