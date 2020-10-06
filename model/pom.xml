@@ -11,24 +11,25 @@
 	<url>http://www.gluu.org</url>
 
 	<parent>
-		<groupId>org.janssen</groupId>
-		<artifactId>janssen-fido2</artifactId>
+		<groupId>io.jans</groupId>
+		<artifactId>fido2</artifactId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 			<!-- Gluu -->
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-annotation</artifactId>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>persistence-model</artifactId>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>org.janssen</groupId> <!--todo fix -->
                 <artifactId>janssen-model</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
 			<!-- Jackson -->

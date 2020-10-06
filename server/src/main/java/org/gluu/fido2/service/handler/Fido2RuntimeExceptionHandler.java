@@ -13,11 +13,11 @@
 
 package org.gluu.fido2.service.handler;
 
-import javax.inject.Inject;
-
+import io.jans.service.exception.ExceptionHandler;
 import org.gluu.fido2.exception.Fido2RuntimeException;
-import org.gluu.service.exception.ExceptionHandler;
 import org.slf4j.Logger;
+
+import javax.inject.Inject;
 
 public class Fido2RuntimeExceptionHandler {
 

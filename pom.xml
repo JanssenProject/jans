@@ -5,8 +5,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.janssen</groupId>
-	<artifactId>janssen-fido2</artifactId>
+	<groupId>io.jans</groupId>
+	<artifactId>fido2</artifactId>
 	<packaging>pom</packaging>
 	<version>5.0.0-SNAPSHOT</version>
 	<name>Fido2 API</name>
@@ -54,30 +54,30 @@
 		<dependencies>
 			<!-- janssen -->
 			<dependency>
-				<groupId>org.janssen</groupId>
-				<artifactId>janssen-core-bom</artifactId>
+				<groupId>io.jans</groupId>
+				<artifactId>core-bom</artifactId>
 				<version>${janssen.parent.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
 
 			<dependency>
-				<groupId>org.janssen</groupId>
+				<groupId>io.jans</groupId>
 				<artifactId>janssen-common</artifactId>
 				<version>${janssen.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.janssen</groupId>
+				<groupId>io.jans</groupId>
 				<artifactId>janssen-model</artifactId>
 				<version>${janssen.version}</version>
 			</dependency>
             <dependency>
-                <groupId>org.janssen</groupId>
+                <groupId>io.jans</groupId>
                 <artifactId>janssen-client</artifactId>
                 <version>${janssen.version}</version>
             </dependency>
 			<dependency>
-				<groupId>org.janssen</groupId>
+				<groupId>io.jans</groupId>
 				<artifactId>fido2-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
