@@ -1,4 +1,4 @@
-package org.gluu.i18n;
+package io.jans.i18n;
 
 import java.io.File;
 import java.io.IOException;
