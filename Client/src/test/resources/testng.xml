@@ -20,7 +20,7 @@
     -->
     <test name="PKCS11 Rest Service Test (HTTP)" enabled="true">
         <classes>
-            <class name="org.gluu.oxeleven.PKCS11RestServiceTest"/>
+            <class name="io.jans.eleven.PKCS11RestServiceTest"/>
         </classes>
     </test>
 </suite>
