@@ -1,20 +1,15 @@
 package io.jans.service.cache;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-
 import io.jans.persist.couchbase.impl.CouchbaseEntryManager;
 import io.jans.persist.couchbase.impl.CouchbaseEntryManagerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.*;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Movchan Date: 11/29/2019
@@ -34,7 +29,7 @@ public class CouchbaseNativeBenchmarkCacheTest {
 	}
 
 	@Test(enabled = false, threadPoolSize = 300, invocationCount = 10000) // manual
-	public void couchbaseCacheProvider() throws IOException {
+	public void couchbaseCacheProvider() {
 		final String baseDn = "ou=cache,o=gluu";
 
 		final CacheConfiguration cacheConfiguration = new CacheConfiguration();
