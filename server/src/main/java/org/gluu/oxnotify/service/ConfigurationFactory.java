@@ -6,22 +6,20 @@
 
 package org.gluu.oxnotify.service;
 
-import java.io.File;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jans.util.properties.FileConfiguration;
+import org.gluu.oxnotify.exception.ConfigurationException;
+import org.gluu.oxnotify.model.conf.AccessConfiguration;
+import org.gluu.oxnotify.model.conf.Configuration;
+import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.gluu.oxnotify.exception.ConfigurationException;
-import org.gluu.oxnotify.model.conf.AccessConfiguration;
-import org.gluu.oxnotify.model.conf.Configuration;
-import org.gluu.util.properties.FileConfiguration;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Yuriy Movchan
