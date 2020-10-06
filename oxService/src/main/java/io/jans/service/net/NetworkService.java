@@ -5,8 +5,8 @@
  */
 package io.jans.service.net;
 
-import org.gluu.net.InetAddressUtility;
-import org.gluu.util.StringHelper;
+import io.jans.net.InetAddressUtility;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

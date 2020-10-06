@@ -6,8 +6,8 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import io.jans.service.CacheService;
-import org.gluu.model.security.protect.AuthenticationAttempt;
-import org.gluu.model.security.protect.AuthenticationAttemptList;
+import io.jans.model.security.protect.AuthenticationAttempt;
+import io.jans.model.security.protect.AuthenticationAttemptList;
 import org.slf4j.Logger;
 
 /**

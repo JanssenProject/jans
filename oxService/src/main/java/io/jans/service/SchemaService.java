@@ -18,13 +18,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.model.SchemaEntry;
+import io.jans.model.SchemaEntry;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.persist.hybrid.impl.HybridEntryManagerFactory;
 import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
 import io.jans.persist.ldap.operation.LdapOperationService;
-import org.gluu.util.StringHelper;
-import org.gluu.util.exception.InvalidSchemaUpdateException;
+import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidSchemaUpdateException;
 import org.slf4j.Logger;
 
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;

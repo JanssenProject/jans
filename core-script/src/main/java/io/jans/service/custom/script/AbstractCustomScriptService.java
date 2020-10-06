@@ -6,11 +6,11 @@
 package io.jans.service.custom.script;
 
 import com.google.common.base.Optional;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.model.CustomScript;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.model.CustomScript;
 import io.jans.persist.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
-import org.gluu.util.OxConstants;
+import io.jans.util.OxConstants;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.JobShedule;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.gluu.util.init.Initializable;
+import io.jans.util.init.Initializable;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;

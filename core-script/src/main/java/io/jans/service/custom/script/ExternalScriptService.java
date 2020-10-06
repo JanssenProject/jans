@@ -16,11 +16,11 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import io.jans.service.custom.inject.ReloadScript;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.model.CustomScript;
-import org.gluu.model.custom.script.type.BaseExternalType;
-import org.gluu.util.StringHelper;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.model.CustomScript;
+import io.jans.model.custom.script.type.BaseExternalType;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
