@@ -3,13 +3,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>janssen-notify-model</artifactId>
-	<name>janssen-notify Model</name>
+	<artifactId>notify-model</artifactId>
+	<name>notify Model</name>
 	<packaging>jar</packaging>
 
 	<parent>
-		<artifactId>janssen-notify</artifactId>
-		<groupId>org.janssen</groupId>
+		<artifactId>notify</artifactId>
+		<groupId>io.jans</groupId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 

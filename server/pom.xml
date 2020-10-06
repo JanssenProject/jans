@@ -2,28 +2,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>janssen-notify-server</artifactId>
-	<name>janssen-notify Server</name>
+	<artifactId>notify-server</artifactId>
+	<name>notify Server</name>
 	<packaging>war</packaging>
 
 	<parent>
-		<artifactId>janssen-notify</artifactId>
-		<groupId>org.janssen</groupId>
+		<artifactId>notify</artifactId>
+		<groupId>io.jans</groupId>
 		<version>5.0.0-SNAPSHOT</version>
 	</parent>
 
 	<build>
-		<finalName>janssen-notify</finalName>
+		<finalName>notify</finalName>
 	</build>
 
 	<dependencies>
 		<!-- janssen -->
 		<dependency>
-			<groupId>org.janssen</groupId>
-			<artifactId>janssen-notify-model</artifactId>
+			<groupId>io.jans</groupId>
+			<artifactId>notify-model</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.janssen</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>core-util</artifactId>
 			<exclusions>
 				<exclusion>
