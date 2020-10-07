@@ -8,7 +8,7 @@
 
   <parent>
     <groupId>io.jans</groupId>
-    <artifactId>jans-auth-server</artifactId>
+    <artifactId>jans-auth</artifactId>
     <version>5.0.0-SNAPSHOT</version>
   </parent>
 
