@@ -2,7 +2,7 @@ package org.gluu.oxauth.model.uma;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.gluu.model.uma.ClaimDefinition;
+import io.jans.model.uma.ClaimDefinition;
 
 import java.io.Serializable;
 import java.util.List;
