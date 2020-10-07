@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
