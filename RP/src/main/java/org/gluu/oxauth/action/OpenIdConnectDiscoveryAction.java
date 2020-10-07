@@ -6,21 +6,27 @@
 
 package org.gluu.oxauth.action;
 
-import org.apache.http.client.HttpClient;
-import org.gluu.net.SslDefaultHttpClient;
-import org.gluu.net.TrustAllTrustManager;
-import org.gluu.oxauth.client.*;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.slf4j.Logger;
+import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+
+import java.io.Serializable;
+import java.net.URISyntaxException;
 
 import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.io.Serializable;
-import java.net.URISyntaxException;
 
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import org.apache.http.client.HttpClient;
+import org.gluu.oxauth.client.OpenIdConfigurationClient;
+import org.gluu.oxauth.client.OpenIdConfigurationResponse;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryRequest;
+import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.slf4j.Logger;
+
+import io.jans.net.SslDefaultHttpClient;
+import io.jans.net.TrustAllTrustManager;
 
 /**
  * @author Javier Rojas Blum
