@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.HasParamName;
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.persist.annotation.AttributeEnum;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
