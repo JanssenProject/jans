@@ -12,11 +12,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<oxcore.version>5.0.0-SNAPSHOT</oxcore.version>
-		<oxeleven.version>5.0.0-SNAPSHOT</oxeleven.version>
-		<janssen-notify.version>5.0.0-SNAPSHOT</janssen-notify.version>
-		<oxlicense.version>5.0.0-SNAPSHOT</oxlicense.version>
-		<fido2.version>5.0.0-SNAPSHOT</fido2.version>
+		<jans-core.version>5.0.0-SNAPSHOT</jans-core.version>
+		<jans-eleven.version>5.0.0-SNAPSHOT</jans-eleven.version>
+		<jans-notify.version>5.0.0-SNAPSHOT</jans-notify.version>
+		<jans-fido2.version>5.0.0-SNAPSHOT</jans-fido2.version>
 
 		<json.version>20180813</json.version>
 		<jackson.version>2.10.1</jackson.version>
@@ -172,87 +171,87 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-util</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-annotation</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-ldap</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-couchbase</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-hybrid</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-cdi</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>persistence-filter</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-service</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-server</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-jsf-util</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-saml</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-model</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-document-store</artifactId>
-				<version>${oxcore.version}</version>
+				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>eleven-client</artifactId>
-				<version>${oxeleven.version}</version>
+				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>eleven-model</artifactId>
-				<version>${oxeleven.version}</version>
+				<version>${jans-eleven.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>janssen-notify-client</artifactId>
-				<version>${janssen-notify.version}</version>
+				<version>${jans-notify.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>janssen-notify-model</artifactId>
-				<version>${janssen-notify.version}</version>
+				<version>${jans-notify.version}</version>
 			</dependency>
 
 			<!-- Weld -->
