@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>persistence-annotation</artifactId>
+			<artifactId>jans-orm-annotation</artifactId>
 		</dependency>
 		
 		<!-- Validation -->
