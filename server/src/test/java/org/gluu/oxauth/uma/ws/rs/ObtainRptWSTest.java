@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

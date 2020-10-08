@@ -21,7 +21,7 @@ import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

@@ -8,7 +8,7 @@ package org.gluu.oxauth.ws.rs;
 
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.util.Base64Util;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;
