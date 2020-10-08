@@ -12,7 +12,7 @@ import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import javax.ws.rs.client.Entity;

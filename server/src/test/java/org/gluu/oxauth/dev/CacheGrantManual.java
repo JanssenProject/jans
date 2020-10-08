@@ -12,8 +12,8 @@ import net.spy.memcached.DefaultConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
-import org.gluu.oxauth.model.common.CacheGrant;
-import org.gluu.oxauth.model.common.SessionId;
+import io.jans.as.server.model.common.CacheGrant;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 

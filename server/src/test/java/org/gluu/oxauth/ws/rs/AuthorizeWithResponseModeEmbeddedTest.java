@@ -18,7 +18,7 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;

@@ -11,7 +11,7 @@ import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.model.uma.TUma;
 import io.jans.as.model.uma.UmaTestUtil;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;

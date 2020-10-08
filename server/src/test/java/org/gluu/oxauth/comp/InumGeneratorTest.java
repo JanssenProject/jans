@@ -9,7 +9,7 @@ package org.gluu.oxauth.comp;
 import io.jans.as.model.common.IdType;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.idgen.ws.rs.InumGenerator;
+import io.jans.as.server.idgen.ws.rs.InumGenerator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
