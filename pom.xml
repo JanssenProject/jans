@@ -175,32 +175,32 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-annotation</artifactId>
+				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-ldap</artifactId>
+				<artifactId>jans-orm-ldap</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-couchbase</artifactId>
+				<artifactId>jans-orm-couchbase</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-hybrid</artifactId>
+				<artifactId>jans-orm-hybrid</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-cdi</artifactId>
+				<artifactId>jans-orm-cdi</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>persistence-filter</artifactId>
+				<artifactId>jans-orm-filter</artifactId>
 				<version>${jans-core.version}</version>
 			</dependency>
 			<dependency>
