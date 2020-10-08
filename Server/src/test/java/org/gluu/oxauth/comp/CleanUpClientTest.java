@@ -15,7 +15,7 @@ import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

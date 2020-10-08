@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.service.ciba;
 
-import org.gluu.util.StringHelper;
-import org.gluu.util.security.PropertiesDecrypter;
-import org.gluu.util.security.StringEncrypter;
-import org.gluu.util.security.StringEncrypter.EncryptionException;
+import io.jans.util.StringHelper;
+import io.jans.util.security.PropertiesDecrypter;
+import io.jans.util.security.StringEncrypter;
+import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

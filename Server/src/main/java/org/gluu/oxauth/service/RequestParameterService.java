@@ -13,8 +13,8 @@ import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

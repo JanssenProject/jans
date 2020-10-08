@@ -8,7 +8,7 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService, AppInitializer
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from java.util import Arrays, HashMap
 
 import java

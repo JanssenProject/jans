@@ -22,7 +22,7 @@ import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
 import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
 import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.util.io.ByteDataInputStream;
+import io.jans.util.io.ByteDataInputStream;
 import org.slf4j.Logger;
 
 import com.google.common.io.ByteArrayDataOutput;

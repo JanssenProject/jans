@@ -18,7 +18,7 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper, ArrayHelper
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.oxauth.model.config import Constants
 from javax.ws.rs.core import Response

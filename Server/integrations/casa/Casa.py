@@ -19,7 +19,7 @@ from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager
 from org.gluu.service import CacheService
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 
 try:
     import json

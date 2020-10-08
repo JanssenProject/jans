@@ -19,7 +19,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper, ArrayHelper, Util
+from io.jans.util import StringHelper, ArrayHelper, Util
 from org.gluu.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):

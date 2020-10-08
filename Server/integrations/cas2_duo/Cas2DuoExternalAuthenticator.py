@@ -8,7 +8,7 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.util import ArrayHelper, StringHelper
+from io.jans.util import ArrayHelper, StringHelper
 from java.util import ArrayList, Arrays
 
 from Cas2ExternalAuthenticator import PersonAuthentication as Cas2ExternalAuthenticator

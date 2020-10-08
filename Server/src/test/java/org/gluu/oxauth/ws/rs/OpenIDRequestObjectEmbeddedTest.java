@@ -24,7 +24,7 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;

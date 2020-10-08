@@ -20,7 +20,7 @@ import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.gluu.service.LookupService;
 import org.gluu.service.custom.script.CustomScriptManager;
 import org.gluu.service.custom.script.ExternalScriptService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

@@ -25,8 +25,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.ArrayHelper;
-import org.gluu.util.StringHelper;
+import io.jans.util.ArrayHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

@@ -21,7 +21,7 @@ import org.gluu.oxauth.uma.service.UmaRptService;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
