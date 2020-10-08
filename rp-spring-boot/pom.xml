@@ -10,10 +10,10 @@
 	</parent>
 
 	<groupId>io.jans</groupId>
-	<artifactId>rp-spring-boot</artifactId>
+	<artifactId>jans-auth-rp-spring-boot</artifactId>
 	<version>5.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>rp-spring-boot</name>
+	<name>jans-auth-rp-spring-boot</name>
 	<description>jans demo project for Spring Boot</description>
 
 	<properties>
