@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>core-radius</artifactId>
     <packaging>jar</packaging>
-    <name>oxRadius</name>
+    <name>core-radius</name>
     
     <parent>
         <groupId>io.jans</groupId>
