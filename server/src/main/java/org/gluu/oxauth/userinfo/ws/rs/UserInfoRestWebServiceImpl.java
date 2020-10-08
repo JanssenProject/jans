@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.userinfo.ws.rs;
 
+import io.jans.as.model.common.ScopeType;
 import org.apache.commons.lang.StringUtils;
 import io.jans.model.GluuAttribute;
 import io.jans.model.attribute.AttributeDataType;
@@ -15,38 +16,37 @@ import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.Claim;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.exception.InvalidClaimException;
-import org.gluu.oxauth.model.exception.InvalidJweException;
-import org.gluu.oxauth.model.json.JsonApplier;
-import org.gluu.oxauth.model.jwe.Jwe;
-import org.gluu.oxauth.model.jwe.JweEncrypter;
-import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaims;
-import org.gluu.oxauth.model.jwt.JwtSubClaimObject;
-import org.gluu.oxauth.model.jwt.JwtType;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidClaimException;
+import io.jans.as.model.exception.InvalidJweException;
+import io.jans.as.model.json.JsonApplier;
+import io.jans.as.model.jwe.Jwe;
+import io.jans.as.model.jwe.JweEncrypter;
+import io.jans.as.model.jwe.JweEncrypterImpl;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.jwt.JwtSubClaimObject;
+import io.jans.as.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.token.JsonWebResponse;
-import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import org.gluu.oxauth.model.userinfo.UserInfoParamsValidator;
-import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.ServerCryptoProvider;
 import org.gluu.oxauth.service.UserService;
-import org.gluu.oxauth.service.common.*;
 import org.gluu.oxauth.service.external.ExternalDynamicScopeService;
 import org.gluu.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.gluu.oxauth.service.token.TokenService;
@@ -323,7 +323,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
             org.oxauth.persistence.model.Scope scope = scopeService.getScopeById(scopeName);
-            if ((scope != null) && (org.gluu.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
+            if ((scope != null) && (ScopeType.DYNAMIC == scope.getScopeType())) {
                 dynamicScopes.add(scope);
                 continue;
             }

@@ -8,12 +8,12 @@ package org.gluu.oxauth.ws.rs.deviceauthz;
 
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.authorize.DeviceAuthzErrorResponseType;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
+import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
 import static org.testng.Assert.*;
 
 /**

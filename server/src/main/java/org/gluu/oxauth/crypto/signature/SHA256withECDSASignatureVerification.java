@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
-import org.gluu.oxauth.model.exception.SignatureException;
+import io.jans.as.model.exception.SignatureException;
 
 @Named
 public class SHA256withECDSASignatureVerification implements SignatureVerification {

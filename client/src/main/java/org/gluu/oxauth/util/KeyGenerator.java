@@ -6,18 +6,19 @@
 
 package org.gluu.oxauth.util;
 
+import io.jans.as.model.jwk.*;
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.OxElevenCryptoProvider;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.OxElevenCryptoProvider;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.*;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +29,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
+import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * Command example:

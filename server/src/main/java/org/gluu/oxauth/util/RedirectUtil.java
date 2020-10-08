@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.util;
 
-import org.gluu.oxauth.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseMode;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
 import org.json.JSONException;
 import org.json.JSONObject;

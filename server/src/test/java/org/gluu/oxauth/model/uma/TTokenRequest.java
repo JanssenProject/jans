@@ -33,20 +33,19 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.client.TokenRequest;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.Holder;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.uma.RPTResponse;
-import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaScopeType;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Holder;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.uma.RPTResponse;
+import io.jans.as.model.uma.RptIntrospectionResponse;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.Assert;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

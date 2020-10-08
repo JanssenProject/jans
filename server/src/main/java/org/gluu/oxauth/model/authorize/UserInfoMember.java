@@ -13,7 +13,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum Date: 03.09.2012

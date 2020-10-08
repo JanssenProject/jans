@@ -8,7 +8,7 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.register.ApplicationType;
+import io.jans.as.model.register.ApplicationType;
 import org.gluu.oxauth.util.ClientUtil;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
@@ -20,8 +20,8 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Map;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.util.StringUtils.implode;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.

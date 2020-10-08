@@ -8,9 +8,9 @@ package org.gluu.oxauth.ciba;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import org.gluu.oxauth.model.registration.Client;
 
 import javax.ejb.Stateless;

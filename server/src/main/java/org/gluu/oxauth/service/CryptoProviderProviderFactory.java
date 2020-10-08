@@ -5,9 +5,10 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.model.common.WebKeyStorage;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.common.WebKeyStorage;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.CryptoProviderFactory;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
 import org.slf4j.Logger;
 
 /**
@@ -36,7 +37,7 @@ public class CryptoProviderProviderFactory {
             throw new RuntimeException("Failed to initialize cryptoProvider, cryptoProviderType is not specified!");
         }
 
-        AbstractCryptoProvider cryptoProvider = org.gluu.oxauth.model.crypto.CryptoProviderFactory.getCryptoProvider(appConfiguration);
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
 
         if (cryptoProvider == null) {
             throw new RuntimeException("Failed to initialize cryptoProvider, cryptoProviderType is unsupported: " + webKeyStorage);

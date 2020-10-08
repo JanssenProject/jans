@@ -11,7 +11,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.AuthorizeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.UserService;

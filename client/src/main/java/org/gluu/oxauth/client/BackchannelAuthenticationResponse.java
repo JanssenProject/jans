@@ -9,11 +9,11 @@ package org.gluu.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.*;
 
 /**
  * Represents a CIBA backchannel authorization response.

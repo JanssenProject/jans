@@ -47,7 +47,7 @@ import org.bouncycastle.x509.util.StreamParsingException;
 import org.gluu.oxauth.cert.validation.model.ValidationStatus;
 import org.gluu.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
 import org.gluu.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.as.model.util.SecurityProviderUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,20 +7,21 @@
 package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Strings;
+import io.jans.as.model.token.ClientAssertionType;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.jwt.JwtHeaderName;
-import org.gluu.oxauth.model.jwt.JwtType;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtHeaderName;
+import io.jans.as.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.JwtUtil;
+import io.jans.as.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
@@ -37,7 +38,7 @@ public class ClientAssertion {
     private Jwt jwt;
     private String clientSecret;
 
-    public ClientAssertion(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    public ClientAssertion(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, io.jans.as.model.token.ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException {
         try {
             if (!load(appConfiguration, cryptoProvider, clientId, clientAssertionType, encodedAssertion)) {
@@ -58,7 +59,7 @@ public class ClientAssertion {
         return clientSecret;
     }
 
-    private boolean load(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    private boolean load(AppConfiguration appConfiguration, AbstractCryptoProvider cryptoProvider, String clientId, io.jans.as.model.token.ClientAssertionType clientAssertionType, String encodedAssertion)
             throws Exception {
         boolean result;
 

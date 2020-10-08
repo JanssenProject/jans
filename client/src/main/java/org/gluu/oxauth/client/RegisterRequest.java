@@ -9,16 +9,17 @@ package org.gluu.oxauth.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.jans.as.model.common.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.json.JsonApplier;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterRequestParam;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.json.JsonApplier;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterRequestParam;
 import org.gluu.oxauth.util.ClientUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,9 +28,9 @@ import org.json.JSONObject;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
-import static org.gluu.oxauth.model.util.StringUtils.toJSONArray;
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.model.util.StringUtils.toJSONArray;
 
 /**
  * Represents a register request to send to the authorization server.

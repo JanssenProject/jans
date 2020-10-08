@@ -9,8 +9,8 @@ package org.gluu.oxauth.client.uma;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaMetadata;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata.

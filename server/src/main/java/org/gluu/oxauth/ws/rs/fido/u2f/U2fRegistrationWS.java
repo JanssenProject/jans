@@ -6,18 +6,19 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
+import io.jans.as.model.fido.u2f.U2fErrorResponseType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.fido.u2f.*;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
-import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.gluu.oxauth.model.fido.u2f.protocol.RegisterResponse;
-import org.gluu.oxauth.model.fido.u2f.protocol.RegisterStatus;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.exception.RegistrationNotAllowed;
+import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
+import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
+import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -115,7 +116,7 @@ public class U2fRegistrationWS {
 
                 if (removeEnrollment) {
                     // We allow to use enrollment code only one time
-                    user.setAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, (String) null);
+                    user.setAttribute(io.jans.as.model.fido.u2f.U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE, (String) null);
                     userService.updateUser(user);
                 }
             }
@@ -142,11 +143,11 @@ public class U2fRegistrationWS {
 
             if (ex instanceof RegistrationNotAllowed) {
                 throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
-                        .entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.REGISTRATION_NOT_ALLOWED)).build());
+                        .entity(errorResponseFactory.getErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.REGISTRATION_NOT_ALLOWED)).build());
             }
 
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SERVER_ERROR)).build());
+                    .entity(errorResponseFactory.getJsonErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.SERVER_ERROR)).build());
         }
     }
 
@@ -167,7 +168,7 @@ public class U2fRegistrationWS {
             RegisterRequestMessageLdap registerRequestMessageLdap = u2fRegistrationService.getRegisterRequestMessageByRequestId(requestId);
             if (registerRequestMessageLdap == null) {
                 throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getJsonErrorResponse(U2fErrorResponseType.SESSION_EXPIRED)).build());
+                        .entity(errorResponseFactory.getJsonErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.SESSION_EXPIRED)).build());
             }
             u2fRegistrationService.removeRegisterRequestMessage(registerRequestMessageLdap);
 
@@ -210,7 +211,7 @@ public class U2fRegistrationWS {
 
             if (ex instanceof BadInputException) {
                 throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                        .entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.INVALID_REQUEST)).build());
+                        .entity(errorResponseFactory.getErrorResponse(io.jans.as.model.fido.u2f.U2fErrorResponseType.INVALID_REQUEST)).build());
             }
 
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)

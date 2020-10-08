@@ -1,9 +1,9 @@
 package org.gluu.oxauth.model.crypto.binding;
 
-import org.gluu.oxauth.model.crypto.binding.TokenBinding;
-import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
-import org.gluu.oxauth.model.crypto.binding.TokenBindingParseException;
-import org.gluu.oxauth.model.crypto.binding.TokenBindingType;
+import io.jans.as.model.crypto.binding.TokenBinding;
+import io.jans.as.model.crypto.binding.TokenBindingMessage;
+import io.jans.as.model.crypto.binding.TokenBindingParseException;
+import io.jans.as.model.crypto.binding.TokenBindingType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

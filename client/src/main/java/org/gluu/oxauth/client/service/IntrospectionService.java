@@ -7,7 +7,7 @@
 package org.gluu.oxauth.client.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.gluu.oxauth.model.common.IntrospectionResponse;
+import io.jans.as.model.common.IntrospectionResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

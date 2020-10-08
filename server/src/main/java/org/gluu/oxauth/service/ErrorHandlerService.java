@@ -8,10 +8,10 @@ package org.gluu.oxauth.service;
 
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorHandlingMethod;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.error.IErrorType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorHandlingMethod;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.error.IErrorType;
 import org.gluu.oxauth.util.RedirectUri;
 import io.jans.util.StringHelper;
 import org.python.jline.internal.Log;

@@ -7,9 +7,9 @@
 package org.gluu.oxauth.uma.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;

@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

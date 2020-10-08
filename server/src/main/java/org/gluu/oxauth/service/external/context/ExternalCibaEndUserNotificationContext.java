@@ -1,6 +1,6 @@
 package org.gluu.oxauth.service.external.context;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.ciba.CibaEncryptionService;
 
 /**

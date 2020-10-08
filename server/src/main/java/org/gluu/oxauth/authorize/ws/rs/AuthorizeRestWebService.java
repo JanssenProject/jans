@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

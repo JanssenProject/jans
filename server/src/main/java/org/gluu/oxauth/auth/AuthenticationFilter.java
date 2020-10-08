@@ -6,24 +6,25 @@
 
 package org.gluu.oxauth.auth;
 
+import io.jans.as.model.common.AuthenticationMethod;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import io.jans.model.security.Identity;
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
-import org.gluu.oxauth.model.token.ClientAssertionType;
+import io.jans.as.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.token.HttpAuthTokenType;
-import org.gluu.oxauth.model.token.TokenErrorResponseType;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.CookieService;
@@ -45,7 +46,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Javier Rojas Blum
@@ -188,7 +189,7 @@ public class AuthenticationFilter implements Filter {
                 }
             } else {
                 String sessionId = cookieService.getSessionIdFromCookie(httpRequest);
-                List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
+                List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
                 if (StringUtils.isBlank(sessionId) && appConfiguration.getSessionIdRequestParameterEnabled()) {
                     sessionId = httpRequest.getParameter(AuthorizeRequestParam.SESSION_ID);
@@ -199,7 +200,7 @@ public class AuthenticationFilter implements Filter {
                     sessionIdObject = sessionIdService.getSessionId(sessionId);
                 }
                 if (sessionIdObject != null && SessionIdState.AUTHENTICATED == sessionIdObject.getState()
-                        && !prompts.contains(Prompt.LOGIN)) {
+                        && !prompts.contains(io.jans.as.model.common.Prompt.LOGIN)) {
                     processSessionAuth(sessionId, httpRequest, httpResponse, filterChain);
                 } else {
                     filterChain.doFilter(httpRequest, httpResponse);
@@ -229,8 +230,8 @@ public class AuthenticationFilter implements Filter {
         if (StringUtils.isNotBlank(clientId)) {
             final Client client = clientService.getClient(clientId);
             if (client != null &&
-                    (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH ||
-                            client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
+                    (client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.TLS_CLIENT_AUTH ||
+                            client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
                 return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }
         }
@@ -324,7 +325,7 @@ public class AuthenticationFilter implements Filter {
                                 || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                             Client client = clientService.getClient(username);
                             if (client == null
-                                    || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
+                                    || io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
                                 throw new Exception("The Token Authentication Method is not valid.");
                             }
                             requireAuth = !authenticator.authenticateClient(servletRequest);
@@ -384,7 +385,7 @@ public class AuthenticationFilter implements Filter {
             if (requireAuth) {
                 if (isExistUserPassword) {
                     Client client = clientService.getClient(clientId);
-                    if (client != null && AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
+                    if (client != null && io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
                         // Only authenticate if username doesn't match
                         // Identity.username and user isn't authenticated
                         if (!clientId.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {

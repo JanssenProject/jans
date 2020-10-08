@@ -18,12 +18,12 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.uma.PermissionTicket;
+import io.jans.as.model.uma.PermissionTicket;
 import org.gluu.oxauth.model.uma.TUma;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaPermission;
-import org.gluu.oxauth.model.uma.UmaResourceResponse;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaPermission;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

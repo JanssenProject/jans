@@ -7,10 +7,10 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.exception.InvalidClaimException;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.exception.InvalidClaimException;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.EncryptionService;
 import io.jans.orm.PersistenceEntryManager;

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthorizationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
 
 /**
  * Represents a User Info request to send to the authorization server.

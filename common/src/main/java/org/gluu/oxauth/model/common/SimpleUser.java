@@ -9,10 +9,7 @@ package org.gluu.oxauth.model.common;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.gluu.oxauth.model.exception.InvalidClaimException;
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.util.StringHelper;
+import io.jans.as.model.exception.InvalidClaimException;
 
 /**
  * @author Javier Rojas Blum

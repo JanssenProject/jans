@@ -14,7 +14,7 @@ import io.jans.search.filter.Filter;
 import io.jans.util.ArrayHelper;
 import io.jans.util.StringHelper;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;

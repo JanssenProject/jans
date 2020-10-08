@@ -7,17 +7,17 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.crypto.PublicKey;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * Encapsulates functionality to make JWK request calls to an authorization

@@ -8,14 +8,14 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.Util;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationRequestParam.*;
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationRequestParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.*;
 
 /**
  * Encapsulates functionality to make backchannel authentication request calls to an authorization server via REST Services.

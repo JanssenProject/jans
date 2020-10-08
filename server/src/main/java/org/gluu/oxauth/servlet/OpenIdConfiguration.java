@@ -9,11 +9,11 @@ package org.gluu.oxauth.servlet;
 import org.apache.commons.lang.StringUtils;
 import io.jans.model.GluuAttribute;
 import org.gluu.oxauth.ciba.CIBAConfigurationService;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.ScopeType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.ScopeType;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ScopeService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
@@ -34,8 +34,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
+import static io.jans.as.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum

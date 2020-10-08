@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.client;
 
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.RESOURCE;
-import static org.gluu.oxauth.model.util.StringUtils.addQueryStringParam;
+import static io.jans.as.model.discovery.WebFingerParam.REL;
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
+import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
+import static io.jans.as.model.util.StringUtils.addQueryStringParam;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;

@@ -7,7 +7,7 @@
 package org.gluu.oxauth.ws.rs;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.util.Base64Util;
 import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

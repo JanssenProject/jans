@@ -14,7 +14,7 @@ import org.gluu.oxauth.client.TokenClient;
 import org.gluu.oxauth.client.TokenResponse;
 import org.gluu.oxauth.client.uma.wrapper.UmaClient;
 import org.gluu.oxauth.model.uma.UmaTestUtil;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

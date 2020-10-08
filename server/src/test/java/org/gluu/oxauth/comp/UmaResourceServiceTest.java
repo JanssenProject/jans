@@ -1,10 +1,10 @@
 package org.gluu.oxauth.comp;
 
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
-import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import io.jans.as.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.InumService;
 import org.gluu.oxauth.uma.service.UmaResourceService;

@@ -6,20 +6,21 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
+import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
 import org.gluu.oxauth.crypto.random.ChallengeGenerator;
 import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.gluu.oxauth.model.fido.u2f.*;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.gluu.oxauth.model.fido.u2f.protocol.*;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.util.Base64Util;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -67,13 +68,13 @@ public class RegistrationService extends RequestService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
+    public io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
         if (applicationService.isValidateApplication()) {
             applicationService.checkIsValid(appId);
         }
 
-        List<AuthenticateRequest> authenticateRequests = new ArrayList<AuthenticateRequest>();
-        List<RegisterRequest> registerRequests = new ArrayList<RegisterRequest>();
+        List<io.jans.as.model.fido.u2f.protocol.AuthenticateRequest> authenticateRequests = new ArrayList<io.jans.as.model.fido.u2f.protocol.AuthenticateRequest>();
+        List<io.jans.as.model.fido.u2f.protocol.RegisterRequest> registerRequests = new ArrayList<io.jans.as.model.fido.u2f.protocol.RegisterRequest>();
 
         boolean twoStep = StringHelper.isNotEmpty(userInum);
         if (twoStep) {
@@ -82,7 +83,7 @@ public class RegistrationService extends RequestService {
             for (DeviceRegistration deviceRegistration : deviceRegistrations) {
                 if (!deviceRegistration.isCompromised()) {
                     try {
-                        AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
+                        io.jans.as.model.fido.u2f.protocol.AuthenticateRequest authenticateRequest = u2fAuthenticationService.startAuthentication(appId, deviceRegistration);
                         authenticateRequests.add(authenticateRequest);
                     } catch (DeviceCompromisedException ex) {
                         log.error("Faield to authenticate device", ex);
@@ -91,27 +92,27 @@ public class RegistrationService extends RequestService {
             }
         }
 
-        RegisterRequest request = startRegistration(appId);
+        io.jans.as.model.fido.u2f.protocol.RegisterRequest request = startRegistration(appId);
         registerRequests.add(request);
 
-        return new RegisterRequestMessage(authenticateRequests, registerRequests);
+        return new io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage(authenticateRequests, registerRequests);
     }
 
-    public RegisterRequest startRegistration(String appId) {
+    public io.jans.as.model.fido.u2f.protocol.RegisterRequest startRegistration(String appId) {
         return startRegistration(appId, challengeGenerator.generateChallenge());
     }
 
-    public RegisterRequest startRegistration(String appId, byte[] challenge) {
-        return new RegisterRequest(Base64Util.base64urlencode(challenge), appId);
+    public io.jans.as.model.fido.u2f.protocol.RegisterRequest startRegistration(String appId, byte[] challenge) {
+        return new io.jans.as.model.fido.u2f.protocol.RegisterRequest(Base64Util.base64urlencode(challenge), appId);
     }
 
-    public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum) throws BadInputException {
+    public DeviceRegistrationResult finishRegistration(io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage requestMessage, io.jans.as.model.fido.u2f.protocol.RegisterResponse response, String userInum) throws BadInputException {
         return finishRegistration(requestMessage, response, userInum, null);
     }
 
-    public DeviceRegistrationResult finishRegistration(RegisterRequestMessage requestMessage, RegisterResponse response, String userInum, Set<String> facets)
+    public DeviceRegistrationResult finishRegistration(io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage requestMessage, io.jans.as.model.fido.u2f.protocol.RegisterResponse response, String userInum, Set<String> facets)
             throws BadInputException {
-        RegisterRequest request = requestMessage.getRegisterRequest();
+        io.jans.as.model.fido.u2f.protocol.RegisterRequest request = requestMessage.getRegisterRequest();
         String appId = request.getAppId();
 
         ClientData clientData = response.getClientData();
@@ -136,7 +137,7 @@ public class RegistrationService extends RequestService {
         if (StringHelper.isNotEmpty(responseDeviceData)) {
             try {
                 String responseDeviceDataDecoded = new String(Base64Util.base64urldecode(responseDeviceData));
-                DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceDataDecoded, DeviceData.class);
+                io.jans.as.model.fido.u2f.protocol.DeviceData deviceData = ServerUtil.jsonMapperWithWrapRoot().readValue(responseDeviceDataDecoded, io.jans.as.model.fido.u2f.protocol.DeviceData.class);
                 deviceRegistration.setDeviceData(deviceData);
             } catch (Exception ex) {
                 throw new BadInputException(String.format("Device data is invalid: %s", responseDeviceData), ex);
@@ -168,7 +169,7 @@ public class RegistrationService extends RequestService {
         return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.APPROVED);
     }
 
-    public RequestMessageLdap storeRegisterRequestMessage(RegisterRequestMessage requestMessage, String userInum, String sessionId) {
+    public RequestMessageLdap storeRegisterRequestMessage(io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage requestMessage, String userInum, String sessionId) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String registerRequestMessageId = UUID.randomUUID().toString();
 
@@ -179,7 +180,7 @@ public class RegistrationService extends RequestService {
         return registerRequestMessageLdap;
     }
 
-    public RegisterRequestMessage getRegisterRequestMessage(String oxId) {
+    public io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage getRegisterRequestMessage(String oxId) {
         String requestDn = getDnForRegisterRequestMessage(oxId);
 
         RegisterRequestMessageLdap registerRequestMessageLdap = ldapEntryManager.find(RegisterRequestMessageLdap.class, requestDn);

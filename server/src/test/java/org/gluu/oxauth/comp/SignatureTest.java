@@ -9,18 +9,18 @@ package org.gluu.oxauth.comp;
 import static org.testng.Assert.assertTrue;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.crypto.Certificate;
-import org.gluu.oxauth.model.crypto.Key;
-import org.gluu.oxauth.model.crypto.KeyFactory;
-import org.gluu.oxauth.model.crypto.signature.ECDSAKeyFactory;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.RSAKeyFactory;
-import org.gluu.oxauth.model.crypto.signature.RSAPrivateKey;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jws.ECDSASigner;
-import org.gluu.oxauth.model.jws.RSASigner;
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.Key;
+import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.crypto.signature.ECDSAKeyFactory;
+import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAKeyFactory;
+import io.jans.as.model.crypto.signature.RSAPrivateKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jws.ECDSASigner;
+import io.jans.as.model.jws.RSASigner;
 import org.testng.annotations.Test;
 
 /**

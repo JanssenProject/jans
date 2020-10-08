@@ -2,9 +2,9 @@ package org.gluu.oxauth.client;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
+import io.jans.as.model.register.RegisterResponseParam;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 

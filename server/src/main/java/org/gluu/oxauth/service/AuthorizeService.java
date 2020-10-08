@@ -7,18 +7,19 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
+import io.jans.as.model.common.Prompt;
 import org.apache.commons.lang.StringUtils;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import org.gluu.oxauth.auth.Authenticator;
 import org.gluu.oxauth.ciba.CIBAPingCallbackService;
 import org.gluu.oxauth.ciba.CIBAPushErrorService;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.ciba.PushErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.ciba.PushErrorResponseType;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
@@ -143,9 +144,9 @@ public class AuthorizeService {
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
-            boolean persistDuringImplicitFlow = !ResponseType.isImplicitFlow(responseType);
+            boolean persistDuringImplicitFlow = !io.jans.as.model.common.ResponseType.isImplicitFlow(responseType);
             if (!client.getTrustedClient() && persistDuringImplicitFlow && client.getPersistClientAuthorizations()) {
-                final Set<String> scopes = Sets.newHashSet(org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
+                final Set<String> scopes = Sets.newHashSet(io.jans.as.model.util.StringUtils.spaceSeparatedToList(scope));
                 clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
             }
             session.addPermission(clientId, true);
@@ -159,9 +160,9 @@ public class AuthorizeService {
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
-                List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
+                List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
                 prompts.remove(Prompt.CONSENT);
-                sessionAttribute.put(AuthorizeRequestParam.PROMPT, org.gluu.oxauth.model.util.StringUtils.implodeEnum(prompts, " "));
+                sessionAttribute.put(AuthorizeRequestParam.PROMPT, io.jans.as.model.util.StringUtils.implodeEnum(prompts, " "));
             }
 
             final String parametersAsString = requestParameterService.parametersAsString(sessionAttribute);
@@ -190,8 +191,8 @@ public class AuthorizeService {
 
         String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
         String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
-        ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
-        List<ResponseType> responseType = ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
+        io.jans.as.model.common.ResponseMode responseMode = io.jans.as.model.common.ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
+        List<io.jans.as.model.common.ResponseType> responseType = io.jans.as.model.common.ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
 
         RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
         redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));

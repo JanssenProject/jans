@@ -12,7 +12,7 @@ import org.gluu.oxauth.client.BaseRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static org.gluu.oxauth.model.ciba.PushTokenDeliveryRequestParam.AUTHORIZATION_REQUEST_ID;
+import static io.jans.as.model.ciba.PushTokenDeliveryRequestParam.AUTHORIZATION_REQUEST_ID;
 
 /**
  * @author Javier Rojas Blum

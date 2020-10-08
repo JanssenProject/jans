@@ -1,0 +1,21 @@
+package io.jans.as.model.util;
+
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.CryptoProviderFactory;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+
+/**
+ * @author Javier Rojas Blum
+ * @version July 31, 2016
+ */
+public class SubjectIdentifierGenerator {
+
+    public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,
+                                                           String salt, AppConfiguration configuration) throws Exception {
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
+
+        String signingInput = sectorIdentifier + localAccountId + salt;
+        return cryptoProvider.sign(signingInput, null, key, SignatureAlgorithm.HS256);
+    }
+}

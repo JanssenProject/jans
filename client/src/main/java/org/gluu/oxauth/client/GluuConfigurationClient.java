@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
 import java.util.*;
 

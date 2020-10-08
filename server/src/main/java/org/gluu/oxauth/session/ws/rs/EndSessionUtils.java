@@ -1,7 +1,7 @@
 package org.gluu.oxauth.session.ws.rs;
 
 import org.gluu.oxauth.client.service.ClientFactory;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.discovery.WebFingerLink;
+import io.jans.as.model.discovery.WebFingerLink;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
@@ -19,7 +19,7 @@ import org.jboss.resteasy.client.ClientResponse;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
-import static org.gluu.oxauth.model.discovery.WebFingerParam.*;
+import static io.jans.as.model.discovery.WebFingerParam.*;
 
 import java.net.URISyntaxException;
 

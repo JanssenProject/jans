@@ -10,9 +10,9 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.model.util.URLPatternList;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.model.util.URLPatternList;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -20,7 +20,7 @@ import javax.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.*;
 
 /**

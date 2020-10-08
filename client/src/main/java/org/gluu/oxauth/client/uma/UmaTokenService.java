@@ -2,8 +2,8 @@ package org.gluu.oxauth.client.uma;
 
 import javax.ws.rs.*;
 
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaTokenResponse;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaTokenResponse;
 
 /**
  * @author yuriyz on 06/21/2017.

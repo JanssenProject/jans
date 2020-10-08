@@ -7,11 +7,9 @@
 package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.StringUtils;
 
 import java.io.Serializable;
-import java.security.SecureRandom;
 import java.util.List;
 
 /**
