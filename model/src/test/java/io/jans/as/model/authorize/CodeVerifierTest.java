@@ -1,4 +1,4 @@
-package org.gluu.oxauth.model.authorize;
+package io.jans.as.model.authorize;
 
 import io.jans.as.model.authorize.CodeVerifier;
 import org.testng.annotations.Test;
