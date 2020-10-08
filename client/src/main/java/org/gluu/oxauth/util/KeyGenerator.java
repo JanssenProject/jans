@@ -16,7 +16,6 @@ import io.jans.as.model.crypto.OxAuthCryptoProvider;
 import io.jans.as.model.crypto.OxElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.*;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
