@@ -148,12 +148,12 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>fido2-server</artifactId>
+				<artifactId>jans-fido2-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>fido2-client</artifactId>
+				<artifactId>jans-fido2-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
