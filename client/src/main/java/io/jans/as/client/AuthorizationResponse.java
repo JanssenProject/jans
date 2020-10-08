@@ -6,22 +6,22 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.TokenType;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
-
-import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.

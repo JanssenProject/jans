@@ -6,24 +6,24 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
 import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
 import static io.jans.as.model.register.RegisterResponseParam.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
 
 /**
  * Represents a register response received from the authorization server.

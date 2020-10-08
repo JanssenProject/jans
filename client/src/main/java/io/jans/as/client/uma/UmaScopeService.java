@@ -6,13 +6,13 @@
 
 package io.jans.as.client.uma;
 
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaScopeDescription;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaScopeDescription;
 
 /**
  * @author Yuriy Zabrovarnyy

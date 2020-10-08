@@ -6,9 +6,9 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import io.jans.as.model.common.GrantType;
 
 import javax.ws.rs.HttpMethod;
 
