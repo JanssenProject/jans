@@ -24,13 +24,13 @@ import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
 import io.jans.fido2.service.shared.UserService;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.ProcessBatchOperation;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.util.StringHelper;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.ProcessBatchOperation;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.search.filter.Filter;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

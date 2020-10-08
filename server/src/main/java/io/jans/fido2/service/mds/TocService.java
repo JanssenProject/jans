@@ -34,9 +34,9 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
-import org.gluu.service.cdi.event.ApplicationInitialized;
-import org.gluu.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

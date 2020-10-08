@@ -28,12 +28,12 @@ import org.gluu.oxauth.model.config.StaticConfiguration;
  * Copyright (c) 2014, Gluu
  */
 
-import org.gluu.oxauth.service.common.UserService;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.net.NetworkService;
-import org.gluu.util.StringHelper;
+import io.jans.oxauth.service.common.UserService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.search.filter.Filter;
+import io.jans.service.net.NetworkService;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

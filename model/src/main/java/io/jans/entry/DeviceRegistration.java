@@ -13,12 +13,12 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.Expiration;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
-import org.gluu.persist.model.base.BaseEntry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
 
 /**
  * U2F Device registration

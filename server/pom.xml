@@ -99,9 +99,12 @@
             <artifactId>jans-fido2-model</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.janssen</groupId> <!--todo fix-->
-            <artifactId>janssen-common</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-common</artifactId>
             <exclusions>
             	<exclusion>
             		<groupId>org.apache.jackrabbit</groupId>
