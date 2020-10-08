@@ -13,7 +13,7 @@ import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.UmaTokenResponse;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.common.ExecutionContext;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;

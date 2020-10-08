@@ -1,6 +1,6 @@
 package org.gluu.oxauth.service.external.context;
 
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.SpontaneousScopeService;
 
 import java.util.Set;

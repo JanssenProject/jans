@@ -14,7 +14,7 @@ import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
 import org.gluu.oxauth.uma.authorization.UmaWebException;

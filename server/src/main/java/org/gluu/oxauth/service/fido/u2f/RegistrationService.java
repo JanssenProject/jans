@@ -21,7 +21,7 @@ import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.gluu.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
 import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 

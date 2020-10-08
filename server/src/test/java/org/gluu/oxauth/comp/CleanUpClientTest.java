@@ -9,7 +9,7 @@ package org.gluu.oxauth.comp;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;

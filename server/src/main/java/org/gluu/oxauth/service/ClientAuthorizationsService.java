@@ -14,7 +14,7 @@ import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
