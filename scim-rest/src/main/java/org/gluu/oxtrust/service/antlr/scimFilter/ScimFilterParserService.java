@@ -23,7 +23,7 @@ import org.gluu.oxtrust.service.antlr.scimFilter.antlr4.ScimFilterBaseListener;
 import org.gluu.oxtrust.service.antlr.scimFilter.antlr4.ScimFilterLexer;
 import org.gluu.oxtrust.service.antlr.scimFilter.antlr4.ScimFilterParser;
 import org.gluu.oxtrust.service.antlr.scimFilter.util.FilterUtil;
-import org.gluu.persist.service.PersistanceFactoryService;
+import io.jans.orm.service.PersistanceFactoryService;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 

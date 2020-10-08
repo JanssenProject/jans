@@ -45,7 +45,7 @@ import org.gluu.oxtrust.service.scim2.ExtensionService;
 import org.gluu.oxtrust.service.scim2.UserPersistenceHelper;
 import org.gluu.oxtrust.service.scim2.serialization.ListResponseJsonSerializer;
 import org.gluu.oxtrust.service.scim2.serialization.ScimResourceSerializer;
-import org.gluu.persist.model.SortOrder;
+import io.jans.orm.model.SortOrder;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 

@@ -51,9 +51,9 @@ import org.gluu.oxtrust.service.IFidoDeviceService;
 import org.gluu.oxtrust.service.antlr.scimFilter.ScimFilterParserService;
 import org.gluu.oxtrust.service.filter.ProtectedApi;
 import org.gluu.oxtrust.service.scim2.interceptor.RefAdjusted;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.model.PagedResult;
-import org.gluu.persist.model.SortOrder;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import org.gluu.search.filter.Filter;
 import org.joda.time.format.ISODateTimeFormat;
 

@@ -9,7 +9,7 @@ import org.gluu.oxtrust.service.AttributeService;
 import org.gluu.oxtrust.service.IGroupService;
 import org.gluu.oxtrust.service.IPersonService;
 import org.gluu.oxtrust.util.ServiceUtil;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 

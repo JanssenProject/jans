@@ -1,8 +1,8 @@
 package org.gluu.oxtrust.model.scim;
 
-import org.gluu.persist.model.base.CustomObjectAttribute;
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.Entry;
+import io.jans.orm.model.base.CustomObjectAttribute;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.Entry;
 
 import java.io.Serializable;
 import java.time.Instant;
