@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import org.gluu.model.SmtpConfiguration;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter.EncryptionException;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;

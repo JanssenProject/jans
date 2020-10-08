@@ -44,7 +44,7 @@ import org.gluu.oxauth.service.common.InumService;
 import org.gluu.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.persist.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomAttribute;
 import org.gluu.util.StringHelper;
 import org.gluu.util.security.StringEncrypter;
 import org.json.JSONArray;

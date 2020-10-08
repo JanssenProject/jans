@@ -10,7 +10,7 @@ import org.gluu.model.ApplicationType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.ConfigurationService;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.service.metric.inject.ReportMetric;
 import org.gluu.service.net.NetworkService;
 import org.gluu.oxauth.model.config.StaticConfiguration;

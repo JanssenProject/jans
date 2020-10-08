@@ -11,9 +11,9 @@ import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.EntryPersistenceException;
-import org.gluu.persist.model.base.SimpleBranch;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;
 

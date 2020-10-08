@@ -10,7 +10,7 @@ import org.gluu.oxauth.service.cdi.event.ExpirationEvent;
 import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.session.SessionEvent;
 import org.gluu.oxauth.service.external.session.SessionEventType;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.Scheduled;

@@ -6,7 +6,7 @@
 
 package org.oxauth.persistence.model.base;
 
-import org.gluu.persist.annotation.DN;
+import io.jans.orm.annotation.DN;
 
 /**
  * Provides DN attribute
