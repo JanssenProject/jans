@@ -6,10 +6,10 @@
 
 package io.jans.as.client.fido.u2f;
 
-import javax.ws.rs.*;
-
 import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
+
+import javax.ws.rs.*;
 
 /**
  * Еhe endpoint allows to start and finish U2F registration process

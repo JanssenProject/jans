@@ -6,10 +6,10 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;

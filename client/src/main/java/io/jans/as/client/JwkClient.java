@@ -6,11 +6,11 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.crypto.PublicKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.json.JSONObject;
 
