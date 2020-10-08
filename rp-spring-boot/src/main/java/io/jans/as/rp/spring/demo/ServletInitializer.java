@@ -1,4 +1,4 @@
-package org.gluu.demo;
+package io.jans.as.rp.spring.demo;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
