@@ -27,8 +27,8 @@ import org.apache.commons.lang.BooleanUtils;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.ConfigurationUpdate;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 

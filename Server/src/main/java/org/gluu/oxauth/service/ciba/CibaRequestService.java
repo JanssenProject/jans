@@ -15,8 +15,8 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
 import org.gluu.oxauth.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.CacheService;
+import io.jans.search.filter.Filter;
+import io.jans.service.CacheService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

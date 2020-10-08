@@ -18,7 +18,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
-import org.gluu.search.filter.Filter;
+import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.BaseDnConfiguration;

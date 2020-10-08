@@ -29,7 +29,7 @@ import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.RedirectUriResponse;
-import org.gluu.service.cdi.util.CdiUtil;
+import io.jans.service.cdi.util.CdiUtil;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jetbrains.annotations.Nullable;

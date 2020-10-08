@@ -1,12 +1,12 @@
 package org.gluu.oxauth.service.external;
 
 import com.google.common.collect.Sets;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.spontaneous.SpontaneousScopeType;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.spontaneous.SpontaneousScopeType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.external.context.SpontaneousScopeExternalContext;
-import org.gluu.service.custom.script.ExternalScriptService;
+import io.jans.service.custom.script.ExternalScriptService;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

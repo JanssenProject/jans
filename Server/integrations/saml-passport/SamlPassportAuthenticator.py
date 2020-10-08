@@ -21,9 +21,9 @@ from org.gluu.oxauth.service.net import HttpService
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.config.oxtrust import LdapOxPassportConfiguration
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 from java.util import ArrayList, Arrays, Collections, HashSet
 from org.gluu.oxauth.model.exception import InvalidJwtException

@@ -20,7 +20,7 @@ import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.CustomAttribute;
-import org.gluu.service.cdi.util.CdiUtil;
+import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.ArrayHelper;
 import io.jans.util.Util;
 import org.json.JSONObject;

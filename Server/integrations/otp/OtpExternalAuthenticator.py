@@ -30,12 +30,12 @@ from java.util import Arrays
 from java.util.concurrent import TimeUnit
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 

@@ -15,8 +15,8 @@ import org.gluu.oxauth.model.uma.UmaErrorResponseType;
 import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.CacheService;
+import io.jans.search.filter.Filter;
+import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 

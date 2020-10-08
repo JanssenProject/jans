@@ -9,7 +9,7 @@ package org.gluu.oxauth.service.common;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.gluu.model.SmtpConfiguration;
+import io.jans.model.SmtpConfiguration;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;

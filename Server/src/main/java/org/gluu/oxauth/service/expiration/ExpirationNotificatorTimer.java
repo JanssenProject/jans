@@ -11,11 +11,11 @@ import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.session.SessionEvent;
 import org.gluu.oxauth.service.external.session.SessionEventType;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
+import io.jans.search.filter.Filter;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

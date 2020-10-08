@@ -14,7 +14,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.SimpleCustomProperty;
+import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.exception.InvalidJwtException;

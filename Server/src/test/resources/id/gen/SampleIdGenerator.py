@@ -1,4 +1,4 @@
-from org.gluu.model.custom.script.type.id import IdGeneratorType
+from io.jans.model.custom.script.type.id import IdGeneratorType
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
 from java.util import UUID

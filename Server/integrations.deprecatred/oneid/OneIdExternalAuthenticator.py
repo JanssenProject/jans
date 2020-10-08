@@ -8,11 +8,11 @@ import json
 from java.util import Arrays
 from oneid import OneID
 from org.apache.http.entity import ContentType
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.service.net import HttpService
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import ArrayHelper
 from io.jans.util import StringHelper
 

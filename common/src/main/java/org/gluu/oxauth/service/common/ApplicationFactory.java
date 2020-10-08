@@ -6,23 +6,23 @@
 
 package org.gluu.oxauth.service.common;
 
+import io.jans.model.SmtpConfiguration;
+import io.jans.orm.PersistenceEntryManagerFactory;
+import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.cache.CacheConfiguration;
+import io.jans.service.cache.InMemoryConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.config.StaticConfiguration;
+import org.oxauth.persistence.model.configuration.GluuConfiguration;
+import org.slf4j.Logger;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.model.SmtpConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import io.jans.orm.PersistenceEntryManagerFactory;
-import io.jans.orm.model.PersistenceConfiguration;
-import io.jans.orm.service.PersistanceFactoryService;
-import org.gluu.service.cache.CacheConfiguration;
-import org.gluu.service.cache.InMemoryConfiguration;
-import org.gluu.service.document.store.conf.DocumentStoreConfiguration;
-import org.gluu.service.document.store.conf.LocalDocumentStoreConfiguration;
-import org.oxauth.persistence.model.configuration.GluuConfiguration;
-import org.slf4j.Logger;
 
 /**
  * Holds factory methods to create services
