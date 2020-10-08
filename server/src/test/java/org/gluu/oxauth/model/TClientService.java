@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.register.ws.rs.RegisterRestWebService;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.register.ws.rs.RegisterRestWebService;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.as.client.ws.rs.ClientTestUtil;
 
 import javax.ejb.Stateless;

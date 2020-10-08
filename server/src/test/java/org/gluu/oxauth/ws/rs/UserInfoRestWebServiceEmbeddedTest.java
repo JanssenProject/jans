@@ -23,7 +23,7 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 import io.jans.as.client.BaseTest;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
