@@ -3,14 +3,14 @@ package io.jans.as.server.auth;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import io.jans.jsf2.service.FacesService;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.SessionId;
 import io.jans.as.common.model.common.User;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.jsf2.service.FacesService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;

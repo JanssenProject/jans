@@ -1,19 +1,19 @@
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.persistence.model.PairwiseIdentifier;
+import io.jans.as.persistence.model.SectorIdentifier;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.CIBAGrant;
+import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.IAuthorizationGrant;
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.persistence.model.PairwiseIdentifier;
-import io.jans.as.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

@@ -6,23 +6,23 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.util.Base64Util;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
-import io.jans.util.StringHelper;
 import io.jans.as.server.crypto.random.ChallengeGenerator;
 import io.jans.as.server.exception.fido.u2f.DeviceCompromisedException;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
 import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.fido.u2f.RequestMessageLdap;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.search.filter.Filter;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

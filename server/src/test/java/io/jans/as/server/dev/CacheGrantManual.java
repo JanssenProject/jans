@@ -8,14 +8,14 @@ package io.jans.as.server.dev;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.server.model.common.CacheGrant;
+import io.jans.as.server.model.common.SessionId;
 import net.spy.memcached.DefaultConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
-import io.jans.as.server.model.common.CacheGrant;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

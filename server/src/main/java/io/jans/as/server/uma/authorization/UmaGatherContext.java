@@ -6,22 +6,22 @@
 
 package io.jans.as.server.uma.authorization;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.jsf2.service.FacesService;
-import io.jans.model.SimpleCustomProperty;
 import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
 import io.jans.as.server.uma.service.RedirectParameters;
 import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.ws.rs.UmaMetadataWS;
+import io.jans.jsf2.service.FacesService;
+import io.jans.model.SimpleCustomProperty;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;

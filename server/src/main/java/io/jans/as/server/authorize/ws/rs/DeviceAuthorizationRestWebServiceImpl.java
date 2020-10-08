@@ -6,23 +6,23 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.StringUtils;
-import io.jans.util.StringHelper;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

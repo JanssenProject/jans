@@ -1,14 +1,14 @@
 package io.jans.as.server.service;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.PairwiseIdType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.SubjectIdentifierGenerator;
+import io.jans.as.persistence.model.PairwiseIdentifier;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
-import io.jans.as.common.service.common.UserService;
-import io.jans.as.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

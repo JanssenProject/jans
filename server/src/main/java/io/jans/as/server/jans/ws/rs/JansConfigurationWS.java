@@ -8,18 +8,18 @@ package io.jans.as.server.jans.ws.rs;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.gluu.GluuConfiguration;
 import io.jans.as.model.gluu.GluuErrorResponseType;
-import io.jans.model.GluuAttribute;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.service.AttributeService;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.as.persistence.model.Scope;
+import io.jans.model.GluuAttribute;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

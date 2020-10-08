@@ -7,10 +7,13 @@
 package io.jans.as.server.service;
 
 import com.google.common.collect.Sets;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidClaimException;
+import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomAttribute;
@@ -21,10 +24,7 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.EncryptionService;
 import org.json.JSONArray;
-import io.jans.as.persistence.model.Scope;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 

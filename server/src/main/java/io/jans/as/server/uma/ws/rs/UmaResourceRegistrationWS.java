@@ -9,12 +9,12 @@ package io.jans.as.server.uma.ws.rs;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaScopeService;
 import io.jans.as.server.uma.service.UmaValidationService;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.util.ServerUtil;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

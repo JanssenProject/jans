@@ -8,8 +8,8 @@ package io.jans.as.server.service;
 
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
-import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.introspection.ws.rs.IntrospectionWebService;
+import io.jans.as.server.jans.ws.rs.JansConfigurationWS;
 import io.jans.as.server.jwk.ws.rs.JwkRestWebServiceImpl;
 import io.jans.as.server.register.ws.rs.RegisterRestWebServiceImpl;
 import io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImpl;

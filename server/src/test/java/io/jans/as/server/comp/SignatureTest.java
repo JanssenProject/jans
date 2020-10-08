@@ -6,13 +6,13 @@
 
 package io.jans.as.server.comp;
 
+import io.jans.as.client.BaseTest;
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.Key;
 import io.jans.as.model.crypto.KeyFactory;
 import io.jans.as.model.crypto.signature.*;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
-import io.jans.as.client.BaseTest;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;

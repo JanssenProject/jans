@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.token;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -14,10 +15,9 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import io.jans.service.cdi.util.CdiUtil;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ServerCryptoProvider;
+import io.jans.service.cdi.util.CdiUtil;
 import org.python.jline.internal.Preconditions;
 
 /**

@@ -9,6 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Lists;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.persistence.model.Scope;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.service.BaseCacheService;
@@ -16,7 +17,6 @@ import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

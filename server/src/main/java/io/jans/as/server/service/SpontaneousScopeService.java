@@ -1,11 +1,11 @@
 package io.jans.as.server.service;
 
 import com.google.common.collect.Lists;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Pair;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;

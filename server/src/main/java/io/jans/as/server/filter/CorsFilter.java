@@ -6,14 +6,14 @@
 
 package io.jans.as.server.filter;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.service.ClientService;
 import io.jans.server.filters.AbstractCorsFilter;
 import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
-import io.jans.as.server.model.config.ConfigurationFactory;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.service.ClientService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

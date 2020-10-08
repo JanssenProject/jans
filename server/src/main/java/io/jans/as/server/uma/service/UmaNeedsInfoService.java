@@ -1,20 +1,19 @@
 package io.jans.as.server.uma.service;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.AttributeService;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
 import io.jans.as.server.uma.authorization.*;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.uma.ClaimDefinition;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
-import io.jans.as.common.service.common.UserService;
-import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
-import org.gluu.oxauth.uma.authorization.*;
-import io.jans.as.server.util.ServerUtil;
-import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
