@@ -7,8 +7,6 @@
 package org.gluu.oxauth.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -24,8 +22,10 @@ import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
-import org.gluu.oxauth.util.ServerUtil;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.client.ResponseAsserter;
+import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;

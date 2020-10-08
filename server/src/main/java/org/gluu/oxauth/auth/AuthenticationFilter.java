@@ -6,32 +6,32 @@
 
 package org.gluu.oxauth.auth;
 
+import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.token.ClientAssertionType;
+import io.jans.as.model.token.TokenErrorResponseType;
+import io.jans.as.model.util.Util;
+import io.jans.model.security.Identity;
+import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
-import io.jans.model.security.Identity;
-import io.jans.as.model.authorize.AuthorizeRequestParam;
 import org.gluu.oxauth.model.common.*;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.AbstractCryptoProvider;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.ClientAssertion;
-import io.jans.as.model.token.ClientAssertionType;
 import org.gluu.oxauth.model.token.HttpAuthTokenType;
-import io.jans.as.model.token.TokenErrorResponseType;
-import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.ClientFilterService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

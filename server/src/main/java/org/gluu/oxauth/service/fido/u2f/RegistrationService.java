@@ -6,21 +6,24 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
-import io.jans.as.model.fido.u2f.protocol.ClientData;
-import org.gluu.oxauth.crypto.random.ChallengeGenerator;
-import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
-import org.gluu.oxauth.model.fido.u2f.*;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.util.Base64Util;
-import org.gluu.oxauth.service.common.UserService;
-import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.crypto.random.ChallengeGenerator;
+import org.gluu.oxauth.exception.fido.u2f.DeviceCompromisedException;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.gluu.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.gluu.oxauth.model.fido.u2f.RequestMessageLdap;
+import org.gluu.oxauth.service.common.UserService;
+import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
-import io.jans.as.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

@@ -6,7 +6,6 @@
 
 package org.gluu.oxauth.uma.service;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.UmaPermissionList;
@@ -16,6 +15,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
-import org.apache.commons.lang.StringUtils;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import io.jans.jsf2.message.FacesMessages;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.service.SessionIdService;

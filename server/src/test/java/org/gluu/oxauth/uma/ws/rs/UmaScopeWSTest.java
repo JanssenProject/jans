@@ -6,22 +6,21 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
-import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.uma.TUma;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeDescription;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.model.uma.TUma;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy

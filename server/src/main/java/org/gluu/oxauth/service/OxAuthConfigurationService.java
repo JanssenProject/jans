@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.service;
 
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.util.StringHelper;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.util.StringHelper;
 
 /**
  * OxAuthConfigurationService

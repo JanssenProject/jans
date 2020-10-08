@@ -6,26 +6,25 @@
 
 package org.gluu.oxauth.comp;
 
-import java.io.File;
-import java.io.FileInputStream;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorMessages;
+import io.jans.orm.PersistenceEntryManager;
+import org.apache.commons.io.IOUtils;
+import org.gluu.oxauth.ConfigurableTest;
+import org.gluu.oxauth.model.config.ConfigurationFactory;
+import org.gluu.oxauth.util.ServerUtil;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-
-import org.apache.commons.io.IOUtils;
-import org.gluu.oxauth.ConfigurableTest;
-import io.jans.as.model.config.Conf;
-import org.gluu.oxauth.model.config.ConfigurationFactory;
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.config.WebKeysConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorMessages;
-import org.gluu.oxauth.util.ServerUtil;
-import io.jans.orm.PersistenceEntryManager;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * @author Yuriy Zabrovarnyy

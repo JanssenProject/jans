@@ -6,13 +6,13 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.apache.logging.log4j.util.Strings;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.util.Util;
+import org.apache.logging.log4j.util.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;

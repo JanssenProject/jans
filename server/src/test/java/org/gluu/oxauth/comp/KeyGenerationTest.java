@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.comp;
 
-import javax.inject.Inject;
-
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import javax.inject.Inject;
 
 /**
  * @author Javier Rojas Blum Date: 05.30.2012

@@ -7,7 +7,6 @@
 package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.common.User;
 
 /**
  * The client credentials (or other forms of client authentication) can be used

@@ -6,21 +6,15 @@
 
 package org.gluu.oxauth.uma.authorization;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
-import io.jans.jsf2.service.FacesService;
-import io.jans.model.SimpleCustomProperty;
-import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.jsf2.service.FacesService;
+import io.jans.model.SimpleCustomProperty;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.context.ExternalScriptContext;
 import org.gluu.oxauth.uma.service.RedirectParameters;
@@ -28,7 +22,12 @@ import org.gluu.oxauth.uma.service.UmaPctService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
 import org.gluu.oxauth.uma.ws.rs.UmaMetadataWS;
-import org.gluu.oxauth.model.common.User;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yuriyz

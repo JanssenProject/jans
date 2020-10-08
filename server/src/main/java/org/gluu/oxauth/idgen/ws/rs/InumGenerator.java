@@ -6,23 +6,22 @@
 
 package org.gluu.oxauth.idgen.ws.rs;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.common.IdType;
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import io.jans.as.model.config.BaseDnConfiguration;
-import io.jans.as.model.config.StaticConfiguration;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.

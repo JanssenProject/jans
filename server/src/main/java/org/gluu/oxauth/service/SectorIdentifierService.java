@@ -1,14 +1,17 @@
 package org.gluu.oxauth.service;
 
 import io.jans.as.model.common.SubjectType;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.AuthorizationGrantType;
+import org.gluu.oxauth.model.common.CIBAGrant;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.registration.Client;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.oxauth.persistence.model.SectorIdentifier;
 import org.slf4j.Logger;

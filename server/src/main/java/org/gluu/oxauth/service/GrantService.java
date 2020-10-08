@@ -7,25 +7,28 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.common.CacheGrant;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.ldap.TokenLdap;
-import org.gluu.oxauth.model.ldap.TokenType;
-import org.gluu.oxauth.util.TokenHashUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.CacheProviderType;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
+import org.gluu.oxauth.model.common.CacheGrant;
+import org.gluu.oxauth.model.ldap.TokenLdap;
+import org.gluu.oxauth.model.ldap.TokenType;
+import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import static org.gluu.oxauth.util.ServerUtil.isTrue;
 

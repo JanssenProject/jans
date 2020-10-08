@@ -6,12 +6,6 @@
 
 package org.gluu.oxauth.service;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
-
 import org.gluu.oxauth.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import org.gluu.oxauth.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import org.gluu.oxauth.gluu.ws.rs.GluuConfigurationWS;
@@ -20,13 +14,13 @@ import org.gluu.oxauth.jwk.ws.rs.JwkRestWebServiceImpl;
 import org.gluu.oxauth.register.ws.rs.RegisterRestWebServiceImpl;
 import org.gluu.oxauth.session.ws.rs.EndSessionRestWebServiceImpl;
 import org.gluu.oxauth.token.ws.rs.TokenRestWebServiceImpl;
-import org.gluu.oxauth.uma.ws.rs.UmaGatheringWS;
-import org.gluu.oxauth.uma.ws.rs.UmaMetadataWS;
-import org.gluu.oxauth.uma.ws.rs.UmaPermissionRegistrationWS;
-import org.gluu.oxauth.uma.ws.rs.UmaResourceRegistrationWS;
-import org.gluu.oxauth.uma.ws.rs.UmaRptIntrospectionWS;
-import org.gluu.oxauth.uma.ws.rs.UmaScopeWS;
+import org.gluu.oxauth.uma.ws.rs.*;
 import org.gluu.oxauth.userinfo.ws.rs.UserInfoRestWebServiceImpl;
+
+import javax.ws.rs.core.Application;
+import javax.ws.rs.ext.Provider;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Integration with Resteasy

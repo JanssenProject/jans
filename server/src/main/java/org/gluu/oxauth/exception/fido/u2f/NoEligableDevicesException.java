@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.exception.fido.u2f;
 
+import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
+
 import java.util.Collections;
 import java.util.List;
-
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 
 public class NoEligableDevicesException extends Exception {
 

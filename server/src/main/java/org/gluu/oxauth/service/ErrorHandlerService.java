@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.service;
 
-import io.jans.jsf2.message.FacesMessages;
-import io.jans.jsf2.service.FacesService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
-import org.gluu.oxauth.util.RedirectUri;
+import io.jans.jsf2.message.FacesMessages;
+import io.jans.jsf2.service.FacesService;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.util.RedirectUri;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 

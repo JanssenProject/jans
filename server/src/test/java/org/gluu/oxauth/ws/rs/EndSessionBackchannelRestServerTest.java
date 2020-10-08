@@ -2,13 +2,13 @@ package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
 import io.jans.as.client.RegisterRequest;
-import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.TClientService;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.model.TClientService;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

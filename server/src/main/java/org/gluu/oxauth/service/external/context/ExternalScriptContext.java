@@ -6,17 +6,17 @@
 
 package org.gluu.oxauth.service.external.context;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.net.util.SubnetUtils;
 import io.jans.as.model.util.Util;
-import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
+import org.apache.commons.net.util.SubnetUtils;
+import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Holds object required in custom scripts

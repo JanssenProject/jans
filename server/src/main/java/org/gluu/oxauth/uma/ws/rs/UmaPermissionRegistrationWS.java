@@ -8,13 +8,9 @@ package org.gluu.oxauth.uma.ws.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.jans.as.model.uma.UmaPermission;
-import org.gluu.oxauth.model.common.AuthorizationGrant;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.uma.PermissionTicket;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaErrorResponseType;
-import io.jans.as.model.uma.UmaPermissionList;
+import io.jans.as.model.uma.*;
+import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
