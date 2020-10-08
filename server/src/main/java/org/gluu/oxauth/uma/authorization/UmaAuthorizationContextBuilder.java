@@ -10,7 +10,7 @@ import io.jans.as.common.service.common.UserService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaSessionService;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;

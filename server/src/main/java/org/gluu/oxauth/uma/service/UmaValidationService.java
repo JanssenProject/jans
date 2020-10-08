@@ -39,7 +39,7 @@ import org.gluu.oxauth.uma.authorization.UmaPCT;
 import org.gluu.oxauth.uma.authorization.UmaRPT;
 import org.gluu.oxauth.uma.authorization.UmaWebException;
 import org.gluu.oxauth.util.ServerUtil;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.python.google.common.base.Function;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;

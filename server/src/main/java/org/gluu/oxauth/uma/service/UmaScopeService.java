@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.service.SpontaneousScopeService;
 import io.jans.as.common.service.common.InumService;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
