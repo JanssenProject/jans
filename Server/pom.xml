@@ -2,7 +2,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>janssen-server</artifactId>
+	<artifactId>jans-auth-server</artifactId>
 	<name>janssen server</name>
 	<packaging>war</packaging>
 
@@ -276,25 +276,25 @@
 		<!-- janssen -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-model</artifactId>
+			<artifactId>jans-auth-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-common</artifactId>
+			<artifactId>jans-auth-common</artifactId>
 		</dependency>
 		<!-- persistence model -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-persistence-model</artifactId>
+			<artifactId>jans-auth-persistence-model</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-client</artifactId>
+			<artifactId>jans-auth-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-static</artifactId>
+			<artifactId>jans-auth-static</artifactId>
 		</dependency>
 
 		<!-- janssen -->
@@ -360,11 +360,11 @@
 		<!-- janssen-notify -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-notify-model</artifactId>
+			<artifactId>jans-notify-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-notify-client</artifactId>
+			<artifactId>jans-notify-client</artifactId>
 		</dependency>
 
 		<!-- Fido2 -->
@@ -589,14 +589,14 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-model</artifactId>
+			<artifactId>jans-auth-model</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>janssen-client</artifactId>
+			<artifactId>jans-auth-client</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -1151,14 +1151,14 @@
 			<dependencies>
 				<dependency>
 					<groupId>io.jans</groupId>
-					<artifactId>janssen-model</artifactId>
+					<artifactId>jans-auth-model</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
 					<groupId>io.jans</groupId>
-					<artifactId>janssen-client</artifactId>
+					<artifactId>jans-auth-client</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>
