@@ -14,7 +14,7 @@ from io.jans.service import CacheService
 from io.jans.util import StringHelper
 from io.jans.orm.exception import AuthenticationException
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from java.time import LocalDateTime, Duration
 from java.time.format import DateTimeFormatter
 

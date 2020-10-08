@@ -7,7 +7,7 @@
 package org.gluu.oxauth.service;
 
 import com.google.common.collect.Lists;
-import org.gluu.exception.ConfigurationException;
+import io.jans.exception.ConfigurationException;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleProperty;
 import io.jans.model.custom.script.CustomScriptType;

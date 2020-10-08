@@ -1,6 +1,6 @@
 package org.gluu.oxauth.i18n;
 
-import org.gluu.jsf2.i18n.ExtendedResourceBundle;
+import io.jans.jsf2.i18n.ExtendedResourceBundle;
 
 /**
  * Custom i18n resource loader

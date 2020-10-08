@@ -6,36 +6,23 @@
 
 package org.gluu.oxauth.service;
 
-import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
-
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.service.FacesService;
 import io.jans.model.GluuStatus;
 import io.jans.model.SimpleProperty;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.model.metric.MetricType;
 import io.jans.model.security.Credentials;
 import io.jans.model.security.SimplePrincipal;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.AuthenticationException;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomEntry;
+import io.jans.orm.model.base.CustomObjectAttribute;
+import io.jans.util.ArrayHelper;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SimpleUser;
 import org.gluu.oxauth.model.common.User;
@@ -47,17 +34,20 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.UserService;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.EntryPersistenceException;
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.orm.model.base.CustomEntry;
-import io.jans.orm.model.base.CustomObjectAttribute;
-import io.jans.util.ArrayHelper;
-import io.jans.util.Pair;
-import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.slf4j.Logger;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.*;
+
+import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods

@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.jsf2.message.FacesMessages;
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.message.FacesMessages;
+import io.jans.jsf2.service.FacesService;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;

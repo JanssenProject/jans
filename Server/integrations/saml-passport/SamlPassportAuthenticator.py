@@ -6,8 +6,8 @@
 # Author: Christian Eland
 #
 
-from org.gluu.jsf2.service import FacesService
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.service import FacesService
+from io.jans.jsf2.message import FacesMessages
 
 from org.gluu.oxauth.model.common import User, WebKeyStorage
 from org.gluu.oxauth.model.configuration import AppConfiguration
