@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>jans-auth-rp-demo</artifactId>
-  <name>janssen RP Demo</name>
+  <name>jans-auth-rp-demo</name>
   <packaging>war</packaging>
 
   <parent>
@@ -17,7 +17,7 @@
   </prerequisites>
 
   <build>
-    <finalName>janssen-rp-demo</finalName>
+    <finalName>jans-auth-rp-demo</finalName>
 
     <plugins>
       <plugin>

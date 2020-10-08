@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-client</artifactId>
-	<name>janssen client</name>
+	<name>jans-auth-client</name>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -17,7 +17,7 @@
 	</prerequisites>
 
 	<build>
-		<finalName>janssen-client</finalName>
+		<finalName>jans-auth-client</finalName>
 
 		<filters>
 			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
