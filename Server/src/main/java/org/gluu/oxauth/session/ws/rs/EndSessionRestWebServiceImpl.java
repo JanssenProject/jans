@@ -35,8 +35,8 @@ import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
 import org.gluu.oxauth.service.external.ExternalEndSessionService;
 import org.gluu.oxauth.service.external.context.EndSessionContext;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

@@ -6,7 +6,7 @@ import io.jans.orm.PersistenceEntryManager;
 import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
-import org.gluu.util.OxConstants;
+import io.jans.util.OxConstants;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

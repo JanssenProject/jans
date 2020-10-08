@@ -28,7 +28,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
 import org.gluu.service.JsonService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerationException;

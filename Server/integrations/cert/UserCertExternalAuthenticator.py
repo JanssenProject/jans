@@ -11,7 +11,7 @@ from javax.faces.context import FacesContext
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService
 from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.oxauth.service.common import EncryptionService
 from java.util import Arrays

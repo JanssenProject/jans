@@ -11,8 +11,8 @@ from org.gluu.oxauth.service import UserService, AuthenticationService, AppIniti
 from org.gluu.oxauth.service import MetricService
 from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.model.metric import MetricType
-from org.gluu.util import StringHelper
-from org.gluu.util import ArrayHelper
+from io.jans.util import StringHelper
+from io.jans.util import ArrayHelper
 from io.jans.orm.service import PersistanceFactoryService
 from io.jans.orm.ldap.impl import LdapEntryManagerFactory
 from org.gluu.model.ldap import GluuLdapConfiguration

@@ -11,13 +11,13 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from org.gluu.oxauth.service.net import HttpService
 from org.json import JSONObject
 import base64
 import java
 
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from java.lang import String
 
 class PersonAuthentication(PersonAuthenticationType):

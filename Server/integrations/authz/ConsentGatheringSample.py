@@ -7,7 +7,7 @@
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.authz import ConsentGatheringType
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 
 import java
 import random

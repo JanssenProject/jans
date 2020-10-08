@@ -9,7 +9,7 @@ import org.gluu.oxauth.uma.authorization.UmaPCT;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.INumGenerator;
+import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 

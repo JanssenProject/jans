@@ -12,7 +12,7 @@ import org.json.JSONArray;
 import org.gluu.oxauth.model.exception.InvalidClaimException;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum

@@ -19,7 +19,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.SearchException;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 
 /**
  * Provides operations with authentication filters

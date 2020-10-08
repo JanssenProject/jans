@@ -12,7 +12,7 @@ import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.gluu.oxauth.uma.authorization.UmaScriptByScope;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

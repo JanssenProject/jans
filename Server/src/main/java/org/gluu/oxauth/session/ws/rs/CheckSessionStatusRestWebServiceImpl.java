@@ -11,7 +11,7 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

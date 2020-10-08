@@ -43,7 +43,7 @@ import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

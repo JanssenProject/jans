@@ -11,8 +11,8 @@ from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.service import XmlService
 from org.gluu.oxauth.service import EncryptionService 
-from org.gluu.util import StringHelper
-from org.gluu.util import ArrayHelper
+from io.jans.util import StringHelper
+from io.jans.util import ArrayHelper
 from java.lang import Boolean
 
 import java

@@ -32,8 +32,8 @@ import org.gluu.oxauth.service.external.context.ExternalResourceOwnerPasswordCre
 import org.gluu.oxauth.uma.service.UmaTokenService;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.exception.AuthenticationException;
-import org.gluu.util.OxConstants;
-import org.gluu.util.StringHelper;
+import io.jans.util.OxConstants;
+import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

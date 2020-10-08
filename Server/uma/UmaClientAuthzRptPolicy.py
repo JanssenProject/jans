@@ -11,7 +11,7 @@
 from org.gluu.model.custom.script.type.uma import UmaRptPolicyType
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.model.uma import ClaimDefinitionBuilder
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 from java.lang import String
 
