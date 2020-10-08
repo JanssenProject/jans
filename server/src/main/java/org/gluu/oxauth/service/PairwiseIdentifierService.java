@@ -1,8 +1,8 @@
 package org.gluu.oxauth.service;
 
-import org.gluu.oxauth.model.common.PairwiseIdType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.util.SubjectIdentifierGenerator;
+import io.jans.as.model.common.PairwiseIdType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.SubjectIdentifierGenerator;
 import org.gluu.oxauth.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;

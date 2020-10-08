@@ -19,13 +19,12 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaResource;
-import org.gluu.oxauth.model.uma.UmaResourceResponse;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaResource;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

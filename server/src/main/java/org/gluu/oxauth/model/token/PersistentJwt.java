@@ -18,7 +18,7 @@ import org.gluu.oxauth.model.common.AccessToken;
 import org.gluu.oxauth.model.common.AuthorizationGrantType;
 import org.gluu.oxauth.model.common.IdToken;
 import org.gluu.oxauth.model.common.RefreshToken;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

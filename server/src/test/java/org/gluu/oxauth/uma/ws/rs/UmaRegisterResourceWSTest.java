@@ -14,9 +14,9 @@ import java.util.List;
 
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.uma.TUma;
-import org.gluu.oxauth.model.uma.UmaResource;
-import org.gluu.oxauth.model.uma.UmaResourceResponse;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.UmaResource;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.wrapper.Token;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

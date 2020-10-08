@@ -8,6 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.jans.as.model.common.HasParamName;
 
 /**
  * An authorization grant is a credential representing the resource owner's

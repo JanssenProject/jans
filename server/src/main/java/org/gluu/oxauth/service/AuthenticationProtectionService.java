@@ -5,8 +5,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.configuration.AuthenticationProtectionConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
 import io.jans.service.cdi.event.ConfigurationUpdate;
 
 /**

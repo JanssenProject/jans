@@ -12,24 +12,24 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.jwk.JSONWebKey;
-import org.gluu.oxauth.model.jws.RSASigner;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.jwt.JwtHeaderName;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jws.RSASigner;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtHeaderName;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.uma.ClaimTokenFormatType;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.model.uma.UmaPermissionList;
-import org.gluu.oxauth.model.uma.UmaScopeType;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import io.jans.as.model.uma.ClaimTokenFormatType;
+import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.uma.UmaPermissionList;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.RedirectionUriService;
 import org.gluu.oxauth.service.token.TokenService;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.gluu.oxauth.model.uma.UmaErrorResponseType.*;
+import static io.jans.as.model.uma.UmaErrorResponseType.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -169,12 +169,12 @@ public class UmaValidationService {
     }
 
     public void validatePermissions(UmaPermissionList permissions, Client client) {
-        for (org.gluu.oxauth.model.uma.UmaPermission permission : permissions) {
+        for (io.jans.as.model.uma.UmaPermission permission : permissions) {
             validatePermission(permission, client);
         }
     }
 
-    public void validatePermission(org.gluu.oxauth.model.uma.UmaPermission permission, Client client) {
+    public void validatePermission(io.jans.as.model.uma.UmaPermission permission, Client client) {
         String resourceId = permission.getResourceId();
         if (StringHelper.isEmpty(resourceId)) {
             log.error("Resource id is empty");
@@ -475,7 +475,7 @@ public class UmaValidationService {
         }
     }
 
-    public void validateResource(org.gluu.oxauth.model.uma.UmaResource resource) {
+    public void validateResource(io.jans.as.model.uma.UmaResource resource) {
         validateScopeExpression(resource.getScopeExpression());
 
         List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());

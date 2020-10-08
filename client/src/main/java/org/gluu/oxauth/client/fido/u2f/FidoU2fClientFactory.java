@@ -7,7 +7,7 @@
 package org.gluu.oxauth.client.fido.u2f;
 
 import org.gluu.oxauth.client.service.ClientFactory;
-import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
+import io.jans.as.model.fido.u2f.U2fConfiguration;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import io.jans.orm.PersistenceEntryManager;
@@ -189,9 +189,9 @@ public class ServerUtil {
         });
     }
 
-    public static org.gluu.oxauth.model.uma.UmaPermission convert(UmaPermission permission, UmaScopeService umaScopeService) {
+    public static io.jans.as.model.uma.UmaPermission convert(UmaPermission permission, UmaScopeService umaScopeService) {
         if (permission != null) {
-            final org.gluu.oxauth.model.uma.UmaPermission result = new org.gluu.oxauth.model.uma.UmaPermission();
+            final io.jans.as.model.uma.UmaPermission result = new io.jans.as.model.uma.UmaPermission();
             result.setResourceId(permission.getResourceId());
             result.setScopes(umaScopeService.getScopeIdsByDns(permission.getScopeDns()));
             result.setExpiresAt(dateToSeconds(permission.getExpirationDate()));

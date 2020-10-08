@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.session.ws.rs;
 
-import org.gluu.oxauth.model.session.EndSessionRequestParam;
+import io.jans.as.model.session.EndSessionRequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

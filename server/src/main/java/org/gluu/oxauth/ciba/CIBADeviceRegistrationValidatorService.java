@@ -7,14 +7,14 @@
 package org.gluu.oxauth.ciba;
 
 import org.apache.logging.log4j.util.Strings;
-import org.gluu.oxauth.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.DefaultErrorResponse;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID;
 
 /**
  * @author Javier Rojas Blum

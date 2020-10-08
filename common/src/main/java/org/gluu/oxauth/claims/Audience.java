@@ -1,6 +1,6 @@
 package org.gluu.oxauth.claims;
 
-import org.gluu.oxauth.model.jwt.JwtClaims;
+import io.jans.as.model.jwt.JwtClaims;
 import org.gluu.oxauth.model.registration.Client;
 
 /**

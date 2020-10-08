@@ -11,13 +11,13 @@ import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.TokenRequest;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -33,7 +33,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.*;
 
 /**

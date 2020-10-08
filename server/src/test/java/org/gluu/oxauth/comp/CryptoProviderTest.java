@@ -9,11 +9,10 @@ package org.gluu.oxauth.comp;
 import org.json.JSONObject;
 import org.gluu.oxauth.ConfigurableTest;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.Algorithm;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import org.testng.annotations.Test;
 
 import javax.inject.Inject;

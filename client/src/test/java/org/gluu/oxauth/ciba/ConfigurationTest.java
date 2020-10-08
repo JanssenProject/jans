@@ -12,7 +12,7 @@ import org.gluu.oxauth.client.OpenIdConfigurationResponse;
 import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
 import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
 import org.gluu.oxauth.dev.HostnameVerifierType;
-import org.gluu.oxauth.model.common.GrantType;
+import io.jans.as.model.common.GrantType;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

@@ -6,7 +6,7 @@ import java.security.cert.X509Certificate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.gluu.oxauth.crypto.cert.CertificateParser;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.util.Base64Util;
 
 /**
  * U2F Device registration key

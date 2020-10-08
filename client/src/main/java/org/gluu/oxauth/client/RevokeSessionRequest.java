@@ -1,7 +1,7 @@
 package org.gluu.oxauth.client;
 
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.util.QueryBuilder;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
 

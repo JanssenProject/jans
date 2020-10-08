@@ -8,16 +8,15 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;
 
-import static org.gluu.oxauth.model.authorize.DeviceAuthorizationRequestParam.*;
-import static org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam.*;
+import static io.jans.as.model.authorize.DeviceAuthorizationRequestParam.*;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
 
 /**
  * Encapsulates functionality to make Device Authz request calls to an authorization server via REST Services.

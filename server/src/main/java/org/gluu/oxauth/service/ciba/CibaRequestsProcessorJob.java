@@ -8,11 +8,11 @@ package org.gluu.oxauth.service.ciba;
 
 import org.gluu.oxauth.ciba.CIBAPingCallbackService;
 import org.gluu.oxauth.ciba.CIBAPushErrorService;
-import org.gluu.oxauth.model.ciba.PushErrorResponseType;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.ciba.PushErrorResponseType;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.CibaRequestCacheControl;
 import org.gluu.oxauth.model.common.CibaRequestStatus;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.CIBARequest;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.service.cdi.async.Asynchronous;

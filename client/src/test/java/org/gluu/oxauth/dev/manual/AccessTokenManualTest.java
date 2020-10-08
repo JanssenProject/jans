@@ -3,7 +3,7 @@ package org.gluu.oxauth.dev.manual;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.AuthorizationRequest;
 import org.gluu.oxauth.client.AuthorizationResponse;
-import org.gluu.oxauth.model.common.ResponseType;
+import io.jans.as.model.common.ResponseType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;

@@ -1,6 +1,6 @@
 package org.gluu.oxauth.client;
 
-import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.session.EndSessionErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
 
 /**

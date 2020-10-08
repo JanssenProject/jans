@@ -7,12 +7,12 @@
 package org.gluu.oxauth.ciba;
 
 import org.apache.logging.log4j.util.Strings;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONArray;
@@ -25,8 +25,8 @@ import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import java.util.List;
 
-import static org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode.*;
-import static org.gluu.oxauth.model.common.GrantType.CIBA;
+import static io.jans.as.model.common.BackchannelTokenDeliveryMode.*;
+import static io.jans.as.model.common.GrantType.CIBA;
 
 /**
  * @author Javier Rojas Blum

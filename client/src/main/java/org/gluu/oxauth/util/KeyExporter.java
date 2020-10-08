@@ -13,10 +13,10 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.bouncycastle.util.encoders.Base64;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 import java.io.File;
 import java.security.PrivateKey;

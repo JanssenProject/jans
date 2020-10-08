@@ -16,12 +16,12 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.IOUtils;
 import org.gluu.oxauth.ConfigurableTest;
-import org.gluu.oxauth.model.config.Conf;
+import io.jans.as.model.config.Conf;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorMessages;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorMessages;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import org.testng.Assert;

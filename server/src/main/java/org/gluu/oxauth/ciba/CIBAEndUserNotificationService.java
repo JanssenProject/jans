@@ -9,7 +9,7 @@ package org.gluu.oxauth.ciba;
 import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingClient;
 import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingRequest;
 import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingResponse;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.ciba.CibaEncryptionService;
 import org.gluu.oxauth.service.external.ExternalCibaEndUserNotificationService;
 import org.gluu.oxauth.service.external.context.ExternalCibaEndUserNotificationContext;
@@ -22,7 +22,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

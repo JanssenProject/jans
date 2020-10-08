@@ -9,7 +9,7 @@ package org.gluu.oxauth.client;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.oxauth.model.common.AuthorizationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
 
 /**
  * Represents a Client Info request to send to the authorization server.

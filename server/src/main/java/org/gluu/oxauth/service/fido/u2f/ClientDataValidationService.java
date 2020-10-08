@@ -16,8 +16,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
 import org.slf4j.Logger;
 
 /**

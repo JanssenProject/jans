@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.service.common.api;
 
-import org.gluu.oxauth.model.common.IdType;
+import io.jans.as.model.common.IdType;
 
 /**
  * Id generator interface. Base interface for id generation. It must be implemented by

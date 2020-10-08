@@ -13,10 +13,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
+import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import org.gluu.oxauth.exception.fido.u2f.InvalidDeviceCounterException;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.protocol.DeviceData;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.protocol.DeviceData;
+import io.jans.as.model.util.Base64Util;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
@@ -62,7 +63,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	private long counter;
 
     @AttributeName(name = "oxStatus")
-	private DeviceRegistrationStatus status;
+	private io.jans.as.model.fido.u2f.DeviceRegistrationStatus status;
 
 	@AttributeName(name = "oxApplication")
 	private String application;
@@ -94,7 +95,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 
 	public DeviceRegistration() {}
 
-	public DeviceRegistration(String userInum, String keyHandle, String publicKey, String attestationCert, long counter, DeviceRegistrationStatus status,
+	public DeviceRegistration(String userInum, String keyHandle, String publicKey, String attestationCert, long counter, io.jans.as.model.fido.u2f.DeviceRegistrationStatus status,
 			String application, Integer keyHandleHashCode, Date creationDate) {
 		this.deviceRegistrationConfiguration = new DeviceRegistrationConfiguration(publicKey, attestationCert);
 		this.counter = counter;
@@ -183,11 +184,11 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 		this.counter = counter;
 	}
 
-	public DeviceRegistrationStatus getStatus() {
+	public io.jans.as.model.fido.u2f.DeviceRegistrationStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(DeviceRegistrationStatus status) {
+	public void setStatus(io.jans.as.model.fido.u2f.DeviceRegistrationStatus status) {
 		this.status = status;
 	}
 
@@ -266,7 +267,7 @@ public class DeviceRegistration extends BaseEntry implements Serializable {
 	}
 
 	public boolean isCompromised() {
-		return DeviceRegistrationStatus.COMPROMISED == this.status;
+		return io.jans.as.model.fido.u2f.DeviceRegistrationStatus.COMPROMISED == this.status;
 	}
 
 	public void markCompromised() {

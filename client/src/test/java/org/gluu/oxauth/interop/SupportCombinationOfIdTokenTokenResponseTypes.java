@@ -8,9 +8,9 @@ package org.gluu.oxauth.interop;
 
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
