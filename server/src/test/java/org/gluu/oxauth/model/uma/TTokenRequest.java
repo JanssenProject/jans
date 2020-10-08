@@ -10,6 +10,7 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.*;
+import io.jans.as.model.uma.*;
 import io.jans.as.model.uma.RPTResponse;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;

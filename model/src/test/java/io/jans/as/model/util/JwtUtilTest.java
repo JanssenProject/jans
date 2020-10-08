@@ -1,4 +1,4 @@
-package org.gluu.oxauth.model.util;
+package io.jans.as.model.util;
 
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;

@@ -1,4 +1,4 @@
-package org.gluu.oxauth.model.uma;
+package io.jans.as.model.uma;
 
 import io.jans.as.model.uma.JsonLogic;
 import org.testng.Assert;

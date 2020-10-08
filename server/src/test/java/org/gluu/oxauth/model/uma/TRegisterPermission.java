@@ -10,6 +10,7 @@ import io.jans.as.model.common.Holder;
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaPermission;
+import io.jans.as.model.uma.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.util.ServerUtil;

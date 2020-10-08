@@ -1,8 +1,6 @@
-package org.gluu.oxauth.model.uma;
+package io.jans.as.model.uma;
 
 import org.apache.commons.io.IOUtils;
-import io.jans.as.model.uma.JsonLogicNode;
-import io.jans.as.model.uma.JsonLogicNodeParser;
 import org.testng.annotations.Test;
 
 import java.io.IOException;

@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.gluu.oxauth.model.uma;
+package io.jans.as.model.uma;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
