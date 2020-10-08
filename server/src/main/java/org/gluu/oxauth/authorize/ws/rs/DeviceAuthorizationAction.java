@@ -13,8 +13,8 @@ import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.service.SessionIdService;
@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.authorize.AuthorizeRequestParam.*;
-import static org.gluu.oxauth.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
+import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
 import static org.gluu.oxauth.service.DeviceAuthorizationService.*;
 
 /**

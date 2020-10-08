@@ -2,8 +2,7 @@ package org.gluu.oxauth.model.ciba;
 
 import org.gluu.oxauth.client.BackchannelAuthenticationRequest;
 import org.gluu.oxauth.client.BackchannelAuthenticationResponse;
-import org.gluu.oxauth.client.TokenResponse;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 
 public class CibaRequestSession {
 

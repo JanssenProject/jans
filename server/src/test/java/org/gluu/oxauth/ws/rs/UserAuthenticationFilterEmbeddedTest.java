@@ -10,16 +10,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -35,7 +34,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.*;
 
 /**

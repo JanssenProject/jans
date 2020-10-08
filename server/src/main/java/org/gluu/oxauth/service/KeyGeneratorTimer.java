@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.oxauth.model.config.Conf;
+import io.jans.as.model.config.Conf;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.jwk.JSONWebKey;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
@@ -33,7 +33,7 @@ import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.*;
+import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum

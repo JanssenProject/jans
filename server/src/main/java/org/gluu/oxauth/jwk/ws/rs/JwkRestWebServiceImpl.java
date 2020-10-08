@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.jwk.ws.rs;
 
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.jwk.JSONWebKey;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwk.JSONWebKey;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

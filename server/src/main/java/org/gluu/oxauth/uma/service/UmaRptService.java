@@ -10,15 +10,15 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang.ArrayUtils;
 import org.gluu.oxauth.claims.Audience;
 import org.gluu.oxauth.model.common.ExecutionContext;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwt.Jwt;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.token.JwtSigner;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.util.JwtUtil;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.external.ExternalUmaRptClaimsService;
 import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
@@ -271,13 +271,13 @@ public class UmaRptService {
     }
 
     public JSONArray buildPermissionsJSONObject(List<UmaPermission> permissions) throws IOException, JSONException {
-        List<org.gluu.oxauth.model.uma.UmaPermission> result = new ArrayList<>();
+        List<io.jans.as.model.uma.UmaPermission> result = new ArrayList<>();
 
         for (UmaPermission permission : permissions) {
             permission.checkExpired();
             permission.isValid();
             if (permission.isValid()) {
-                final org.gluu.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
+                final io.jans.as.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                 if (toAdd != null) {
                     result.add(toAdd);
                 }

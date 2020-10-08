@@ -7,7 +7,7 @@
 package org.gluu.oxauth.ciba;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Named;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.util;
 
-import org.gluu.oxauth.model.util.CertUtils;
+import io.jans.as.model.util.CertUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

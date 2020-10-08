@@ -1,7 +1,8 @@
 package org.gluu.oxauth.model.util;
 
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaims;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.util.JwtUtil;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 

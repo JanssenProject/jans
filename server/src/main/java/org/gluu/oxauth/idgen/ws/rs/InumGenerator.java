@@ -15,14 +15,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.IdType;
+import io.jans.as.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.BaseDnConfiguration;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 /**
  * Inum ID generator. Generates inum: e.g. @!1111!0001!1234.

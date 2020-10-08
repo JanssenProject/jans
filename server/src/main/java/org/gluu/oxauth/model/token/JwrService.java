@@ -1,24 +1,25 @@
 package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Function;
+import io.jans.as.model.token.JsonWebResponse;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.exception.InvalidJweException;
-import org.gluu.oxauth.model.jwe.Jwe;
-import org.gluu.oxauth.model.jwe.JweEncrypter;
-import org.gluu.oxauth.model.jwe.JweEncrypterImpl;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtType;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.exception.InvalidJweException;
+import io.jans.as.model.jwe.Jwe;
+import io.jans.as.model.jwe.JweEncrypter;
+import io.jans.as.model.jwe.JweEncrypterImpl;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.JwtUtil;
+import io.jans.as.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SectorIdentifierService;
 import org.gluu.oxauth.service.ServerCryptoProvider;
@@ -31,7 +32,7 @@ import javax.inject.Named;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
-import static org.gluu.oxauth.model.jwt.JwtHeaderName.ALGORITHM;
+import static io.jans.as.model.jwt.JwtHeaderName.ALGORITHM;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -64,7 +65,7 @@ public class JwrService {
      *
      * @return encoded Jwr
      */
-    public JsonWebResponse encode(JsonWebResponse jwr, Client client) throws Exception {
+    public io.jans.as.model.token.JsonWebResponse encode(io.jans.as.model.token.JsonWebResponse jwr, Client client) throws Exception {
         if (jwr instanceof Jwe) {
             return encryptJwe((Jwe) jwr, client);
         }
@@ -110,7 +111,7 @@ public class JwrService {
         throw new IllegalArgumentException("Unsupported encryption algorithm: " + keyEncryptionAlgorithm);
     }
 
-    public JsonWebResponse createJwr(Client client) {
+    public io.jans.as.model.token.JsonWebResponse createJwr(Client client) {
         try {
             if (client.getIdTokenEncryptedResponseAlg() != null
                     && client.getIdTokenEncryptedResponseEnc() != null) {
@@ -133,11 +134,11 @@ public class JwrService {
         }
     }
 
-    public void setSubjectIdentifier(JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) {
+    public void setSubjectIdentifier(io.jans.as.model.token.JsonWebResponse jwr, IAuthorizationGrant authorizationGrant) {
         jwr.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
     }
 
-    public static Function<JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String outsideSid) {
+    public static Function<io.jans.as.model.token.JsonWebResponse, Void> wrapWithSidFunction(Function<JsonWebResponse, Void> input, String outsideSid) {
         return jwr -> {
             if (jwr == null) {
                 return null;

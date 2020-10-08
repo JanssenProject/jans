@@ -1,12 +1,13 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
+import io.jans.as.model.common.Prompt;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
@@ -29,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -117,7 +118,7 @@ public class AuthorizeRestWebServiceValidator {
         }
     }
 
-    public void validate(List<ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, ResponseMode responseMode) {
+    public void validate(List<io.jans.as.model.common.ResponseType> responseTypes, List<Prompt> prompts, String nonce, String state, String redirectUri, HttpServletRequest httpRequest, Client client, io.jans.as.model.common.ResponseMode responseMode) {
         if (!AuthorizeParamsValidator.validateParams(responseTypes, prompts, nonce, appConfiguration.getFapiCompatibility())) {
             if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) != null) {
                 RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);

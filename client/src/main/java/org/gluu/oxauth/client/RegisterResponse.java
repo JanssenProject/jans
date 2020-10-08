@@ -11,16 +11,16 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.register.RegisterErrorResponseType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientResponse;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
+import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;

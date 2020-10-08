@@ -1,7 +1,7 @@
 package org.gluu.oxauth.service;
 
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.error.IErrorType;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.error.IErrorType;
 import org.gluu.oxauth.util.RedirectUri;
 import org.gluu.oxauth.util.RedirectUtil;
 import org.slf4j.Logger;

@@ -2,12 +2,12 @@ package org.gluu.oxauth.service;
 
 import org.apache.log4j.Logger;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.jwk.Use;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
 import io.jans.service.cdi.util.CdiUtil;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;

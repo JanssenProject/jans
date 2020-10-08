@@ -8,9 +8,9 @@ package org.gluu.oxauth.ciba;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.DefaultErrorResponse;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.DefaultErrorResponse;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.*;
 
 /**
  * @author Javier Rojas Blum

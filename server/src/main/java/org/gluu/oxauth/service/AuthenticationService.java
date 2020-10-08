@@ -27,10 +27,10 @@ import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SimpleUser;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.UserService;
@@ -47,7 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
 
-import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods

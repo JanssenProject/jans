@@ -8,10 +8,10 @@ package org.gluu.oxauth.client.uma;
 
 import javax.ws.rs.*;
 
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaResource;
-import org.gluu.oxauth.model.uma.UmaResourceResponse;
-import org.gluu.oxauth.model.uma.UmaResourceWithId;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaResource;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.UmaResourceWithId;
 
 import java.util.List;
 

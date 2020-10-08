@@ -25,7 +25,7 @@ import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ConfigurationUpdate;

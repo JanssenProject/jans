@@ -1,10 +1,10 @@
 package org.gluu.oxauth.uma.authorization;
 
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaResource;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;

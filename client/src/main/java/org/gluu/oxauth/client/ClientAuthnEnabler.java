@@ -1,8 +1,8 @@
 package org.gluu.oxauth.client;
 
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.token.ClientAssertionType;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.token.ClientAssertionType;
 import org.jboss.resteasy.client.ClientRequest;
 
 

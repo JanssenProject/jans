@@ -6,18 +6,18 @@
 
 package org.gluu.oxauth.action;
 
-import com.google.common.collect.Lists;
+import io.jans.as.model.common.*;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterRequestParam;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterRequestParam;
+import io.jans.as.model.util.StringUtils;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;

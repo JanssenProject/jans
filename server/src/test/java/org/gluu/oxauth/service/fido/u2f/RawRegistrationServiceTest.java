@@ -6,9 +6,8 @@ import static org.testng.Assert.assertNotNull;
 import javax.inject.Inject;
 
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.service.fido.u2f.RawRegistrationService;
+import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.util.Base64Util;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 

@@ -10,14 +10,14 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.json.JSONObject;
-import org.gluu.oxauth.model.crypto.Certificate;
-import org.gluu.oxauth.model.crypto.Key;
-import org.gluu.oxauth.model.crypto.signature.ECDSAKeyFactory;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPrivateKey;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.util.SecurityProviderUtility;
+import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.Key;
+import io.jans.as.model.crypto.signature.ECDSAKeyFactory;
+import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.util.SecurityProviderUtility;
 import org.python.icu.util.Calendar;
 
 /**

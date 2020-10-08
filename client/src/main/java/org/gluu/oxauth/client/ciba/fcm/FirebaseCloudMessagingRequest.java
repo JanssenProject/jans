@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 import javax.ws.rs.core.MediaType;
 
-import static org.gluu.oxauth.model.ciba.FirebaseCloudMessagingRequestParam.*;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

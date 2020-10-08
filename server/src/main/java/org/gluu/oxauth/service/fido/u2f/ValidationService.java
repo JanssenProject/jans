@@ -12,7 +12,7 @@ import javax.inject.Named;
 
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.fido.u2f.U2fConstants;
+import io.jans.as.model.fido.u2f.U2fConstants;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.service.common.UserService;
 import io.jans.util.StringHelper;

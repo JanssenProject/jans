@@ -15,7 +15,7 @@ import io.jans.service.cache.InMemoryConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.slf4j.Logger;
 

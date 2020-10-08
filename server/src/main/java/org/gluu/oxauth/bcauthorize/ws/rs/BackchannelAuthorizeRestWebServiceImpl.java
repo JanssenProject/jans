@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.bcauthorize.ws.rs;
 
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
@@ -18,19 +19,19 @@ import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.error.DefaultErrorResponse;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.exception.InvalidClaimException;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.jws.ECDSASigner;
-import org.gluu.oxauth.model.jws.RSASigner;
-import org.gluu.oxauth.model.jwt.Jwt;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidClaimException;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jws.ECDSASigner;
+import io.jans.as.model.jws.RSASigner;
+import io.jans.as.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.security.Identity;
@@ -55,8 +56,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.*;
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationResponseParam.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.*;
+import static io.jans.as.model.ciba.BackchannelAuthenticationResponseParam.*;
 
 /**
  * Implementation for request backchannel authorization through REST web services.

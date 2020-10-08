@@ -9,7 +9,7 @@ package org.gluu.oxauth.ciba;
 import org.gluu.oxauth.client.ciba.push.PushTokenDeliveryClient;
 import org.gluu.oxauth.client.ciba.push.PushTokenDeliveryRequest;
 import org.gluu.oxauth.client.ciba.push.PushTokenDeliveryResponse;
-import org.gluu.oxauth.model.common.TokenType;
+import io.jans.as.model.common.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

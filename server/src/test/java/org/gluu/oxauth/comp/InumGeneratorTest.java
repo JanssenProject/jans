@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.BaseComponentTest;
 import org.gluu.oxauth.idgen.ws.rs.InumGenerator;
-import org.gluu.oxauth.model.common.IdType;
+import io.jans.as.model.common.IdType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
