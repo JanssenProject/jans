@@ -1,13 +1,13 @@
 package io.jans.as.server.session.ws.rs;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.token.JsonWebResponse;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.service.SectorIdentifierService;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
 import org.slf4j.Logger;

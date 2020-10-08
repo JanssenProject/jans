@@ -6,10 +6,10 @@
 
 package io.jans.as.server.util;
 
+import io.jans.as.server.crypto.cert.CertificateParser;
 import io.jans.util.StringHelper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import io.jans.as.server.crypto.cert.CertificateParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

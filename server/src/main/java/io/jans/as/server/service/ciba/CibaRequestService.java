@@ -6,17 +6,17 @@
 
 package io.jans.as.server.service.ciba;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.common.CibaRequestCacheControl;
+import io.jans.as.server.model.common.CibaRequestStatus;
+import io.jans.as.server.model.ldap.CIBARequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.service.CacheService;
 import org.apache.commons.lang.time.DateUtils;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.ldap.CIBARequest;
-import io.jans.as.common.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

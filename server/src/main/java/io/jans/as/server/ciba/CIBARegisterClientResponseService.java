@@ -6,8 +6,8 @@
 
 package io.jans.as.server.ciba;
 
-import io.jans.as.model.util.Util;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.util.Util;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

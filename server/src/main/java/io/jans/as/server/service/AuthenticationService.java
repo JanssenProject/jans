@@ -6,8 +6,17 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.common.SimpleUser;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.config.Constants;
+import io.jans.as.server.model.session.SessionClient;
+import io.jans.as.server.security.Identity;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.GluuStatus;
 import io.jans.model.SimpleProperty;
@@ -25,15 +34,6 @@ import io.jans.util.ArrayHelper;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.common.SimpleUser;
-import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.config.Constants;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.model.session.SessionClient;
-import io.jans.as.server.security.Identity;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.UserService;
 import org.json.JSONException;
 import org.slf4j.Logger;
 

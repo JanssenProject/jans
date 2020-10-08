@@ -11,6 +11,8 @@ import com.google.common.collect.Sets;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.fido.u2f.RequestService;
+import io.jans.as.server.uma.service.UmaPctService;
+import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.search.filter.Filter;
@@ -20,8 +22,6 @@ import io.jans.service.cdi.event.CleanerEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import io.jans.as.server.uma.service.UmaPctService;
-import io.jans.as.server.uma.service.UmaResourceService;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;

@@ -6,9 +6,9 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
+import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.log4j.Logger;
-import io.jans.as.server.model.config.ConfigurationFactory;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
 

@@ -6,13 +6,13 @@
 
 package io.jans.as.server.service.external;
 
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.external.session.SessionEvent;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.service.custom.script.ExternalScriptService;
-import io.jans.as.server.model.common.SessionId;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

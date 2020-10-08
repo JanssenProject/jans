@@ -6,11 +6,11 @@
 
 package io.jans.as.server;
 
+import io.jans.as.server.util.Deployments;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
-import io.jans.as.server.util.Deployments;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OverProtocol;
 import org.jboss.arquillian.testng.Arquillian;

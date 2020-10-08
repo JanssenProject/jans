@@ -7,22 +7,22 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.model.metric.MetricType;
-import io.jans.service.CacheService;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.model.ldap.TokenLdap;
 import io.jans.as.server.model.ldap.TokenType;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
+import io.jans.model.metric.MetricType;
+import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.Dependent;

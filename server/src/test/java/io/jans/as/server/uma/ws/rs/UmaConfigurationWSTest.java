@@ -6,10 +6,10 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.client.BaseTest;
-import io.jans.as.server.model.uma.TUma;
+import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.server.model.uma.TUma;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

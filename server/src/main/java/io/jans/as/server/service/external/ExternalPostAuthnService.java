@@ -1,11 +1,11 @@
 package io.jans.as.server.service.external;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.postauthn.PostAuthnType;
 import io.jans.service.custom.script.ExternalScriptService;
-import io.jans.as.common.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;

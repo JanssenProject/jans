@@ -2,13 +2,13 @@ package io.jans.as.server.uma.authorization;
 
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.server.model.common.AbstractToken;
+import io.jans.as.server.uma.service.UmaPctService;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.uma.service.UmaPctService;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

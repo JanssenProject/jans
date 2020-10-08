@@ -6,8 +6,8 @@
 
 package io.jans.as.server.security;
 
-import io.jans.as.server.model.common.SessionId;
 import io.jans.as.common.model.common.User;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.session.SessionClient;
 
 import javax.annotation.Priority;

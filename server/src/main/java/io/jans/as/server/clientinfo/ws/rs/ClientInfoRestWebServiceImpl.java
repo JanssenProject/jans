@@ -6,22 +6,22 @@
 
 package io.jans.as.server.clientinfo.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.model.GluuAttribute;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.clientinfo.ClientInfoParamsValidator;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.AttributeService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.GluuAttribute;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

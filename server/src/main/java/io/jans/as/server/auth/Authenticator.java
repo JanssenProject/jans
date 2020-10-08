@@ -6,10 +6,19 @@
 
 package io.jans.as.server.auth;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.server.i18n.LanguageBean;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.config.Constants;
+import io.jans.as.server.model.exception.InvalidSessionStateException;
+import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
+import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -17,16 +26,6 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.i18n.LanguageBean;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
-import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.config.Constants;
-import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.security.Identity;
-import org.gluu.oxauth.service.*;
-import io.jans.as.server.service.external.ExternalAuthenticationService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

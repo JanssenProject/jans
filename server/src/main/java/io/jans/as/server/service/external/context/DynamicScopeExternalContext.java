@@ -6,10 +6,10 @@
 
 package io.jans.as.server.service.external.context;
 
-import io.jans.as.model.token.JsonWebResponse;
-import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.as.common.model.common.User;
+import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.model.common.IAuthorizationGrant;
 
 import java.util.ArrayList;
 import java.util.List;

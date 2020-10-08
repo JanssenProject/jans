@@ -6,15 +6,15 @@
 
 package io.jans.as.server.uma.service;
 
-import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.SessionId;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.util.Util;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
