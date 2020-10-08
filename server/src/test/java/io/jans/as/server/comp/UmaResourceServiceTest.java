@@ -1,14 +1,14 @@
 package io.jans.as.server.comp;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.util.security.StringEncrypter;
 import io.jans.as.server.BaseComponentTest;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.service.ClientService;
-import io.jans.as.common.service.common.InumService;
 import io.jans.as.server.uma.service.UmaResourceService;
+import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 

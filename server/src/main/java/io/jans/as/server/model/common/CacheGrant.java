@@ -7,9 +7,9 @@
 package io.jans.as.server.model.common;
 
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.model.registration.Client;
 
 import javax.enterprise.inject.Instance;
 import java.io.Serializable;

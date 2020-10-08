@@ -6,15 +6,15 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang3.ArrayUtils;
-import io.jans.as.server.model.ldap.ClientAuthorization;
-import io.jans.as.common.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

@@ -6,11 +6,14 @@
 
 package io.jans.as.server.uma.ws.rs;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.as.server.uma.authorization.UmaWebException;
 import io.jans.as.server.uma.service.UmaPctService;
@@ -19,9 +22,6 @@ import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.service.common.UserService;
-import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

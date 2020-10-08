@@ -2,6 +2,7 @@ package io.jans.as.server.service.expiration;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.service.cdi.event.ExpirationEvent;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.external.session.SessionEvent;
@@ -15,7 +16,6 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import net.jodah.expiringmap.ExpirationListener;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import io.jans.as.server.model.common.SessionId;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

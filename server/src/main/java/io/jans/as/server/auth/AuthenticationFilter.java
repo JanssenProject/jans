@@ -6,6 +6,7 @@
 
 package io.jans.as.server.auth;
 
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -16,14 +17,6 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.*;
-import io.jans.model.security.Identity;
-import io.jans.util.StringHelper;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.entity.ContentType;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.ClientFilterService;
@@ -32,6 +25,13 @@ import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.security.Identity;
+import io.jans.util.StringHelper;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

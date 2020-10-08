@@ -6,13 +6,13 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.fido.u2f.U2fConstants;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.util.StringHelper;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.config.Constants;
-import io.jans.as.common.service.common.UserService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

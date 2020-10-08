@@ -1,6 +1,7 @@
 package io.jans.as.server.auth;
 
 import com.google.common.base.Strings;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.Prompt;
@@ -11,12 +12,11 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.JwtUtil;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.SessionIdService;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

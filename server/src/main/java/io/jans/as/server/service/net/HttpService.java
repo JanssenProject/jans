@@ -6,6 +6,8 @@
 
 package io.jans.as.server.service.net;
 
+import io.jans.as.server.model.net.HttpServiceResponse;
+import io.jans.net.SslDefaultHttpClient;
 import io.jans.util.StringHelper;
 import io.jans.util.Util;
 import org.apache.commons.codec.binary.Base64;
@@ -29,8 +31,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import io.jans.net.SslDefaultHttpClient;
-import io.jans.as.server.model.net.HttpServiceResponse;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 

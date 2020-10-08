@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
@@ -14,10 +15,6 @@ import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.util.Base64Util;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.search.filter.Filter;
-import io.jans.util.StringHelper;
-import org.apache.commons.codec.binary.Hex;
 import io.jans.as.server.crypto.random.ChallengeGenerator;
 import io.jans.as.server.crypto.signature.SHA256withECDSASignatureVerification;
 import io.jans.as.server.exception.fido.u2f.DeviceCompromisedException;
@@ -26,7 +23,10 @@ import io.jans.as.server.exception.fido.u2f.NoEligableDevicesException;
 import io.jans.as.server.model.fido.u2f.AuthenticateRequestMessageLdap;
 import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.as.server.model.fido.u2f.DeviceRegistrationResult;
-import io.jans.as.common.service.common.UserService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.search.filter.Filter;
+import io.jans.util.StringHelper;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

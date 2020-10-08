@@ -6,17 +6,17 @@
 
 package io.jans.as.server.service.fido.u2f;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
-import io.jans.as.server.model.fido.u2f.DeviceRegistration;
-import io.jans.as.common.service.common.UserService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

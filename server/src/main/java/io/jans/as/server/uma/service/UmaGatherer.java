@@ -6,17 +6,17 @@
 
 package io.jans.as.server.uma.service;
 
+import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.server.i18n.LanguageBean;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.config.Constants;
+import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.i18n.LanguageBean;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.config.Constants;
-import io.jans.as.common.service.common.UserService;
-import io.jans.as.server.service.external.ExternalUmaClaimsGatheringService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

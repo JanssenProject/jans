@@ -1,23 +1,23 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.orm.exception.EntryPersistenceException;
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.SessionId;
-import io.jans.as.common.model.registration.Client;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RedirectionUriService;
-import io.jans.as.common.util.RedirectUri;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.orm.exception.EntryPersistenceException;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package io.jans.as.server.uma.authorization;
 
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.as.persistence.model.Scope;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 /**
  * @author yuriyz

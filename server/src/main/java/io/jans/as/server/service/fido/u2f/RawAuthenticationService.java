@@ -13,9 +13,9 @@ import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.server.crypto.signature.SHA256withECDSASignatureVerification;
 import io.jans.util.io.ByteDataInputStream;
 import org.apache.commons.io.IOUtils;
-import io.jans.as.server.crypto.signature.SHA256withECDSASignatureVerification;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

@@ -6,10 +6,10 @@
 
 package io.jans.as.server.service.token;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.token.HttpAuthTokenType;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

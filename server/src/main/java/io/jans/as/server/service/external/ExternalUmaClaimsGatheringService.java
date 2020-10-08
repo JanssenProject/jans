@@ -1,5 +1,6 @@
 package io.jans.as.server.service.external;
 
+import io.jans.as.server.uma.authorization.UmaGatherContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
@@ -7,7 +8,6 @@ import io.jans.service.LookupService;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.StringHelper;
-import io.jans.as.server.uma.authorization.UmaGatherContext;
 import org.slf4j.Logger;
 
 import javax.ejb.DependsOn;

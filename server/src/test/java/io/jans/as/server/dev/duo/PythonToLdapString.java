@@ -7,9 +7,9 @@
 package io.jans.as.server.dev.duo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.IOUtils;
 import io.jans.as.persistence.model.configuration.CustomProperty;
 import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
 import java.io.File;

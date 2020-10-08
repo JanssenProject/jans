@@ -6,11 +6,11 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.*;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.orm.PersistenceEntryManager;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.EncryptionService;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.orm.PersistenceEntryManager;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

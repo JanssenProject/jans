@@ -1,8 +1,8 @@
 package io.jans.as.server.service;
 
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
-import io.jans.as.common.util.RedirectUri;
 import io.jans.as.server.util.RedirectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
