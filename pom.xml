@@ -167,7 +167,7 @@
 				<version>${project.version}</version>
 			</dependency>
 
-			<!-- janssen -->
+			<!-- jans -->
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>core-util</artifactId>

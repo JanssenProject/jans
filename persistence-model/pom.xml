@@ -17,7 +17,7 @@
 	</properties>
 
 	<build>
-		<finalName>janssen-persistence-model</finalName>
+		<finalName>jans-auth-persistence-model</finalName>
 
 		<resources>
 			<resource>
