@@ -21,7 +21,7 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.ArrayHelper;
 import io.jans.util.Util;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.ApplicationFactory;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.json.JSONObject;
 import org.slf4j.Logger;

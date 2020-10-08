@@ -8,6 +8,8 @@ package org.gluu.oxauth.token.ws.rs;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -24,7 +26,7 @@ import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
 import org.gluu.oxauth.model.token.JwrService;
 import org.gluu.oxauth.model.token.TokenParamsValidator;

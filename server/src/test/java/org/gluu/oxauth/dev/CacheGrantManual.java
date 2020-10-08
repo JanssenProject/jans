@@ -14,8 +14,8 @@ import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
 import org.gluu.oxauth.model.common.CacheGrant;
 import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

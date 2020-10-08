@@ -6,12 +6,13 @@
 
 package org.gluu.oxauth.model.common;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.CertUtils;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.ldap.TokenLdap;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.common.model.registration.Client;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -339,7 +340,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     /**
-     * Returns the {@link org.gluu.oxauth.model.registration.Client}. An
+     * Returns the {@link Client}. An
      * application making protected resource requests on behalf of the resource
      * owner and with its authorization.
      *

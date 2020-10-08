@@ -9,10 +9,10 @@ package org.gluu.oxauth.service.fido.u2f;
 import io.jans.as.model.fido.u2f.U2fConstants;
 import io.jans.util.StringHelper;
 import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.User;
+import io.jans.as.common.model.common.User;
 import org.gluu.oxauth.model.config.Constants;
 import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.common.UserService;
+import io.jans.as.common.service.common.UserService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

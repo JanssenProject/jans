@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.model.common;
 
+import io.jans.as.common.model.common.User;
 import io.jans.service.CacheService;
 import org.apache.commons.lang.StringUtils;
 
