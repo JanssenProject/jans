@@ -53,9 +53,9 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import org.gluu.util.ArrayHelper;
-import org.gluu.util.Pair;
-import org.gluu.util.StringHelper;
+import io.jans.util.ArrayHelper;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.slf4j.Logger;
 

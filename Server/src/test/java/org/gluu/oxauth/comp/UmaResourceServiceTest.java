@@ -8,7 +8,7 @@ import org.gluu.oxauth.model.uma.persistence.UmaResource;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.InumService;
 import org.gluu.oxauth.uma.service.UmaResourceService;
-import org.gluu.util.security.StringEncrypter;
+import io.jans.util.security.StringEncrypter;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 

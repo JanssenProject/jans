@@ -21,7 +21,7 @@ from org.gluu.config.oxtrust import LdapOxPassportConfiguration
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 from java.util import ArrayList, Arrays, Collections
 
 from javax.faces.application import FacesMessage

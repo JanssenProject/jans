@@ -18,7 +18,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.*;
 import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

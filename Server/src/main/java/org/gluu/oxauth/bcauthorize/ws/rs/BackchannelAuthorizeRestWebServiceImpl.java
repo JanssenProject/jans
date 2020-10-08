@@ -37,7 +37,7 @@ import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

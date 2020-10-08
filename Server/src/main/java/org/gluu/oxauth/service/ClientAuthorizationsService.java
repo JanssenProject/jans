@@ -14,7 +14,7 @@ import org.gluu.oxauth.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

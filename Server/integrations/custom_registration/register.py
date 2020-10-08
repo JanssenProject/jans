@@ -11,7 +11,7 @@ from org.xdi.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.util import ServerUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages

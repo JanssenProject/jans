@@ -34,8 +34,8 @@ import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 import org.gluu.service.custom.script.ExternalScriptService;
-import org.gluu.util.OxConstants;
-import org.gluu.util.StringHelper;
+import io.jans.util.OxConstants;
+import io.jans.util.StringHelper;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;

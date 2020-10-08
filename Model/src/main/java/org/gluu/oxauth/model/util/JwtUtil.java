@@ -17,7 +17,7 @@ import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
 import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;

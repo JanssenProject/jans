@@ -12,7 +12,7 @@ import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.OxConstants;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.BaseCacheService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

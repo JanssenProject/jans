@@ -7,7 +7,7 @@ import org.gluu.oxauth.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.oxauth.persistence.model.PairwiseIdentifier;
 import org.slf4j.Logger;
 

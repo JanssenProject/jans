@@ -15,7 +15,7 @@ import org.gluu.model.custom.script.type.authz.ConsentGatheringType;
 import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
 import org.gluu.service.LookupService;
 import org.gluu.service.custom.script.ExternalScriptService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**

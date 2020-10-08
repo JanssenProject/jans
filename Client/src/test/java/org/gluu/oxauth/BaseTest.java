@@ -33,7 +33,7 @@ import org.gluu.oxauth.model.util.SecurityProviderUtility;
 import org.gluu.oxauth.model.util.Util;
 import org.gluu.oxauth.page.AbstractPage;
 import org.gluu.oxauth.page.PageConfig;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;

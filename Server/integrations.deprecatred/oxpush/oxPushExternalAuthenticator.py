@@ -11,7 +11,7 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxpush import OxPushClient
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):

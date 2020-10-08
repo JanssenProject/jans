@@ -45,8 +45,8 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.gluu.net.SslDefaultHttpClient;
 import org.gluu.oxauth.model.net.HttpServiceResponse;
-import org.gluu.util.StringHelper;
-import org.gluu.util.Util;
+import io.jans.util.StringHelper;
+import io.jans.util.Util;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
 /**

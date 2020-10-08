@@ -13,7 +13,7 @@ import org.gluu.oxauth.model.error.ErrorHandlingMethod;
 import org.gluu.oxauth.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.error.IErrorType;
 import org.gluu.oxauth.util.RedirectUri;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 

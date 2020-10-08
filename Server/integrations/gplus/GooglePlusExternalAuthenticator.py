@@ -15,7 +15,7 @@ from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import StringHelper, ArrayHelper
+from io.jans.util import StringHelper, ArrayHelper
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

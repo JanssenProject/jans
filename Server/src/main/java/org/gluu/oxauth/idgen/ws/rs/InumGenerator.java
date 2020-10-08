@@ -19,7 +19,7 @@ import org.gluu.oxauth.model.common.IdType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
-import org.gluu.util.INumGenerator;
+import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.BaseDnConfiguration;
 import org.gluu.oxauth.model.config.StaticConfiguration;

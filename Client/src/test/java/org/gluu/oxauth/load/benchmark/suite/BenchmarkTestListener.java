@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestNGMethod;

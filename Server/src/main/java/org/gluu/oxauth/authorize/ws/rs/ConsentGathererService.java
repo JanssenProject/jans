@@ -17,7 +17,7 @@ import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.service.external.ExternalConsentGatheringService;
 import org.gluu.oxauth.service.external.context.ConsentGatheringContext;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
