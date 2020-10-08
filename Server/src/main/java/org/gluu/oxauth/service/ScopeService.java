@@ -15,7 +15,7 @@ import org.gluu.search.filter.Filter;
 import org.gluu.service.BaseCacheService;
 import org.gluu.service.CacheService;
 import org.gluu.service.LocalCacheService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 

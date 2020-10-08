@@ -13,8 +13,8 @@ from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.service.net import HttpService
 from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.util import ArrayHelper
-from org.gluu.util import StringHelper
+from io.jans.util import ArrayHelper
+from io.jans.util import StringHelper
 
 
 class PersonAuthentication(PersonAuthenticationType):

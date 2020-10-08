@@ -26,8 +26,8 @@ import org.gluu.service.cdi.async.Asynchronous;
 import org.gluu.service.cdi.event.*;
 import org.gluu.service.timer.event.TimerEvent;
 import org.gluu.service.timer.schedule.TimerSchedule;
-import org.gluu.util.StringHelper;
-import org.gluu.util.properties.FileConfiguration;
+import io.jans.util.StringHelper;
+import io.jans.util.properties.FileConfiguration;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

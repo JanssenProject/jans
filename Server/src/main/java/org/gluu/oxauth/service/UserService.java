@@ -20,7 +20,7 @@ import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
 import org.gluu.service.net.NetworkService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 
 /**
  * Provides operations with users.

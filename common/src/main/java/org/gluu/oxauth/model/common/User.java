@@ -13,7 +13,7 @@ import java.util.List;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.CustomObjectAttribute;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013

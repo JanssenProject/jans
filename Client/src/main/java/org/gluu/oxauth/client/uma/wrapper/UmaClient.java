@@ -17,7 +17,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.uma.UmaScopeType;
 import org.gluu.oxauth.model.uma.wrapper.Token;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 
 import java.util.ArrayList;

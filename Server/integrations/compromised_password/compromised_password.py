@@ -8,12 +8,12 @@ from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
-from org.gluu.util import StringHelper
+from io.jans.util import StringHelper
 import javax.crypto.spec.SecretKeySpec as SecretKeySpec
 import javax.crypto.spec.IvParameterSpec as IvParameterSpec
 import javax.crypto.Cipher
 from javax.crypto import *
-from org.gluu.util import ArrayHelper
+from io.jans.util import ArrayHelper
 from java.util import Arrays
 import urllib, urllib2, json
 

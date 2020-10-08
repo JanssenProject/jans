@@ -25,7 +25,7 @@ import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.external.ExternalAuthenticationService;
-import org.gluu.util.StringHelper;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;
