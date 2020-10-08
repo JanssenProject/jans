@@ -6,16 +6,14 @@
 
 package io.jans.as.client;
 
-import static io.jans.as.model.discovery.WebFingerParam.REL;
-import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
-import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
-import static io.jans.as.model.util.StringUtils.addQueryStringParam;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.apache.commons.lang.StringUtils;
+import static io.jans.as.model.discovery.WebFingerParam.*;
+import static io.jans.as.model.util.StringUtils.addQueryStringParam;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

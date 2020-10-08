@@ -6,15 +6,15 @@
 
 package io.jans.as.client;
 
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.userinfo.UserInfoErrorResponseType;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;

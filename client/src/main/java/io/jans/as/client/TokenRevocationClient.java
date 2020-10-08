@@ -6,10 +6,10 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.token.TokenRevocationRequestParam;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.HttpMethod;
 

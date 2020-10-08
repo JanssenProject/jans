@@ -6,10 +6,10 @@
 
 package io.jans.as.client;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.util.Util;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import javax.ws.rs.HttpMethod;

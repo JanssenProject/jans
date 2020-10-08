@@ -7,9 +7,8 @@
 package io.jans.as.client.model.authorize;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.Display;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
@@ -25,7 +24,8 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.Util;
-import io.jans.as.client.util.ClientUtil;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
