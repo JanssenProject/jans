@@ -1,4 +1,4 @@
-package org.gluu.demo;
+package io.jans.as.rp.spring.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

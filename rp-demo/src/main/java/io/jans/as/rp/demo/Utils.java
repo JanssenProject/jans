@@ -1,4 +1,4 @@
-package org.gluu.oxauth.rp.demo;
+package io.jans.as.rp.demo;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;

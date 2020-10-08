@@ -1,4 +1,4 @@
-package org.gluu.oxauth.rp.demo;
+package io.jans.as.rp.demo;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
