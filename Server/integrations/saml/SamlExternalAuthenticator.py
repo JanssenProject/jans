@@ -10,7 +10,7 @@ from java.lang import StringBuilder
 from javax.faces.context import FacesContext
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from org.gluu.ldap.model import CustomAttribute
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
@@ -20,7 +20,7 @@ from org.gluu.oxauth.service import UserService, ClientService, AuthenticationSe
 from org.gluu.oxauth.service.net import HttpService
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper, Util
-from org.gluu.jsf2.service import FacesService
+from io.jans.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

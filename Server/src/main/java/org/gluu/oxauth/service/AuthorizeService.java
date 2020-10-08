@@ -8,8 +8,8 @@ package org.gluu.oxauth.service;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.message.FacesMessages;
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.message.FacesMessages;
+import io.jans.jsf2.service.FacesService;
 import org.gluu.oxauth.auth.Authenticator;
 import org.gluu.oxauth.ciba.CIBAPingCallbackService;
 import org.gluu.oxauth.ciba.CIBAPushErrorService;

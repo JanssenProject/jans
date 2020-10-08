@@ -18,7 +18,7 @@ from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil
 from io.jans.util import StringHelper, ArrayHelper
 from javax.faces.application import FacesMessage
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 
 from org.jsmpp import InvalidResponseException, PDUException
 from org.jsmpp.bean import Alphabet, BindType, ESMClass, GeneralDataCoding, MessageClass, NumberingPlanIndicator, RegisteredDelivery, SMSCDeliveryReceipt, TypeOfNumber
