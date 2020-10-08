@@ -8,9 +8,9 @@
 #   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
-from org.gluu.model.custom.script.type.uma import UmaRptPolicyType
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.uma import ClaimDefinitionBuilder
+from io.jans.model.custom.script.type.uma import UmaRptPolicyType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.uma import ClaimDefinitionBuilder
 from io.jans.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
 from java.lang import String

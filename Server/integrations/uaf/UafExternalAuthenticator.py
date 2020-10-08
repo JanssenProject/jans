@@ -13,8 +13,8 @@
 #   registration_uri: https://<idp_hostname>/identity/register
 #   qr_options: { width: 400, height: 400 }
 
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import AuthenticationService, SessionIdService
 from org.gluu.oxauth.service.common import UserService

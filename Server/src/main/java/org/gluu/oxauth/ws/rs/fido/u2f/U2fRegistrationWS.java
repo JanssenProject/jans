@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.config.Constants;

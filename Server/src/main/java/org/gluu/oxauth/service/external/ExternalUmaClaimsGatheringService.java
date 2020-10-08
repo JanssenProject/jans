@@ -13,13 +13,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.uma.UmaClaimsGatheringType;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.gluu.oxauth.uma.authorization.UmaGatherContext;
-import org.gluu.service.LookupService;
-import org.gluu.service.custom.script.CustomScriptManager;
-import org.gluu.service.custom.script.ExternalScriptService;
+import io.jans.service.LookupService;
+import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 

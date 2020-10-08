@@ -22,7 +22,7 @@ import org.gluu.oxauth.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.util.JwtUtil;
 import org.gluu.oxauth.service.ClientService;
-import org.gluu.service.cdi.util.CdiUtil;
+import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
 
 import java.util.Date;

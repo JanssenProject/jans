@@ -14,8 +14,8 @@
 # 4. authorize() method is called if all required claims are provided.
 # 5. destroy()
 
-from org.gluu.model.custom.script.type.uma import UmaRptPolicyType
-from org.gluu.model.uma import ClaimDefinitionBuilder
+from io.jans.model.custom.script.type.uma import UmaRptPolicyType
+from io.jans.model.uma import ClaimDefinitionBuilder
 from java.lang import String
 
 class UmaRptPolicy(UmaRptPolicyType):

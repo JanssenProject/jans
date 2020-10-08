@@ -16,7 +16,7 @@ import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
+import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 import org.gluu.oxauth.model.config.StaticConfiguration;

@@ -1,12 +1,12 @@
 package org.gluu.oxauth.service.external;
 
 import com.google.common.collect.Lists;
-import org.gluu.model.custom.script.CustomScriptType;
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
-import org.gluu.model.custom.script.type.introspection.IntrospectionType;
+import io.jans.model.custom.script.CustomScriptType;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.introspection.IntrospectionType;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.external.context.ExternalIntrospectionContext;
-import org.gluu.service.custom.script.ExternalScriptService;
+import io.jans.service.custom.script.ExternalScriptService;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.slf4j.Logger;

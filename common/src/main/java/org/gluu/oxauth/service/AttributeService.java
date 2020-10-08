@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.service;
 
-import org.gluu.model.GluuAttribute;
+import io.jans.model.GluuAttribute;
 import org.gluu.oxauth.model.config.StaticConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.OxConstants;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.BaseCacheService;
+import io.jans.search.filter.Filter;
+import io.jans.service.BaseCacheService;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -26,7 +26,7 @@ import java.util.UUID;
  * @version May 30, 2018
  */
 @ApplicationScoped
-public class AttributeService extends org.gluu.service.AttributeService {
+public class AttributeService extends io.jans.service.AttributeService {
 
     /**
      *

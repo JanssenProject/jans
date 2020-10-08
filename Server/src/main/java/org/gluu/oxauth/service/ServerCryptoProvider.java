@@ -8,7 +8,7 @@ import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.jwk.Algorithm;
 import org.gluu.oxauth.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.service.cdi.util.CdiUtil;
+import io.jans.service.cdi.util.CdiUtil;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;
 

@@ -7,14 +7,14 @@
 import java
 import json
 from java.util import Arrays, HashMap, IdentityHashMap
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.client import TokenClient, TokenRequest, UserInfoClient
 from org.gluu.oxauth.model.common import GrantType, AuthenticationMethod
 from org.gluu.oxauth.model.common import User
 from org.gluu.oxauth.model.jwt import Jwt, JwtClaimName
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper
 
 class PersonAuthentication(PersonAuthenticationType):
