@@ -10,9 +10,9 @@ import java.io.File;
 import java.util.Properties;
 
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
-import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
+import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import org.gluu.util.properties.FileConfiguration;
 import org.gluu.util.security.PropertiesDecrypter;
 import org.testng.annotations.AfterClass;

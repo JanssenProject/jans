@@ -9,8 +9,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.JsonObject;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.JsonObject;
 
 /**
  * U2F registration requests

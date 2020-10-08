@@ -16,8 +16,8 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.persist.exception.operation.SearchException;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.operation.SearchException;
 
 /**
  * @author Yuriy Zabrovarnyy

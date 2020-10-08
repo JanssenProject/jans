@@ -13,8 +13,8 @@ from org.gluu.oxauth.service.common import EncryptionService
 from org.gluu.model.metric import MetricType
 from org.gluu.util import StringHelper
 from org.gluu.util import ArrayHelper
-from org.gluu.persist.service import PersistanceFactoryService
-from org.gluu.persist.ldap.impl import LdapEntryManagerFactory
+from io.jans.orm.service import PersistanceFactoryService
+from io.jans.orm.ldap.impl import LdapEntryManagerFactory
 from org.gluu.model.ldap import GluuLdapConfiguration
 from java.util import Arrays, Properties
 

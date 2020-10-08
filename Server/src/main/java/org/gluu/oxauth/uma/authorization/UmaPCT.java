@@ -8,10 +8,10 @@ import org.gluu.oxauth.model.common.AbstractToken;
 import org.gluu.oxauth.model.exception.InvalidJwtException;
 import org.gluu.oxauth.model.jwt.JwtClaims;
 import org.gluu.oxauth.uma.service.UmaPctService;
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.DN;
-import org.gluu.persist.annotation.DataEntry;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

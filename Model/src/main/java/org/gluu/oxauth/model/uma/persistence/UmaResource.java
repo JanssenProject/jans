@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.uma.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
-import org.gluu.persist.annotation.*;
+import io.jans.orm.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

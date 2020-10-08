@@ -37,7 +37,7 @@ import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
 import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
 import org.gluu.oxauth.model.util.Base64Util;
 import org.gluu.oxauth.service.common.UserService;
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import org.gluu.search.filter.Filter;
 import org.gluu.util.StringHelper;
 import org.slf4j.Logger;

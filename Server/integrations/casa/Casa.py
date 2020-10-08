@@ -16,7 +16,7 @@ from org.gluu.model import SimpleCustomProperty
 from org.gluu.model.casa import ApplicationConfiguration
 from org.gluu.model.custom.script import CustomScriptType
 from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.persist import PersistenceEntryManager
+from io.jans.orm import PersistenceEntryManager
 from org.gluu.service import CacheService
 from org.gluu.service.cdi.util import CdiUtil
 from org.gluu.util import StringHelper

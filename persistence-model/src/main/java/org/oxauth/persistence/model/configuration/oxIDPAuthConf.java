@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.gluu.model.ldap.GluuLdapConfiguration;
 import org.gluu.oxauth.model.util.Util;
-import org.gluu.persist.couchbase.model.CouchbaseConnectionConfiguration;
+import io.jans.orm.couchbase.model.CouchbaseConnectionConfiguration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
