@@ -8,8 +8,8 @@ package org.gluu.oxauth.dev.duo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.oxauth.persistence.model.configuration.CustomProperty;
-import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.as.persistence.model.configuration.CustomProperty;
+import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
 import org.testng.annotations.Test;
 
 import java.io.File;

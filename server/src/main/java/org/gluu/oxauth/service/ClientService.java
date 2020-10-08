@@ -24,7 +24,7 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.EncryptionService;
 import org.json.JSONArray;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 

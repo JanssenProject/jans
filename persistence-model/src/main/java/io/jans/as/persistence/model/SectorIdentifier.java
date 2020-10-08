@@ -1,4 +1,4 @@
-package org.oxauth.persistence.model;
+package io.jans.as.persistence.model;
 
 import java.io.Serializable;
 import java.util.List;

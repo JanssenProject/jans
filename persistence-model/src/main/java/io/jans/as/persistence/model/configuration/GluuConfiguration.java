@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package org.oxauth.persistence.model.configuration;
+package io.jans.as.persistence.model.configuration;
 
 import java.io.Serializable;
 import java.util.List;

@@ -6,7 +6,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Pair;
 import io.jans.as.common.model.registration.Client;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.python.google.common.collect.Sets;
 import org.slf4j.Logger;
 

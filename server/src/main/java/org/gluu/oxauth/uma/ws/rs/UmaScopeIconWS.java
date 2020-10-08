@@ -11,7 +11,7 @@ import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.uma.service.UmaScopeService;
-import org.oxauth.persistence.model.Scope;
+import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

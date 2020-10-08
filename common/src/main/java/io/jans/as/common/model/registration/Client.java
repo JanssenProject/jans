@@ -15,7 +15,7 @@ import io.jans.as.model.register.ApplicationType;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.DeletableEntity;
-import org.oxauth.persistence.model.ClientAttributes;
+import io.jans.as.persistence.model.ClientAttributes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
