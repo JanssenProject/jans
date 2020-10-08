@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.uma;
 
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaMetadata;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 

@@ -1,7 +1,7 @@
 package org.gluu.oxauth.gluu.ws.rs;
 
 import io.jans.as.model.gluu.GluuConfiguration;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.extension.rest.client.ArquillianResteasyResource;
