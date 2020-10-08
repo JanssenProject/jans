@@ -13,7 +13,7 @@
 	<!-- Authentication filter -->
 	<filter>
 		<filter-name>Authentication Filter</filter-name>
-		<filter-class>org.gluu.oxauth.auth.AuthenticationFilter</filter-class>
+		<filter-class>io.jans.as.server.auth.AuthenticationFilter</filter-class>
 	</filter>
 
 	<filter-mapping>

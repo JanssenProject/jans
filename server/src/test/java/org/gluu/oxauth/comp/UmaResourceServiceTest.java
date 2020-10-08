@@ -5,10 +5,10 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.util.security.StringEncrypter;
 import org.gluu.oxauth.BaseComponentTest;
 import io.jans.as.common.model.registration.Client;
-import org.gluu.oxauth.model.token.HandleTokenFactory;
-import org.gluu.oxauth.service.ClientService;
+import io.jans.as.server.model.token.HandleTokenFactory;
+import io.jans.as.server.service.ClientService;
 import io.jans.as.common.service.common.InumService;
-import org.gluu.oxauth.uma.service.UmaResourceService;
+import io.jans.as.server.uma.service.UmaResourceService;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 

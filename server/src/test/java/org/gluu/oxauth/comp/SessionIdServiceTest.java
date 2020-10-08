@@ -7,9 +7,9 @@
 package org.gluu.oxauth.comp;
 
 import org.gluu.oxauth.BaseComponentTest;
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.common.SessionIdState;
-import org.gluu.oxauth.service.SessionIdService;
+import io.jans.as.server.model.common.SessionId;
+import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.service.SessionIdService;
 import io.jans.as.common.service.common.UserService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;

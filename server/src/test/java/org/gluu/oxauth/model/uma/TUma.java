@@ -14,7 +14,7 @@ import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.wrapper.Token;
-import org.gluu.oxauth.util.ServerUtil;
+import io.jans.as.server.util.ServerUtil;
 
 import java.io.IOException;
 import java.net.URI;
