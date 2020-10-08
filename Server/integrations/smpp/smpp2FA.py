@@ -10,9 +10,9 @@ from java.util import Arrays, Date
 from java.io import IOException
 from java.lang import Enum
 
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import AuthenticationService
 from org.gluu.oxauth.service.common import UserService
 from org.gluu.oxauth.util import ServerUtil

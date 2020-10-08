@@ -6,9 +6,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.model.SimpleCustomProperty;
-import org.gluu.model.custom.script.type.auth.DummyPersonAuthenticationType;
-import org.gluu.model.security.Credentials;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
+import io.jans.model.security.Credentials;
 import org.gluu.oxauth.service.AuthenticationService;
 
 /**

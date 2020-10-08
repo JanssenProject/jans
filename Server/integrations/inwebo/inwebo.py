@@ -1,7 +1,7 @@
 from org.gluu.oxauth.service import AuthenticationService
 from org.gluu.oxauth.security import Identity
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper,ArrayHelper
 from org.gluu.oxauth.util import ServerUtil
 from org.gluu.oxauth.service import UserService, AuthenticationService,SessionIdService

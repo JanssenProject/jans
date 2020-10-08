@@ -21,7 +21,7 @@
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
 		<Logger name="org.gluu.oxauth" level="debug" />
-		<Logger name="org.gluu.service" level="error" />
+		<Logger name="io.jans.service" level="error" />
 
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="error" />

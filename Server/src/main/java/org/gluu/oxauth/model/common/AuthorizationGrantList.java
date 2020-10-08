@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.model.metric.MetricType;
+import io.jans.model.metric.MetricType;
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
@@ -21,7 +21,7 @@ import org.gluu.oxauth.service.MetricService;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.util.TokenHashUtil;
-import org.gluu.service.CacheService;
+import io.jans.service.CacheService;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.Dependent;

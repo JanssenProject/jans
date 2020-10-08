@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.clientinfo.ws.rs;
 
-import org.gluu.model.GluuAttribute;
+import io.jans.model.GluuAttribute;
 import org.gluu.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.gluu.oxauth.model.clientinfo.ClientInfoParamsValidator;
 import org.gluu.oxauth.model.common.AbstractToken;

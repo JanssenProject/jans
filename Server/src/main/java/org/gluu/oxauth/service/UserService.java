@@ -18,8 +18,8 @@ import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.net.NetworkService;
+import io.jans.search.filter.Filter;
+import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 
 /**

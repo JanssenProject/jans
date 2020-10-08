@@ -16,10 +16,10 @@ import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.ldap.TokenType;
 import org.gluu.oxauth.util.TokenHashUtil;
 import io.jans.orm.PersistenceEntryManager;
-import org.gluu.search.filter.Filter;
-import org.gluu.service.CacheService;
-import org.gluu.service.cache.CacheConfiguration;
-import org.gluu.service.cache.CacheProviderType;
+import io.jans.search.filter.Filter;
+import io.jans.service.CacheService;
+import io.jans.service.cache.CacheConfiguration;
+import io.jans.service.cache.CacheProviderType;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

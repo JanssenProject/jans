@@ -13,12 +13,12 @@ from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
 from org.gluu.saml import SamlConfiguration, AuthRequest, Response
 from org.gluu.ldap.model import CustomAttribute
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.model.common import User
 from org.gluu.oxauth.security import Identity
 from org.gluu.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
 from org.gluu.oxauth.service.net import HttpService
-from org.gluu.service.cdi.util import CdiUtil
+from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper, ArrayHelper, Util
 from org.gluu.jsf2.service import FacesService
 

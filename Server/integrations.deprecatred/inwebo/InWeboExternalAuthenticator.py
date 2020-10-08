@@ -5,11 +5,11 @@
 #
 
 from org.gluu.oxauth.security import Identity
-from org.gluu.service.cdi.util import CdiUtil
-from org.gluu.model.custom.script.type.auth import PersonAuthenticationType
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from org.gluu.oxauth.service import UserService, AuthenticationService
 from org.gluu.oxauth.service.net import HttpService
-from org.gluu.service import XmlService
+from io.jans.service import XmlService
 from org.gluu.oxauth.service import EncryptionService 
 from io.jans.util import StringHelper
 from io.jans.util import ArrayHelper

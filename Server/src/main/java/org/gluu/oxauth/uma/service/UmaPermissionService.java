@@ -14,7 +14,7 @@ import org.gluu.oxauth.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.model.util.Pair;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
+import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
 

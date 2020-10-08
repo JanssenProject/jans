@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.model.SimpleCustomProperty;
+import io.jans.model.SimpleCustomProperty;
 import org.gluu.oxauth.authorize.ws.rs.ConsentGatheringSessionService;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.configuration.AppConfiguration;

@@ -1,6 +1,6 @@
 package org.gluu.oxauth.service.external.context;
 
-import org.gluu.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.common.UserService;

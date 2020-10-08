@@ -4,7 +4,7 @@
 # Author: Yuriy Zabrovarnyy
 #
 
-from org.gluu.model.custom.script.type.uma import UmaClaimsGatheringType
+from io.jans.model.custom.script.type.uma import UmaClaimsGatheringType
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 

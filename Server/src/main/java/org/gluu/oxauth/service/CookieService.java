@@ -7,7 +7,7 @@ import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
 import org.gluu.oxauth.model.configuration.AppConfiguration;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.gluu.service.cdi.util.CdiUtil;
+import io.jans.service.cdi.util.CdiUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;

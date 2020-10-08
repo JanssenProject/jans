@@ -21,11 +21,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import io.jans.orm.operation.PersistenceOperationService;
-import org.gluu.service.cdi.async.Asynchronous;
-import org.gluu.service.cdi.event.LdapStatusEvent;
-import org.gluu.service.cdi.event.Scheduled;
-import org.gluu.service.timer.event.TimerEvent;
-import org.gluu.service.timer.schedule.TimerSchedule;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.LdapStatusEvent;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
 import org.slf4j.Logger;
 
 /**
