@@ -9,7 +9,6 @@ package io.jans.as.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import io.jans.as.model.common.*;
-import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 
 import java.util.ArrayList;

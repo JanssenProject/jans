@@ -6,15 +6,14 @@
 
 package io.jans.as.model.jws;
 
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -47,13 +46,13 @@ public class HMACSigner extends AbstractJwsSigner {
 
         String algorithm;
         switch (getSignatureAlgorithm()) {
-            case SignatureAlgorithm.HS256:
+            case HS256:
                 algorithm = "HMACSHA256";
                 break;
-            case SignatureAlgorithm.HS384:
+            case HS384:
                 algorithm = "HMACSHA384";
                 break;
-            case SignatureAlgorithm.HS512:
+            case HS512:
                 algorithm = "HMACSHA512";
                 break;
             default:
