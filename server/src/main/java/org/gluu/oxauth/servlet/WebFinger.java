@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.servlet;
 
-import static org.gluu.oxauth.model.discovery.WebFingerParam.HREF;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.LINKS;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.RESOURCE;
-import static org.gluu.oxauth.model.discovery.WebFingerParam.SUBJECT;
+import static io.jans.as.model.discovery.WebFingerParam.HREF;
+import static io.jans.as.model.discovery.WebFingerParam.LINKS;
+import static io.jans.as.model.discovery.WebFingerParam.REL;
+import static io.jans.as.model.discovery.WebFingerParam.REL_VALUE;
+import static io.jans.as.model.discovery.WebFingerParam.RESOURCE;
+import static io.jans.as.model.discovery.WebFingerParam.SUBJECT;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 import org.slf4j.Logger;
 

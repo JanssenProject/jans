@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
+import io.jans.as.model.uma.UmaConstants;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.uma.*;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.uma.service.UmaResourceService;
 import org.gluu.oxauth.uma.service.UmaScopeService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
@@ -65,12 +65,12 @@ public class UmaResourceRegistrationWS {
     private AppConfiguration appConfiguration;
 
     @POST
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @Consumes({io.jans.as.model.uma.UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({io.jans.as.model.uma.UmaConstants.JSON_MEDIA_TYPE})
     public Response createResource(
             @HeaderParam("Authorization")
                     String authorization,
-            UmaResource resource) {
+            io.jans.as.model.uma.UmaResource resource) {
         try {
             String id = UUID.randomUUID().toString();
             log.trace("Try to create resource, id: {}", id);
@@ -83,17 +83,17 @@ public class UmaResourceRegistrationWS {
                 throw (WebApplicationException) ex;
             }
 
-            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, io.jans.as.model.uma.UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
         }
     }
 
     @PUT
     @Path("{rsid}")
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @Consumes({io.jans.as.model.uma.UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({io.jans.as.model.uma.UmaConstants.JSON_MEDIA_TYPE})
     public Response updateResource(@HeaderParam("Authorization") String authorization,
                                    @PathParam("rsid") String rsid,
-                                   UmaResource resource) {
+                                   io.jans.as.model.uma.UmaResource resource) {
         try {
             return putResourceImpl(Response.Status.OK, authorization, rsid, resource);
         } catch (Exception ex) {
@@ -103,13 +103,13 @@ public class UmaResourceRegistrationWS {
                 throw (WebApplicationException) ex;
             }
 
-            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, io.jans.as.model.uma.UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
         }
     }
 
     @GET
     @Path("{rsid}")
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({io.jans.as.model.uma.UmaConstants.JSON_MEDIA_TYPE})
     public Response getResource(
             @HeaderParam("Authorization")
                     String authorization,
@@ -120,9 +120,9 @@ public class UmaResourceRegistrationWS {
             umaValidationService.validateRestrictedByClient(authorizationGrant.getClientDn(), rsid);
             log.debug("Getting resource description: '{}'", rsid);
 
-            final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
+            final io.jans.as.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
 
-            final UmaResourceWithId response = new UmaResourceWithId();
+            final io.jans.as.model.uma.UmaResourceWithId response = new io.jans.as.model.uma.UmaResourceWithId();
 
             response.setId(ldapResource.getId());
             response.setName(ldapResource.getName());
@@ -144,7 +144,7 @@ public class UmaResourceRegistrationWS {
                 throw (WebApplicationException) ex;
             }
 
-            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, io.jans.as.model.uma.UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
         }
     }
 
@@ -170,11 +170,11 @@ public class UmaResourceRegistrationWS {
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
 
-            final List<org.gluu.oxauth.model.uma.persistence.UmaResource> ldapResources = resourceService
+            final List<io.jans.as.model.uma.persistence.UmaResource> ldapResources = resourceService
                     .getResourcesByAssociatedClient(clientDn);
 
             final List<String> result = new ArrayList<String>(ldapResources.size());
-            for (org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource : ldapResources) {
+            for (io.jans.as.model.uma.persistence.UmaResource ldapResource : ldapResources) {
 
                 // if scope parameter is not null then filter by it, otherwise just add to result
                 if (StringUtils.isNotBlank(scope)) {
@@ -194,7 +194,7 @@ public class UmaResourceRegistrationWS {
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             } else {
-                throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
+                throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, io.jans.as.model.uma.UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
             }
         }
     }
@@ -221,11 +221,11 @@ public class UmaResourceRegistrationWS {
                 throw (WebApplicationException) ex;
             }
 
-            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, io.jans.as.model.uma.UmaErrorResponseType.SERVER_ERROR, ex.getMessage());
         }
     }
 
-    private Response putResourceImpl(Response.Status status, String authorization, String rsid, UmaResource resource) throws IOException {
+    private Response putResourceImpl(Response.Status status, String authorization, String rsid, io.jans.as.model.uma.UmaResource resource) throws IOException {
         log.trace("putResourceImpl, rsid: {}, status:", rsid, status.name());
 
         AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
@@ -234,7 +234,7 @@ public class UmaResourceRegistrationWS {
         String userDn = authorizationGrant.getUserDn();
         String clientDn = authorizationGrant.getClientDn();
 
-        org.gluu.oxauth.model.uma.persistence.UmaResource ldapUpdatedResource;
+        io.jans.as.model.uma.persistence.UmaResource ldapUpdatedResource;
 
         if (status == Response.Status.CREATED) {
             ldapUpdatedResource = addResource(rsid, resource, userDn, clientDn);
@@ -243,7 +243,7 @@ public class UmaResourceRegistrationWS {
             ldapUpdatedResource = updateResource(rsid, resource);
         }
 
-        UmaResourceResponse response = new UmaResourceResponse();
+        io.jans.as.model.uma.UmaResourceResponse response = new io.jans.as.model.uma.UmaResourceResponse();
         response.setId(ldapUpdatedResource.getId());
 
         return Response.status(status).
@@ -252,7 +252,7 @@ public class UmaResourceRegistrationWS {
                 build();
     }
 
-    private org.gluu.oxauth.model.uma.persistence.UmaResource addResource(String rsid, UmaResource resource, String userDn, String clientDn) {
+    private io.jans.as.model.uma.persistence.UmaResource addResource(String rsid, io.jans.as.model.uma.UmaResource resource, String userDn, String clientDn) {
         log.debug("Adding new resource: '{}'", rsid);
 
         final String resourceDn = resourceService.getDnForResource(rsid);
@@ -269,7 +269,7 @@ public class UmaResourceRegistrationWS {
             exp = new Date(resource.getExp() * 1000L);
         }
 
-        final org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = new org.gluu.oxauth.model.uma.persistence.UmaResource();
+        final io.jans.as.model.uma.persistence.UmaResource ldapResource = new io.jans.as.model.uma.persistence.UmaResource();
 
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
@@ -300,10 +300,10 @@ public class UmaResourceRegistrationWS {
         return creationCalender.getTime();
     }
 
-    private org.gluu.oxauth.model.uma.persistence.UmaResource updateResource(String rsid, UmaResource resource) {
+    private io.jans.as.model.uma.persistence.UmaResource updateResource(String rsid, io.jans.as.model.uma.UmaResource resource) {
         log.debug("Updating resource description: '{}'.", rsid);
 
-        org.gluu.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
+        io.jans.as.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
         if (ldapResource == null) {
             return throwNotFoundException(rsid);
         }
@@ -336,7 +336,7 @@ public class UmaResourceRegistrationWS {
 
     private <T> T throwNotFoundException(String rsid) {
         log.error("Specified resource description doesn't exist, id: " + rsid);
-        throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, UmaErrorResponseType.NOT_FOUND, "Resource does not exists.");
+        throw errorResponseFactory.createWebApplicationException(Response.Status.NOT_FOUND, io.jans.as.model.uma.UmaErrorResponseType.NOT_FOUND, "Resource does not exists.");
     }
 
     @HEAD

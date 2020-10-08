@@ -9,13 +9,13 @@ package org.gluu.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.TokenType;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.TokenType;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientResponse;
 
-import static org.gluu.oxauth.model.authorize.AuthorizeResponseParam.*;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

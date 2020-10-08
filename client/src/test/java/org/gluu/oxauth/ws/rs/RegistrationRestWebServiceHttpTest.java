@@ -12,16 +12,16 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.RegisterClient;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
+import io.jans.as.model.util.Util;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -32,9 +32,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.common.GrantType.*;
-import static org.gluu.oxauth.model.common.ResponseType.*;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.common.GrantType.*;
+import static io.jans.as.model.common.ResponseType.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
 
 /**

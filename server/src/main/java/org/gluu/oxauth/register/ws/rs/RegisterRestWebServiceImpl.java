@@ -8,6 +8,7 @@ package org.gluu.oxauth.register.ws.rs;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import io.jans.model.GluuAttribute;
 import io.jans.model.metric.MetricType;
@@ -18,24 +19,23 @@ import org.gluu.oxauth.ciba.CIBARegisterParamsValidatorService;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.json.JsonApplier;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.register.RegisterErrorResponseType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.json.JsonApplier;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterResponseParam;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.registration.RegisterParamsValidator;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
-import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.Pair;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.Pair;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.MetricService;
@@ -65,10 +65,10 @@ import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.*;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
-import static org.gluu.oxauth.model.util.StringUtils.implode;
-import static org.gluu.oxauth.model.util.StringUtils.toList;
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.util.StringUtils.implode;
+import static io.jans.as.model.util.StringUtils.toList;
 
 /**
  * Implementation for register REST web services.
@@ -172,13 +172,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             if (r.getSubjectType() == null) {
-                SubjectType defaultSubjectType = SubjectType.fromString(appConfiguration.getDefaultSubjectType());
+                io.jans.as.model.common.SubjectType defaultSubjectType = io.jans.as.model.common.SubjectType.fromString(appConfiguration.getDefaultSubjectType());
                 if (defaultSubjectType != null) {
                     r.setSubjectType(defaultSubjectType);
-                } else if (appConfiguration.getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
-                    r.setSubjectType(SubjectType.PUBLIC);
-                } else if (appConfiguration.getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
-                    r.setSubjectType(SubjectType.PAIRWISE);
+                } else if (appConfiguration.getSubjectTypesSupported().contains(io.jans.as.model.common.SubjectType.PUBLIC.toString())) {
+                    r.setSubjectType(io.jans.as.model.common.SubjectType.PUBLIC);
+                } else if (appConfiguration.getSubjectTypesSupported().contains(io.jans.as.model.common.SubjectType.PAIRWISE.toString())) {
+                    r.setSubjectType(io.jans.as.model.common.SubjectType.PAIRWISE);
                 }
             }
 
@@ -339,13 +339,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             Jwt softwareStatement = Jwt.parse(requestObject.getString(SOFTWARE_STATEMENT.toString()));
             final SignatureAlgorithm signatureAlgorithm = softwareStatement.getHeader().getSignatureAlgorithm();
 
-            final SoftwareStatementValidationType validationType = SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
-            if (validationType == SoftwareStatementValidationType.NONE) {
+            final io.jans.as.model.common.SoftwareStatementValidationType validationType = io.jans.as.model.common.SoftwareStatementValidationType.fromString(appConfiguration.getSoftwareStatementValidationType());
+            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.NONE) {
                 log.trace("software_statement validation was skipped due to `softwareStatementValidationType` configuration property set to none. (Not recommended.)");
                 return softwareStatement.getClaims().toJsonObject();
             }
 
-            if (validationType == SoftwareStatementValidationType.SCRIPT) {
+            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.SCRIPT) {
                 if (!externalDynamicClientRegistrationService.isEnabled()) {
                     log.error("Server is mis-configured. softwareStatementValidationType=script but there is no any Dynamic Client Registration script enabled.");
                     return null;
@@ -379,20 +379,20 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 return softwareStatement.getClaims().toJsonObject();
             }
 
-            if ((validationType == SoftwareStatementValidationType.JWKS_URI ||
-                    validationType == SoftwareStatementValidationType.JWKS) &&
+            if ((validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS_URI ||
+                    validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS) &&
                     StringUtils.isBlank(appConfiguration.getSoftwareStatementValidationClaimName())) {
                 log.error("softwareStatementValidationClaimName configuration property is not specified. Please specify claim name from software_statement which points to jwks (or jwks_uri).");
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "Failed to validate software statement");
             }
 
             String jwksUriClaim = null;
-            if (validationType == SoftwareStatementValidationType.JWKS_URI) {
+            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS_URI) {
                 jwksUriClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
             }
 
             String jwksClaim = null;
-            if (validationType == SoftwareStatementValidationType.JWKS) {
+            if (validationType == io.jans.as.model.common.SoftwareStatementValidationType.JWKS) {
                 jwksClaim = softwareStatement.getClaims().getClaimAsString(appConfiguration.getSoftwareStatementValidationClaimName());
             }
 
@@ -455,34 +455,34 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
 
-        Set<ResponseType> responseTypeSet = new HashSet<>();
+        Set<io.jans.as.model.common.ResponseType> responseTypeSet = new HashSet<>();
         responseTypeSet.addAll(requestObject.getResponseTypes());
 
-        Set<GrantType> grantTypeSet = new HashSet<>();
+        Set<io.jans.as.model.common.GrantType> grantTypeSet = new HashSet<>();
         grantTypeSet.addAll(requestObject.getGrantTypes());
 
         if (appConfiguration.getClientRegDefaultToCodeFlowWithRefresh()) {
             if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
-                responseTypeSet.add(ResponseType.CODE);
+                responseTypeSet.add(io.jans.as.model.common.ResponseType.CODE);
             }
-            if (responseTypeSet.contains(ResponseType.CODE)) {
-                grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
-                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            if (responseTypeSet.contains(io.jans.as.model.common.ResponseType.CODE)) {
+                grantTypeSet.add(io.jans.as.model.common.GrantType.AUTHORIZATION_CODE);
+                grantTypeSet.add(io.jans.as.model.common.GrantType.REFRESH_TOKEN);
             }
-            if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
-                responseTypeSet.add(ResponseType.CODE);
-                grantTypeSet.add(GrantType.REFRESH_TOKEN);
+            if (grantTypeSet.contains(io.jans.as.model.common.GrantType.AUTHORIZATION_CODE)) {
+                responseTypeSet.add(io.jans.as.model.common.ResponseType.CODE);
+                grantTypeSet.add(io.jans.as.model.common.GrantType.REFRESH_TOKEN);
             }
         }
-        if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
-            grantTypeSet.add(GrantType.IMPLICIT);
+        if (responseTypeSet.contains(io.jans.as.model.common.ResponseType.TOKEN) || responseTypeSet.contains(io.jans.as.model.common.ResponseType.ID_TOKEN)) {
+            grantTypeSet.add(io.jans.as.model.common.GrantType.IMPLICIT);
         }
-        if (grantTypeSet.contains(GrantType.IMPLICIT)) {
-            responseTypeSet.add(ResponseType.TOKEN);
+        if (grantTypeSet.contains(io.jans.as.model.common.GrantType.IMPLICIT)) {
+            responseTypeSet.add(io.jans.as.model.common.ResponseType.TOKEN);
         }
 
-        Set<Set<ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
-        Set<GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
+        Set<Set<io.jans.as.model.common.ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
+        Set<io.jans.as.model.common.GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
 
         if (!responseTypesSupported.contains(responseTypeSet)) {
             responseTypeSet.clear();
@@ -490,16 +490,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         grantTypeSet.retainAll(grantTypesSupported);
 
-        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+        Set<io.jans.as.model.common.GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
         if (!update || requestObject.getResponseTypes().size() > 0) {
-            p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+            p_client.setResponseTypes(responseTypeSet.toArray(new io.jans.as.model.common.ResponseType[responseTypeSet.size()]));
         }
         if (!update) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+            p_client.setGrantTypes(grantTypeSet.toArray(new io.jans.as.model.common.GrantType[grantTypeSet.size()]));
         } else if (appConfiguration.getEnableClientGrantTypeUpdate() && requestObject.getGrantTypes().size() > 0) {
-            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+            p_client.setGrantTypes(grantTypeSet.toArray(new io.jans.as.model.common.GrantType[grantTypeSet.size()]));
         }
 
         List<String> contacts = requestObject.getContacts();
@@ -582,7 +582,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (requestObject.getTokenEndpointAuthMethod() != null) {
             p_client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
         } else { // If omitted, the default is client_secret_basic
-            p_client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
+            p_client.setTokenEndpointAuthMethod(io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
             p_client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
@@ -630,7 +630,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
 
         List<String> scopes = requestObject.getScope();
-        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+        if (grantTypeSet.contains(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
             scopes = Lists.newArrayList(scopes);
             scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
         }
@@ -848,7 +848,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS.toString(), client.getRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS_REDIRECT_URIS.toString(), client.getClaimRedirectUris());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), ResponseType.toStringArray(client.getResponseTypes()));
+        Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), io.jans.as.model.common.ResponseType.toStringArray(client.getResponseTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), GrantType.toStringArray(client.getGrantTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CONTACTS.toString(), client.getContacts());

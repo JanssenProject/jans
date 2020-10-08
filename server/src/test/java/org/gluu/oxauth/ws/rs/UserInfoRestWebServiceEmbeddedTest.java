@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.model.common.GrantType;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,17 +15,15 @@ import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.Claim;
 import org.gluu.oxauth.client.model.authorize.ClaimValue;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
-import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.register.RegisterResponseParam;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -40,7 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.*;
+import static io.jans.as.model.register.RegisterResponseParam.*;
 import static org.testng.Assert.*;
 
 /**
@@ -77,20 +76,20 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String sectorIdentifierUri) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.CODE, io.jans.as.model.common.ResponseType.TOKEN, io.jans.as.model.common.ResponseType.ID_TOKEN);
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSubjectType(io.jans.as.model.common.SubjectType.PAIRWISE);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setClaims(Arrays.asList(
                 "iname",
                 "o"));
 
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
+                io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
         registerRequest.setGrantTypes(grantTypes);
 
@@ -121,14 +120,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         final String userEncodedCredentials = Base64.encodeBase64String((userId + ":" + userSecret).getBytes());
         final String state = UUID.randomUUID().toString();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
 
         Builder request = ResteasyClientBuilder.newClient()
                 .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
@@ -254,7 +253,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         // Testing with valid parameters
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-        TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+        TokenRequest tokenRequest = new TokenRequest(io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
         tokenRequest.setUsername(userId);
         tokenRequest.setPassword(userSecret);
         tokenRequest.setScope("openid profile address email");
@@ -359,7 +358,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestUserInfoInvalidToken(final String userInfoPath) throws Exception {
         UserInfoRequest userInfoRequest = new UserInfoRequest("INVALID_ACCESS_TOKEN");
-        userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
+        userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
         Response response = request
@@ -415,15 +414,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                                 final String userSecret, final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-        responseTypes.add(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = new ArrayList<io.jans.as.model.common.ResponseType>();
+        responseTypes.add(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
@@ -486,7 +485,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
         UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken3);
-        userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
+        userInfoRequest.setAuthorizationMethod(io.jans.as.model.common.AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
         Response response = request
                 .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
@@ -528,7 +527,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -536,8 +535,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
+                io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
         registerRequest.setGrantTypes(grantTypes);
 
@@ -573,14 +572,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
@@ -671,7 +670,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestUserInfoHS384Step1(final String registerPath, final String redirectUris) throws Exception {
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -679,8 +678,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        List<GrantType> grantTypes = Arrays.asList(
-                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
+                io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
         registerRequest.setGrantTypes(grantTypes);
 
@@ -718,14 +717,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 
@@ -818,7 +817,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void requestUserInfoHS512Step1(final String registerPath, final String redirectUris) throws Exception {
         Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -826,7 +825,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-        List<GrantType> grantTypes = Arrays.asList(
+        List<io.jans.as.model.common.GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
         registerRequest.setGrantTypes(grantTypes);
@@ -863,14 +862,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                           final String redirectUri) throws Exception {
         final String state = UUID.randomUUID().toString();
 
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<io.jans.as.model.common.ResponseType> responseTypes = Arrays.asList(io.jans.as.model.common.ResponseType.TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "email");
         String nonce = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.getPrompts().add(io.jans.as.model.common.Prompt.NONE);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
 

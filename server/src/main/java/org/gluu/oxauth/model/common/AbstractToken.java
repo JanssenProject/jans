@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.model.common;
 
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.gluu.oxauth.model.token.HandleTokenFactory;
-import org.gluu.oxauth.model.util.HashUtil;
+import io.jans.as.model.util.HashUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.model.base.Deletable;

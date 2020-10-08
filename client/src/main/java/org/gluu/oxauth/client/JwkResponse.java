@@ -10,14 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.gluu.oxauth.model.crypto.PublicKey;
-import org.gluu.oxauth.model.crypto.signature.AlgorithmFamily;
-import org.gluu.oxauth.model.crypto.signature.ECDSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKey;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
+import io.jans.as.model.crypto.PublicKey;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKeySet;
 
 /**
  * Represents a JSON Web Key (JWK) received from the authorization server.
@@ -47,7 +47,7 @@ public class JwkResponse extends BaseResponse {
     }
 
     /**
-     * Search and returns a {@link org.gluu.oxauth.model.jwk.JSONWebKey} given its <code>keyId</code>.
+     * Search and returns a {@link JSONWebKey} given its <code>keyId</code>.
      *
      * @param keyId The key id.
      * @return The JSONWebKey if found, otherwise <code>null</code>.

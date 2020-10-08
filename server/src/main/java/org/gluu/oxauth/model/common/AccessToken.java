@@ -8,7 +8,7 @@ package org.gluu.oxauth.model.common;
 
 import java.util.Date;
 
-import org.gluu.oxauth.model.common.TokenType;
+import io.jans.as.model.common.TokenType;
 
 /**
  * <p>

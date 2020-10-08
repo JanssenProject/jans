@@ -16,9 +16,9 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.ResponseMode;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.util.Util;
 
 /**
  * @author Javier Rojas Blum

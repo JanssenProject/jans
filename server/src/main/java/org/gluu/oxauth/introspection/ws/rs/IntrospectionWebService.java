@@ -7,18 +7,19 @@
 package org.gluu.oxauth.introspection.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.model.common.IntrospectionResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.claims.Audience;
-import org.gluu.oxauth.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.config.WebKeysConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.jwt.Jwt;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.Jwt;
 import org.gluu.oxauth.model.token.JwtSigner;
-import org.gluu.oxauth.model.uma.UmaScopeType;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.AttributeService;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.external.ExternalIntrospectionService;
@@ -122,7 +123,7 @@ public class IntrospectionWebService {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build();
             }
 
-            final IntrospectionResponse response = new IntrospectionResponse(false);
+            final io.jans.as.model.common.IntrospectionResponse response = new io.jans.as.model.common.IntrospectionResponse(false);
 
             final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
 
@@ -143,7 +144,7 @@ public class IntrospectionWebService {
 
                 if (tokenToIntrospect instanceof AccessToken) {
                     AccessToken accessToken = (AccessToken) tokenToIntrospect;
-                    response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : TokenType.BEARER.getName());
+                    response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : io.jans.as.model.common.TokenType.BEARER.getName());
                 }
             } else {
                 log.debug("Failed to find grant for access_token: " + p_token + ". Return 200 with active=false.");

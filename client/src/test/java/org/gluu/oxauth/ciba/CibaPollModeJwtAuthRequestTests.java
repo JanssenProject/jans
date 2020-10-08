@@ -4,26 +4,26 @@ import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jws.RSASigner;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.jwt.JwtHeaderName;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jws.RSASigner;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtHeaderName;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.util.*;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
 
 /**

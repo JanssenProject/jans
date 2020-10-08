@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.client.fido.u2f;
 
-import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
-import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
+import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
+import io.jans.as.model.fido.u2f.protocol.AuthenticateStatus;
 
 import javax.ws.rs.*;
 

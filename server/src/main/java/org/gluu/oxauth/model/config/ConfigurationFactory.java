@@ -6,16 +6,20 @@
 
 package org.gluu.oxauth.model.config;
 
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.Conf;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.config.WebKeysConfiguration;
 import org.apache.commons.lang.StringUtils;
 import io.jans.exception.ConfigurationException;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.configuration.Configuration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.CryptoProviderFactory;
-import org.gluu.oxauth.model.error.ErrorMessages;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.Configuration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.CryptoProviderFactory;
+import io.jans.as.model.error.ErrorMessages;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.event.CryptoProviderEvent;
-import org.gluu.oxauth.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.JSONWebKey;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
@@ -120,8 +124,8 @@ public class ConfigurationFactory {
     
     private PersistenceConfiguration persistenceConfiguration;
 	private AppConfiguration conf;
-	private StaticConfiguration staticConf;
-	private WebKeysConfiguration jwks;
+	private io.jans.as.model.config.StaticConfiguration staticConf;
+	private io.jans.as.model.config.WebKeysConfiguration jwks;
 	private ErrorResponseFactory errorResponseFactory;
 	private String cryptoConfigurationSalt;
 
@@ -251,7 +255,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean isRevisionIncreased() {
-        final Conf conf = loadConfigurationFromLdap("oxRevision");
+        final io.jans.as.model.config.Conf conf = loadConfigurationFromLdap("oxRevision");
         if (conf == null) {
             return false;
         }
@@ -287,13 +291,13 @@ public class ConfigurationFactory {
 
 	@Produces
 	@ApplicationScoped
-	public StaticConfiguration getStaticConfiguration() {
+	public io.jans.as.model.config.StaticConfiguration getStaticConfiguration() {
 		return staticConf;
 	}
 
 	@Produces
 	@ApplicationScoped
-	public WebKeysConfiguration getWebKeysConfiguration() {
+	public io.jans.as.model.config.WebKeysConfiguration getWebKeysConfiguration() {
 		return jwks;
 	}
 
@@ -319,7 +323,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean reloadWebkeyFromFile() {
-		final WebKeysConfiguration webKeysFromFile = loadWebKeysFromFile();
+		final io.jans.as.model.config.WebKeysConfiguration webKeysFromFile = loadWebKeysFromFile();
 		if (webKeysFromFile != null) {
 			log.info("Reloaded web keys from file: " + webKeysFilePath);
 			jwks = webKeysFromFile;
@@ -332,7 +336,7 @@ public class ConfigurationFactory {
 	}
 
 	private boolean reloadStaticConfFromFile() {
-		final StaticConfiguration staticConfFromFile = loadStaticConfFromFile();
+		final io.jans.as.model.config.StaticConfiguration staticConfFromFile = loadStaticConfFromFile();
 		if (staticConfFromFile != null) {
 			log.info("Reloaded static conf from file: " + staticConfFilePath);
 			staticConf = staticConfFromFile;
@@ -380,15 +384,15 @@ public class ConfigurationFactory {
 	private boolean createFromLdap(boolean recoverFromFiles) {
 		log.info("Loading configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
 		try {
-			final Conf c = loadConfigurationFromLdap();
+			final io.jans.as.model.config.Conf c = loadConfigurationFromLdap();
 			if (c != null) {
 				init(c);
 
 				// Destroy old configuration
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
-					destroy(StaticConfiguration.class);
-					destroy(WebKeysConfiguration.class);
+					destroy(io.jans.as.model.config.StaticConfiguration.class);
+					destroy(io.jans.as.model.config.WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
 				}
 
@@ -429,11 +433,11 @@ public class ConfigurationFactory {
         CryptoProviderFactory.reset();
 	}
 
-	private Conf loadConfigurationFromLdap(String... returnAttributes) {
+	private io.jans.as.model.config.Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager ldapManager = persistenceEntryManagerInstance.get();
 		final String dn = this.baseConfiguration.getString("oxauth_ConfigurationEntryDN");
 		try {
-			final Conf conf = ldapManager.find(dn, Conf.class, returnAttributes);
+			final io.jans.as.model.config.Conf conf = ldapManager.find(dn, io.jans.as.model.config.Conf.class, returnAttributes);
 
 			return conf;
 		} catch (BasePersistenceException ex) {
@@ -444,12 +448,12 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private void init(Conf p_conf) {
+	private void init(io.jans.as.model.config.Conf p_conf) {
 		initConfigurationConf(p_conf);
 		this.loadedRevision = p_conf.getRevision();
 	}
 
-	private void initConfigurationConf(Conf p_conf) {
+	private void initConfigurationConf(io.jans.as.model.config.Conf p_conf) {
 		if (p_conf.getDynamic() != null) {
 			conf = p_conf.getDynamic();
 		}
@@ -479,7 +483,7 @@ public class ConfigurationFactory {
 			newWebKeys = jsonObject.toString();
 
 			// Attempt to load new JWKS
-			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, WebKeysConfiguration.class);
+			jwks = ServerUtil.createJsonMapper().readValue(newWebKeys, io.jans.as.model.config.WebKeysConfiguration.class);
 
 			// Store new JWKS in LDAP
 			Conf conf = loadConfigurationFromLdap();
@@ -518,7 +522,7 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private StaticConfiguration loadStaticConfFromFile() {
+	private io.jans.as.model.config.StaticConfiguration loadStaticConfFromFile() {
 		try {
 			return ServerUtil.createJsonMapper().readValue(new File(staticConfFilePath), StaticConfiguration.class);
 		} catch (Exception e) {
@@ -527,7 +531,7 @@ public class ConfigurationFactory {
 		return null;
 	}
 
-	private WebKeysConfiguration loadWebKeysFromFile() {
+	private io.jans.as.model.config.WebKeysConfiguration loadWebKeysFromFile() {
 		try {
 			return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), WebKeysConfiguration.class);
 		} catch (Exception e) {

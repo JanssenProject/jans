@@ -12,10 +12,10 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
 import io.jans.orm.model.base.CustomEntry;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;

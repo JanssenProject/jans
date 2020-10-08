@@ -6,7 +6,7 @@
 
 package org.oxauth.persistence.model;
 
-import org.gluu.oxauth.model.common.ScopeType;
+import io.jans.as.model.common.ScopeType;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.DeletableEntity;
 

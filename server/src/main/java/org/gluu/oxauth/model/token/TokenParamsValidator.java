@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.model.token;
 
-import org.gluu.oxauth.model.common.GrantType;
+import io.jans.as.model.common.GrantType;
 
 import java.net.URI;
 import java.util.Arrays;

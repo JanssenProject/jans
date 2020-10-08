@@ -1,17 +1,17 @@
 package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaims;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.uma.authorization.UmaPCT;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
 import io.jans.util.INumGenerator;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

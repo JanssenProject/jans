@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.SessionIdState;
 import org.gluu.oxauth.model.config.ConfigurationFactory;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.cdi.util.CdiUtil;
 import org.json.JSONArray;
@@ -25,7 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
 
-import static org.gluu.oxauth.model.util.StringUtils.toList;
+import static io.jans.as.model.util.StringUtils.toList;
 
 /**
  * @author Yuriy Zabrovarnyy

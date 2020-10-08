@@ -18,9 +18,9 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.common.IntrospectionResponse;
+import io.jans.as.model.common.IntrospectionResponse;
 import org.gluu.oxauth.model.uma.TUma;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.common.AuthorizationMethod;
-import org.gluu.oxauth.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 

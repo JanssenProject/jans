@@ -7,11 +7,11 @@
 package org.gluu.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.uma.UmaPermissionList;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.util.Pair;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.UmaPermissionList;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.util.Pair;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.search.filter.Filter;
@@ -63,7 +63,7 @@ public class UmaPermissionService {
 
         final String ticket = generateNewTicket();
         List<UmaPermission> result = new ArrayList<UmaPermission>();
-        for (org.gluu.oxauth.model.uma.UmaPermission permission : permissions) {
+        for (io.jans.as.model.uma.UmaPermission permission : permissions) {
             UmaPermission p = new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()), ticket, configurationCode, expirationDate);
             if (permission.getParams() != null && !permission.getParams().isEmpty()) {
                 p.getAttributes().putAll(permission.getParams());

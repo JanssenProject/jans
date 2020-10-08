@@ -9,7 +9,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.common.EncryptionService;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;

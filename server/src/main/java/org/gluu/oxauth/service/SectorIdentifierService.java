@@ -1,10 +1,11 @@
 package org.gluu.oxauth.service;
 
+import io.jans.as.model.common.SubjectType;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
@@ -112,7 +113,7 @@ public class SectorIdentifierService {
                 if (!isCibaGrant) {
                     sectorIdentifierUri = !ArrayUtils.isEmpty(client.getRedirectUris()) ? client.getRedirectUris()[0] : null;
                 } else {
-                    if (client.getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PUSH) {
+                    if (client.getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.PUSH) {
                         sectorIdentifierUri = client.getBackchannelClientNotificationEndpoint();
                     } else {
                         sectorIdentifierUri = client.getJwksUri();

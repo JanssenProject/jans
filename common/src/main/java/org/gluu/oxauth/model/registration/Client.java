@@ -8,10 +8,10 @@ package org.gluu.oxauth.model.registration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.as.model.common.*;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.*;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
 import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.DeletableEntity;

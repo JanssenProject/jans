@@ -7,10 +7,9 @@
 package org.gluu.oxauth.client.fido.u2f;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
-import org.gluu.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
-import org.gluu.oxauth.model.fido.u2f.protocol.RegisterStatus;
+import io.jans.as.model.fido.u2f.protocol.RegisterRequestMessage;
+import io.jans.as.model.fido.u2f.protocol.RegisterStatus;
 
 /**
  * Еhe endpoint allows to start and finish U2F registration process

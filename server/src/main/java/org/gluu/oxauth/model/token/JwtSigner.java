@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.model.token;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwk.Algorithm;
-import org.gluu.oxauth.model.jwk.JSONWebKeySet;
-import org.gluu.oxauth.model.jwk.Use;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtType;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.ServerCryptoProvider;

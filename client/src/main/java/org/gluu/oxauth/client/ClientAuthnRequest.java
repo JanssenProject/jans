@@ -2,13 +2,13 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtType;
-import org.gluu.oxauth.model.token.ClientAssertionType;
-import org.gluu.oxauth.model.util.QueryBuilder;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtType;
+import io.jans.as.model.token.ClientAssertionType;
+import io.jans.as.model.util.QueryBuilder;
 
 import java.util.*;
 

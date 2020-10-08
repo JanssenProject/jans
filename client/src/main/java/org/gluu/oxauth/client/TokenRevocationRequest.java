@@ -7,10 +7,10 @@
 package org.gluu.oxauth.client;
 
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.TokenTypeHint;
-import org.gluu.oxauth.model.token.TokenRevocationRequestParam;
-import org.gluu.oxauth.model.util.QueryBuilder;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.TokenTypeHint;
+import io.jans.as.model.token.TokenRevocationRequestParam;
+import io.jans.as.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
 

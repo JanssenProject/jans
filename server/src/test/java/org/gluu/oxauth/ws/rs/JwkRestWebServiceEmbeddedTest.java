@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.gluu.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -23,8 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.jwt.JwtClaims;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.util.Base64Util;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.python.core.util.StringUtil;

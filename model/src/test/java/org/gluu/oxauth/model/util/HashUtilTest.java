@@ -1,7 +1,8 @@
 package org.gluu.oxauth.model.util;
 
+import io.jans.as.model.util.HashUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.testng.annotations.Test;
 
 import java.security.Security;

@@ -8,10 +8,10 @@ package org.gluu.oxauth.model.common;
 
 import org.gluu.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.TokenLdap;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.CertUtils;
+import io.jans.as.model.util.CertUtils;
 import org.gluu.oxauth.util.TokenHashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

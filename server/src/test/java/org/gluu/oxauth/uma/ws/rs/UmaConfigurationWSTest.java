@@ -10,7 +10,7 @@ import java.net.URI;
 
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.uma.TUma;
-import org.gluu.oxauth.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaMetadata;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

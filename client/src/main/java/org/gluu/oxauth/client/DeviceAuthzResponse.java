@@ -8,8 +8,8 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
-import org.gluu.oxauth.model.authorize.DeviceAuthzErrorResponseType;
+import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
 import org.json.JSONException;
 import org.json.JSONObject;

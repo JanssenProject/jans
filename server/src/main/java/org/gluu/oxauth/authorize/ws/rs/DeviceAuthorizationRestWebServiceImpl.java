@@ -9,15 +9,15 @@ package org.gluu.oxauth.authorize.ws.rs;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.gluu.oxauth.model.authorize.DeviceAuthorizationResponseParam.*;
-import static org.gluu.oxauth.model.token.TokenErrorResponseType.INVALID_CLIENT;
-import static org.gluu.oxauth.model.token.TokenErrorResponseType.INVALID_GRANT;
+import static io.jans.as.model.authorize.DeviceAuthorizationResponseParam.*;
+import static io.jans.as.model.token.TokenErrorResponseType.INVALID_CLIENT;
+import static io.jans.as.model.token.TokenErrorResponseType.INVALID_GRANT;
 
 /**
  * Implementation for device authorization rest service.

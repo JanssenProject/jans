@@ -7,8 +7,8 @@
 package org.gluu.oxauth.service;
 
 import io.jans.model.GluuAttribute;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.OxConstants;
 import io.jans.search.filter.Filter;
 import io.jans.service.BaseCacheService;

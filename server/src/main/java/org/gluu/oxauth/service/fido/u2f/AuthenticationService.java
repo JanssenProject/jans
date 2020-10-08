@@ -29,19 +29,19 @@ import org.gluu.oxauth.exception.fido.u2f.NoEligableDevicesException;
 import org.gluu.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistrationResult;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
-import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
-import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
-import org.gluu.oxauth.model.fido.u2f.protocol.AuthenticateResponse;
-import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
+import io.jans.as.model.fido.u2f.protocol.AuthenticateRequest;
+import io.jans.as.model.fido.u2f.protocol.AuthenticateRequestMessage;
+import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
+import io.jans.as.model.util.Base64Util;
 import org.gluu.oxauth.service.common.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 /**
  * Provides operations with U2F authentication request

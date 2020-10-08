@@ -7,8 +7,8 @@
 package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.session.EndSessionRequestParam;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.session.EndSessionRequestParam;
+import io.jans.as.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

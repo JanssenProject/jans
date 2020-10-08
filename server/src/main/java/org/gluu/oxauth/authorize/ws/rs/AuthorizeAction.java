@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.Prompt;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import io.jans.jsf2.message.FacesMessages;
@@ -18,17 +20,17 @@ import org.gluu.oxauth.model.auth.AuthenticationMode;
 import org.gluu.oxauth.model.authorize.*;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.exception.AcrChangedException;
-import org.gluu.oxauth.model.exception.InvalidJwtException;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.JwtClaimName;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.util.Base64Util;
-import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
 import org.gluu.oxauth.service.ciba.CibaRequestService;
@@ -241,10 +243,10 @@ public class AuthorizeAction {
 
         // Fix the list of scopes in the authorization page. oxAuth #739
         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
-        allowedScope = org.gluu.oxauth.model.util.StringUtils.implode(grantedScopes, " ");
+        allowedScope = io.jans.as.model.util.StringUtils.implode(grantedScopes, " ");
 
         SessionId session = getSession();
-        List<Prompt> prompts = Prompt.fromString(prompt, " ");
+        List<io.jans.as.model.common.Prompt> prompts = io.jans.as.model.common.Prompt.fromString(prompt, " ");
 
         try {
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, session != null ? session.getSessionAttributes().get(SESSION_USER_CODE) : null, (HttpServletRequest) externalContext.getRequest());
@@ -328,7 +330,7 @@ public class AuthorizeAction {
                 sessionIdService.remove(session); // #1030, remove previous session
             }
 
-            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
+            boolean persisted = sessionIdService.persistSessionId(unauthenticatedSession, !prompts.contains(io.jans.as.model.common.Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
                 log.trace("Session '{}' persisted to LDAP", unauthenticatedSession.getId());
             }
@@ -339,8 +341,8 @@ public class AuthorizeAction {
             identity.setSessionId(unauthenticatedSession);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
-            if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
-                loginParameters.put(AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
+            if (requestParameterMap.containsKey(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT)) {
+                loginParameters.put(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT));
             }
 
             boolean enableRedirect = StringHelper.toBoolean(System.getProperty("gluu.enable-redirect", "false"), false); 
@@ -363,7 +365,7 @@ public class AuthorizeAction {
             ExternalContext externalContext = facesContext.getExternalContext();
             externalContext.setResponseStatus(HttpServletResponse.SC_BAD_REQUEST);
             externalContext.setResponseContentType(MediaType.APPLICATION_JSON);
-            externalContext.getResponseOutputWriter().write(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""));
+            externalContext.getResponseOutputWriter().write(errorResponseFactory.getErrorAsJson(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST_REDIRECT_URI, state, ""));
             facesContext.responseComplete();
         }
 
@@ -371,13 +373,13 @@ public class AuthorizeAction {
             log.trace("checkPermissionGranted, userDn = " + session.getUserDn());
         }
 
-        if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+        if (prompts.contains(io.jans.as.model.common.Prompt.SELECT_ACCOUNT)) {
             Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
             facesService.redirect("/selectAccount.xhtml", requestParameterMap);
             return;
         }
 
-        if (prompts.contains(Prompt.NONE) && prompts.size() > 1) {
+        if (prompts.contains(io.jans.as.model.common.Prompt.NONE) && prompts.size() > 1) {
             invalidRequest();
             return;
         }
@@ -385,14 +387,14 @@ public class AuthorizeAction {
         ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest)externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
         final boolean forceAuthorization = externalPostAuthnService.externalForceReAuthentication(client, postAuthnContext);
 
-        final boolean hasConsentPrompt = prompts.contains(Prompt.CONSENT);
+        final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
         if (!hasConsentPrompt && !forceAuthorization) {
             if (appConfiguration.getTrustedClientEnabled() && client.getTrustedClient()) {
                 // if trusted client = true, then skip authorization page and grant access directly
                 permissionGranted(session);
                 return;
             } else if (ServerUtil.isTrue(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId())
-                    && SubjectType.PAIRWISE.toString().equals(client.getSubjectType()) && hasOnlyOpenidScope()) {
+                    && io.jans.as.model.common.SubjectType.PAIRWISE.toString().equals(client.getSubjectType()) && hasOnlyOpenidScope()) {
                 // If a client has only openid scope and pairwise id, person should not have to authorize. oxAuth-743
                 permissionGranted(session);
                 return;
@@ -404,7 +406,7 @@ public class AuthorizeAction {
                     client.getClientId());
             if (clientAuthorization != null && clientAuthorization.getScopes() != null &&
                     Arrays.asList(clientAuthorization.getScopes()).containsAll(
-                            org.gluu.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                            io.jans.as.model.util.StringUtils.spaceSeparatedToList(scope))) {
                 permissionGranted(session);
                 return;
             }
@@ -428,14 +430,14 @@ public class AuthorizeAction {
         }
     }
 
-    private SessionId handleAcrChange(SessionId session, List<Prompt> prompts) {
+    private SessionId handleAcrChange(SessionId session, List<io.jans.as.model.common.Prompt> prompts) {
         if (session != null) {
             if (session.getState() == SessionIdState.AUTHENTICATED) {
 
-                if (!prompts.contains(Prompt.LOGIN)) {
+                if (!prompts.contains(io.jans.as.model.common.Prompt.LOGIN)) {
                     prompts.add(Prompt.LOGIN);
                 }
-                session.getSessionAttributes().put("prompt", org.gluu.oxauth.model.util.StringUtils.implode(prompts, " "));
+                session.getSessionAttributes().put("prompt", io.jans.as.model.util.StringUtils.implode(prompts, " "));
                 session.setState(SessionIdState.UNAUTHENTICATED);
 
                 // Update Remote IP
@@ -810,7 +812,7 @@ public class AuthorizeAction {
         } else {
             sb.append("?");
         }
-        sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST,
+        sb.append(errorResponseFactory.getErrorAsQueryString(io.jans.as.model.authorize.AuthorizeErrorResponseType.INVALID_REQUEST,
                 getState()));
 
         facesService.redirectToExternalURL(sb.toString());
@@ -825,7 +827,7 @@ public class AuthorizeAction {
         } else {
             sb.append("?");
         }
-        sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
+        sb.append(errorResponseFactory.getErrorAsQueryString(io.jans.as.model.authorize.AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
 
         facesService.redirectToExternalURL(sb.toString());
     }
@@ -927,7 +929,7 @@ public class AuthorizeAction {
     }
 
     protected void handleSessionInvalid() {
-        errorHandlerService.handleError(Authenticator.INVALID_SESSION_MESSAGE, AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID, "Create authorization request to start new authentication session.");
+        errorHandlerService.handleError(Authenticator.INVALID_SESSION_MESSAGE, io.jans.as.model.authorize.AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID, "Create authorization request to start new authentication session.");
     }
 
 

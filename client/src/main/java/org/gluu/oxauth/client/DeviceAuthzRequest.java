@@ -8,9 +8,9 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.Util;
 import org.json.JSONException;
 
 import javax.ws.rs.core.MediaType;

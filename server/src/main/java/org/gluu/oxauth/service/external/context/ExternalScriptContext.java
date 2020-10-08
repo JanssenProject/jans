@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.net.util.SubnetUtils;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;

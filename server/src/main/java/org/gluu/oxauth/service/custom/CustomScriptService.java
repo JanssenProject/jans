@@ -14,8 +14,8 @@ import javax.enterprise.inject.Alternative;
 import javax.interceptor.Interceptor;
 import javax.inject.Inject;
 
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.util.Base64Util;
 import io.jans.service.custom.script.AbstractCustomScriptService;
 
 /**

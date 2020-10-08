@@ -10,8 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.common.TokenType;
-import org.gluu.oxauth.model.token.TokenErrorResponseType;
+import io.jans.as.model.common.TokenType;
+import io.jans.as.model.token.TokenErrorResponseType;
 import org.jboss.resteasy.client.ClientResponse;
 
 /**

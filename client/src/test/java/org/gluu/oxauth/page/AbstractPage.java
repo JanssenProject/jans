@@ -1,8 +1,8 @@
 package org.gluu.oxauth.page;
 
 import com.google.common.base.Preconditions;
-import org.gluu.oxauth.model.common.Holder;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.Holder;
+import io.jans.as.model.util.Util;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
