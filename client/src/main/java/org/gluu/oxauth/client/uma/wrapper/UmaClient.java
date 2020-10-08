@@ -8,15 +8,15 @@ package org.gluu.oxauth.client.uma.wrapper;
 
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.uma.exception.UmaException;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.uma.UmaScopeType;
-import org.gluu.oxauth.model.uma.wrapper.Token;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.ClientExecutor;
 

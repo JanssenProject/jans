@@ -9,11 +9,11 @@ package org.gluu.oxauth.client.ciba.push;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.gluu.oxauth.client.BaseRequest;
-import org.gluu.oxauth.model.ciba.PushErrorResponseType;
+import io.jans.as.model.ciba.PushErrorResponseType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static org.gluu.oxauth.model.ciba.PushErrorRequestParam.*;
+import static io.jans.as.model.ciba.PushErrorRequestParam.*;
 
 /**
  * @author Javier Rojas Blum

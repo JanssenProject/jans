@@ -6,11 +6,11 @@
 
 package org.gluu.oxauth.client;
 
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.token.ClientAssertionType;
-import org.gluu.oxauth.model.uma.UmaScopeType;
-import org.gluu.oxauth.model.util.QueryBuilder;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.token.ClientAssertionType;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.util.QueryBuilder;
 
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;

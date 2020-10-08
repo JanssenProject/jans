@@ -7,13 +7,13 @@
 package org.gluu.oxauth.service;
 
 import io.jans.model.ApplicationType;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.common.ApplicationFactory;
 import org.gluu.oxauth.service.common.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;

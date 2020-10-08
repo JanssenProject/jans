@@ -1,14 +1,14 @@
 package org.gluu.oxauth.uma.service;
 
 import com.google.common.collect.Lists;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.uma.JsonLogic;
-import org.gluu.oxauth.model.uma.JsonLogicNode;
-import org.gluu.oxauth.model.uma.JsonLogicNodeParser;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
-import org.gluu.oxauth.model.uma.persistence.UmaResource;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.uma.JsonLogic;
+import io.jans.as.model.uma.JsonLogicNode;
+import io.jans.as.model.uma.JsonLogicNodeParser;
+import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.gluu.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.gluu.oxauth.uma.authorization.UmaScriptByScope;

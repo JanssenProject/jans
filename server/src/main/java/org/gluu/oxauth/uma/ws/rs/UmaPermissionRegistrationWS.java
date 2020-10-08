@@ -8,12 +8,13 @@ package org.gluu.oxauth.uma.ws.rs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.jans.as.model.uma.UmaPermission;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.uma.PermissionTicket;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.model.uma.UmaPermissionList;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.uma.PermissionTicket;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.uma.UmaPermissionList;
 import org.gluu.oxauth.service.token.TokenService;
 import org.gluu.oxauth.uma.service.UmaPermissionService;
 import org.gluu.oxauth.uma.service.UmaValidationService;
@@ -97,14 +98,14 @@ public class UmaPermissionRegistrationWS {
     private UmaPermissionList parseRequest(String requestAsString) {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         try {
-            org.gluu.oxauth.model.uma.UmaPermission permission = mapper.readValue(requestAsString, org.gluu.oxauth.model.uma.UmaPermission.class);
+            UmaPermission permission = mapper.readValue(requestAsString, UmaPermission.class);
             return new UmaPermissionList().addPermission(permission);
         } catch (IOException e) {
             // ignore
         }
 
         try {
-            UmaPermissionList permissions = mapper.readValue(requestAsString, org.gluu.oxauth.model.uma.UmaPermissionList.class);
+            UmaPermissionList permissions = mapper.readValue(requestAsString, UmaPermissionList.class);
             if (!permissions.isEmpty()) {
                 return permissions;
             }

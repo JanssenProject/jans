@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * @author Javier Rojas Blum

@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.service.common;
 
-import org.gluu.oxauth.model.util.Pair;
+import io.jans.as.model.util.Pair;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 

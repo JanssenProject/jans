@@ -9,17 +9,17 @@ package org.gluu.oxauth.ws.rs;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.JwtState;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.crypto.AbstractCryptoProvider;
-import org.gluu.oxauth.model.crypto.OxAuthCryptoProvider;
-import org.gluu.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jwe.Jwe;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.JwtUtil;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.OxAuthCryptoProvider;
+import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
+import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwe.Jwe;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.StringUtils;
 import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.jwt.JwtStateClaimName.*;
+import static io.jans.as.model.jwt.JwtStateClaimName.*;
 import static org.testng.Assert.*;
 
 /**

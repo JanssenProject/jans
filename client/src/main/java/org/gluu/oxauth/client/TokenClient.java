@@ -8,7 +8,7 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.GrantType;
+import io.jans.as.model.common.GrantType;
 
 import javax.ws.rs.HttpMethod;
 

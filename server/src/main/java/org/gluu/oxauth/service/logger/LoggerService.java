@@ -1,6 +1,6 @@
 package org.gluu.oxauth.service.logger;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.util.ServerUtil;
 
 import javax.enterprise.context.ApplicationScoped;

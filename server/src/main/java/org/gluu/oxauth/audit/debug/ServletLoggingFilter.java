@@ -22,7 +22,7 @@ import org.gluu.oxauth.audit.debug.entity.HttpRequest;
 import org.gluu.oxauth.audit.debug.entity.HttpResponse;
 import org.gluu.oxauth.audit.debug.wrapper.RequestWrapper;
 import org.gluu.oxauth.audit.debug.wrapper.ResponseWrapper;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

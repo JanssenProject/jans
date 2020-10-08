@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.client;
 
-import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.session.EndSessionErrorResponseType;
 
 /**
  * Represents an end session response received from the authorization server.

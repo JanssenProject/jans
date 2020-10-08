@@ -16,12 +16,12 @@ import javax.inject.Named;
 import org.apache.commons.io.IOUtils;
 import org.gluu.oxauth.crypto.cert.CertificateParser;
 import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
-import org.gluu.oxauth.model.exception.SignatureException;
+import io.jans.as.model.exception.SignatureException;
 import org.gluu.oxauth.model.fido.u2f.DeviceRegistration;
-import org.gluu.oxauth.model.fido.u2f.exception.BadInputException;
-import org.gluu.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.gluu.oxauth.model.fido.u2f.protocol.ClientData;
-import org.gluu.oxauth.model.util.Base64Util;
+import io.jans.as.model.fido.u2f.exception.BadInputException;
+import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
+import io.jans.as.model.util.Base64Util;
 import io.jans.util.io.ByteDataInputStream;
 import org.slf4j.Logger;
 

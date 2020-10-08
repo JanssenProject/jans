@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.gluu.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
+import static io.jans.as.model.register.RegisterResponseParam.CLIENT_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -33,19 +33,16 @@ import org.gluu.oxauth.client.EndSessionRequest;
 import org.gluu.oxauth.client.QueryStringDecoder;
 import org.gluu.oxauth.client.RegisterRequest;
 import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.model.authorize.AuthorizeResponseParam;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 /**
  * Test cases for the end session web service (embedded)

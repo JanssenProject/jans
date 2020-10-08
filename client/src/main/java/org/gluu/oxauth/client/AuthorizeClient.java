@@ -7,11 +7,11 @@
 package org.gluu.oxauth.client;
 
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.authorize.AuthorizeRequestParam;
-import org.gluu.oxauth.model.common.AuthorizationMethod;
-import org.gluu.oxauth.model.common.Display;
-import org.gluu.oxauth.model.common.Prompt;
-import org.gluu.oxauth.model.common.ResponseType;
+import io.jans.as.model.authorize.AuthorizeRequestParam;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.common.Display;
+import io.jans.as.model.common.Prompt;
+import io.jans.as.model.common.ResponseType;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 

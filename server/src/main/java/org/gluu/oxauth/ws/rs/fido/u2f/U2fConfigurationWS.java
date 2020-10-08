@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.ws.rs.fido.u2f;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.fido.u2f.U2fConfiguration;
-import org.gluu.oxauth.model.fido.u2f.U2fErrorResponseType;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.fido.u2f.U2fConfiguration;
+import io.jans.as.model.fido.u2f.U2fErrorResponseType;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
 

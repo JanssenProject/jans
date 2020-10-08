@@ -6,10 +6,10 @@
 
 package org.gluu.oxauth.client;
 
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationRequestParam;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.util.QueryBuilder;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.ciba.BackchannelAuthenticationRequestParam;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.util.QueryBuilder;
+import io.jans.as.model.util.Util;
 
 import javax.ws.rs.core.MediaType;
 import java.util.List;

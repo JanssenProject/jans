@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.gluu.oxauth.model.ciba.FirebaseCloudMessagingResponseParam.*;
+import static io.jans.as.model.ciba.FirebaseCloudMessagingResponseParam.*;
 
 /**
  * @author Javier Rojas Blum

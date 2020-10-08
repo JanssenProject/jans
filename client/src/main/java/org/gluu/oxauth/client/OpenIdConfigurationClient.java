@@ -8,7 +8,7 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.json.JSONException;
@@ -18,7 +18,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
-import static org.gluu.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static io.jans.as.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.

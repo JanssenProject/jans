@@ -9,19 +9,19 @@ package org.gluu.oxauth.ciba;
 import org.apache.commons.lang.RandomStringUtils;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
-import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.crypto.signature.AsymmetricSignatureAlgorithm;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.token.TokenErrorResponseType;
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.common.BackchannelTokenDeliveryMode;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.token.TokenErrorResponseType;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.*;
 
 /**

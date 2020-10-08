@@ -9,10 +9,10 @@ package org.gluu.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.session.EndSessionErrorResponseType;
-import org.gluu.oxauth.model.session.EndSessionRequestParam;
-import org.gluu.oxauth.model.session.EndSessionResponseParam;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.session.EndSessionRequestParam;
+import io.jans.as.model.session.EndSessionResponseParam;
+import io.jans.as.model.util.Util;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;

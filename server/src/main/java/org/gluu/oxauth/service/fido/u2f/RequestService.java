@@ -19,7 +19,7 @@ import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.search.filter.Filter;
 import org.slf4j.Logger;
-import org.gluu.oxauth.model.config.StaticConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 
 /**
  * Provides generic operations with U2F requests

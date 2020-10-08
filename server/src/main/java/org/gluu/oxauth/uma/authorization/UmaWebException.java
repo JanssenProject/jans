@@ -1,9 +1,9 @@
 package org.gluu.oxauth.uma.authorization;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.error.DefaultErrorResponse;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.uma.UmaErrorResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

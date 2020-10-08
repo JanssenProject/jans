@@ -7,8 +7,8 @@
 package org.gluu.oxauth.service;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.model.ldap.ClientAuthorization;
 import org.gluu.oxauth.model.registration.Client;
 import io.jans.orm.PersistenceEntryManager;

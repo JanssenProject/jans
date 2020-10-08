@@ -7,7 +7,7 @@
 package org.gluu.oxauth.model.authorize;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.util.Util;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

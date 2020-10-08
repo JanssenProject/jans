@@ -7,13 +7,13 @@
 package org.gluu.oxauth.uma.service;
 
 import org.gluu.oxauth.model.common.ExecutionContext;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.jwt.Jwt;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.Jwt;
 import org.gluu.oxauth.model.registration.Client;
-import org.gluu.oxauth.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.model.uma.UmaTokenResponse;
-import org.gluu.oxauth.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.uma.UmaTokenResponse;
+import io.jans.as.model.uma.persistence.UmaPermission;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.uma.authorization.*;
 import org.gluu.oxauth.util.ServerUtil;

@@ -1,6 +1,6 @@
 package org.gluu.oxauth.model.uma;
 
-import org.gluu.oxauth.model.uma.JsonLogic;
+import io.jans.as.model.uma.JsonLogic;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -9,7 +9,7 @@ package org.gluu.oxauth.client;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.gluu.oxauth.model.error.IErrorType;
+import io.jans.as.model.error.IErrorType;
 import org.jboss.resteasy.client.ClientResponse;
 
 /**

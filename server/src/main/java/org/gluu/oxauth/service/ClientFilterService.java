@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 

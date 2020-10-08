@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.gluu.oxauth.model.configuration.BaseFilter;
+import io.jans.as.model.configuration.BaseFilter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;

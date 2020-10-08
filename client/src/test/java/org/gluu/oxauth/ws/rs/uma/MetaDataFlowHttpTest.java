@@ -9,7 +9,7 @@ package org.gluu.oxauth.ws.rs.uma;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.uma.UmaClientFactory;
 import org.gluu.oxauth.client.uma.UmaMetadataService;
-import org.gluu.oxauth.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaMetadata;
 import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.Parameters;

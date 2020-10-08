@@ -8,7 +8,7 @@ package org.gluu.oxauth.service.external.context;
 
 import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.token.JsonWebResponse;
+import io.jans.as.model.token.JsonWebResponse;
 import org.oxauth.persistence.model.Scope;
 
 import java.util.ArrayList;

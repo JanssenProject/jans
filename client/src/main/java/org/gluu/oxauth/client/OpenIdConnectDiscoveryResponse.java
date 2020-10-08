@@ -9,7 +9,7 @@ package org.gluu.oxauth.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.oxauth.model.discovery.WebFingerLink;
+import io.jans.as.model.discovery.WebFingerLink;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013

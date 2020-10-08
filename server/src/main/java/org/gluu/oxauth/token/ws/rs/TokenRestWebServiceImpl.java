@@ -8,21 +8,22 @@ package org.gluu.oxauth.token.ws.rs;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.authorize.CodeVerifier;
+import io.jans.as.model.authorize.CodeVerifier;
 import org.gluu.oxauth.model.common.*;
 import org.gluu.oxauth.model.config.Constants;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.crypto.binding.TokenBindingMessage;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.binding.TokenBindingMessage;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import org.gluu.oxauth.model.token.JsonWebResponse;
+import io.jans.as.model.token.JsonWebResponse;
 import org.gluu.oxauth.model.token.JwrService;
-import org.gluu.oxauth.model.token.TokenErrorResponseType;
+import io.jans.as.model.token.TokenErrorResponseType;
 import org.gluu.oxauth.model.token.TokenParamsValidator;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.*;
@@ -145,7 +146,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Failed to validate request parameters"), oAuth2AuditLog);
             }
 
-            GrantType gt = GrantType.fromString(grantType);
+            io.jans.as.model.common.GrantType gt = io.jans.as.model.common.GrantType.fromString(grantType);
             log.debug("Grant type: '{}'", gt);
 
             SessionClient sessionClient = identity.getSessionClient();
@@ -170,7 +171,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null);
 
 
-            if (gt == GrantType.AUTHORIZATION_CODE) {
+            if (gt == io.jans.as.model.common.GrantType.AUTHORIZATION_CODE) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Grant types are invalid."), oAuth2AuditLog);
                 }
@@ -237,7 +238,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return response(Response.ok().entity(entity), oAuth2AuditLog);
             }
 
-            if (gt == GrantType.REFRESH_TOKEN) {
+            if (gt == io.jans.as.model.common.GrantType.REFRESH_TOKEN) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
@@ -290,7 +291,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         scope,
                         idToken));
                 oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
-            } else if (gt == GrantType.CLIENT_CREDENTIALS) {
+            } else if (gt == io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
@@ -319,7 +320,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         null,
                         scope,
                         idToken));
-            } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
+            } else if (gt == io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
                 if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                     return response(error(400, TokenErrorResponseType.INVALID_GRANT, "grant_type is not present in client."), oAuth2AuditLog);
                 }
@@ -402,7 +403,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     log.debug("Invalid user", new RuntimeException("User is empty"));
                     builder = error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user.");
                 }
-            } else if (gt == GrantType.CIBA) {
+            } else if (gt == io.jans.as.model.common.GrantType.CIBA) {
                 if (!appConfiguration.getCibaEnabled()) {
                     log.warn("Trying to get CIBA token, however CIBA config is disabled.");
                     return response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Grant types are invalid."), oAuth2AuditLog);
@@ -422,8 +423,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT, "The client is not authorized.");
                         return response(builder, oAuth2AuditLog);
                     }
-                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
-                            cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
+                    if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.PING ||
+                            cibaGrant.getClient().getBackchannelTokenDeliveryMode() == io.jans.as.model.common.BackchannelTokenDeliveryMode.POLL) {
                         if (!cibaGrant.isTokensDelivered()) {
                             RefreshToken refToken = cibaGrant.createRefreshToken();
                             log.debug("Issuing refresh token: {}", refToken.getCode());
@@ -501,7 +502,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.EXPIRED_TOKEN, "Unable to find grant object for given auth_req_id.");
                     }
                 }
-            } else if (gt == GrantType.DEVICE_CODE) {
+            } else if (gt == io.jans.as.model.common.GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(gt, client, deviceCode, scope, request, response, oAuth2AuditLog);
             }
         } catch (WebApplicationException e) {
@@ -524,7 +525,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
      * @param response HttpServletResponse
      * @param oAuth2AuditLog OAuth2AuditLog
      */
-    private Response processDeviceCodeGrantType(final GrantType grantType, final Client client, final String deviceCode,
+    private Response processDeviceCodeGrantType(final io.jans.as.model.common.GrantType grantType, final Client client, final String deviceCode,
                                                 String scope, final HttpServletRequest request,
                                                 final HttpServletResponse response, final OAuth2AuditLog oAuth2AuditLog) {
         if (!TokenParamsValidator.validateGrantType(grantType, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
@@ -606,7 +607,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private boolean isRefreshTokenAllowed(Client client, IAuthorizationGrant grant) {
-        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !grant.getScopes().contains(ScopeConstants.OFFLINE_ACCESS)) {
+        if (appConfiguration.getForceOfflineAccessScopeToEnableRefreshToken() && !grant.getScopes().contains(io.jans.as.model.common.ScopeConstants.OFFLINE_ACCESS)) {
             return false;
         }
         return Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN);
@@ -643,7 +644,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     /**
      * Builds a JSon String with the structure for token issues.
      */
-    public String getJSonResponse(AccessToken accessToken, TokenType tokenType,
+    public String getJSonResponse(AccessToken accessToken, io.jans.as.model.common.TokenType tokenType,
                                   Integer expiresIn, RefreshToken refreshToken, String scope,
                                   IdToken idToken) {
         JSONObject jsonObj = new JSONObject();

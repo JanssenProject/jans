@@ -10,14 +10,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.gluu.oxauth.model.uma.PermissionTicket;
-import org.gluu.oxauth.model.uma.RPTResponse;
-import org.gluu.oxauth.model.uma.RptIntrospectionResponse;
-import org.gluu.oxauth.model.uma.UmaMetadata;
-import org.gluu.oxauth.model.uma.UmaPermission;
-import org.gluu.oxauth.model.uma.UmaResource;
-import org.gluu.oxauth.model.uma.UmaResourceResponse;
-import org.gluu.oxauth.model.uma.wrapper.Token;
+import io.jans.as.model.uma.PermissionTicket;
+import io.jans.as.model.uma.RPTResponse;
+import io.jans.as.model.uma.RptIntrospectionResponse;
+import io.jans.as.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaPermission;
+import io.jans.as.model.uma.UmaResource;
+import io.jans.as.model.uma.UmaResourceResponse;
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
 
 /**

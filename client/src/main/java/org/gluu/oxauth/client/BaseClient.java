@@ -8,10 +8,10 @@ package org.gluu.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.AuthorizationMethod;
-import org.gluu.oxauth.model.common.HasParamName;
-import org.gluu.oxauth.model.util.Util;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.AuthorizationMethod;
+import io.jans.as.model.common.HasParamName;
+import io.jans.as.model.util.Util;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;

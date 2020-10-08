@@ -6,22 +6,20 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import com.google.common.collect.Lists;
-
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
-import org.gluu.oxauth.model.common.ResponseType;
-import org.gluu.oxauth.model.common.SubjectType;
-import org.gluu.oxauth.model.crypto.signature.RSAPublicKey;
-import org.gluu.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.jws.RSASigner;
-import org.gluu.oxauth.model.jwt.Jwt;
-import org.gluu.oxauth.model.jwt.JwtClaimName;
-import org.gluu.oxauth.model.jwt.JwtHeaderName;
-import org.gluu.oxauth.model.register.ApplicationType;
-import org.gluu.oxauth.model.util.StringUtils;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.crypto.signature.RSAPublicKey;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jws.RSASigner;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
+import io.jans.as.model.jwt.JwtHeaderName;
+import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,8 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.gluu.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.gluu.oxauth.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.*;
 
 /**

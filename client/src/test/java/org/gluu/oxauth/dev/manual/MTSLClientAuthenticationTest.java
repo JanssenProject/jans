@@ -7,8 +7,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.gluu.oxauth.client.TokenClient;
 import org.gluu.oxauth.client.TokenRequest;
 import org.gluu.oxauth.client.TokenResponse;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
-import org.gluu.oxauth.model.common.GrantType;
+import io.jans.as.model.common.AuthenticationMethod;
+import io.jans.as.model.common.GrantType;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 
 import javax.net.ssl.KeyManagerFactory;

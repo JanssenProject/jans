@@ -10,13 +10,13 @@ import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.ciba.CIBADeviceRegistrationValidatorService;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
+import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import org.gluu.oxauth.model.common.AuthorizationGrant;
 import org.gluu.oxauth.model.common.AuthorizationGrantList;
 import org.gluu.oxauth.model.common.User;
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.error.DefaultErrorResponse;
-import org.gluu.oxauth.model.error.ErrorResponseFactory;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.service.common.UserService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import static org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
-import static org.gluu.oxauth.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
+import static io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType.INVALID_REQUEST;
+import static io.jans.as.model.ciba.BackchannelDeviceRegistrationErrorResponseType.UNKNOWN_USER_ID;
 
 /**
  * Implementation for request backchannel device registration through REST web services.

@@ -17,11 +17,10 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.model.uma.UmaConstants;
-import org.gluu.oxauth.model.uma.UmaMetadata;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaMetadata;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -15,8 +15,8 @@ import java.util.Map;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
-import org.gluu.oxauth.model.configuration.AppConfiguration;
-import org.gluu.oxauth.model.configuration.CorsConfigurationFilter;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.CorsConfigurationFilter;
 
 /**
  * @author Javier Rojas Blum
