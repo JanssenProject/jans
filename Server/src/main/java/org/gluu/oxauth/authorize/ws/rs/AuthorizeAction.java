@@ -8,8 +8,8 @@ package org.gluu.oxauth.authorize.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.gluu.jsf2.message.FacesMessages;
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.message.FacesMessages;
+import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.auth.Authenticator;

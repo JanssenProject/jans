@@ -6,7 +6,7 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.service.FacesService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import org.gluu.oxauth.i18n.LanguageBean;
 import org.gluu.oxauth.model.common.SessionId;

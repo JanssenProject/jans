@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.service.FacesService;
+import io.jans.jsf2.service.FacesService;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.security.Identity;

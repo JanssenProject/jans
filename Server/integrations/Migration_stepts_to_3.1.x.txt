@@ -52,7 +52,7 @@ facesMessages.add(StatusMessage.Severity.ERROR, "Error message")
 FacesContext.getCurrentInstance().getExternalContext().getExternalContext().getFlash().setKeepMessages(True)
 
 use:
-from org.gluu.jsf2.message import FacesMessages
+from io.jans.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
 ...
 facesMessages = CdiUtil.bean(FacesMessages)
