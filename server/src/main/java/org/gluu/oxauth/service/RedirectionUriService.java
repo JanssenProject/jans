@@ -9,7 +9,7 @@ package org.gluu.oxauth.service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.client.QueryStringDecoder;
+import io.jans.as.client.QueryStringDecoder;
 import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;

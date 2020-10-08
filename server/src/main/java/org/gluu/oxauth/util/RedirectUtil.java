@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import static org.gluu.oxauth.client.AuthorizationRequest.NO_REDIRECT_HEADER;
+import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
 
 /**
  * @version October 7, 2019

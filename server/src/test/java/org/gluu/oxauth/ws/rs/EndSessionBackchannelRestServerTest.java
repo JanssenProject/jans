@@ -1,8 +1,8 @@
 package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.client.RegisterRequest;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.TClientService;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
@@ -36,7 +36,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
     @ArquillianResource
     private URI url;
 
-    private static RegisterResponse registerResponse;
+    private static io.jans.as.client.RegisterResponse registerResponse;
     private static String idToken;
     private static String sessionId;
 
@@ -44,7 +44,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
     @Test
     public void requestEndSessionStep1(final String redirectUris, final String postLogoutRedirectUri) throws Exception {
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", StringUtils.spaceSeparatedToList(redirectUris));
+        io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
@@ -64,7 +64,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes,
+        io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes,
                 redirectUri, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -89,7 +89,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -117,7 +117,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
             throws Exception {
         String state = UUID.randomUUID().toString();
 
-        EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
+        io.jans.as.client.EndSessionRequest endSessionRequest = new io.jans.as.client.EndSessionRequest(idToken, postLogoutRedirectUri, state);
         endSessionRequest.setSessionId(sessionId);
 
         Invocation.Builder request = ResteasyClientBuilder.newClient()

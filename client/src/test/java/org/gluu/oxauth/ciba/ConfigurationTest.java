@@ -7,10 +7,10 @@
 package org.gluu.oxauth.ciba;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.OpenIdConfigurationClient;
-import org.gluu.oxauth.client.OpenIdConfigurationResponse;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import io.jans.as.client.OpenIdConfigurationClient;
+import io.jans.as.client.OpenIdConfigurationResponse;
+import io.jans.as.client.OpenIdConnectDiscoveryClient;
+import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import org.gluu.oxauth.dev.HostnameVerifierType;
 import io.jans.as.model.common.GrantType;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;

@@ -7,6 +7,7 @@
 package org.gluu.oxauth;
 
 import com.google.common.collect.Maps;
+import io.jans.as.client.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -23,7 +24,6 @@ import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
-import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.dev.HostnameVerifierType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.crypto.AbstractCryptoProvider;

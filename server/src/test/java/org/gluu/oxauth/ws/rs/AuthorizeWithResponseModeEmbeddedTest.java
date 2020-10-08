@@ -26,10 +26,10 @@ import javax.ws.rs.core.Response;
 
 import org.json.JSONException;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.AuthorizationRequest;
-import org.gluu.oxauth.client.QueryStringDecoder;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.QueryStringDecoder;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;

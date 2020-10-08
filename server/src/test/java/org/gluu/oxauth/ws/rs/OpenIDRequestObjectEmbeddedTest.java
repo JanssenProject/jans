@@ -6,11 +6,12 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.model.authorize.Claim;
-import org.gluu.oxauth.client.model.authorize.ClaimValue;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.model.authorize.Claim;
+import io.jans.as.client.model.authorize.ClaimValue;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.common.Prompt;
@@ -83,7 +84,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
 					ResponseType.ID_TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -102,7 +103,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
 		assertNotNull(entity, "Unexpected result: " + entity);
 		try {
-			final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+			final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
 			ClientTestUtil.assert_(registerResponse);
 
 			clientId = registerResponse.getClientId();
@@ -122,7 +123,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
@@ -170,7 +171,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId1, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -216,7 +217,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
 			assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -238,7 +239,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
 		request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-		UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken1);
+		io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(accessToken1);
 		userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
 		Response response = request
@@ -280,7 +281,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new io.jans.as.client.RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
@@ -328,7 +329,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid", "profile");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId2, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -365,7 +366,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
 			assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -385,7 +386,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
 		request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-		UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken2);
+		io.jans.as.client.UserInfoRequest userInfoRequest = new io.jans.as.client.UserInfoRequest(accessToken2);
 		userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
 		Response response = request
@@ -425,7 +426,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 		String nonce = UUID.randomUUID().toString();
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.setRequest("INVALID_REQUEST_OBJECT");
@@ -450,7 +451,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -477,7 +478,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.setAuthUsername(userId);
@@ -525,7 +526,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -551,7 +552,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.setAuthUsername(userId);
@@ -600,7 +601,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -626,7 +627,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -664,7 +665,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -690,7 +691,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -737,7 +738,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
 			assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The idToken is null");
@@ -769,7 +770,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 		String nonce = UUID.randomUUID().toString();
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -828,7 +829,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get("access_token"), "The accessToken is null");
 			assertNotNull(params.get("id_token"), "The idToken is null");
@@ -855,7 +856,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 		String nonce = UUID.randomUUID().toString();
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -883,7 +884,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -910,7 +911,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 		String nonce = UUID.randomUUID().toString();
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -937,7 +938,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -966,7 +967,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 		String nonce = UUID.randomUUID().toString();
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1027,7 +1028,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 				URI uri = new URI(response.getLocation().toString());
 				assertNotNull(uri.getFragment(), "Fragment is null");
 
-				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 				assertNotNull(params.get("error"), "The error value is null");
 				assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -1051,7 +1052,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 		try {
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
@@ -1086,7 +1087,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			List<String> scopes = Arrays.asList("openid");
 			String nonce = UUID.randomUUID().toString();
 
-			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
+			io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId3, scopes,
 					redirectUri, nonce);
 			authorizationRequest.setState(state);
 			authorizationRequest.getPrompts().add(Prompt.NONE);
@@ -1132,7 +1133,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The accessToken is null");
 			assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
