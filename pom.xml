@@ -85,14 +85,14 @@
 	</scm>
 
 	<modules>
-		<module>Model</module>
+		<module>model</module>
 		<module>persistence-model</module>
-		<module>Client</module>
-		<module>oxAuthStatic</module>
-		<module>RP</module>
-		<module>RP-Demo</module>
+		<module>client</module>
+		<module>static</module>
+		<module>rp</module>
+		<module>rp-demo</module>
 		<module>common</module>
-		<module>Server</module>
+		<module>server</module>
 		<module>rp-spring-boot</module>
   </modules>
 
