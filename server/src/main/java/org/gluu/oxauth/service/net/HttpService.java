@@ -29,7 +29,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
-import org.gluu.net.SslDefaultHttpClient;
+import io.jans.net.SslDefaultHttpClient;
 import org.gluu.oxauth.model.net.HttpServiceResponse;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.slf4j.Logger;
