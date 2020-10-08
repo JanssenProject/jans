@@ -1,8 +1,8 @@
 package org.gluu.oxauth.servlet;
 
-import org.apache.commons.io.IOUtils;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.apache.logging.log4j.util.Strings;
 import io.jans.as.model.error.DefaultErrorResponse;
+import org.apache.logging.log4j.util.Strings;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;

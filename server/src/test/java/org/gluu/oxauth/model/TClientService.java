@@ -1,9 +1,9 @@
 package org.gluu.oxauth.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.register.ws.rs.RegisterRestWebService;
 import org.gluu.oxauth.util.ServerUtil;
 import org.gluu.oxauth.ws.rs.ClientTestUtil;

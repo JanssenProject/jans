@@ -6,25 +6,23 @@
 
 package org.gluu.oxauth.service;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.config.CustomAuthenticationConfiguration;
-import org.gluu.oxauth.service.common.ConfigurationService;
 import io.jans.util.StringHelper;
+import org.gluu.oxauth.service.common.ConfigurationService;
 import org.oxauth.persistence.model.configuration.CustomProperty;
 import org.oxauth.persistence.model.configuration.GluuConfiguration;
 import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides service methods methods with LDAP configuration

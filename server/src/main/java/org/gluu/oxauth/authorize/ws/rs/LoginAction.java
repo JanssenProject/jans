@@ -1,10 +1,10 @@
 package org.gluu.oxauth.authorize.ws.rs;
 
+import org.slf4j.Logger;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
 
 
 /**

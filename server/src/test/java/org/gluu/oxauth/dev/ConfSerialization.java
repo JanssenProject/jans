@@ -6,14 +6,14 @@
 
 package org.gluu.oxauth.dev;
 
+import io.jans.as.model.config.BaseDnConfiguration;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.error.ErrorMessage;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import org.gluu.oxauth.util.ServerUtil;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import io.jans.as.model.config.BaseDnConfiguration;
-import io.jans.as.model.config.StaticConfiguration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

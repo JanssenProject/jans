@@ -1,9 +1,6 @@
 package org.gluu.oxauth.model.token;
 
 import com.google.common.base.Function;
-import io.jans.as.model.token.JsonWebResponse;
-import org.apache.commons.lang.StringUtils;
-import org.gluu.oxauth.model.common.IAuthorizationGrant;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -18,8 +15,11 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
-import org.gluu.oxauth.model.registration.Client;
+import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.JwtUtil;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.IAuthorizationGrant;
+import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.SectorIdentifierService;
 import org.gluu.oxauth.service.ServerCryptoProvider;

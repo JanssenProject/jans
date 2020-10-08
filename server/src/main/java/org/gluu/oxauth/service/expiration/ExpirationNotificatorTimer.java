@@ -1,21 +1,21 @@
 package org.gluu.oxauth.service.expiration;
 
-import net.jodah.expiringmap.ExpirationListener;
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
-import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.gluu.oxauth.service.cdi.event.ExpirationEvent;
-import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
-import org.gluu.oxauth.service.external.session.SessionEvent;
-import org.gluu.oxauth.service.external.session.SessionEventType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+import net.jodah.expiringmap.ExpirationListener;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.service.cdi.event.ExpirationEvent;
+import org.gluu.oxauth.service.external.ExternalApplicationSessionService;
+import org.gluu.oxauth.service.external.session.SessionEvent;
+import org.gluu.oxauth.service.external.session.SessionEventType;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.ApplicationScoped;

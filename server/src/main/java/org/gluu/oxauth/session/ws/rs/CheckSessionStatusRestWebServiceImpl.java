@@ -7,11 +7,11 @@
 package org.gluu.oxauth.session.ws.rs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

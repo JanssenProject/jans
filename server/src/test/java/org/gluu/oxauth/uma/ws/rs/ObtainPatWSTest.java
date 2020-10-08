@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.uma.ws.rs;
 
-import java.net.URI;
-
+import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.model.uma.TUma;
-import io.jans.as.model.uma.wrapper.Token;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+
+import java.net.URI;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,22 +6,16 @@
 
 package org.gluu.oxauth.comp;
 
-import static org.testng.Assert.assertTrue;
-
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.Key;
 import io.jans.as.model.crypto.KeyFactory;
-import io.jans.as.model.crypto.signature.ECDSAKeyFactory;
-import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
-import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAKeyFactory;
-import io.jans.as.model.crypto.signature.RSAPrivateKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.crypto.signature.*;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
+import org.gluu.oxauth.BaseTest;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Javier Rojas Blum Date: 12.03.2012

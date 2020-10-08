@@ -6,15 +6,15 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import io.jans.as.model.util.Util;
+import io.jans.orm.exception.EntryPersistenceException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.oxauth.model.common.SessionId;
 import org.gluu.oxauth.model.common.User;
 import org.gluu.oxauth.model.registration.Client;
-import io.jans.as.model.util.Util;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.CookieService;
 import org.gluu.oxauth.service.SessionIdService;
-import io.jans.orm.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

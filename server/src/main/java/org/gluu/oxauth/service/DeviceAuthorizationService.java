@@ -6,16 +6,16 @@
 
 package org.gluu.oxauth.service;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
-import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
 import io.jans.as.model.common.GrantType;
-import org.gluu.oxauth.model.common.SessionId;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.service.CacheService;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
+import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.registration.Client;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

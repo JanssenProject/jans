@@ -6,23 +6,23 @@
 
 package org.gluu.oxauth.authorize.ws.rs;
 
+import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.util.StringUtils;
+import io.jans.util.StringHelper;
 import org.gluu.oxauth.audit.ApplicationAuditLogger;
 import org.gluu.oxauth.model.audit.Action;
 import org.gluu.oxauth.model.audit.OAuth2AuditLog;
-import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
 import org.gluu.oxauth.model.authorize.ScopeChecker;
 import org.gluu.oxauth.model.common.DeviceAuthorizationCacheControl;
 import org.gluu.oxauth.model.common.DeviceAuthorizationStatus;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
 import org.gluu.oxauth.model.registration.Client;
 import org.gluu.oxauth.model.session.SessionClient;
-import io.jans.as.model.util.StringUtils;
 import org.gluu.oxauth.security.Identity;
 import org.gluu.oxauth.service.ClientService;
 import org.gluu.oxauth.service.DeviceAuthorizationService;
 import org.gluu.oxauth.util.ServerUtil;
-import io.jans.util.StringHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;

@@ -6,18 +6,22 @@
 
 package org.gluu.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.QueryStringDecoder;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.model.common.*;
+import io.jans.as.model.uma.RPTResponse;
+import io.jans.as.model.uma.RptIntrospectionResponse;
+import io.jans.as.model.uma.UmaConstants;
+import io.jans.as.model.uma.UmaScopeType;
+import io.jans.as.model.uma.wrapper.Token;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.util.ServerUtil;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.testng.Assert;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -25,27 +29,11 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.gluu.oxauth.BaseTest;
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.QueryStringDecoder;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Holder;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.uma.RPTResponse;
-import io.jans.as.model.uma.RptIntrospectionResponse;
-import io.jans.as.model.uma.UmaConstants;
-import io.jans.as.model.uma.UmaScopeType;
-import io.jans.as.model.uma.wrapper.Token;
-import org.gluu.oxauth.util.ServerUtil;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.testng.Assert;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

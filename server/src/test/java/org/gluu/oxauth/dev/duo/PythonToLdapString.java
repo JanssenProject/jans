@@ -6,19 +6,18 @@
 
 package org.gluu.oxauth.dev.duo;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
+import org.oxauth.persistence.model.configuration.CustomProperty;
+import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
+import org.testng.annotations.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.oxauth.persistence.model.configuration.CustomProperty;
-import org.oxauth.persistence.model.configuration.oxIDPAuthConf;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Yuriy Zabrovarnyy

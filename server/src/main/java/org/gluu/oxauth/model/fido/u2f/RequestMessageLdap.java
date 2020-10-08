@@ -1,10 +1,10 @@
 package org.gluu.oxauth.model.fido.u2f;
 
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.model.base.BaseEntry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
 
 import java.util.Calendar;
 import java.util.Date;

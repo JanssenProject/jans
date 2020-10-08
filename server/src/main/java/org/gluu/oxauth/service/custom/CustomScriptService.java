@@ -6,17 +6,16 @@
 
 package org.gluu.oxauth.service.custom;
 
-import java.io.UnsupportedEncodingException;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.model.util.Base64Util;
+import io.jans.service.custom.script.AbstractCustomScriptService;
 
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
-import javax.interceptor.Interceptor;
 import javax.inject.Inject;
-
-import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.util.Base64Util;
-import io.jans.service.custom.script.AbstractCustomScriptService;
+import javax.interceptor.Interceptor;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Operations with custom scripts

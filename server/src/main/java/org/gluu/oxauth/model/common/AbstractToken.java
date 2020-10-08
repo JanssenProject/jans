@@ -7,11 +7,11 @@
 package org.gluu.oxauth.model.common;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import org.gluu.oxauth.model.token.HandleTokenFactory;
 import io.jans.as.model.util.HashUtil;
-import org.gluu.oxauth.util.ServerUtil;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.model.base.Deletable;
+import org.gluu.oxauth.model.token.HandleTokenFactory;
+import org.gluu.oxauth.util.ServerUtil;
 
 import java.io.Serializable;
 import java.util.Calendar;

@@ -1,15 +1,14 @@
 package org.gluu.oxauth.service.external.internal;
 
-import java.util.Map;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.security.Credentials;
 import org.gluu.oxauth.service.AuthenticationService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Map;
 
 /**
  * Wrapper to call internal authentication method

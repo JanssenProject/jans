@@ -6,24 +6,22 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
-import java.io.IOException;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.io.IOUtils;
-import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import io.jans.as.model.exception.SignatureException;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.util.Base64Util;
 import io.jans.util.io.ByteDataInputStream;
+import org.apache.commons.io.IOUtils;
+import org.gluu.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.slf4j.Logger;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
 
 /**
  * Provides operations with U2F RAW authentication response

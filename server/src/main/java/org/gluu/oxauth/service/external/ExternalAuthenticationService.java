@@ -6,21 +6,8 @@
 
 package org.gluu.oxauth.service.external;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.HashSet;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
@@ -30,15 +17,20 @@ import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import io.jans.model.ldap.GluuLdapConfiguration;
-import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
-import org.gluu.oxauth.service.common.ApplicationFactory;
-import org.gluu.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.service.cdi.event.ReloadAuthScript;
+import org.gluu.oxauth.service.common.ApplicationFactory;
+import org.gluu.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Provides factory methods needed to create external authenticator

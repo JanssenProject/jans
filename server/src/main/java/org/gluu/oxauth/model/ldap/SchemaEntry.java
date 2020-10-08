@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.model.ldap;
 
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.base.BaseEntry;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.jans.orm.model.base.BaseEntry;
-import io.jans.orm.annotation.AttributeName;
 
 /**
  * Schema attribute

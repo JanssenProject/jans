@@ -6,17 +6,12 @@
 
 package org.gluu.oxauth.filter;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.CorsConfigurationFilter;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.configuration.CorsConfigurationFilter;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum

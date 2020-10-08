@@ -6,27 +6,24 @@
 
 package org.gluu.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
-
-import org.gluu.oxauth.BaseTest;
 import io.jans.as.model.common.IntrospectionResponse;
-import org.gluu.oxauth.model.uma.TUma;
 import io.jans.as.model.uma.wrapper.Token;
+import org.gluu.oxauth.BaseTest;
+import org.gluu.oxauth.model.uma.TUma;
+import org.gluu.oxauth.model.uma.UmaTestUtil;
 import org.gluu.oxauth.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy

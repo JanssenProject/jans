@@ -6,18 +6,18 @@
 
 package org.gluu.oxauth.service.fido.u2f;
 
+import io.jans.as.model.fido.u2f.U2fConstants;
+import io.jans.util.StringHelper;
+import org.gluu.oxauth.model.common.SessionId;
+import org.gluu.oxauth.model.common.User;
+import org.gluu.oxauth.model.config.Constants;
+import org.gluu.oxauth.service.SessionIdService;
+import org.gluu.oxauth.service.common.UserService;
+import org.slf4j.Logger;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.gluu.oxauth.model.common.SessionId;
-import org.gluu.oxauth.model.config.Constants;
-import io.jans.as.model.fido.u2f.U2fConstants;
-import org.gluu.oxauth.service.SessionIdService;
-import org.gluu.oxauth.service.common.UserService;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-import org.gluu.oxauth.model.common.User;
 
 /**
  * Utility to validate U2F input data

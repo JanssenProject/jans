@@ -6,17 +6,17 @@
 
 package org.gluu.oxauth.uma.service;
 
-import org.apache.commons.lang.StringUtils;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.gluu.oxauth.model.registration.Client;
 import io.jans.as.model.uma.UmaErrorResponseType;
-import org.gluu.oxauth.service.SpontaneousScopeService;
-import org.gluu.oxauth.service.common.InumService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
+import org.apache.commons.lang.StringUtils;
+import org.gluu.oxauth.model.registration.Client;
+import org.gluu.oxauth.service.SpontaneousScopeService;
+import org.gluu.oxauth.service.common.InumService;
 import org.oxauth.persistence.model.Scope;
 import org.slf4j.Logger;
 

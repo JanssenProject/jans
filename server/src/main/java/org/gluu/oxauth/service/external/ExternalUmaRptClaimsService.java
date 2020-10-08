@@ -3,8 +3,8 @@ package org.gluu.oxauth.service.external;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
-import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
 import io.jans.service.custom.script.ExternalScriptService;
+import org.gluu.oxauth.service.external.context.ExternalUmaRptClaimsContext;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 

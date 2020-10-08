@@ -6,10 +6,6 @@
 
 package org.gluu.oxauth.model.uma;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-
 import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.RPTResponse;
 import io.jans.as.model.uma.RptIntrospectionResponse;
@@ -19,6 +15,10 @@ import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.wrapper.Token;
 import org.gluu.oxauth.util.ServerUtil;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
