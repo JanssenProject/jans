@@ -6,12 +6,12 @@
 
 package org.gluu.oxauth.dev;
 
+import io.jans.as.client.*;
 import junit.framework.Assert;
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import org.jboss.resteasy.client.ClientExecutor;

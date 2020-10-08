@@ -7,9 +7,9 @@
 package org.gluu.oxauth.ws.rs;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.RegisterRequest;
-import org.gluu.oxauth.client.RegisterResponse;
-import org.gluu.oxauth.client.TokenRequest;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;

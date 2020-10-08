@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingClient;
-import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingRequest;
-import org.gluu.oxauth.client.ciba.fcm.FirebaseCloudMessagingResponse;
+import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingClient;
+import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingRequest;
+import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingResponse;
 import io.jans.as.model.configuration.AppConfiguration;
 import org.gluu.oxauth.service.ciba.CibaEncryptionService;
 import org.gluu.oxauth.service.external.ExternalCibaEndUserNotificationService;

@@ -11,9 +11,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryClient;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryRequest;
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryResponse;
+import io.jans.as.client.OpenIdConnectDiscoveryClient;
+import io.jans.as.client.OpenIdConnectDiscoveryRequest;
+import io.jans.as.client.OpenIdConnectDiscoveryResponse;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

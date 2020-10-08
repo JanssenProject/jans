@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.ciba;
 
-import org.gluu.oxauth.client.ciba.ping.PingCallbackClient;
-import org.gluu.oxauth.client.ciba.ping.PingCallbackRequest;
-import org.gluu.oxauth.client.ciba.ping.PingCallbackResponse;
+import io.jans.as.client.ciba.ping.PingCallbackClient;
+import io.jans.as.client.ciba.ping.PingCallbackRequest;
+import io.jans.as.client.ciba.ping.PingCallbackResponse;
 import io.jans.as.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

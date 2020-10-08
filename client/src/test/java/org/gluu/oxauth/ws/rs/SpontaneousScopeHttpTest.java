@@ -1,8 +1,8 @@
 package org.gluu.oxauth.ws.rs;
 
 import com.google.common.collect.Lists;
+import io.jans.as.client.*;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;

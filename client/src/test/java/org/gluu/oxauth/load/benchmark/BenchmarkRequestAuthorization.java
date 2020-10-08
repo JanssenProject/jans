@@ -6,8 +6,8 @@
 
 package org.gluu.oxauth.load.benchmark;
 
+import io.jans.as.client.*;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.gluu.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;

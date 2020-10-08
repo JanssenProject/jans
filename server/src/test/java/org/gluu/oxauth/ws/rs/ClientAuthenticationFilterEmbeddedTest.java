@@ -6,6 +6,7 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.RegisterRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.gluu.oxauth.BaseTest;
@@ -65,7 +66,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 					ResponseType.ID_TOKEN);
 
 			customAttrValue1 = UUID.randomUUID().toString();
-			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+			io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.setResponseTypes(responseTypes);
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
@@ -102,7 +103,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 		List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+		io.jans.as.client.AuthorizationRequest authorizationRequest = new io.jans.as.client.AuthorizationRequest(responseTypes, clientId, scopes,
 				redirectUri, nonce);
 		authorizationRequest.setState(state);
 		authorizationRequest.setAuthUsername(userId);
@@ -126,7 +127,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 			URI uri = new URI(response.getLocation().toString());
 			assertNotNull(uri.getFragment(), "Query string is null");
 
-			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
 
 			assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
 			assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
@@ -149,7 +150,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 			throws Exception {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-		TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+		io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.AUTHORIZATION_CODE);
 		tokenRequest.setCode(authorizationCode1);
 		tokenRequest.setRedirectUri(redirectUri);
 		tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
@@ -192,7 +193,7 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 													final String userSecret) throws Exception {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-		TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
+		io.jans.as.client.TokenRequest tokenRequest = new io.jans.as.client.TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
 		tokenRequest.setUsername(userId);
 		tokenRequest.setPassword(userSecret);
 		tokenRequest.setScope("profile email");

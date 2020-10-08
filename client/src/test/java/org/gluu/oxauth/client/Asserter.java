@@ -1,5 +1,6 @@
 package org.gluu.oxauth.client;
 
+import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;

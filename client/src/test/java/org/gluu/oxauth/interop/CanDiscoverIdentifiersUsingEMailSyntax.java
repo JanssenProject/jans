@@ -8,7 +8,7 @@ package org.gluu.oxauth.interop;
 
 import static org.testng.Assert.assertEquals;
 
-import org.gluu.oxauth.client.OpenIdConnectDiscoveryRequest;
+import io.jans.as.client.OpenIdConnectDiscoveryRequest;
 import org.testng.annotations.Test;
 
 /**

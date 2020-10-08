@@ -1,9 +1,9 @@
 package org.gluu.oxauth.ciba;
 
+import io.jans.as.client.*;
 import org.apache.commons.lang.time.DateUtils;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
-import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;

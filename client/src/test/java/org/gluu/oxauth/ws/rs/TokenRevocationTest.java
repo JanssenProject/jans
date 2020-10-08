@@ -6,9 +6,9 @@
 
 package org.gluu.oxauth.ws.rs;
 
+import io.jans.as.client.*;
 import io.jans.as.model.common.*;
 import org.gluu.oxauth.BaseTest;
-import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.model.common.*;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
