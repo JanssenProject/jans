@@ -127,23 +127,23 @@
 			<!-- jans -->
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-model</artifactId>
+				<artifactId>jans-auth-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-persistence-model</artifactId>
+				<artifactId>jans-auth-persistence-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-model</artifactId>
+				<artifactId>jans-auth-model</artifactId>
 				<version>${project.version}</version>
 				<type>test-jar</type>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-common</artifactId>
+				<artifactId>jans-auth-common</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -158,12 +158,12 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-client</artifactId>
+				<artifactId>jans-auth-client</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-static</artifactId>
+				<artifactId>jans-auth-static</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -245,12 +245,12 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-notify-client</artifactId>
+				<artifactId>jans-notify-client</artifactId>
 				<version>${jans-notify.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>janssen-notify-model</artifactId>
+				<artifactId>jans-notify-model</artifactId>
 				<version>${jans-notify.version}</version>
 			</dependency>
 
