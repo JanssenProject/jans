@@ -8,11 +8,11 @@ package io.jans.model.attribute;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.GluuStatus;
 import io.jans.model.user.UserRole;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DataEntry;
-import io.jans.persist.annotation.JsonObject;
-import io.jans.persist.annotation.ObjectClass;
-import io.jans.persist.model.base.Entry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.Entry;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

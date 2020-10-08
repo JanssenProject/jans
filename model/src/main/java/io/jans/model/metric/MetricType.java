@@ -14,7 +14,7 @@ import io.jans.model.metric.counter.CounterMetricData;
 import io.jans.model.metric.counter.CounterMetricEntry;
 import io.jans.model.metric.timer.TimerMetricData;
 import io.jans.model.metric.timer.TimerMetricEntry;
-import io.jans.persist.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * Metric event type declaration

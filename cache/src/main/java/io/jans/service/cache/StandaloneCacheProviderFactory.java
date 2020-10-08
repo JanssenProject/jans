@@ -1,6 +1,6 @@
 package io.jans.service.cache;
 
-import io.jans.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;

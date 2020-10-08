@@ -7,8 +7,8 @@
 import java.util.Date;
 
 import io.jans.model.metric.ldap.MetricEntry;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.JsonObject;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.JsonObject;
 
 /**
  * Timer entry which represents timer value

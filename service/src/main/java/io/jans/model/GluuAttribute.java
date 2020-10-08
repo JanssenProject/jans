@@ -15,11 +15,11 @@ import javax.validation.constraints.Size;
 
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.attribute.AttributeValidation;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DataEntry;
-import io.jans.persist.annotation.JsonObject;
-import io.jans.persist.annotation.ObjectClass;
-import io.jans.persist.model.base.Entry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.Entry;
 
 /**
  * Attribute Metadata

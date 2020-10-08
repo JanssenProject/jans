@@ -21,7 +21,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import io.jans.exception.PythonException;
-import io.jans.persist.reflect.util.ReflectHelper;
+import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.util.StringHelper;
 import org.python.core.PyException;
 import org.python.core.PyObject;

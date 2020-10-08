@@ -2,9 +2,9 @@ package io.jans.service.cache;
 
 import com.couchbase.client.java.cluster.User;
 import com.google.common.collect.Maps;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DN;
-import io.jans.persist.annotation.JsonObject;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.JsonObject;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Transient;

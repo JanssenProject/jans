@@ -1,7 +1,7 @@
 package io.jans.service.cache;
 
-import io.jans.persist.couchbase.impl.CouchbaseEntryManager;
-import io.jans.persist.couchbase.impl.CouchbaseEntryManagerFactory;
+import io.jans.orm.couchbase.impl.CouchbaseEntryManager;
+import io.jans.orm.couchbase.impl.CouchbaseEntryManagerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
