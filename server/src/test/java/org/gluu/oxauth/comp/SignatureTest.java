@@ -12,7 +12,7 @@ import io.jans.as.model.crypto.KeyFactory;
 import io.jans.as.model.crypto.signature.*;
 import io.jans.as.model.jws.ECDSASigner;
 import io.jans.as.model.jws.RSASigner;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertTrue;

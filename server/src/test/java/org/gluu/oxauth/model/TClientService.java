@@ -3,10 +3,10 @@ package org.gluu.oxauth.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import org.gluu.oxauth.BaseTest;
+import io.jans.as.client.BaseTest;
 import org.gluu.oxauth.register.ws.rs.RegisterRestWebService;
 import org.gluu.oxauth.util.ServerUtil;
-import org.gluu.oxauth.ws.rs.ClientTestUtil;
+import io.jans.as.client.ws.rs.ClientTestUtil;
 
 import javax.ejb.Stateless;
 import javax.inject.Named;

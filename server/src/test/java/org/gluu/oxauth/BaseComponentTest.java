@@ -6,6 +6,8 @@
 
 package org.gluu.oxauth;
 
+import io.jans.as.client.BaseTest;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
