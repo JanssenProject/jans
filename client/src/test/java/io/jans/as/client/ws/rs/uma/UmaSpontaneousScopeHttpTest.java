@@ -27,7 +27,7 @@ import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.gluu.oxauth.model.uma.UmaTestUtil.assert_;
+import static io.jans.as.model.uma.UmaTestUtil.assert_;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;

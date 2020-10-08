@@ -10,7 +10,7 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaScopeService;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaScopeDescription;
-import org.gluu.oxauth.model.uma.UmaTestUtil;
+import io.jans.as.model.uma.UmaTestUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 

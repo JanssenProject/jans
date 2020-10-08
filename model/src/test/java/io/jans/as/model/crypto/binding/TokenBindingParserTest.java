@@ -1,4 +1,4 @@
-package org.gluu.oxauth.model.crypto.binding;
+package io.jans.as.model.crypto.binding;
 
 import io.jans.as.model.crypto.binding.TokenBinding;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
