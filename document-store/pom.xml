@@ -50,7 +50,7 @@
 		</dependency>
         <dependency>
             <groupId>io.jans</groupId>
-            <artifactId>persistence-util</artifactId>
+            <artifactId>jans-orm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
 
