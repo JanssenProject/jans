@@ -2,6 +2,7 @@ package io.jans.model.security;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
@@ -15,8 +16,9 @@ import javax.interceptor.Interceptor;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
-import io.jans.model.security.event.Authenticated;
 import org.slf4j.Logger;
+
+import io.jans.model.security.event.Authenticated;
 
 @RequestScoped
 @Named

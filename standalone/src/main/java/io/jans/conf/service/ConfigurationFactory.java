@@ -8,12 +8,12 @@ package io.jans.conf.service;
 
 import io.jans.conf.model.AppConfiguration;
 import io.jans.conf.model.SharedConfigurationEntry;
-import io.jans.persist.PersistenceEntryManager;
-import io.jans.persist.PersistenceEntryManagerFactory;
-import io.jans.persist.exception.BasePersistenceException;
-import io.jans.persist.model.PersistenceConfiguration;
-import io.jans.persist.service.PersistanceFactoryService;
-import io.jans.persist.service.StandalonePersistanceFactoryService;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManagerFactory;
+import io.jans.orm.exception.BasePersistenceException;
+import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.orm.service.StandalonePersistanceFactoryService;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.ConfigurationException;
 import io.jans.util.properties.FileConfiguration;

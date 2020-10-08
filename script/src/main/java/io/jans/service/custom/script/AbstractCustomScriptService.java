@@ -8,7 +8,7 @@ package io.jans.service.custom.script;
 import com.google.common.base.Optional;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
-import io.jans.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.OxConstants;
 import org.slf4j.Logger;

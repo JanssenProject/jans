@@ -8,7 +8,7 @@ package io.jans.service.external.context;
 
 import java.util.Properties;
 
-import io.jans.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 
 /**
  * Holds object required in persistence scope custom scripts 

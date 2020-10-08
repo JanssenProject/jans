@@ -1,7 +1,7 @@
 package io.jans.service;
 
-import io.jans.persist.PersistenceEntryManager;
-import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 
 import java.io.Serializable;
 import javax.enterprise.context.ApplicationScoped;
