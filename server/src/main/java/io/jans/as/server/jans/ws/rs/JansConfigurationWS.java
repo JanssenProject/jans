@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.gluu.ws.rs;
+package io.jans.as.server.jans.ws.rs;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -33,8 +33,8 @@ import java.util.*;
 /**
  * Created by eugeniuparvan on 8/5/16.
  */
-@Path("/.well-known/gluu-configuration")
-public class GluuConfigurationWS {
+@Path("/.well-known/jans-configuration")
+public class JansConfigurationWS {
 
     @Inject
     private Logger log;
