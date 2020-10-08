@@ -7,14 +7,14 @@
 package io.jans.as.server.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jans.model.AuthenticationScriptUsageType;
-import io.jans.model.SimpleCustomProperty;
-import io.jans.model.config.CustomAuthenticationConfiguration;
-import io.jans.util.StringHelper;
 import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.persistence.model.configuration.CustomProperty;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.as.persistence.model.configuration.oxIDPAuthConf;
+import io.jans.model.AuthenticationScriptUsageType;
+import io.jans.model.SimpleCustomProperty;
+import io.jans.model.config.CustomAuthenticationConfiguration;
+import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

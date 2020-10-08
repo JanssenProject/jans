@@ -1,16 +1,16 @@
 package io.jans.as.server.uma.authorization;
 
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.uma.persistence.UmaPermission;
-import io.jans.as.model.uma.persistence.UmaResource;
-import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.uma.persistence.UmaPermission;
+import io.jans.as.model.uma.persistence.UmaResource;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.uma.service.UmaPermissionService;
 import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaSessionService;
-import io.jans.as.persistence.model.Scope;
+import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashSet;

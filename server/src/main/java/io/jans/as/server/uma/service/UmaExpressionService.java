@@ -9,10 +9,10 @@ import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
 import io.jans.as.server.uma.authorization.UmaAuthorizationContext;
 import io.jans.as.server.uma.authorization.UmaScriptByScope;
 import io.jans.util.StringHelper;
-import io.jans.as.server.service.external.ExternalUmaRptPolicyService;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

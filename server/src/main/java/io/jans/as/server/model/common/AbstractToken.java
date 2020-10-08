@@ -8,10 +8,10 @@ package io.jans.as.server.model.common;
 
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.HashUtil;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.model.base.Deletable;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.base.Deletable;
 
 import java.io.Serializable;
 import java.util.Calendar;

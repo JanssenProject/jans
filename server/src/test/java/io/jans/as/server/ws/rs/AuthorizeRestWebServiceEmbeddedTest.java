@@ -6,7 +6,9 @@
 
 package io.jans.as.server.ws.rs;
 
+import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
@@ -14,8 +16,6 @@ import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

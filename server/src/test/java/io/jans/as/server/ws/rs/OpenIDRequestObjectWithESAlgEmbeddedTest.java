@@ -7,8 +7,10 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.AuthorizationRequest;
+import io.jans.as.client.BaseTest;
 import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
@@ -20,8 +22,6 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
 import io.jans.as.model.util.StringUtils;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.client.ResponseAsserter;
 import io.jans.as.server.util.ServerUtil;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;

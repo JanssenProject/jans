@@ -9,11 +9,11 @@ package io.jans.as.server.ciba;
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingClient;
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingRequest;
 import io.jans.as.client.ciba.fcm.FirebaseCloudMessagingResponse;
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.ciba.CibaEncryptionService;
 import io.jans.as.server.service.external.ExternalCibaEndUserNotificationService;
 import io.jans.as.server.service.external.context.ExternalCibaEndUserNotificationContext;
-import io.jans.as.common.util.RedirectUri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

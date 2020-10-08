@@ -6,18 +6,18 @@
 
 package io.jans.as.server.uma.service;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.service.SpontaneousScopeService;
-import io.jans.as.common.service.common.InumService;
-import io.jans.as.persistence.model.Scope;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;

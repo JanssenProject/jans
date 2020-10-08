@@ -6,11 +6,11 @@
 
 package io.jans.as.server.uma.authorization;
 
+import io.jans.as.server.model.common.AbstractToken;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.as.server.model.common.AbstractToken;
 
 import java.util.Date;
 import java.util.List;

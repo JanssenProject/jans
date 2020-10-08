@@ -1,17 +1,17 @@
 package io.jans.as.server.revoke;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.session.EndSessionErrorResponseType;
-import org.apache.commons.lang.ArrayUtils;
 import io.jans.as.server.model.common.SessionId;
 import io.jans.as.server.model.common.SessionIdState;
-import io.jans.as.common.model.common.User;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.UserService;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

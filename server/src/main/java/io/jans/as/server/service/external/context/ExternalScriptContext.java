@@ -7,11 +7,11 @@
 package io.jans.as.server.service.external.context;
 
 import io.jans.as.model.util.Util;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
 import org.apache.commons.net.util.SubnetUtils;
-import io.jans.as.server.util.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

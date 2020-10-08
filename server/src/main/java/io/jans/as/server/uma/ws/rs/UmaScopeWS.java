@@ -10,10 +10,10 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.uma.UmaScopeDescription;
-import org.apache.commons.lang.StringUtils;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.uma.service.UmaScopeService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.as.persistence.model.Scope;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

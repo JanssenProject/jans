@@ -6,8 +6,8 @@
 
 package io.jans.as.server.bcauthorize.ws.rs;
 
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.configuration.AppConfiguration;
 import org.slf4j.Logger;
 
 import javax.enterprise.context.RequestScoped;

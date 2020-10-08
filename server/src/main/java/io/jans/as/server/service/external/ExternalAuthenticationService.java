@@ -8,6 +8,9 @@ package io.jans.as.server.service.external;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.server.service.cdi.event.ReloadAuthScript;
+import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
@@ -21,9 +24,6 @@ import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
-import io.jans.as.server.service.cdi.event.ReloadAuthScript;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;

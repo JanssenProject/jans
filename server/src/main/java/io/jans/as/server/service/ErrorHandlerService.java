@@ -6,6 +6,7 @@
 
 package io.jans.as.server.service;
 
+import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -13,7 +14,6 @@ import io.jans.as.model.error.IErrorType;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.util.StringHelper;
-import io.jans.as.common.util.RedirectUri;
 import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 

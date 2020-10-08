@@ -11,11 +11,11 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorMessages;
-import io.jans.orm.PersistenceEntryManager;
-import org.apache.commons.io.IOUtils;
 import io.jans.as.server.ConfigurableTest;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.orm.PersistenceEntryManager;
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

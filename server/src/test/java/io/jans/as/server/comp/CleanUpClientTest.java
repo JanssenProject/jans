@@ -6,11 +6,11 @@
 
 package io.jans.as.server.comp;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.server.BaseComponentTest;
+import io.jans.as.server.service.ClientService;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
-import io.jans.as.server.BaseComponentTest;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.server.service.ClientService;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
