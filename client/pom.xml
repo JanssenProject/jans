@@ -90,9 +90,8 @@
 
         <!-- Janssen -->
         <dependency>
-            <groupId>org.janssen</groupId> <!--todo fix -->
-            <artifactId>janssen-client</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>

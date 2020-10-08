@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.gluu.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 
 /**
  * Health check controller

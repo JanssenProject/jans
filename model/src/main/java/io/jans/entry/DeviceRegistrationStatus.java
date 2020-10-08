@@ -9,7 +9,7 @@ package io.jans.entry;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * Device registration types

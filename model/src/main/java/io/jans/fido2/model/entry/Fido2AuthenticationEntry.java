@@ -9,9 +9,9 @@ package io.jans.fido2.model.entry;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.gluu.persist.annotation.AttributeName;
-import org.gluu.persist.annotation.JsonObject;
-import org.gluu.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 
 /**
  * Fido2 registration entry

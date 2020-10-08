@@ -41,8 +41,8 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.client.ResteasyClientFactory;
 import io.jans.fido2.service.verifier.CommonVerifiers;
-import org.gluu.service.cdi.event.ApplicationInitialized;
-import org.gluu.util.StringHelper;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.StringHelper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.slf4j.Logger;
 

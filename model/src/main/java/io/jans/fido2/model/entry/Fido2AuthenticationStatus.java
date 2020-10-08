@@ -9,7 +9,7 @@ package io.jans.fido2.model.entry;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.gluu.persist.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Yuriy Movchan

@@ -11,8 +11,8 @@ import javax.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.service.BaseCacheService;
-import org.gluu.util.StringHelper;
+import io.jans.service.BaseCacheService;
+import io.jans.util.StringHelper;
 
 /**
  * @author Yuriy Movchan

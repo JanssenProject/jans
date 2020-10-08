@@ -12,12 +12,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
-import org.gluu.model.ApplicationType;
+import io.jans.model.ApplicationType;
 import org.gluu.oxauth.model.config.StaticConfiguration;
-import org.gluu.oxauth.service.common.ApplicationFactory;
-import org.gluu.persist.PersistenceEntryManager;
-import org.gluu.service.metric.inject.ReportMetric;
-import org.gluu.service.net.NetworkService;
+import io.jans.oxauth.service.common.ApplicationFactory;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.metric.inject.ReportMetric;
+import io.jans.service.net.NetworkService;
 
 /**
  * Store and retrieve metric

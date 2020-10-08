@@ -27,9 +27,8 @@
                 <artifactId>jans-orm-model</artifactId>
             </dependency>
             <dependency>
-                <groupId>org.janssen</groupId> <!--todo fix -->
-                <artifactId>janssen-model</artifactId>
-                <version>${project.version}</version>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-auth-model</artifactId>
             </dependency>
 
 			<!-- Jackson -->

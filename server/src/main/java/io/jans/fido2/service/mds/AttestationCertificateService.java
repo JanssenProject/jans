@@ -25,7 +25,7 @@ import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.KeyStoreCreator;
 import io.jans.fido2.service.verifier.CommonVerifiers;
-import org.gluu.service.cdi.event.ApplicationInitialized;
+import io.jans.service.cdi.event.ApplicationInitialized;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
