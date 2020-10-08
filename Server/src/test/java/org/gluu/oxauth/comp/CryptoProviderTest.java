@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_ID;
+import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
 import static org.testng.Assert.*;
 
 /**
