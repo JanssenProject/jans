@@ -5,7 +5,6 @@ import org.gluu.oxauth.BaseTest;
 import org.gluu.oxauth.client.*;
 import org.gluu.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.gluu.oxauth.model.ciba.BackchannelAuthenticationErrorResponseType;
-import org.gluu.oxauth.model.common.AuthenticationMethod;
 import org.gluu.oxauth.model.common.BackchannelTokenDeliveryMode;
 import org.gluu.oxauth.model.common.GrantType;
 import org.gluu.oxauth.model.common.ResponseType;
@@ -39,8 +38,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowPS256HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowPS256HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
                 backchannelClientNotificationEndpoint);
@@ -56,8 +55,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowPS384HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowPS384HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS384,
                 backchannelClientNotificationEndpoint);
@@ -73,8 +72,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowPS512HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowPS512HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS512,
                 backchannelClientNotificationEndpoint);
@@ -90,8 +89,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowES256HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowES256HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES256,
                 backchannelClientNotificationEndpoint);
@@ -107,8 +106,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowES384HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowES384HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES384,
                 backchannelClientNotificationEndpoint);
@@ -124,8 +123,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void pingFlowES512HappyFlow(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                       final String keyStoreFile, final String keyStoreSecret,
+                                       final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("pingFlowES512HappyFlow");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.ES512,
                 backchannelClientNotificationEndpoint);
@@ -141,8 +140,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void cibaPingJWTRequestDataValidations(final String keyId, final String userId, final String dnName,
-                                        final String keyStoreFile, final String keyStoreSecret,
-                                        final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                                  final String keyStoreFile, final String keyStoreSecret,
+                                                  final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("cibaPingJWTRequestDataValidations");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
                 backchannelClientNotificationEndpoint);
@@ -189,8 +188,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test(dependsOnMethods = "idTokenHintRS384")
     public void cibaPingJWTRequestIdTokenHint(final String keyId, final String userId, final String dnName,
-                                                  final String keyStoreFile, final String keyStoreSecret,
-                                                  final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                              final String keyStoreFile, final String keyStoreSecret,
+                                              final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("cibaPingJWTRequestIdTokenHint");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
                 backchannelClientNotificationEndpoint);
@@ -208,8 +207,8 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
             "backchannelClientNotificationEndpoint"})
     @Test
     public void cibaPingJWTRequestWrongSigning(final String keyId, final String userId, final String dnName,
-                                              final String keyStoreFile, final String keyStoreSecret,
-                                              final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
+                                               final String keyStoreFile, final String keyStoreSecret,
+                                               final String clientJwksUri, final String backchannelClientNotificationEndpoint) throws Exception {
         showTitle("cibaPingJWTRequestWrongSigning");
         registerPingClient(clientJwksUri, BackchannelTokenDeliveryMode.PING, AsymmetricSignatureAlgorithm.PS256,
                 backchannelClientNotificationEndpoint);
@@ -226,6 +225,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Registers a client using CIBA configuration for Ping flow and PS256
+     *
      * @param clientJwksUri
      */
     private void registerPingClient(final String clientJwksUri, final BackchannelTokenDeliveryMode mode,
@@ -260,8 +260,9 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Process a Ciba call to the OP using JWT Request object.
-     * @param jwtRequest JWT in plain String.
-     * @param clientId Client identifier.
+     *
+     * @param jwtRequest   JWT in plain String.
+     * @param clientId     Client identifier.
      * @param clientSecret Client secret.
      */
     private void processCibaAuthorizationEndpointSuccessfulCall(String jwtRequest, String clientId, String clientSecret) {
@@ -285,11 +286,12 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
 
     /**
      * Process a Ciba call to the OP using JWT Request object and validate HTTP status and error type.
-     * @param jwtRequest JWT in plain String.
-     * @param clientId Client identifier.
+     *
+     * @param jwtRequest   JWT in plain String.
+     * @param clientId     Client identifier.
      * @param clientSecret Client secret.
-     * @param httpStatus Param used to validate response from the server.
-     * @param error Error used to validate error response from the server.
+     * @param httpStatus   Param used to validate response from the server.
+     * @param error        Error used to validate error response from the server.
      */
     private void processCibaAuthorizationEndpointFailCall(String jwtRequest, String clientId, String clientSecret, int httpStatus, String error) {
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -321,7 +323,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
         String clientId = registerResponse.getClientId();
 
-        int now = (int)(System.currentTimeMillis() / 1000);
+        int now = (int) (System.currentTimeMillis() / 1000);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 null, signatureAlgorithm, cryptoProvider);
@@ -332,7 +334,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         jwtAuthorizationRequest.setScopes(Collections.singletonList("openid"));
         jwtAuthorizationRequest.setIss(clientId);
         jwtAuthorizationRequest.setBindingMessage("1234");
-        jwtAuthorizationRequest.setExp((int)(DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
+        jwtAuthorizationRequest.setExp((int) (DateUtils.addMinutes(new Date(), 5).getTime() / 1000));
         jwtAuthorizationRequest.setIat(now);
         jwtAuthorizationRequest.setJti(UUID.randomUUID().toString());
         jwtAuthorizationRequest.setKeyId(keyId);
