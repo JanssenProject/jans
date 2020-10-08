@@ -8,10 +8,10 @@ package io.jans.radius.model;
 
 import java.io.Serializable;
 
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DataEntry;
-import io.jans.persist.annotation.DN;
-import io.jans.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.ObjectClass;
 
 @DataEntry
 @ObjectClass(value = "oxRadiusClient")

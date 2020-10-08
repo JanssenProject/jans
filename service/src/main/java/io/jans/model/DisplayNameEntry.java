@@ -8,9 +8,9 @@ package io.jans.model;
 
 import java.io.Serializable;
 
-import io.jans.persist.model.base.Entry;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DataEntry;
+import io.jans.orm.model.base.Entry;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
 
 /**
  * Entry with display Name attribute

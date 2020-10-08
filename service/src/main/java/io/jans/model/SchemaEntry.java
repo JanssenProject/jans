@@ -10,15 +10,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.jans.persist.model.base.Entry;
-import io.jans.persist.annotation.AttributeName;
+import io.jans.orm.model.base.Entry;
+import io.jans.orm.annotation.AttributeName;
 
 /**
  * Schema attribute
  *
  * @author Yuriy Movchan Date: 10.14.2010
  */
-@io.jans.persist.annotation.SchemaEntry
+@io.jans.orm.annotation.SchemaEntry
 public final class SchemaEntry extends Entry implements Serializable {
 
     private static final long serialVersionUID = 3819004894646725606L;

@@ -7,10 +7,10 @@ package io.jans.model.metric.ldap;
 
 import io.jans.model.ApplicationType;
 import io.jans.model.metric.MetricType;
-import io.jans.persist.annotation.AttributeName;
-import io.jans.persist.annotation.DN;
-import io.jans.persist.annotation.DataEntry;
-import io.jans.persist.annotation.ObjectClass;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.ObjectClass;
 
 import java.util.Date;
 

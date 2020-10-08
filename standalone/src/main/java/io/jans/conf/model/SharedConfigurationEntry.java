@@ -8,8 +8,8 @@ package io.jans.conf.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.SmtpConfiguration;
-import io.jans.persist.annotation.*;
-import io.jans.persist.model.base.InumEntry;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
 
 import java.io.Serializable;

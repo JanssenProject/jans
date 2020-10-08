@@ -6,7 +6,7 @@
 
 import java.util.Properties;
 
-import io.jans.persist.ldap.operation.impl.LdapConnectionProvider;
+import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 
 /**
  * Super class to forbid interceptor calls

@@ -6,7 +6,7 @@
 
 package io.jans.model;
 
-import io.jans.persist.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
 import java.util.Map;

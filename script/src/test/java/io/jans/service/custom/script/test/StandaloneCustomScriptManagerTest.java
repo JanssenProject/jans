@@ -6,9 +6,9 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import io.jans.log.LoggingHelper;
-import io.jans.persist.PersistenceEntryManager;
-import io.jans.persist.ldap.impl.LdapEntryManager;
-import io.jans.persist.ldap.impl.LdapEntryManagerFactory;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.ldap.impl.LdapEntryManager;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.service.custom.script.StandaloneCustomScriptManager;
 
 public class StandaloneCustomScriptManagerTest {

@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import io.jans.model.GluuAttribute;
 import io.jans.model.SchemaEntry;
-import io.jans.persist.PersistenceEntryManager;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.search.filter.Filter;
 import io.jans.util.OxConstants;
 import org.slf4j.Logger;

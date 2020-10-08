@@ -1,8 +1,8 @@
 package io.jans.service.cache;
 
-import io.jans.persist.annotation.*;
-import io.jans.persist.model.base.Deletable;
-import io.jans.persist.model.base.DeletableEntity;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.Deletable;
+import io.jans.orm.model.base.DeletableEntity;
 
 import java.io.Serializable;
 import java.util.Date;
